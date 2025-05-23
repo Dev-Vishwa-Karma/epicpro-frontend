@@ -3,32 +3,40 @@ import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
 class Events extends Component {
 	constructor(props) {
-		super(props);
-		this.state = {
-			events: [],
-			selectedYear: new Date().getFullYear(),
-			showAddEventModal: false,
-			employee_id: null,
-			event_name: "",
-			event_date: "",
-			errors: {
-				event_name: '',
-        		event_date: '',
-			},
-			selectedEvent: '',
-			successMessage: "",
-      		errorMessage: "",
-			showSuccess: false,
-      		showError: false,
-			loading: true,
-			employees: [],
-			todos: [],
-			selectedEmployeeIdForTodo: '',
-			selectedEmployeeIdForModal: '',
-			logged_in_employee_id: '',
-			logged_in_employee_role: '',
-		}
-	}
+    super(props);
+    this.state = {
+      events: [],
+      workingHoursReports: [],
+      selectedYear: new Date().getFullYear(),
+	  // Add this for admin
+	  leaveViewEmployeeId: "",
+      showAddEventModal: false,
+      employee_id: null,
+      event_name: "",
+      event_date: "",
+      errors: {
+		event_name: '',
+		event_date: '',
+      },
+	  selectedEvent: '',
+      successMessage: "",
+      errorMessage: "",
+      showSuccess: false,
+      showError: false,
+      loading: true,
+      employees: [],
+      todos: [],
+      selectedEmployeeIdForTodo: '',
+      selectedEmployeeIdForModal: '',
+      logged_in_employee_id: '',
+      logged_in_employee_role: '',
+      calendarView: "report",
+       showReportEditModal: false,
+      selectedReportDate: null,
+      editedWorkingHours: '',
+      leaveData: [],
+    };
+  }
 
 	componentDidMount() {
 		const {role, id} = window.user;
@@ -50,7 +58,7 @@ class Events extends Component {
 			}
 		);
 
-		// Check if user is admin or superadmin
+			// Check if user is admin or superadmin
         if (role === 'admin' || role === 'super_admin') {
             // Fetch employees data if user is admin or super_admin
             fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
@@ -93,7 +101,69 @@ class Events extends Component {
 			this.setState({ message: 'Failed to fetch data', loading: false });
 			console.error(err);
 		});
+
+		this.fetchWorkingHoursReports(id);
+		// Fetch leave data for the current year
+		const start_date = `${this.state.selectedYear}-01-01`;
+		const end_date = `${this.state.selectedYear}-12-31`;     
+		this.fetchLeaveData(id, start_date, end_date);
 	}
+
+  	fetchWorkingHoursReports = (employeeId) => {
+		fetch(
+		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`,
+		{
+			method: "GET",
+		}
+		)
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
+			}
+			return response.json();
+		})
+		.then((data) => {
+			if (data.status === "success") {
+				this.setState({ 
+					workingHoursReports: data.data,
+					loading: false 
+				});
+			} else {
+				this.setState({ 
+					error: data.message || "Failed to load reports",
+					loading: false 
+				});
+			}
+		})
+		.catch((err) => {
+			console.error("Error fetching working hours:", err);
+			this.setState({ 
+				error: "Failed to fetch working hours",
+				loading: false 
+			});
+		});
+		};
+	isMonday = (date) => {
+		return date.getDay() === 1; // 0 is Sunday, 1 is Monday, etc.
+	};
+
+	hasReportForDate = (dateStr, reports) => {
+		return reports.some((report) => report.created_at?.split(" ")[0] === dateStr);
+	};
+
+
+	isAlternateSunday = (date) => {
+		if (date.getDay() !== 0) return false; // Not Sunday
+			const firstSunday = new Date(date.getFullYear(), 0, 1);
+			while (firstSunday.getDay() !== 1) 
+		{
+			firstSunday.setDate(firstSunday.getDate() + 1);
+		}
+			const diffInDays = Math.floor((date - firstSunday) / (1000 * 60 * 60 * 24));
+			const weekNumber = Math.floor(diffInDays / 7);
+			return weekNumber % 2 === 0; // Alternate every other week (0, 2, 4...)
+	};
+
 
 	fetchTodos = (employeeId) => {
 		if (!employeeId) {
@@ -119,6 +189,25 @@ class Events extends Component {
 			this.setState({ todos: [], loading: false });
 		});
 	};
+
+
+	fetchLeaveData = (employee_id, start_date, end_date) => {
+		  const url = `${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&start_date=${start_date}&end_date=${end_date}&employee_id=${employee_id}`;
+			fetch(url)
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.status === "success" && Array.isArray(data.data)) {
+					this.setState({ leaveData: data.data });
+					} else {
+					this.setState({ leaveData: [] });
+					}
+				})
+				.catch((err) => {
+				console.error("Error fetching leave data:", err);
+				this.setState({ leaveData: [] });
+			});
+	};
+
 
 	// Handle year selection
 	handleYearChange = (event) => {
@@ -306,9 +395,44 @@ class Events extends Component {
 		}
     };
 
+	formatLeaveEvents = (leaveData) => {
+		if (!Array.isArray(leaveData)) return [];
+		const events = [];
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		leaveData.forEach((leave) => {
+		const start = new Date(leave.from_date);
+		const end = new Date(leave.to_date);
+
+    		//Only process if the leave ends today or in the future
+			if (end >= today) {
+				//Start from today if leave started in the past, otherwise from leave start
+				const loopStart = start < today ? new Date(today) : new Date(start);
+
+				for (
+					let d = new Date(loopStart);
+					d <= end;
+					d.setDate(d.getDate() + 1)
+				) {
+					// Only add if d >= today
+					if (d >= today) {
+					events.push({
+						title: leave.reason || leave.status || "Leave",
+						start: d.toISOString().split("T")[0],
+						className: "leave-event",
+						allDay: true,
+					});
+					}
+				}
+			}
+		});
+	return events;
+	};
+
     render() {
         const { fixNavbar} = this.props;
-		const {events, selectedYear, showAddEventModal, loading, employees, logged_in_employee_role, selectedEmployeeIdForModal, selectedEmployeeIdForTodo, todos } = this.state;
+		const {events, selectedYear, showAddEventModal, loading, employees, logged_in_employee_role, selectedEmployeeIdForModal, selectedEmployeeIdForTodo, todos, workingHoursReports, calendarView } = this.state;
 
 		// Dynamic generation of years (last 50 years to next 10 years)
 		const currentDate = new Date();
@@ -373,6 +497,101 @@ class Events extends Component {
 				};
 			}
 		}).flat();
+
+		 //Add new changes and create new functions
+		 //add this function for calculate totalworking hour or coloring according to  workinh hours
+        const workingHoursEvents = workingHoursReports.map((report) => {
+			const hoursStr = report.todays_working_hours?.slice(0, 5);
+			const hours = parseFloat(hoursStr);
+
+			let backgroundColor = "#4ee44e";
+			if (hours < 4) backgroundColor = "#D6010133";
+			else if (hours < 8) backgroundColor = "#87ceeb";
+
+			return {
+				title: `${hoursStr}`,
+				start: report.created_at?.split(" ")[0],
+				display: "background",
+				borderColor: backgroundColor,
+				backgroundColor: backgroundColor,
+				allDay: true,
+				className: "daily-report",
+			};
+    	});
+
+		const officeClosures = [];
+		const startDate = new Date(selectedYear, 0, 1);
+		const endDate = new Date(selectedYear, 11, 31);
+
+		// this condition apply only on employees other wise remove this condition
+		if (logged_in_employee_role === "employee") {
+			for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+				if (this.isMonday(d) || this.isAlternateSunday(d)) {
+					officeClosures.push({
+					start: new Date(d).toISOString().split("T")[0],
+					// title: "Office Off",
+					event_type: "holiday",
+					allDay: true,
+					className: "office-closure-event",
+					});
+				}
+			}
+		}
+
+		// Create events for days without reports
+		const missingReportEvents = [];
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		// if (workingHoursReports.length > 0) {
+		if (workingHoursReports.length > 0 && logged_in_employee_role === "employee") {
+			// Corrected line - properly spread the array of timestamps
+			
+			const reportTimestamps = workingHoursReports.map(r => new Date(r.created_at).getTime());
+			const firstReportDate = new Date(Math.min(...reportTimestamps));
+			
+			let currentDate = new Date(firstReportDate);
+			
+			while (currentDate <= today) {
+				const dateStr = currentDate.toISOString().split("T")[0];
+				const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+				const isOfficeClosure = officeClosures.some(
+				(closure) => closure.start === dateStr
+			);
+				
+					// if (!isWeekend && !isOfficeClosure) {
+					if ( !isOfficeClosure) {
+					const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
+					
+					if (!hasReport) {
+						missingReportEvents.push({
+						start: dateStr,
+						display: 'background',
+						color: '#ff6b6b',
+						allDay: true,
+						// title:'Leave',
+						className: 'missing-report-day'
+					});
+				}
+			}
+					currentDate.setDate(currentDate.getDate() + 1);
+			}
+		}
+		// Pass all events in fullcalendar
+		let allEvents = [];
+		const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
+        if (calendarView === "report") {
+           allEvents = [
+			// ...formattedEvents,
+            ...workingHoursEvents,
+            ...officeClosures,
+            ...missingReportEvents,
+			...leaveEvents,
+         ];
+        } else if (calendarView === "event") {
+           allEvents = [...formattedEvents ];
+        }
+		//END
 
         return (
             <>
@@ -571,11 +790,89 @@ class Events extends Component {
 														</option>
 													))}
 												</select>
+
+												  {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+											  <>
+													<label htmlFor="leave-employee-selector" className="d-flex card-title mr-3 ml-3 align-items-center">
+													 Employee:
+													</label>
+												<select
+												id="leave-employee-selector"
+												className="w-100 custom-select"
+												value={this.state.leaveViewEmployeeId}
+												onChange={
+														e => {
+														const empId = e.target.value;
+														this.setState({ leaveViewEmployeeId: empId });
+														const start_date = `${selectedYear}-01-01`;
+														const end_date = `${selectedYear}-12-31`;
+														this.fetchLeaveData(empId, start_date, end_date);
+												   }
+											  }
+												>
+										<option value="">Select an Employee</option>
+										{employees.map(emp => (
+											<option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
+										))}
+										</select>
+									</>
+									)}
+										{/* Add new drodown for show Event/Report */}
+										{logged_in_employee_role === "employee" && (
+										<>
+											<label
+											htmlFor="view-selector"
+											className="d-flex card-title mr-3 ml-3 align-items-center"
+											>
+											View:{" "}
+											</label>
+											<select
+											id="view-selector"
+											className="w-100 custom-select"
+											value={calendarView}
+											onChange={(e) =>
+												this.setState({ calendarView: e.target.value })
+											}
+										>
+												<option value="report"> Reports</option>
+												<option value="event">Events</option>
+											</select>
+										</>
+										)}
+                            				{/* Changes (END) */}
 											</div>
 										</div>
 										<div className="card-body">
 											{/* Pass the formatted events to the FullCalendar component */}
-											<Fullcalender events={formattedEvents} defaultDate={defaultDate}></Fullcalender>
+											<Fullcalender events={allEvents} defaultDate={defaultDate}
+											 //add new chnages
+											 
+											dayCellClassNames={(arg) => {
+											const dateStr = arg.date.toISOString().split("T")[0];
+											const today = new Date();
+											today.setHours(0, 0, 0, 0);
+											
+											const cellDate = new Date(arg.date);
+											cellDate.setHours(0, 0, 0, 0);
+
+											const isWeekend = arg.date.getDay() === 0 || arg.date.getDay() === 6;
+											const isOfficeClosure = officeClosures.some(
+												(closure) => closure.start === dateStr
+											);
+											
+											if (isWeekend || isOfficeClosure) {
+												return "";
+											}
+
+											const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
+											
+											if (!hasReport && cellDate <= today) {
+												return "no-report-day";
+											}
+
+											return "";
+										}}
+										></Fullcalender>
 										</div>
 									</div>
 								</div>

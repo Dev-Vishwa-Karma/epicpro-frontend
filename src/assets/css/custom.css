@@ -4,17 +4,17 @@
     border-color:  #39374e !important;
 } */
 .green-event {
-    background-color: #e9f7df !important;
-    border-color: #e9f7df !important;
-    color: #28a745 !important; /* optional for text */
-    font-weight: 600 !important;
+    background-color: #39374e !important;
+    border-color: #39374e !important;
+    color: #BABDBF !important; /* optional for text */
+    /* font-weight: 600 !important; */
 }
   
 .red-event {
-    background-color: #fdecea !important;
-    border-color: #fdecea !important;
-    color: #d9534f !important;
-    font-weight: 600 !important;
+    background-color: #39374e !important;
+    border-color: #39374e !important;
+    color: #BABDBF !important;
+    /* font-weight: 600 !important; */
 }
 
 .edit-profile-calendar-total-working-hours {
@@ -119,3 +119,56 @@ div.rtl{
     }
 }
   
+
+
+/* Add new CSS */
+
+.fc .office-closure-event {
+  background-color: #fff !important;
+  border: none !important;
+}
+
+.daily-report{
+  color: #5e5e5e !important;
+  text-align: center !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+/* Missing reports - working days without reports */
+.missing-report-day {
+  background-color: rgba(214, 1, 1, 0.2) !important;
+  border: none !important;
+  opacity: 1 !important;
+}
+
+.no-report-day {
+  background-color: rgba(255, 0, 0, 0.2) !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: transparent !important;
+  
+}
+
+.no-report-day.fc-day-today {
+  background-color: rgba(255, 0, 0, 0.3) !important;
+}
+
+.leave-event {
+    background-color: rgba(214, 1, 1, 0.2) !important;
+    border-color: rgba(214, 1, 1, 0.2) !important;
+    opacity: 0.8 !important;
+    border: none !important
+}
+
+.fc-event.leave-event .fc-content {
+    color: black !important;
+    font-weight:500;
+    padding: 2px 5px;
+}
+
+.fc .leave-event {
+    background-color: rgba(214, 1, 1, 0.2);
+    opacity: 0.7;
+}
