@@ -126,10 +126,16 @@ class Events extends Component {
 		})
 		.then((data) => {
 			if (data.status === "success") {
-				this.setState({ 
-					workingHoursReports: data.data,
-					loading: false 
-				});
+				if(employeeId == ''){
+					this.setState({ 
+						workingHoursReports: []
+					});
+				}else{
+					this.setState({ 
+						workingHoursReports: data.data,
+						loading: false 
+					});
+				}
 			} else {
 				this.setState({ 
 					workingHoursReports: [],
@@ -147,6 +153,8 @@ class Events extends Component {
 			});
 		});
 		};
+
+		
 	isMonday = (date) => {
 		return date.getDay() === 1; // 0 is Sunday, 1 is Monday, etc.
 	};
@@ -201,8 +209,11 @@ class Events extends Component {
 				.then((res) => res.json())
 				.then((data) => {
 					if (data.status === "success" && Array.isArray(data.data)) {
-						console.log('data',data.data)
-					this.setState({ leaveData: data.data });
+						if(employee_id == ''){
+							this.setState({ leaveData: [] });
+						}else{
+							this.setState({ leaveData: data.data });
+						}
 					} else {
 					this.setState({ leaveData: [] });
 					}
@@ -212,6 +223,7 @@ class Events extends Component {
 				this.setState({ leaveData: [] });
 			});
 	};
+ 
 
 
 	// Handle year selection
