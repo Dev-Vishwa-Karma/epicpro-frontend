@@ -35,6 +35,7 @@ class Events extends Component {
       selectedReportDate: null,
       editedWorkingHours: '',
       leaveData: [],
+	  allEvents: []
     };
   }
 
@@ -111,7 +112,7 @@ class Events extends Component {
 
   	fetchWorkingHoursReports = (employeeId) => {
 		fetch(
-		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`,
+		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}`,
 		{
 			method: "GET",
 		}
@@ -197,6 +198,7 @@ class Events extends Component {
 				.then((res) => res.json())
 				.then((data) => {
 					if (data.status === "success" && Array.isArray(data.data)) {
+						console.log('data',data.data)
 					this.setState({ leaveData: data.data });
 					} else {
 					this.setState({ leaveData: [] });
@@ -400,35 +402,35 @@ class Events extends Component {
 		const events = [];
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
-
 		leaveData.forEach((leave) => {
 		const start = new Date(leave.from_date);
 		const end = new Date(leave.to_date);
-
-    		//Only process if the leave ends today or in the future
 			if (end >= today) {
-				//Start from today if leave started in the past, otherwise from leave start
-				const loopStart = start < today ? new Date(today) : new Date(start);
-
-				for (
-					let d = new Date(loopStart);
-					d <= end;
-					d.setDate(d.getDate() + 1)
-				) {
-					// Only add if d >= today
+			const loopStart = start < today ? new Date(today) : new Date(start);
+			 	for (let d = new Date(loopStart); d <= end; d.setDate(d.getDate() + 1)) {
 					if (d >= today) {
-					events.push({
-						title: leave.reason || leave.status || "Leave",
-						start: d.toISOString().split("T")[0],
-						className: "leave-event",
-						allDay: true,
-					});
-					}
-				}
+					if (leave.is_half_day === 1 || leave.is_half_day === "1" || leave.is_half_day === true) {
+				events.push({
+					title: leave.reason || "Half Day Leave",
+					start: d.toISOString().split("T")[0],
+					className: "half-day-leave-event",
+					allDay: true,
+					// color: "#FFA500"
+				});
+			} else {
+				events.push({
+					title: leave.reason || leave.status || "Leave",
+					start: d.toISOString().split("T")[0],
+					className: "leave-event",
+					allDay: true,
+				});
 			}
-		});
-	return events;
-	};
+                }
+            }
+        }
+    });
+    return events;
+};
 
     render() {
         const { fixNavbar} = this.props;
@@ -577,21 +579,27 @@ class Events extends Component {
 					currentDate.setDate(currentDate.getDate() + 1);
 			}
 		}
-		// Pass all events in fullcalendar
-		let allEvents = [];
-		const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
-        if (calendarView === "report") {
-           allEvents = [
-			// ...formattedEvents,
-            ...workingHoursEvents,
-            ...officeClosures,
-            ...missingReportEvents,
-			...leaveEvents,
-         ];
-        } else if (calendarView === "event") {
-           allEvents = [...formattedEvents ];
-        }
+			// Pass all events in fullcalendar
+			const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
+			if (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") {
+				this.state.allEvents = [
+					...formattedEvents,         
+					...workingHoursEvents,     
+					...leaveEvents              
+				];
+			} else if (calendarView === "report") {
+				this.state.allEvents = [
+					...workingHoursEvents,
+					...officeClosures,
+					...missingReportEvents,
+					...leaveEvents,
+				];
+			} else if (calendarView === "event") {
+				this.state.allEvents = [...formattedEvents];
+			}
 		//END
+
+
 
         return (
             <>
@@ -839,12 +847,37 @@ class Events extends Component {
 											</select>
 										</>
 										)}
+
+										{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+  <>
+    <label htmlFor="report-employee-selector" className="d-flex card-title mr-3 ml-3 align-items-center">
+      Reports
+    </label>
+    <select
+      id="report-employee-selector"
+      className="w-100 custom-select"
+      value={this.state.reportViewEmployeeId}
+      onChange={e => {
+        const empId = e.target.value;
+        this.setState({ reportViewEmployeeId: empId }, () => {
+          this.fetchWorkingHoursReports(empId);
+        });
+      }}
+    >
+      <option value="">Select an Employee</option>
+      {employees.map(emp => (
+        <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
+      ))}
+    </select>
+  </>
+)}
+										
                             				{/* Changes (END) */}
 											</div>
 										</div>
 										<div className="card-body">
 											{/* Pass the formatted events to the FullCalendar component */}
-											<Fullcalender events={allEvents} defaultDate={defaultDate}
+											<Fullcalender events={this.state.allEvents} defaultDate={defaultDate}
 											 //add new chnages
 											 
 											dayCellClassNames={(arg) => {

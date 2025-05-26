@@ -66,6 +66,7 @@ class Employee extends Component {
 				instagram_url: '',
 				upwork_profile_url: '',
 				resume: '',
+				
 			},
 			// Set state for add employee leave
 			employee_id: '',
@@ -86,7 +87,8 @@ class Employee extends Component {
 			showSuccess: false,
 			successMessage: '',
 			showError: false,
-			errorMessage: ''
+			errorMessage: '',
+			addLeaveErrors: {},
 		};
 	}
 	handleStatistics(e) {
@@ -350,6 +352,23 @@ class Employee extends Component {
 		event.preventDefault();
 
         const { employee_id, from_date, to_date, reason, status, halfDayCheckbox, logged_in_employee_role} = this.state;
+		
+		let errors = {};
+  let isValid = true;
+
+  if (!employee_id) { errors.employee_id = "Select employee is required."; isValid = false; }
+  if (!from_date) { errors.from_date = "From date is required."; isValid = false; }
+  if (!to_date) { errors.to_date = "To date is required."; isValid = false; }
+  if (!reason) { errors.reason = "Reason is required."; isValid = false; }
+  if (!status) { errors.status = "Status is required."; isValid = false; }
+
+  if (!isValid) {
+    this.setState({ addLeaveErrors: errors, showError: true, errorMessage: "Please fill in all required fields." });
+    setTimeout(() => this.setState({ showError: false }), 3000);
+    return;
+  } else {
+    this.setState({ addLeaveErrors: {} });
+  }
 
         // Validate form inputs
         if (!from_date || !to_date || !reason) {
@@ -370,7 +389,7 @@ class Employee extends Component {
         addEmployeeLeaveData.append('to_date', to_date);
         addEmployeeLeaveData.append('reason', reason);
         addEmployeeLeaveData.append('status', finalStatus);
-        addEmployeeLeaveData.append('half_day', halfDayCheckbox);
+        addEmployeeLeaveData.append('is_half_day', halfDayCheckbox);
 
         // API call to add employee leave
         fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=add`, {
@@ -677,6 +696,7 @@ class Employee extends Component {
 		const indexOfFirstLeave = indexOfLastLeave - dataPerPage;
 		const currentEmployeeLeaves = leaveList.slice(indexOfFirstLeave, indexOfLastLeave);
 		const totalPagesLeaves = Math.ceil(leaveList.length / dataPerPage);
+
 
 		return (
 			<>
@@ -1062,6 +1082,9 @@ class Employee extends Component {
 										value={this.state.employee_id}
 										onChange={this.handleInputChangeForAddLeaves}
 									/>
+									{this.state.addLeaveErrors.employeeId && (
+  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.employeeId}</div>
+											)}
 									{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
 										<div className="col-md-12">
 											<div className="form-group">
@@ -1092,7 +1115,11 @@ class Employee extends Component {
 												name='from_date'
 												value={this.state.from_date}
 												onChange={this.handleInputChangeForAddLeaves}
+												min={new Date().toISOString().split("T")[0]} 
 											/>
+											{this.state.addLeaveErrors.from_date && (
+  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>
+											)}
 										</div>
 									</div>
 									<div className="col-md-6">
@@ -1104,7 +1131,11 @@ class Employee extends Component {
 												name='to_date'
 												value={this.state.to_date}
 												onChange={this.handleInputChangeForAddLeaves}
+												min={new Date().toISOString().split("T")[0]} 
 											/>
+											{this.state.addLeaveErrors.to_date && (
+  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.to_date}</div>
+											)} 
 										</div>
 									</div>
 									<div className="col-md-12">
@@ -1118,6 +1149,9 @@ class Employee extends Component {
 												value={this.state.reason}
 												onChange={this.handleInputChangeForAddLeaves}
 											/>
+													{this.state.addLeaveErrors.reason && (
+													<div className=" small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.reason}</div>
+														)}
 										</div>
 									</div>
 									{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
@@ -1136,6 +1170,9 @@ class Employee extends Component {
 													<option value="approved">Approved</option>
 													<option value="rejected">Rejected</option>
 												</select>
+												{this.state.addLeaveErrors.status && (
+  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.status}</div>
+											)}
 											</div>
 										</div>
 									)}
@@ -1201,6 +1238,7 @@ class Employee extends Component {
 														value={selectedEmployeeLeave?.from_date || ""} 
 														onChange={this.handleInputChangeForEditEmployeeLeave}
 														name="from_date"
+														min={new Date().toISOString().split("T")[0]} 
 													/>
 												</div>
 											</div>
@@ -1213,6 +1251,7 @@ class Employee extends Component {
 														value={selectedEmployeeLeave?.to_date || ""} 
 														onChange={this.handleInputChangeForEditEmployeeLeave}
 														name="to_date"
+														min={new Date().toISOString().split("T")[0]}
 													/>
 												</div>
 											</div>
