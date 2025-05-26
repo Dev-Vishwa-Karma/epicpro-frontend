@@ -4,6 +4,7 @@ import Fullcalender from '../../common/fullcalender';
 class Events extends Component {
 	constructor(props) {
     super(props);
+    const userRole = window.user?.role;
     this.state = {
       events: [],
       workingHoursReports: [],
@@ -30,7 +31,7 @@ class Events extends Component {
       selectedEmployeeIdForModal: '',
       logged_in_employee_id: '',
       logged_in_employee_role: '',
-      calendarView: "report",
+      calendarView: (userRole === "admin" || userRole === "super_admin") ? "any" : "report",
        showReportEditModal: false,
       selectedReportDate: null,
       editedWorkingHours: '',
@@ -131,6 +132,7 @@ class Events extends Component {
 				});
 			} else {
 				this.setState({ 
+					workingHoursReports: [],
 					error: data.message || "Failed to load reports",
 					loading: false 
 				});
@@ -139,6 +141,7 @@ class Events extends Component {
 		.catch((err) => {
 			console.error("Error fetching working hours:", err);
 			this.setState({ 
+				workingHoursReports: [],
 				error: "Failed to fetch working hours",
 				loading: false 
 			});
@@ -409,9 +412,9 @@ class Events extends Component {
 			const loopStart = start < today ? new Date(today) : new Date(start);
 			 	for (let d = new Date(loopStart); d <= end; d.setDate(d.getDate() + 1)) {
 					if (d >= today) {
-					if (leave.is_half_day === 1 || leave.is_half_day === "1" || leave.is_half_day === true) {
+					if (leave.is_half_day === "1") {
 				events.push({
-					title: leave.reason || "Half Day Leave",
+					title: leave.reason,
 					start: d.toISOString().split("T")[0],
 					className: "half-day-leave-event",
 					allDay: true,
@@ -419,7 +422,7 @@ class Events extends Component {
 				});
 			} else {
 				events.push({
-					title: leave.reason || leave.status || "Leave",
+					title: leave.reason,
 					start: d.toISOString().split("T")[0],
 					className: "leave-event",
 					allDay: true,
@@ -581,20 +584,26 @@ class Events extends Component {
 		}
 			// Pass all events in fullcalendar
 			const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
-			if (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") {
+			
 				this.state.allEvents = [
-					...formattedEvents,         
 					...workingHoursEvents,     
 					...leaveEvents              
 				];
-			} else if (calendarView === "report") {
+
+				if (calendarView === "any") {
+				this.state.allEvents = [];
+			}
+
+			if (calendarView === "report") {
 				this.state.allEvents = [
 					...workingHoursEvents,
 					...officeClosures,
 					...missingReportEvents,
 					...leaveEvents,
 				];
-			} else if (calendarView === "event") {
+			}
+			if (calendarView === "event") {
+				console.log("formattedEvents", formattedEvents);
 				this.state.allEvents = [...formattedEvents];
 			}
 		//END
@@ -815,6 +824,7 @@ class Events extends Component {
 														const start_date = `${selectedYear}-01-01`;
 														const end_date = `${selectedYear}-12-31`;
 														this.fetchLeaveData(empId, start_date, end_date);
+														this.fetchWorkingHoursReports(empId);
 												   }
 											  }
 												>
@@ -826,7 +836,7 @@ class Events extends Component {
 									</>
 									)}
 										{/* Add new drodown for show Event/Report */}
-										{logged_in_employee_role === "employee" && (
+										{ (
 										<>
 											<label
 											htmlFor="view-selector"
@@ -841,36 +851,19 @@ class Events extends Component {
 											onChange={(e) =>
 												this.setState({ calendarView: e.target.value })
 											}
+											disabled={
+                                                (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") &&
+                                                !this.state.leaveViewEmployeeId
+                                              }
 										>
+												{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+    												<option value="any">Any</option>
+  												)}
 												<option value="report"> Reports</option>
 												<option value="event">Events</option>
 											</select>
 										</>
 										)}
-
-										{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-  <>
-    <label htmlFor="report-employee-selector" className="d-flex card-title mr-3 ml-3 align-items-center">
-      Reports
-    </label>
-    <select
-      id="report-employee-selector"
-      className="w-100 custom-select"
-      value={this.state.reportViewEmployeeId}
-      onChange={e => {
-        const empId = e.target.value;
-        this.setState({ reportViewEmployeeId: empId }, () => {
-          this.fetchWorkingHoursReports(empId);
-        });
-      }}
-    >
-      <option value="">Select an Employee</option>
-      {employees.map(emp => (
-        <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
-      ))}
-    </select>
-  </>
-)}
 										
                             				{/* Changes (END) */}
 											</div>
