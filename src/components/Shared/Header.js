@@ -346,7 +346,7 @@ class Header extends Component {
 		if (!this.validateReportForm()) {
 			return;
 		}
-
+		this.setState({ isReportSubmitting: true });
 		const { report, start_time, break_duration_in_minutes, end_time, todays_working_hours, todays_total_hours } = this.state;
 
 		const formData = new FormData();
@@ -377,7 +377,9 @@ class Header extends Component {
 						punchSuccess: data.message,
 						isPunchedIn: false,
 						showModal: false,
-						report: ''
+						report: '',
+						isReportSubmitting: false,
+                    	isReportSubmitted: true, //disable after submit
 					});
 
 					document.querySelector("#addReportModal .close").click();
@@ -386,7 +388,7 @@ class Header extends Component {
 						this.setState({ punchSuccess: null });
 					}, 5000);
 				} else {
-					this.setState({ punchError: data.message });
+					this.setState({ punchError: data.message, isReportSubmitting: false  });
 					//window.location.href = '/hr-report';
 					setTimeout(() => {
 						this.setState({ punchError: null });
@@ -394,7 +396,7 @@ class Header extends Component {
 				}
 			})
 			.catch((error) => {
-				this.setState({ punchError: 'Something went wrong. Please try again.' });
+				this.setState({ punchError: 'Something went wrong. Please try again.', isReportSubmitting: false  });
 				setTimeout(() => {
 					this.setState({ punchError: null });
 				}, 5000);
@@ -787,6 +789,7 @@ class Header extends Component {
 				</div> */}
 
 				{/* Modal for Add Report */}
+				
 				<div className="modal fade" id="addReportModal" tabIndex={-1} role="dialog" aria-labelledby="addReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
 					<div className="modal-dialog modal-xl" role="document">
 						<div className="modal-content">
@@ -924,7 +927,7 @@ class Header extends Component {
 							</div>
 
 							<div className="modal-footer">
-								<button type="button" className="btn btn-primary" onClick={this.handleAddReport}>Submit</button>
+								<button type="button" className="btn btn-primary" onClick={this.handleAddReport} disabled={this.state.isReportSubmitting || this.state.isReportSubmitted}>Submit</button>
 							</div>
 						</div>
 					</div>
