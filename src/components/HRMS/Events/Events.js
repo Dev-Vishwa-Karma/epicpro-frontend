@@ -33,12 +33,12 @@ class Events extends Component {
       logged_in_employee_role: '',
       calendarView: (userRole === "admin" || userRole === "super_admin") ? "any" : "report",
        showReportEditModal: false,
-      selectedReportDate: null,
+    selectedReportDate: null,
       editedWorkingHours: '',
       leaveData: [],
 	  allEvents: []
     };
-  }
+}  
 
 	componentDidMount() {
 		const {role, id} = window.user;
@@ -486,6 +486,9 @@ class Events extends Component {
 		})
 		.sort((a, b) => new Date(a.event_date) - new Date(b.event_date)); // Sort events by date
 
+		// Collect all event instances for all years
+		let allYearsEventInstances = [];
+
 		// Format filtered events, ensuring 'event' type events show up for all years
 		const formattedEvents = filteredEvents.map(event => {
 			if (event.event_type === 'event') {
@@ -496,11 +499,13 @@ class Events extends Component {
 					const newEventDate = new Date(eventDate);
 					newEventDate.setFullYear(year);
 		
-					formattedEventForAllYears.push({
+					const eventObj = {
 						title: event.event_name,
 						start: newEventDate.toISOString().split('T')[0],
 						className: 'green-event'
-					});
+					};
+					formattedEventForAllYears.push(eventObj);
+					allYearsEventInstances.push(eventObj);
 				}
 		
 				return formattedEventForAllYears;
@@ -528,7 +533,7 @@ class Events extends Component {
 			return {
 				title: `${hoursStr}`,
 				start: report.created_at?.split(" ")[0],
-				display: "background",
+				display: "background", 
 				borderColor: backgroundColor,
 				backgroundColor: backgroundColor,
 				allDay: true,
@@ -560,68 +565,70 @@ class Events extends Component {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
-		// if (workingHoursReports.length > 0) {
-		if (workingHoursReports.length > 0 && logged_in_employee_role === "employee") {
-			// Corrected line - properly spread the array of timestamps
-			
-			const reportTimestamps = workingHoursReports.map(r => new Date(r.created_at).getTime());
-			const firstReportDate = new Date(Math.min(...reportTimestamps));
-			
-			let currentDate = new Date(firstReportDate);
-			
-			while (currentDate <= today) {
-				const dateStr = currentDate.toISOString().split("T")[0];
-				const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
-				const isOfficeClosure = officeClosures.some(
-				(closure) => closure.start === dateStr
-			);
-				
-					// if (!isWeekend && !isOfficeClosure) {
-					if ( !isOfficeClosure) {
-					const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-					
-					if (!hasReport) {
-						missingReportEvents.push({
-						start: dateStr,
-						display: 'background',
-						color: '#ff6b6b',
-						allDay: true,
-						// title:'Leave',
-						className: 'missing-report-day'
-					});
-				}
-			}
-					currentDate.setDate(currentDate.getDate() + 1);
-			}
-		}
+		// For admin/super_admin
+        let reportsForMissing = workingHoursReports;
+        let missingEmployeeId = logged_in_employee_role === 'employee' ? this.state.logged_in_employee_id : this.state.leaveViewEmployeeId;
+        if (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') {
+            if (this.state.leaveViewEmployeeId) {
+                reportsForMissing = workingHoursReports.filter(r => r.employee_id == this.state.leaveViewEmployeeId);
+            } else {
+                reportsForMissing = [];
+            }
+        }
+
+        if (reportsForMissing.length > 0 && missingEmployeeId) {
+            const reportTimestamps = reportsForMissing.map(r => new Date(r.created_at).getTime());
+            const firstReportDate = new Date(Math.min(...reportTimestamps));
+            let currentDate = new Date(firstReportDate);
+            while (currentDate <= today) {
+                const dateStr = currentDate.toISOString().split("T")[0];
+                const isOfficeClosure = officeClosures.some(
+                    (closure) => closure.start === dateStr
+                );
+                const isSunday = currentDate.getDay() === 0;
+                if (!isOfficeClosure && !isSunday) {
+                    const hasReport = reportsForMissing.some((report) => report.created_at?.split(" ")[0] === dateStr);
+                    if (!hasReport) {
+                        missingReportEvents.push({
+                            start: dateStr,
+                            display: 'background',
+                            color: '#ff6b6b',
+                            allDay: true,	
+                            className: 'missing-report-day'
+                        });
+                    }
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
 			// Pass all events in fullcalendar
 			const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
 			
 				this.state.allEvents = [
-					...workingHoursEvents,     
-					...leaveEvents              
+					...workingHoursEvents,
+					...leaveEvents
 				];
 
 				if (calendarView === "any") {
-				this.state.allEvents = [];
-			}
+				// Show only holidays (red-event) in the 'any' view
+				this.state.allEvents = formattedEvents.filter(e => e.className === 'red-event');
+				}
 
-			if (calendarView === "report") {
+				if (calendarView === "report") {
 				this.state.allEvents = [
-					...workingHoursEvents,
-					...officeClosures,
-					...missingReportEvents,
-					...leaveEvents,
-				];
-			}
-			if (calendarView === "event") {
+						...workingHoursEvents,
+						...officeClosures,
+						...missingReportEvents,
+						...leaveEvents,
+					];
+					// Display Holidays by default
+					this.state.allEvents = formattedEvents.filter(e => e.className === 'red-event');
+				}
+				if (calendarView === "event") {
 				console.log("formattedEvents", formattedEvents);
 				this.state.allEvents = [...formattedEvents];
-			}
-		//END
-
-
-
+				}
+			//END
         return (
             <>
 				<div>
@@ -1005,7 +1012,7 @@ class Events extends Component {
 						</div>
 					</div>
 				)}
-            </>
+							          </>
         )
     }
 }
