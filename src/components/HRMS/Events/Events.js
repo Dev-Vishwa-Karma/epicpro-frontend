@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
+import { Callbacks } from 'jquery';
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -31,7 +32,7 @@ class Events extends Component {
       selectedEmployeeIdForModal: '',
       logged_in_employee_id: '',
       logged_in_employee_role: '',
-      calendarView: (userRole === "admin" || userRole === "super_admin") ? "any" : "report",
+      calendarView: (userRole === "admin" || userRole === "super_admin") ? "event" : "report",
        showReportEditModal: false,
       selectedReportDate: null,
       editedWorkingHours: '',
@@ -461,7 +462,25 @@ class Events extends Component {
 
         // Generate an array of years
     	const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-
+		console.log(
+			"ddd",
+			employees
+		);
+		
+		employees.map(employee => {
+			console.log(
+				employee.first_name
+			);
+			
+			let dobDate = new Date(employee.dob);
+			events.push({
+					event_name: 'Birthday of ' + employee.first_name+ " " + employee.last_name,
+					event_date: dobDate.toISOString().split("T")[0],
+					className: 'green-event',
+					event_type: 'event'
+			});
+		});
+		console.log('events',events)
 		const filteredEvents = events
 		.map((event) => {
 			let eventDate = new Date(event.event_date);
@@ -499,7 +518,7 @@ class Events extends Component {
 					formattedEventForAllYears.push({
 						title: event.event_name,
 						start: newEventDate.toISOString().split('T')[0],
-						className: 'green-event'
+						className: 'blue-event'
 					});
 				}
 		
@@ -675,10 +694,50 @@ class Events extends Component {
                     <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
                         <div className="container-fluid">
                             <div className="row clearfix row-deck">
+							<div className="col-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col-lg-12 col-md-12 col-sm-12">
+											{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+											  <>
+												<select
+												id="leave-employee-selector"
+												className="w-100 custom-select"
+												value={this.state.leaveViewEmployeeId}
+												onChange={
+														e => {
+														const empId = e.target.value;
+														this.setState({ 
+															leaveViewEmployeeId: empId,
+															calendarView: empId ? 'employeeSelected' : 'event'
+														});
+														const start_date = `${selectedYear}-01-01`;
+														const end_date = `${selectedYear}-12-31`;
+														this.fetchLeaveData(empId, start_date, end_date);
+														this.fetchWorkingHoursReports(empId);
+												   }
+											  }
+												>
+										<option value="">All Events</option>
+										{employees.map(emp => (
+											<option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
+										))}
+										</select>
+									</>
+									)}
+                                            </div>
+                                      
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 								<div className="col-lg-4 col-md-12">
+
+								
 									<div className="card">
 										<div className="card-header bline d-flex justify-content-between align-items-center">
-											<h3 className="card-title">Events List</h3>
+											<h3 className="card-title">Events Listsss</h3>
 											{(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
 												<div className="header-action">
 													<button
@@ -818,65 +877,7 @@ class Events extends Component {
 															{year}
 														</option>
 													))}
-												</select>
-
-												  {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-											  <>
-													<label htmlFor="leave-employee-selector" className="d-flex card-title mr-3 ml-3 align-items-center">
-													 Employee:
-													</label>
-												<select
-												id="leave-employee-selector"
-												className="w-100 custom-select"
-												value={this.state.leaveViewEmployeeId}
-												onChange={
-														e => {
-														const empId = e.target.value;
-														this.setState({ leaveViewEmployeeId: empId });
-														const start_date = `${selectedYear}-01-01`;
-														const end_date = `${selectedYear}-12-31`;
-														this.fetchLeaveData(empId, start_date, end_date);
-														this.fetchWorkingHoursReports(empId);
-												   }
-											  }
-												>
-										<option value="">Select an Employee</option>
-										{employees.map(emp => (
-											<option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
-										))}
-										</select>
-									</>
-									)}
-										{/* Add new drodown for show Event/Report */}
-										{ (
-										<>
-											<label
-											htmlFor="view-selector"
-											className="d-flex card-title mr-3 ml-3 align-items-center"
-											>
-											View:{" "}
-											</label>
-											<select
-											id="view-selector"
-											className="w-100 custom-select"
-											value={calendarView}
-											onChange={(e) =>
-												this.setState({ calendarView: e.target.value })
-											}
-											disabled={
-                                                (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") &&
-                                                !this.state.leaveViewEmployeeId
-                                              }
-										>
-												{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-    												<option value="any">Any</option>
-  												)}
-												<option value="report"> Reports</option>
-												<option value="event">Events</option>
-											</select>
-										</>
-										)}
-										
+												</select>										
                             				{/* Changes (END) */}
 											</div>
 										</div>
