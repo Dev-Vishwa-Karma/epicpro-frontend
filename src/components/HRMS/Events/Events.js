@@ -36,7 +36,7 @@ class Events extends Component {
     selectedReportDate: null,
       editedWorkingHours: '',
       leaveData: [],
-	  allEvents: []
+	  allEvents: [],
     };
 }  
 
@@ -104,11 +104,13 @@ class Events extends Component {
 			console.error(err);
 		});
 
-		this.fetchWorkingHoursReports(id);
-		// Fetch leave data for the current year
-		const start_date = `${this.state.selectedYear}-01-01`;
-		const end_date = `${this.state.selectedYear}-12-31`;     
-		this.fetchLeaveData(id, start_date, end_date);
+		// Fetch initial data based on user role
+		if (role === 'employee') {
+			this.fetchWorkingHoursReports(id);
+			const start_date = `${this.state.selectedYear}-01-01`;
+			const end_date = `${this.state.selectedYear}-12-31`;     
+			this.fetchLeaveData(id, start_date, end_date);
+		}
 	}
 
   	fetchWorkingHoursReports = (employeeId) => {
@@ -393,23 +395,23 @@ class Events extends Component {
 		}
     };
 
-	handleEmployeeSelection = (e, context = 'todo') => {
-        const selectedId = e.target.value;
-		if (context === 'todo') {
-			this.setState({
-				selectedEmployeeIdForTodo: selectedId,
-				todos: [],
-			}, () => {
-				if (selectedId) {
-					this.fetchTodos(selectedId);
-				}
-			});
-		} else if (context === 'modal') {
-			this.setState({
-				selectedEmployeeIdForModal: selectedId,
-				errors: { ...this.state.errors, selectedEmployeeIdForModal: '' },
-			});
-		}
+	handleEmployeeSelection = (e) => {
+        const selectedEmployeeId = e.target.value;
+        this.setState({ leaveViewEmployeeId: selectedEmployeeId }, () => {
+            if (selectedEmployeeId) {
+                // Fetch reports and leaves for selected employee
+                this.fetchWorkingHoursReports(selectedEmployeeId);
+                const start_date = `${this.state.selectedYear}-01-01`;
+                const end_date = `${this.state.selectedYear}-12-31`;
+                this.fetchLeaveData(selectedEmployeeId, start_date, end_date);
+            } else {
+                // Clear reports and leaves if no employee selected
+                this.setState({
+                    workingHoursReports: [],
+                    leaveData: []
+                });
+            }
+        });
     };
 
 	formatLeaveEvents = (leaveData) => {
@@ -487,7 +489,7 @@ class Events extends Component {
 		.sort((a, b) => new Date(a.event_date) - new Date(b.event_date)); // Sort events by date
 
 		// Collect all event instances for all years
-		let allYearsEventInstances = [];
+let allYearsEventInstances = [];
 
 		// Format filtered events, ensuring 'event' type events show up for all years
 		const formattedEvents = filteredEvents.map(event => {
@@ -620,9 +622,8 @@ class Events extends Component {
 						...officeClosures,
 						...missingReportEvents,
 						...leaveEvents,
+						...formattedEvents.filter(e => e.className === 'red-event')
 					];
-					// Display Holidays by default
-					this.state.allEvents = formattedEvents.filter(e => e.className === 'red-event');
 				}
 				if (calendarView === "event") {
 				console.log("formattedEvents", formattedEvents);
@@ -762,7 +763,7 @@ class Events extends Component {
 															id="selectedEmployeeIdForTodo"
 															className="form-control custom-select"
 															value={selectedEmployeeIdForTodo}
-															onChange={(e) => this.handleEmployeeSelection(e, 'todo')}
+															onChange={(e) => this.handleEmployeeSelection(e)}
 														>
 															<option value="">Select an Employee</option>
 															{employees.map((employee) => (
@@ -836,16 +837,7 @@ class Events extends Component {
 												id="leave-employee-selector"
 												className="w-100 custom-select"
 												value={this.state.leaveViewEmployeeId}
-												onChange={
-														e => {
-														const empId = e.target.value;
-														this.setState({ leaveViewEmployeeId: empId });
-														const start_date = `${selectedYear}-01-01`;
-														const end_date = `${selectedYear}-12-31`;
-														this.fetchLeaveData(empId, start_date, end_date);
-														this.fetchWorkingHoursReports(empId);
-												   }
-											  }
+												onChange={this.handleEmployeeSelection}
 												>
 										<option value="">Select an Employee</option>
 										{employees.map(emp => (
@@ -854,7 +846,7 @@ class Events extends Component {
 										</select>
 									</>
 									)}
-										{/* Add new drodown for show Event/Report */}
+										{/* Add new droown for show Event/Report */}
 										{ (
 										<>
 											<label
@@ -890,9 +882,8 @@ class Events extends Component {
 										<div className="card-body">
 											{/* Pass the formatted events to the FullCalendar component */}
 											<Fullcalender events={this.state.allEvents} defaultDate={defaultDate}
-											 //add new chnages
-											 
-											dayCellClassNames={(arg) => {
+	
+										dayCellClassNames={(arg) => {
 											const dateStr = arg.date.toISOString().split("T")[0];
 											const today = new Date();
 											today.setHours(0, 0, 0, 0);
@@ -948,7 +939,7 @@ class Events extends Component {
 														id="selectedEmployeeIdForModal"
 														className={`form-control ${this.state.errors.selectedEmployeeIdForModal ? "is-invalid" : ""}`}
 														value={selectedEmployeeIdForModal}
-														onChange={(e) => this.handleEmployeeSelection(e, 'modal')}
+														onChange={(e) => this.handleEmployeeSelection(e)}
 													>
 														<option value="">Select an Employee</option>
 														{employees.map((employee) => (
