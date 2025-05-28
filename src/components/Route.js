@@ -13,6 +13,8 @@ import Payroll from './HRMS/Payroll/Payroll';
 import Report from './HRMS/Report/Report';
 import Accounts from './HRMS/Accounts/Accounts';
 import Gallery from './HRMS/Gallery/Gallery';
+import Alternate from './HRMS/Alternate/Alternate';
+
 // import ProjectDashboard from './Project/Dashboard/Dashboard';
 import ProjectList from './Project/ProjectList/Projectlist';
 import Clients from './Project/Clients/Clients';
@@ -130,6 +132,13 @@ const Routes = [
         exact: true,
         pageTitle: "Image Gallery",
         component: Gallery
+    },
+    {
+        path: "/select-saturday",
+        name: 'saturday selection',
+        exact: true,
+        pageTitle: "Saturday Settings",
+        component: Alternate
     },
     // add new routes here
 

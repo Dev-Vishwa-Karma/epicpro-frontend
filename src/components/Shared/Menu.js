@@ -397,6 +397,21 @@ class Menu extends Component {
 						hrmsSection.content.splice(activitiesIndex + 1, 0, activities);
 					}
 
+					// Add the "Employee" item to the HRMS section after the department item
+					const saturdaySettings = {
+						"id": 6,
+						"label": "Saturday Settings",
+						"to": "/select-saturday"
+					};
+
+					// Find the index of "Department" (id: 5)
+					const saturdaySettingsIndex = hrmsSection.content.findIndex(item => item.id === 6);
+
+					if (saturdaySettingsIndex !== -1) {
+						// Insert "Employee" before "Activities"
+						hrmsSection.content.splice(saturdaySettingsIndex + 1, 0, saturdaySettings);
+					}
+
 
 					// Add the "Payroll" for admin/super_admin item to the HRMS section after the Events item
 					const payroll = {
