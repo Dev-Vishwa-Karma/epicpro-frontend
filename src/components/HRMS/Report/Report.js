@@ -11,7 +11,7 @@ class Report extends Component {
             reports: [],
             selectedReport: null,
             isModalOpen: false,
-            selectedEmployee: "",
+            selectedEmployee: "",	
             employeeData: [],
             selectedStatus: "",
             punchOutReport: "",
@@ -44,6 +44,7 @@ class Report extends Component {
                 break_duration_in_minutes: ''
 			},
             loading: true,
+            reportSearchQuery: "", // <-- Add this line
         };
         this.reportMessageTimeout = null;
     }
@@ -55,7 +56,7 @@ class Report extends Component {
         if (window.user.role === 'super_admin' || window.user.role === 'admin') {
             apiUrl = `${process.env.REACT_APP_API_URL}/reports.php`;
         } else {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`;
+            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id }`;
         }
 
         // Make the GET API call when the component is mounted
@@ -748,18 +749,37 @@ class Report extends Component {
 		}
 	};
 
+    handleReportSearch = (event) => {
+        this.setState({ reportSearchQuery: event.target.value.toLowerCase(), currentPageReports: 1 });
+    };
+
     render() {
         const { fixNavbar } = this.props;
-        const { reports, error, employeeData, selectedStatus, selectedEmployee, punchOutReport, reportError, reportSuccess, addReportByAdminError, existingFullName, existingActivityType, existingActivityDescription, existingActivityInTime, existingActivityOutTime, existingActivitySatus, editReportByAdminError, selectedReport, loading, report, start_time, todays_total_hours, break_duration_in_minutes, todays_working_hours, end_time, punchError, punchSuccess, currentPageReports, dataPerPage } = this.state;
+        const { 
+            reports, error, employeeData, selectedStatus, selectedEmployee, punchOutReport, reportError, reportSuccess, 
+            addReportByAdminError, existingFullName, existingActivityType, existingActivityDescription, existingActivityInTime, 
+            existingActivityOutTime, existingActivitySatus, editReportByAdminError, selectedReport, loading, report, start_time, 
+            todays_total_hours, break_duration_in_minutes, todays_working_hours, end_time, punchError, punchSuccess, 
+            currentPageReports, dataPerPage, reportSearchQuery 
+        } = this.state;
 
-        // Handle empty employee data safely
-		const reportList = (reports || []).length > 0 ? reports : [];
+        // Filter reports by employee name for admin/super_admin
+        let filteredReports = reports;
+        if (
+            (window.user.role === "admin" || window.user.role === "super_admin") &&
+            reportSearchQuery
+        ) {
+            filteredReports = reports.filter((r) => {
+                const fullName = (r.full_name || "").toLowerCase();
+                return fullName.includes(reportSearchQuery);
+            });
+        }
 
-		// Pagination Logic for Reports
-		const indexOfLastReport = currentPageReports * dataPerPage;
-		const indexOfFirstReport = indexOfLastReport - dataPerPage;
-		const currentReports = reportList.slice(indexOfFirstReport, indexOfLastReport);
-		const totalPagesReports = Math.ceil(reportList.length / dataPerPage);
+        // Pagination Logic for Reports
+        const indexOfLastReport = currentPageReports * dataPerPage;
+        const indexOfFirstReport = indexOfLastReport - dataPerPage;
+        const currentReports = filteredReports.slice(indexOfFirstReport, indexOfLastReport);
+        const totalPagesReports = Math.ceil(filteredReports.length / dataPerPage);
 
         return (
             <>
@@ -775,11 +795,19 @@ class Report extends Component {
                             <div className="d-flex justify-content-between align-items-center">
                                 <ul className="nav nav-tabs page-header-tab">
                                 </ul>
-                                {/* {window.user && window.user.role !== 'employee' && (
+                                {/* Show search only for admin/super_admin */}
+                                {(window.user.role === "admin" || window.user.role === "super_admin") && (
                                     <div className="header-action d-md-flex">
-                                        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#addReportModal"><i className="fe fe-plus mr-2" />Add</button>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search employee by name..."
+                                            style={{ maxWidth: 250 }}
+                                            value={reportSearchQuery}
+                                            onChange={this.handleReportSearch}
+                                        />
                                     </div>
-                                )} */}
+                                )}
                             </div>
                         </div>
                     </div>

@@ -25,7 +25,7 @@ class ViewEmployee extends Component {
             showSuccess: false,
             errorMessage: "",
             showError: false,
-            activeTab: "",
+            activeTab: "calendar", 
             activities: [],
             reports: [],
             leaves: [],
@@ -43,7 +43,9 @@ class ViewEmployee extends Component {
     };
 
     componentDidMount() {
-        const { employee, employeeId, tab } = this.props.location.state || {};
+        const { employee, employeeId } = this.props.location.state || {};
+        // Always force calendar tab open on mount
+        this.setState({ activeTab: "calendar" });
 
         // Get the logged-in user from localStorage
         const storedUser = JSON.parse(localStorage.getItem("user")) || null;
@@ -53,15 +55,14 @@ class ViewEmployee extends Component {
             this.setState({
                 employee: { ...this.state.employee, ...employee },
                 employeeId,
-                previewImage: `${process.env.REACT_APP_API_URL}/${employee.profile}`,
-                activeTab: tab,
+                previewImage: `${process.env.REACT_APP_API_URL}/${employee.profile}`
             });
         }
 
         // If viewing the logged-in user's profile, use the latest localStorage data
         if (storedUser && employee && storedUser.id === employee.id) {
             this.setState({
-                employee: { ...this.state.employee, ...storedUser }, // Merge the latest stored data
+                employee: { ...this.state.employee, ...storedUser },
                 employeeId: storedUser.id,
                 previewImage: `${process.env.REACT_APP_API_URL}/${storedUser.profile}`
             });
@@ -70,38 +71,10 @@ class ViewEmployee extends Component {
         if (employeeId) {
             this.fetchEmployeeDetails(employeeId);
         }
-
-        // Get activities
-        /* let apiUrl = '';
-
-		if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-		apiUrl = `${process.env.REACT_APP_API_URL}/activities.php`;
-		}
-		else {
-		apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?user_id=${window.user.id}`;
-        apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?employee_id=${window.user.id}`;
-		}
-
-		fetch(apiUrl, {
-			method: "GET",
-		})
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                this.setState({ activities: data.data });
-            } else {
-                this.setState({ errorMessage: data.message });
-            }
-        })
-        .catch(err => {
-            this.setState({ error: 'Failed to fetch data' });
-            console.error(err);
-        }); */
-
         this.loadEmployeeData();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
         const { employee, employeeId, tab } = this.props.location.state || {};
         if (employee && employee !== prevProps.location.state?.employee) {
             this.setState({
@@ -113,6 +86,10 @@ class ViewEmployee extends Component {
         if (employeeId && employeeId !== prevProps.location.state?.employeeId) {
             this.fetchEmployeeDetails(employeeId);
         }
+
+        if (employeeId && employeeId !== prevState.employeeId) {
+        this.loadEmployeeData();
+    }
 
          // Watch for tab change even if pathname is same
         if (tab && tab !== prevProps.location.state?.tab) {
@@ -142,12 +119,21 @@ class ViewEmployee extends Component {
     // Usage example (inside your componentDidMount or wherever you load data)
     loadEmployeeData = () => {
         const baseUrl = process.env.REACT_APP_API_URL;
-
-        if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-            this.fetchData(`${baseUrl}/activities.php`, 'activities');
-            this.fetchData(`${baseUrl}/reports.php`, 'reports');
-            this.fetchData(`${baseUrl}/employee_leaves.php`, 'leaves');
-        } else {
+        const { employeeId } = this.state;
+        const isAdmin = window.user.role === 'super_admin' || window.user.role === 'admin';
+    
+        if (employeeId) {
+            this.fetchData(`${baseUrl}/activities.php?user_id=${employeeId}`, 'activities');
+            this.fetchData(`${baseUrl}/reports.php?user_id=${employeeId}`, 'reports');
+            this.fetchData(`${baseUrl}/employee_leaves.php?employee_id=${employeeId}`, 'leaves');
+        } 
+        else if (isAdmin) {
+            const userId = window.user.id;
+            this.fetchData(`${baseUrl}/activities.php?user_id=${userId}`, 'activities');
+            this.fetchData(`${baseUrl}/reports.php?user_id=${userId}`, 'reports');
+            this.fetchData(`${baseUrl}/employee_leaves.php?employee_id=${userId}`, 'leaves');
+        }
+        else {
             const userId = window.user.id;
             this.fetchData(`${baseUrl}/activities.php?user_id=${userId}`, 'activities');
             this.fetchData(`${baseUrl}/reports.php?user_id=${userId}`, 'reports');
@@ -173,6 +159,51 @@ class ViewEmployee extends Component {
             .catch((error) => console.error("Error fetching employee details:", error));
     };
 
+
+    fetchWorkingHoursReports = (employeeId) => {
+		fetch(
+		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}`,
+		{
+			method: "GET",
+		}
+		)
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
+			}
+			return response.json();
+		})
+		.then((data) => {
+			if (data.status === "success") {
+				if(employeeId == ''){
+					this.setState({ 
+						workingHoursReports: []
+					});
+				}else{
+					this.setState({ 
+						workingHoursReports: data.data,
+						loading: false 
+					});
+				}
+			} else {
+				this.setState({ 
+					workingHoursReports: [],
+					error: data.message || "Failed to load reports",
+					loading: false 
+				});
+			}
+		})
+		.catch((err) => {
+			console.error("Error fetching working hours:", err);
+			this.setState({ 
+				workingHoursReports: [],
+				error: "Failed to fetch working hours",
+				loading: false 
+			});
+		});
+		};
+
+        
     handleImageChange = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -406,15 +437,22 @@ class ViewEmployee extends Component {
 
         // Format filtered total working hours
 		const totalWorkingHours = reports.map(report => {
-            const formattedtotalWorkingHours = [];
-		
-            formattedtotalWorkingHours.push({
-                title: `Working: ${report.todays_working_hours?.slice(0, 5)}`,
-                start: report.created_at.split(' ')[0],
-                className: 'edit-profile-calendar-total-working-hours'
-            });
-		
-            return formattedtotalWorkingHours;
+            const hoursStr = report.todays_working_hours?.slice(0, 5);
+			const hours = parseFloat(hoursStr);
+
+			let backgroundColor = "#4ee44e";
+			if (hours < 4) backgroundColor = "#D6010133";
+			else if (hours < 8) backgroundColor = "#87ceeb";
+
+			return {
+				title: `${hoursStr}`,
+				start: report.created_at?.split(" ")[0],
+				display: "background", 
+				borderColor: backgroundColor,
+				backgroundColor: backgroundColor,
+				allDay: true,
+				className: "daily-report",
+			};
 		}).flat();
 
 
@@ -427,11 +465,12 @@ class ViewEmployee extends Component {
         
             for (let date = from.clone(); date.isSameOrBefore(to); date.add(1, 'days')) {
                 days.push({
-                    // title: leave.reason || "Leave",
+                    title: leave.reason || "Leave",
                     start: date.format('YYYY-MM-DD'),
-                    backgroundColor: 'red',
-                    borderColor: 'red',
-                    textColor: 'white',
+                    backgroundColor: 'rgba(214, 1, 1, 0.2)',
+                    borderColor: 'rgba(214, 1, 1, 0.2)',
+                    textColor: 'black',
+                    className: 'leave-event-calender',
                 });
             }
         
@@ -439,25 +478,15 @@ class ViewEmployee extends Component {
         });
 
         // First, merge both arrays
+        // NOTE: Only the selected employee's reports and approved leaves are included in calendarEvents.
+        // The data fetching logic ensures that reports and leaves are always scoped to the selected employee (admin) or the logged-in user (employee).
         const calendarEvents = [
             ...totalWorkingHours,
             ...employeeLeavesData
         ];
 
         // Prepare leave dates separately for day coloring
-        const leaveDatesSet = new Set(
-            leaves
-            .filter(leave => leave.status === 'approved')
-            .flatMap(leave => {
-                const from = moment(leave.from_date);
-                const to = moment(leave.to_date);
-                const dates = [];
-                for (let date = from.clone(); date.isSameOrBefore(to); date.add(1, 'days')) {
-                    dates.push(date.format('YYYY-MM-DD'));
-                }
-                return dates;
-            })
-        );
+       
 
         return (
             <>
@@ -667,7 +696,9 @@ class ViewEmployee extends Component {
                                                 </div> */}
                                             </div>
                                             <div className="card-body">
-                                                <Fullcalender events={calendarEvents} leaveDatesSet={leaveDatesSet}></Fullcalender>
+                                                <Fullcalender events={calendarEvents}
+                                                
+                                                ></Fullcalender>
                                             </div>
                                         </div>
                                     </div>
