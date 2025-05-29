@@ -3,18 +3,32 @@
     color: #BABDBF!important;
     border-color:  #39374e !important;
 } */
+
+/* Birthday Event Styling */
+.birthday-event {
+    background-color: #e8f4fc !important; /* Light Orange */
+    border-left: 6px solid #007bff !important; /* Orange */
+    color: #007bff !important;
+}
+
 .green-event {
-    background-color: #39374e !important;
-    border-color: #39374e !important;
-    color: #BABDBF !important; /* optional for text */
-    /* font-weight: 600 !important; */
+    background-color: #0879FA !important;
+    border-color: #0879FA !important;
+    color: #fff !important;
+    text-align: center !important;
 }
   
 .red-event {
-    background-color: #39374e !important;
-    border-color: #39374e !important;
-    color: #BABDBF !important;
-    /* font-weight: 600 !important; */
+    background-color: #ee8c81 !important;
+    border-color: #FDECEA !important;
+    color: #fff !important;
+    text-align: center !important;
+}
+
+.blue-event{
+    background-color: #4FA845 !important;
+    color: #fff !important;
+    text-align: center !important;
 }
 
 .edit-profile-calendar-total-working-hours {
@@ -137,7 +151,7 @@ div.rtl{
 
 /* Missing reports - working days without reports */
 .missing-report-day {
-  background-color: rgba(214, 1, 1, 0.2) !important;
+  background-color: rgba(255, 0, 0, 0.2) !important;
   border: none !important;
   opacity: 1 !important;
 }
@@ -178,4 +192,17 @@ div.rtl{
     color: black !important;
     border: none !important;
     text-align: center !important;
+}
+
+
+.office-closure-day {
+    background-color: #fff !important;
+    opacity: 0.7;
+}
+
+.office-closure-event {
+    background-color: #fff !important;
+    border-color: #fff !important; 
+    color: #fff !important; 
+    font-weight: bold;
 }
