@@ -401,7 +401,7 @@ class Menu extends Component {
 					const saturdaySettings = {
 						"id": 6,
 						"label": "Saturday Settings",
-						"to": "/select-saturday"
+						"to": "/saturday-settings"
 					};
 
 					// Find the index of "Department" (id: 5)
