@@ -11,6 +11,7 @@ class Report extends Component {
             reports: [],
             selectedReport: null,
             isModalOpen: false,
+            selectedReportEmployee:"",
             selectedEmployee: "",
             employeeData: [],
             selectedStatus: "",
@@ -37,6 +38,8 @@ class Report extends Component {
 			todays_total_hours: '',
 			currentPageReports: 1,
             dataPerPage: 10,
+			fromDate: null,
+			toDate: null,
 			error: {
                 report: '',
 				start_time: '',
@@ -49,31 +52,15 @@ class Report extends Component {
     }
 
     componentDidMount() {
-
-        let apiUrl = '';
-
-        if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php`;
-        } else {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`;
-        }
-
-        // Make the GET API call when the component is mounted
-        fetch(apiUrl, {
-            method: "GET",
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    this.setState({ reports: data.data, loading: false });
-                } else {
-                    this.setState({ reports: [], error: data.message, loading: false });
-                }
-            })
-            .catch(err => {
-                this.setState({ error: 'Failed to fetch data' });
-                console.error(err);
-            });
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0); // Set to start of day
+        this.setState({ 
+            fromDate: yesterday,
+            toDate: yesterday 
+        }, () => {
+            this.fetchReports()
+        });
 
         /** Get employees list */
         fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
@@ -108,6 +95,7 @@ class Report extends Component {
         // Listen for custom event
         window.addEventListener("reportMessage", this.handleReportMessage);
     }
+
 
     componentWillUnmount() {
         window.removeEventListener("reportMessage", this.handleReportMessage);
@@ -329,7 +317,9 @@ class Report extends Component {
 
     // Handle dropdown change for employee
     handleEmployeeChange = (event) => {
-        this.setState({ selectedEmployee: event.target.value });
+        this.setState({ selectedReportEmployee: event.target.value }, () => {
+            this.fetchReports();
+        });
     };
 
     // Handle dropdown change
@@ -717,11 +707,42 @@ class Report extends Component {
 	};
 
     fetchReports = () => {
-        fetch(`${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`)
+        const { fromDate, toDate, selectedReportEmployee } = this.state;
+        let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?action=view&user_id=${selectedReportEmployee}`;
+        
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); 
+            const day = String(date.getDate()).padStart(2, '0'); 
+            return `${year}-${month}-${day}`; 
+        };
+
+        if (fromDate) {
+            apiUrl += `&from_date=${formatDate(fromDate)}`;
+        }
+        if (toDate) {
+            apiUrl += `&to_date=${formatDate(toDate)}`;
+        }
+
+        fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                this.setState({ reports: data.data });
+                    this.setState({ 
+                        reports: data.data,
+                        filteredReports: data.data,
+                        loading: false,
+                        currentPageReports: 1, 
+                        error: null 
+                    });
+                
+            }else {
+                this.setState({ 
+                    error: data.message || 'Failed to fetch reports',
+                    loading: false,
+                    reports: [],
+                    filteredReports: []
+                });
             }
         });
     }
@@ -748,18 +769,91 @@ class Report extends Component {
 		}
 	};
 
+    // Add new method for handling date changes
+    handleDateChange = (date, type) => {
+        const { fromDate, toDate } = this.state;
+        if (date) {
+            // Ensure the date is set to start of day for fromDate and end of day for toDate
+            const newDate = new Date(date);
+            if (type === 'fromDate') {
+                this.setState({ fromDate: newDate }, () => {
+                    this.fetchReports();
+                });
+               
+            } else if (type === 'toDate') {
+                this.setState({ toDate: newDate }, () => {
+                    this.fetchReports();
+                });
+            }
+         
+        } else {
+            // Handle null date (when date is cleared)
+            this.setState({ [type]: null }, () => {
+                this.fetchReports();
+            });
+        }
+    };
+
+    resetFilters = () => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0); // Set to start of day
+        
+        this.setState({
+            fromDate: yesterday,
+            toDate: yesterday,
+            selectedReportEmployee: "",
+            loading: true
+        }, () => {
+            this.fetchReports();
+        });
+    };
+
     render() {
         const { fixNavbar } = this.props;
-        const { reports, error, employeeData, selectedStatus, selectedEmployee, punchOutReport, reportError, reportSuccess, addReportByAdminError, existingFullName, existingActivityType, existingActivityDescription, existingActivityInTime, existingActivityOutTime, existingActivitySatus, editReportByAdminError, selectedReport, loading, report, start_time, todays_total_hours, break_duration_in_minutes, todays_working_hours, end_time, punchError, punchSuccess, currentPageReports, dataPerPage } = this.state;
+        const { 
+            reports, 
+            error, 
+            employeeData, 
+            selectedStatus, 
+            selectedEmployee, 
+            selectedReportEmployee,
+            punchOutReport, 
+            reportError, 
+            reportSuccess, 
+            addReportByAdminError, 
+            existingFullName, 
+            existingActivityType, 
+            existingActivityDescription, 
+            existingActivityInTime, 
+            existingActivityOutTime, 
+            existingActivitySatus, 
+            editReportByAdminError, 
+            selectedReport, 
+            loading, 
+            report, 
+            start_time, 
+            todays_total_hours, 
+            break_duration_in_minutes, 
+            todays_working_hours, 
+            end_time, 
+            punchError, 
+            punchSuccess, 
+            currentPageReports, 
+            dataPerPage,
+            fromDate,
+            toDate,
+            filteredReports
+        } = this.state;
 
         // Handle empty employee data safely
-		const reportList = (reports || []).length > 0 ? reports : [];
+        const reportList = (filteredReports || reports || []).length > 0 ? (filteredReports || reports) : [];
 
-		// Pagination Logic for Reports
-		const indexOfLastReport = currentPageReports * dataPerPage;
-		const indexOfFirstReport = indexOfLastReport - dataPerPage;
-		const currentReports = reportList.slice(indexOfFirstReport, indexOfLastReport);
-		const totalPagesReports = Math.ceil(reportList.length / dataPerPage);
+        // Pagination Logic for Reports
+        const indexOfLastReport = currentPageReports * dataPerPage;
+        const indexOfFirstReport = indexOfLastReport - dataPerPage;
+        const currentReports = reportList.slice(indexOfFirstReport, indexOfLastReport);
+        const totalPagesReports = Math.ceil(reportList.length / dataPerPage);
 
         return (
             <>
@@ -788,6 +882,70 @@ class Report extends Component {
                             <div className="tab-content mt-3">
                                 <div className="tab-pane fade show active" id="Report-Invoices" role="tabpanel">
                                     <div className="card">
+                                        {/* Add date range filters */}
+                                        {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
+                                        <div className="card-header">
+                                            <div className="row">
+                                                <div className="col-md-3">
+                                                    <div className="form-group">
+                                                        <label className="form-label">From Date</label>
+                                                        <DatePicker
+                                                            selected={fromDate}
+                                                            onChange={(date) => this.handleDateChange(date, 'fromDate')}
+                                                            className="form-control"
+                                                            dateFormat="yyyy-MM-dd"
+                                                            placeholderText="From Date"
+                                                            maxDate={new Date()}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-3">
+                                                    <div className="form-group">
+                                                        <label className="form-label">To Date</label>
+                                                        <DatePicker
+                                                            selected={toDate}
+                                                            onChange={(date) => this.handleDateChange(date, 'toDate')}
+                                                            className="form-control"
+                                                            dateFormat="yyyy-MM-dd"
+                                                            placeholderText="To Date"
+                                                            minDate={fromDate}
+                                                            maxDate={new Date()}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-3">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Select Employee</label>
+                                                        <select 
+                                                            className="form-control" 
+                                                            value={selectedReportEmployee} 
+                                                            onChange={this.handleEmployeeChange}
+                                                        >
+                                                            <option value="">All Employees</option>
+                                                            {employeeData.map((employee) => (
+                                                                <option key={employee.id} value={employee.id}>
+                                                                    {employee.first_name} {employee.last_name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-3">
+                                                    <div className="form-group">
+                                                        <label className="form-label">&nbsp;</label>
+                                                        <button 
+                                                            type="button" 
+                                                            className="btn btn-primary btn-block"
+                                                            onClick={this.resetFilters}
+                                                        >
+                                                            <i className="fa fa-refresh mr-2"></i>Reset Filters
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        )}
+
                                         {/* Display activity success message outside the modal */}
                                         {reportSuccess && (
                                             <div className="alert alert-success mb-0">{reportSuccess}</div>
@@ -874,65 +1032,6 @@ class Report extends Component {
                                                                 </tr>
                                                             )}
                                                         </tbody>
-                                                        {/* <thead>
-                                                            <tr>
-                                                                <th>Employee Name</th>
-                                                                <th>Activity Type</th>
-                                                                <th>In Time</th>
-                                                                <th>Out Time</th>
-                                                                <th>Duration</th>
-                                                                <th>Status</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {reports.length > 0 ? (
-                                                                reports.map((report, index) => (
-                                                                    <tr>
-                                                                        <td>{report.full_name}</td>
-                                                                        <td>{report.activity_type}</td>
-                                                                        <td>{report.complete_in_time}</td>
-                                                                        <td>{report.complete_out_time}</td>
-                                                                        <td>{report.duration}</td>
-                                                                        <td>
-                                                                            {report.status === 'active' && (
-                                                                                <label className="badge badge-primary">Active</label>
-                                                                            )}
-                                                                            {report.status === 'completed' && (
-                                                                                <label className="badge badge-success">Completed</label>
-                                                                            )}
-                                                                            {report.status === 'auto closed' && (
-                                                                                <label className="badge badge-warning">Auto Closed</label>
-                                                                            )}
-                                                                        </td>
-                                                                        <td>
-                                                                        {
-                                                                            !(report.activity_type === 'Punch' && !report.complete_out_time) && (
-                                                                                <button 
-                                                                                    type="button" 
-                                                                                    className="btn btn-icon btn-sm" 
-                                                                                    title="View" 
-                                                                                    data-toggle="modal" 
-                                                                                    data-target="#viewpunchOutReportModal" 
-                                                                                    onClick={() => this.openModal(report)}
-                                                                                >
-                                                                                    <i className="icon-eye text-danger"></i>
-                                                                                </button>
-                                                                            )
-                                                                        }
-                                                                            <button type="button" class="btn btn-icon btn-sm" title="Edit" data-toggle="modal" data-target="#editReportModal" onClick={() => this.setStateForEditReportModel(report)}><i class="icon-pencil text-danger"></i></button>
-                                                                            <button type="button" class="btn btn-icon btn-sm" title="Delete" data-toggle="modal" data-target="#deleteReportModal" onClick={() => this.setActivityIdState(report)}><i class="icon-trash text-danger"></i></button>
-                                                                        </td>
-                                                                    </tr>
-                                                                ))
-                                                            ) : (
-                                                                <tr>
-                                                                    <td colSpan="8" style={{ textAlign: 'center' }}>
-                                                                        {error ? error : 'No reports available.'}
-                                                                    </td>
-                                                                </tr>
-                                                            )}
-                                                        </tbody> */}
                                                     </table>
                                                 </div>
                                             )}

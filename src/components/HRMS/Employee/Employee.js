@@ -325,8 +325,17 @@ class Employee extends Component {
 				console.log('halfDayCheckbox === ', name);
 				console.log('halfDayCheckbox value === ', this.state.halfDayCheckbox);
 			});
+		} else if (name === 'from_date') {
+			// If selecting from_date, auto-fill to_date if empty or before from_date
+			this.setState((prevState) => {
+				let newState = { from_date: value };
+				if (!prevState.to_date || prevState.to_date < value) {
+					newState.to_date = value;
+				}
+				return newState;
+			});
 		} else {
-			this.setState({ [name]: value });
+			this.setState({ [name]: value });	
 		}
     };
 
@@ -744,31 +753,28 @@ class Employee extends Component {
 									</div>
 								</div>
 								{/* Show leave count */}
-								<div className="row">
+								<div className="row justify-content-center align-items-stretch">
 									{[
 										{ label: "Total Leaves", value: totalLeaves },
 										{ label: "Approved Leaves", value: approvedLeaves },
 										{ label: "Rejected Leaves", value: rejectedLeaves },
-										{ label: "Pending Leaves", value: pendingLeaves },
-										{ label: "Cancelled Leaves", value: cancelledLeaves}
+										{ label: "Pending Leaves", value: pendingLeaves }
 									].map((item, index) => (
-										<div className="col-lg-2 custom-col col-md-6" key={index}>
-											<div className="card">
-												<div className="card-body w_sparkline">
-													<div className="details">
-														<span>{item.label}</span>
-														{loading ? (
-															<div className="d-flex" style={{ height: "20px" }}>
-																<div className="spinner-border" role="status" style={{ width: "20px", height: "20px", borderWidth: "2px" }}>
+										<div className="col-6 col-sm-6 col-md-3 mb-3 d-flex align-items-stretch" key={index}>
+											<div className="card w-100 h-100">
+												<div className="card-body w_sparkline d-flex flex-column justify-content-center align-items-center">
+													<span>{item.label}</span>
+													{loading ? (
+														<div className="d-flex" style={{ height: "20px" }}>
+															<div className="spinner-border" role="status" style={{ width: "20px", height: "20px", borderWidth: "2px" }}>
 																<span className="sr-only">Loading...</span>
-																</div>
 															</div>
-														) : (
-															<h3 className="mb-0 counter">
-																<CountUp end={item.value} />
-															</h3>
-														)}
-													</div>
+														</div>
+													) : (
+														<h3 className="mb-0 counter">
+															<CountUp end={item.value} />
+														</h3>
+													)}
 												</div>
 											</div>
 										</div>
@@ -823,13 +829,11 @@ class Employee extends Component {
 																</tr>
 															</thead>
 															<tbody>
-																{currentEmployees.length > 0 ? (
-																	currentEmployees.map((employee, index) => (
+																{employeeList.length > 0 ? (
+																	employeeList.map((employee, index) => (
 																		<tr key={index}>
 																			<td className="w40">
-																				{((this.state.currentPageEmployees - 1) * dataPerPage + index + 1)
-																				.toString()
-																				.padStart(2, '0')}
+																				{(index + 1).toString().padStart(2, '0')}
 																			</td>
 																			<td className="d-flex">
 																				<span
@@ -902,31 +906,6 @@ class Employee extends Component {
 												)}
 											</div>
 										</div>
-
-										{/* Only show pagination if there are employees */}
-										{totalPagesEmployees > 1 && (
-											<nav aria-label="Page navigation">
-												<ul className="pagination mb-0 justify-content-end">
-													<li className={`page-item ${currentPageEmployees === 1 ? 'disabled' : ''}`}>
-														<button className="page-link" onClick={() => this.handlePageChange(currentPageEmployees - 1, 'employees')}>
-															Previous
-														</button>
-													</li>
-													{[...Array(totalPagesEmployees)].map((_, i) => (
-														<li key={i} className={`page-item ${currentPageEmployees === i + 1 ? 'active' : ''}`}>
-															<button className="page-link" onClick={() => this.handlePageChange(i + 1, 'employees')}>
-																{i + 1}
-															</button>
-														</li>
-													))}
-													<li className={`page-item ${currentPageEmployees === totalPagesEmployees ? 'disabled' : ''}`}>
-														<button className="page-link" onClick={() => this.handlePageChange(currentPageEmployees + 1, 'employees')}>
-															Next
-														</button>
-													</li>
-												</ul>
-											</nav>
-										)}
 									</div>
 									<div className="tab-pane fade" id="Employee-Request" role="tabpanel">
 										<div className="card">
@@ -1115,7 +1094,7 @@ class Employee extends Component {
 												name='from_date'
 												value={this.state.from_date}
 												onChange={this.handleInputChangeForAddLeaves}
-												min={new Date().toISOString().split("T")[0]} 
+												min={new Date().toISOString().split("T")[0]}
 											/>
 											{this.state.addLeaveErrors.from_date && (
   											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>
@@ -1131,7 +1110,7 @@ class Employee extends Component {
 												name='to_date'
 												value={this.state.to_date}
 												onChange={this.handleInputChangeForAddLeaves}
-												min={new Date().toISOString().split("T")[0]} 
+												min={this.state.from_date ? this.state.from_date : new Date().toISOString().split("T")[0]}
 											/>
 											{this.state.addLeaveErrors.to_date && (
   											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.to_date}</div>
@@ -1251,7 +1230,7 @@ class Employee extends Component {
 														value={selectedEmployeeLeave?.to_date || ""} 
 														onChange={this.handleInputChangeForEditEmployeeLeave}
 														name="to_date"
-														min={new Date().toISOString().split("T")[0]}
+														min={selectedEmployeeLeave?.from_date || new Date().toISOString().split("T")[0]}
 													/>
 												</div>
 											</div>

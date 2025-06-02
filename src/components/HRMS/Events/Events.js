@@ -61,49 +61,52 @@ class Events extends Component {
 			}
 		);
 
-			// Check if user is admin or superadmin
-        if (role === 'admin' || role === 'super_admin') {
-            // Fetch employees data if user is admin or super_admin
-            fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-                method: "GET",
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    this.setState({
-                        employees: data.status === 'success' ? data.data : [],
-                        loading: false
-                    });
-                } else {
-                    this.setState({ error: data.message, loading: false });
-                }
-            })
-            .catch(err => {
-                this.setState({ error: 'Failed to fetch employees data' });
-                console.error(err);
-            });
-        }
+		// Check if user is admin or superadmin
+		
+			// Fetch employees data if user is admin or super_admin
+			fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
+				method: "GET",
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.status === 'success') {
+					// Process employees to create birthday events
+					const birthdayEvents = data.data.map(employee => {
+						if (!employee.dob) {
+							return null;
+						}
+						// Create birthday event for the selected year
+						const dob = new Date(employee.dob);
+						const month = dob.getMonth();
+						const day = dob.getDate();
+						const selectedYear = this.state.selectedYear;
+						const birthdayDate = new Date(selectedYear, month, day);
 
-		// Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/events.php`, {
-			method: "GET",
-		})
-		.then(response => response.json())
-		.then(data => {
-			if (data.status === 'success') {
-				const eventsData = data.data;
-				this.setState({
-					events: eventsData,
-					loading: false
-				});
-			} else {
-			  	this.setState({ message: data.message, loading: false });
-			}
-		})
-		.catch(err => {
-			this.setState({ message: 'Failed to fetch data', loading: false });
-			console.error(err);
-		});
+						return {
+							id: `birthday_${employee.id}`,
+							event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
+							event_date: birthdayDate.toISOString().split('T')[0],
+							event_type: 'birthday',
+							employee_id: employee.id
+						};
+					}).filter(event => event !== null); // Remove null entries
+
+					this.setState({
+						employees: data.data,
+						loading: false
+					}, () => {
+						// Fetch regular events after setting employees
+						this.fetchEvents(birthdayEvents);
+					});
+				} else {
+					this.setState({ error: data.message, loading: false });
+				}
+			})
+			.catch(err => {
+				//console.error('Error fetching employees:', err); // Debug log
+				this.setState({ error: 'Failed to fetch employees data' });
+			});
+		
 
 		this.fetchWorkingHoursReports(id);
 		// Fetch leave data for the current year
@@ -280,15 +283,7 @@ class Events extends Component {
 
 		// Check if we're editing or adding an event
 		const eventData = this.state.selectedEvent || this.state;
-		const { event_name, event_date, selectedEmployeeIdForModal } = eventData;
-
-
-        // Validate employee selection only if admin or super_admin
-		const userRole = window.user?.role;
-		if ((userRole === "admin" || userRole === "super_admin") && !selectedEmployeeIdForModal) {
-			errors.selectedEmployeeIdForModal = "Please select an employee.";
-			isValid = false;
-		}
+		const { event_name, event_date } = eventData;
 
 		// Validate event name (only letters and spaces)
 		const namePattern = /^[a-zA-Z\s]+$/;
@@ -326,24 +321,16 @@ class Events extends Component {
 		}
 
 		if (this.validateForm(e)) {
-			const { event_name, event_date, selectedEmployeeIdForModal, logged_in_employee_id } = this.state;
-			const userRole = window.user?.role;
-
-			let employeeIdToSend = "";
-			if (userRole === "admin" || userRole === "super_admin") {
-				employeeIdToSend = selectedEmployeeIdForModal;
-			} else if (userRole === "employee") {
-				employeeIdToSend = logged_in_employee_id;
-			}
+			const { event_name, event_date, logged_in_employee_id } = this.state;
 
 			const addEventData = new FormData();
-			addEventData.append('employee_id', employeeIdToSend);
+			addEventData.append('employee_id', logged_in_employee_id); // Always use logged in user's ID
 			addEventData.append('event_name', event_name);
 			addEventData.append('event_date', event_date);
 			addEventData.append('event_type', 'event');
 			addEventData.append('created_by', logged_in_employee_id);
 
-			// API call to add employee leave
+			// API call to add event
 			fetch(`${process.env.REACT_APP_API_URL}/events.php?action=add`, {
 				method: "POST",
 				body: addEventData,
@@ -413,6 +400,69 @@ class Events extends Component {
 		}
     };
 
+
+	// add handle events delete
+	handleDeleteEvent = (eventId) => {
+		// Find the event to check its type
+		const eventToDelete = this.state.events.find(ev => ev.id === eventId);
+		
+		if (!eventToDelete) {
+			console.error('Event not found:', eventId);
+			this.setState({
+				errorMessage: 'Event not found',
+				showError: true,
+				loading: false
+			});
+			return;
+		}
+
+		// Don't allow deletion of birthday events
+		if (eventToDelete.event_type === 'birthday') {
+			this.setState({
+				errorMessage: 'Birthday events cannot be deleted',
+				showError: true,
+				loading: false
+			});
+			return;
+		}
+
+		if (!window.confirm('Are you sure you want to delete this event?')) return;
+		this.setState({ loading: true });
+		
+		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=delete&event_id=${eventId}`, {
+			method: 'GET'
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			return response.json();
+		})
+		.then(data => {
+			if (data.status === 'success') {
+				this.setState(prevState => ({
+					events: prevState.events.filter(ev => ev.id !== eventId),
+					successMessage: 'Event deleted successfully!',
+					showSuccess: true,
+					loading: false
+				}));
+				setTimeout(() => this.setState({ showSuccess: false }), 2000);
+			} else {
+				throw new Error(data.message || 'Failed to delete event');
+			}
+		})
+		.catch(err => {
+			console.error('Error deleting event:', err);
+			this.setState({
+				errorMessage: err.message || 'Failed to delete event',
+				showError: true,
+				loading: false
+			});
+			setTimeout(() => this.setState({ showError: false }), 2000);
+		});
+	}
+
+
 	formatLeaveEvents = (leaveData) => {
 		if (!Array.isArray(leaveData)) return [];
 		const events = [];
@@ -448,6 +498,115 @@ class Events extends Component {
     return events;
 };
 
+// Add this method to calculate missing reports for any employee
+getMissingReportEvents = (workingHoursReports, officeClosures, selectedYear) => {
+    const missingReportEvents = [];
+    if (!workingHoursReports || workingHoursReports.length === 0) return missingReportEvents;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(selectedYear, 0, 1);
+    const endDate = new Date(selectedYear, 11, 31);
+    let currentDate = new Date(startDate);
+
+    // while (currentDate <= today && currentDate <= endDate) {
+    //     const dateStr = currentDate.toISOString().split("T")[0];
+    //     const isOfficeClosure = officeClosures.some(
+	// 	(closure) => closure.start === dateStr && (closure.event_type === 'holiday' || closure.event_type === 'weekend')
+	// 	);
+	// 		if (!isOfficeClosure) {
+    //         const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
+    //         if (!hasReport) {
+    //             missingReportEvents.push({
+    //                 start: dateStr,
+    //                 display: 'background',
+    //                 color: '#fff',
+	// 				backgroundColor:'#fff',
+    //                 allDay: true,
+    //                 className: 'missing-report-day'
+    //             });
+    //         }
+    //     }
+    //     currentDate.setDate(currentDate.getDate() + 1);
+    // }
+while (currentDate <= today && currentDate <= endDate) {
+    const dateStr = currentDate.toISOString().split("T")[0];
+    const isOfficeClosure = officeClosures.some(
+        (closure) => closure.start === dateStr && (closure.event_type === 'holiday' || closure.event_type === 'weekend')
+    );
+    const dayOfWeek = currentDate.getDay(); 
+    if (!isOfficeClosure && dayOfWeek !==1 && dayOfWeek !==1) {
+        const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
+        if (!hasReport) {
+            missingReportEvents.push({
+                start: dateStr,
+                display: 'background',
+                color: '#fff',
+                allDay: true,
+                className: 'missing-report-day'
+            });
+        }
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+}
+	
+    return missingReportEvents;
+}
+
+// New method to fetch events
+fetchEvents = (birthdayEvents) => {
+	fetch(`${process.env.REACT_APP_API_URL}/events.php`, {
+		method: "GET",
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.status === 'success') {
+			const eventsData = data.data;
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const selectedYear = this.state.selectedYear;
+
+			// Combine regular events with birthday events
+			const allEvents = [...eventsData, ...birthdayEvents];
+
+			// Filter events to include upcoming events, birthdays, and holidays for the selected year
+			const filteredEvents = allEvents.filter(event => {
+				if (!event || !event.event_date) {
+					return false;
+				}
+
+				const eventDate = new Date(event.event_date);
+				const eventYear = eventDate.getFullYear();
+
+				// Show birthday and holiday events for the selected year
+				if (event.event_type === 'birthday' || event.event_type === 'holiday') {
+					return eventYear === selectedYear;
+				}
+
+				// Show regular events for the selected year if they are upcoming
+				if (event.event_type === 'event') {
+					return eventYear === selectedYear && eventDate >= today;
+				}
+
+				return false;
+			});
+
+
+			this.setState({
+				events: filteredEvents,
+				loading: false
+			}, () => {
+				//console.log('Updated state with events:', this.state.events); // Debug log
+			});
+		} else {
+			this.setState({ message: data.message, loading: false });
+		}
+	})
+	.catch(err => {
+		console.error('Error fetching events:', err); // Debug log
+		this.setState({ message: 'Failed to fetch data', loading: false });
+	});
+};
+
     render() {
         const { fixNavbar} = this.props;
 		const {events, selectedYear, showAddEventModal, loading, employees, logged_in_employee_role, selectedEmployeeIdForModal, selectedEmployeeIdForTodo, todos, workingHoursReports, calendarView } = this.state;
@@ -459,35 +618,25 @@ class Events extends Component {
         const defaultDate = `${selectedYear}-${String(currentMonth).padStart(2, '0')}-01`;
         const startYear = currentYear - 1;
         const endYear = currentYear + 10;
+		
 
         // Generate an array of years
     	const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-		console.log(
-			"ddd",
-			employees
-		);
-		
-		employees.map(employee => {
-			console.log(
-				employee.first_name
-			);
-			
-			let dobDate = new Date(employee.dob);
-			events.push({
-					event_name: 'Birthday of ' + employee.first_name+ " " + employee.last_name,
-					event_date: dobDate.toISOString().split("T")[0],
-					className: 'green-event',
-					event_type: 'event'
-			});
-		});
-		console.log('events',events)
 		const filteredEvents = events
 		.map((event) => {
 			let eventDate = new Date(event.event_date);
 			let eventYear = eventDate.getFullYear();
 
-			// Only update the year if event_type is "event" and the event is from a previous year
-			if (event.event_type === "event" && eventYear < selectedYear) {
+			// For birthday events, keep them in the current year
+			if (event.event_type === "birthday") {
+				// Extract month and day from the original date
+				const month = eventDate.getMonth();
+				const day = eventDate.getDate();
+				// Create new date with selected year
+				eventDate = new Date(selectedYear, month, day);
+			}
+			// For regular events, update year if from previous year
+			else if (event.event_type === "event" && eventYear < selectedYear) {
 				eventDate.setFullYear(selectedYear);
 			}
 
@@ -498,15 +647,63 @@ class Events extends Component {
 		})
 		.filter((event) => {
 			const eventDate = new Date(event.event_date);
-    		const eventYear = eventDate.getFullYear();
+			const eventYear = eventDate.getFullYear();
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
 
-    		// Show only events from the selected year AND from today onwards
-    		return eventYear === selectedYear && eventDate >= currentDate;
+			// For birthday events, show them for the selected year
+			if (event.event_type === 'birthday') {
+				return eventYear === selectedYear;
+			}
+
+			// For holidays, show them for the selected year
+			if (event.event_type === 'holiday') {
+				return eventYear === selectedYear;
+			}
+
+			// For regular events, show only upcoming events
+			if (event.event_type === 'event') {
+				return eventYear === selectedYear && eventDate >= today;
+			}
+
+			return false;
 		})
-		.sort((a, b) => new Date(a.event_date) - new Date(b.event_date)); // Sort events by date
+		.sort((a, b) => {
+			// Sort by date
+			const dateA = new Date(a.event_date);
+			const dateB = new Date(b.event_date);
+			
+			// If dates are the same, sort by event type (birthday first, then holiday, then event)
+			if (dateA.getTime() === dateB.getTime()) {
+				const typeOrder = { birthday: 0, holiday: 1, event: 2 };
+				return typeOrder[a.event_type] - typeOrder[b.event_type];
+			}
+			
+			return dateA - dateB;
+		});
+
+		// Add new Event Filter for no multiple time rendering 
+		const uniqueEventsMap = new Map();
+		filteredEvents.forEach(event => {
+			if (event.event_type === 'event') {
+				const key = event.event_name + '_' + event.event_date;
+				if (!uniqueEventsMap.has(key)) {
+					uniqueEventsMap.set(key, event);
+				}
+			} else if (event.event_type === 'birthday') {
+				// For birthday events, use a unique key that includes the employee ID
+				const key = `birthday_${event.id}`;
+				uniqueEventsMap.set(key, event);
+			} else if (event.event_type === 'holiday') {
+				// For holiday events, use a unique key
+				const key = `holiday_${event.id}`;
+				uniqueEventsMap.set(key, event);
+			}
+		});
+		const uniqueFilteredEvents = Array.from(uniqueEventsMap.values());
 
 		// Format filtered events, ensuring 'event' type events show up for all years
-		const formattedEvents = filteredEvents.map(event => {
+		const formattedEvents = uniqueFilteredEvents.map(event => {
 			if (event.event_type === 'event') {
 				const eventDate = new Date(event.event_date);
 				const formattedEventForAllYears = [];
@@ -532,7 +729,35 @@ class Events extends Component {
 					className: 'red-event'
 				};
 			}
+
+			if (event.event_type === 'birthday') {
+				return {
+					title: `${event.event_name}`,
+					start: event.event_date,
+					className: 'green-event'
+				};
+			}
 		}).flat();
+
+		// Add new Event Filter for no multiple time rendering 
+		const uniqueEventsMap2 = new Map();
+		filteredEvents.forEach(event => {
+			if (event.event_type === 'event') {
+				const key = event.event_name + '_' + event.event_date;
+				if (!uniqueEventsMap2.has(key)) {
+					uniqueEventsMap2.set(key, event);
+				}
+			} else if (event.event_type === 'birthday') {
+				// For birthday events, use a unique key that includes the employee ID
+				const key = `birthday_${event.id}`;
+				uniqueEventsMap2.set(key, event);
+			} else if (event.event_type === 'holiday') {
+				// For holiday events, use a unique key
+				const key = `holiday_${event.id}`;
+				uniqueEventsMap2.set(key, event);
+			}
+		});
+		const uniqueFilteredEvents2 = Array.from(uniqueEventsMap2.values());
 
 		 //Add new changes and create new functions
 		 //add this function for calculate totalworking hour or coloring according to  workinh hours
@@ -566,78 +791,57 @@ class Events extends Component {
 					officeClosures.push({
 					start: new Date(d).toISOString().split("T")[0],
 					// title: "Office Off",
-					event_type: "holiday",
+					event_type: "weekend",
 					allDay: true,
+					backgroundColor:'#fff',
 					className: "office-closure-event",
 					});
 				}
 			}
 		}
 
+		
+
 		// Create events for days without reports
-		const missingReportEvents = [];
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-
-		// if (workingHoursReports.length > 0) {
-		if (workingHoursReports.length > 0 && logged_in_employee_role === "employee") {
-			// Corrected line - properly spread the array of timestamps
-			
-			const reportTimestamps = workingHoursReports.map(r => new Date(r.created_at).getTime());
-			const firstReportDate = new Date(Math.min(...reportTimestamps));
-			
-			let currentDate = new Date(firstReportDate);
-			
-			while (currentDate <= today) {
-				const dateStr = currentDate.toISOString().split("T")[0];
-				const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
-				const isOfficeClosure = officeClosures.some(
-				(closure) => closure.start === dateStr
-			);
+		const missingReportEvents = this.getMissingReportEvents(workingHoursReports, officeClosures, selectedYear);
+		
+				// Pass all events in fullcalendar
+				const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
 				
-					// if (!isWeekend && !isOfficeClosure) {
-					if ( !isOfficeClosure) {
-					const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-					
-					if (!hasReport) {
-						missingReportEvents.push({
-						start: dateStr,
-						display: 'background',
-						color: '#ff6b6b',
-						allDay: true,
-						// title:'Leave',
-						className: 'missing-report-day'
-					});
+					this.state.allEvents = [
+						...workingHoursEvents,     
+						...leaveEvents,
+						...missingReportEvents,
+						...officeClosures
+
+					];
+					if (calendarView === "any") {
+					this.state.allEvents = [];
 				}
-			}
-					currentDate.setDate(currentDate.getDate() + 1);
-			}
-		}
-			// Pass all events in fullcalendar
-			const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
-			
-				this.state.allEvents = [
-					...workingHoursEvents,     
-					...leaveEvents              
-				];
 
-				if (calendarView === "any") {
-				this.state.allEvents = [];
-			}
+				if (calendarView === "report") {
+					this.state.allEvents = [
+						...workingHoursEvents,
+						...officeClosures,
+						...missingReportEvents,
+						...leaveEvents,
+					];
+				}
+				if (calendarView === "event") {
+					this.state.allEvents = [
+						...formattedEvents,
+						...officeClosures
+					];
+				}
 
-			if (calendarView === "report") {
-				this.state.allEvents = [
-					...workingHoursEvents,
-					...officeClosures,
-					...missingReportEvents,
-					...leaveEvents,
-				];
-			}
-			if (calendarView === "event") {
-				console.log("formattedEvents", formattedEvents);
-				this.state.allEvents = [...formattedEvents];
-			}
-		//END
+				// Remove this duplicate addition of missing reports
+				// if (calendarView !== "any") {
+				// 	this.state.allEvents = [
+				// 		...this.state.allEvents,
+				// 		...missingReportEvents
+				// 	];
+				// }
+			//END
 
 
 
@@ -698,46 +902,27 @@ class Events extends Component {
                                 <div className="card">
                                     <div className="card-body">
                                         <div className="row">
-                                            <div className="col-lg-12 col-md-12 col-sm-12">
-											{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-											  <>
-												<select
-												id="leave-employee-selector"
-												className="w-100 custom-select"
-												value={this.state.leaveViewEmployeeId}
-												onChange={
-														e => {
-														const empId = e.target.value;
-														this.setState({ 
-															leaveViewEmployeeId: empId,
-															calendarView: empId ? 'employeeSelected' : 'event'
-														});
-														const start_date = `${selectedYear}-01-01`;
-														const end_date = `${selectedYear}-12-31`;
-														this.fetchLeaveData(empId, start_date, end_date);
-														this.fetchWorkingHoursReports(empId);
-												   }
-											  }
-												>
-										<option value="">All Events</option>
-										{employees.map(emp => (
-											<option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
-										))}
-										</select>
-									</>
-									)}
-                                            </div>
-                                      
-                                        </div>
+										<div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+											<label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
+											Year:
+											</label>
+											<select id="year-selector" className='w-70 custom-select' value={selectedYear}
+											onChange={this.handleYearChange}>
+											{years.map(year => (
+											<option key={year} value={year}>
+												{year}
+											</option>
+											))}
+											</select>
+										</div>
+										</div>
                                     </div>
                                 </div>
                             </div>
 								<div className="col-lg-4 col-md-12">
-
-								
 									<div className="card">
 										<div className="card-header bline d-flex justify-content-between align-items-center">
-											<h3 className="card-title">Events Listsss</h3>
+											<h3 className="card-title">Events Lists</h3>
 											{(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
 												<div className="header-action">
 													<button
@@ -757,43 +942,79 @@ class Events extends Component {
 												</div>
 											) : (
 												<div id="event-list" className="fc event_list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-													{filteredEvents.length > 0 ? (
-														filteredEvents.map((event, index) => (
-															<div key={index} className="event-item">
-																<div
-																	data-class={
-																		event.event_type === 'holiday'
-																			? 'bg-danger'
-																			: event.event_type === 'event'
-																			? 'bg-info'
-																			: 'bg-primary'
-																	}
-																	className= {
-																		`fc-event ${
-																		event.event_type === 'holiday'
-																			? 'holiday-event'
-																			: event.event_type === 'event'
-																			? 'regular-event'
-																			: 'other-event'
-																	}`
-																}>
-																	<strong className="d-block">{event.event_name}</strong>
-																	<small>
-																		{event.event_date 
-																			? new Date(event.event_date).toLocaleDateString('en-US', { 
-																				year: 'numeric', 
-																				month: 'short', 
-																				day: 'numeric' 
-																			}) 
-																			: 'No Date'}
-																	</small>
-																</div>
-															</div>
-														))
-													): (
-														<div className="fc-event bg-info" data-class="bg-info">No events found for this year.</div>
-													)}
-												</div>
+								{uniqueFilteredEvents2.length > 0 ? (
+									uniqueFilteredEvents2.map((event, index) => (
+									<div key={index} className="event-card card mb-0">
+										<div className="d-flex justify-content-between align-items-center">
+										<div
+											className={`fc-event ${
+											event.event_type === 'holiday'
+												? 'holiday-event'
+												: event.event_type === 'event'
+												? 'regular-event'
+												: event.event_type === 'birthday'
+												? 'birthday-event'
+												: 'other-event'
+											}`}
+											data-class={
+											event.event_type === 'holiday'
+												? 'bg-danger'
+												: event.event_type === 'event'
+												? 'bg-info'
+												: event.event_type === 'birthday'
+												? 'bg-success'
+												: 'bg-primary'
+											}
+											style={{ flex: 1 }}
+										>
+
+											{/* Show trash icon only for 'event' type and for admin/super_admin */}
+										{event.event_type === 'event' &&
+											(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
+											<button
+												className="btn btn-link text-danger position-absolute"
+												title="Delete Event"
+												onClick={() => this.handleDeleteEvent(event.id)}
+												style={{
+												top: '2px',
+												right: '2px',
+												padding: '2px 6px',
+												fontSize: '0.75rem',
+												lineHeight: 1,
+												fontSize: '1.2rem'
+												}}
+											>
+												<i className="fa fa-trash" aria-hidden="true" style={{color:"red"}}></i>
+											</button>
+											)}
+
+											<strong className="d-block">
+												{event.event_type === 'birthday'}
+												{event.event_name}
+											</strong>
+											<small>
+											{event.event_date
+												? new Date(event.event_date).toLocaleDateString('en-US', {
+													year: 'numeric',
+													month: 'short',
+													day: 'numeric',
+												})
+												: 'No Date'}
+											</small>
+										</div>
+
+									
+										
+										</div>
+									</div>
+									))
+								) : (
+									<div className="fc-event bg-info" data-class="bg-info">
+									No events found for this year.
+									</div>
+								)}
+								</div>
+
 											)}
 
 											{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
@@ -865,19 +1086,41 @@ class Events extends Component {
 										<div className="card-header bline">
 											<h3 className="card-title">Event Calendar</h3>
 											<div className="card-options">
-												<label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>Year: </label>
+												{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+											  <>
 												<select
-													id="year-selector"
-													className='w-70 custom-select'
-													value={selectedYear}
-													onChange={this.handleYearChange}
+												id="leave-employee-selector"
+												className=" custom-select" style={{width: "200px"}}
+												value={this.state.leaveViewEmployeeId}
+												onChange={e => {
+													const empId = e.target.value;
+													this.setState({ 
+														leaveViewEmployeeId: empId,
+														calendarView: empId ? 'employeeSelected' : 'event'
+													});
+													const start_date = `${selectedYear}-01-01`;
+													const end_date = `${selectedYear}-12-31`;
+													this.fetchLeaveData(empId, start_date, end_date);
+													this.fetchWorkingHoursReports(empId);
+													// After fetching, update allEvents for the selected employee
+													setTimeout(() => {
+														const missingReportEvents = this.getMissingReportEvents(this.state.workingHoursReports, officeClosures, selectedYear);
+														this.setState({
+															allEvents: [
+																...this.state.allEvents,
+																...missingReportEvents,
+															]
+														});
+													}, 500);
+												}}
 												>
-													{years.map(year => (
-														<option key={year} value={year}>
-															{year}
-														</option>
-													))}
-												</select>										
+										<option value="">All Events</option>
+										{employees.map(emp => (
+											<option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
+										))}
+										</select>
+									</>
+									)}									
                             				{/* Changes (END) */}
 											</div>
 										</div>
@@ -885,7 +1128,6 @@ class Events extends Component {
 											{/* Pass the formatted events to the FullCalendar component */}
 											<Fullcalender events={this.state.allEvents} defaultDate={defaultDate}
 											 //add new chnages
-											 
 											dayCellClassNames={(arg) => {
 											const dateStr = arg.date.toISOString().split("T")[0];
 											const today = new Date();
@@ -934,28 +1176,7 @@ class Events extends Component {
 								<form onSubmit={this.addEvent}>
 									<div className="modal-body">
 										<div className="row clearfix">
-											{/* Employee Selection Section */}
-											{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-												<div className="col-md-12 form-group mt-3">
-													<label htmlFor="selectedEmployeeIdForModal" className="form-label">Select Employee</label>
-													<select
-														id="selectedEmployeeIdForModal"
-														className={`form-control ${this.state.errors.selectedEmployeeIdForModal ? "is-invalid" : ""}`}
-														value={selectedEmployeeIdForModal}
-														onChange={(e) => this.handleEmployeeSelection(e, 'modal')}
-													>
-														<option value="">Select an Employee</option>
-														{employees.map((employee) => (
-															<option key={employee.id} value={employee.id}>
-																{employee.first_name} {employee.last_name}
-															</option>
-														))}
-													</select>
-													{this.state.errors.selectedEmployeeIdForModal && (
-														<small className={`invalid-feedback ${this.state.errors.selectedEmployeeIdForModal ? 'd-block' : ''}`}>{this.state.errors.selectedEmployeeIdForModal}</small>
-													)}
-												</div>
-											)}
+											{/* Remove Employee Selection Section */}
 											<div className="col-md-12">
 												<div className="form-group">
 													<label className="form-label" htmlFor="event_name">Event Name</label>
@@ -982,6 +1203,7 @@ class Events extends Component {
 														id='event_date'
 														value={this.state.event_date}
 														onChange={this.handleInputChangeForAddEvent}
+														min={new Date().toISOString().split('T')[0]} 
 													/>
 													{this.state.errors.event_date && (
 														<div className="invalid-feedback">{this.state.errors.event_date}</div>
