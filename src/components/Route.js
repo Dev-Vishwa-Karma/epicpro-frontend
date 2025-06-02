@@ -13,7 +13,7 @@ import Payroll from './HRMS/Payroll/Payroll';
 import Report from './HRMS/Report/Report';
 import Accounts from './HRMS/Accounts/Accounts';
 import Gallery from './HRMS/Gallery/Gallery';
-import Alternate from './HRMS/Alternate/Alternate';
+import SaturdaySettings from './HRMS/SaturdaySettings/SaturdaySettings';
 
 // import ProjectDashboard from './Project/Dashboard/Dashboard';
 import ProjectList from './Project/ProjectList/Projectlist';
@@ -134,11 +134,11 @@ const Routes = [
         component: Gallery
     },
     {
-        path: "/select-saturday",
-        name: 'saturday selection',
+        path: "/saturday-settings",
+        name: 'saturday settings',
         exact: true,
         pageTitle: "Saturday Settings",
-        component: Alternate
+        component: SaturdaySettings
     },
     // add new routes here
 
