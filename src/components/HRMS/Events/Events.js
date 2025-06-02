@@ -62,19 +62,17 @@ class Events extends Component {
 		);
 
 		// Check if user is admin or superadmin
-		if (role === 'admin' || role === 'super_admin') {
+		
 			// Fetch employees data if user is admin or super_admin
 			fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
 				method: "GET",
 			})
 			.then(response => response.json())
 			.then(data => {
-				console.log('Employee Data:', data); // Debug log
 				if (data.status === 'success') {
 					// Process employees to create birthday events
 					const birthdayEvents = data.data.map(employee => {
 						if (!employee.dob) {
-							console.log('Employee without DOB:', employee); // Debug log
 							return null;
 						}
 						// Create birthday event for the selected year
@@ -93,8 +91,6 @@ class Events extends Component {
 						};
 					}).filter(event => event !== null); // Remove null entries
 
-					//console.log('Generated Birthday Events:', birthdayEvents); // Debug log
-
 					this.setState({
 						employees: data.data,
 						loading: false
@@ -110,10 +106,7 @@ class Events extends Component {
 				//console.error('Error fetching employees:', err); // Debug log
 				this.setState({ error: 'Failed to fetch employees data' });
 			});
-		} else {
-			// For non-admin users, just fetch regular events
-			this.fetchEvents([]);
-		}
+		
 
 		this.fetchWorkingHoursReports(id);
 		// Fetch leave data for the current year
@@ -561,13 +554,11 @@ while (currentDate <= today && currentDate <= endDate) {
 
 // New method to fetch events
 fetchEvents = (birthdayEvents) => {
-	//console.log('Fetching events with birthday events:', birthdayEvents); 
 	fetch(`${process.env.REACT_APP_API_URL}/events.php`, {
 		method: "GET",
 	})
 	.then(response => response.json())
 	.then(data => {
-		//console.log('Events API Response:', data); 
 		if (data.status === 'success') {
 			const eventsData = data.data;
 			const today = new Date();
@@ -576,12 +567,10 @@ fetchEvents = (birthdayEvents) => {
 
 			// Combine regular events with birthday events
 			const allEvents = [...eventsData, ...birthdayEvents];
-			//console.log('Combined Events:', allEvents); 
 
 			// Filter events to include upcoming events, birthdays, and holidays for the selected year
 			const filteredEvents = allEvents.filter(event => {
 				if (!event || !event.event_date) {
-					//console.log('Invalid event:', event); // Debug log
 					return false;
 				}
 
@@ -601,7 +590,6 @@ fetchEvents = (birthdayEvents) => {
 				return false;
 			});
 
-			//console.log('Filtered Events:', filteredEvents); // Debug log
 
 			this.setState({
 				events: filteredEvents,
@@ -634,12 +622,6 @@ fetchEvents = (birthdayEvents) => {
 
         // Generate an array of years
     	const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-		//console.log(
-		//	"ddd",
-		//	employees
-		//);
-		
-		//console.log('All events after adding birthdays:', events);
 		const filteredEvents = events
 		.map((event) => {
 			let eventDate = new Date(event.event_date);
@@ -720,10 +702,6 @@ fetchEvents = (birthdayEvents) => {
 		});
 		const uniqueFilteredEvents = Array.from(uniqueEventsMap.values());
 
-		// Debug log to check events
-		//console.log('Filtered Events:', filteredEvents);
-		console.log('Unique Filtered Events:', uniqueFilteredEvents);
-
 		// Format filtered events, ensuring 'event' type events show up for all years
 		const formattedEvents = uniqueFilteredEvents.map(event => {
 			if (event.event_type === 'event') {
@@ -761,9 +739,6 @@ fetchEvents = (birthdayEvents) => {
 			}
 		}).flat();
 
-		// Debug log to check events
-		console.log('Formatted Events:', formattedEvents);
-
 		// Add new Event Filter for no multiple time rendering 
 		const uniqueEventsMap2 = new Map();
 		filteredEvents.forEach(event => {
@@ -783,10 +758,6 @@ fetchEvents = (birthdayEvents) => {
 			}
 		});
 		const uniqueFilteredEvents2 = Array.from(uniqueEventsMap2.values());
-
-		// Debug log to check events
-		console.log('Filtered Events:', filteredEvents);
-		console.log('Unique Filtered Events:', uniqueFilteredEvents2);
 
 		 //Add new changes and create new functions
 		 //add this function for calculate totalworking hour or coloring according to  workinh hours
