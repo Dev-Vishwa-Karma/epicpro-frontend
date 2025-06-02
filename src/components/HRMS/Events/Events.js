@@ -73,12 +73,12 @@ class Events extends Component {
 				if (data.status === 'success') {
 					// Process employees to create birthday events
 					const birthdayEvents = data.data.map(employee => {
-						if (!employee.date_of_birth) {
+						if (!employee.dob) {
 							console.log('Employee without DOB:', employee); // Debug log
 							return null;
 						}
 						// Create birthday event for the selected year
-						const dob = new Date(employee.date_of_birth);
+						const dob = new Date(employee.dob);
 						const month = dob.getMonth();
 						const day = dob.getDate();
 						const selectedYear = this.state.selectedYear;
@@ -93,7 +93,7 @@ class Events extends Component {
 						};
 					}).filter(event => event !== null); // Remove null entries
 
-					console.log('Generated Birthday Events:', birthdayEvents); // Debug log
+					//console.log('Generated Birthday Events:', birthdayEvents); // Debug log
 
 					this.setState({
 						employees: data.data,
@@ -107,7 +107,7 @@ class Events extends Component {
 				}
 			})
 			.catch(err => {
-				console.error('Error fetching employees:', err); // Debug log
+				//console.error('Error fetching employees:', err); // Debug log
 				this.setState({ error: 'Failed to fetch employees data' });
 			});
 		} else {
@@ -561,13 +561,13 @@ while (currentDate <= today && currentDate <= endDate) {
 
 // New method to fetch events
 fetchEvents = (birthdayEvents) => {
-	console.log('Fetching events with birthday events:', birthdayEvents); 
+	//console.log('Fetching events with birthday events:', birthdayEvents); 
 	fetch(`${process.env.REACT_APP_API_URL}/events.php`, {
 		method: "GET",
 	})
 	.then(response => response.json())
 	.then(data => {
-		console.log('Events API Response:', data); 
+		//console.log('Events API Response:', data); 
 		if (data.status === 'success') {
 			const eventsData = data.data;
 			const today = new Date();
@@ -576,12 +576,12 @@ fetchEvents = (birthdayEvents) => {
 
 			// Combine regular events with birthday events
 			const allEvents = [...eventsData, ...birthdayEvents];
-			console.log('Combined Events:', allEvents); 
+			//console.log('Combined Events:', allEvents); 
 
 			// Filter events to include upcoming events, birthdays, and holidays for the selected year
 			const filteredEvents = allEvents.filter(event => {
 				if (!event || !event.event_date) {
-					console.log('Invalid event:', event); // Debug log
+					//console.log('Invalid event:', event); // Debug log
 					return false;
 				}
 
@@ -601,13 +601,13 @@ fetchEvents = (birthdayEvents) => {
 				return false;
 			});
 
-			console.log('Filtered Events:', filteredEvents); // Debug log
+			//console.log('Filtered Events:', filteredEvents); // Debug log
 
 			this.setState({
 				events: filteredEvents,
 				loading: false
 			}, () => {
-				console.log('Updated state with events:', this.state.events); // Debug log
+				//console.log('Updated state with events:', this.state.events); // Debug log
 			});
 		} else {
 			this.setState({ message: data.message, loading: false });
@@ -634,12 +634,12 @@ fetchEvents = (birthdayEvents) => {
 
         // Generate an array of years
     	const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-		console.log(
-			"ddd",
-			employees
-		);
+		//console.log(
+		//	"ddd",
+		//	employees
+		//);
 		
-		console.log('All events after adding birthdays:', events);
+		//console.log('All events after adding birthdays:', events);
 		const filteredEvents = events
 		.map((event) => {
 			let eventDate = new Date(event.event_date);
@@ -721,7 +721,7 @@ fetchEvents = (birthdayEvents) => {
 		const uniqueFilteredEvents = Array.from(uniqueEventsMap.values());
 
 		// Debug log to check events
-		console.log('Filtered Events:', filteredEvents);
+		//console.log('Filtered Events:', filteredEvents);
 		console.log('Unique Filtered Events:', uniqueFilteredEvents);
 
 		// Format filtered events, ensuring 'event' type events show up for all years
@@ -1131,7 +1131,6 @@ fetchEvents = (birthdayEvents) => {
 													const end_date = `${selectedYear}-12-31`;
 													this.fetchLeaveData(empId, start_date, end_date);
 													this.fetchWorkingHoursReports(empId);
-													this.officeClosures(empId)
 													// After fetching, update allEvents for the selected employee
 													setTimeout(() => {
 														const missingReportEvents = this.getMissingReportEvents(this.state.workingHoursReports, officeClosures, selectedYear);

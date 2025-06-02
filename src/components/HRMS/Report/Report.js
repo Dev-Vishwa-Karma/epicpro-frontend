@@ -11,6 +11,7 @@ class Report extends Component {
             reports: [],
             selectedReport: null,
             isModalOpen: false,
+            selectedReportEmployee:"",
             selectedEmployee: "",
             employeeData: [],
             selectedStatus: "",
@@ -51,46 +52,15 @@ class Report extends Component {
     }
 
     componentDidMount() {
-// Add newww
         const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0); // Set to start of day
-
-    this.setState({ 
-        fromDate: yesterday,
-        toDate: yesterday 
-    }, () => {
-        // Now fetch reports with the default date range
-        this.fetchReportsWithDefaultDates();
-    });
-
-
-    // Add newww end
-
-        let apiUrl = '';
-
-        if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php`;
-        } else {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`;
-        }
-
-        // Make the GET API call when the component is mounted
-        fetch(apiUrl, {
-            method: "GET",
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    this.setState({ reports: data.data, filteredReports: data.data, loading: false });
-                } else {
-                    this.setState({ reports: [], filteredReports: [], error: data.message, loading: false });
-                }
-            })
-            .catch(err => {
-                this.setState({ error: 'Failed to fetch data' });
-                console.error(err);
-            });
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0); // Set to start of day
+        this.setState({ 
+            fromDate: yesterday,
+            toDate: yesterday 
+        }, () => {
+            this.fetchReports()
+        });
 
         /** Get employees list */
         fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
@@ -127,26 +97,6 @@ class Report extends Component {
     }
 
 
-    fetchReportsWithDefaultDates = () => {
-        const { fromDate, toDate } = this.state;
-        let apiUrl = '';
-        
-        if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php`;
-        } else {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`;
-        }
-    
-        // Add date range parameters
-        if (fromDate) {
-            apiUrl += `${apiUrl.includes('?') ? '&' : '?'}from_date=${fromDate.toISOString().split('T')[0]}`;
-        }
-        if (toDate) {
-            apiUrl += `${apiUrl.includes('?') ? '&' : '?'}to_date=${toDate.toISOString().split('T')[0]}`;
-        }   
-    }
-
-    
     componentWillUnmount() {
         window.removeEventListener("reportMessage", this.handleReportMessage);
 
@@ -367,8 +317,8 @@ class Report extends Component {
 
     // Handle dropdown change for employee
     handleEmployeeChange = (event) => {
-        this.setState({ selectedEmployee: event.target.value }, () => {
-            this.filterReports();
+        this.setState({ selectedReportEmployee: event.target.value }, () => {
+            this.fetchReports();
         });
     };
 
@@ -757,22 +707,42 @@ class Report extends Component {
 	};
 
     fetchReports = () => {
-        const { fromDate, toDate } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`;
+        const { fromDate, toDate, selectedReportEmployee } = this.state;
+        let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?action=view&user_id=${selectedReportEmployee}`;
         
-        // Add date range parameters if they exist
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); 
+            const day = String(date.getDate()).padStart(2, '0'); 
+            return `${year}-${month}-${day}`; 
+        };
+
         if (fromDate) {
-            apiUrl += `&from_date=${fromDate.toISOString().split('T')[0]}`;
+            apiUrl += `&from_date=${formatDate(fromDate)}`;
         }
         if (toDate) {
-            apiUrl += `&to_date=${toDate.toISOString().split('T')[0]}`;
+            apiUrl += `&to_date=${formatDate(toDate)}`;
         }
 
         fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                this.setState({ reports: data.data });
+                    this.setState({ 
+                        reports: data.data,
+                        filteredReports: data.data,
+                        loading: false,
+                        currentPageReports: 1, 
+                        error: null 
+                    });
+                
+            }else {
+                this.setState({ 
+                    error: data.message || 'Failed to fetch reports',
+                    loading: false,
+                    reports: [],
+                    filteredReports: []
+                });
             }
         });
     }
@@ -801,124 +771,41 @@ class Report extends Component {
 
     // Add new method for handling date changes
     handleDateChange = (date, type) => {
+        const { fromDate, toDate } = this.state;
         if (date) {
             // Ensure the date is set to start of day for fromDate and end of day for toDate
             const newDate = new Date(date);
             if (type === 'fromDate') {
-                newDate.setHours(0, 0, 0, 0);
+                this.setState({ fromDate: newDate }, () => {
+                    this.fetchReports();
+                });
+               
             } else if (type === 'toDate') {
-                newDate.setHours(23, 59, 59, 999);
+                this.setState({ toDate: newDate }, () => {
+                    this.fetchReports();
+                });
             }
-            this.setState({ [type]: newDate }, () => {
-                this.filterReports();
-            });
+         
         } else {
             // Handle null date (when date is cleared)
             this.setState({ [type]: null }, () => {
-                this.filterReports();
+                this.fetchReports();
             });
         }
-    };
-
-    // Add new method for filtering reports
-    filterReports = () => {
-        const { fromDate, toDate, selectedEmployee } = this.state;
-    
-        // Show loading state
-        this.setState({ loading: true });
-    
-        let apiUrl = '';
-        
-        if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php`;
-        } else {
-            apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`;
-        }
-    
-        // Add date range parameters if they exist
-        if (fromDate) {
-            apiUrl += `${apiUrl.includes('?') ? '&' : '?'}from_date=${fromDate.toISOString().split('T')[0]}`;
-        }
-        if (toDate) {
-            apiUrl += `${apiUrl.includes('?') ? '&' : '?'}to_date=${toDate.toISOString().split('T')[0]}`;
-        }
-        if (selectedEmployee) {
-            apiUrl += `${apiUrl.includes('?') ? '&' : '?'}employee_id=${selectedEmployee}`;
-        }
-
-        // Fetch filtered reports
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    this.setState({ 
-                        reports: data.data,
-                        filteredReports: data.data,
-                        loading: false,
-                        currentPageReports: 1, 
-                        error: null 
-                    });
-                } else {
-                    this.setState({ 
-                        error: data.message || 'Failed to fetch reports',
-                        loading: false,
-                        reports: [],
-                        filteredReports: []
-                    });
-                }
-            })
-            .catch(error => {
-                this.setState({ 
-                    error: 'Failed to fetch reports: ' + error.message,
-                    loading: false,
-                    reports: [],
-                    filteredReports: []
-                });
-            });
     };
 
     resetFilters = () => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0); // Set to start of day
+        
         this.setState({
-            fromDate: null,
-            toDate: null,
-            selectedEmployee: "",
+            fromDate: yesterday,
+            toDate: yesterday,
+            selectedReportEmployee: "",
             loading: true
         }, () => {
-            // Fetch all reports when filters are reset
-            let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php`;
-            
-            // Add user_id if not admin
-            if (window.user.role === 'employee') {
-                apiUrl += `?user_id=${window.user.id}`;
-            }
-
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        this.setState({ 
-                            reports: data.data,
-                            filteredReports: data.data,
-                            loading: false,
-                            error: null 
-                        });
-                    } else {
-                        this.setState({ 
-                            error: data.message || 'Failed to fetch reports',
-                            loading: false,
-                            reports: [],
-                            filteredReports: []
-                        });
-                    }
-                })
-                .catch(error => {
-                    this.setState({ 
-                        error: 'Failed to fetch reports: ' + error.message,
-                        loading: false,
-                        reports: [],
-                        filteredReports: []
-                    });
-                });
+            this.fetchReports();
         });
     };
 
@@ -930,6 +817,7 @@ class Report extends Component {
             employeeData, 
             selectedStatus, 
             selectedEmployee, 
+            selectedReportEmployee,
             punchOutReport, 
             reportError, 
             reportSuccess, 
@@ -1007,6 +895,7 @@ class Report extends Component {
                                                             className="form-control"
                                                             dateFormat="yyyy-MM-dd"
                                                             placeholderText="From Date"
+                                                            maxDate={new Date()}
                                                         />
                                                     </div>
                                                 </div>
@@ -1020,6 +909,7 @@ class Report extends Component {
                                                             dateFormat="yyyy-MM-dd"
                                                             placeholderText="To Date"
                                                             minDate={fromDate}
+                                                            maxDate={new Date()}
                                                         />
                                                     </div>
                                                 </div>
@@ -1028,7 +918,7 @@ class Report extends Component {
                                                         <label className="form-label">Select Employee</label>
                                                         <select 
                                                             className="form-control" 
-                                                            value={selectedEmployee} 
+                                                            value={selectedReportEmployee} 
                                                             onChange={this.handleEmployeeChange}
                                                         >
                                                             <option value="">All Employees</option>
