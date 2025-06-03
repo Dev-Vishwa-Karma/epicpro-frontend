@@ -942,7 +942,7 @@ class Employee extends Component {
 																					data-toggle="tooltip"
 																					title="Avatar Name"
 																				>
-																					{leave.first_name.charAt(0).toUpperCase()}{leave.last_name.charAt(0).toUpperCase()}
+																					{(leave.first_name ? leave.first_name.charAt(0).toUpperCase() : '')}{(leave.last_name ? leave.last_name.charAt(0).toUpperCase() : '')}
 																				</span>
 																			</td>
 																			<td>
@@ -951,15 +951,19 @@ class Employee extends Component {
 																				</div>
 																			</td>
 																			<td>
-																			{`${new Intl.DateTimeFormat('en-US', {
-																				day: '2-digit',
-																				month: 'short',
-																				year: 'numeric',
-																				}).format(new Date(leave.from_date))} to ${new Intl.DateTimeFormat('en-US', {
-																				day: '2-digit',
-																				month: 'short',
-																				year: 'numeric',
-																				}).format(new Date(leave.to_date))}`}
+																			{leave.from_date && !isNaN(new Date(leave.from_date)) && leave.to_date && !isNaN(new Date(leave.to_date)) ? (
+                                                                                `${new Intl.DateTimeFormat('en-US', {
+                                                                                day: '2-digit',
+                                                                                month: 'short',
+                                                                                year: 'numeric',
+                                                                                }).format(new Date(leave.from_date))} to ${new Intl.DateTimeFormat('en-US', {
+                                                                                day: '2-digit',
+                                                                                month: 'short',
+                                                                                year: 'numeric',
+                                                                                }).format(new Date(leave.to_date))}`
+                                                                            ) : (
+                                                                                '-' // fallback if date is missing or invalid
+                                                                            )}
 																			</td>
 																			<td>{leave.reason}</td>
 																			<td>

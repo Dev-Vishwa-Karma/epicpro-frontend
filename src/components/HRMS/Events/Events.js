@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
 import { Callbacks } from 'jquery';
+import ReportModal from '../Report/ReportModal';
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -1345,62 +1346,15 @@ formatDateTimeAMPM = (timeString) => {
 					</div>
 				)}
 
-				{/* Add Report Modal */}
 				{this.state.showReportModal && this.state.selectedReport && (
-					<div className="modal fade show d-block" id="viewpunchOutReportModal" tabIndex="-1" role="dialog" 
-						style={{ 
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							position: 'fixed',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							zIndex: 1050
-						}}>
-						<div className="modal-dialog modal-dialog-centered" role="dialog">
-							<div className="modal-content">
-								<div className="modal-header">
-									<h5 className="modal-title">Daily Report</h5>
-									<button type="button" className="close" onClick={this.closeReportModal}>
-										<span aria-hidden="true">&times;</span>
-									</button>
-								</div>
-								<div className="modal-body">
-									<div className="row">
-										{window.user && window.user.role !== 'employee' && (
-											<div className="col-md-12 mb-3">
-												<strong>Employee Name:</strong> {this.state.selectedReport.full_name}
-											</div>
-										)}
-										<div className="col-md-12 mb-2">
-											<strong>Start Time:</strong> {this.formatDateTimeAMPM(this.state.selectedReport.start_time)}
-										</div>
-										<div className="col-md-12 mb-2">
-											<strong>End Time:</strong> {this.formatDateTimeAMPM(this.state.selectedReport.end_time)}
-										</div>
-										<div className="col-md-12 mb-2">
-											<strong>Break Duration:</strong> {this.state.selectedReport.break_duration_in_minutes} Mins
-										</div>
-										<div className="col-md-12 mb-2">
-											<strong>Working Hours:</strong> {this.state.selectedReport.todays_working_hours?.slice(0, 5)}
-										</div>
-										<div className="col-md-12 mb-2">
-											<strong>Total Hours:</strong> {this.state.selectedReport.todays_total_hours?.slice(0, 5)}
-										</div>
-										<div className="col-md-12 mb-2">
-											<div className="multiline-text"><strong>Description</strong> &nbsp; <br/>
-												{this.state.selectedReport.report}
-											</div>
-										</div>
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button type="button" className="btn btn-secondary" onClick={this.closeReportModal}>Close</button>
-								</div>
-							</div>
-						</div>
-					</div>
+					<ReportModal
+						show={this.state.showReportModal}
+						report={this.state.selectedReport}
+						onClose={this.closeReportModal}
+						userRole={this.state.logged_in_employee_role}
+					/>
 				)}
+
             </>
         )
     }

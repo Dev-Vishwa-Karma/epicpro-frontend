@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import Fullcalender from '../../common/fullcalender';
 import moment from 'moment';
+import ReportModal from '../Report/ReportModal';
+
 
 class ViewEmployee extends Component {
     constructor(props) {
@@ -678,41 +680,14 @@ class ViewEmployee extends Component {
             <>
                 {this.renderAlertMessages()} {/* Show Toast Messages */}
 
-                {/* Report Modal */}
-                <div className={`modal fade ${showReportModal ? 'show' : ''}`} 
-                     style={{ display: showReportModal ? 'block' : 'none' }} 
-                     tabIndex="-1" 
-                     role="dialog">
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Daily Report</h5>
-                                <button type="button" className="close" onClick={this.closeReportModal}>
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                {selectedReport && (
-                                    <div>
-                                        <p><strong>Date </strong>{new Date(this.state.selectedReport.created_at).toLocaleDateString()}</p>
-                                        <p><strong>Working Hours:</strong> {selectedReport.todays_working_hours}</p>
-                                        <p><strong>Today Total Hours</strong> {this.state.selectedReport.todays_total_hours}</p>
-
-                                        <p><strong>Start Time</strong> {this.state.selectedReport.start_time}</p>
-                                        <p><strong>End Time</strong> {this.state.selectedReport.end_time}</p>
-                                        <p><strong>Break Duration(minutes) </strong>{this.state.selectedReport.break_duration_in_minutes}</p>
-                                        <p><strong>Description </strong> {this.state.selectedReport.report || 'No description provided'}</p>
-                                        {/* Add more report details as needed */}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={this.closeReportModal}>Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {showReportModal && <div className="modal-backdrop fade show"></div>}
+                {this.state.showReportModal && this.state.selectedReport && (
+                    <ReportModal
+                        show={this.state.showReportModal}
+                        report={this.state.selectedReport}
+                        onClose={this.closeReportModal}
+                        userRole={this.state.logged_in_employee_role}
+                    />
+                )}
 
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
                     <div className="container-fluid">
@@ -919,6 +894,7 @@ class ViewEmployee extends Component {
                                             </div>
                                             <div className="card-body">
                                                 <Fullcalender 
+                                                    key={`calendar-${this.state.activeTab}`}
                                                     events={finalCalendarEvents}
                                                     eventClick={this.handleEventClick}
                                                     selectable={true}

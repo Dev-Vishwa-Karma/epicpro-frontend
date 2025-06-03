@@ -9,6 +9,7 @@ class Report extends Component {
         super(props);
         this.state = {
             reports: [],
+            selectedModalReport:[],
             selectedReport: null,
             isModalOpen: false,
             selectedReportEmployee:"",
@@ -495,7 +496,7 @@ class Report extends Component {
 
     openReportModal = (report) => {
         this.setState({ 
-            selectedReport: report,
+            selectedModalReport: report,
             report: report.report || '',
             start_time: report.start_time ? report.start_time : null,
             break_duration_in_minutes: report.break_duration_in_minutes || 0,
@@ -508,7 +509,7 @@ class Report extends Component {
     };
 
     closeReportModal = () => {
-        this.setState({ selectedReport: null });
+        this.setState({ selectedModalReport: null });
     };
 
     handleChange = (field, value) => {
@@ -843,7 +844,8 @@ class Report extends Component {
             dataPerPage,
             fromDate,
             toDate,
-            filteredReports
+            filteredReports,
+            selectedModalReport
         } = this.state;
 
         // Handle empty employee data safely
@@ -1071,32 +1073,32 @@ class Report extends Component {
                         <div className="modal-dialog" role="dialog">
                             <div className="modal-content">
                                 <div className="modal-body">
-                                    {selectedReport ? (
+                                    {selectedModalReport ? (
                                         <div className="row">
                                             {window.user && window.user.role !== 'employee' && (
                                                 <div className="col-md-12 mb-3">
-                                                    <strong>Employee Name:</strong> {selectedReport.full_name}
+                                                    <strong>Employee Name:</strong> {selectedModalReport.full_name}
                                                 </div>
                                             )}
                                             <div className="col-md-12 mb-4">
                                                 <div className="multiline-text" >
-                                                    {selectedReport.report}
+                                                    {selectedModalReport.report}
                                                 </div>
                                             </div>
                                             <div className="col-md-12 mb-2">
-                                                <strong>Start Time:</strong> {this.formatDateTimeAMPM(selectedReport.start_time)}
+                                                <strong>Start Time:</strong> {this.formatDateTimeAMPM(selectedModalReport.start_time)}
                                             </div>
                                             <div className="col-md-12 mb-2">
-                                                <strong>End Time:</strong> {this.formatDateTimeAMPM(selectedReport.end_time)}
+                                                <strong>End Time:</strong> {this.formatDateTimeAMPM(selectedModalReport.end_time)}
                                             </div>
                                             <div className="col-md-12 mb-2">
-                                                <strong>Break Duration:</strong> {selectedReport.break_duration_in_minutes} Mins
+                                                <strong>Break Duration:</strong> {selectedModalReport.break_duration_in_minutes} Mins
                                             </div>
                                             <div className="col-md-12 mb-2">
-                                                <strong>Working Hours:</strong> {selectedReport.todays_working_hours?.slice(0, 5)}
+                                                <strong>Working Hours:</strong> {selectedModalReport.todays_working_hours?.slice(0, 5)}
                                             </div>
                                             <div className="col-md-12 mb-2">
-                                                <strong>Total Hours:</strong> {selectedReport.todays_total_hours?.slice(0, 5)}
+                                                <strong>Total Hours:</strong> {selectedModalReport.todays_total_hours?.slice(0, 5)}
                                             </div>
                                         </div>
                                     ) : (
