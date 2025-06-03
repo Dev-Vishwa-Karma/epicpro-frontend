@@ -29,6 +29,9 @@ class ViewEmployee extends Component {
             activities: [],
             reports: [],
             leaves: [],
+            calendarEventsData: [],
+            showReportModal: false,
+            selectedReport: null
         };
     }
 
@@ -116,28 +119,238 @@ class ViewEmployee extends Component {
         });
     }
 
-    // Usage example (inside your componentDidMount or wherever you load data)
+    // Helper function to check if a date is a Monday
+    isMonday = (date) => {
+        return date.getDay() === 1; // Monday is 1
+    };
+
+    // Helper function to check if a Sunday is an alternate Sunday
+    isAlternateSunday = (date) => {
+        if (date.getDay() !== 0) return false; // Not Sunday
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        const firstSundayOfYear = new Date(firstDayOfYear);
+        // Find the first Sunday of the year
+        while (firstSundayOfYear.getDay() !== 0) {
+            firstSundayOfYear.setDate(firstSundayOfYear.getDate() + 1);
+        }
+
+        // Calculate the number of weeks between the first Sunday and the given date
+        const diffInTime = date.getTime() - firstSundayOfYear.getTime();
+        const diffInDays = diffInTime / (1000 * 60 * 60 * 24);
+        const weekNumber = Math.floor(diffInDays / 7);
+
+        return weekNumber % 2 === 0; // Alternate every other Sunday (0, 2, 4...)
+    };
+
+    generateCalendarEvents = (reports, leaves) => {
+        const { employeeId } = this.state;
+        const logged_in_employee_role = window.user.role;
+
+        // 1. Working Hours Events
+        const totalWorkingHours = reports.map(report => {
+            const hoursStr = report.todays_working_hours?.slice(0, 5);
+            const hours = parseFloat(hoursStr);
+
+            let backgroundColor = "#4ee44e"; // Default green for >= 8 hours
+            if (hours < 4) backgroundColor = "#D6010133"; // Red for < 4 hours
+            else if (hours < 8) backgroundColor = "#87ceeb"; // Blue for < 8 hours
+
+            return {
+                title: `${hoursStr} Hrs`, // Display hours
+                start: report.created_at?.split(" ")[0],
+                display: "background", // Render as background event
+                borderColor: backgroundColor,
+                backgroundColor: backgroundColor,
+                allDay: true,
+                className: "daily-report",
+                report: report // Store the full report object directly
+            };
+        }).flat();
+
+        // 2. Approved Leaves Events
+        const employeeLeavesData = leaves
+            .filter(leave => leave.status === 'approved')
+            .flatMap(leave => {
+                const from = moment(leave.from_date);
+                const to = moment(leave.to_date);
+                const days = [];
+
+                for (let date = from.clone(); date.isSameOrBefore(to); date.add(1, 'days')) {
+                    days.push({
+                        title: leave.reason || "Leave",
+                        start: date.format('YYYY-MM-DD'),
+                        backgroundColor: 'rgba(214, 1, 1, 0.2)',
+                        borderColor: 'rgba(214, 1, 1, 0.2)',
+                        textColor: 'black',
+                        className: 'leave-event-calender',
+                    });
+                }
+
+                return days;
+            });
+
+        // 3. Office Closure Events (Alternate Mondays and Tuesdays)
+        const officeClosures = [];
+        const currentYear = new Date().getFullYear(); // Consider a range, e.g., current year
+        const startDate = new Date(currentYear, 0, 1);
+        const endDate = new Date(currentYear, 11, 31);
+
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            // Check for alternate Monday and Tuesday
+            if (this.isMonday(d) || this.isAlternateSunday(d)) { // Assuming Monday and Alternate Sunday are the weekend
+                 // You might need to adjust the logic here based on your exact definition of 'Alternate monday and tuesday'
+                 // The current logic marks all Mondays and alternate Sundays as office closures.
+                officeClosures.push({
+                    start: new Date(d).toISOString().split("T")[0],
+                    // title: "Office Off",
+                    event_type: "office-close",
+                    backgroundColor: '#e9ecef',
+                    borderColor: '#e9ecef',
+                    allDay: true,
+                    display: 'background',
+                    className: "office-closure-event",
+                });
+            }
+        }
+         console.log('Generated officeClosures:', officeClosures);
+
+
+        // 4. Missing Report Events
+        const missingReportEvents = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Determine which reports to check based on employeeId in state
+        let reportsForMissing = reports;
+
+        if (reportsForMissing.length > 0) {
+            const reportTimestamps = reportsForMissing.map(r => new Date(r.created_at).getTime());
+             // Find the earliest and latest report dates
+            const firstReportDate = new Date(Math.min(...reportTimestamps));
+            const lastReportDate = new Date(Math.max(...reportTimestamps));
+
+            let currentDate = new Date(firstReportDate);
+
+            while (currentDate <= today && currentDate <= lastReportDate) { // Iterate up to the latest report date or today, whichever is earlier
+                const dateStr = currentDate.toISOString().split("T")[0];
+
+                // Check if the current day is an office closure
+                 const isOfficeClosure = officeClosures.some(
+                    (closure) => closure.start === dateStr
+                );
+
+                // Check if there is a report for the current day
+                const hasReport = reportsForMissing.some((report) => report.created_at?.split(" ")[0] === dateStr);
+
+                if (!isOfficeClosure && !hasReport) {
+                     missingReportEvents.push({
+                         start: dateStr,
+                         display: 'background',
+                         color: '#ff6b6b', 
+                         allDay: true,
+                         className: 'missing-report-day',
+                        //  title: 'Missing Report' 
+                     });
+                }
+
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+         console.log('Generated missingReportEvents:', missingReportEvents);
+
+
+        // Merge all events
+        const calendarEvents = [
+            ...totalWorkingHours,
+            ...employeeLeavesData,
+            ...officeClosures,
+            ...missingReportEvents,
+        ];
+         console.log('Final calendarEvents:', calendarEvents);
+
+
+        return calendarEvents;
+    }
+
     loadEmployeeData = () => {
         const baseUrl = process.env.REACT_APP_API_URL;
         const { employeeId } = this.state;
         const isAdmin = window.user.role === 'super_admin' || window.user.role === 'admin';
-    
-        if (employeeId) {
-            this.fetchData(`${baseUrl}/activities.php?user_id=${employeeId}`, 'activities');
-            this.fetchData(`${baseUrl}/reports.php?user_id=${employeeId}`, 'reports');
-            this.fetchData(`${baseUrl}/employee_leaves.php?employee_id=${employeeId}`, 'leaves');
-        } 
-        else if (isAdmin) {
-            const userId = window.user.id;
-            this.fetchData(`${baseUrl}/activities.php?user_id=${userId}`, 'activities');
-            this.fetchData(`${baseUrl}/reports.php?user_id=${userId}`, 'reports');
-            this.fetchData(`${baseUrl}/employee_leaves.php?employee_id=${userId}`, 'leaves');
-        }
-        else {
-            const userId = window.user.id;
-            this.fetchData(`${baseUrl}/activities.php?user_id=${userId}`, 'activities');
-            this.fetchData(`${baseUrl}/reports.php?user_id=${userId}`, 'reports');
-            this.fetchData(`${baseUrl}/employee_leaves.php?employee_id=${userId}`, 'leaves');
+        const userId = window.user.id;
+
+        const currentEmployeeId = employeeId || userId; // Use employeeId if available, otherwise use logged-in userId
+
+        if (currentEmployeeId) {
+            // Fetch activities
+            this.fetchData(`${baseUrl}/activities.php?user_id=${currentEmployeeId}`, 'activities');
+
+            // Fetch reports
+            fetch(`${baseUrl}/reports.php?user_id=${currentEmployeeId}`, {
+                method: "GET",
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const reports = data.data;
+                     console.log('Fetched reports for calendar:', reports);
+                     this.setState({ reports }, () => {
+                         // Generate calendar events after reports and leaves are fetched and state is updated
+                         const { reports, leaves } = this.state;
+                         const calendarEventsData = this.generateCalendarEvents(reports, leaves);
+                         this.setState({ calendarEventsData });
+                         console.log('Calendar events data set in state:', this.state.calendarEventsData);
+                     });
+                } else {
+                    this.setState({ errorMessage: data.message, reports: [] });
+                     console.error('Error fetching reports for calendar:', data.message);
+                     // Still generate events even if reports fetch fails, to show leaves/closures
+                     const { reports, leaves } = this.state;
+                     const calendarEventsData = this.generateCalendarEvents(reports, leaves);
+                     this.setState({ calendarEventsData });
+                }
+            })
+            .catch(err => {
+                this.setState({ error: 'Failed to fetch reports', reports: [] });
+                console.error('Error fetching reports for calendar:', err);
+                 // Still generate events even if reports fetch fails, to show leaves/closures
+                 const { reports, leaves } = this.state;
+                 const calendarEventsData = this.generateCalendarEvents(reports, leaves);
+                 this.setState({ calendarEventsData });
+            });
+
+             // Fetch leaves
+            fetch(`${baseUrl}/employee_leaves.php?employee_id=${currentEmployeeId}`, {
+                method: "GET",
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const leaves = data.data;
+                     console.log('Fetched leaves for calendar:', leaves);
+                    this.setState({ leaves }, () => {
+                         // Generate calendar events after reports and leaves are fetched and state is updated
+                         const { reports, leaves } = this.state;
+                         const calendarEventsData = this.generateCalendarEvents(reports, leaves);
+                         this.setState({ calendarEventsData });
+                         console.log('Calendar events data set in state:', this.state.calendarEventsData);
+                    });
+                } else {
+                    this.setState({ errorMessage: data.message, leaves: [] });
+                     console.error('Error fetching leaves for calendar:', data.message);
+                      // Still generate events even if leaves fetch fails, to show reports/closures
+                     const { reports, leaves } = this.state;
+                     const calendarEventsData = this.generateCalendarEvents(reports, leaves);
+                     this.setState({ calendarEventsData });
+                }
+            })
+            .catch(err => {
+                this.setState({ error: 'Failed to fetch leaves', leaves: [] });
+                console.error('Error fetching leaves for calendar:', err);
+                 // Still generate events even if leaves fetch fails, to show reports/closures
+                 const { reports, leaves } = this.state;
+                 const calendarEventsData = this.generateCalendarEvents(reports, leaves);
+                 this.setState({ calendarEventsData });
+            });
         }
     }
 
@@ -158,7 +371,6 @@ class ViewEmployee extends Component {
             })
             .catch((error) => console.error("Error fetching employee details:", error));
     };
-
 
     fetchWorkingHoursReports = (employeeId) => {
 		fetch(
@@ -427,136 +639,80 @@ class ViewEmployee extends Component {
         );
     };
 
-    isMonday = (date) => {
-        return date.getDay() === 1; // 0 is Sunday, 1 is Monday, etc.
-    };
-
-    isAlternateSunday = (date) => {
-        if (date.getDay() !== 0) return false; // Not Sunday
-        const firstSunday = new Date(date.getFullYear(), 0, 1);
-        while (firstSunday.getDay() !== 1) {
-            firstSunday.setDate(firstSunday.getDate() + 1);
+    handleEventClick = (eventInfo) => {
+        console.log('Event clicked:', eventInfo);
+        
+        // The event data is directly in the eventInfo object
+        const report = eventInfo.report;
+        
+        if (report) {
+            console.log('Found report:', report);
+            this.setState({
+                selectedReport: report,
+                showReportModal: true
+            });
+        } else {
+            console.log('No report data found in event');
         }
-        const diffInDays = Math.floor((date - firstSunday) / (1000 * 60 * 60 * 24));
-        const weekNumber = Math.floor(diffInDays / 7);
-        return weekNumber % 2 === 0; // Alternate every other week (0, 2, 4...)
     };
 
-    hasReportForDate = (dateStr, reports) => {
-        return reports.some((report) => report.created_at?.split(" ")[0] === dateStr);
-    };
-
-    getMissingReportEvents = (workingHoursReports, officeClosures, selectedYear) => {
-        const missingReportEvents = [];
-        if (!workingHoursReports || workingHoursReports.length === 0) return missingReportEvents;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const startDate = new Date(selectedYear, 0, 1);
-        const endDate = new Date(selectedYear, 11, 31);
-        let currentDate = new Date(startDate);
-        while (currentDate <= today && currentDate <= endDate) {
-            const dateStr = currentDate.toISOString().split("T")[0];
-            const isOfficeClosure = officeClosures.some((closure) => closure.start === dateStr);
-            if (!isOfficeClosure) {
-                const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-                if (!hasReport) {
-                    missingReportEvents.push({
-                        start: dateStr,
-                        display: 'background',
-                        color: '#ff6b6b',
-                        allDay: true,
-                        className: 'missing-report-day'
-                    });
-                }
-            }
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-        return missingReportEvents;
+    closeReportModal = () => {
+        this.setState({
+            showReportModal: false,
+            selectedReport: null
+        });
     };
 
     render() {
         const { fixNavbar} = this.props;
-        const {employee, activities, reports, leaves, errorMessage} = this.state;
+        const {employee, activities, reports, leaves, errorMessage, calendarEventsData, showReportModal, selectedReport} = this.state;
         // Handle case where employee data is not available
         if (!employee) {
             return <p>Loading employee details...</p>;
         }
 
-        // Format filtered total working hours
-        const totalWorkingHours = reports.map(report => {
-            const hoursStr = report.todays_working_hours?.slice(0, 5);
-            const hours = parseFloat(hoursStr);
-
-            let backgroundColor = "#4ee44e";
-            if (hours < 4) backgroundColor = "#D6010133";
-            else if (hours < 8) backgroundColor = "#87ceeb";
-
-            return {
-                title: `${hoursStr}`,
-                start: report.created_at?.split(" ")[0],
-                display: "background", 
-                borderColor: backgroundColor,
-                backgroundColor: backgroundColor,
-                allDay: true,
-                className: "daily-report",
-            };
-        }).flat();
-
-        // Process leave data first
-        const employeeLeavesData = leaves
-            .filter(leave => leave.status === 'approved')
-            .flatMap(leave => {
-                const from = moment(leave.from_date);
-                const to = moment(leave.to_date);
-                const days = [];
-            
-                for (let date = from.clone(); date.isSameOrBefore(to); date.add(1, 'days')) {
-                    days.push({
-                        title: leave.reason || "Leave",
-                        start: date.format('YYYY-MM-DD'),
-                        backgroundColor: 'rgba(214, 1, 1, 0.2)',
-                        borderColor: 'rgba(214, 1, 1, 0.2)',
-                        textColor: 'black',
-                        className: 'leave-event-calender',
-                    });
-                }
-            
-                return days;
-            });
-
-        // Add office closures for alternate Sundays and Mondays
-        const officeClosures = [];
-        const startDate = new Date(new Date().getFullYear(), 0, 1);
-        const endDate = new Date(new Date().getFullYear(), 11, 31);
-
-        // Only apply for employees
-        if (window.user.role === "employee") {
-            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                if (this.isMonday(d) || this.isAlternateSunday(d)) {
-                    officeClosures.push({
-                        start: new Date(d).toISOString().split("T")[0],
-                        event_type: "holiday",
-                        allDay: true,
-                        className: "office-closure-event",
-                    });
-                }
-            }
-        }
-
-        // Create events for days without reports
-        const missingReportEvents = this.getMissingReportEvents(reports, officeClosures, new Date().getFullYear());
-
-        // Merge all events
-        const calendarEvents = [
-            ...totalWorkingHours,
-            ...employeeLeavesData,
-            ...officeClosures,
-            ...missingReportEvents
-        ];
+        // Use calendarEventsData from state, default to empty array if not yet loaded
+        const finalCalendarEvents = calendarEventsData || [];
 
         return (
             <>
                 {this.renderAlertMessages()} {/* Show Toast Messages */}
+
+                {/* Report Modal */}
+                <div className={`modal fade ${showReportModal ? 'show' : ''}`} 
+                     style={{ display: showReportModal ? 'block' : 'none' }} 
+                     tabIndex="-1" 
+                     role="dialog">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Daily Report</h5>
+                                <button type="button" className="close" onClick={this.closeReportModal}>
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {selectedReport && (
+                                    <div>
+                                        <p><strong>Date </strong>{new Date(this.state.selectedReport.created_at).toLocaleDateString()}</p>
+                                        <p><strong>Working Hours:</strong> {selectedReport.todays_working_hours}</p>
+                                        <p><strong>Today Total Hours</strong> {this.state.selectedReport.todays_total_hours}</p>
+
+                                        <p><strong>Start Time</strong> {this.state.selectedReport.start_time}</p>
+                                        <p><strong>End Time</strong> {this.state.selectedReport.end_time}</p>
+                                        <p><strong>Break Duration(minutes) </strong>{this.state.selectedReport.break_duration_in_minutes}</p>
+                                        <p><strong>Description </strong> {this.state.selectedReport.report || 'No description provided'}</p>
+                                        {/* Add more report details as needed */}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={this.closeReportModal}>Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {showReportModal && <div className="modal-backdrop fade show"></div>}
 
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
                     <div className="container-fluid">
@@ -614,7 +770,7 @@ class ViewEmployee extends Component {
                                                 </li>
                                             ) : (
                                                 <li className="list-inline-item">
-                                                    <a 
+                                                    <a
                                                         href="#"
                                                         onClick={(e) => e.preventDefault()} 
                                                         title="Facebook (No link available)" 
@@ -763,33 +919,13 @@ class ViewEmployee extends Component {
                                             </div>
                                             <div className="card-body">
                                                 <Fullcalender 
-                                                    events={calendarEvents}
-                                                    dayCellClassNames={(arg) => {
-                                                        const dateStr = arg.date.toISOString().split("T")[0];
-                                                        const today = new Date();
-                                                        today.setHours(0, 0, 0, 0);
-                                                        
-                                                        const cellDate = new Date(arg.date);
-                                                        cellDate.setHours(0, 0, 0, 0);
-
-                                                        const isWeekend = arg.date.getDay() === 0 || arg.date.getDay() === 6;
-                                                        const isOfficeClosure = officeClosures.some(
-                                                            (closure) => closure.start === dateStr
-                                                        );
-                                                        
-                                                        if (isWeekend || isOfficeClosure) {
-                                                            return "";
-                                                        }
-
-                                                        const hasReport = this.hasReportForDate(dateStr, reports);
-                                                        
-                                                        if (!hasReport && cellDate <= today) {
-                                                            return "no-report-day";
-                                                        }
-
-                                                        return "";
-                                                    }}
-                                                ></Fullcalender>
+                                                    events={finalCalendarEvents}
+                                                    eventClick={this.handleEventClick}
+                                                    selectable={true}
+                                                    selectMirror={true}
+                                                    dayMaxEvents={true}
+                                                    eventDisplay="block"
+                                                />
                                             </div>
                                         </div>
                                     </div>
