@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
 import { Callbacks } from 'jquery';
+import ReportModal from '../Report/ReportModal';
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -37,7 +38,9 @@ class Events extends Component {
       selectedReportDate: null,
       editedWorkingHours: '',
       leaveData: [],
-	  allEvents: []
+	  allEvents: [],
+      showReportModal: false,
+      selectedReport: null
     };
   }
 
@@ -561,6 +564,7 @@ fetchEvents = (birthdayEvents) => {
 	.then(data => {
 		if (data.status === 'success') {
 			const eventsData = data.data;
+			const currentYear = new Date().getFullYear();
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
 			const selectedYear = this.state.selectedYear;
@@ -577,17 +581,18 @@ fetchEvents = (birthdayEvents) => {
 				const eventDate = new Date(event.event_date);
 				const eventYear = eventDate.getFullYear();
 
-				// Show birthday and holiday events for the selected year
-				if (event.event_type === 'birthday' || event.event_type === 'holiday') {
-					return eventYear === selectedYear;
-				}
-
-				// Show regular events for the selected year if they are upcoming
-				if (event.event_type === 'event') {
+				// For current year, only show future events
+				if (selectedYear === currentYear) {
 					return eventYear === selectedYear && eventDate >= today;
 				}
-
-				return false;
+				// For past years, show all events
+				else if (selectedYear < currentYear) {
+					return eventYear === selectedYear;
+				}
+				// For future years, show all events
+				else {
+					return eventYear === selectedYear;
+				}
 			});
 
 
@@ -605,6 +610,76 @@ fetchEvents = (birthdayEvents) => {
 		console.error('Error fetching events:', err); // Debug log
 		this.setState({ message: 'Failed to fetch data', loading: false });
 	});
+};
+
+// Add function to handle report click
+handleReportClick = (report) => {
+    if (!report || typeof report !== 'object') {
+        console.error('Invalid report object:', report);
+        this.setState({
+            showReportModal: true,
+            selectedReport: null,
+            errorMessage: 'No report data available',
+            showError: true
+        });
+        setTimeout(() => this.setState({ showError: false, errorMessage: '' }), 3000);
+        return;
+    }
+    const safeReport = {
+        id: report.id || '',
+        employee_id: report.employee_id || '',
+        full_name: report.full_name || 'N/A',
+        report: report.report || 'No report content available',
+        start_time: report.start_time || '',
+        end_time: report.end_time || '',
+        break_duration_in_minutes: report.break_duration_in_minutes || 0,
+        todays_working_hours: report.todays_working_hours || '',
+        todays_total_hours: report.todays_total_hours || '',
+        created_at: report.created_at || ''
+    };
+
+    this.setState({
+        showReportModal: true,
+        selectedReport: safeReport
+    });
+};
+
+// Add function to close report modal
+closeReportModal = () => {
+    this.setState({
+        showReportModal: false,
+        selectedReport: null
+    });
+};
+
+// Add formatDateTimeAMPM function
+formatDateTimeAMPM = (timeString) => {
+    if (!timeString || typeof timeString !== 'string') return '';
+
+    // If input is in format "YYYY-MM-DD HH:mm" or "YYYY-MM-DD HH:mm:ss"
+    if (timeString.includes(' ')) {
+        const parts = timeString.split(' ');
+        timeString = parts[1]; // Extract the time part
+    }
+
+    const [hours, minutes, seconds = '00'] = timeString.split(':');
+    const now = new Date();
+
+    now.setHours(parseInt(hours, 10));
+    now.setMinutes(parseInt(minutes, 10));
+    now.setSeconds(parseInt(seconds, 10));
+    now.setMilliseconds(0);
+
+    if (isNaN(now.getTime())) {
+        console.warn("Invalid time format:", timeString);
+        return '';
+    }
+
+    return now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
 };
 
     render() {
@@ -663,7 +738,7 @@ fetchEvents = (birthdayEvents) => {
 
 			// For regular events, show only upcoming events
 			if (event.event_type === 'event') {
-				return eventYear === selectedYear && eventDate >= today;
+				return eventYear === selectedYear;
 			}
 
 			return false;
@@ -760,25 +835,32 @@ fetchEvents = (birthdayEvents) => {
 		const uniqueFilteredEvents2 = Array.from(uniqueEventsMap2.values());
 
 		 //Add new changes and create new functions
-		 //add this function for calculate totalworking hour or coloring according to  workinh hours
+         //add this function for calculate totalworking hour or coloring according to  workinh hours
         const workingHoursEvents = workingHoursReports.map((report) => {
-			const hoursStr = report.todays_working_hours?.slice(0, 5);
-			const hours = parseFloat(hoursStr);
+            console.log('Creating event for report:', report); 
+            const hoursStr = report.todays_working_hours?.slice(0, 5);
+            const hours = parseFloat(hoursStr);
 
-			let backgroundColor = "#4ee44e";
-			if (hours < 4) backgroundColor = "#D6010133";
-			else if (hours < 8) backgroundColor = "#87ceeb";
+            let backgroundColor = "#4ee44e";
+            if (hours < 4) backgroundColor = "#D6010133";
+            else if (hours < 8) backgroundColor = "#87ceeb";
 
-			return {
-				title: `${hoursStr}`,
-				start: report.created_at?.split(" ")[0],
-				display: "background",
-				borderColor: backgroundColor,
-				backgroundColor: backgroundColor,
-				allDay: true,
-				className: "daily-report",
-			};
-    	});
+            const event = {
+                id: report.id,
+                title: `${hoursStr}`,
+                start: report.created_at?.split(" ")[0],
+                display: "background",
+                borderColor: backgroundColor,
+                backgroundColor: backgroundColor,
+                allDay: true,
+                className: "daily-report"
+            };
+            console.log('Created event:', event);
+            return event;
+        });
+
+        // Debug log for all events
+        console.log('All working hours events:', workingHoursEvents);
 
 		const officeClosures = [];
 		const startDate = new Date(selectedYear, 0, 1);
@@ -1086,6 +1168,17 @@ fetchEvents = (birthdayEvents) => {
 										<div className="card-header bline">
 											<h3 className="card-title">Event Calendar</h3>
 											<div className="card-options">
+											{logged_in_employee_role === "employee" && (
+												<select
+													className="form-control custom-select"
+													value={calendarView}
+													onChange={(e) => this.setState({ calendarView: e.target.value })}
+													style={{ width: "150px", marginRight: "10px" }}
+												>
+													<option value="event">Events</option>
+													<option value="report">Reports</option>
+												</select>
+											)}
 												{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
 											  <>
 												<select
@@ -1120,40 +1213,64 @@ fetchEvents = (birthdayEvents) => {
 										))}
 										</select>
 									</>
-									)}									
+								)}									
                             				{/* Changes (END) */}
-											</div>
-										</div>
+									</div>
+							</div>
 										<div className="card-body">
 											{/* Pass the formatted events to the FullCalendar component */}
-											<Fullcalender events={this.state.allEvents} defaultDate={defaultDate}
-											 //add new chnages
-											dayCellClassNames={(arg) => {
-											const dateStr = arg.date.toISOString().split("T")[0];
-											const today = new Date();
-											today.setHours(0, 0, 0, 0);
-											
-											const cellDate = new Date(arg.date);
-											cellDate.setHours(0, 0, 0, 0);
+											<Fullcalender 
+												events={this.state.allEvents} 
+												defaultDate={defaultDate}
+												dayCellClassNames={(arg) => {
+													const dateStr = arg.date.toISOString().split("T")[0];
+													const today = new Date();
+													today.setHours(0, 0, 0, 0);
+													
+													const cellDate = new Date(arg.date);
+													cellDate.setHours(0, 0, 0, 0);
 
-											const isWeekend = arg.date.getDay() === 0 || arg.date.getDay() === 6;
-											const isOfficeClosure = officeClosures.some(
-												(closure) => closure.start === dateStr
-											);
-											
-											if (isWeekend || isOfficeClosure) {
-												return "";
-											}
+													const isWeekend = arg.date.getDay() === 0 || arg.date.getDay() === 6;
+													const isOfficeClosure = officeClosures.some(
+														(closure) => closure.start === dateStr
+													);
+													
+													if (isWeekend || isOfficeClosure) {
+														return "";
+													}
 
-											const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-											
-											if (!hasReport && cellDate <= today) {
-												return "no-report-day";
-											}
+													const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
+													
+													if (!hasReport && cellDate <= today) {
+														return "no-report-day";
+													}
 
-											return "";
-										}}
-										></Fullcalender>
+													return "";
+												}}
+												eventClick={(info) => {
+													console.log('Event info received:', info);
+													// The event data is directly in the info object
+													const eventData = info;
+													// Try to find the corresponding report in workingHoursReports
+													const report = this.state.workingHoursReports.find(r => 
+														r.id === eventData.id || 
+														r.created_at?.split(" ")[0] === eventData.start?.format('YYYY-MM-DD')
+													);
+													console.log('Found report:', report);
+													if (report) {
+														this.handleReportClick(report);
+													} else {
+														console.error('No report data found for event:', eventData);
+														this.setState({
+															showReportModal: true,
+															selectedReport: null,
+															errorMessage: 'No report data available',
+															showError: true
+														});
+														setTimeout(() => this.setState({ showError: false, errorMessage: '' }), 3000);
+													}
+												}}
+											></Fullcalender>
 										</div>
 									</div>
 								</div>
@@ -1228,6 +1345,16 @@ fetchEvents = (birthdayEvents) => {
 						</div>
 					</div>
 				)}
+
+				{this.state.showReportModal && this.state.selectedReport && (
+					<ReportModal
+						show={this.state.showReportModal}
+						report={this.state.selectedReport}
+						onClose={this.closeReportModal}
+						userRole={this.state.logged_in_employee_role}
+					/>
+				)}
+
             </>
         )
     }

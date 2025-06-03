@@ -25,7 +25,7 @@ class Fullcalender extends Component {
                     editable={true}
                     eventLimit={true}
                     events={events}
-
+                    eventClick={this.props.eventClick}
                     // HERE: highlight leave days
                     dayRender={(date, cell) => {
                         const dateStr = date.format('YYYY-MM-DD');
