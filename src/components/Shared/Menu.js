@@ -399,7 +399,7 @@ class Menu extends Component {
 
 					// Add the "Employee" item to the HRMS section after the department item
 					const saturdaySettings = {
-						"id": 6,
+						"id": 30,
 						"label": "Saturday Settings",
 						"to": "/saturday-settings"
 					};
