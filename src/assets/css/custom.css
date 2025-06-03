@@ -4,10 +4,9 @@
     border-color:  #39374e !important;
 } */
 
-/* Birthday Event Styling */
 .birthday-event {
-    background-color: #e8f4fc !important; /* Light Orange */
-    border-left: 6px solid #007bff !important; /* Orange */
+    background-color: #e8f4fc !important; 
+    border-left: 6px solid #007bff !important; 
     color: #007bff !important;
 }
 
@@ -50,7 +49,7 @@ div.font-opensans{
     font-family:"Open Sans",sans-serif;
     font-size:14px
 }
-/* div.rtl{ */
+
 div.rtl{
     direction: rtl !important;   
     text-align: right;
@@ -68,21 +67,18 @@ div.rtl{
     overflow-wrap: break-word;
 }
 
-/* Holiday Styling */
 .holiday-event {
-    background-color: #fdecea !important; /* Light Red */
-    border-left: 6px solid #d9534f !important; /* Dark Red */
+    background-color: #fdecea !important; 
+    border-left: 6px solid #d9534f !important;
     color: #d9534f !important;
 }
 
-/* Regular Events (Birthdays, Anniversaries, etc.) */
 .regular-event {
-    background-color: #e9f7df !important; /* Light Green */
-    border-left: 6px solid #28a745 !important; /* Dark Green */
+    background-color: #e9f7df !important;
+    border-left: 6px solid #28a745 !important; 
     color: #28a745 !important;
 }
 
-/* Other Event Styling */
 .other-event {
     background-color: #e8f4fc !important;
     border-left: 6px solid #007bff !important;
@@ -90,7 +86,6 @@ div.rtl{
 }
 
 
-/* Dashboard component css */
 @media (min-width: 1200px) { 
     .col-xl-1_7 {
         flex: 0 0 14.2857%;
@@ -98,7 +93,6 @@ div.rtl{
     }
 }
 
-/* Add this css for projectlist.js file */
 .avatar-list-stacked .avatar.add-space {
     margin-right: 3px !important;
     width: 32px;
@@ -113,15 +107,14 @@ div.rtl{
     border: 1px solid #C7D2FE
 }
 
-/* Employee section css */
 .custom-col {
-    flex: 1 1 20%; /* Ensures five equal sections */
+    flex: 1 1 20%; 
     max-width: 20%;
 }
   
 @media (max-width: 1200px) {
     .custom-col {
-      flex: 1 1 33%; /* Adjust for smaller screens */
+      flex: 1 1 33%;
       max-width: 33%;
     }
 }
@@ -133,10 +126,6 @@ div.rtl{
     }
 }
   
-
-
-/* Add new CSS */
-
 .fc .office-closure-event {
   background-color: #fff !important;
   border: none !important;
@@ -147,9 +136,9 @@ div.rtl{
   text-align: center !important;
   font-weight: 600 !important;
   border: none !important;
+  cursor: pointer !important;
 }
 
-/* Missing reports - working days without reports */
 .missing-report-day {
   background-color: rgba(255, 0, 0, 0.2) !important;
   border: none !important;
@@ -206,3 +195,6 @@ div.rtl{
     color: #fff !important; 
     font-weight: bold;
 }
+
+
+
