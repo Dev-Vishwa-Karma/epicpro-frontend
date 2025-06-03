@@ -61,6 +61,12 @@ class ReportModal extends Component {
 										<strong>Employee Name:</strong> {report.full_name}
 									</div>
 								)}
+                                <div className="col-md-12 mb-2">
+									<div className="multiline-text">
+										<strong>Description</strong> <br />
+										{report.report}
+									</div>
+								</div>
 								<div className="col-md-12 mb-2">
 									<strong>Start Time:</strong> {this.formatDateTimeAMPM(report.start_time)}
 								</div>
@@ -75,12 +81,6 @@ class ReportModal extends Component {
 								</div>
 								<div className="col-md-12 mb-2">
 									<strong>Total Hours:</strong> {report.todays_total_hours?.slice(0, 5)}
-								</div>
-								<div className="col-md-12 mb-2">
-									<div className="multiline-text">
-										<strong>Description</strong> <br />
-										{report.report}
-									</div>
 								</div>
 							</div>
 						</div>
