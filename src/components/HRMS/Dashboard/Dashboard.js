@@ -146,26 +146,6 @@ class Dashboard extends Component {
 									<div className="col-6 col-md-4 col-xl-1_7">
 										<div className="card">
 											<div className="card-body">
-												<Link to="/hr-payroll" className="my_sort_cut text-muted">
-													<i className="icon-credit-card" />
-													<span>Payroll</span>
-												</Link>
-											</div>
-										</div>
-									</div>
-									<div className="col-6 col-md-4 col-xl-1_7">
-										<div className="card">
-											<div className="card-body">
-												<Link to="/hr-accounts" className="my_sort_cut text-muted">
-													<i className="icon-calculator" />
-													<span>Accounts</span>
-												</Link>
-											</div>
-										</div>
-									</div>
-									<div className="col-6 col-md-4 col-xl-1_7">
-										<div className="card">
-											<div className="card-body">
 												<Link to="/hr-report" className="my_sort_cut text-muted">
 													<i className="icon-pie-chart" />
 													<span>Report</span>
