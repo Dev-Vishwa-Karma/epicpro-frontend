@@ -151,7 +151,6 @@ class Menu extends Component {
 		this.props.boxLayoutAction(e.target.checked)
 	}
 	toggleLeftMenu(e) {
-		console.log(e, 'asdasdada')
 		this.props.toggleLeftMenuAction(e)
 	}
 	toggleRightSidebar() {

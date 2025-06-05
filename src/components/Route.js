@@ -14,6 +14,7 @@ import Report from './HRMS/Report/Report';
 import Accounts from './HRMS/Accounts/Accounts';
 import Gallery from './HRMS/Gallery/Gallery';
 import SaturdaySettings from './HRMS/SaturdaySettings/SaturdaySettings';
+import Statistics from './HRMS/Statistics/Statistics';
 
 // import ProjectDashboard from './Project/Dashboard/Dashboard';
 import ProjectList from './Project/ProjectList/Projectlist';
@@ -139,6 +140,13 @@ const Routes = [
         exact: true,
         pageTitle: "Saturday Settings",
         component: SaturdaySettings
+    },
+    {
+        path: "/statistics",
+        name: 'Statistics',
+        exact: true,
+        pageTitle: "Statistics",
+        component: Statistics
     },
     // add new routes here
 
