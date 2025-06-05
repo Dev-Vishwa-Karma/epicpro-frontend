@@ -226,6 +226,7 @@ class Users extends Component {
         updateProfileData.append('last_name', selectedUser.last_name);
         updateProfileData.append('email', selectedUser.email);
         updateProfileData.append('selected_role', selectedUser.role);
+		updateProfileData.append('dob', selectedUser.dob);
         updateProfileData.append('department_id', selectedUser.department_id);
         updateProfileData.append('logged_in_employee_id', logged_in_employee_id);
         updateProfileData.append('logged_in_employee_role', logged_in_employee_role);
@@ -1019,6 +1020,19 @@ class Users extends Component {
 															value={selectedUser?.email || ""} 
 															onChange={this.handleInputChangeForEditUser}
                                                             name="email"
+														/>
+													</div>
+												</div>
+												<div className="col-md-12">
+													<div className="form-group">
+														<label className="form-label">Date of Birth</label>
+														<input
+															type="date"
+															className="form-control"
+															value={selectedUser?.dob || ""} 
+															onChange={this.handleInputChangeForEditUser}
+                                                            name="dob"
+                                                            max={new Date().toISOString().split("T")[0]}
 														/>
 													</div>
 												</div>
