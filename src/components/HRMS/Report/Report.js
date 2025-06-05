@@ -318,9 +318,7 @@ class Report extends Component {
 
     // Handle dropdown change for employee
     handleEmployeeChange = (event) => {
-        this.setState({ selectedReportEmployee: event.target.value }, () => {
-            this.fetchReports();
-        });
+        this.setState({ selectedReportEmployee: event.target.value });
     };
 
     // Handle dropdown change
@@ -774,25 +772,21 @@ class Report extends Component {
     handleDateChange = (date, type) => {
         const { fromDate, toDate } = this.state;
         if (date) {
-            // Ensure the date is set to start of day for fromDate and end of day for toDate
             const newDate = new Date(date);
             if (type === 'fromDate') {
-                this.setState({ fromDate: newDate }, () => {
-                    this.fetchReports();
-                });
+                this.setState({ fromDate: newDate });
                
             } else if (type === 'toDate') {
-                this.setState({ toDate: newDate }, () => {
-                    this.fetchReports();
-                });
+                this.setState({ toDate: newDate });
             }
          
         } else {
-            // Handle null date (when date is cleared)
-            this.setState({ [type]: null }, () => {
-                this.fetchReports();
-            });
+            this.setState({ [type]: null });
         }
+    };
+
+    handleApplyFilters = () => {
+        this.fetchReports();
     };
 
     resetFilters = () => {
@@ -884,69 +878,68 @@ class Report extends Component {
                             <div className="tab-content mt-3">
                                 <div className="tab-pane fade show active" id="Report-Invoices" role="tabpanel">
                                     <div className="card">
-                                        {/* Add date range filters */}
-                                        {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
                                         <div className="card-header">
-                                            <div className="row">
-                                                <div className="col-md-3">
-                                                    <div className="form-group">
-                                                        <label className="form-label">From Date</label>
-                                                        <DatePicker
-                                                            selected={fromDate}
-                                                            onChange={(date) => this.handleDateChange(date, 'fromDate')}
-                                                            className="form-control"
-                                                            dateFormat="yyyy-MM-dd"
-                                                            placeholderText="From Date"
-                                                            maxDate={new Date()}
-                                                        />
+                                                <div className="row">
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">From Date</label>
+                                                            <DatePicker
+                                                                selected={fromDate}
+                                                                onChange={(date) => this.handleDateChange(date, 'fromDate')}
+                                                                className="form-control"
+                                                                dateFormat="yyyy-MM-dd"
+                                                                placeholderText="From Date"
+                                                                maxDate={new Date()}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="col-md-3">
-                                                    <div className="form-group">
-                                                        <label className="form-label">To Date</label>
-                                                        <DatePicker
-                                                            selected={toDate}
-                                                            onChange={(date) => this.handleDateChange(date, 'toDate')}
-                                                            className="form-control"
-                                                            dateFormat="yyyy-MM-dd"
-                                                            placeholderText="To Date"
-                                                            minDate={fromDate}
-                                                            maxDate={new Date()}
-                                                        />
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">To Date</label>
+                                                            <DatePicker
+                                                                selected={toDate}
+                                                                onChange={(date) => this.handleDateChange(date, 'toDate')}
+                                                                className="form-control"
+                                                                dateFormat="yyyy-MM-dd"
+                                                                placeholderText="To Date"
+                                                                minDate={fromDate}
+                                                                maxDate={new Date()}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="col-md-3">
-                                                    <div className="form-group">
-                                                        <label className="form-label">Select Employee</label>
-                                                        <select 
-                                                            className="form-control" 
-                                                            value={selectedReportEmployee} 
-                                                            onChange={this.handleEmployeeChange}
-                                                        >
-                                                            <option value="">All Employees</option>
-                                                            {employeeData.map((employee) => (
-                                                                <option key={employee.id} value={employee.id}>
-                                                                    {employee.first_name} {employee.last_name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div className="col-md-3">
-                                                    <div className="form-group">
-                                                        <label className="form-label">&nbsp;</label>
-                                                        <button 
-                                                            type="button" 
-                                                            className="btn btn-primary btn-block"
-                                                            onClick={this.resetFilters}
-                                                        >
-                                                            <i className="fa fa-refresh mr-2"></i>Reset Filters
-                                                        </button>
+                                                    {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Select Employee</label>
+                                                            <select 
+                                                                className="form-control" 
+                                                                value={selectedReportEmployee} 
+                                                                onChange={this.handleEmployeeChange}
+                                                            >
+                                                                <option value="">All Employees</option>
+                                                                {employeeData.map((employee) => (
+                                                                    <option key={employee.id} value={employee.id}>
+                                                                        {employee.first_name} {employee.last_name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div> 
+                                                    )}
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">&nbsp;</label>
+                                                            <button 
+                                                                type="button" 
+                                                                className="btn btn-primary btn-block"
+                                                                onClick={this.handleApplyFilters}
+                                                            >
+                                                                Apply
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        )}
 
                                         {/* Display activity success message outside the modal */}
                                         {reportSuccess && (
@@ -1177,11 +1170,6 @@ class Report extends Component {
                                                             <label className="form-label" htmlFor="break_duration_in_minutes">Break duration in minutes</label>
                                                             <input
                                                             type="number"
-                                                            min="0"
-                                                            className={`form-control ${this.state.error.break_duration_in_minutes ? "is-invalid" : ""}`}
-                                                            name="break_duration_in_minutes"
-                                                            id="break_duration_in_minutes"
-                                                            placeholder="Add break duration in minutes"
                                                             value={break_duration_in_minutes || 0}
                                                             onChange={(e) => this.handleChange('break_duration_in_minutes', e.target.value)}
                                                             />

@@ -88,8 +88,8 @@ div.rtl{
 
 @media (min-width: 1200px) { 
     .col-xl-1_7 {
-        flex: 0 0 14.2857%;
-        max-width: 14.2857%;
+        flex: 0 0 19.8000%;
+        max-width: 19.8000%;
     }
 }
 
@@ -171,7 +171,6 @@ div.rtl{
 }
 
 .fc .leave-event {
-    background-color: rgba(214, 1, 1, 0.2);
     opacity: 0.7;
     text-align: center !important;
 }
@@ -190,11 +189,13 @@ div.rtl{
 }
 
 .office-closure-event {
-    background-color: #fff !important;
+    /* background-color: #fff !important;
     border-color: #fff !important; 
-    color: #fff !important; 
+    color: #fff !important;  */
     font-weight: bold;
 }
 
 
-
+.alternate-saturday-closure{
+    background-color: chocolate !important;
+}

@@ -8,7 +8,7 @@ class Fullcalender extends Component {
         this.state = {}
     }
     render() {
-        const {events, defaultDate, leaveDatesSet} = this.props;
+        const {events, defaultDate} = this.props;
         return (
             
             <div id="example-component">
@@ -26,14 +26,6 @@ class Fullcalender extends Component {
                     eventLimit={true}
                     events={events}
                     eventClick={this.props.eventClick}
-                    // HERE: highlight leave days
-                    dayRender={(date, cell) => {
-                        const dateStr = date.format('YYYY-MM-DD');
-                        if (leaveDatesSet && leaveDatesSet.has(dateStr)) {
-                            cell.css('background-color', 'red');
-                            cell.css('color', 'white');
-                        }
-                    }}
                 />
             </div>
         );
