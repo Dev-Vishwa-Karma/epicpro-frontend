@@ -471,7 +471,6 @@ class Statistics extends Component {
                       const halfLeaves = halfLeaveCounts[emp.id] || 0;
                       const extraWorkCounts = extraWorkingCounts[emp.id] || 0;
                       const deduction =  (extraWorkCounts + 1) - (fullLeaves + halfLeaves);
-                      // console.log('deduction',deduction,fullLeaves,halfLeaves,extraWorkCounts,emp.id)
                       const salaryDays = deduction + 30;
                       return (
                         <td key={emp.id}>{salaryDays}</td>
