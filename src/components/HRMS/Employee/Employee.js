@@ -89,6 +89,7 @@ class Employee extends Component {
 			showError: false,
 			errorMessage: '',
 			addLeaveErrors: {},
+			selectedLeaveEmployeeId: '',
 		};
 	}
 	handleStatistics(e) {
@@ -694,6 +695,20 @@ class Employee extends Component {
 		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
 		const leaveList = (employeeLeavesData || []).length > 0 ? employeeLeavesData : [];
 
+		// Filter leaves
+		const filteredLeaveList = (this.state.selectedLeaveEmployeeId
+			? leaveList.filter(l => String(l.employee_id) === String(this.state.selectedLeaveEmployeeId))
+			: leaveList
+		).slice().sort((a, b) => {
+			//Descending Order
+			const dateA = new Date(a.from_date);
+			const dateB = new Date(b.from_date);
+			if (!isNaN(dateA) && !isNaN(dateB)) {
+				return dateB - dateA;
+			}
+			return (b.id || 0) - (a.id || 0);
+		});
+
 		// Pagination Logic for Employees
 		const indexOfLastEmployee = this.state.currentPageEmployees * dataPerPage;
 		const indexOfFirstEmployee = indexOfLastEmployee - dataPerPage;
@@ -703,8 +718,8 @@ class Employee extends Component {
 		// Pagination logic for employee leaves
 		const indexOfLastLeave = this.state.currentPageLeaves * dataPerPage;
 		const indexOfFirstLeave = indexOfLastLeave - dataPerPage;
-		const currentEmployeeLeaves = leaveList.slice(indexOfFirstLeave, indexOfLastLeave);
-		const totalPagesLeaves = Math.ceil(leaveList.length / dataPerPage);
+		const currentEmployeeLeaves = filteredLeaveList.slice(indexOfFirstLeave, indexOfLastLeave);
+		const totalPagesLeaves = Math.ceil(filteredLeaveList.length / dataPerPage);
 
 
 		return (
@@ -911,6 +926,24 @@ class Employee extends Component {
 										<div className="card">
 											<div className="card-header">
 												<h3 className="card-title">Leave List</h3>
+												{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
+													<div style={{ marginLeft: 'auto', minWidth: 220 }}>
+														<select
+															className="form-control"
+															value={this.state.selectedLeaveEmployeeId || ''}
+															onChange={e => {
+																this.setState({ selectedLeaveEmployeeId: e.target.value, currentPageLeaves: 1 });
+															}}
+														>
+															<option value="">All Employees</option>
+															{this.state.employeeData.map(emp => (
+																<option key={emp.id} value={emp.id}>
+																	{emp.first_name} {emp.last_name}
+																</option>
+															))}
+														</select>
+													</div>
+												)}
 											</div>
 											<div className="card-body">
 												{loading ? (
@@ -975,7 +1008,7 @@ class Employee extends Component {
 																					? 'tag-warning'
 																					: 'tag-danger'
 																					}`}>
-																						{leave.status}
+																					{leave.status}
 																				</span>
 																			</td>
 																			<td>
