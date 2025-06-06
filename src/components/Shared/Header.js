@@ -728,16 +728,19 @@ class Header extends Component {
 												<i className="dropdown-icon fe fe-activity" /> Timeline
 											</NavLink>
 
-											<NavLink
-												to={{
-													pathname: "/saturday-settings",
-													state: { employee: user, employeeId: userId, tab: "saturday-settings" }
-												}}
-												className={`dropdown-item ${currentTab === "saturday-settings" ? "active" : ""}`}
-												isActive={(match, location) => location?.state?.tab === "saturday-settings"}
-											>
-												<i className="dropdown-icon fe fe-sun" /> Saturday Settings
-											</NavLink>
+											{(userRole === 'admin' || userRole === 'super_admin') && (
+												<NavLink
+													to={{
+														pathname: "/saturday-settings",
+														state: { employee: user, employeeId: userId, tab: "saturday-settings" }
+													}}
+													className={`dropdown-item ${currentTab === "saturday-settings" ? "active" : ""}`}
+													isActive={(match, location) => location?.state?.tab === "saturday-settings"}
+												>
+													<i className="dropdown-icon fe fe-sun" /> Saturday Settings
+												</NavLink>
+											)}
+
 											{/* <a className="dropdown-item" >
 												<i className="dropdown-icon fe fe-settings" /> Settings
 											</a>

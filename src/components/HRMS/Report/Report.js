@@ -12,7 +12,7 @@ class Report extends Component {
             selectedModalReport:[],
             selectedReport: null,
             isModalOpen: false,
-            selectedReportEmployee:"",
+            selectedReportEmployee: (window.user.role === 'admin' || window.user.role === 'super_admin') ? "" : window.user.id,
             selectedEmployee: "",
             employeeData: [],
             selectedStatus: "",
@@ -789,20 +789,6 @@ class Report extends Component {
         this.fetchReports();
     };
 
-    resetFilters = () => {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0); // Set to start of day
-        
-        this.setState({
-            fromDate: yesterday,
-            toDate: yesterday,
-            selectedReportEmployee: "",
-            loading: true
-        }, () => {
-            this.fetchReports();
-        });
-    };
 
     render() {
         const { fixNavbar } = this.props;
