@@ -41,7 +41,8 @@ class Events extends Component {
 	  allEvents: [],
       showReportModal: false,
       selectedReport: null,
-    };
+	};
+		localStorage.removeItem('empId');
   }
 
 	componentDidMount() {
@@ -111,8 +112,8 @@ class Events extends Component {
 			});
 		
 
-
-		this.fetchWorkingHoursReports(id);
+		
+		this.fetchWorkingHoursReports(null);
 		// Fetch leave data for the current year
 		const start_date = `${this.state.selectedYear}-01-01`;
 		const end_date = `${this.state.selectedYear}-12-31`;     
@@ -121,7 +122,7 @@ class Events extends Component {
 
 	fetchWorkingHoursReports = (employeeId) => {
 			if (!employeeId) {
-				employeeId = this.state.employee_id;
+				employeeId = localStorage.getItem('empId');
 			}
 			let startDate = localStorage.getItem('startDate');
 			let endDate = localStorage.getItem('endDate');
@@ -1219,7 +1220,7 @@ formatDateTimeAMPM = (timeString) => {
 													const start_date = `${selectedYear}-01-01`;
 													const end_date = `${selectedYear}-12-31`;
 													this.fetchLeaveData(empId, start_date, end_date);
-													localStorage.setItem('employeeId', empId)
+													localStorage.setItem('empId', empId)
 													this.fetchWorkingHoursReports(empId);
 													// After fetching, update allEvents for the selected employee
 													setTimeout(() => {
