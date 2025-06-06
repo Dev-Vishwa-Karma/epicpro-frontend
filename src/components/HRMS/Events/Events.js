@@ -40,7 +40,7 @@ class Events extends Component {
       leaveData: [],
 	  allEvents: [],
       showReportModal: false,
-      selectedReport: null
+      selectedReport: null,
     };
   }
 
@@ -111,6 +111,7 @@ class Events extends Component {
 			});
 		
 
+
 		this.fetchWorkingHoursReports(id);
 		// Fetch leave data for the current year
 		const start_date = `${this.state.selectedYear}-01-01`;
@@ -118,9 +119,33 @@ class Events extends Component {
 		this.fetchLeaveData(id, start_date, end_date);
 	}
 
-  	fetchWorkingHoursReports = (employeeId) => {
+	fetchWorkingHoursReports = (employeeId) => {
+			if (!employeeId) {
+				employeeId = this.state.employee_id;
+			}
+			let startDate = localStorage.getItem('startDate');
+			let endDate = localStorage.getItem('endDate');
+
+			if (!startDate || !endDate) {
+			const now = new Date();
+
+				// First day of the current month
+				const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+
+				// Last day of the current month
+				const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+
+				// Format as YYYY-MM-DD
+				const formatDate = (date) =>
+					date.toISOString().split('T')[0];
+
+				startDate = formatDate(firstDay);
+				endDate = formatDate(lastDay);
+			}
+
 		fetch(
-		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}`,
+			
+		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
 		{
 			method: "GET",
 		}
@@ -475,12 +500,12 @@ class Events extends Component {
 		const start = new Date(leave.from_date);
 		const end = new Date(leave.to_date);
 			if (end >= today) {
-			const loopStart = start < today ? new Date(today) : new Date(start);
+				const loopStart = start < today ? new Date(today) : new Date(start);
 			 	for (let d = new Date(loopStart); d <= end; d.setDate(d.getDate() + 1)) {
 					if (d >= today) {
 					if (leave.is_half_day === "1") {
 				events.push({
-					title: leave.reason,
+					title: '',
 					start: d.toISOString().split("T")[0],
 					className: "half-day-leave-event",
 					allDay: true,
@@ -488,7 +513,7 @@ class Events extends Component {
 				});
 			} else {
 				events.push({
-					title: leave.reason,
+					title: '',
 					start: d.toISOString().split("T")[0],
 					className: "leave-event",
 					allDay: true,
@@ -600,7 +625,6 @@ fetchEvents = (birthdayEvents) => {
 				events: filteredEvents,
 				loading: false
 			}, () => {
-				//console.log('Updated state with events:', this.state.events); // Debug log
 			});
 		} else {
 			this.setState({ message: data.message, loading: false });
@@ -622,6 +646,7 @@ handleReportClick = (report) => {
             errorMessage: 'No report data available',
             showError: true
         });
+		
         setTimeout(() => this.setState({ showError: false, errorMessage: '' }), 3000);
         return;
     }
@@ -690,7 +715,10 @@ formatDateTimeAMPM = (timeString) => {
 		const currentDate = new Date();
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth() + 1;
-        const defaultDate = `${selectedYear}-${String(currentMonth).padStart(2, '0')}-01`;
+		const defaultDate = localStorage.getItem('startDate') ??
+			`${selectedYear}-${String(currentMonth).padStart(2, '0')}-01`;
+		const defaultView = localStorage.getItem('defaultView') ?? 'month';
+
         const startYear = currentYear - 1;
         const endYear = currentYear + 10;
 		
@@ -788,7 +816,7 @@ formatDateTimeAMPM = (timeString) => {
 					newEventDate.setFullYear(year);
 		
 					formattedEventForAllYears.push({
-						title: event.event_name,
+						title: '',
 						start: newEventDate.toISOString().split('T')[0],
 						className: 'blue-event'
 					});
@@ -799,7 +827,7 @@ formatDateTimeAMPM = (timeString) => {
 		
 			if (event.event_type === 'holiday') {
 				return {
-					title: event.event_name,
+					title: '',
 					start: event.event_date,
 					className: 'red-event'
 				};
@@ -807,7 +835,7 @@ formatDateTimeAMPM = (timeString) => {
 
 			if (event.event_type === 'birthday') {
 				return {
-					title: `${event.event_name}`,
+					title: ``,
 					start: event.event_date,
 					className: 'green-event'
 				};
@@ -837,30 +865,27 @@ formatDateTimeAMPM = (timeString) => {
 		 //Add new changes and create new functions
          //add this function for calculate totalworking hour or coloring according to  workinh hours
         const workingHoursEvents = workingHoursReports.map((report) => {
-            console.log('Creating event for report:', report); 
             const hoursStr = report.todays_working_hours?.slice(0, 5);
             const hours = parseFloat(hoursStr);
 
-            let backgroundColor = "#4ee44e";
-            if (hours < 4) backgroundColor = "#D6010133";
-            else if (hours < 8) backgroundColor = "#87ceeb";
+            let className = "daily-report";
+			if (hours < 4) className = "red-event";
+			else if (hours >= 4  && hours < 8) className = "half-day-leave-event";
+				
+            // else if (hours < 8) backgroundColor = "#87ceeb";
 
             const event = {
                 id: report.id,
                 title: `${hoursStr}`,
                 start: report.created_at?.split(" ")[0],
                 display: "background",
-                borderColor: backgroundColor,
-                backgroundColor: backgroundColor,
                 allDay: true,
-                className: "daily-report"
+                className: className
             };
-            console.log('Created event:', event);
             return event;
         });
 
         // Debug log for all events
-        console.log('All working hours events:', workingHoursEvents);
 
 		const officeClosures = [];
 		const startDate = new Date(selectedYear, 0, 1);
@@ -1194,6 +1219,7 @@ formatDateTimeAMPM = (timeString) => {
 													const start_date = `${selectedYear}-01-01`;
 													const end_date = `${selectedYear}-12-31`;
 													this.fetchLeaveData(empId, start_date, end_date);
+													localStorage.setItem('employeeId', empId)
 													this.fetchWorkingHoursReports(empId);
 													// After fetching, update allEvents for the selected employee
 													setTimeout(() => {
@@ -1222,6 +1248,8 @@ formatDateTimeAMPM = (timeString) => {
 											<Fullcalender 
 												events={this.state.allEvents} 
 												defaultDate={defaultDate}
+												defaultView={defaultView}
+												onAction={this.fetchWorkingHoursReports}
 												dayCellClassNames={(arg) => {
 													const dateStr = arg.date.toISOString().split("T")[0];
 													const today = new Date();
@@ -1248,15 +1276,13 @@ formatDateTimeAMPM = (timeString) => {
 													return "";
 												}}
 												eventClick={(info) => {
-													console.log('Event info received:', info);
-													// The event data is directly in the info object
+													// The event data is directly in the info
 													const eventData = info;
 													// Try to find the corresponding report in workingHoursReports
 													const report = this.state.workingHoursReports.find(r => 
 														r.id === eventData.id || 
 														r.created_at?.split(" ")[0] === eventData.start?.format('YYYY-MM-DD')
 													);
-													console.log('Found report:', report);
 													if (report) {
 														this.handleReportClick(report);
 													} else {
