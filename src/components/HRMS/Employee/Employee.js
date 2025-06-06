@@ -1098,7 +1098,6 @@ class Employee extends Component {
 												name='from_date'
 												value={this.state.from_date}
 												onChange={this.handleInputChangeForAddLeaves}
-												min={new Date().toISOString().split("T")[0]}
 											/>
 											{this.state.addLeaveErrors.from_date && (
   											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>

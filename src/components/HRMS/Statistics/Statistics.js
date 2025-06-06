@@ -51,7 +51,13 @@ class Statistics extends Component {
   }
 
   getReports = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=view`)
+    const { selectedYear, selectedMonth } = this.state;
+    const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
+    const lastDay = new Date(selectedYear, selectedMonth, 0);
+    const fromDate = firstDay.toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
+    const toDate = lastDay.toISOString().split('T')[0]; 
+
+    fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=view&from_date=${fromDate}&to_date=${toDate}`)
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
@@ -139,7 +145,11 @@ class Statistics extends Component {
 
   handleMonthChange = (e) => {
     const month = parseInt(e.target.value);
-    this.setState({ selectedMonth: month }, this.getAlternateSaturdays);
+    
+    this.setState({ selectedMonth: month }, () => {
+      this.getAlternateSaturdays();  
+      this.getReports();
+    });
   };
 
   getAllDatesOfMonth = (year, month) => {
@@ -334,6 +344,12 @@ class Statistics extends Component {
                   ))}
                 </select>
               </div>
+
+              <div className="ml-auto">
+                <span style={{ backgroundColor: "#ff0000", color: "#fff", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Leave</span>
+                <span style={{ backgroundColor: "#00ffff", color: "#000", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Half day</span>
+                <span style={{ backgroundColor: "#28a745", color: "#000", padding: "4px 8px", borderRadius: "4px" }}>Extra working</span>
+              </div>
             </div>
   
             {/* Table */}
@@ -421,6 +437,13 @@ class Statistics extends Component {
                           let splitValue = dayAttendance[employee.id] || "";
                           if (splitValue && splitValue.split(":").length === 3) {
                             splitValue = splitValue.split(":").slice(0, 2).join(":");
+                            
+                            // Remove the leading 0 from the hour part (if it exists)
+                            let parts = splitValue.split(":");
+                            if (parts[0].startsWith('0')) {
+                              parts[0] = parts[0].slice(1); 
+                            }
+                            splitValue = parts.join(":");
                           }
                          
                           return (
@@ -490,13 +513,6 @@ class Statistics extends Component {
                   </tr>
                 </tbody>
               </table>
-            </div>
-  
-            {/* Legend */}
-            <div className="mt-3">
-              <span style={{ backgroundColor: "#ff0000", color: "#fff", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Leave</span>
-              <span style={{ backgroundColor: "#00ffff", color: "#000", padding: "4px 8px", borderRadius: "4px", marginRight: "10px"}}>Half day</span>
-              <span style={{ backgroundColor: "#28a745", color: "#000", padding: "4px 8px", borderRadius: "4px" }}>Extra working</span>
             </div>
   
           </div>
