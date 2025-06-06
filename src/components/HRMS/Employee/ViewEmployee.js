@@ -179,12 +179,11 @@ class ViewEmployee extends Component {
 
                 for (let date = from.clone(); date.isSameOrBefore(to); date.add(1, 'days')) {
                     days.push({
-                        title: leave.reason || "Leave",
-                        start: date.format('YYYY-MM-DD'),
-                        backgroundColor: 'rgba(214, 1, 1, 0.2)',
-                        borderColor: 'rgba(214, 1, 1, 0.2)',
-                        textColor: 'black',
-                        className: 'leave-event-calender',
+                      start: date.format("YYYY-MM-DD"),
+                      backgroundColor: "red",
+                      borderColor: "red",
+                      textColor: "black",
+                      className: "leave-event-calender",
                     });
                 }
 
@@ -204,7 +203,6 @@ class ViewEmployee extends Component {
                  // The current logic marks all Mondays and alternate Sundays as office closures.
                 officeClosures.push({
                     start: new Date(d).toISOString().split("T")[0],
-                    // title: "Office Off",
                     event_type: "office-close",
                     backgroundColor: '#e9ecef',
                     borderColor: '#e9ecef',

@@ -151,7 +151,6 @@ class Menu extends Component {
 		this.props.boxLayoutAction(e.target.checked)
 	}
 	toggleLeftMenu(e) {
-		console.log(e, 'asdasdada')
 		this.props.toggleLeftMenuAction(e)
 	}
 	toggleRightSidebar() {
@@ -397,19 +396,18 @@ class Menu extends Component {
 						hrmsSection.content.splice(activitiesIndex + 1, 0, activities);
 					}
 
-					// Add the "Employee" item to the HRMS section after the department item
-					const saturdaySettings = {
-						"id": 30,
-						"label": "Saturday Settings",
-						"to": "/saturday-settings"
+					const statistics = {
+						"id": 31,
+						"label": "Statistics",
+						"to": "/statistics"
 					};
 
 					// Find the index of "Department" (id: 5)
-					const saturdaySettingsIndex = hrmsSection.content.findIndex(item => item.id === 6);
+					const statisticsIndex = hrmsSection.content.findIndex(item => item.id === 6);
 
-					if (saturdaySettingsIndex !== -1) {
+					if (statisticsIndex !== -1) {
 						// Insert "Employee" before "Activities"
-						hrmsSection.content.splice(saturdaySettingsIndex + 1, 0, saturdaySettings);
+						hrmsSection.content.splice(statisticsIndex + 1, 0, statistics);
 					}
 
 
