@@ -16,7 +16,8 @@ class Statistics extends Component {
       reportsData: [],
       leavesData: [],
       alternateSaturdayData: [],
-      holidaysData:[]
+      holidaysData:[],
+      isLoading: true
     };
   }
 
@@ -39,13 +40,13 @@ class Statistics extends Component {
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          this.setState({ employeesData: data.data });
+          this.setState({ employeesData: data.data, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch employees data' });
+        this.setState({ error: 'Failed to fetch employees data', isLoading: false });
         console.error(err);
       });
   }
@@ -61,13 +62,13 @@ class Statistics extends Component {
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          this.setState({ reportsData: data.data });
+          this.setState({ reportsData: data.data, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch reports data' });
+        this.setState({ error: 'Failed to fetch reports data', isLoading: false });
         console.error(err);
       });
   }
@@ -77,13 +78,13 @@ class Statistics extends Component {
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          this.setState({ leavesData: data.data });
+          this.setState({ leavesData: data.data, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch leaves data' });
+        this.setState({ error: 'Failed to fetch leaves data',isLoading: false });
         console.error(err);
       });
   }
@@ -122,18 +123,19 @@ class Statistics extends Component {
   };
 
   getHolidays = () => {
+    this.setState({ isLoading: true })
     fetch(`${process.env.REACT_APP_API_URL}/events.php?action=view&event_type=holiday`)
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
           const holidayDates = data.data.map(item => item.event_date); // Using 'event_date' field directly
-          this.setState({ holidaysData: holidayDates });
+          this.setState({ holidaysData: holidayDates, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch holidays data' });
+        this.setState({ error: 'Failed to fetch holidays data', isLoading: false });
         console.error(err);
       });
   };
@@ -306,7 +308,7 @@ class Statistics extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { selectedYear, selectedMonth, employeesData, leavesData, alternateSaturdayData, holidaysData } = this.state;
+    const { selectedYear, selectedMonth, employeesData, leavesData, alternateSaturdayData, holidaysData, isLoading} = this.state;
     const monthDays = this.getAllDatesOfMonth(selectedYear, selectedMonth);
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
@@ -350,9 +352,13 @@ class Statistics extends Component {
                 <span style={{ backgroundColor: "#00ffff", color: "#000", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Half day</span>
                 <span style={{ backgroundColor: "#28a745", color: "#000", padding: "4px 8px", borderRadius: "4px" }}>Extra working</span>
               </div>
+            </div>  
+
+            {isLoading ? (
+            <div className="dimmer active p-5">
+              <div className="loader" />
             </div>
-  
-            {/* Table */}
+							) : (
             <div style={{ overflowX: 'auto' }}>
               <table className="table table-bordered table-sm text-center" style={{ minWidth: '600px' }}>
                 <thead style={{backgroundColor: "#a2c4c9"}}>
@@ -513,7 +519,9 @@ class Statistics extends Component {
                   </tr>
                 </tbody>
               </table>
-            </div>
+              </div>
+            )}
+            
   
           </div>
         </div>
