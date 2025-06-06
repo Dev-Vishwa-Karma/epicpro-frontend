@@ -180,25 +180,31 @@ class Statistics extends Component {
 
   countLeavesPerEmployee = (leavesData, selectedYear, selectedMonth) => {
     const counts = {};
-   
+  
     leavesData.forEach((leave) => {
-      const { employee_id, from_date, to_date } = leave;
+      const { employee_id, from_date, to_date, is_half_day } = leave;
       const from = new Date(from_date);
       const to = new Date(to_date);
       const year = selectedYear;
       const month = selectedMonth;
-
+  
       let current = new Date(from);
       while (current <= to) {
         if (current.getFullYear() === year && current.getMonth() + 1 === month) {
-          counts[employee_id] = (counts[employee_id] || 0) + 1;
+          const dateKey = current.toISOString().split('T')[0]; // "YYYY-MM-DD"
+          if (is_half_day === "1" || is_half_day === 1) {
+            counts[employee_id] = (counts[employee_id] || 0) + 0.5;
+          } else {
+            counts[employee_id] = (counts[employee_id] || 0) + 1;
+          }
         }
         current.setDate(current.getDate() + 1);
       }
     });
-
+  
     return counts;
   };
+  
 
   calculateHalfLeaves = (attendanceByDate, employeesData, monthDays) => {
     const { holidaysData, alternateSaturdayData } = this.state;
@@ -364,11 +370,14 @@ class Statistics extends Component {
                           let hoursNumber = 0;
                           let cellStyle = {};
   
-                          const isOnLeave = leavesData.some((leave) =>
+                          const matchingLeave = leavesData.find((leave) =>
                             leave.employee_id === employee.id.toString() &&
                             day.key >= leave.from_date &&
                             day.key <= leave.to_date
                           );
+                          const isOnLeave = !!matchingLeave;
+                          const isHalfDayLeave = matchingLeave?.is_half_day === "1" || matchingLeave?.is_half_day === 1;
+                          
   
                           const workedOnSpecialDay = !isMissingReport && (
                               isSunday || isAlternateSaturday || isHoliday
@@ -397,9 +406,11 @@ class Statistics extends Component {
                             cellStyle = { backgroundColor: "#28a745", color: "#000" }; // Green for working on a special day
                           } else if (isOnLeave) {
                             if(!isMissingReport){
-                              leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) - 1;
+                              leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) - (isHalfDayLeave ? 0.5 : 1);
                             }else{
-                              cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Override red if it's a leave
+                              cellStyle = isHalfDayLeave
+                              ? { backgroundColor: "#00ffff", color: "#000" } // Cyan for half-day
+                              : { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
                             }
                           } else if (isMissingReport && !highlightRow && currentDate < today) {
                             // Missing report and it is not alternae sat,sun or hoilday
