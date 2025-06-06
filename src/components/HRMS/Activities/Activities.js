@@ -14,7 +14,8 @@ class Activities extends Component {
 			activitySuccess: null,
 			loading: true,
 			isBreakedIn: false,
-			breakOutError: null
+			breakOutError: null,
+			filterEmployeeId: "",
 		};
 	}
 
@@ -300,18 +301,48 @@ class Activities extends Component {
 										)}
 										<div className="card-header bline d-flex justify-content-between align-items-center">
 											<h3 className="card-title">Timeline Activity</h3>
-											{window.user && window.user.role !== 'employee' && (
-												<div>
-													<button style={{ float: "right" }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal"><i className="fe fe-plus mr-2" />Add</button>
-												</div>
-											)}
-											{window.user && window.user.role === 'employee' && (
-												<div>
-													<button style={{ float: "right" }} className="btn btn-primary" onClick={isBreakedIn ? this.handleBreakOut : this.handleBreakIn} data-toggle={isBreakedIn ? "" : "modal"} data-target={isBreakedIn ? "" : "#addBreakReasonModal"}>
-														{isBreakedIn ? 'Break Out' : 'Break In'}
+											<div className="d-flex align-items-center">
+												{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
+													<select
+														className="form-control mr-2"
+														style={{ minWidth: 200 }}
+														value={this.state.filterEmployeeId}
+														onChange={async (e) => {
+															const employeeId = e.target.value;
+															this.setState({ filterEmployeeId: employeeId, loading: true });
+															let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php`;
+															if (employeeId) {
+																apiUrl += `?user_id=${this.state.filterEmployeeId}`;
+															}
+															const res = await fetch(apiUrl);
+															const data = await res.json();
+															if (data.status === 'success') {
+																this.setState({ activities: data.data, loading: false });
+															} else {
+																this.setState({ activities: [], loading: false });
+															}
+														}}
+													>
+														<option value="">All Employees</option>
+														{this.state.employeeData.map(emp => (
+															<option key={emp.id} value={emp.id}>
+																{emp.first_name} {emp.last_name}
+															</option>
+														))}
+													</select>
+												)}
+												{/* Existing Add button */}
+												{window.user.role !== 'employee' && (
+													<button style={{ float: "right" }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal">
+														<i className="fe fe-plus mr-2" />Add
 													</button>
-												</div>
-											)}
+												)}
+												{window.user.role === 'employee' && (
+													<button style={{ float: "right" }} className="btn btn-primary" onClick={this.state.isBreakedIn ? this.handleBreakOut : this.handleBreakIn} data-toggle={this.state.isBreakedIn ? "" : "modal"} data-target={this.state.isBreakedIn ? "" : "#addBreakReasonModal"}>
+														{this.state.isBreakedIn ? 'Break Out' : 'Break In'}
+													</button>
+												)}
+											</div>
 										</div>
 										{loading ? (
 											<div className="dimmer active p-5">
@@ -319,8 +350,7 @@ class Activities extends Component {
 											</div>
 										) : (
 											<div className="card-body">
-												<div className="summernote">
-												</div>
+												<div className="summernote"></div>
 												{activities.length > 0 ? (
 													activities.map((activity, index) => (
 														<>
@@ -436,7 +466,7 @@ class Activities extends Component {
 														</>
 													))
 												) : (
-													error && <p>{error}</p>
+													<div className="text-center text-muted py-4">activities not found</div>
 												)}
 											</div>
 										)}

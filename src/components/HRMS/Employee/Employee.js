@@ -89,6 +89,8 @@ class Employee extends Component {
 			showError: false,
 			errorMessage: '',
 			addLeaveErrors: {},
+			selectedLeaveEmployeeId: '',
+			allEmployeesData: [],
 		};
 	}
 	handleStatistics(e) {
@@ -175,6 +177,7 @@ class Employee extends Component {
 	
 				this.setState({
 					employeeData: employeesArray,
+					allEmployeesData: employeesArray, //Save all employees (Working)
 					filterEmployeesData: employeesArray,
 					employeeLeavesData: employeesLeaveArray,
 					totalLeaves,
@@ -193,8 +196,39 @@ class Employee extends Component {
 			console.warn("window.user is undefined");
 		}
 	}
-		
 
+	fetchEmployeeAndLeavesById = (employeeId) => {
+		const apiUrl = process.env.REACT_APP_API_URL;
+		const leavesUrl = `${apiUrl}/employee_leaves.php?employee_id=${employeeId}`;
+		this.setState({ loading: true });
+
+		Promise.all([
+			fetch(leavesUrl, { method: "GET" }).then(res => res.json()),
+		])
+		.then(([employeeData, employeeLeavesData]) => {
+			let employeesArray = Array.isArray(employeeData.data) ? employeeData.data : [employeeData.data];
+			let employeesLeaveArray = Array.isArray(employeeLeavesData.data) ? employeeLeavesData.data : [employeeLeavesData.data];
+
+			const { totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, cancelledLeaves } = 
+				this.calculateLeaveCounts(employeesLeaveArray);
+
+			this.setState({
+				employeeData: employeesArray,
+				employeeLeavesData: employeesLeaveArray,
+				totalLeaves,
+				pendingLeaves,
+				approvedLeaves,
+				rejectedLeaves,
+				cancelledLeaves,
+				loading: false,
+			});
+		})
+		.catch(err => {
+			this.setState({ message: "Failed to fetch data", loading: false });
+			console.error(err);
+		});
+	};
+		
 	goToEditEmployee(employee, employeeId) {
 		// Fetch salary details based on employee_id
 		fetch(`${process.env.REACT_APP_API_URL}/employee_salary_details.php?action=view&employee_id=${employeeId}`,{
@@ -694,6 +728,20 @@ class Employee extends Component {
 		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
 		const leaveList = (employeeLeavesData || []).length > 0 ? employeeLeavesData : [];
 
+		// Filter leaves
+		const filteredLeaveList = (this.state.selectedLeaveEmployeeId
+			? leaveList.filter(l => l && String(l.employee_id) === String(this.state.selectedLeaveEmployeeId))
+			: leaveList.filter(l => l)
+		).slice().sort((a, b) => {
+			//Descending Order
+			const dateA = new Date(a.from_date);
+			const dateB = new Date(b.from_date);
+			if (!isNaN(dateA) && !isNaN(dateB)) {
+				return dateB - dateA;
+			}
+			return (b.id || 0) - (a.id || 0);
+		});
+
 		// Pagination Logic for Employees
 		const indexOfLastEmployee = this.state.currentPageEmployees * dataPerPage;
 		const indexOfFirstEmployee = indexOfLastEmployee - dataPerPage;
@@ -703,8 +751,8 @@ class Employee extends Component {
 		// Pagination logic for employee leaves
 		const indexOfLastLeave = this.state.currentPageLeaves * dataPerPage;
 		const indexOfFirstLeave = indexOfLastLeave - dataPerPage;
-		const currentEmployeeLeaves = leaveList.slice(indexOfFirstLeave, indexOfLastLeave);
-		const totalPagesLeaves = Math.ceil(leaveList.length / dataPerPage);
+		const currentEmployeeLeaves = filteredLeaveList.slice(indexOfFirstLeave, indexOfLastLeave);
+		const totalPagesLeaves = Math.ceil(filteredLeaveList.length / dataPerPage);
 
 
 		return (
@@ -911,6 +959,31 @@ class Employee extends Component {
 										<div className="card">
 											<div className="card-header">
 												<h3 className="card-title">Leave List</h3>
+												{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
+													<div style={{ marginLeft: 'auto', minWidth: 220 }}>
+														<select
+															className="form-control"
+															value={this.state.selectedLeaveEmployeeId || ''}
+															onChange={e => {
+																const selectedId = e.target.value;
+																this.setState({ selectedLeaveEmployeeId: selectedId, currentPageLeaves: 1 }, () => {
+																	if (selectedId) {
+																		this.fetchEmployeeAndLeavesById(this.state.selectedLeaveEmployeeId);
+																	} else {
+																		this.componentDidMount(); //Add Componentdidmount to reload all employees and leaves
+																	}
+																});
+															}}
+														>
+															<option value="">All Employees</option>
+															{this.state.allEmployeesData.map(emp => (
+																<option key={emp.id} value={emp.id}>
+																	{emp.first_name} {emp.last_name}
+																</option>
+															))}
+														</select>
+													</div>
+												)}
 											</div>
 											<div className="card-body">
 												{loading ? (
@@ -934,7 +1007,7 @@ class Employee extends Component {
 															</thead>
 															<tbody>
 																{currentEmployeeLeaves.length > 0 ? (
-																	currentEmployeeLeaves.map((leave, index) => (
+																	currentEmployeeLeaves.filter(l => l).map((leave, index) => (
 																		<tr key={index}>
 																			<td className="width45">
 																				<span
@@ -975,7 +1048,7 @@ class Employee extends Component {
 																					? 'tag-warning'
 																					: 'tag-danger'
 																					}`}>
-																						{leave.status}
+																					{leave.status}
 																				</span>
 																			</td>
 																			<td>
@@ -1003,8 +1076,10 @@ class Employee extends Component {
 																			</td>
 																		</tr>
 																	))
-																): (
-																	!message && <tr><td>No leaves found</td></tr>
+																) : (
+																	<tr>
+                                                                        <td colSpan={6} className="text-center">No leaves found</td>
+                                                                    </tr>
 																)}
 															</tbody>
 														</table>
