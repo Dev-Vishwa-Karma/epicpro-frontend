@@ -77,6 +77,7 @@ class ViewEmployee extends Component {
             this.fetchEmployeeDetails(employeeId);
         }
         this.loadEmployeeData();
+        this.fetchWorkingHoursReports(null);
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -153,18 +154,16 @@ class ViewEmployee extends Component {
             const hoursStr = report.todays_working_hours?.slice(0, 5);
             const hours = parseFloat(hoursStr);
 
-            let backgroundColor = "#4ee44e"; // Default green for >= 8 hours
-            if (hours < 4) backgroundColor = "#D6010133"; // Red for < 4 hours
-            else if (hours < 8) backgroundColor = "#87ceeb"; // Blue for < 8 hours
+            let className = "daily-report";
+			if (hours < 4) className = "red-event";
+			else if (hours >= 4  && hours < 8) className = "half-day-leave-event";
 
             return {
-                title: `${hoursStr} Hrs`, // Display hours
+                title: `${hoursStr}`, // Display hours
                 start: report.created_at?.split(" ")[0],
                 display: "background", // Render as background event
-                borderColor: backgroundColor,
-                backgroundColor: backgroundColor,
                 allDay: true,
-                className: "daily-report",
+                className: className, // Use the className based on hours
                 report: report // Store the full report object directly
             };
         }).flat();
@@ -204,10 +203,10 @@ class ViewEmployee extends Component {
                 officeClosures.push({
                     start: new Date(d).toISOString().split("T")[0],
                     event_type: "office-close",
-                    backgroundColor: '#e9ecef',
-                    borderColor: '#e9ecef',
+                    // backgroundColor: '#e9ecef',
+                    // borderColor: '#e9ecef',
                     allDay: true,
-                    display: 'background',
+                    // display: 'background',
                     className: "office-closure-event",
                 });
             }
@@ -372,9 +371,34 @@ class ViewEmployee extends Component {
             .catch((error) => console.error("Error fetching employee details:", error));
     };
 
+    
     fetchWorkingHoursReports = (employeeId) => {
+			if (!employeeId) {
+				employeeId = localStorage.getItem('empId');
+			}
+			let startDate = localStorage.getItem('startDate');
+			let endDate = localStorage.getItem('endDate');
+
+			if (!startDate || !endDate) {
+			const now = new Date();
+
+				// First day of the current month
+				const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+
+				// Last day of the current month
+				const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+
+				// Format as YYYY-MM-DD
+				const formatDate = (date) =>
+					date.toISOString().split('T')[0];
+
+				startDate = formatDate(firstDay);
+				endDate = formatDate(lastDay);
+			}
+
 		fetch(
-		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}`,
+			
+		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
 		{
 			method: "GET",
 		}
@@ -899,6 +923,25 @@ class ViewEmployee extends Component {
                                                     selectMirror={true}
                                                     dayMaxEvents={true}
                                                     eventDisplay="block"
+                                                    headerToolbar={{
+                                                        left: 'prev,next today',
+                                                        center: 'title',
+                                                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                                                    }}
+                                                    buttonText={{
+                                                        today: 'Today',
+                                                        month: 'Month',
+                                                        week: 'Week',
+                                                        day: 'Day'
+                                                    }}
+                                                    height="auto"
+                                                    onAction={() => {}}
+                                                    eventTimeFormat={{
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        meridiem: false,
+                                                        hour12: false
+                                                    }}
                                                 />
                                             </div>
                                         </div>
