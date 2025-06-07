@@ -91,6 +91,10 @@ class Employee extends Component {
 			addLeaveErrors: {},
 			selectedLeaveEmployeeId: '',
 			allEmployeesData: [],
+			leaveFilterEmployeeId: '',
+			leaveFilterFromDate: '',
+			leaveFilterToDate: '',
+			leaveFilterApplied: false,
 		};
 	}
 	handleStatistics(e) {
@@ -372,6 +376,92 @@ class Employee extends Component {
 			this.setState({ [name]: value });	
 		}
     };
+
+	// Filter Leaves
+	handleLeaveFilterChange = (e) => {
+	const { name, value } = e.target;
+	this.setState({
+		[name]: value,
+	});
+	};
+
+	handleLeaveFilterApply = () => {
+		const { leaveFilterFromDate, leaveFilterToDate } = this.state;
+		
+		if (leaveFilterFromDate && leaveFilterToDate && leaveFilterFromDate > leaveFilterToDate) {
+			this.setState({
+			showError: true,
+			errorMessage: "Start date cannot be after End date",
+			});
+			setTimeout(() => this.setState({ showError: false }), 3000);
+			return;
+		}
+
+		this.fetchFilteredLeaves(
+			this.state.leaveFilterEmployeeId,
+			this.state.leaveFilterFromDate,
+			this.state.leaveFilterToDate
+		);
+		
+		this.setState({ leaveFilterApplied: true });
+		};
+
+	fetchFilteredLeaves = (employeeId, fromDate, toDate) => {
+		const apiUrl = process.env.REACT_APP_API_URL;
+		let url = `${apiUrl}/employee_leaves.php?action=view`;
+		
+		if (employeeId) {
+			url += `&employee_id=${employeeId}`;
+		}
+		
+		if (fromDate && toDate) {
+			url += `&start_date=${fromDate}&end_date=${toDate}`;
+		} else if (fromDate) {
+			url += `&start_date=${fromDate}`;
+		} else if (toDate) {
+			url += `&end_date=${toDate}`;
+		}
+
+		this.setState({ loading: true });
+		
+		fetch(url, {
+			method: "GET"
+		})
+		.then(res => res.json())
+		.then(data => {
+			if (data.status === "success") {
+			const leavesData = Array.isArray(data.data) ? data.data : [data.data];
+			const { totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, cancelledLeaves } = 
+				this.calculateLeaveCounts(leavesData);
+			
+			this.setState({
+				employeeLeavesData: leavesData,
+				totalLeaves,
+				pendingLeaves,
+				approvedLeaves,
+				rejectedLeaves,
+				cancelledLeaves,
+				loading: false,
+				currentPageLeaves: 1 // Reset to first page
+			});
+			} else {
+				this.setState({
+				employeeLeavesData: [],
+			});
+				
+			throw new Error(data.message || "Failed to fetch filtered leaves");
+			}
+		})
+		.catch(err => {
+			this.setState({ 
+			message: err.message, 
+			loading: false,
+			showError: true,
+			errorMessage: err.message
+			});
+			setTimeout(() => this.setState({ showError: false }), 3000);
+		});
+	};
 
 	handleLeaveStatus = (event) => {
 		const { value } = event.target;
@@ -728,31 +818,40 @@ class Employee extends Component {
 		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
 		const leaveList = (employeeLeavesData || []).length > 0 ? employeeLeavesData : [];
 
-		// Filter leaves
-		const filteredLeaveList = (this.state.selectedLeaveEmployeeId
+		let filteredLeaveList = (this.state.selectedLeaveEmployeeId
 			? leaveList.filter(l => l && String(l.employee_id) === String(this.state.selectedLeaveEmployeeId))
 			: leaveList.filter(l => l)
-		).slice().sort((a, b) => {
-			//Descending Order
-			const dateA = new Date(a.from_date);
-			const dateB = new Date(b.from_date);
+		);
+		// Apply date range filter
+		if (this.state.leaveFilterFromDate || this.state.leaveFilterToDate) {
+			filteredLeaveList = filteredLeaveList.filter(leave => {
+				const { leaveFilterFromDate, leaveFilterToDate } = this.state;
+				const leaveFrom = leave.from_date ? new Date(leave.from_date) : null;
+				const leaveTo = leave.to_date ? new Date(leave.to_date) : null;
+				let fromMatch = true, toMatch = true;
+				if (leaveFilterFromDate) {
+					const filterFrom = new Date(leaveFilterFromDate);
+					fromMatch = leaveTo && leaveTo >= filterFrom;
+				}
+				if (leaveFilterToDate) {
+					const filterTo = new Date(leaveFilterToDate);
+					toMatch = leaveFrom && leaveFrom <= filterTo;
+				}
+				return fromMatch && toMatch;
+			});
+		}
+		filteredLeaveList = filteredLeaveList.slice().sort(function(a, b) {
+			var dateA = new Date(a.from_date);
+			var dateB = new Date(b.from_date);
 			if (!isNaN(dateA) && !isNaN(dateB)) {
 				return dateB - dateA;
 			}
 			return (b.id || 0) - (a.id || 0);
 		});
-
-		// Pagination Logic for Employees
-		const indexOfLastEmployee = this.state.currentPageEmployees * dataPerPage;
-		const indexOfFirstEmployee = indexOfLastEmployee - dataPerPage;
-		const currentEmployees = employeeList.slice(indexOfFirstEmployee, indexOfLastEmployee);
-		const totalPagesEmployees = Math.ceil(employeeList.length / dataPerPage);
-
-		// Pagination logic for employee leaves
-		const indexOfLastLeave = this.state.currentPageLeaves * dataPerPage;
-		const indexOfFirstLeave = indexOfLastLeave - dataPerPage;
-		const currentEmployeeLeaves = filteredLeaveList.slice(indexOfFirstLeave, indexOfLastLeave);
-		const totalPagesLeaves = Math.ceil(filteredLeaveList.length / dataPerPage);
+		let indexOfLastLeave = this.state.currentPageLeaves * dataPerPage;
+		let indexOfFirstLeave = indexOfLastLeave - dataPerPage;
+		let currentEmployeeLeaves = filteredLeaveList.slice(indexOfFirstLeave, indexOfLastLeave);
+		let totalPagesLeaves = Math.ceil(filteredLeaveList.length / dataPerPage);
 
 
 		return (
@@ -946,7 +1045,7 @@ class Employee extends Component {
 																		</tr>
 																	))
 																): (
-																	!message && <tr><td>No employees found</td></tr>
+																	<tr><td>No employees found</td></tr>
 																)}
 															</tbody>
 														</table>
@@ -955,35 +1054,84 @@ class Employee extends Component {
 											</div>
 										</div>
 									</div>
+									
 									<div className="tab-pane fade" id="Employee-Request" role="tabpanel">
+
+										<div className="container mt-4">
+										<div className="card shadow-sm">
+											<div className="card-body">
+											{(this.state.logged_in_employee_role === "admin" ||
+												this.state.logged_in_employee_role === "super_admin") && (
+												<form className="row g-2 align-items-end">
+												<div className="col-md-3">
+													<label htmlFor="leaveFilterEmployeeId" className="form-label">
+													Employee
+													</label>
+													<select
+													className="form-control"
+													id="leaveFilterEmployeeId"
+													name="leaveFilterEmployeeId"
+													value={this.state.leaveFilterEmployeeId}
+													onChange={this.handleLeaveFilterChange}
+													>
+													<option value="">All Employees</option>
+													{this.state.allEmployeesData.map((emp) => (
+														<option key={emp.id} value={emp.id}>
+														{emp.first_name} {emp.last_name}
+														</option>
+													))}
+													</select>
+												</div>
+
+												<div className="col-md-3">
+													<label htmlFor="leaveFilterFromDate" className="form-label">
+													From Date
+													</label>
+													<input
+													type="date"
+													className="form-control"
+													id="leaveFilterFromDate"
+													name="leaveFilterFromDate"
+													value={this.state.leaveFilterFromDate}
+													onChange={this.handleLeaveFilterChange}
+													max={this.state.leaveFilterToDate || undefined}
+													/>
+												</div>
+
+												<div className="col-md-3">
+													<label htmlFor="leaveFilterToDate" className="form-label">
+													To Date
+													</label>
+													<input
+													type="date"
+													className="form-control"
+													id="leaveFilterToDate"
+													name="leaveFilterToDate"
+													value={this.state.leaveFilterToDate}
+													onChange={this.handleLeaveFilterChange}
+													min={this.state.leaveFilterFromDate || undefined}
+													/>
+												</div>
+
+												<div className="col-md-3 d-flex align-items-end">
+													<button
+													type="button"
+													className="btn btn-primary w-100"
+													onClick={this.handleLeaveFilterApply}
+													>
+													Apply
+													</button>
+												</div>
+												</form>
+											)}
+											</div>
+										</div>
+									</div>
+
+									
 										<div className="card">
-											<div className="card-header">
+											<div className="card-header d-flex align-items-center">
 												<h3 className="card-title">Leave List</h3>
-												{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
-													<div style={{ marginLeft: 'auto', minWidth: 220 }}>
-														<select
-															className="form-control"
-															value={this.state.selectedLeaveEmployeeId || ''}
-															onChange={e => {
-																const selectedId = e.target.value;
-																this.setState({ selectedLeaveEmployeeId: selectedId, currentPageLeaves: 1 }, () => {
-																	if (selectedId) {
-																		this.fetchEmployeeAndLeavesById(this.state.selectedLeaveEmployeeId);
-																	} else {
-																		this.componentDidMount(); //Add Componentdidmount to reload all employees and leaves
-																	}
-																});
-															}}
-														>
-															<option value="">All Employees</option>
-															{this.state.allEmployeesData.map(emp => (
-																<option key={emp.id} value={emp.id}>
-																	{emp.first_name} {emp.last_name}
-																</option>
-															))}
-														</select>
-													</div>
-												)}
 											</div>
 											<div className="card-body">
 												{loading ? (
@@ -1006,8 +1154,14 @@ class Employee extends Component {
 																</tr>
 															</thead>
 															<tbody>
-																{currentEmployeeLeaves.length > 0 ? (
-																	currentEmployeeLeaves.filter(l => l).map((leave, index) => (
+																{this.state.showError ? (
+																	<tr>
+																		<td colSpan={6} className="text-center">
+																			<span className="text-danger">{this.state.errorMessage}</span>
+																		</td>
+																	</tr>
+																) : currentEmployeeLeaves.length > 0 ? (
+																	currentEmployeeLeaves.map((leave, index) => (
 																		<tr key={index}>
 																			<td className="width45">
 																				<span
@@ -1078,8 +1232,8 @@ class Employee extends Component {
 																	))
 																) : (
 																	<tr>
-                                                                        <td colSpan={6} className="text-center">No leaves found</td>
-                                                                    </tr>
+																		<td colSpan={6} className="text-center text-muted">No leaves found for this employee.</td>
+																	</tr>
 																)}
 															</tbody>
 														</table>
@@ -1247,7 +1401,7 @@ class Employee extends Component {
 											<label className="form-label" htmlFor="halfDayCheckbox">
 												Half day
 											</label>
-										</div>
+										</div>	
 									</div>
 								</div>
 							</div>
