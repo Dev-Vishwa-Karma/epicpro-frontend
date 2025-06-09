@@ -16,7 +16,8 @@ class Statistics extends Component {
       reportsData: [],
       leavesData: [],
       alternateSaturdayData: [],
-      holidaysData:[]
+      holidaysData:[],
+      isLoading: true
     };
   }
 
@@ -39,29 +40,35 @@ class Statistics extends Component {
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          this.setState({ employeesData: data.data });
+          this.setState({ employeesData: data.data, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch employees data' });
+        this.setState({ error: 'Failed to fetch employees data', isLoading: false });
         console.error(err);
       });
   }
 
   getReports = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=view`)
+    const { selectedYear, selectedMonth } = this.state;
+    const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
+    const lastDay = new Date(selectedYear, selectedMonth, 0);
+    const fromDate = firstDay.toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
+    const toDate = lastDay.toISOString().split('T')[0]; 
+
+    fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=view&from_date=${fromDate}&to_date=${toDate}`)
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          this.setState({ reportsData: data.data });
+          this.setState({ reportsData: data.data, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch reports data' });
+        this.setState({ error: 'Failed to fetch reports data', isLoading: false });
         console.error(err);
       });
   }
@@ -71,13 +78,13 @@ class Statistics extends Component {
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          this.setState({ leavesData: data.data });
+          this.setState({ leavesData: data.data, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch leaves data' });
+        this.setState({ error: 'Failed to fetch leaves data',isLoading: false });
         console.error(err);
       });
   }
@@ -116,18 +123,19 @@ class Statistics extends Component {
   };
 
   getHolidays = () => {
+    this.setState({ isLoading: true })
     fetch(`${process.env.REACT_APP_API_URL}/events.php?action=view&event_type=holiday`)
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
           const holidayDates = data.data.map(item => item.event_date); // Using 'event_date' field directly
-          this.setState({ holidaysData: holidayDates });
+          this.setState({ holidaysData: holidayDates, isLoading: false });
         } else {
-          this.setState({ error: data.message });
+          this.setState({ error: data.message, isLoading: false });
         }
       })
       .catch(err => {
-        this.setState({ error: 'Failed to fetch holidays data' });
+        this.setState({ error: 'Failed to fetch holidays data', isLoading: false });
         console.error(err);
       });
   };
@@ -139,7 +147,11 @@ class Statistics extends Component {
 
   handleMonthChange = (e) => {
     const month = parseInt(e.target.value);
-    this.setState({ selectedMonth: month }, this.getAlternateSaturdays);
+    
+    this.setState({ selectedMonth: month }, () => {
+      this.getAlternateSaturdays();  
+      this.getReports();
+    });
   };
 
   getAllDatesOfMonth = (year, month) => {
@@ -180,25 +192,31 @@ class Statistics extends Component {
 
   countLeavesPerEmployee = (leavesData, selectedYear, selectedMonth) => {
     const counts = {};
-   
+  
     leavesData.forEach((leave) => {
-      const { employee_id, from_date, to_date } = leave;
+      const { employee_id, from_date, to_date, is_half_day } = leave;
       const from = new Date(from_date);
       const to = new Date(to_date);
       const year = selectedYear;
       const month = selectedMonth;
-
+  
       let current = new Date(from);
       while (current <= to) {
         if (current.getFullYear() === year && current.getMonth() + 1 === month) {
-          counts[employee_id] = (counts[employee_id] || 0) + 1;
+          const dateKey = current.toISOString().split('T')[0]; // "YYYY-MM-DD"
+          if (is_half_day === "1" || is_half_day === 1) {
+            counts[employee_id] = (counts[employee_id] || 0) + 0.5;
+          } else {
+            counts[employee_id] = (counts[employee_id] || 0) + 1;
+          }
         }
         current.setDate(current.getDate() + 1);
       }
     });
-
+  
     return counts;
   };
+  
 
   calculateHalfLeaves = (attendanceByDate, employeesData, monthDays) => {
     const { holidaysData, alternateSaturdayData } = this.state;
@@ -290,7 +308,7 @@ class Statistics extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { selectedYear, selectedMonth, employeesData, leavesData, alternateSaturdayData, holidaysData } = this.state;
+    const { selectedYear, selectedMonth, employeesData, leavesData, alternateSaturdayData, holidaysData, isLoading} = this.state;
     const monthDays = this.getAllDatesOfMonth(selectedYear, selectedMonth);
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
@@ -328,9 +346,19 @@ class Statistics extends Component {
                   ))}
                 </select>
               </div>
+
+              <div className="ml-auto">
+                <span style={{ backgroundColor: "#ff0000", color: "#fff", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Leave</span>
+                <span style={{ backgroundColor: "#00ffff", color: "#000", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Half day</span>
+                <span style={{ backgroundColor: "#28a745", color: "#000", padding: "4px 8px", borderRadius: "4px" }}>Extra working</span>
+              </div>
+            </div>  
+
+            {isLoading ? (
+            <div className="dimmer active p-5">
+              <div className="loader" />
             </div>
-  
-            {/* Table */}
+							) : (
             <div style={{ overflowX: 'auto' }}>
               <table className="table table-bordered table-sm text-center" style={{ minWidth: '600px' }}>
                 <thead style={{backgroundColor: "#a2c4c9"}}>
@@ -364,11 +392,14 @@ class Statistics extends Component {
                           let hoursNumber = 0;
                           let cellStyle = {};
   
-                          const isOnLeave = leavesData.some((leave) =>
+                          const matchingLeave = leavesData.find((leave) =>
                             leave.employee_id === employee.id.toString() &&
                             day.key >= leave.from_date &&
                             day.key <= leave.to_date
                           );
+                          const isOnLeave = !!matchingLeave;
+                          const isHalfDayLeave = matchingLeave?.is_half_day === "1" || matchingLeave?.is_half_day === 1;
+                          
   
                           const workedOnSpecialDay = !isMissingReport && (
                               isSunday || isAlternateSaturday || isHoliday
@@ -397,9 +428,11 @@ class Statistics extends Component {
                             cellStyle = { backgroundColor: "#28a745", color: "#000" }; // Green for working on a special day
                           } else if (isOnLeave) {
                             if(!isMissingReport){
-                              leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) - 1;
+                              leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) - (isHalfDayLeave ? 0.5 : 1);
                             }else{
-                              cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Override red if it's a leave
+                              cellStyle = isHalfDayLeave
+                              ? { backgroundColor: "#00ffff", color: "#000" } // Cyan for half-day
+                              : { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
                             }
                           } else if (isMissingReport && !highlightRow && currentDate < today) {
                             // Missing report and it is not alternae sat,sun or hoilday
@@ -410,6 +443,13 @@ class Statistics extends Component {
                           let splitValue = dayAttendance[employee.id] || "";
                           if (splitValue && splitValue.split(":").length === 3) {
                             splitValue = splitValue.split(":").slice(0, 2).join(":");
+                            
+                            // Remove the leading 0 from the hour part (if it exists)
+                            let parts = splitValue.split(":");
+                            if (parts[0].startsWith('0')) {
+                              parts[0] = parts[0].slice(1); 
+                            }
+                            splitValue = parts.join(":");
                           }
                          
                           return (
@@ -479,14 +519,9 @@ class Statistics extends Component {
                   </tr>
                 </tbody>
               </table>
-            </div>
-  
-            {/* Legend */}
-            <div className="mt-3">
-              <span style={{ backgroundColor: "#ff0000", color: "#fff", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Leave</span>
-              <span style={{ backgroundColor: "#00ffff", color: "#000", padding: "4px 8px", borderRadius: "4px", marginRight: "10px"}}>Half day</span>
-              <span style={{ backgroundColor: "#28a745", color: "#000", padding: "4px 8px", borderRadius: "4px" }}>Extra working</span>
-            </div>
+              </div>
+            )}
+            
   
           </div>
         </div>
