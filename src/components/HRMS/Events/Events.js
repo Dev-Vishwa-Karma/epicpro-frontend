@@ -40,9 +40,13 @@ class Events extends Component {
       leaveData: [],
 	  allEvents: [],
       showReportModal: false,
-      selectedReport: null,
+		selectedReport: null,
+	  defaultDate: new Date()
 	};
-		localStorage.removeItem('empId');
+	localStorage.removeItem('empId');
+	localStorage.removeItem('startDate');
+	localStorage.removeItem('endDate');
+	localStorage.removeItem('defaultView');
   }
 
 	componentDidMount() {
@@ -121,9 +125,14 @@ class Events extends Component {
 	}
 
 	fetchWorkingHoursReports = (employeeId) => {
-			if (!employeeId) {
-				employeeId = localStorage.getItem('empId');
-			}
+		if (!employeeId && !localStorage.getItem('empId')) {
+			return;
+				
+		}
+		if (!employeeId) {
+			employeeId = localStorage.getItem('empId')
+		}
+		
 			let startDate = localStorage.getItem('startDate');
 			let endDate = localStorage.getItem('endDate');
 
@@ -261,7 +270,12 @@ class Events extends Component {
 
 	// Handle year selection
 	handleYearChange = (event) => {
-		this.setState({ selectedYear: Number(event.target.value) });
+		// this.setState({  });
+        const currentMonth = new Date().getMonth() + 1;
+		this.setState({
+			defaultDate: `${event.target.value}-${String(currentMonth).padStart(2, '0')}-01`,
+			selectedYear: Number(event.target.value)
+		});
 	};
 
 	handleClose = (messageType) => {
@@ -716,7 +730,7 @@ formatDateTimeAMPM = (timeString) => {
 		const currentDate = new Date();
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth() + 1;
-		const defaultDate = localStorage.getItem('startDate') ??
+		this.state.defaultDate = localStorage.getItem('startDate') ??
 			`${selectedYear}-${String(currentMonth).padStart(2, '0')}-01`;
 		const defaultView = localStorage.getItem('defaultView') ?? 'month';
 
@@ -815,11 +829,11 @@ formatDateTimeAMPM = (timeString) => {
 				for (let year = startYear; year <= endYear; year++) {
 					const newEventDate = new Date(eventDate);
 					newEventDate.setFullYear(year);
-		
 					formattedEventForAllYears.push({
-						title: '',
+						title: event.event_name.length > 6 ? event.event_name.substring(0, 6).concat('...') : event.event_name,
+						toottip: event.event_name,
 						start: newEventDate.toISOString().split('T')[0],
-						className: 'blue-event'
+						className: 'green-event'
 					});
 				}
 		
@@ -828,7 +842,7 @@ formatDateTimeAMPM = (timeString) => {
 		
 			if (event.event_type === 'holiday') {
 				return {
-					title: '',
+					title: event.event_name.length,
 					start: event.event_date,
 					className: 'red-event'
 				};
@@ -836,9 +850,11 @@ formatDateTimeAMPM = (timeString) => {
 
 			if (event.event_type === 'birthday') {
 				return {
-					title: ``,
+					title: event.event_name.length > 6 ? event.event_name.substring(0,6).concat('....') : event.event_name,
+						toottip: event.event_name,
+				
 					start: event.event_date,
-					className: 'green-event'
+					className: 'blue-event'
 				};
 			}
 		}).flat();
@@ -1220,7 +1236,9 @@ formatDateTimeAMPM = (timeString) => {
 													const start_date = `${selectedYear}-01-01`;
 													const end_date = `${selectedYear}-12-31`;
 													this.fetchLeaveData(empId, start_date, end_date);
-													localStorage.setItem('empId', empId)
+													empId ?
+														localStorage.setItem('empId', empId) :
+														localStorage.removeItem('empId')
 													this.fetchWorkingHoursReports(empId);
 													// After fetching, update allEvents for the selected employee
 													setTimeout(() => {
@@ -1248,7 +1266,7 @@ formatDateTimeAMPM = (timeString) => {
 											{/* Pass the formatted events to the FullCalendar component */}
 											<Fullcalender 
 												events={this.state.allEvents} 
-												defaultDate={defaultDate}
+												defaultDate={this.state.defaultDate}
 												defaultView={defaultView}
 												onAction={this.fetchWorkingHoursReports}
 												dayCellClassNames={(arg) => {
