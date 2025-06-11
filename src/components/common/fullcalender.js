@@ -74,18 +74,13 @@ class Fullcalender extends Component {
 
                             if (cell.hasClass && cell.hasClass('fc-sat')) {
                                 alternateSatudays.map(alternateSatuday => {
-                                const saturday = JSON.parse(alternateSatuday.date);
+                                    const saturday = JSON.parse(alternateSatuday.date);
                                     saturday.forEach(element => {                                      
                                         if (this.formatDate(date) === this.formatDate(element) && event.className == 'missing-report-day' ) {
-                                        cell.css('background-color', 'white');
-                                    }
-                                    
-                                });
-
-                                // if (alternateSatuday.date)
-                            })
-                                // You can modify the cell here, e.g. add custom styles
-                                // cell.css('background-color', 'lightblue');
+                                            cell.css('background-color', 'white');
+                                        }
+                                    });
+                                })
                             }
                     
                         })

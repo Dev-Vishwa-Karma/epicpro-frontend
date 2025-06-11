@@ -132,7 +132,15 @@ class Events extends Component {
 	}
 
 	fetchWorkingHoursReports = (employeeId) => {
-		if (!employeeId || !localStorage.getItem('empId')) {
+		console.log(
+			"employeId",
+			employeeId,
+			localStorage.getItem('empId')
+	
+		);
+		
+		if (!employeeId && !localStorage.getItem('empId')) {
+
 			return;				
 		}
 		if (!employeeId) {
@@ -878,7 +886,8 @@ formatDateTimeAMPM = (timeString) => {
 		
 			if (event.event_type === 'holiday') {
 				return {
-					title: event.event_name.length,
+					title: event.event_name.length > 6 ? event.event_name.substring(0,6).concat('....') : event.event_name,
+					toottip: event.event_name,
 					start: event.event_date,
 					className: 'red-event'
 				};
@@ -1220,9 +1229,9 @@ formatDateTimeAMPM = (timeString) => {
 													const start_date = `${selectedYear}-01-01`;
 													const end_date = `${selectedYear}-12-31`;
 													this.fetchLeaveData(empId, start_date, end_date);
-													empId ?
-														localStorage.setItem('empId', empId) :
-														localStorage.removeItem('empId')
+													// empId ?
+														localStorage.setItem('empId', empId) 
+														// localStorage.removeItem('empId')
 													this.fetchWorkingHoursReports(empId);
 													// After fetching, update allEvents for the selected employee
 													setTimeout(() => {
