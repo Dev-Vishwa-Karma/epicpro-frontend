@@ -10,17 +10,30 @@ class Activities extends Component {
 			selectedStatus: "",
 			selectedEmployee: "",
 			breakReason: "",
-			activityError: null,
-			activitySuccess: null,
 			loading: true,
 			isBreakedIn: false,
-			breakOutError: null,
 			filterEmployeeId: "",
+			isPunchIn: false,
+			breakReasonModal: false,
+
+			successMessage: "",
+            showSuccess: false,
+            errorMessage: "",
+            showError: false,
 		};
 	}
 
-	componentDidMount() {
+	    // Function to dismiss messages
+    dismissMessages = () => {
+        this.setState({
+            showSuccess: false,
+            successMessage: "",
+            showError: false,
+            errorMessage: "",
+        });
+    };
 
+	componentDidMount() {
 		let apiUrl = '';
 
 		if (window.user.role === 'super_admin' || window.user.role === 'admin') {
@@ -77,10 +90,35 @@ class Activities extends Component {
 				this.setState({ error: 'Failed to fetch data' });
 				console.error(err);
 			});
+
+			this.getPunchInStatus()
 	}
 
-	handleBreakOut = () => {
+	getPunchInStatus = async () => {
+		try {
+			const response = await fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${window.user.id}`);
+			const data = await response.json();
+			if (data.status === 'success') {
+			this.setState({ isPunchIn: true });
+			} else {
+			this.setState({ isPunchIn: false });
+			}
+		} catch (err) {
+			this.setState({ error: 'Failed to fetch data' });
+			console.error(err);
+		}
+	}
 
+	openbreakReasonModal = () => {
+		this.getPunchInStatus()
+    	this.setState({ breakReasonModal: true });
+  	};
+	
+	closebreakReasonModal = () => {
+		this.setState({ breakReasonModal: false });
+	};
+
+	handleBreakOut = () => {
 		const formData = new FormData();
 		formData.append('employee_id', window.user.id);
 		formData.append('activity_type', 'Break');
@@ -95,31 +133,43 @@ class Activities extends Component {
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.status === "success") {
-					this.setState({ isBreakedIn: true, activitySuccess: data.message });
+					this.setState({
+						isBreakedIn: true,
+						successMessage: data.message,
+						showError: false,
+						showSuccess: true,
+					});
+					setTimeout(this.dismissMessages, 3000);
 					this.componentDidMount();
-					// Hide the error message after 5 seconds
-					setTimeout(() => {
-						this.setState({ activitySuccess: null });
-					}, 5000);
 				} else {
-					this.setState({ breakOutError: data.message });
-					// Hide the error message after 5 seconds
-					setTimeout(() => {
-						this.setState({ breakOutError: null });
-					}, 5000);
+					this.setState({
+						errorMessage: data.message,
+						showError: true,
+						showSuccess: false,
+					});
+					setTimeout(this.dismissMessages, 3000);
 				}
 			})
 			.catch((error) => {
-				// Stop loader in case of error
-				this.setState({ activityError: 'Something went wrong. Please try again.' });
-				// Hide the error message after 5 seconds
-				setTimeout(() => {
-					this.setState({ activityError: null });
-				}, 5000);
+					this.setState({
+						errorMessage: "Something went wrong. Please try again.",
+						showError: true,
+						showSuccess: false,
+					});
+					setTimeout(this.dismissMessages, 3000);
 			});
 	};
 
 	handleSaveBreakIn = () => {
+		if (this.state.isPunchIn === false) {
+			this.setState({
+				errorMessage: "You need to Punch In first",
+				showError: true,
+				showSuccess: false,
+			});
+			setTimeout(this.dismissMessages, 3000);
+			return;
+		}
 
 		if (!this.state.breakReason) {
 			this.setState({ activityError: 'Please provide the reason for your break' });
@@ -144,28 +194,32 @@ class Activities extends Component {
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.status === "success") {
-					this.setState({ isBreakedIn: false, breakReason: '', activitySuccess: data.message });
+					this.setState({
+						isBreakedIn: false,
+						breakReason: '',
+						successMessage : data.message,
+						showError: false,
+						showSuccess: true,
+					});
+					setTimeout(this.dismissMessages, 3000);
 					document.querySelector("#addBreakReasonModal .close").click();
 					this.componentDidMount();
-					// Hide the success message after 5 seconds
-					setTimeout(() => {
-						this.setState({ activitySuccess: null });
-					}, 5000);
 				} else {
-					this.setState({ activityError: data.message });
-					// Hide the error message after 5 seconds
-					setTimeout(() => {
-						this.setState({ activityError: null });
-					}, 5000);
+					this.setState({
+						errorMessage: data.message,
+						showError: true,
+						showSuccess: false,
+					});
+					setTimeout(this.dismissMessages, 3000);
 				}
 			})
 			.catch((error) => {
-				// Stop loader in case of error
-				this.setState({ activityError: 'Something went wrong. Please try again.' });
-				// Hide the error message after 5 seconds
-				setTimeout(() => {
-					this.setState({ activityError: null });
-				}, 5000);
+					this.setState({
+						errorMessage: "Something went wrong. Please try again.",
+						showError: true,
+						showSuccess: false,
+					});
+					setTimeout(this.dismissMessages, 3000);
 			});
 	};
 
@@ -188,43 +242,43 @@ class Activities extends Component {
 	addActivityForEmployee = () => {
 		const { selectedEmployee, selectedStatus, breakReason } = this.state;
 
-		// Reset error and success messages
-		this.setState({ activityError: null, activitySuccess: null });
-
 		// Validate form inputs
 		if (!selectedEmployee && !selectedStatus) {
-			this.setState({ activityError: 'Please select an employee and status' });
-			// Hide the error message after 5 seconds
-			setTimeout(() => {
-				this.setState({ activityError: null });
-			}, 5000)
+			this.setState({
+				errorMessage: "Please select an employee and status",
+				showError: true,
+				showSuccess: false,
+			});
 			return;
 		}
 
 		if (!selectedEmployee) {
-			this.setState({ activityError: 'Please select an employee' });
-			// Hide the error message after 5 seconds
-			setTimeout(() => {
-				this.setState({ activityError: null });
-			}, 5000)
+			this.setState({
+				errorMessage: "Please select an employee",
+				showError: true,
+				showSuccess: false,
+			});
+			setTimeout(this.dismissMessages, 3000);
 			return;
 		}
 
 		if (!selectedStatus) {
-			this.setState({ activityError: 'Please select a status' });
-			// Hide the error message after 5 seconds
-			setTimeout(() => {
-				this.setState({ activityError: null });
-			}, 5000)
+			this.setState({
+				errorMessage: "Please select a status",
+				showError: true,
+				showSuccess: false,
+			});
+			setTimeout(this.dismissMessages, 3000);
 			return;
 		}
 
 		if (selectedStatus === 'active' && !breakReason) {
-			this.setState({ activityError: 'Please enter the reason for break' });
-			// Hide the error message after 5 seconds
-			setTimeout(() => {
-				this.setState({ activityError: null });
-			}, 5000)
+			this.setState({
+				errorMessage: "Please enter the reason for break",
+				showError: true,
+				showSuccess: false,
+			});
+			setTimeout(this.dismissMessages, 3000);
 			return;
 		}
 
@@ -249,41 +303,99 @@ class Activities extends Component {
 				this.setState({ loading: false });
 
 				if (data.status === "success") {
-					this.setState({ activitySuccess: data.message });
+					this.setState({
+						successMessage : data.message,
+						showError: false,
+						showSuccess: true,
+					});
+					setTimeout(this.dismissMessages, 3000);
 					// Close the modal
 					document.querySelector("#addBreakModal .close").click();
 					this.componentDidMount();
-					// Hide the success message after 5 seconds
-					setTimeout(() => {
-						this.setState({ activitySuccess: null });
-					}, 5000);
 				} else {
-					this.setState({ activityError: data.message });
-					console.log("Failed to add break data");
-
-					// Hide the error message after 5 seconds
-					setTimeout(() => {
-						this.setState({ activityError: null });
-					}, 5000);
+					this.setState({
+						errorMessage: data.message,
+						showError: true,
+						showSuccess: false,
+					});
+					setTimeout(this.dismissMessages, 3000);
 				}
 			})
 			.catch((error) => {
 				this.setState({ loading: false });
-				// Stop loader in case of error
-				this.setState({ activityError: 'Something went wrong. Please try again.' });
+				this.setState({
+					errorMessage: "Something went wrong. Please try again.",
+					showError: true,
+					showSuccess: false,
+				});
+				setTimeout(this.dismissMessages, 3000);
 				console.error("Error:", error);
-				// Hide the error message after 5 seconds
-				setTimeout(() => {
-					this.setState({ activityError: null });
-				}, 5000);
 			});
 	};
 
+	// Render function for Bootstrap toast messages
+    renderAlertMessages = () => {
+        return (
+            
+            <>
+			
+                {/* Add the alert for success messages */}
+                <div 
+                    className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
+                    role="alert" 
+                    style={{ 
+                        position: "fixed", 
+                        top: "20px", 
+                        right: "20px", 
+                        zIndex: 1050, 
+                        minWidth: "250px", 
+                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
+                    }}
+                >
+                    <i className="fa-solid fa-circle-check me-2"></i>
+                    {this.state.successMessage}
+                    <button
+                        type="button"
+                        className="close"
+                        aria-label="Close"
+                        onClick={() => this.setState({ showSuccess: false })}
+                    >
+                    </button>
+                </div>
+
+                {/* Add the alert for error messages */}
+                <div 
+                    className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
+                    role="alert" 
+                    style={{ 
+                        position: "fixed", 
+                        top: "20px", 
+                        right: "20px", 
+                        zIndex: 1050, 
+                        minWidth: "250px", 
+                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
+                    }}
+                >
+                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
+                    {this.state.errorMessage}
+                    <button
+                        type="button"
+                        className="close"
+                        aria-label="Close"
+                        onClick={() => this.setState({ showError: false })}
+                    >
+                    </button>
+                </div>
+            </>
+        );
+    };
+
 	render() {
 		const { fixNavbar } = this.props;
-		const { activities, error, employeeData, selectedStatus, selectedEmployee, breakReason, activityError, activitySuccess, loading, isBreakedIn, breakOutError } = this.state;
+		const { activities, error, employeeData, selectedStatus, selectedEmployee, breakReason, loading, isBreakedIn } = this.state;
 		return (
 			<>
+			 {this.renderAlertMessages()}
 				{/* <link rel="stylesheet" href="../assets/plugins/summernote/dist/summernote.css" /> */}
 				<div>
 					<div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
@@ -291,14 +403,6 @@ class Activities extends Component {
 							<div className="row clearfix">
 								<div className="col-md-12">
 									<div className="card">
-										{/* Display activity success message outside the modal */}
-										{activitySuccess && (
-											<div className="alert alert-success mb-0">{activitySuccess}</div>
-										)}
-										{/* Display activity error message outside the modal */}
-										{breakOutError && (
-											<div className="alert alert-danger mb-0">{breakOutError}</div>
-										)}
 										<div className="card-header bline d-flex justify-content-between align-items-center">
 											<h3 className="card-title">Timeline Activity</h3>
 											<div className="d-flex align-items-center">
@@ -338,7 +442,10 @@ class Activities extends Component {
 													</button>
 												)}
 												{window.user.role === 'employee' && (
-													<button style={{ float: "right" }} className="btn btn-primary" onClick={this.state.isBreakedIn ? this.handleBreakOut : this.handleBreakIn} data-toggle={this.state.isBreakedIn ? "" : "modal"} data-target={this.state.isBreakedIn ? "" : "#addBreakReasonModal"}>
+													<button style={{ float: "right" }} className="btn btn-primary" onClick={this.state.isBreakedIn ? this.handleBreakOut : this.openbreakReasonModal} 
+													
+													//data-toggle={this.state.isBreakedIn ? "" : "modal"} 
+													/*data-target={this.state.isBreakedIn ? "" : "#addBreakReasonModal"} */>
 														{this.state.isBreakedIn ? 'Break Out' : 'Break In'}
 													</button>
 												)}
@@ -487,8 +594,6 @@ class Activities extends Component {
 								</div>
 								<div className="dimmer-content">
 									<div className="modal-body">
-										{/* Display error message inside the modal */}
-										{activityError && <div className="alert alert-danger mb-0">{activityError}</div>}
 										<div className="row clearfix">
 											<div className="col-md-12">
 												<div className="form-group">
@@ -540,17 +645,22 @@ class Activities extends Component {
 					</div>
 
 					{/* Add Break reason Modal for loggedin employee */}
-					<div className="modal fade" id="addBreakReasonModal" tabIndex={-1} role="dialog" aria-labelledby="addBreakReasonModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+		{this.state.breakReasonModal && (
+          <div
+            className="modal fade show d-block"
+            id="addBreakReasonModal"
+            tabIndex="-1"
+            role="dialog"
+          >
+					
 						<div className="modal-dialog" role="dialog">
 							<div className="modal-content">
 								<div className="modal-header">
 									<h5 className="modal-title" id="addBreakReasonModalLabel">Break Reason</h5>
-									<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+									<button type="button" className="close" onClick={this.closebreakReasonModal}aria-label="Close"><span aria-hidden="true">×</span></button>
 								</div>
 								<div className="dimmer-content">
 									<div className="modal-body">
-										{/* Display error message inside the modal */}
-										{activityError && <div className="alert alert-danger mb-0">{activityError}</div>}
 										<div className="row clearfix">
 											<div className="col-md-12">
 												<div className="form-group">
@@ -573,8 +683,9 @@ class Activities extends Component {
 							</div>
 						</div>
 					</div>
-
+ )}
 				</div>
+				
 			</>
 		);
 	}
