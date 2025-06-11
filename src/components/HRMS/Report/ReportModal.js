@@ -2,6 +2,24 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 class ReportModal extends Component {
+	componentDidMount() {
+		if (this.props.show) {
+			document.body.style.overflow = 'hidden';
+		}
+	}
+
+	componentDidUpdate(prevProps) {
+		if (this.props.show && !prevProps.show) {
+			document.body.style.overflow = 'hidden';
+		} else if (!this.props.show && prevProps.show) {
+			document.body.style.overflow = '';
+		}
+	}
+
+	componentWillUnmount() {
+		document.body.style.overflow = '';
+	}
+
 	formatDateTimeAMPM = (timeString) => {
 		if (!timeString || typeof timeString !== 'string') return '';
 
@@ -37,31 +55,42 @@ class ReportModal extends Component {
 				tabIndex="-1"
 				role="dialog"
 				style={{
-					backgroundColor: 'rgba(0, 0, 0, 0.5)',
-					position: 'fixed',
-					top: 0,
-					left: 0,
-					right: 0,
-					bottom: 0,
-					zIndex: 1050
+					backgroundColor: 'rgba(0, 0, 0, 0.5)'
 				}}
 			>
-				<div className="modal-dialog modal-dialog-centered" role="dialog">
-					<div className="modal-content">
+				<div
+					className="modal-dialog modal-dialog-centered modal-lg"
+					role="document"
+				>
+					<div
+						className="modal-content"
+						style={{
+							maxHeight: '90vh',
+							display: 'flex',
+							flexDirection: 'column'
+						}}
+					>
 						<div className="modal-header">
 							<h5 className="modal-title">Daily Report</h5>
 							<button type="button" className="close" onClick={onClose}>
 								<span>&times;</span>
 							</button>
 						</div>
-						<div className="modal-body">
+
+						<div
+							className="modal-body"
+							style={{
+								overflowY: 'auto',
+								flex: '1 1 auto'
+							}}
+						>
 							<div className="row">
 								{userRole !== 'employee' && (
 									<div className="col-md-12 mb-3">
 										<strong>Employee Name:</strong> {report.full_name}
 									</div>
 								)}
-                                <div className="col-md-12 mb-2">
+								<div className="col-md-12 mb-2">
 									<div className="multiline-text">
 										<strong>Description</strong> <br />
 										{report.report}
@@ -84,6 +113,7 @@ class ReportModal extends Component {
 								</div>
 							</div>
 						</div>
+
 						<div className="modal-footer">
 							<button type="button" className="btn btn-secondary" onClick={onClose}>
 								Close
@@ -96,7 +126,6 @@ class ReportModal extends Component {
 	}
 }
 
-// If needed for Redux:
 const mapStateToProps = state => ({});
 const mapDispatchToProps = dispatch => ({});
 
