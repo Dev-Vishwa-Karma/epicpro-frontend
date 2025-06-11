@@ -68,7 +68,7 @@ class Header extends Component {
 				}, 5000);
 			});
 
-		this.fetchReports();
+		// this.fetchReports();
 	}
 
 	fetchReports = (callback) => {

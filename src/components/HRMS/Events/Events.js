@@ -41,10 +41,13 @@ class Events extends Component {
 	  allEvents: [],
       showReportModal: false,
 		selectedReport: null,
-	  defaultDate: new Date()
+		defaultDate: null,
+		alternateSatudays: [],
 	};
 	localStorage.removeItem('empId');
 	localStorage.removeItem('startDate');
+	localStorage.removeItem('eventStartDate');
+	localStorage.removeItem('eventEndDate');
 	localStorage.removeItem('endDate');
 	localStorage.removeItem('defaultView');
   }
@@ -122,12 +125,12 @@ class Events extends Component {
 		const start_date = `${this.state.selectedYear}-01-01`;
 		const end_date = `${this.state.selectedYear}-12-31`;     
 		this.fetchLeaveData(id, start_date, end_date);
+		this.getAlternateSaturday();
 	}
 
 	fetchWorkingHoursReports = (employeeId) => {
-		if (!employeeId && !localStorage.getItem('empId')) {
-			return;
-				
+		if (!employeeId || !localStorage.getItem('empId')) {
+			return;				
 		}
 		if (!employeeId) {
 			employeeId = localStorage.getItem('empId')
@@ -166,7 +169,7 @@ class Events extends Component {
 			}
 			return response.json();
 		})
-		.then((data) => {
+			.then((data) => {
 			if (data.status === "success") {
 				if(employeeId == ''){
 					this.setState({ 
@@ -186,7 +189,7 @@ class Events extends Component {
 				});
 			}
 		})
-		.catch((err) => {
+			.catch((err) => {
 			console.error("Error fetching working hours:", err);
 			this.setState({ 
 				workingHoursReports: [],
@@ -269,14 +272,49 @@ class Events extends Component {
 
 
 	// Handle year selection
-	handleYearChange = (event) => {
-		// this.setState({  });
-        const currentMonth = new Date().getMonth() + 1;
-		this.setState({
-			defaultDate: `${event.target.value}-${String(currentMonth).padStart(2, '0')}-01`,
-			selectedYear: Number(event.target.value)
-		});
-	};
+handleYearChange = (event) => {
+  const year = Number(event.target.value);
+ 
+  const newDate = `${year}-01-01`;
+  const eventStartDate = `${year}-01-01`;
+  const newEndDate = `${year}-01-31`;
+  const eventEndDate = `${year}-12-31`;
+	this.setState(prevState => ({
+		 
+    selectedYear: year,
+	}));
+	localStorage.setItem('startDate', newDate);
+	localStorage.setItem('eventStartDate', eventStartDate);
+	localStorage.setItem('startDate', newDate);
+	
+	localStorage.setItem('eventEndDate', eventEndDate);
+	const birthdayEvents = this.state.employees.map(employee => {
+						if (!employee.dob) {
+							return null;
+						}
+						// Create birthday event for the selected year
+						const dob = new Date(employee.dob);
+						const month = dob.getMonth();
+						const day = dob.getDate();
+						const selectedYear = this.state.selectedYear;
+						const birthdayDate = new Date(selectedYear, month, day);
+
+						return {
+							id: `birthday_${employee.id}`,
+							event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
+							event_date: birthdayDate.toISOString().split('T')[0],
+							event_type: 'birthday',
+							employee_id: employee.id
+						};
+					}).filter(event => event !== null); // Remove null entries
+
+	this.fetchEvents(birthdayEvents);
+	this.fetchWorkingHoursReports();
+	this.getMissingReportEvents();
+	this.fetchLeaveData(localStorage.getItem('empId'), newDate, newEndDate);
+
+
+};
 
 	handleClose = (messageType) => {
 		if (messageType === 'success') {
@@ -351,6 +389,23 @@ class Events extends Component {
 		this.setState({ errors });
 		return isValid;
 	};
+
+	getAlternateSaturday = async () => {
+		const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
+		try {
+			const response = await fetch(
+				`${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${now.getFullYear()}`
+			);
+			const data = await response.json();
+
+			this.setState({
+				alternateSatudays: data?.data
+			})
+			
+		 } catch (error) {
+      console.error("Failed to fetch saved Saturdays:", error);
+    }
+	}
 
 	addEvent = (e) => {
 		// Prevent default form submission behavior
@@ -597,7 +652,24 @@ while (currentDate <= today && currentDate <= endDate) {
 
 // New method to fetch events
 fetchEvents = (birthdayEvents) => {
-	fetch(`${process.env.REACT_APP_API_URL}/events.php`, {
+	let startDate = localStorage.getItem('eventStartDate');
+	let endDate = localStorage.getItem('eventEndDate');
+
+	if (!startDate || !endDate) {
+	const now = new Date();
+
+		// First day of the current month
+		const firstDay = new Date(now.getFullYear(),1, 1);
+
+		// Last day of the current month
+const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the current year
+		const formatDate = (date) =>
+			date.toISOString().split('T')[0];
+
+		startDate = formatDate(firstDay);
+		endDate = formatDate(lastDay);
+	}
+	fetch(`${process.env.REACT_APP_API_URL}/events.php?start_date=${startDate}&end_date=${endDate}`, {
 		method: "GET",
 	})
 	.then(response => response.json())
@@ -608,39 +680,50 @@ fetchEvents = (birthdayEvents) => {
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
 			const selectedYear = this.state.selectedYear;
-
+			
 			// Combine regular events with birthday events
-			const allEvents = [...eventsData, ...birthdayEvents];
+			if (eventsData && eventsData.length > 0) {
+				const allEvents = [...eventsData, ...birthdayEvents];
+				console.log(
+					allEvents
+				);
+				// Filter events to include upcoming events, birthdays, and holidays for the selected year
+				const filteredEvents = allEvents.filter(event => {
+					if (!event || !event.event_date) {
+						return false;
+					}
+	
+					const eventDate = new Date(event.event_date);
+					const eventYear = eventDate.getFullYear();
+	
+					// For current year, only show future events
+					if (selectedYear === currentYear) {
+						return eventYear === selectedYear && eventDate >= today;
+					}
+					// For past years, show all events
+					else if (selectedYear < currentYear) {
+						return eventYear === selectedYear;
+					}
+					// For future years, show all events
+					else {
+						return eventYear === selectedYear;
+					}
+				});
+	
+	
+				this.setState({
+					events: filteredEvents,
+					loading: false
+				}, () => {
+				});
+			} else {
+				this.setState({
+					events: birthdayEvents,
+					loading: false
+				});
+			}
+			
 
-			// Filter events to include upcoming events, birthdays, and holidays for the selected year
-			const filteredEvents = allEvents.filter(event => {
-				if (!event || !event.event_date) {
-					return false;
-				}
-
-				const eventDate = new Date(event.event_date);
-				const eventYear = eventDate.getFullYear();
-
-				// For current year, only show future events
-				if (selectedYear === currentYear) {
-					return eventYear === selectedYear && eventDate >= today;
-				}
-				// For past years, show all events
-				else if (selectedYear < currentYear) {
-					return eventYear === selectedYear;
-				}
-				// For future years, show all events
-				else {
-					return eventYear === selectedYear;
-				}
-			});
-
-
-			this.setState({
-				events: filteredEvents,
-				loading: false
-			}, () => {
-			});
 		} else {
 			this.setState({ message: data.message, loading: false });
 		}
@@ -740,8 +823,7 @@ formatDateTimeAMPM = (timeString) => {
 
         // Generate an array of years
     	const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-		const filteredEvents = events
-		.map((event) => {
+		const filteredEvents = events?.map((event) => {
 			let eventDate = new Date(event.event_date);
 			let eventYear = eventDate.getFullYear();
 
@@ -802,22 +884,24 @@ formatDateTimeAMPM = (timeString) => {
 
 		// Add new Event Filter for no multiple time rendering 
 		const uniqueEventsMap = new Map();
-		filteredEvents.forEach(event => {
-			if (event.event_type === 'event') {
-				const key = event.event_name + '_' + event.event_date;
-				if (!uniqueEventsMap.has(key)) {
+		if (filteredEvents && filteredEvents.length > 0) {
+			filteredEvents.forEach(event => {
+				if (event.event_type === 'event') {
+					const key = event.event_name + '_' + event.event_date;
+					if (!uniqueEventsMap.has(key)) {
+						uniqueEventsMap.set(key, event);
+					}
+				} else if (event.event_type === 'birthday') {
+					// For birthday events, use a unique key that includes the employee ID
+					const key = `birthday_${event.id}`;
+					uniqueEventsMap.set(key, event);
+				} else if (event.event_type === 'holiday') {
+					// For holiday events, use a unique key
+					const key = `holiday_${event.id}`;
 					uniqueEventsMap.set(key, event);
 				}
-			} else if (event.event_type === 'birthday') {
-				// For birthday events, use a unique key that includes the employee ID
-				const key = `birthday_${event.id}`;
-				uniqueEventsMap.set(key, event);
-			} else if (event.event_type === 'holiday') {
-				// For holiday events, use a unique key
-				const key = `holiday_${event.id}`;
-				uniqueEventsMap.set(key, event);
-			}
-		});
+			});
+		}
 		const uniqueFilteredEvents = Array.from(uniqueEventsMap.values());
 
 		// Format filtered events, ensuring 'event' type events show up for all years
@@ -861,22 +945,24 @@ formatDateTimeAMPM = (timeString) => {
 
 		// Add new Event Filter for no multiple time rendering 
 		const uniqueEventsMap2 = new Map();
-		filteredEvents.forEach(event => {
-			if (event.event_type === 'event') {
-				const key = event.event_name + '_' + event.event_date;
-				if (!uniqueEventsMap2.has(key)) {
+		if (filteredEvents && filteredEvents.length > 0) {
+			filteredEvents.forEach(event => {
+				if (event.event_type === 'event') {
+					const key = event.event_name + '_' + event.event_date;
+					if (!uniqueEventsMap2.has(key)) {
+						uniqueEventsMap2.set(key, event);
+					}
+				} else if (event.event_type === 'birthday') {
+					// For birthday events, use a unique key that includes the employee ID
+					const key = `birthday_${event.id}`;
+					uniqueEventsMap2.set(key, event);
+				} else if (event.event_type === 'holiday') {
+					// For holiday events, use a unique key
+					const key = `holiday_${event.id}`;
 					uniqueEventsMap2.set(key, event);
 				}
-			} else if (event.event_type === 'birthday') {
-				// For birthday events, use a unique key that includes the employee ID
-				const key = `birthday_${event.id}`;
-				uniqueEventsMap2.set(key, event);
-			} else if (event.event_type === 'holiday') {
-				// For holiday events, use a unique key
-				const key = `holiday_${event.id}`;
-				uniqueEventsMap2.set(key, event);
-			}
-		});
+			});
+		}
 		const uniqueFilteredEvents2 = Array.from(uniqueEventsMap2.values());
 
 		 //Add new changes and create new functions
@@ -966,6 +1052,7 @@ formatDateTimeAMPM = (timeString) => {
 				// 	];
 				// }
 			//END
+
 
 
 
@@ -1267,9 +1354,14 @@ formatDateTimeAMPM = (timeString) => {
 											<Fullcalender 
 												events={this.state.allEvents} 
 												defaultDate={this.state.defaultDate}
+												alternateSatudays={this.state.alternateSatudays}
 												defaultView={defaultView}
 												onAction={this.fetchWorkingHoursReports}
 												dayCellClassNames={(arg) => {
+													console.log(
+														"fdd"
+													);
+													
 													const dateStr = arg.date.toISOString().split("T")[0];
 													const today = new Date();
 													today.setHours(0, 0, 0, 0);
