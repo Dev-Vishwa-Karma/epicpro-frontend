@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
-import { Callbacks } from 'jquery';
 import ReportModal from '../Report/ReportModal';
+import TodoList from './TodoList';
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -40,9 +40,12 @@ class Events extends Component {
       leaveData: [],
 	  allEvents: [],
       showReportModal: false,
-		selectedReport: null,
-		defaultDate: null,
-		alternateSatudays: [],
+	  selectedReport: null,
+	  defaultDate: new Date(),
+      selectedReport: null,
+	  showDeleteModal: false,
+	  eventIdToDelete: null,
+	  alternateSatudays: [],
 	};
 	localStorage.removeItem('empId');
 	localStorage.removeItem('startDate');
@@ -268,8 +271,6 @@ class Events extends Component {
 				this.setState({ leaveData: [] });
 			});
 	};
- 
-
 
 	// Handle year selection
 handleYearChange = (event) => {
@@ -479,33 +480,11 @@ handleYearChange = (event) => {
 		}
     };
 
-	handleEmployeeSelection = (e, context = 'todo') => {
-        const selectedId = e.target.value;
-		if (context === 'todo') {
-			this.setState({
-				selectedEmployeeIdForTodo: selectedId,
-				todos: [],
-			}, () => {
-				if (selectedId) {
-					this.fetchTodos(selectedId);
-				}
-			});
-		} else if (context === 'modal') {
-			this.setState({
-				selectedEmployeeIdForModal: selectedId,
-				errors: { ...this.state.errors, selectedEmployeeIdForModal: '' },
-			});
-		}
-    };
-
-
 	// add handle events delete
 	handleDeleteEvent = (eventId) => {
-		// Find the event to check its type
+		this.setState({ loading: true, showDeleteModal: false, eventIdToDelete: null });
 		const eventToDelete = this.state.events.find(ev => ev.id === eventId);
-		
 		if (!eventToDelete) {
-			console.error('Event not found:', eventId);
 			this.setState({
 				errorMessage: 'Event not found',
 				showError: true,
@@ -513,20 +492,6 @@ handleYearChange = (event) => {
 			});
 			return;
 		}
-
-		// Don't allow deletion of birthday events
-		if (eventToDelete.event_type === 'birthday') {
-			this.setState({
-				errorMessage: 'Birthday events cannot be deleted',
-				showError: true,
-				loading: false
-			});
-			return;
-		}
-
-		if (!window.confirm('Are you sure you want to delete this event?')) return;
-		this.setState({ loading: true });
-		
 		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=delete&event_id=${eventId}`, {
 			method: 'GET'
 		})
@@ -550,7 +515,6 @@ handleYearChange = (event) => {
 			}
 		})
 		.catch(err => {
-			console.error('Error deleting event:', err);
 			this.setState({
 				errorMessage: err.message || 'Failed to delete event',
 				showError: true,
@@ -560,6 +524,15 @@ handleYearChange = (event) => {
 		});
 	}
 
+	//Add new open delete modal
+	openDeleteModal = (eventId) => {
+		this.setState({ showDeleteModal: true, eventIdToDelete: eventId });
+	};
+
+	//Add new close delete modal
+	closeDeleteModal = () => {
+		this.setState({ showDeleteModal: false, eventIdToDelete: null });
+	};
 
 	formatLeaveEvents = (leaveData) => {
 		if (!Array.isArray(leaveData)) return [];
@@ -606,51 +579,30 @@ getMissingReportEvents = (workingHoursReports, officeClosures, selectedYear) => 
     const endDate = new Date(selectedYear, 11, 31);
     let currentDate = new Date(startDate);
 
-    // while (currentDate <= today && currentDate <= endDate) {
-    //     const dateStr = currentDate.toISOString().split("T")[0];
-    //     const isOfficeClosure = officeClosures.some(
-	// 	(closure) => closure.start === dateStr && (closure.event_type === 'holiday' || closure.event_type === 'weekend')
-	// 	);
-	// 		if (!isOfficeClosure) {
-    //         const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-    //         if (!hasReport) {
-    //             missingReportEvents.push({
-    //                 start: dateStr,
-    //                 display: 'background',
-    //                 color: '#fff',
-	// 				backgroundColor:'#fff',
-    //                 allDay: true,
-    //                 className: 'missing-report-day'
-    //             });
-    //         }
-    //     }
-    //     currentDate.setDate(currentDate.getDate() + 1);
-    // }
-while (currentDate <= today && currentDate <= endDate) {
-    const dateStr = currentDate.toISOString().split("T")[0];
-    const isOfficeClosure = officeClosures.some(
-        (closure) => closure.start === dateStr && (closure.event_type === 'holiday' || closure.event_type === 'weekend')
-    );
-    const dayOfWeek = currentDate.getDay(); 
-    if (!isOfficeClosure && dayOfWeek !==1 && dayOfWeek !==1) {
-        const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-        if (!hasReport) {
-            missingReportEvents.push({
-                start: dateStr,
-                display: 'background',
-                color: '#fff',
-                allDay: true,
-                className: 'missing-report-day'
-            });
-        }
-    }
-    currentDate.setDate(currentDate.getDate() + 1);
-}
+	while (currentDate <= today && currentDate <= endDate) {
+		const dateStr = currentDate.toISOString().split("T")[0];
+		const isOfficeClosure = officeClosures.some(
+			(closure) => closure.start === dateStr && (closure.event_type === 'holiday' || closure.event_type === 'weekend')
+		);
+		const dayOfWeek = currentDate.getDay(); 
+		if (!isOfficeClosure && dayOfWeek !==1 && dayOfWeek !==1) {
+			const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
+			if (!hasReport) {
+				missingReportEvents.push({
+					start: dateStr,
+					display: 'background',
+					color: '#fff',
+					allDay: true,
+					className: 'missing-report-day'
+				});
+			}
+		}
+		currentDate.setDate(currentDate.getDate() + 1);
+	}
 	
     return missingReportEvents;
 }
 
-// New method to fetch events
 fetchEvents = (birthdayEvents) => {
 	let startDate = localStorage.getItem('eventStartDate');
 	let endDate = localStorage.getItem('eventEndDate');
@@ -1010,8 +962,6 @@ formatDateTimeAMPM = (timeString) => {
 			}
 		}
 
-		
-
 		// Create events for days without reports
 		const missingReportEvents = this.getMissingReportEvents(workingHoursReports, officeClosures, selectedYear);
 		
@@ -1185,7 +1135,7 @@ formatDateTimeAMPM = (timeString) => {
 											<button
 												className="btn btn-link text-danger position-absolute"
 												title="Delete Event"
-												onClick={() => this.handleDeleteEvent(event.id)}
+												onClick={() => this.openDeleteModal(event.id)}
 												style={{
 												top: '2px',
 												right: '2px',
@@ -1231,62 +1181,9 @@ formatDateTimeAMPM = (timeString) => {
 											{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
 											<div className="todo_list mt-4">
 
-												{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin" || (Array.isArray(todos) && todos.length > 0)) && (
-													<h3 className="card-title">
-														ToDo List {/* <small>This Month task list</small> */}
-													</h3>
-												)}
-												
-												{/* Show dropdown only if user is admin/super_admin */}
-												{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-													<div className="form-group mt-3">
-														<label htmlFor="employeeSelect" className="form-label font-weight-bold">Select Employee</label>
-														<select
-															name="selectedEmployeeIdForTodo"
-															id="selectedEmployeeIdForTodo"
-															className="form-control custom-select"
-															value={selectedEmployeeIdForTodo}
-															onChange={(e) => this.handleEmployeeSelection(e, 'todo')}
-														>
-															<option value="">Select an Employee</option>
-															{employees.map((employee) => (
-																<option key={employee.id} value={employee.id}>
-																	{employee.first_name} {employee.last_name}
-																</option>
-															))}
-														</select>
-													</div>
-												)}
-
-												{/* Show only if todos exist */}
-												{Array.isArray(todos) && (					
-													<div className="todo-container mt-3" style={{ maxHeight: "250px", overflowY: "auto" }}>
-														<ul className="list-unstyled mb-0">
-															{selectedEmployeeIdForTodo === "" ? (
-																<li className="text-center w-100 small" /* style={{color: "#dc3545"}} */>Select an employee to view the To-Do list</li>
-															) : Array.isArray(todos) && todos.length > 0 ? (
-																todos.map((todo) => (
-																<li key={todo.id}>
-																	<label className="custom-control custom-checkbox">
-																		<input
-																			type="checkbox"
-																			className="custom-control-input"
-																			name="example-checkbox1"
-																			defaultValue="option1"
-																			/* defaultChecked */
-																		/>
-																		<span className="custom-control-label">
-																			{todo.title}
-																		</span>
-																	</label>
-																</li>
-																))
-															) : (
-																<li className="text-center w-100 small" style={{color: "#dc3545"}}>No todos available for this employee</li>
-															)}
-														</ul>
-													</div>
-												)}
+											{(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
+                      						<TodoList employees={employees} logged_in_employee_role={logged_in_employee_role} />
+                    						)}												
 											</div>
 											)}
 										</div>
@@ -1492,6 +1389,29 @@ formatDateTimeAMPM = (timeString) => {
 					/>
 				)}
 
+				{this.state.showDeleteModal && (
+					<div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+						<div className="modal-dialog" role="document">
+							<div className="modal-content">
+								<div className="modal-body">
+									<p>Are you sure you want to delete this event?</p>
+								</div>
+								<div className="modal-footer">
+									<button type="button" className="btn btn-secondary" onClick={this.closeDeleteModal}>
+										Cancel
+									</button>
+									<button
+										type="button"
+										className="btn btn-danger"
+										onClick={() => this.handleDeleteEvent(this.state.eventIdToDelete)}
+									>
+										Delete
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
             </>
         )
     }
