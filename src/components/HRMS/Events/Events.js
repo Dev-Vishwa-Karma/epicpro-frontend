@@ -40,10 +40,19 @@ class Events extends Component {
       leaveData: [],
 	  allEvents: [],
       showReportModal: false,
+	  selectedReport: null,
+	  defaultDate: new Date(),
       selectedReport: null,
-      showDeleteModal: false,
-      eventIdToDelete: null
-    };
+	  showDeleteModal: false,
+	  eventIdToDelete: null,
+	  alternateSatudays: [],
+	};
+	localStorage.removeItem('empId');
+	localStorage.removeItem('startDate');
+	localStorage.removeItem('eventStartDate');
+	localStorage.removeItem('eventEndDate');
+	localStorage.removeItem('endDate');
+	localStorage.removeItem('defaultView');
   }
 
 	componentDidMount() {
@@ -113,16 +122,54 @@ class Events extends Component {
 			});
 		
 
-		this.fetchWorkingHoursReports(id);
+		
+		this.fetchWorkingHoursReports(null);
 		// Fetch leave data for the current year
 		const start_date = `${this.state.selectedYear}-01-01`;
 		const end_date = `${this.state.selectedYear}-12-31`;     
 		this.fetchLeaveData(id, start_date, end_date);
+		this.getAlternateSaturday();
 	}
 
-  	fetchWorkingHoursReports = (employeeId) => {
+	fetchWorkingHoursReports = (employeeId) => {
+		console.log(
+			"employeId",
+			employeeId,
+			localStorage.getItem('empId')
+	
+		);
+		
+		if (!employeeId && !localStorage.getItem('empId')) {
+
+			return;				
+		}
+		if (!employeeId) {
+			employeeId = localStorage.getItem('empId')
+		}
+		
+			let startDate = localStorage.getItem('startDate');
+			let endDate = localStorage.getItem('endDate');
+
+			if (!startDate || !endDate) {
+			const now = new Date();
+
+				// First day of the current month
+				const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+
+				// Last day of the current month
+				const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+
+				// Format as YYYY-MM-DD
+				const formatDate = (date) =>
+					date.toISOString().split('T')[0];
+
+				startDate = formatDate(firstDay);
+				endDate = formatDate(lastDay);
+			}
+
 		fetch(
-		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}`,
+			
+		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
 		{
 			method: "GET",
 		}
@@ -133,7 +180,7 @@ class Events extends Component {
 			}
 			return response.json();
 		})
-		.then((data) => {
+			.then((data) => {
 			if (data.status === "success") {
 				if(employeeId == ''){
 					this.setState({ 
@@ -153,7 +200,7 @@ class Events extends Component {
 				});
 			}
 		})
-		.catch((err) => {
+			.catch((err) => {
 			console.error("Error fetching working hours:", err);
 			this.setState({ 
 				workingHoursReports: [],
@@ -234,9 +281,49 @@ class Events extends Component {
 	};
 
 	// Handle year selection
-	handleYearChange = (event) => {
-		this.setState({ selectedYear: Number(event.target.value) });
-	};
+handleYearChange = (event) => {
+  const year = Number(event.target.value);
+ 
+  const newDate = `${year}-01-01`;
+  const eventStartDate = `${year}-01-01`;
+  const newEndDate = `${year}-01-31`;
+  const eventEndDate = `${year}-12-31`;
+	this.setState(prevState => ({
+		 
+    selectedYear: year,
+	}));
+	localStorage.setItem('startDate', newDate);
+	localStorage.setItem('eventStartDate', eventStartDate);
+	localStorage.setItem('startDate', newDate);
+	
+	localStorage.setItem('eventEndDate', eventEndDate);
+	const birthdayEvents = this.state.employees.map(employee => {
+						if (!employee.dob) {
+							return null;
+						}
+						// Create birthday event for the selected year
+						const dob = new Date(employee.dob);
+						const month = dob.getMonth();
+						const day = dob.getDate();
+						const selectedYear = this.state.selectedYear;
+						const birthdayDate = new Date(selectedYear, month, day);
+
+						return {
+							id: `birthday_${employee.id}`,
+							event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
+							event_date: birthdayDate.toISOString().split('T')[0],
+							event_type: 'birthday',
+							employee_id: employee.id
+						};
+					}).filter(event => event !== null); // Remove null entries
+
+	this.fetchEvents(birthdayEvents);
+	this.fetchWorkingHoursReports();
+	this.getMissingReportEvents();
+	this.fetchLeaveData(localStorage.getItem('empId'), newDate, newEndDate);
+
+
+};
 
 	handleClose = (messageType) => {
 		if (messageType === 'success') {
@@ -311,6 +398,23 @@ class Events extends Component {
 		this.setState({ errors });
 		return isValid;
 	};
+
+	getAlternateSaturday = async () => {
+		const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
+		try {
+			const response = await fetch(
+				`${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${now.getFullYear()}`
+			);
+			const data = await response.json();
+
+			this.setState({
+				alternateSatudays: data?.data
+			})
+			
+		 } catch (error) {
+      console.error("Failed to fetch saved Saturdays:", error);
+    }
+	}
 
 	addEvent = (e) => {
 		// Prevent default form submission behavior
@@ -447,12 +551,12 @@ class Events extends Component {
 		const start = new Date(leave.from_date);
 		const end = new Date(leave.to_date);
 			if (end >= today) {
-			const loopStart = start < today ? new Date(today) : new Date(start);
+				const loopStart = start < today ? new Date(today) : new Date(start);
 			 	for (let d = new Date(loopStart); d <= end; d.setDate(d.getDate() + 1)) {
 					if (d >= today) {
 					if (leave.is_half_day === "1") {
 				events.push({
-					title: leave.reason,
+					title: '',
 					start: d.toISOString().split("T")[0],
 					className: "half-day-leave-event",
 					allDay: true,
@@ -460,7 +564,7 @@ class Events extends Component {
 				});
 			} else {
 				events.push({
-					title: leave.reason,
+					title: '',
 					start: d.toISOString().split("T")[0],
 					className: "leave-event",
 					allDay: true,
@@ -508,9 +612,26 @@ getMissingReportEvents = (workingHoursReports, officeClosures, selectedYear) => 
 }
 
 fetchEvents = (birthdayEvents) => {
-	fetch(`${process.env.REACT_APP_API_URL}/events.php`, {
-    method: "GET",
-  })
+	let startDate = localStorage.getItem('eventStartDate');
+	let endDate = localStorage.getItem('eventEndDate');
+
+	if (!startDate || !endDate) {
+	const now = new Date();
+
+		// First day of the current month
+		const firstDay = new Date(now.getFullYear(),1, 1);
+
+		// Last day of the current month
+const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the current year
+		const formatDate = (date) =>
+			date.toISOString().split('T')[0];
+
+		startDate = formatDate(firstDay);
+		endDate = formatDate(lastDay);
+	}
+	fetch(`${process.env.REACT_APP_API_URL}/events.php?start_date=${startDate}&end_date=${endDate}`, {
+		method: "GET",
+	})
 	.then(response => response.json())
 	.then(data => {
 		if (data.status === 'success') {
@@ -519,40 +640,50 @@ fetchEvents = (birthdayEvents) => {
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
 			const selectedYear = this.state.selectedYear;
-
+			
 			// Combine regular events with birthday events
-			const allEvents = [...eventsData, ...birthdayEvents];
+			if (eventsData && eventsData.length > 0) {
+				const allEvents = [...eventsData, ...birthdayEvents];
+				console.log(
+					allEvents
+				);
+				// Filter events to include upcoming events, birthdays, and holidays for the selected year
+				const filteredEvents = allEvents.filter(event => {
+					if (!event || !event.event_date) {
+						return false;
+					}
+	
+					const eventDate = new Date(event.event_date);
+					const eventYear = eventDate.getFullYear();
+	
+					// For current year, only show future events
+					if (selectedYear === currentYear) {
+						return eventYear === selectedYear && eventDate >= today;
+					}
+					// For past years, show all events
+					else if (selectedYear < currentYear) {
+						return eventYear === selectedYear;
+					}
+					// For future years, show all events
+					else {
+						return eventYear === selectedYear;
+					}
+				});
+	
+	
+				this.setState({
+					events: filteredEvents,
+					loading: false
+				}, () => {
+				});
+			} else {
+				this.setState({
+					events: birthdayEvents,
+					loading: false
+				});
+			}
+			
 
-			// Filter events to include upcoming events, birthdays, and holidays for the selected year
-			const filteredEvents = allEvents.filter(event => {
-				if (!event || !event.event_date) {
-					return false;
-				}
-
-				const eventDate = new Date(event.event_date);
-				const eventYear = eventDate.getFullYear();
-
-				// For current year, only show future events
-				if (selectedYear === currentYear) {
-					return eventYear === selectedYear && eventDate >= today;
-				}
-				// For past years, show all events
-				else if (selectedYear < currentYear) {
-					return eventYear === selectedYear;
-				}
-				// For future years, show all events
-				else {
-					return eventYear === selectedYear;
-				}
-			});
-
-
-			this.setState({
-				events: filteredEvents,
-				loading: false
-			}, () => {
-				//console.log('Updated state with events:', this.state.events); // Debug log
-			});
 		} else {
 			this.setState({ message: data.message, loading: false });
 		}
@@ -573,6 +704,7 @@ handleReportClick = (report) => {
             errorMessage: 'No report data available',
             showError: true
         });
+		
         setTimeout(() => this.setState({ showError: false, errorMessage: '' }), 3000);
         return;
     }
@@ -641,15 +773,17 @@ formatDateTimeAMPM = (timeString) => {
 		const currentDate = new Date();
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth() + 1;
-        const defaultDate = `${selectedYear}-${String(currentMonth).padStart(2, '0')}-01`;
+		this.state.defaultDate = localStorage.getItem('startDate') ??
+			`${selectedYear}-${String(currentMonth).padStart(2, '0')}-01`;
+		const defaultView = localStorage.getItem('defaultView') ?? 'month';
+
         const startYear = currentYear - 1;
         const endYear = currentYear + 10;
 		
 
         // Generate an array of years
     	const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-		const filteredEvents = events
-		.map((event) => {
+		const filteredEvents = events?.map((event) => {
 			let eventDate = new Date(event.event_date);
 			let eventYear = eventDate.getFullYear();
 
@@ -710,22 +844,24 @@ formatDateTimeAMPM = (timeString) => {
 
 		// Add new Event Filter for no multiple time rendering 
 		const uniqueEventsMap = new Map();
-		filteredEvents.forEach(event => {
-			if (event.event_type === 'event') {
-				const key = event.event_name + '_' + event.event_date;
-				if (!uniqueEventsMap.has(key)) {
+		if (filteredEvents && filteredEvents.length > 0) {
+			filteredEvents.forEach(event => {
+				if (event.event_type === 'event') {
+					const key = event.event_name + '_' + event.event_date;
+					if (!uniqueEventsMap.has(key)) {
+						uniqueEventsMap.set(key, event);
+					}
+				} else if (event.event_type === 'birthday') {
+					// For birthday events, use a unique key that includes the employee ID
+					const key = `birthday_${event.id}`;
+					uniqueEventsMap.set(key, event);
+				} else if (event.event_type === 'holiday') {
+					// For holiday events, use a unique key
+					const key = `holiday_${event.id}`;
 					uniqueEventsMap.set(key, event);
 				}
-			} else if (event.event_type === 'birthday') {
-				// For birthday events, use a unique key that includes the employee ID
-				const key = `birthday_${event.id}`;
-				uniqueEventsMap.set(key, event);
-			} else if (event.event_type === 'holiday') {
-				// For holiday events, use a unique key
-				const key = `holiday_${event.id}`;
-				uniqueEventsMap.set(key, event);
-			}
-		});
+			});
+		}
 		const uniqueFilteredEvents = Array.from(uniqueEventsMap.values());
 
 		// Format filtered events, ensuring 'event' type events show up for all years
@@ -737,11 +873,11 @@ formatDateTimeAMPM = (timeString) => {
 				for (let year = startYear; year <= endYear; year++) {
 					const newEventDate = new Date(eventDate);
 					newEventDate.setFullYear(year);
-		
 					formattedEventForAllYears.push({
-						title: event.event_name,
+						title: event.event_name.length > 6 ? event.event_name.substring(0, 6).concat('...') : event.event_name,
+						toottip: event.event_name,
 						start: newEventDate.toISOString().split('T')[0],
-						className: 'blue-event'
+						className: 'green-event'
 					});
 				}
 		
@@ -750,7 +886,8 @@ formatDateTimeAMPM = (timeString) => {
 		
 			if (event.event_type === 'holiday') {
 				return {
-					title: event.event_name,
+					title: event.event_name.length > 6 ? event.event_name.substring(0,6).concat('....') : event.event_name,
+					toottip: event.event_name,
 					start: event.event_date,
 					className: 'red-event'
 				};
@@ -758,60 +895,61 @@ formatDateTimeAMPM = (timeString) => {
 
 			if (event.event_type === 'birthday') {
 				return {
-					title: `${event.event_name}`,
+					title: event.event_name.length > 6 ? event.event_name.substring(0,6).concat('....') : event.event_name,
+						toottip: event.event_name,
+				
 					start: event.event_date,
-					className: 'green-event'
+					className: 'blue-event'
 				};
 			}
 		}).flat();
 
 		// Add new Event Filter for no multiple time rendering 
 		const uniqueEventsMap2 = new Map();
-		filteredEvents.forEach(event => {
-			if (event.event_type === 'event') {
-				const key = event.event_name + '_' + event.event_date;
-				if (!uniqueEventsMap2.has(key)) {
+		if (filteredEvents && filteredEvents.length > 0) {
+			filteredEvents.forEach(event => {
+				if (event.event_type === 'event') {
+					const key = event.event_name + '_' + event.event_date;
+					if (!uniqueEventsMap2.has(key)) {
+						uniqueEventsMap2.set(key, event);
+					}
+				} else if (event.event_type === 'birthday') {
+					// For birthday events, use a unique key that includes the employee ID
+					const key = `birthday_${event.id}`;
+					uniqueEventsMap2.set(key, event);
+				} else if (event.event_type === 'holiday') {
+					// For holiday events, use a unique key
+					const key = `holiday_${event.id}`;
 					uniqueEventsMap2.set(key, event);
 				}
-			} else if (event.event_type === 'birthday') {
-				// For birthday events, use a unique key that includes the employee ID
-				const key = `birthday_${event.id}`;
-				uniqueEventsMap2.set(key, event);
-			} else if (event.event_type === 'holiday') {
-				// For holiday events, use a unique key
-				const key = `holiday_${event.id}`;
-				uniqueEventsMap2.set(key, event);
-			}
-		});
+			});
+		}
 		const uniqueFilteredEvents2 = Array.from(uniqueEventsMap2.values());
 
 		 //Add new changes and create new functions
          //add this function for calculate totalworking hour or coloring according to  workinh hours
         const workingHoursEvents = workingHoursReports.map((report) => {
-            console.log('Creating event for report:', report); 
             const hoursStr = report.todays_working_hours?.slice(0, 5);
             const hours = parseFloat(hoursStr);
 
-            let backgroundColor = "#4ee44e";
-            if (hours < 4) backgroundColor = "#D6010133";
-            else if (hours < 8) backgroundColor = "#87ceeb";
+            let className = "daily-report";
+			if (hours < 4) className = "red-event";
+			else if (hours >= 4  && hours < 8) className = "half-day-leave-event";
+				
+            // else if (hours < 8) backgroundColor = "#87ceeb";
 
             const event = {
                 id: report.id,
                 title: `${hoursStr}`,
                 start: report.created_at?.split(" ")[0],
                 display: "background",
-                borderColor: backgroundColor,
-                backgroundColor: backgroundColor,
                 allDay: true,
-                className: "daily-report"
+                className: className
             };
-            console.log('Created event:', event);
             return event;
         });
 
         // Debug log for all events
-        console.log('All working hours events:', workingHoursEvents);
 
 		const officeClosures = [];
 		const startDate = new Date(selectedYear, 0, 1);
@@ -873,6 +1011,7 @@ formatDateTimeAMPM = (timeString) => {
 				// 	];
 				// }
 			//END
+
 
 
 
@@ -1090,6 +1229,9 @@ formatDateTimeAMPM = (timeString) => {
 													const start_date = `${selectedYear}-01-01`;
 													const end_date = `${selectedYear}-12-31`;
 													this.fetchLeaveData(empId, start_date, end_date);
+													// empId ?
+														localStorage.setItem('empId', empId) 
+														// localStorage.removeItem('empId')
 													this.fetchWorkingHoursReports(empId);
 													// After fetching, update allEvents for the selected employee
 													setTimeout(() => {
@@ -1117,8 +1259,15 @@ formatDateTimeAMPM = (timeString) => {
 											{/* Pass the formatted events to the FullCalendar component */}
 											<Fullcalender 
 												events={this.state.allEvents} 
-												defaultDate={defaultDate}
+												defaultDate={this.state.defaultDate}
+												alternateSatudays={this.state.alternateSatudays}
+												defaultView={defaultView}
+												onAction={this.fetchWorkingHoursReports}
 												dayCellClassNames={(arg) => {
+													console.log(
+														"fdd"
+													);
+													
 													const dateStr = arg.date.toISOString().split("T")[0];
 													const today = new Date();
 													today.setHours(0, 0, 0, 0);
@@ -1144,15 +1293,13 @@ formatDateTimeAMPM = (timeString) => {
 													return "";
 												}}
 												eventClick={(info) => {
-													console.log('Event info received:', info);
-													// The event data is directly in the info object
+													// The event data is directly in the info
 													const eventData = info;
 													// Try to find the corresponding report in workingHoursReports
 													const report = this.state.workingHoursReports.find(r => 
 														r.id === eventData.id || 
 														r.created_at?.split(" ")[0] === eventData.start?.format('YYYY-MM-DD')
 													);
-													console.log('Found report:', report);
 													if (report) {
 														this.handleReportClick(report);
 													} else {

@@ -14,11 +14,37 @@ class Dashboard extends Component {
 			user: authService.getUser(),
 			projects: [],
 			loading: true,
+			showBirthdayBannerModal: false,
+			defaultProfileUrl: true,
+			birthdayMessage: '',
+			dontShowAgain: false
 		};
 	}
 
 	componentDidMount() {
 		var loggedInUser = JSON.parse(localStorage.getItem('user')); // Get logged-in user details
+
+		const isMale = this.state.user.gender === 'male';
+		this.setState({
+			defaultProfileUrl : isMale ? '../../assets/images/sm/avatar2.jpg' : '../../assets/images/sm/avatar1.jpg',
+		});
+
+		const todayMD = new Date().toISOString().slice(5, 10);
+		const dob = loggedInUser.dob?.slice(5, 10);
+
+		if (localStorage.getItem("isBirthdayBannerVisible") !== 'false' && dob === todayMD) {
+			const messages = [
+				"Wishing you an incredible year filled with success, happiness, and health!",
+				"May your day be as amazing as you are!",
+				"Cheers to another year of greatness!",
+				"Enjoy your special day to the fullest!",
+				"May your birthday be filled with laughter and love!",
+			];
+			const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+		    this.setState({ birthdayMessage: randomMessage });
+
+			this.openBirthdayBannerModel();
+		}
 
 		// Make the GET API call when the component is mounted
 		fetch(`${process.env.REACT_APP_API_URL}/dashboard.php`, {
@@ -71,9 +97,29 @@ class Dashboard extends Component {
         });
 	}
 
+	openBirthdayBannerModel = () => {
+		this.setState({
+			showBirthdayBannerModal: true
+		});
+    };
+
+	closeBirthdayBannerModal = () => {
+		if (this.state.dontShowAgain) {
+    		localStorage.setItem("isBirthdayBannerVisible", 'false');
+  		}
+
+		this.setState({
+			showBirthdayBannerModal: false,
+		});
+    };
+
+	handleCheckboxChange = (e) => {
+		this.setState({ dontShowAgain: e.target.checked });
+	};
+
 	render() {
 		const { fixNavbar } = this.props;
-		const { totalUsers, totalEmployees, totalHolidays, totalEvents, user, projects, message, loading } = this.state;
+		const { totalUsers, totalEmployees, totalHolidays, totalEvents, user, projects, message, loading, showBirthdayBannerModal } = this.state;
 		return (
 			<>
 				<div>
@@ -247,6 +293,68 @@ class Dashboard extends Component {
 						</div>
 					</div>
 				</div>
+				{/* Modal for show birthday banner */}
+				{showBirthdayBannerModal && (
+				<div
+					className="modal fade show d-block"
+					id="birthdayBannerModal"
+					tabIndex="-1"
+					role="dialog"
+					style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+					>
+					<div className="modal-dialog modal-dialog-centered" role="document">
+						<div className="modal-content text-center p-4" style={{ borderRadius: '15px', background: 'linear-gradient(to right, #ffecd2, #fcb69f)' }}>
+						
+							{/* Modal Header */}
+							<div className="modal-header border-0">
+								<h5 className="modal-title w-100 text-dark display-6 fw-bold">🎉 Happy Birthday! 🎂 </h5>
+							</div>
+
+							{/* Modal Body */}
+							<div className="modal-body">
+								<img
+									src={this.state.user.profile || this.state.defaultProfileUrl}
+									alt={this.state.user.first_name}
+									className="rounded-circle shadow mb-3"
+									width="130"
+									height="130"
+								/>
+								<h3 className="fw-bold text-dark mb-2">{ this.state.user.first_name } {this.state.user.last_name}</h3>
+								<p className="lead text-dark">
+									{this.state.birthdayMessage}
+								</p>
+								<p className="text-muted small mt-3">
+								— From all of us at <strong>Profilics Systems PVT. LTD.</strong>
+								</p>
+								<div className="form-check mt-4">
+									<input
+										className="form-check-input"
+										type="checkbox"
+										id="dontShowAgain"
+										onChange={this.handleCheckboxChange}
+										checked={this.state.dontShowAgain}
+										/>
+									<label className="form-check-label" htmlFor="dontShowAgain">
+										Don’t show this again
+									</label>
+								</div>
+							</div>
+
+							{/* Modal Footer */}
+							<div className="modal-footer border-0 justify-content-center">
+								<button
+								type="button"
+								className="btn btn-outline-dark px-4"
+								onClick={this.closeBirthdayBannerModal}
+								>
+								Thank You
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				)}
 			</>
 		);
 	}

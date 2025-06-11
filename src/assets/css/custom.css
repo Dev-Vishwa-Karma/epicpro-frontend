@@ -10,22 +10,23 @@
     color: #007bff !important;
 }
 
-.green-event {
+.blue-event {
     background-color: #0879FA !important;
-    border-color: #0879FA !important;
+    border: none !important;
     color: #fff !important;
     text-align: center !important;
 }
   
 .red-event {
     background-color: #ee8c81 !important;
-    border-color: #FDECEA !important;
+    border: none !important;
     color: #fff !important;
     text-align: center !important;
 }
 
-.blue-event{
+.green-event{
     background-color: #4FA845 !important;
+    border: none !important;
     color: #fff !important;
     text-align: center !important;
 }
@@ -69,8 +70,11 @@ div.rtl{
 
 .holiday-event {
     background-color: #fdecea !important; 
-    border-left: 6px solid #d9534f !important;
-    color: #d9534f !important;
+border-left: 6px solid #e6140d !important;
+  color: red !important;
+}
+.fc-unthemed .fc-content {
+    border: none !important;
 }
 
 .regular-event {
@@ -140,13 +144,13 @@ div.rtl{
 }
 
 .missing-report-day {
-  background-color: rgba(255, 0, 0, 0.2) !important;
+  background-color: red !important;
   border: none !important;
-  opacity: 1 !important;
+  /* opacity: 1 !important; */
 }
 
 .no-report-day {
-  background-color: rgba(255, 0, 0, 0.2) !important;
+  background-color: red !important;
 }
 
 .fc .fc-daygrid-day.fc-day-today {
@@ -168,15 +172,18 @@ div.rtl{
 .fc-event.leave-event .fc-content {
     color: black !important;
     font-weight:500;
-}
 
+}
+.fc-event  {
+    background-color: transparent !important;
+}
 .fc .leave-event {
     opacity: 0.7;
     text-align: center !important;
 }
 
 .half-day-leave-event{
-    background-color: #87ceeb !important;
+    /* background-color: #87ceeb !important; */
     color: black !important;
     border: none !important;
     text-align: center !important;
@@ -189,8 +196,13 @@ div.rtl{
 }
 
 .office-closure-event {
-    /* background-color: #fff !important;
-    border-color: #fff !important; 
-    color: #fff !important;  */
+    background-color: #fff !important;
+    border: none !important; 
+    color: #fff !important; 
     font-weight: bold;
+    font-weight: bold;
+}
+
+.alternate-saturday-closure{
+    background-color: chocolate !important;
 }
