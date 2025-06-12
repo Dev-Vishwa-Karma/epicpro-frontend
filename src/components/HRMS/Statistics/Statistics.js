@@ -350,7 +350,9 @@ class Statistics extends Component {
               <div className="ml-auto">
                 <span style={{ backgroundColor: "#ff0000", color: "#fff", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Leave</span>
                 <span style={{ backgroundColor: "#00ffff", color: "#000", padding: "4px 8px", borderRadius: "4px", marginRight: "10px" }}>Half day</span>
-                <span style={{ backgroundColor: "#28a745", color: "#000", padding: "4px 8px", borderRadius: "4px" }}>Extra working</span>
+                <span style={{ backgroundColor: "#28a745", color: "#000", padding: "4px 8px", borderRadius: "4px",marginRight: "10px" }}>Extra working</span>
+                <span style={{ backgroundColor: "#FAAA69", color: "#000", padding: "4px 8px", borderRadius: "4px",marginRight: "10px"  }}>Holiday</span>
+                <span style={{ backgroundColor: "#fff2cc", color: "#000", padding: "4px 8px", borderRadius: "4px" }}>Alternate Saturday/Sunday</span>
               </div>
             </div>  
 
@@ -381,9 +383,9 @@ class Statistics extends Component {
   
                     // Highlight entire row if Sunday or alternate Saturday
                     const highlightRow = isAlternateSaturday || isSunday || isHoliday;
-  
+                  
                     return (
-                      <tr key={rowIndex} style={highlightRow ? { backgroundColor: '#fff2cc' } : {}}>
+                      <tr key={rowIndex} style={highlightRow ? { backgroundColor: isHoliday ? '#FAAA69' : '#fff2cc' } : {}}>
                         <td style={{backgroundColor: "#b7e1cd"}}>{day.display}</td>
                         {sortedEmployees.map((employee, colIndex) => {
                           const value = dayAttendance[employee.id] || "";
