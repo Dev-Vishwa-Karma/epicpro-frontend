@@ -82,7 +82,9 @@ class Events extends Component {
 		this.getAlternateSaturday();
 	}
 
-	fetchWorkingHoursReports = (employeeId) => {
+	fetchWorkingHoursReports = () => {
+		const employeeId = window.user?.role !== 'admin' ?
+			this.state.calendarView == 'report' ? window.user.id: null : null;
 	if (!employeeId && !localStorage.getItem('empId')) {
 		return;
 	}
@@ -508,9 +510,9 @@ formatDate = (date) => {
 };
 	
 // Add this method to calculate missing reports for any employee
-getMissingReportEvents = (workingHoursReports, selectedYear) => {
+	getMissingReportEvents = (workingHoursReports, selectedYear) => {
+	
     const missingReportEvents = [];
-    if (!workingHoursReports || workingHoursReports.length === 0) return missingReportEvents;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const startDate = new Date(selectedYear, 0, 1);
@@ -1257,6 +1259,7 @@ formatDateTimeAMPM = (timeString) => {
 						</div>
 					</div>
 				)}
+
 
 				{this.state.showReportModal && this.state.selectedReport && (
 					<ReportModal

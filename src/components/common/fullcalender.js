@@ -95,7 +95,8 @@ class Fullcalender extends Component {
                                                 saturday.forEach((element) => {
                                                     if (
                                                         this.formatDate(date) === this.formatDate(element) &&
-                                                        event.className === 'missing-report-day'
+                                                       ( event.className === 'missing-report-day' || 
+                                                        event.className === 'leave-event')
                                                     ) {
                                                         cell.css('background-color', 'white');
                                                     }
