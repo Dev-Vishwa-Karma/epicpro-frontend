@@ -62,12 +62,13 @@ class Header extends Component {
         userId: id,
         userRole: role,
       });
+     
     }
 
     // Proceed with the punch-in status check
     this.startTimerInterval();
     this.getPunchInStatus();
-    this.getActivities();
+  //  this.getActivities();
     this.getBreakInStatus();
   }
 
@@ -328,6 +329,7 @@ class Header extends Component {
   };
 
   handlePunchOut = () => {
+    this.getActivities();
     this.getBreakInStatus();
     const { start_time, break_duration_in_minutes } = this.state;
     const currentTime = new Date();
@@ -725,15 +727,16 @@ class Header extends Component {
                 <h1 className="page-title">{this.props.dataFromSubParent}</h1>
               </div>
               <div className="right">
-                <button
-                  className="btn btn-primary"
-                  onClick={
-                    isPunchedIn ? this.handlePunchOut : this.handlePunchIn
-                  }
-                >
-                  {isPunchedIn ? `Punch Out : ${elapsedFormatted}` : "Punch In"}
-                </button>
-
+                {window.user && (window.user.role === 'employee') && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={
+                      isPunchedIn ? this.handlePunchOut : this.handlePunchIn
+                    }
+                  >
+                    {isPunchedIn ? `Punch Out : ${elapsedFormatted}` : "Punch In"}
+                  </button>
+                )}
                 <div className="notification d-flex">
                   <div className="dropdown d-flex">
                     <a
