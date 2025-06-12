@@ -74,43 +74,92 @@ class Events extends Component {
 				}
 			}
 		);
+		this.fetchEmployees();
+		this.fetchWorkingHoursReports(null);
+		const start_date = `${this.state.selectedYear}-01-01`;
+		const end_date = `${this.state.selectedYear}-12-31`;     
+		this.fetchLeaveData(id, start_date, end_date);
+		this.getAlternateSaturday();
+	}
 
-		// Check if user is admin or superadmin
-		
-			// Fetch employees data if user is admin or super_admin
-			fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-				method: "GET",
-			})
+	fetchWorkingHoursReports = (employeeId) => {
+	if (!employeeId && !localStorage.getItem('empId')) {
+		return;
+	}
+	if (!employeeId) {
+		employeeId = localStorage.getItem('empId');
+	}
+
+	let startDate = localStorage.getItem('startDate');
+	let endDate = localStorage.getItem('endDate');
+
+	if (!startDate || !endDate) {
+		const now = new Date();
+		const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+		const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+		const formatDate = (date) => date.toISOString().split('T')[0];
+		startDate = formatDate(firstDay);
+		endDate = formatDate(lastDay);
+	}
+
+	fetch(
+		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
+		{ method: 'GET' }
+	)
+		.then((response) => {
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		return response.json();
+		})
+		.then((data) => {
+		// Defer state update
+		setTimeout(() => {
+			if (data.status === 'success') {
+			if (employeeId === '') {
+				this.setState({ workingHoursReports: [] });
+			} else {
+				this.setState({
+				workingHoursReports: data.data,
+				loading: false,
+				});
+			}
+			} else {
+			this.setState({
+				workingHoursReports: [],
+				error: data.message || 'Failed to load reports',
+				loading: false,
+			});
+			}
+		}, 0);
+		})
+		.catch((err) => {
+		console.error('Error fetching working hours:', err);
+		// Defer state update
+		setTimeout(() => {
+			this.setState({
+			workingHoursReports: [],
+			error: 'Failed to fetch working hours',
+			loading: false,
+			});
+		}, 0);
+		});
+	};
+
+	fetchEmployees = () => {
+		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
+			method: "GET",
+		})
 			.then(response => response.json())
 			.then(data => {
 				if (data.status === 'success') {
-					// Process employees to create birthday events
-					const birthdayEvents = data.data.map(employee => {
-						if (!employee.dob) {
-							return null;
-						}
-						// Create birthday event for the selected year
-						const dob = new Date(employee.dob);
-						const month = dob.getMonth();
-						const day = dob.getDate();
-						const selectedYear = this.state.selectedYear;
-						const birthdayDate = new Date(selectedYear, month, day);
-
-						return {
-							id: `birthday_${employee.id}`,
-							event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
-							event_date: birthdayDate.toISOString().split('T')[0],
-							event_type: 'birthday',
-							employee_id: employee.id
-						};
-					}).filter(event => event !== null); // Remove null entries
-
+		
 					this.setState({
 						employees: data.data,
 						loading: false
 					}, () => {
 						// Fetch regular events after setting employees
-						this.fetchEvents(birthdayEvents);
+						this.fetchEvents();
 					});
 				} else {
 					this.setState({ error: data.message, loading: false });
@@ -120,119 +169,11 @@ class Events extends Component {
 				//console.error('Error fetching employees:', err); // Debug log
 				this.setState({ error: 'Failed to fetch employees data' });
 			});
-		
-
-		
-		this.fetchWorkingHoursReports(null);
-		// Fetch leave data for the current year
-		const start_date = `${this.state.selectedYear}-01-01`;
-		const end_date = `${this.state.selectedYear}-12-31`;     
-		this.fetchLeaveData(id, start_date, end_date);
-		this.getAlternateSaturday();
 	}
-
-	fetchWorkingHoursReports = (employeeId) => {
-		console.log(
-			"employeId",
-			employeeId,
-			localStorage.getItem('empId')
-	
-		);
-		
-		if (!employeeId && !localStorage.getItem('empId')) {
-
-			return;				
-		}
-		if (!employeeId) {
-			employeeId = localStorage.getItem('empId')
-		}
-		
-			let startDate = localStorage.getItem('startDate');
-			let endDate = localStorage.getItem('endDate');
-
-			if (!startDate || !endDate) {
-			const now = new Date();
-
-				// First day of the current month
-				const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-
-				// Last day of the current month
-				const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-
-				// Format as YYYY-MM-DD
-				const formatDate = (date) =>
-					date.toISOString().split('T')[0];
-
-				startDate = formatDate(firstDay);
-				endDate = formatDate(lastDay);
-			}
-
-		fetch(
-			
-		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
-		{
-			method: "GET",
-		}
-		)
-		.then((response) => {
-			if (!response.ok) {
-				throw new Error("Network response was not ok");
-			}
-			return response.json();
-		})
-			.then((data) => {
-			if (data.status === "success") {
-				if(employeeId == ''){
-					this.setState({ 
-						workingHoursReports: []
-					});
-				}else{
-					this.setState({ 
-						workingHoursReports: data.data,
-						loading: false 
-					});
-				}
-			} else {
-				this.setState({ 
-					workingHoursReports: [],
-					error: data.message || "Failed to load reports",
-					loading: false 
-				});
-			}
-		})
-			.catch((err) => {
-			console.error("Error fetching working hours:", err);
-			this.setState({ 
-				workingHoursReports: [],
-				error: "Failed to fetch working hours",
-				loading: false 
-			});
-		});
-		};
-
-		
-	isMonday = (date) => {
-		return date.getDay() === 1; // 0 is Sunday, 1 is Monday, etc.
-	};
 
 	hasReportForDate = (dateStr, reports) => {
 		return reports.some((report) => report.created_at?.split(" ")[0] === dateStr);
 	};
-
-
-	isAlternateSunday = (date) => {
-		if (date.getDay() !== 0) return false; // Not Sunday
-			const firstSunday = new Date(date.getFullYear(), 0, 1);
-			while (firstSunday.getDay() !== 1) 
-		{
-			firstSunday.setDate(firstSunday.getDate() + 1);
-		}
-			const diffInDays = Math.floor((date - firstSunday) / (1000 * 60 * 60 * 24));
-			const weekNumber = Math.floor(diffInDays / 7);
-			return weekNumber % 2 === 0; // Alternate every other week (0, 2, 4...)
-	};
-
-
 	fetchTodos = (employeeId) => {
 		if (!employeeId) {
 			this.setState({ todos: [] }); // Ensure todos is always an array
@@ -297,27 +238,7 @@ handleYearChange = (event) => {
 	localStorage.setItem('startDate', newDate);
 	
 	localStorage.setItem('eventEndDate', eventEndDate);
-	const birthdayEvents = this.state.employees.map(employee => {
-						if (!employee.dob) {
-							return null;
-						}
-						// Create birthday event for the selected year
-						const dob = new Date(employee.dob);
-						const month = dob.getMonth();
-						const day = dob.getDate();
-						const selectedYear = this.state.selectedYear;
-						const birthdayDate = new Date(selectedYear, month, day);
-
-						return {
-							id: `birthday_${employee.id}`,
-							event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
-							event_date: birthdayDate.toISOString().split('T')[0],
-							event_type: 'birthday',
-							employee_id: employee.id
-						};
-					}).filter(event => event !== null); // Remove null entries
-
-	this.fetchEvents(birthdayEvents);
+	this.fetchEvents();
 	this.fetchWorkingHoursReports();
 	this.getMissingReportEvents();
 	this.fetchLeaveData(localStorage.getItem('empId'), newDate, newEndDate);
@@ -577,8 +498,17 @@ handleYearChange = (event) => {
     return events;
 };
 
+
+formatDate = (date) => {
+	const d = new Date(date);
+	const year = d.getFullYear();
+	const month = (`0${d.getMonth() + 1}`).slice(-2);
+	const day = (`0${d.getDate()}`).slice(-2);
+	return `${year}-${month}-${day}`;
+};
+	
 // Add this method to calculate missing reports for any employee
-getMissingReportEvents = (workingHoursReports, officeClosures, selectedYear) => {
+getMissingReportEvents = (workingHoursReports, selectedYear) => {
     const missingReportEvents = [];
     if (!workingHoursReports || workingHoursReports.length === 0) return missingReportEvents;
     const today = new Date();
@@ -587,48 +517,75 @@ getMissingReportEvents = (workingHoursReports, officeClosures, selectedYear) => 
     const endDate = new Date(selectedYear, 11, 31);
     let currentDate = new Date(startDate);
 
+	
 	while (currentDate <= today && currentDate <= endDate) {
 		const dateStr = currentDate.toISOString().split("T")[0];
-		const isOfficeClosure = officeClosures.some(
-			(closure) => closure.start === dateStr && (closure.event_type === 'holiday' || closure.event_type === 'weekend')
-		);
-		const dayOfWeek = currentDate.getDay(); 
-		if (!isOfficeClosure && dayOfWeek !==1 && dayOfWeek !==1) {
-			const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-			if (!hasReport) {
-				missingReportEvents.push({
+		
+		const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
+			// this.state.allEvents
+		if (!hasReport) {
+
+					missingReportEvents.push({
 					start: dateStr,
 					display: 'background',
 					color: '#fff',
 					allDay: true,
-					className: 'missing-report-day'
-				});
-			}
-		}
+						className: 'missing-report-day'
+					
+					}); 
+				}
+				
 		currentDate.setDate(currentDate.getDate() + 1);
 	}
+
+	if (missingReportEvents && missingReportEvents.length > 0) {
+		missingReportEvents.forEach((event) => {
+			this.state.leaveData.forEach(element => {
+				if (this.formatDate(element.from_date) == this.formatDate(event.start) && element.is_half_day == '1') {
+					event.className = 'half-day-leave-event'
+				}
+			})
+						
+		})
+	}
+	
 	
     return missingReportEvents;
 }
 
-fetchEvents = (birthdayEvents) => {
+fetchEvents = () => {
 	let startDate = localStorage.getItem('eventStartDate');
 	let endDate = localStorage.getItem('eventEndDate');
 
 	if (!startDate || !endDate) {
-	const now = new Date();
-
-		// First day of the current month
+		const now = new Date();
 		const firstDay = new Date(now.getFullYear(),1, 1);
-
-		// Last day of the current month
-const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the current year
+		const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the current year
 		const formatDate = (date) =>
-			date.toISOString().split('T')[0];
-
+		date.toISOString().split('T')[0];
 		startDate = formatDate(firstDay);
 		endDate = formatDate(lastDay);
 	}
+	const birthdayEvents = this.state.employees.map(employee => {
+		if (!employee.dob) {
+			return null;
+		}
+		// Create birthday event for the selected year
+		const dob = new Date(employee.dob);
+		const month = dob.getMonth();
+		const day = dob.getDate();
+		const selectedYear = this.state.selectedYear;
+		const birthdayDate = new Date(selectedYear, month, day);
+
+		return {
+			id: `birthday_${employee.id}`,
+			event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
+			event_date: birthdayDate.toISOString().split('T')[0],
+			event_type: 'birthday',
+			employee_id: employee.id
+		};
+	}).filter(event => event !== null); // Remove null entries
+
 	fetch(`${process.env.REACT_APP_API_URL}/events.php?start_date=${startDate}&end_date=${endDate}`, {
 		method: "GET",
 	})
@@ -644,37 +601,9 @@ const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the cur
 			// Combine regular events with birthday events
 			if (eventsData && eventsData.length > 0) {
 				const allEvents = [...eventsData, ...birthdayEvents];
-				console.log(
-					allEvents
-				);
-				// Filter events to include upcoming events, birthdays, and holidays for the selected year
-				const filteredEvents = allEvents.filter(event => {
-					if (!event || !event.event_date) {
-						return false;
-					}
-	
-					const eventDate = new Date(event.event_date);
-					const eventYear = eventDate.getFullYear();
-	
-					// For current year, only show future events
-					if (selectedYear === currentYear) {
-						return eventYear === selectedYear && eventDate >= today;
-					}
-					// For past years, show all events
-					else if (selectedYear < currentYear) {
-						return eventYear === selectedYear;
-					}
-					// For future years, show all events
-					else {
-						return eventYear === selectedYear;
-					}
-				});
-	
-	
 				this.setState({
-					events: filteredEvents,
+					events: allEvents,
 					loading: false
-				}, () => {
 				});
 			} else {
 				this.setState({
@@ -862,6 +791,7 @@ formatDateTimeAMPM = (timeString) => {
 				}
 			});
 		}
+
 		const uniqueFilteredEvents = Array.from(uniqueEventsMap.values());
 
 		// Format filtered events, ensuring 'event' type events show up for all years
@@ -930,7 +860,8 @@ formatDateTimeAMPM = (timeString) => {
          //add this function for calculate totalworking hour or coloring according to  workinh hours
         const workingHoursEvents = workingHoursReports.map((report) => {
             const hoursStr = report.todays_working_hours?.slice(0, 5);
-            const hours = parseFloat(hoursStr);
+			const hours = parseFloat(hoursStr);
+			
 
             let className = "daily-report";
 			if (hours < 4) className = "red-event";
@@ -947,73 +878,39 @@ formatDateTimeAMPM = (timeString) => {
                 className: className
             };
             return event;
-        });
-
-        // Debug log for all events
-
-		const officeClosures = [];
-		const startDate = new Date(selectedYear, 0, 1);
-		const endDate = new Date(selectedYear, 11, 31);
-
-		// this condition apply only on employees other wise remove this condition
-		if (logged_in_employee_role === "employee") {
-			for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-				if (this.isMonday(d) || this.isAlternateSunday(d)) {
-					officeClosures.push({
-					start: new Date(d).toISOString().split("T")[0],
-					// title: "Office Off",
-					event_type: "weekend",
-					allDay: true,
-					backgroundColor:'#fff',
-					className: "office-closure-event",
-					});
-				}
-			}
-		}
+		});
+		
 
 		// Create events for days without reports
-		const missingReportEvents = this.getMissingReportEvents(workingHoursReports, officeClosures, selectedYear);
+		const missingReportEvents = this.getMissingReportEvents(workingHoursReports, selectedYear);
+		console.log(
+			missingReportEvents
+		);
+		// Pass all events in fullcalendar
+		const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
 		
-				// Pass all events in fullcalendar
-				const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
-				
-					this.state.allEvents = [
-						...workingHoursEvents,     
-						...leaveEvents,
-						...missingReportEvents,
-						...officeClosures
+			this.state.allEvents = [
+				...workingHoursEvents,     
+				...leaveEvents,
+				...missingReportEvents,
 
-					];
-					if (calendarView === "any") {
-					this.state.allEvents = [];
-				}
+			];
+			if (calendarView === "any") {
+			this.state.allEvents = [];
+		}
 
-				if (calendarView === "report") {
-					this.state.allEvents = [
-						...workingHoursEvents,
-						...officeClosures,
-						...missingReportEvents,
-						...leaveEvents,
-					];
-				}
-				if (calendarView === "event") {
-					this.state.allEvents = [
-						...formattedEvents,
-						...officeClosures
-					];
-				}
-
-				// Remove this duplicate addition of missing reports
-				// if (calendarView !== "any") {
-				// 	this.state.allEvents = [
-				// 		...this.state.allEvents,
-				// 		...missingReportEvents
-				// 	];
-				// }
-			//END
-
-
-
+		if (calendarView === "report") {
+			this.state.allEvents = [
+				...workingHoursEvents,
+				...missingReportEvents,
+				...leaveEvents,
+			];
+		}
+		if (calendarView === "event") {
+			this.state.allEvents = [
+				...formattedEvents,
+			];
+		}
 
         return (
             <>
@@ -1235,7 +1132,7 @@ formatDateTimeAMPM = (timeString) => {
 													this.fetchWorkingHoursReports(empId);
 													// After fetching, update allEvents for the selected employee
 													setTimeout(() => {
-														const missingReportEvents = this.getMissingReportEvents(this.state.workingHoursReports, officeClosures, selectedYear);
+														const missingReportEvents = this.getMissingReportEvents(this.state.workingHoursReports, selectedYear);
 														this.setState({
 															allEvents: [
 																...this.state.allEvents,
@@ -1263,35 +1160,7 @@ formatDateTimeAMPM = (timeString) => {
 												alternateSatudays={this.state.alternateSatudays}
 												defaultView={defaultView}
 												onAction={this.fetchWorkingHoursReports}
-												dayCellClassNames={(arg) => {
-													console.log(
-														"fdd"
-													);
-													
-													const dateStr = arg.date.toISOString().split("T")[0];
-													const today = new Date();
-													today.setHours(0, 0, 0, 0);
-													
-													const cellDate = new Date(arg.date);
-													cellDate.setHours(0, 0, 0, 0);
-
-													const isWeekend = arg.date.getDay() === 0 || arg.date.getDay() === 6;
-													const isOfficeClosure = officeClosures.some(
-														(closure) => closure.start === dateStr
-													);
-													
-													if (isWeekend || isOfficeClosure) {
-														return "";
-													}
-
-													const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
-													
-													if (!hasReport && cellDate <= today) {
-														return "no-report-day";
-													}
-
-													return "";
-												}}
+												callEventAPI={this.fetchEvents}
 												eventClick={(info) => {
 													// The event data is directly in the info
 													const eventData = info;
