@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import CountUp from 'react-countup';
 import { connect } from 'react-redux';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 import {
 	statisticsAction,
 	statisticsCloseAction
@@ -91,6 +93,9 @@ class Employee extends Component {
 			addLeaveErrors: {},
 			selectedLeaveEmployeeId: '',
 			allEmployeesData: [],
+			fromDate: null,
+			toDate: null,
+			selectedLeaveEmployee: (window.user.role === 'admin' || window.user.role === 'super_admin') ? "" : window.user.id,
 		};
 	}
 	handleStatistics(e) {
@@ -139,7 +144,7 @@ class Employee extends Component {
 				employee_id: id || null,
 				logged_in_employee_role: role || null,
 			});
-	
+			
 			const apiUrl = process.env.REACT_APP_API_URL;
 			let employeesUrl = "";
 			let leavesUrl = "";
@@ -147,7 +152,8 @@ class Employee extends Component {
 			// Role-based API selection
 			if (role === "admin" || role === "super_admin") {
 				employeesUrl = `${apiUrl}/get_employees.php?action=view&role=employee`; // Fetch all employees
-				leavesUrl = `${apiUrl}/employee_leaves.php`; // Fetch all leaves
+				leavesUrl = `${apiUrl}/employee_leaves.php?action=view&employee_id=`; // Fetch all leaves
+
 			} else if (role === "employee") {
 				employeesUrl = `${apiUrl}/get_employees.php?action=view&user_id=${id}`; // Fetch only logged-in employee
 				leavesUrl = `${apiUrl}/employee_leaves.php?employee_id=${id}`; // Fetch only logged-in employee's leaves
@@ -196,38 +202,53 @@ class Employee extends Component {
 			console.warn("window.user is undefined");
 		}
 	}
+	
 
-	fetchEmployeeAndLeavesById = (employeeId) => {
-		const apiUrl = process.env.REACT_APP_API_URL;
-		const leavesUrl = `${apiUrl}/employee_leaves.php?employee_id=${employeeId}`;
-		this.setState({ loading: true });
+	fetchEmployeeLeaves = () => {
+        const { fromDate, toDate, selectedLeaveEmployee } = this.state;
+		console.log('pppppppppppppppppp',fromDate)
+        let apiUrl = `${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&employee_id=${selectedLeaveEmployee}`;
+        
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); 
+            const day = String(date.getDate()).padStart(2, '0'); 
+            return `${year}-${month}-${day}`; 
+        };
 
-		Promise.all([
-			fetch(leavesUrl, { method: "GET" }).then(res => res.json()),
-		])
-		.then(([employeeData, employeeLeavesData]) => {
-			let employeesArray = Array.isArray(employeeData.data) ? employeeData.data : [employeeData.data];
-			let employeesLeaveArray = Array.isArray(employeeLeavesData.data) ? employeeLeavesData.data : [employeeLeavesData.data];
+        if (fromDate) {
+            apiUrl += `&start_date=${formatDate(fromDate)}`;
+        }
+        if (toDate) {
+            apiUrl += `&end_date=${formatDate(toDate)}`;
+        }
 
-			const { totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, cancelledLeaves } = 
-				this.calculateLeaveCounts(employeesLeaveArray);
+        fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+				console.log('employeesLeaveArray',data.data)
+				let employeesLeaveArray = Array.isArray(data.data) ? data.data : [data.data];
+                    this.setState({ 
+                        //reports: data.data,
+                        employeeLeavesData: employeesLeaveArray,
+                        loading: false,
+                        error: null 
+                    });
+                
+            }else {
+                this.setState({ 
+                    error: data.message || 'Failed to fetch reports',
+                    loading: false,
+                    employeeLeavesData: []
+                });
+            }
+        });
+    }
 
-			this.setState({
-				employeeData: employeesArray,
-				employeeLeavesData: employeesLeaveArray,
-				totalLeaves,
-				pendingLeaves,
-				approvedLeaves,
-				rejectedLeaves,
-				cancelledLeaves,
-				loading: false,
-			});
-		})
-		.catch(err => {
-			this.setState({ message: "Failed to fetch data", loading: false });
-			console.error(err);
-		});
-	};
+	handleApplyFilters = () => {
+        this.fetchEmployeeLeaves();
+    };
 		
 	goToEditEmployee(employee, employeeId) {
 		// Fetch salary details based on employee_id
@@ -267,6 +288,42 @@ class Employee extends Component {
 	// Function to handle tab change
     handleTabChange = (tabId) => {
         this.setState({ activeTab: tabId });
+		if(tabId === 'Employee-Request'){
+			const now = new Date();
+			const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+			const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+			// Set the state for fromDate and toDate
+			this.setState({
+				fromDate: firstDay,
+				toDate: lastDay
+			});
+			setTimeout(() => {
+				this.fetchEmployeeLeaves();
+			}, 3000);
+		}
+			
+
+    };
+
+	handleDateChange = (date, type) => {
+        const { fromDate, toDate } = this.state;
+        if (date) {
+            const newDate = new Date(date);
+            if (type === 'fromDate') {
+                this.setState({ fromDate: newDate });
+               
+            } else if (type === 'toDate') {
+                this.setState({ toDate: newDate });
+            }
+         
+        } else {
+            this.setState({ [type]: null });
+        }
+    };
+
+
+	handleEmployeeChange = (event) => {
+        this.setState({ selectedLeaveEmployee: event.target.value });
     };
 
 	// Function for "Add" button based on active tab
@@ -722,7 +779,8 @@ class Employee extends Component {
 
 	render() {
 		const { fixNavbar, /* statisticsOpen, statisticsClose */ } = this.props;
-		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, cancelledLeaves, message, selectedEmployeeLeave, currentPageEmployees,  currentPageLeaves, dataPerPage, loading } = this.state;
+			
+		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, cancelledLeaves, message, selectedEmployeeLeave, currentPageEmployees,  currentPageLeaves, dataPerPage, loading, fromDate, toDate, selectedLeaveEmployee } = this.state;
 
 		// Handle empty employee data safely
 		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
@@ -958,32 +1016,66 @@ class Employee extends Component {
 									<div className="tab-pane fade" id="Employee-Request" role="tabpanel">
 										<div className="card">
 											<div className="card-header">
-												<h3 className="card-title">Leave List</h3>
-												{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
-													<div style={{ marginLeft: 'auto', minWidth: 220 }}>
-														<select
-															className="form-control"
-															value={this.state.selectedLeaveEmployeeId || ''}
-															onChange={e => {
-																const selectedId = e.target.value;
-																this.setState({ selectedLeaveEmployeeId: selectedId, currentPageLeaves: 1 }, () => {
-																	if (selectedId) {
-																		this.fetchEmployeeAndLeavesById(this.state.selectedLeaveEmployeeId);
-																	} else {
-																		this.componentDidMount(); //Add Componentdidmount to reload all employees and leaves
-																	}
-																});
-															}}
-														>
-															<option value="">All Employees</option>
-															{this.state.allEmployeesData.map(emp => (
-																<option key={emp.id} value={emp.id}>
-																	{emp.first_name} {emp.last_name}
-																</option>
-															))}
-														</select>
-													</div>
-												)}
+                                                <div className="row">
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">From Date</label>
+                                                            <DatePicker
+                                                                selected={this.state.fromDate ? new Date(this.state.fromDate) : null}
+                                                                onChange={(date) => this.handleDateChange(date, 'fromDate')}
+                                                                className="form-control"
+                                                                dateFormat="yyyy-MM-dd"
+                                                                placeholderText="From Date"
+                                                                //maxDate={new Date()}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">To Date</label>
+                                                            <DatePicker
+                                                                selected={this.state.toDate ? new Date(this.state.toDate) : null}
+                                                                onChange={(date) => this.handleDateChange(date, 'toDate')}
+                                                                className="form-control"
+                                                                dateFormat="yyyy-MM-dd"
+                                                                placeholderText="To Date"
+                                                               // minDate={fromDate}
+                                                               // maxDate={new Date()}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Select Employee</label>
+                                                            <select 
+                                                                className="form-control" 
+                                                                value={selectedLeaveEmployee} 
+                                                                onChange={this.handleEmployeeChange}
+                                                            >
+                                                                <option value="">All Employees</option>
+                                                                {this.state.allEmployeesData.map((employee) => (
+                                                                    <option key={employee.id} value={employee.id}>
+                                                                        {employee.first_name} {employee.last_name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div> 
+                                                    )}
+                                                    <div className="col-md-3">
+                                                        <div className="form-group">
+                                                            <label className="form-label">&nbsp;</label>
+                                                            <button 
+                                                                type="button" 
+                                                                className="btn btn-primary btn-block"
+                                                                onClick={this.handleApplyFilters}
+                                                            >
+                                                                Apply
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
 											</div>
 											<div className="card-body">
 												{loading ? (

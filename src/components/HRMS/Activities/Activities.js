@@ -416,7 +416,7 @@ class Activities extends Component {
 															this.setState({ filterEmployeeId: employeeId, loading: true });
 															let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php`;
 															if (employeeId) {
-																apiUrl += `?user_id=${this.state.filterEmployeeId}`;
+																apiUrl += `?user_id=${employeeId}`;
 															}
 															const res = await fetch(apiUrl);
 															const data = await res.json();
