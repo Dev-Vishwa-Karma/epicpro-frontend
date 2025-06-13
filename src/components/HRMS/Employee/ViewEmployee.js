@@ -33,8 +33,16 @@ class ViewEmployee extends Component {
             leaves: [],
             calendarEventsData: [],
             showReportModal: false,
-            selectedReport: null
+            selectedReport: null,
+            alternateSatudays: []
         };
+
+        localStorage.removeItem('empId');
+        localStorage.removeItem('startDate');
+        localStorage.removeItem('eventStartDate');
+        localStorage.removeItem('eventEndDate');
+        localStorage.removeItem('endDate');
+        localStorage.removeItem('defaultView');
     }
 
     // Function to dismiss messages
@@ -51,9 +59,10 @@ class ViewEmployee extends Component {
         const { employee, employeeId } = this.props.location.state || {};
         // Always force calendar tab open on mount
         this.setState({ activeTab: "calendar" });
+        const isAdmin = window.user.role === 'super_admin' || window.user.role === 'admin';
+
 
         // Get the logged-in user from localStorage
-        const storedUser = JSON.parse(localStorage.getItem("user")) || null;
 
         // Set the state with the employee data
         if (employee) {
@@ -64,20 +73,13 @@ class ViewEmployee extends Component {
             });
         }
 
-        // If viewing the logged-in user's profile, use the latest localStorage data
-        if (storedUser && employee && storedUser.id === employee.id) {
-            this.setState({
-                employee: { ...this.state.employee, ...storedUser },
-                employeeId: storedUser.id,
-                previewImage: `${process.env.REACT_APP_API_URL}/${storedUser.profile}`
-            });
+        if (!isAdmin) {
+            if (employeeId) {
+                this.fetchEmployeeDetails(employeeId);
+            }
+            this.loadEmployeeData();
+            this.getAlternateSaturday();
         }
-
-        if (employeeId) {
-            this.fetchEmployeeDetails(employeeId);
-        }
-        this.loadEmployeeData();
-        this.fetchWorkingHoursReports(null);
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -93,15 +95,19 @@ class ViewEmployee extends Component {
             this.fetchEmployeeDetails(employeeId);
         }
 
-        if (employeeId && employeeId !== prevState.employeeId) {
-        this.loadEmployeeData();
-    }
-
          // Watch for tab change even if pathname is same
         if (tab && tab !== prevProps.location.state?.tab) {
             this.setState({ activeTab: tab });
         }
     }
+
+    formatDate = (date) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = (`0${d.getMonth() + 1}`).slice(-2);
+        const day = (`0${d.getDate()}`).slice(-2);
+        return `${year}-${month}-${day}`;
+    };
 
     // Common fetch function
     fetchData = (url, onSuccessKey) => {
@@ -122,32 +128,7 @@ class ViewEmployee extends Component {
         });
     }
 
-    // Helper function to check if a date is a Monday
-    isMonday = (date) => {
-        return date.getDay() === 1; // Monday is 1
-    };
-
-    // Helper function to check if a Sunday is an alternate Sunday
-    isAlternateSunday = (date) => {
-        if (date.getDay() !== 0) return false; // Not Sunday
-        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-        const firstSundayOfYear = new Date(firstDayOfYear);
-        // Find the first Sunday of the year
-        while (firstSundayOfYear.getDay() !== 0) {
-            firstSundayOfYear.setDate(firstSundayOfYear.getDate() + 1);
-        }
-
-        // Calculate the number of weeks between the first Sunday and the given date
-        const diffInTime = date.getTime() - firstSundayOfYear.getTime();
-        const diffInDays = diffInTime / (1000 * 60 * 60 * 24);
-        const weekNumber = Math.floor(diffInDays / 7);
-
-        return weekNumber % 2 === 0; // Alternate every other Sunday (0, 2, 4...)
-    };
-
     generateCalendarEvents = (reports, leaves) => {
-        const { employeeId } = this.state;
-        const logged_in_employee_role = window.user.role;
 
         // 1. Working Hours Events
         const totalWorkingHours = reports.map(report => {
@@ -179,40 +160,13 @@ class ViewEmployee extends Component {
                 for (let date = from.clone(); date.isSameOrBefore(to); date.add(1, 'days')) {
                     days.push({
                       start: date.format("YYYY-MM-DD"),
-                      backgroundColor: "red",
-                      borderColor: "red",
-                      textColor: "black",
-                      className: "leave-event-calender",
+                      className: "leave-event",
+                      
                     });
                 }
 
                 return days;
             });
-
-        // 3. Office Closure Events (Alternate Mondays and Tuesdays)
-        const officeClosures = [];
-        const currentYear = new Date().getFullYear(); // Consider a range, e.g., current year
-        const startDate = new Date(currentYear, 0, 1);
-        const endDate = new Date(currentYear, 11, 31);
-
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            // Check for alternate Monday and Tuesday
-            if (this.isMonday(d) || this.isAlternateSunday(d)) { // Assuming Monday and Alternate Sunday are the weekend
-                 // You might need to adjust the logic here based on your exact definition of 'Alternate monday and tuesday'
-                 // The current logic marks all Mondays and alternate Sundays as office closures.
-                officeClosures.push({
-                    start: new Date(d).toISOString().split("T")[0],
-                    event_type: "office-close",
-                    // backgroundColor: '#e9ecef',
-                    // borderColor: '#e9ecef',
-                    allDay: true,
-                    // display: 'background',
-                    className: "office-closure-event",
-                });
-            }
-        }
-         console.log('Generated officeClosures:', officeClosures);
-
 
         // 4. Missing Report Events
         const missingReportEvents = [];
@@ -221,83 +175,100 @@ class ViewEmployee extends Component {
 
         // Determine which reports to check based on employeeId in state
         let reportsForMissing = reports;
+        let startDate;
+        let endDate;
+        
+        const date = new Date();
+        const year = date.getFullYear();
+        const firstDay = new Date(year, 0, 1);
+        const lastDay = new Date(year, 11, 31);
+        const formatDate = (date) => date.toISOString().split('T')[0];
+        startDate = formatDate(firstDay);
+        endDate = formatDate(lastDay);
 
-        if (reportsForMissing.length > 0) {
-            const reportTimestamps = reportsForMissing.map(r => new Date(r.created_at).getTime());
-             // Find the earliest and latest report dates
-            const firstReportDate = new Date(Math.min(...reportTimestamps));
-            const lastReportDate = new Date(Math.max(...reportTimestamps));
-
-            let currentDate = new Date(firstReportDate);
-
-            while (currentDate <= today && currentDate <= lastReportDate) { // Iterate up to the latest report date or today, whichever is earlier
-                const dateStr = currentDate.toISOString().split("T")[0];
-
-                // Check if the current day is an office closure
-                 const isOfficeClosure = officeClosures.some(
-                    (closure) => closure.start === dateStr
-                );
-
-                // Check if there is a report for the current day
-                const hasReport = reportsForMissing.some((report) => report.created_at?.split(" ")[0] === dateStr);
-
-                if (!isOfficeClosure && !hasReport) {
-                     missingReportEvents.push({
-                         start: dateStr,
-                         display: 'background',
-                         color: '#ff6b6b', 
-                         allDay: true,
-                         className: 'missing-report-day',
-                        //  title: 'Missing Report' 
-                     });
-                }
-
-                currentDate.setDate(currentDate.getDate() + 1);
+        let currentDate = new Date(startDate);
+        
+        while (this.formatDate(currentDate) <= this.formatDate(today) && this.formatDate(currentDate) <= this.formatDate(endDate)) { // Iterate up to the latest report date or today, whichever is earlier
+            const dateStr = currentDate.toISOString().split("T")[0];
+            const hasReport = reportsForMissing.some((report) => report.created_at?.split(" ")[0] === dateStr);
+            if (!hasReport) {
+                    missingReportEvents.push({
+                        start: dateStr,
+                        display: 'background',
+                        color: '#ff6b6b', 
+                        allDay: true,
+                        className: 'missing-report-day',
+                    //  title: 'Missing Report' 
+                    });
             }
+
+            currentDate.setDate(currentDate.getDate() + 1);
         }
-         console.log('Generated missingReportEvents:', missingReportEvents);
-
-
+        
         // Merge all events
         const calendarEvents = [
             ...totalWorkingHours,
             ...employeeLeavesData,
-            ...officeClosures,
             ...missingReportEvents,
         ];
-         console.log('Final calendarEvents:', calendarEvents);
-
 
         return calendarEvents;
     }
 
+    getAlternateSaturday = async () => {
+        const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
+        try {
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${now.getFullYear()}`
+            );
+            const data = await response.json();
+
+            this.setState({
+                alternateSatudays: data?.data
+            })
+			
+        } catch (error) {
+            console.error("Failed to fetch saved Saturdays:", error);
+        }
+    }
+
     loadEmployeeData = () => {
         const baseUrl = process.env.REACT_APP_API_URL;
-        const { employeeId } = this.state;
-        const isAdmin = window.user.role === 'super_admin' || window.user.role === 'admin';
-        const userId = window.user.id;
+        let { employeeId } = this.state;
 
-        const currentEmployeeId = employeeId || userId; // Use employeeId if available, otherwise use logged-in userId
+        if (!employeeId) {
+			employeeId = localStorage.getItem('empId');
+		}
+        let startDate = localStorage.getItem('startDate');
+        let endDate = localStorage.getItem('endDate');
+
+		if (!startDate || !endDate) {
+			const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+            const formatDate = (date) => date.toISOString().split('T')[0];
+			startDate = formatDate(firstDay);
+            endDate = formatDate(lastDay);
+        }
+        const currentEmployeeId = employeeId;
 
         if (currentEmployeeId) {
             // Fetch activities
             this.fetchData(`${baseUrl}/activities.php?user_id=${currentEmployeeId}`, 'activities');
 
             // Fetch reports
-            fetch(`${baseUrl}/reports.php?user_id=${currentEmployeeId}`, {
+            fetch(`${baseUrl}/reports.php?user_id=${currentEmployeeId}&from_date=${startDate}&to_date=${endDate}`, {
                 method: "GET",
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     const reports = data.data;
-                     console.log('Fetched reports for calendar:', reports);
                      this.setState({ reports }, () => {
                          // Generate calendar events after reports and leaves are fetched and state is updated
                          const { reports, leaves } = this.state;
                          const calendarEventsData = this.generateCalendarEvents(reports, leaves);
                          this.setState({ calendarEventsData });
-                         console.log('Calendar events data set in state:', this.state.calendarEventsData);
                      });
                 } else {
                     this.setState({ errorMessage: data.message, reports: [] });
@@ -325,13 +296,11 @@ class ViewEmployee extends Component {
             .then(data => {
                 if (data.status === 'success') {
                     const leaves = data.data;
-                     console.log('Fetched leaves for calendar:', leaves);
                     this.setState({ leaves }, () => {
                          // Generate calendar events after reports and leaves are fetched and state is updated
                          const { reports, leaves } = this.state;
                          const calendarEventsData = this.generateCalendarEvents(reports, leaves);
                          this.setState({ calendarEventsData });
-                         console.log('Calendar events data set in state:', this.state.calendarEventsData);
                     });
                 } else {
                     this.setState({ errorMessage: data.message, leaves: [] });
@@ -664,13 +633,10 @@ class ViewEmployee extends Component {
     };
 
     handleEventClick = (eventInfo) => {
-        console.log('Event clicked:', eventInfo);
-        
         // The event data is directly in the eventInfo object
         const report = eventInfo.report;
         
         if (report) {
-            console.log('Found report:', report);
             this.setState({
                 selectedReport: report,
                 showReportModal: true
@@ -689,11 +655,14 @@ class ViewEmployee extends Component {
 
     render() {
         const { fixNavbar} = this.props;
-        const {employee, activities, reports, leaves, errorMessage, calendarEventsData, showReportModal, selectedReport} = this.state;
+        const {employee, activities, errorMessage, calendarEventsData} = this.state;
         // Handle case where employee data is not available
         if (!employee) {
             return <p>Loading employee details...</p>;
         }
+        const defaultDate = localStorage.getItem('startDate') ??
+			`${new Date().getFullYear()}-${String(new Date().getMonth()).padStart(2, '0')}-01`;
+		const defaultView = localStorage.getItem('defaultView') ?? 'month';
 
         // Use calendarEventsData from state, default to empty array if not yet loaded
         const finalCalendarEvents = calendarEventsData || [];
@@ -916,6 +885,9 @@ class ViewEmployee extends Component {
                                             </div>
                                             <div className="card-body">
                                                 <Fullcalender 
+                                                    alternateSatudays={this.state.alternateSatudays}
+                                                    defaultDate={defaultDate}
+                                                    defaultView={defaultView}
                                                     key={`calendar-${this.state.activeTab}`}
                                                     events={finalCalendarEvents}
                                                     eventClick={this.handleEventClick}
@@ -935,7 +907,7 @@ class ViewEmployee extends Component {
                                                         day: 'Day'
                                                     }}
                                                     height="auto"
-                                                    onAction={() => {}}
+                                                    onAction={this.loadEmployeeData}
                                                     eventTimeFormat={{
                                                         hour: '2-digit',
                                                         minute: '2-digit',

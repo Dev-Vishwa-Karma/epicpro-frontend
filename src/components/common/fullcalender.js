@@ -98,6 +98,8 @@ class Fullcalender extends Component {
                                                        ( event.className === 'missing-report-day' || 
                                                         event.className === 'leave-event')
                                                     ) {
+                                                       
+                                                        
                                                         cell.css('background-color', 'white');
                                                     }
                                                 });

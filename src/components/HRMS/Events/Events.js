@@ -83,7 +83,7 @@ class Events extends Component {
 	}
 
 	fetchWorkingHoursReports = () => {
-		const employeeId = window.user?.role !== 'admin' ?
+	let employeeId = window.user?.role !== 'admin' ?
 			this.state.calendarView == 'report' ? window.user.id: null : null;
 	if (!employeeId && !localStorage.getItem('empId')) {
 		return;
