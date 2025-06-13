@@ -550,7 +550,8 @@ class Menu extends Component {
 
 		const { isOpenRightSidebar, isOpenUserMenu } = this.state
 		const { darkMinSidebar, istoggleLeftMenu, friendListOpen, statisticsOpen, statisticsClose, friendListClose } = this.props
-		const pageHeading = Routes.filter((route) => route.path === this.props.location.pathname)
+
+		const pageHeading = Routes.filter((route) =>  route.path.split('/')[1] === this.props.location.pathname.split('/')[1])
 		
 		return (
 			<>

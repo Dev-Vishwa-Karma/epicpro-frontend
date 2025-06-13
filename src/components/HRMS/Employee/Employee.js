@@ -277,11 +277,7 @@ class Employee extends Component {
 
 	viewEmployee(employee, employeeId) {
 		this.props.history.push({
-			pathname: `/view-employee`,
-			state: { 
-				employee, 
-				employeeId,
-			}
+			pathname: `/view-employee/${employeeId}`,
 		});
 	}
 
