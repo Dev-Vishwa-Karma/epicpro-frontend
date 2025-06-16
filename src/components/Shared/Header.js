@@ -4,6 +4,7 @@ import { withRouter, NavLink } from "react-router-dom";
 import authService from "../Authentication/authService";
 import "react-datepicker/dist/react-datepicker.css";
 import { punchInAction } from '../../actions/settingsAction';
+import { breakInAction } from '../../actions/settingsAction';
 
 class Header extends Component {
   constructor(props) {
@@ -72,7 +73,20 @@ class Header extends Component {
     clearInterval(this.state.timer); // Stop the timer when component unmounts
   }
 
-  startTimerInterval = (punchInTime) => {
+  startTimerInterval = (punchInTime, isAutoClose = true) => {
+    if(punchInTime){
+        console.log('punchInTime',punchInTime)
+        const today = new Date();
+        console.log(punchInTime, today, punchInTime < today);
+        const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const punchInDateOnly = new Date(punchInTime.getFullYear(), punchInTime.getMonth(), punchInTime.getDate());
+        console.log(punchInDateOnly, todayDateOnly);
+      
+        if (isAutoClose && punchInDateOnly < todayDateOnly) {
+          this.autoCloseActivities(punchInTime);
+        }
+    }
+
     if (!punchInTime) {
       this.setState({
         elapsedTime: 0,
@@ -100,6 +114,41 @@ class Header extends Component {
 
     this.setState({ timer });
   };
+
+  autoCloseActivities = (punchInTime) => {
+    const punchInTimeDate = punchInTime.toISOString().split('T')[0];
+    console.log('yesterday----------',punchInTimeDate)
+    fetch(`${process.env.REACT_APP_API_URL}/auto_close_breaks_cron.php?date=${punchInTimeDate}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          this.props.punchInAction(false);
+          this.props.breakInAction(false);
+          this.setState({
+            punchInTime: null,
+          });
+          clearInterval(this.state.timer);
+          console.log('Successfully closed your breaks');
+        } else {
+          this.setState({
+            errorMessage: data.message,
+            showError: true,
+            showSuccess: false,
+            loading: false,
+          });
+          setTimeout(this.dismissMessages, 3000);
+        }
+      })
+      .catch((err) => {
+        this.setState({
+          errorMessage: "Failed to fetch data",
+          showError: true,
+          showSuccess: false,
+        });
+        setTimeout(this.dismissMessages, 3000);
+        console.error(err);
+      });
+  }
 
   getPunchInStatus = () => {
     fetch(
@@ -239,7 +288,7 @@ class Header extends Component {
               showSuccess: true,
             },
             () => {
-              this.startTimerInterval(punchInTime);
+              this.startTimerInterval(punchInTime, false);
             }
           );
           setTimeout(this.dismissMessages, 3000);
@@ -658,7 +707,7 @@ class Header extends Component {
                     <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                       <NavLink
                         to={{
-                          pathname: `/view-employee${userId}`,
+                          pathname: "/view-employee",
                           state: {
                             employee: user,
                             employeeId: userId,
@@ -677,7 +726,7 @@ class Header extends Component {
 
                       <NavLink
                         to={{
-                          pathname: `/view-employee/${userId}`,
+                          pathname: "/view-employee",
                           state: {
                             employee: user,
                             employeeId: userId,
@@ -696,7 +745,7 @@ class Header extends Component {
 
                       <NavLink
                         to={{
-                          pathname: `/view-employee/${userId}`,
+                          pathname: "/view-employee",
                           state: {
                             employee: user,
                             employeeId: userId,
@@ -928,7 +977,8 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  punchInAction: (e) => dispatch(punchInAction(e))
+  punchInAction: (e) => dispatch(punchInAction(e)),
+  breakInAction: (e) => dispatch(breakInAction(e))
 });
 // export default connect(mapStateToProps, mapDispatchToProps)(Header);
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Header));
