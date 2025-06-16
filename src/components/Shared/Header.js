@@ -707,7 +707,7 @@ class Header extends Component {
                     <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                       <NavLink
                         to={{
-                          pathname: "/view-employee",
+                          pathname: `/view-employee/${userId}`,
                           state: {
                             employee: user,
                             employeeId: userId,
