@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { breakInAction } from '../../../actions/settingsAction';
 class Activities extends Component {
 	constructor(props) {
 		super(props);
@@ -13,9 +14,7 @@ class Activities extends Component {
 			loading: true,
 			isBreakedIn: false,
 			filterEmployeeId: "",
-			isPunchIn: false,
 			breakReasonModal: false,
-
 			successMessage: "",
             showSuccess: false,
             errorMessage: "",
@@ -23,7 +22,7 @@ class Activities extends Component {
 		};
 	}
 
-	    // Function to dismiss messages
+	// Function to dismiss messages
     dismissMessages = () => {
         this.setState({
             showSuccess: false,
@@ -82,36 +81,30 @@ class Activities extends Component {
 			.then(data => {
 				if (data.status === 'success') {
 					this.setState({ isBreakedIn: true });
+					this.props.breakInAction(true);
 				} else {
 					this.setState({ isBreakedIn: false });
+					this.props.breakInAction(false);
 				}
 			})
 			.catch(err => {
 				this.setState({ error: 'Failed to fetch data' });
 				console.error(err);
 			});
-
-			this.getPunchInStatus()
-	}
-
-	getPunchInStatus = async () => {
-		try {
-			const response = await fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${window.user.id}`);
-			const data = await response.json();
-			if (data.status === 'success') {
-			this.setState({ isPunchIn: true });
-			} else {
-			this.setState({ isPunchIn: false });
-			}
-		} catch (err) {
-			this.setState({ error: 'Failed to fetch data' });
-			console.error(err);
-		}
 	}
 
 	openbreakReasonModal = () => {
-		this.getPunchInStatus()
-    	this.setState({ breakReasonModal: true });
+		if (!this.props.punchIn) {
+			this.setState({
+				errorMessage: "You need to Punch In first",
+				showError: true,
+				showSuccess: false,
+			});
+			setTimeout(this.dismissMessages, 3000);
+			return;
+		}
+
+		this.setState({ breakReasonModal: true });
   	};
 	
 	closebreakReasonModal = () => {
@@ -161,15 +154,6 @@ class Activities extends Component {
 	};
 
 	handleSaveBreakIn = () => {
-		if (this.state.isPunchIn === false) {
-			this.setState({
-				errorMessage: "You need to Punch In first",
-				showError: true,
-				showSuccess: false,
-			});
-			setTimeout(this.dismissMessages, 3000);
-			return;
-		}
 
 		if (!this.state.breakReason) {
 			this.setState({ activityError: 'Please provide the reason for your break' });
@@ -462,7 +446,7 @@ class Activities extends Component {
 													activities.map((activity, index) => (
 														<>
 															{/* In Time Entry */}
-															{activity.activity_type === 'Break' && (
+															{activity.type === 'Break_in' && (
 																<div className="timeline_item ">
 																	<img
 																		className="tl_avatar"
@@ -487,11 +471,11 @@ class Activities extends Component {
 																</div>
 															)}
 															{/* Out Time Entry */}
-															{activity.activity_type === 'Break' && activity.out_time && (
+															{activity.type === 'Break_out' && (
 																<>
-																	<div className="duration text-center">
+																	{/* <div className="duration text-center">
 																		------ {activity.duration} ------
-																	</div>
+																	</div> */}
 																	<div className="timeline_item ">
 																		<img
 																			className="tl_avatar"
@@ -517,7 +501,7 @@ class Activities extends Component {
 															)}
 
 															{/* In Time Entry Punch */}
-															{activity.activity_type === 'Punch' && (
+															{activity.type === 'Punch_in' && (
 																<div className="timeline_item ">
 																	<img
 																		className="tl_avatar"
@@ -542,11 +526,8 @@ class Activities extends Component {
 																</div>
 															)}
 															{/* Out Time Entry */}
-															{activity.activity_type === 'Punch' && activity.out_time && (
+															{activity.type === 'Punch_out' && (
 																<>
-																	<div className="duration text-center">
-																		------ {activity.duration} ------
-																	</div>
 																	<div className="timeline_item ">
 																		<img
 																			className="tl_avatar"
@@ -644,7 +625,7 @@ class Activities extends Component {
 						</div>
 					</div>
 
-					{/* Add Break reason Modal for loggedin employee */}
+		{/* Add Break reason Modal for loggedin employee */}
 		{this.state.breakReasonModal && (
           <div
             className="modal fade show d-block"
@@ -691,8 +672,11 @@ class Activities extends Component {
 	}
 }
 const mapStateToProps = state => ({
-	fixNavbar: state.settings.isFixNavbar
+	fixNavbar: state.settings.isFixNavbar,
+	punchIn: state.settings.isPunchIn
 })
 
-const mapDispatchToProps = dispatch => ({})
+const mapDispatchToProps = dispatch => ({
+	breakInAction: (e) => dispatch(breakInAction(e))
+})
 export default connect(mapStateToProps, mapDispatchToProps)(Activities);

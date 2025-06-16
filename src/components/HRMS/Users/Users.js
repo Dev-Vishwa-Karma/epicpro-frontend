@@ -40,26 +40,7 @@ class Users extends Component {
 			});
 		}
 
-		// Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=admin`, {
-			method: "GET",
-		})
-		.then(response => response.json())
-		.then(data => {
-			if (data.status === 'success') {
-			  	this.setState({
-					users: data.data, // only admin and super_admin users
-					allUsers: data.data,
-					loading: false
-				});
-			} else {
-			  	this.setState({ error: data.message, loading: false });
-			}
-		})
-		.catch(err => {
-			this.setState({ error: 'Failed to fetch data', loading: false });
-			console.error(err);
-		});
+		this.getAdmins();
 
 		// Fetch all users to generate the correct employee code
 		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
@@ -91,6 +72,28 @@ class Users extends Component {
         .catch(error => console.error("Error fetching departments:", error));
 	}
 
+	getAdmins = () => {
+		// Make the GET API call when the component is mounted
+		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=admin`, {
+			method: "GET",
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.status === 'success') {
+			  	this.setState({
+					users: data.data, // only admin and super_admin users
+					allUsers: data.data,
+					loading: false
+				});
+			} else {
+			  	this.setState({ error: data.message, loading: false });
+			}
+		})
+		.catch(err => {
+			this.setState({ error: 'Failed to fetch data', loading: false });
+			console.error(err);
+		});
+	}
 	generateNewUserCode = (users) => {
 		if (!users || users.length === 0) {
 			return "EMP001"; // Default if no users exist
@@ -98,9 +101,9 @@ class Users extends Component {
 	
 		// Extract numeric part from employee IDs
 		const userCodes = users
-			.map(user => user.code) // Assuming 'code' holds the employee ID (e.g., "User005")
-			.filter(code => code.match(/^EMP\d+$/)) // Ensure it matches "EMPXXX" format
-			.map(code => parseInt(code.replace(/\D/g, ""), 10)); // Extract numbers
+			.map(user => user.code)
+			.filter(code => code.match(/^EMP\d+$/))
+			.map(code => parseInt(code.replace(/\D/g, ""), 10));
 	
 		const maxCode = Math.max(...userCodes); // Find the highest number
 		const nextCode = (maxCode + 1).toString().padStart(3, "0"); // Increment and format
@@ -131,7 +134,6 @@ class Users extends Component {
 
         // Validate form inputs
         if (!employeeCode || !firstName || !email ) {
-            console.log("Please fill in all fields");
             return;
         }
 
@@ -239,14 +241,9 @@ class Users extends Component {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
+				this.getAdmins();
                 this.setState((prevState) => {
-                    // Update the existing department in the array
-                    const updatedUserData = prevState.users.map((user) =>
-                        user.id === selectedUser.id ? { ...user, ...data.data } : user
-                    );
-                
                     return {
-                        users: updatedUserData,
 						successMessage: "User updated successfully!",
 						showSuccess: true,
                     };

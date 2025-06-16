@@ -29,7 +29,9 @@ const initialState = {
 	isBox10Close: true,
 	isStatisticsClose: true,
 	isFriendListClose: true,
-	isToggleLeftMenu: false
+	isToggleLeftMenu: false,
+	isBreakIn: false,
+	isPunchIn: false
 }
 
 export default (state = initialState, action) => {
@@ -221,7 +223,16 @@ export default (state = initialState, action) => {
 				...state,
 				isBox10Close: action.payload
 			}
-
+		case 'IS_BREAK_IN':
+			return {
+				...state,
+				isBreakIn: action.payload
+			}
+		case 'IS_PUNCH_IN':
+			return {
+				...state,
+				isPunchIn: action.payload
+			}
 
 		default:
 			return state

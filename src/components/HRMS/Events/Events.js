@@ -885,9 +885,6 @@ formatDateTimeAMPM = (timeString) => {
 
 		// Create events for days without reports
 		const missingReportEvents = this.getMissingReportEvents(workingHoursReports, selectedYear);
-		console.log(
-			missingReportEvents
-		);
 		// Pass all events in fullcalendar
 		const leaveEvents = this.formatLeaveEvents(this.state.leaveData);
 		

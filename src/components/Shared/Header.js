@@ -2,16 +2,14 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter, NavLink } from "react-router-dom";
 import authService from "../Authentication/authService";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { punchInAction } from '../../actions/settingsAction';
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isPunchedIn: false,
       showModal: false,
-      reports: [],
       report: "",
       start_time: "",
       end_time: "",
@@ -68,8 +66,6 @@ class Header extends Component {
     // Proceed with the punch-in status check
     this.startTimerInterval();
     this.getPunchInStatus();
-  //  this.getActivities();
-    this.getBreakInStatus();
   }
 
   componentWillUnmount() {
@@ -87,9 +83,8 @@ class Header extends Component {
 
     const timer = setInterval(() => {
       const currentTime = new Date();
-      const elapsed = Math.floor((currentTime - punchInTime) / 1000); // Elapsed time in seconds
+      const elapsed = Math.floor((currentTime - punchInTime) / 1000);
 
-      // Calculate hours, minutes, and seconds from elapsed time
       const hours = Math.floor(elapsed / 3600);
       const minutes = Math.floor((elapsed % 3600) / 60);
       const seconds = elapsed % 60;
@@ -97,14 +92,12 @@ class Header extends Component {
         seconds < 10 ? "0" : ""
       }${seconds}`;
 
-      // Update state with the newly calculated elapsed time
       this.setState({
-        elapsedTime: elapsed, // Store the raw elapsed time in seconds
-        elapsedFormatted: elapsedFormatted, // Store the formatted time (e.g., "1:02:34")
+        elapsedTime: elapsed,
+        elapsedFormatted: elapsedFormatted,
       });
-    }, 1000); // Update every second
+    }, 1000);
 
-    // Store timer ID to clear it later if needed
     this.setState({ timer });
   };
 
@@ -116,9 +109,8 @@ class Header extends Component {
       .then((data) => {
         if (data.status === "success") {
           const inTime = new Date(data.data[0].in_time);
-          // Store the fetched punchInTime in the state
+          this.props.punchInAction(true);
           this.setState({
-            isPunchedIn: true,
             punchInTime: inTime,
             start_time: inTime.toLocaleTimeString([], {
               hour: "2-digit",
@@ -128,36 +120,12 @@ class Header extends Component {
           });
           this.startTimerInterval(inTime);
         } else {
-          this.setState({ isPunchedIn: false });
+          this.props.punchInAction(false);
         }
       })
       .catch((error) => {
         this.setState({
           errorMessage: "Something went wrong. Please try again.",
-          showError: true,
-          showSuccess: false,
-        });
-        setTimeout(this.dismissMessages, 3000);
-      });
-
-    this.fetchReports();
-  };
-
-  getBreakInStatus = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=get_break_status&user_id=${window.user.id}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.setState({ isBreakedIn: true });
-        } else {
-          this.setState({ isBreakedIn: false });
-        }
-      })
-      .catch((err) => {
-        this.setState({
-          errorMessage: "Failed to fetch data",
           showError: true,
           showSuccess: false,
         });
@@ -170,7 +138,7 @@ class Header extends Component {
       [field]: value,
       error: {
         ...this.state.error,
-        [field]: value ? "" : "This field is required.", // Example validation logic
+        [field]: value ? "" : "This field is required.",
       },
     });
   };
@@ -236,37 +204,6 @@ class Header extends Component {
       });
   };
 
-  fetchReports = (callback) => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/reports.php?user_id=${window.user.id}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.setState({ reports: data.data }, () => {
-            if (typeof callback === "function") {
-              callback(data.data); // Always pass the data
-            }
-          });
-        } else {
-          console.warn("API returned non-success:", data);
-          this.setState({ reports: [] }, () => {
-            if (typeof callback === "function") {
-              callback([]); // Still run callback even if no success
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to fetch reports:", err);
-        this.setState({ reports: [] }, () => {
-          if (typeof callback === "function") {
-            callback([]);
-          }
-        });
-      });
-  };
-
   handlePunchIn = () => {
     const formData = new FormData();
     formData.append("employee_id", window.user.id);
@@ -274,6 +211,7 @@ class Header extends Component {
     formData.append("description", null);
     formData.append("status", "active");
 
+    this.props.punchInAction(true);
     // Proceed with punch-in API call
     fetch(
       `${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
@@ -285,29 +223,25 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          const punchInTime = new Date(); // Current time when user punches in
+          const punchInTime = new Date();
 
           this.setState(
             {
-              punchInTime, // Store punchInTime directly in state
-              isPunchedIn: true,
-              elapsedTime: 0, // Start with 0 seconds for new punch-in
+              punchInTime,
+              elapsedTime: 0,
               start_time: punchInTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               }),
+              successMessage: data.message,
+              showError: false,
+              showSuccess: true,
             },
             () => {
-              // After state is updated, start the timer
-              this.startTimerInterval(punchInTime); // Pass punchInTime to the timer function
+              this.startTimerInterval(punchInTime);
             }
           );
-          this.setState({
-            successMessage: data.message,
-            showError: false,
-            showSuccess: true,
-          });
           setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
@@ -315,6 +249,7 @@ class Header extends Component {
             showError: true,
             showSuccess: false,
           });
+          this.props.punchInAction(false);
           setTimeout(this.dismissMessages, 3000);
         }
       })
@@ -329,8 +264,18 @@ class Header extends Component {
   };
 
   handlePunchOut = () => {
+      if (this.props.breakIn) {
+        this.setState({
+          errorMessage: "You need to Break Out first",
+          showError: true,
+          showSuccess: false,
+        });
+
+        setTimeout(this.dismissMessages, 3000);
+        return;
+    }
+
     this.getActivities();
-    this.getBreakInStatus();
     const { start_time, break_duration_in_minutes } = this.state;
     const currentTime = new Date();
     const endTimeFormatted = currentTime.toLocaleTimeString([], {
@@ -344,19 +289,15 @@ class Header extends Component {
     const start = start_time;
     const end = endTimeFormatted;
     const breakMinutes = break_duration_in_minutes;
-    console.log(start, end, breakMinutes);
-    // Working duration (after break)
     this.calculateWorkingHours(start, end, breakMinutes);
-    // Show modal when punching out
     this.setState({ showModal: true });
   };
 
   convertToDateTime(timeString) {
     const date = new Date();
     const [hour, minute] = timeString.split(":");
-    const [time, period] = minute.split(" "); // AM/PM
+    const [time, period] = minute.split(" ");
 
-    // Adjust the hours based on AM/PM
     let hour24 = parseInt(hour);
     if (period.toUpperCase() === "PM" && hour24 !== 12) {
       hour24 += 12;
@@ -370,23 +311,16 @@ class Header extends Component {
   }
 
   calculateWorkingHours(start, end, breakMinutes) {
-    // Convert the start and end times to Date objects (assuming the convertToDateTime method works correctly)
     const startDate = this.convertToDateTime(start);
     const endDate = this.convertToDateTime(end);
 
-    // Check if breakMinutes is a string and extract numeric value if so
     const breakMinutesInNumber =
       typeof breakMinutes === "string"
         ? parseInt(breakMinutes.replace(/\D/g, ""))
         : breakMinutes;
 
-    // Total working time without break in minutes
-    const totalDuration = (endDate - startDate) / (1000 * 60); // Convert milliseconds to minutes
-
-    // Working time after break
+    const totalDuration = (endDate - startDate) / (1000 * 60);
     const workingTimeWithBreak = totalDuration - breakMinutesInNumber;
-
-    // Convert minutes to 24-hour format (hh:mm)
     const convertToFormattedTime = (minutes) => {
       const hours24 = Math.floor(minutes / 60); // Get the number of hours (24-hour format)
       const remainingMinutes = minutes % 60; // Get the remaining minutes
@@ -480,16 +414,6 @@ class Header extends Component {
   };
 
   handleAddReport = () => {
-    if (this.state.isBreakedIn) {
-      this.setState({
-        errorMessage: "You need to Break Out first",
-        showError: true,
-        showSuccess: false,
-      });
-
-      setTimeout(this.dismissMessages, 3000);
-      return;
-    }
 
     if (!this.validateReportForm()) {
       return;
@@ -531,7 +455,7 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          const newReport = data.data; // assume API returns the new report
+          const newReport = data.data;
 
           // Dispatch the custom event with new report
           window.dispatchEvent(
@@ -544,21 +468,13 @@ class Header extends Component {
             successMessage: data.message,
             showError: false,
             showSuccess: true,
-          });
-
-          this.setState({
-            successMessage: data.message,
-            showError: false,
-            showSuccess: true,
-            isPunchedIn: false,
             showModal: false,
             report: "",
             isReportSubmitting: false,
             isReportSubmitted: true, //disable after submit
           });
 
-          //document.querySelector("#addReportModal .close").click();
-
+          this.props.punchInAction(false);
           setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
@@ -567,8 +483,10 @@ class Header extends Component {
             showSuccess: false,
             isReportSubmitting: false,
           });
-          //window.location.href = '/hr-report';
+
+          this.props.punchInAction(true);
           setTimeout(this.dismissMessages, 3000);
+
         }
       })
       .catch((error) => {
@@ -578,6 +496,7 @@ class Header extends Component {
           showSuccess: false,
           isReportSubmitting: false,
         });
+        this.props.punchInAction(false);
         setTimeout(this.dismissMessages, 3000);
       });
   };
@@ -628,11 +547,7 @@ class Header extends Component {
   // Handle logout functionality
   handleLogout = () => {
     authService.logout();
-
-    // Clear the user data from localStorage
     localStorage.removeItem("user");
-
-    // Redirect to the login page
     window.location.href = "/login";
   };
 
@@ -694,18 +609,13 @@ class Header extends Component {
   };
 
   render() {
-    const { fixNavbar, darkHeader } = this.props;
+    const { fixNavbar, darkHeader, isPunchedIn } = this.props;
     const {
-      isPunchedIn,
-      userRole,
       report,
       punchErrorModel,
       userId,
       user,
-      start_time,
-      end_time,
       todays_working_hours,
-      break_duration_in_minutes,
       todays_total_hours,
       elapsedFormatted,
     } = this.state;
@@ -716,7 +626,6 @@ class Header extends Component {
         {this.renderAlertMessages()}
         <div
           id="page_top"
-          // className={isFixNavbar ? "sticky-top" : "" + this.props.dataFromParent === 'dark' ? 'section-body top_dark' : 'section-body'}
           className={`section-body ${fixNavbar ? "sticky-top" : ""} ${
             darkHeader ? "top_dark" : ""
           }`}
@@ -803,26 +712,28 @@ class Header extends Component {
                       >
                         <i className="dropdown-icon fe fe-activity" /> Timeline
                       </NavLink>
+                      {(window.user.role === 'admin' && window.user.role === 'super_admin') && (
+                        <NavLink
+                          to={{
+                            pathname: "/saturday-settings",
+                            state: {
+                              employee: user,
+                              employeeId: userId,
+                              tab: "saturday-settings",
+                            },
+                          }}
+                          className={`dropdown-item ${
+                            currentTab === "saturday-settings" ? "active" : ""
+                          }`}
+                          isActive={(match, location) =>
+                            location?.state?.tab === "saturday-settings"
+                          }
+                        >
+                          <i className="dropdown-icon fe fe-sun" /> Saturday
+                          Settings
+                        </NavLink>
+                      )}
 
-                      <NavLink
-                        to={{
-                          pathname: "/saturday-settings",
-                          state: {
-                            employee: user,
-                            employeeId: userId,
-                            tab: "saturday-settings",
-                          },
-                        }}
-                        className={`dropdown-item ${
-                          currentTab === "saturday-settings" ? "active" : ""
-                        }`}
-                        isActive={(match, location) =>
-                          location?.state?.tab === "saturday-settings"
-                        }
-                      >
-                        <i className="dropdown-icon fe fe-sun" /> Saturday
-                        Settings
-                      </NavLink>
                       <div className="dropdown-divider" />
                       <a className="dropdown-item">
                         <i className="dropdown-icon fe fe-help-circle" /> Need
@@ -1012,8 +923,12 @@ class Header extends Component {
 const mapStateToProps = (state) => ({
   fixNavbar: state.settings.isFixNavbar,
   darkHeader: state.settings.isDarkHeader,
+  breakIn: state.settings.isBreakIn,
+  isPunchedIn: state.settings.isPunchIn,
 });
 
-const mapDispatchToProps = (dispatch) => ({});
+const mapDispatchToProps = (dispatch) => ({
+  punchInAction: (e) => dispatch(punchInAction(e))
+});
 // export default connect(mapStateToProps, mapDispatchToProps)(Header);
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Header));

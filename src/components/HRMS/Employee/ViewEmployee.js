@@ -641,8 +641,6 @@ class ViewEmployee extends Component {
                 selectedReport: report,
                 showReportModal: true
             });
-        } else {
-            console.log('No report data found in event');
         }
     };
 

@@ -48,6 +48,8 @@ class Report extends Component {
                 break_duration_in_minutes: ''
 			},
             loading: true,
+            errorMessage: "",
+            showError: false,
         };
         this.reportMessageTimeout = null;
     }
@@ -77,7 +79,6 @@ class Report extends Component {
             })
             .catch(err => {
                 this.setState({ error: 'Failed to fetch data' });
-                console.error(err);
             });
 
         // Check report message from route state
@@ -566,7 +567,6 @@ class Report extends Component {
 	
 			return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 		} catch (err) {
-			console.error('Error in calculateWorkingHours:', err);
 			return "00:00";
 		}
 	};
@@ -727,7 +727,7 @@ class Report extends Component {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                    this.setState({ 
+                this.setState({ 
                         reports: data.data,
                         filteredReports: data.data,
                         loading: false,
@@ -737,14 +737,25 @@ class Report extends Component {
                 
             }else {
                 this.setState({ 
+                    errorMessage: data.message || 'Failed to fetch reports',
+                    showError: true,
                     error: data.message || 'Failed to fetch reports',
                     loading: false,
                     reports: [],
                     filteredReports: []
                 });
+                setTimeout(this.dismissMessages, 3000);
             }
         });
     }
+
+    // Function to dismiss messages
+    dismissMessages = () => {
+        this.setState({
+            showError: false,
+            errorMessage: "",
+        });
+    };
 
     // Get the todays date and based on this update the edit report button
     isToday = (dateString) => {
@@ -1008,7 +1019,7 @@ class Report extends Component {
                                                             ) : (
                                                                 <tr>
                                                                     <td colSpan="8" style={{ textAlign: 'center' }}>
-                                                                        {error ? error : 'No reports available.'}
+                                                                        No reports available
                                                                     </td>
                                                                 </tr>
                                                             )}
@@ -1386,6 +1397,29 @@ class Report extends Component {
                             </div>
                         </div>
                     </div>
+                </div>
+                {/* Add the alert for error messages */}
+                <div 
+                    className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
+                    role="alert" 
+                    style={{ 
+                        position: "fixed", 
+                        top: "20px", 
+                        right: "20px", 
+                        zIndex: 1050, 
+                        minWidth: "250px", 
+                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
+                    }}
+                >
+                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
+                    {this.state.errorMessage}
+                    <button
+                        type="button"
+                        className="close"
+                        aria-label="Close"
+                        onClick={() => this.setState({ showError: false })}
+                    >
+                    </button>
                 </div>
             </>
         )

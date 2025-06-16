@@ -232,4 +232,16 @@ export const box10CloseAction = (e) => dispatch => {
 		payload: e
 	})
 }
+export const breakInAction = (e) => dispatch => {
+	dispatch({
+		type: 'IS_BREAK_IN',
+		payload: e
+	})
+}
+export const punchInAction = (e) => dispatch => {
+	dispatch({
+		type: 'IS_PUNCH_IN',
+		payload: e
+	})
+}
 

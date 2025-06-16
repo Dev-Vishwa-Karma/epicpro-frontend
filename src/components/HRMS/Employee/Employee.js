@@ -206,7 +206,6 @@ class Employee extends Component {
 
 	fetchEmployeeLeaves = () => {
         const { fromDate, toDate, selectedLeaveEmployee } = this.state;
-		console.log('pppppppppppppppppp',fromDate)
         let apiUrl = `${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&employee_id=${selectedLeaveEmployee}`;
         
         const formatDate = (date) => {
@@ -227,7 +226,6 @@ class Employee extends Component {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-				console.log('employeesLeaveArray',data.data)
 				let employeesLeaveArray = Array.isArray(data.data) ? data.data : [data.data];
                     this.setState({ 
                         //reports: data.data,
@@ -412,10 +410,7 @@ class Employee extends Component {
 		const { name, type, checked, value } = event.target;
 
 		if (type === 'checkbox') {
-			this.setState({ [name]: checked ? 1 : 0 }, () => {
-				console.log('halfDayCheckbox === ', name);
-				console.log('halfDayCheckbox value === ', this.state.halfDayCheckbox);
-			});
+			this.setState({ [name]: checked ? 1 : 0 }, () => {});
 		} else if (name === 'from_date') {
 			// If selecting from_date, auto-fill to_date if empty or before from_date
 			this.setState((prevState) => {
@@ -472,7 +467,6 @@ class Employee extends Component {
 
         // Validate form inputs
         if (!from_date || !to_date || !reason) {
-            console.log("Please fill in all fields");
             return;
         }
 

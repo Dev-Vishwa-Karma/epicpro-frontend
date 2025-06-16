@@ -332,7 +332,6 @@ class EditEmployee extends Component {
             return response.json(); // Convert response to JSON
         })
         .then((data) => {
-            console.log('update employee data === ', data);
             if (data && data.status === "success") {
                 this.setState((prevState) => {
                     /* const updatedEmployeeData = prevState.users.map((user) =>
@@ -434,8 +433,6 @@ class EditEmployee extends Component {
         // Frontend and Backend Skill Options
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
-        console.log('aadhar file === ', aadharCardFile);
-        console.log('aadhar file url =====', aadharCardFileUrl);
         return (
             <>
                 {/* Show success and error Messages */}

@@ -80,8 +80,6 @@ export default class Login extends Component {
 
 					// Update state with user data
 					this.setState({ user: data.data }, () => {
-						// Log user role after state update
-						console.log("User Role:", this.state.user.role);
 					});
 
 					// Store user data in localstorage using authService
@@ -97,7 +95,6 @@ export default class Login extends Component {
 
 				} else {
 					this.setState({ loginError: data.message, emailError: false, passwordError: false });
-					console.log("Failed to login");
 
 					// Hide the error message after 5 seconds
 					setTimeout(() => {

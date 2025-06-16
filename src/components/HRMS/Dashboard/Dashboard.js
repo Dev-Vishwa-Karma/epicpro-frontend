@@ -129,10 +129,6 @@ class Dashboard extends Component {
 								<div className="col-lg-12">
 									<div className={`section-body ${fixNavbar ? "mb-4 mt-3" : "mb-4"}`}>
 										<h4>Welcome {`${window.user.first_name} ${window.user.last_name}`}!</h4>
-										{/* <small>
-											Measure How Fast You’re Growing Monthly Recurring Revenue.{' '}
-											<a href="fake_url">Learn More</a>
-										</small> */}
 									</div>
 								</div>
 							</div>
@@ -280,7 +276,7 @@ class Dashboard extends Component {
 																	</tr>
 																))
 															): (
-																!message && <tr><td>projects not available.</td></tr>
+																!message && <tr><td colSpan={5} class="text-center">Projects not available</td></tr>
 															)}
 														</tbody>
 													</table>
