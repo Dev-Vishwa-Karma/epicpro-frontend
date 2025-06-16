@@ -56,43 +56,21 @@ class ViewEmployee extends Component {
     };
 
     componentDidMount() {
-        const { employee, employeeId } = this.props.location.state || {};
-        // Always force calendar tab open on mount
-        this.setState({ activeTab: "calendar" });
-        const isAdmin = window.user.role === 'super_admin' || window.user.role === 'admin';
-
-
-        // Get the logged-in user from localStorage
-
-        // Set the state with the employee data
-        if (employee) {
-            this.setState({
-                employee: { ...this.state.employee, ...employee },
-                employeeId,
-                previewImage: `${process.env.REACT_APP_API_URL}/${employee.profile}`
-            });
-        }
-
-        if (!isAdmin) {
-            if (employeeId) {
-                this.fetchEmployeeDetails(employeeId);
-            }
-            this.loadEmployeeData();
-            this.getAlternateSaturday();
-        }
+        const { id } = this.props.match.params;
+        this.setState({
+            employeeId: id
+        })
+        this.setState({ activeTab: "calendar" })
+        this.fetchEmployeeDetails(id);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { employee, employeeId, tab } = this.props.location.state || {};
+        const { employee, tab } = this.props.location.state || {};
         if (employee && employee !== prevProps.location.state?.employee) {
             this.setState({
                 employee: { ...this.state.employee, ...employee },
                 previewImage: `${process.env.REACT_APP_API_URL}/${employee?.profile || ""}`
             });
-        }
-    
-        if (employeeId && employeeId !== prevProps.location.state?.employeeId) {
-            this.fetchEmployeeDetails(employeeId);
         }
 
          // Watch for tab change even if pathname is same
@@ -129,6 +107,25 @@ class ViewEmployee extends Component {
     }
 
     generateCalendarEvents = (reports, leaves) => {
+        const missingReportEvents = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Determine which reports to check based on employeeId in state
+        let reportsForMissing = reports;
+        let startDate;
+        let endDate;
+        
+        const date = new Date();
+        const year = date.getFullYear();
+        const firstDay = new Date(year, 0, 1);
+        const lastDay = new Date(year, 11, 31);
+        const formatDate = (date) => date.toISOString().split('T')[0];
+        startDate = formatDate(firstDay);
+        endDate = formatDate(lastDay);
+        const employeeLeavesData = [];
+        let currentDate = new Date(startDate);
+        
 
         // 1. Working Hours Events
         const totalWorkingHours = reports.map(report => {
@@ -149,57 +146,44 @@ class ViewEmployee extends Component {
             };
         }).flat();
 
-        // 2. Approved Leaves Events
-        const employeeLeavesData = leaves
-            .filter(leave => leave.status === 'approved')
-            .flatMap(leave => {
-                const from = moment(leave.from_date);
-                const to = moment(leave.to_date);
-                const days = [];
-
-                for (let date = from.clone(); date.isSameOrBefore(to); date.add(1, 'days')) {
-                    days.push({
-                      start: date.format("YYYY-MM-DD"),
-                      className: "leave-event",
-                      
-                    });
+        leaves.filter(leave => leave.status === 'approved').forEach((leave) => {
+            const start = new Date(leave.from_date);
+            const end = new Date(leave.to_date);
+            if (end >= today) {
+                const loopStart = start < today ? new Date(today) : new Date(start);
+                for (let d = new Date(loopStart); d <= end; d.setDate(d.getDate() + 1)) {
+                    if (d >= today) {
+                        if (leave.is_half_day === "1") {
+                            employeeLeavesData.push({
+                                title: '',
+                                start: d.toISOString().split("T")[0],
+                                className: "half-day-leave-event",
+                                allDay: true,
+                            });
+                        } else {
+                            employeeLeavesData.push({
+                                title: '',
+                                start: d.toISOString().split("T")[0],
+                                className: "leave-event",
+                                allDay: true,
+                            });
+                        }
+                    }
                 }
+            }
+        });
 
-                return days;
-            });
-
-        // 4. Missing Report Events
-        const missingReportEvents = [];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        // Determine which reports to check based on employeeId in state
-        let reportsForMissing = reports;
-        let startDate;
-        let endDate;
-        
-        const date = new Date();
-        const year = date.getFullYear();
-        const firstDay = new Date(year, 0, 1);
-        const lastDay = new Date(year, 11, 31);
-        const formatDate = (date) => date.toISOString().split('T')[0];
-        startDate = formatDate(firstDay);
-        endDate = formatDate(lastDay);
-
-        let currentDate = new Date(startDate);
-        
-        while (this.formatDate(currentDate) <= this.formatDate(today) && this.formatDate(currentDate) <= this.formatDate(endDate)) { // Iterate up to the latest report date or today, whichever is earlier
+        while (this.formatDate(currentDate) <= this.formatDate(today) && this.formatDate(currentDate) <= this.formatDate(endDate)) {
             const dateStr = currentDate.toISOString().split("T")[0];
             const hasReport = reportsForMissing.some((report) => report.created_at?.split(" ")[0] === dateStr);
             if (!hasReport) {
-                    missingReportEvents.push({
-                        start: dateStr,
-                        display: 'background',
-                        color: '#ff6b6b', 
-                        allDay: true,
-                        className: 'missing-report-day',
-                    //  title: 'Missing Report' 
-                    });
+                missingReportEvents.push({
+                    start: dateStr,
+                    display: 'background',
+                    color: '#ff6b6b', 
+                    allDay: true,
+                    className: 'missing-report-day',
+                });
             }
 
             currentDate.setDate(currentDate.getDate() + 1);
@@ -234,7 +218,7 @@ class ViewEmployee extends Component {
 
     loadEmployeeData = () => {
         const baseUrl = process.env.REACT_APP_API_URL;
-        let { employeeId } = this.state;
+        let employeeId = this.props.match.params.id;
 
         if (!employeeId) {
 			employeeId = localStorage.getItem('empId');
@@ -333,6 +317,18 @@ class ViewEmployee extends Component {
                         employee: { ...prevState.employee, ...data.data }, // Merge new data
                         previewImage: data.data.profile ? `${process.env.REACT_APP_API_URL}/${data.data.profile}` : prevState.previewImage
                     }));
+
+                    console.log(
+                        data
+                    );
+                    
+                    
+
+                    const isAdmin = data.data.role === 'super_admin' || data.data.role === 'admin';
+                    if (!isAdmin) {
+                        this.loadEmployeeData();
+                        this.getAlternateSaturday();
+                    }
                 } else {
                     console.error("Failed to fetch employee details:", data.message);
                 }

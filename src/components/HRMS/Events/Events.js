@@ -540,17 +540,6 @@ formatDate = (date) => {
 		currentDate.setDate(currentDate.getDate() + 1);
 	}
 
-	if (missingReportEvents && missingReportEvents.length > 0) {
-		missingReportEvents.forEach((event) => {
-			this.state.leaveData.forEach(element => {
-				if (this.formatDate(element.from_date) == this.formatDate(event.start) && element.is_half_day == '1') {
-					event.className = 'half-day-leave-event'
-				}
-			})
-						
-		})
-	}
-	
 	
     return missingReportEvents;
 }
