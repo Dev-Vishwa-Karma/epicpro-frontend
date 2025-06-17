@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { breakInAction } from '../../../actions/settingsAction';
+import { breakInAction, breakDurationCalAction } from '../../../actions/settingsAction';
 class Activities extends Component {
 	constructor(props) {
 		super(props);
@@ -22,7 +22,6 @@ class Activities extends Component {
 		};
 	}
 
-	// Function to dismiss messages
     dismissMessages = () => {
         this.setState({
             showSuccess: false,
@@ -36,10 +35,10 @@ class Activities extends Component {
 		let apiUrl = '';
 
 		if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-			apiUrl = `${process.env.REACT_APP_API_URL}/activities.php`;
+			apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?is_timeline=true`;
 		}
 		else {
-			apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?user_id=${window.user.id}`;
+			apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?user_id=${window.user.id}&is_timeline=true`;
 		}
 
 		fetch(apiUrl, {
@@ -132,6 +131,10 @@ class Activities extends Component {
 						showError: false,
 						showSuccess: true,
 					});
+					const breakDuration = this.props.breakDuration || 0;
+					const diff = new Date(data.data.breakOut).getTime() - new Date(data.data.breakIn).getTime();
+					const diffMins = Math.floor(diff / (1000 * 60)); 
+					this.props.breakDurationCalAction(breakDuration + diffMins);
 					setTimeout(this.dismissMessages, 3000);
 					this.componentDidMount();
 				} else {
@@ -673,10 +676,12 @@ class Activities extends Component {
 }
 const mapStateToProps = state => ({
 	fixNavbar: state.settings.isFixNavbar,
-	punchIn: state.settings.isPunchIn
+	punchIn: state.settings.isPunchIn,
+	breakDuration: state.settings.breakDurationCalculation,
 })
 
 const mapDispatchToProps = dispatch => ({
-	breakInAction: (e) => dispatch(breakInAction(e))
+	breakInAction: (e) => dispatch(breakInAction(e)),
+	breakDurationCalAction: (e) => dispatch(breakDurationCalAction(e)),
 })
 export default connect(mapStateToProps, mapDispatchToProps)(Activities);
