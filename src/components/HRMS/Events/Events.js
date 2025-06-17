@@ -149,7 +149,7 @@ class Events extends Component {
 	};
 
 	fetchEmployees = () => {
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
+		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
 			method: "GET",
 		})
 			.then(response => response.json())
@@ -480,7 +480,7 @@ handleYearChange = (event) => {
 					if (leave.is_half_day === "1") {
 				events.push({
 					title: '',
-					start: d.toISOString().split("T")[0],
+					start: this.formatDate(d),
 					className: "half-day-leave-event",
 					allDay: true,
 					// color: "#FFA500"
@@ -488,7 +488,7 @@ handleYearChange = (event) => {
 			} else {
 				events.push({
 					title: '',
-					start: d.toISOString().split("T")[0],
+					start: this.formatDate(d),
 					className: "leave-event",
 					allDay: true,
 				});
@@ -521,7 +521,7 @@ formatDate = (date) => {
 
 	
 	while (currentDate <= today && currentDate <= endDate) {
-		const dateStr = currentDate.toISOString().split("T")[0];
+		const dateStr = this.formatDate(currentDate);
 		
 		const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
 			// this.state.allEvents
@@ -547,7 +547,6 @@ formatDate = (date) => {
 fetchEvents = () => {
 	let startDate = localStorage.getItem('eventStartDate');
 	let endDate = localStorage.getItem('eventEndDate');
-
 	if (!startDate || !endDate) {
 		const now = new Date();
 		const firstDay = new Date(now.getFullYear(),1, 1);
@@ -567,11 +566,10 @@ fetchEvents = () => {
 		const day = dob.getDate();
 		const selectedYear = this.state.selectedYear;
 		const birthdayDate = new Date(selectedYear, month, day);
-
 		return {
 			id: `birthday_${employee.id}`,
 			event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
-			event_date: birthdayDate.toISOString().split('T')[0],
+			event_date: this.formatDate(birthdayDate),
 			event_type: 'birthday',
 			employee_id: employee.id
 		};
@@ -700,7 +698,6 @@ formatDateTimeAMPM = (timeString) => {
         const startYear = currentYear - 1;
         const endYear = currentYear + 10;
 		
-
         // Generate an array of years
     	const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
 		const filteredEvents = events?.map((event) => {
@@ -722,7 +719,7 @@ formatDateTimeAMPM = (timeString) => {
 
 			return {
 				...event,
-				event_date: eventDate.toISOString().split("T")[0], // Convert back to YYYY-MM-DD format
+				event_date: this.formatDate(eventDate), // Convert back to YYYY-MM-DD format
 			};
 		})
 		.filter((event) => {
