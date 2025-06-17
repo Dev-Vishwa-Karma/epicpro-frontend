@@ -36,7 +36,7 @@ class Statistics extends Component {
   };
 
   getEmployees = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`)
+    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee&status=1`)
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
@@ -317,9 +317,6 @@ class Statistics extends Component {
     const halfLeaveCounts = this.calculateHalfLeaves(attendanceByDate, employeesData, monthDays);
     const extraWorkingCounts = this.calculateExtraWorkingDays(attendanceByDate, employeesData, monthDays, alternateSaturdayData);
   
-    // Sort employees alphabetically by first name
-    const sortedEmployees = employeesData.sort((a, b) => a.first_name.localeCompare(b.first_name));
-  
     return (
       <>
         {this.renderAlertMessages()}
@@ -366,7 +363,7 @@ class Statistics extends Component {
                 <thead style={{backgroundColor: "#a2c4c9"}}>
                   <tr>
                     <th style={{padding: "14px"}}>Date</th>
-                    {sortedEmployees.map((employee) => (
+                    {employeesData.map((employee) => (
                       <th style={{padding: "14px"}} key={employee.id}>{employee.first_name}</th>
                     ))}
                   </tr>
@@ -387,7 +384,7 @@ class Statistics extends Component {
                     return (
                       <tr key={rowIndex} style={highlightRow ? { backgroundColor: isHoliday ? '#FAAA69' : '#fff2cc' } : {}}>
                         <td style={{backgroundColor: "#b7e1cd"}}>{day.display}</td>
-                        {sortedEmployees.map((employee, colIndex) => {
+                        {employeesData.map((employee, colIndex) => {
                           const value = dayAttendance[employee.id] || "";
                           const isMissingReport = value === "";
                           
@@ -467,7 +464,7 @@ class Statistics extends Component {
                   {/* Summary Row 1: Leave Taken */}
                   <tr style={{ fontWeight: 'bold' }}>
                     <td style={{ backgroundColor: '#999999' }}>Leave Taken(-)</td>
-                    {sortedEmployees.map((emp) => {
+                    {employeesData.map((emp) => {
                       const fullLeaves = leaveCounts[emp.id] || 0;
                       const halfLeaves = halfLeaveCounts[emp.id] || 0;
                       const total = Math.round((fullLeaves + halfLeaves) * 10) / 10; // Round to 1 decimal
@@ -478,7 +475,7 @@ class Statistics extends Component {
                   {/* Summary Row 2: Extra Working Days */}
                   <tr style={{ fontWeight: 'bold' }}>
                     <td style={{ backgroundColor: '#b7e1cd' }}>Extra Working Days(+)</td>
-                    {sortedEmployees.map((emp) => (
+                    {employeesData.map((emp) => (
                       <td key={emp.id}>{extraWorkingCounts[emp.id] || 0}</td>
                     ))}
                   </tr>
@@ -486,7 +483,7 @@ class Statistics extends Component {
                   {/* Summary Row 3: Paid Leaves */}
                   <tr style={{ fontWeight: 'bold' }}>
                     <td style={{ backgroundColor: '#b7e1cd' }}>Paid Leave(+)</td>
-                    {sortedEmployees.map((emp) => (
+                    {employeesData.map((emp) => (
                       <td key={emp.id}>1</td>
                     ))}
                   </tr>
@@ -494,7 +491,7 @@ class Statistics extends Component {
                   {/* Summary Row 4: Deduction/Paid */}
                   <tr style={{ fontWeight: 'bold', backgroundColor: '#a4c2f4' }}>
                     <td>Deduction/Paid</td>
-                    {sortedEmployees.map((emp) => {
+                    {employeesData.map((emp) => {
                       const fullLeaves = leaveCounts[emp.id] || 0;
                       const halfLeaves = halfLeaveCounts[emp.id] || 0;
                       const extraWorkCounts = extraWorkingCounts[emp.id] || 0;
@@ -508,7 +505,7 @@ class Statistics extends Component {
                   {/* Summary Row 5: No Of Days Salary To Be Credited */}
                   <tr style={{ fontWeight: 'bold', backgroundColor: '#f4cccc' }}>
                     <td>No Of Days Salary To Be Credited</td>
-                    {sortedEmployees.map((emp) => {
+                    {employeesData.map((emp) => {
                       const fullLeaves = leaveCounts[emp.id] || 0;
                       const halfLeaves = halfLeaveCounts[emp.id] || 0;
                       const extraWorkCounts = extraWorkingCounts[emp.id] || 0;

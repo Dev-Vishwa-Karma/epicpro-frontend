@@ -1112,22 +1112,6 @@ class AddEmployee extends Component {
                             />
                           </div>
                         </div>
-
-                        {/* Resume */}
-                        <div className="col-md-12">
-                          <div className="form-group">
-                            <label className="form-label">Resume</label>
-                            <input
-                              type="file"
-                              name="resume"
-                              className="form-control"
-                              placeholder="Select your resume"
-                              onChange={this.handleFileChange}
-                              ref={this.fileInputRefs.resume}
-                            />
-                          </div>
-                        </div>
-
                         {/* Visible status */}
                         <div className="col-md-6">
                           <div className="form-group">
@@ -1146,6 +1130,20 @@ class AddEmployee extends Component {
                                 </option>
                               ))}
                             </select>
+                          </div>
+                        </div>
+                        {/* Resume */}
+                        <div className="col-md-12">
+                          <div className="form-group">
+                            <label className="form-label">Resume</label>
+                            <input
+                              type="file"
+                              name="resume"
+                              className="form-control"
+                              placeholder="Select your resume"
+                              onChange={this.handleFileChange}
+                              ref={this.fileInputRefs.resume}
+                            />
                           </div>
                         </div>
                       </div>
