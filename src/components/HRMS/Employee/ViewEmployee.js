@@ -34,7 +34,8 @@ class ViewEmployee extends Component {
             calendarEventsData: [],
             showReportModal: false,
             selectedReport: null,
-            alternateSatudays: []
+            alternateSatudays: [],
+            openFileSelectModel: false
         };
 
         localStorage.removeItem('empId');
@@ -195,7 +196,6 @@ class ViewEmployee extends Component {
             ...employeeLeavesData,
             ...missingReportEvents,
         ];
-
         return calendarEvents;
     }
 
@@ -376,7 +376,7 @@ class ViewEmployee extends Component {
 		})
 		.then((data) => {
 			if (data.status === "success") {
-				if(employeeId == ''){
+				if(employeeId === ''){
 					this.setState({ 
 						workingHoursReports: []
 					});
@@ -631,13 +631,12 @@ class ViewEmployee extends Component {
     handleEventClick = (eventInfo) => {
         // The event data is directly in the eventInfo object
         const report = eventInfo.report;
-        
         if (report) {
             this.setState({
                 selectedReport: report,
                 showReportModal: true
             });
-        }
+        } 
     };
 
     closeReportModal = () => {
@@ -649,7 +648,7 @@ class ViewEmployee extends Component {
 
     render() {
         const { fixNavbar} = this.props;
-        const {employee, activities, errorMessage, calendarEventsData} = this.state;
+        const {employee, activities, errorMessage, calendarEventsData, openFileSelectModel} = this.state;
         // Handle case where employee data is not available
         if (!employee) {
             return <p>Loading employee details...</p>;
@@ -709,14 +708,18 @@ class ViewEmployee extends Component {
                                                     cursor: "pointer",
                                                 }}
                                             >
-                                                <FontAwesomeIcon icon={faCamera} />
-                                                <input
+                                                <FontAwesomeIcon onClick={() => {
+                                                    this.setState({
+                                                        openFileSelectModel: true
+                                                    })
+                                                }} icon={faCamera} />
+                                                {/* <input
                                                     id="imageUpload"
                                                     type="file"
                                                     accept="image/*"
                                                     onChange={this.handleImageChange}
                                                     style={{ display: "none" }}
-                                                />
+                                                /> */}
                                             </label>
                                         </div>
 
@@ -948,7 +951,7 @@ class ViewEmployee extends Component {
                                                                         alt="fake_url"
                                                                     />
                                                                     <span>
-                                                                        <a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
+                                                                        <a>{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
                                                                         <small className="float-right text-right">
                                                                             {activity.in_time}
                                                                         </small>
@@ -1439,6 +1442,47 @@ class ViewEmployee extends Component {
                         </div>
                     </div>
                 </div>
+                {openFileSelectModel && (
+				<div
+					className="modal fade show d-block"
+					id="birthdayBannerModal"
+					tabIndex="-1"
+					role="dialog"
+					style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+					>
+					<div className="modal-dialog modal-dialog-centered" role="document">
+						<div className="modal-content text-center p-4">
+						
+							{/* Modal Header */}
+							<div className="modal-header border-0">
+                                    <h5 className="modal-title w-100 text-dark display-6 fw-bold">
+                                        Select your profile
+                                </h5>
+							</div>
+
+							{/* Modal Body */}
+							<div className="modal-body">
+                                </div>
+                                
+                            <div className="modal-footer border-0 justify-content-center">
+								<button
+								type="button"
+								className="btn btn-outline-dark px-4"
+                                        onClick={() => {
+                                            this.setState({
+                                                openFileSelectModel: false
+                                            })
+                                    
+                                }}
+								>
+                                    close
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				)}
             </>
         )
     }
