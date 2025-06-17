@@ -998,71 +998,79 @@ formatDateTimeAMPM = (timeString) => {
 											) : (
 												<div id="event-list" className="fc event_list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
 								{uniqueFilteredEvents2.length > 0 ? (
-									uniqueFilteredEvents2.map((event, index) => (
-									<div key={index} className="event-card card mb-0">
-										<div className="d-flex justify-content-between align-items-center">
-										<div
-											className={`fc-event ${
-											event.event_type === 'holiday'
-												? 'holiday-event'
-												: event.event_type === 'event'
-												? 'regular-event'
-												: event.event_type === 'birthday'
-												? 'birthday-event'
-												: 'other-event'
-											}`}
-											data-class={
-											event.event_type === 'holiday'
-												? 'bg-danger'
-												: event.event_type === 'event'
-												? 'bg-info'
-												: event.event_type === 'birthday'
-												? 'bg-success'
-												: 'bg-primary'
-											}
-											style={{ flex: 1 }}
-										>
-
-											{/* Show trash icon only for 'event' type and for admin/super_admin */}
-										{event.event_type === 'event' &&
-											(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-											<button
-												className="btn btn-link text-danger position-absolute"
-												title="Delete Event"
-												onClick={() => this.openDeleteModal(event.id)}
-												style={{
-												top: '2px',
-												right: '2px',
-												padding: '2px 6px',
-												fontSize: '0.75rem',
-												lineHeight: 1,
-												fontSize: '1.2rem'
-												}}
-											>
-												<i className="fa fa-trash" aria-hidden="true" style={{color:"red"}}></i>
-											</button>
-											)}
-
-											<strong className="d-block">
-												{event.event_type === 'birthday'}
-												{event.event_name}
-											</strong>
-											<small>
-											{event.event_date
-												? new Date(event.event_date).toLocaleDateString('en-US', {
-													year: 'numeric',
-													month: 'short',
-													day: 'numeric',
-												})
-												: 'No Date'}
-											</small>
-										</div>
-
-									
+															uniqueFilteredEvents2.map((event, index) => (
 										
-										</div>
-									</div>
-									))
+																<>
+																	{
+																		this.formatDate(event.event_date) >= this.formatDate(new Date()) ? 
+																			<div key={index} className="event-card card mb-0">
+																		<div className="d-flex justify-content-between align-items-center">
+																		<div
+																			className={`fc-event ${
+																			event.event_type === 'holiday'
+																				? 'holiday-event'
+																				: event.event_type === 'event'
+																				? 'regular-event'
+																				: event.event_type === 'birthday'
+																				? 'birthday-event'
+																				: 'other-event'
+																			}`}
+																			data-class={
+																			event.event_type === 'holiday'
+																				? 'bg-danger'
+																				: event.event_type === 'event'
+																				? 'bg-info'
+																				: event.event_type === 'birthday'
+																				? 'bg-success'
+																				: 'bg-primary'
+																			}
+																			style={{ flex: 1 }}
+																		>
+
+																			{/* Show trash icon only for 'event' type and for admin/super_admin */}
+																		{event.event_type === 'event' &&
+																			(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
+																			<button
+																				className="btn btn-link text-danger position-absolute"
+																				title="Delete Event"
+																				onClick={() => this.openDeleteModal(event.id)}
+																				style={{
+																				top: '2px',
+																				right: '2px',
+																				padding: '2px 6px',
+																				fontSize: '0.75rem',
+																				lineHeight: 1,
+																				fontSize: '1.2rem'
+																				}}
+																			>
+																				<i className="fa fa-trash" aria-hidden="true" style={{color:"red"}}></i>
+																			</button>
+																			)}
+
+																			<strong className="d-block">
+																				{event.event_type === 'birthday'}
+																				{event.event_name}
+																			</strong>
+																			<small>
+																			{event.event_date
+																				? new Date(event.event_date).toLocaleDateString('en-US', {
+																					year: 'numeric',
+																					month: 'short',
+																					day: 'numeric',
+																				})
+																				: 'No Date'}
+																			</small>
+																		</div>
+
+																	
+																		
+																		</div>
+																			</div> :
+																			null
+								}
+								</>
+									
+							))
 								) : (
 									<div className="fc-event bg-info" data-class="bg-info">
 									No events found for this year.
@@ -1159,16 +1167,7 @@ formatDateTimeAMPM = (timeString) => {
 													);
 													if (report) {
 														this.handleReportClick(report);
-													} else {
-														console.error('No report data found for event:', eventData);
-														this.setState({
-															showReportModal: true,
-															selectedReport: null,
-															errorMessage: 'No report data available',
-															showError: true
-														});
-														setTimeout(() => this.setState({ showError: false, errorMessage: '' }), 3000);
-													}
+													} 
 												}}
 											></Fullcalender>
 										</div>
