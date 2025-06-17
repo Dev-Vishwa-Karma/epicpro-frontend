@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { withRouter, NavLink } from "react-router-dom";
 import authService from "../Authentication/authService";
 import "react-datepicker/dist/react-datepicker.css";
-import { punchInAction } from '../../actions/settingsAction';
+import { punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
 
 class Header extends Component {
   constructor(props) {
@@ -14,7 +14,6 @@ class Header extends Component {
       start_time: "",
       end_time: "",
       todays_working_hours: "",
-      break_duration_in_minutes: 0,
       todays_total_hours: "",
       error: {
         report: "",
@@ -50,10 +49,9 @@ class Header extends Component {
   };
 
   componentDidMount() {
-    // Check if user exists in localStorage
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-      window.user = user; // Attach user to the global window object
+      window.user = user;
       const { id, role } = window.user;
       this.setState({
         user: user,
@@ -66,10 +64,11 @@ class Header extends Component {
     // Proceed with the punch-in status check
     this.startTimerInterval();
     this.getPunchInStatus();
+    this.getActivities();
   }
 
   componentWillUnmount() {
-    clearInterval(this.state.timer); // Stop the timer when component unmounts
+    clearInterval(this.state.timer);
   }
 
   startTimerInterval = (punchInTime) => {
@@ -153,7 +152,8 @@ class Header extends Component {
           const completedBreaks = data.data.filter(
             (activity) =>
               activity.activity_type === "Break" &&
-              activity.status === "completed"
+              activity.status === "completed" &&
+              this.formatToYMD(activity.complete_in_time) === this.formatToYMD(new Date())
           );
 
           const totalDurationInMinutes = completedBreaks.reduce(
@@ -177,11 +177,10 @@ class Header extends Component {
           );
 
           const totalBreakInMinutes = Math.round(totalDurationInMinutes);
-
+          this.props.breakDurationCalAction(totalBreakInMinutes);
           this.setState({
             activities: data.data,
             loading: false,
-            break_duration_in_minutes: totalBreakInMinutes,
           });
         } else {
           this.setState({
@@ -275,8 +274,7 @@ class Header extends Component {
         return;
     }
 
-    this.getActivities();
-    const { start_time, break_duration_in_minutes } = this.state;
+    const { start_time } = this.state;
     const currentTime = new Date();
     const endTimeFormatted = currentTime.toLocaleTimeString([], {
       hour: "2-digit",
@@ -288,7 +286,7 @@ class Header extends Component {
 
     const start = start_time;
     const end = endTimeFormatted;
-    const breakMinutes = break_duration_in_minutes;
+    const breakMinutes = this.props.breakDuration;
     this.calculateWorkingHours(start, end, breakMinutes);
     this.setState({ showModal: true });
   };
@@ -347,6 +345,15 @@ class Header extends Component {
 
   closeModal = () => {
     this.setState({ showModal: false });
+  };
+
+  formatToYMD(dateStr) {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   };
 
   formatToMySQLDateTime(timeString) {
@@ -424,7 +431,6 @@ class Header extends Component {
     const {
       report,
       start_time,
-      break_duration_in_minutes,
       end_time,
       todays_working_hours,
       todays_total_hours,
@@ -433,7 +439,7 @@ class Header extends Component {
     formData.append("employee_id", window.user.id);
     formData.append("report", report);
     formData.append("start_time", this.formatToMySQLDateTime(start_time));
-    formData.append("break_duration_in_minutes", break_duration_in_minutes);
+    formData.append("break_duration_in_minutes", this.props.breakDuration);
     formData.append("end_time", this.formatToMySQLDateTime(end_time));
     formData.append(
       "todays_working_hours",
@@ -475,6 +481,7 @@ class Header extends Component {
           });
 
           this.props.punchInAction(false);
+          this.props.breakDurationCalAction(0);
           setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
@@ -609,7 +616,7 @@ class Header extends Component {
   };
 
   render() {
-    const { fixNavbar, darkHeader, isPunchedIn } = this.props;
+    const { fixNavbar, darkHeader, isPunchedIn, breakDuration } = this.props;
     const {
       report,
       punchErrorModel,
@@ -836,8 +843,8 @@ class Header extends Component {
                               type="text"
                               className="form-control"
                               value={
-                                this.state.break_duration_in_minutes
-                                  ? this.state.break_duration_in_minutes
+                                breakDuration
+                                  ? breakDuration
                                   : "00"
                               }
                               disabled
@@ -925,10 +932,12 @@ const mapStateToProps = (state) => ({
   darkHeader: state.settings.isDarkHeader,
   breakIn: state.settings.isBreakIn,
   isPunchedIn: state.settings.isPunchIn,
+  breakDuration: state.settings.breakDurationCalculation,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  punchInAction: (e) => dispatch(punchInAction(e))
+  punchInAction: (e) => dispatch(punchInAction(e)),
+  breakDurationCalAction: (e) => dispatch(breakDurationCalAction(e)),
 });
 // export default connect(mapStateToProps, mapDispatchToProps)(Header);
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Header));
