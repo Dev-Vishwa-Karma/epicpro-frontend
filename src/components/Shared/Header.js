@@ -184,9 +184,6 @@ class Header extends Component {
           });
         } else {
           this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
             loading: false,
           });
           setTimeout(this.dismissMessages, 3000);

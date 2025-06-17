@@ -48,6 +48,8 @@ class EditEmployee extends Component {
             upworkProfile: '',
             resume: '',
             resumeUrl: '',
+            visibilityPriority: 0,
+            status: true,
             selectedEmployee: '',
             successMessage: "",
             showSuccess: false,
@@ -124,7 +126,9 @@ class EditEmployee extends Component {
                     upworkProfile: employee.upwork_profile_url,
                     resume: employee.resume,
                     skillsFrontend: uniqueFrontendSkills,
-                    skillsBackend: uniqueBackendSkills
+                    skillsBackend: uniqueBackendSkills,
+                    visibilityPriority: employee.visibility_priority || 0,
+                    status: employee.status,
                 });
             } else {
                 console.error("Failed to fetch employee data.");
@@ -272,7 +276,9 @@ class EditEmployee extends Component {
             linkedin,
             instagram,
             upworkProfile,
-            resume 
+            resume,
+            visibilityPriority,
+            status
         } = this.state;
 
 		const updateEmployeeData = new FormData();
@@ -319,6 +325,9 @@ class EditEmployee extends Component {
         updateEmployeeData.append('instagram_url', instagram);
         updateEmployeeData.append('upwork_profile_url', upworkProfile);
         updateEmployeeData.append('resume', resume);
+        updateEmployeeData.append('visibility_priority', visibilityPriority);
+        updateEmployeeData.append('status', status);
+        
         updateEmployeeData.append("logged_in_employee_id", id);
         updateEmployeeData.append('logged_in_employee_role', role); // Logged-in employee role
         fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=edit&user_id=${employeeId}`, {
@@ -429,7 +438,7 @@ class EditEmployee extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl} = this.state;
+        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, status} = this.state;
         // Frontend and Backend Skill Options
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
@@ -1066,6 +1075,44 @@ class EditEmployee extends Component {
                                                     </div>
                                                 </div>
 
+                                                {/* Visible status */}
+                                                <div className="col-md-6">
+                                                    <div className="form-group">
+                                                        <label className="form-label">
+                                                        Visibility Priority
+                                                        </label>
+                                                        <select
+                                                        className="form-control show-tick"
+                                                        value={visibilityPriority}
+                                                        onChange={this.handleChange}
+                                                        name="visibilityPriority"
+                                                        >
+                                                        {[...Array(11)].map((_, i) => (
+                                                            <option key={i} value={i}>
+                                                            {i}
+                                                            </option>
+                                                        ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                {/* Status */}
+                                                <div className="col-md-6">
+                                                    <div className="form-group">
+                                                        <label className="form-label">
+                                                            Status
+                                                        </label>
+                                                        <select
+                                                            className="form-control show-tick"
+                                                            value={status}
+                                                            onChange={this.handleChange}
+                                                            name="status"
+                                                            id='status'
+                                                        >
+                                                            <option value="1">Active</option>
+                                                            <option value="0">Inactive</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
                                                 {/* Resume */}
                                                 <div className="col-md-12">
                                                     <div className="form-group">
