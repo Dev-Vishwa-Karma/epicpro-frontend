@@ -35,7 +35,8 @@ class ViewEmployee extends Component {
             showReportModal: false,
             selectedReport: null,
             alternateSatudays: [],
-            openFileSelectModel: false
+            openFileSelectModel: false,
+            images: [],        
         };
 
         localStorage.removeItem('empId');
@@ -45,6 +46,80 @@ class ViewEmployee extends Component {
         localStorage.removeItem('endDate');
         localStorage.removeItem('defaultView');
     }
+
+    handleFileChange = async (event) => {
+        try {
+            const file = event.target.files[0];
+            const uploadImageData = new FormData();
+            uploadImageData.append('employee_id', this.state.employeeId);
+            uploadImageData.append('created_by', window.user.id);
+            uploadImageData.append('images[]', file);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=add`, {
+                method: 'POST', body: uploadImageData
+            });
+            const data = await response.json();
+            if (data.status === "success") {
+                const updatedImages = [...this.state.images, ...data.data];
+                const sortedImages = this.sortImages(updatedImages, 'desc');
+                this.setState({ images: sortedImages });
+            }
+        } catch (error) {
+            console.error("Error uploading the image in gallery: ", error);
+
+        }
+    }
+
+    handleSave = async () => {
+
+        try {
+            const { id, role } = window.user;
+            const { employeeId } = this.state;
+            const formData = new FormData();
+            formData.append("employee_id", employeeId);
+            formData.append("logged_in_employee_id", id);
+            formData.append('logged_in_employee_role', role); // Logged-in employee role
+            formData.append("profileUrl", this.state.selectedImage);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=edit&user_id=${employeeId}`, {
+                method: "POST",
+                body: formData,
+            })
+            const data = await response.json();
+            if (data.status === "success") {
+                // Correct the image path and set the previewImage state
+                const profileImagePath = data.data.profile.replace(/\\/g, '/');
+
+                // Update the previewImage state correctly
+                this.setState((prevState) => ({
+                    previewImage: `${process.env.REACT_APP_API_URL}/${profileImagePath}`,
+                    employee: {
+                        ...prevState.employee,
+                        profile: profileImagePath // Update the profile in employee data
+                    },
+                    successMessage: "Image uploaded successfully!",
+                    showSuccess: true,
+                    errorMessage: "",
+                    showError: false,
+                    selectedImage: null
+                }));
+                setTimeout(this.dismissMessages, 3000);
+            } else {
+                this.setState({
+                    errorMessage: "Image upload failed!",
+                    showError: true,
+                    showSuccess: false,
+                });
+            }
+            this.setState({ openFileSelectModel: false });
+            document.body.style.overflow = 'auto';
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            this.setState({
+                errorMessage: "An error occurred while uploading the image.",
+                showError: true,
+                showSuccess: false,
+            });
+        }
+    };
 
     // Function to dismiss messages
     dismissMessages = () => {
@@ -63,6 +138,7 @@ class ViewEmployee extends Component {
         })
         this.setState({ activeTab: "calendar" })
         this.fetchEmployeeDetails(id);
+        this.getEmployeeGallery(id);
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -78,6 +154,7 @@ class ViewEmployee extends Component {
         if (tab && tab !== prevProps.location.state?.tab) {
             this.setState({ activeTab: tab });
         }
+    
     }
 
     formatDate = (date) => {
@@ -86,6 +163,37 @@ class ViewEmployee extends Component {
         const month = (`0${d.getMonth() + 1}`).slice(-2);
         const day = (`0${d.getDate()}`).slice(-2);
         return `${year}-${month}-${day}`;
+    };
+
+    getEmployeeGallery = (id) => {
+        let galleryUrl = `${process.env.REACT_APP_API_URL}/gallery.php?action=view&id=${id}`;
+        // Fetch gallery data (as in the previous code)
+        fetch(galleryUrl, {
+            method: "GET",
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
+                    this.setState({
+                        images: sortedImages,
+                    });
+                } else {
+                    this.setState({ message: data.message, loading: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ message: 'Failed to fetch data', loading: false });
+                console.error(err);
+            });
+    }
+
+    sortImages = (images, sortOrder) => {
+        return [...images].sort((a, b) => {
+            return sortOrder === "asc"
+                ? new Date(b.created_at) - new Date(a.created_at)  // Newest first
+                : new Date(a.created_at) - new Date(b.created_at); // Oldest first
+        });
     };
 
     // Common fetch function
@@ -653,8 +761,9 @@ class ViewEmployee extends Component {
         if (!employee) {
             return <p>Loading employee details...</p>;
         }
-        const defaultDate = localStorage.getItem('startDate') ??
-			`${new Date().getFullYear()}-${String(new Date().getMonth()).padStart(2, '0')}-01`;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const defaultDate = localStorage.getItem('startDate') ?? this.formatDate(today);
 		const defaultView = localStorage.getItem('defaultView') ?? 'month';
 
         // Use calendarEventsData from state, default to empty array if not yet loaded
@@ -712,6 +821,7 @@ class ViewEmployee extends Component {
                                                     this.setState({
                                                         openFileSelectModel: true
                                                     })
+                                                    document.body.style.overflow = 'hidden';
                                                 }} icon={faCamera} />
                                                 {/* <input
                                                     id="imageUpload"
@@ -1443,45 +1553,120 @@ class ViewEmployee extends Component {
                     </div>
                 </div>
                 {openFileSelectModel && (
-				<div
-					className="modal fade show d-block"
-					id="birthdayBannerModal"
-					tabIndex="-1"
-					role="dialog"
-					style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
-					>
-					<div className="modal-dialog modal-dialog-centered" role="document">
-						<div className="modal-content text-center p-4">
-						
-							{/* Modal Header */}
-							<div className="modal-header border-0">
-                                    <h5 className="modal-title w-100 text-dark display-6 fw-bold">
-                                        Select your profile
-                                </h5>
-							</div>
-
-							{/* Modal Body */}
-							<div className="modal-body">
-                                </div>
-                                
-                            <div className="modal-footer border-0 justify-content-center">
-								<button
-								type="button"
-								className="btn btn-outline-dark px-4"
+                <div
+    className="modal fade show d-block"
+    id="birthdayBannerModal"
+    tabIndex="-1"
+    role="dialog"
+    style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+>
+    <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '650px' }}>
+        <div className="modal-content rounded-3" style={{
+							maxHeight: '90vh',
+							display: 'flex',
+							flexDirection: 'column'
+						}}>
+            {/* Modal Header */}
+            <div className="modal-header border-b-2 pb-0">
+                <h5 className="modal-title w-100 text-center fw-bold fs-5 text-dark">
+                    Select Your Profile Picture
+                </h5>
+                <div 
+                    className="btn btn-close" 
                                         onClick={() => {
-                                            this.setState({
-                                                openFileSelectModel: false
-                                            })
-                                    
-                                }}
-								>
-                                    close
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
+                                            this.setState({ openFileSelectModel: false });
+                                             document.body.style.overflow = 'auto';
+                                            
+                                        } 
+                }
+                    aria-label="Close"
+                >
+                    <i class="fa fa-times" data-toggle="tooltip" title="fa fa-times"></i>
+                </div>
+            </div>
 
+            {/* Modal Body */}
+            <div className="modal-body py-4" style={{
+								overflowY: 'auto',
+								flex: '1 1 auto'
+							}}>
+                <div className="mb-3">
+                    <p className="text-muted text-center mb-4">
+                        Choose from existing images or upload a new one
+                    </p>
+                    
+                    <div className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start">
+                        {this.state.images.map((image, index) => (
+                            <div key={index} className="position-relative cursor-pointer mr-2">
+                                <label className="d-block mb-0 pointer">
+                                    <input 
+                                        name="imagecheck" 
+                                        type="radio" 
+                                        value={image.url} 
+                                        className="d-none" 
+                                        onChange={() => this.setState({ selectedImage: image.url })}
+                                    />
+                                    <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
+                                        <img 
+                                            src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
+                                            alt="Profile option" 
+                                            className="img-fluid rounded-1" 
+                                            style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                </label>
+                            </div>
+                        ))}
+                        
+                        <label className="cursor-pointer">
+                            <div className="border rounded-2 mt-1 ml-1 border-dashed hover-bg-light">
+                                <div 
+                                    style={{
+                                        width: '80px',
+                                        height: '80px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#6c757d'
+                                    }}
+                                >
+                                    <i className="fe fe-plus fs-4" />
+                                </div>
+                                <input 
+                                    type="file" 
+                                    className="d-none" 
+                                    accept="image/*"
+                                    onChange={this.handleFileChange}
+                                />
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="modal-footer border-b-2 pt-2 d-flex justify-content-end">
+                <button
+                    className="btn btn-outline-secondary me-3 px-4"
+                                        onClick={() => {
+                                            this.setState({ openFileSelectModel: false })
+                                             document.body.style.overflow = 'auto';
+                                        
+                                        }}
+                >
+                    Cancel
+                </button>
+                <button
+                    className="btn btn-primary px-4"
+                    onClick={this.handleSave}
+                    disabled={!this.state.selectedImage}
+                >
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 				)}
             </>
         )
