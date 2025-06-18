@@ -244,4 +244,9 @@ export const punchInAction = (e) => dispatch => {
 		payload: e
 	})
 }
-
+export const breakDurationCalAction = (e) => dispatch => {
+	dispatch({
+		type: 'BREAK_DURATION_CALCULATION',
+		payload: e
+	})
+}

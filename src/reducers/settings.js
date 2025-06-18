@@ -233,6 +233,11 @@ export default (state = initialState, action) => {
 				...state,
 				isPunchIn: action.payload
 			}
+		case 'BREAK_DURATION_CALCULATION':
+			return {
+				...state,
+				breakDurationCalculation: action.payload
+		   	}
 
 		default:
 			return state
