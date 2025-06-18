@@ -73,12 +73,9 @@ class Header extends Component {
 
   startTimerInterval = (punchInTime, isAutoClose = true) => {
     if(punchInTime){
-        console.log('punchInTime',punchInTime)
         const today = new Date();
-        console.log(punchInTime, today, punchInTime < today);
         const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const punchInDateOnly = new Date(punchInTime.getFullYear(), punchInTime.getMonth(), punchInTime.getDate());
-        console.log(punchInDateOnly, todayDateOnly);
       
         if (isAutoClose && punchInDateOnly < todayDateOnly) {
           this.autoCloseActivities(punchInTime);
@@ -115,8 +112,7 @@ class Header extends Component {
 
   autoCloseActivities = (punchInTime) => {
     const punchInTimeDate = punchInTime.toISOString().split('T')[0];
-    console.log('yesterday----------',punchInTimeDate)
-    fetch(`${process.env.REACT_APP_API_URL}/auto_close_breaks_cron.php?date=${punchInTimeDate}`)
+    fetch(`${process.env.REACT_APP_API_URL}/auto_close_breaks.php?user_id=${window.user.id}&date=${punchInTimeDate}`)
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
@@ -982,7 +978,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   punchInAction: (e) => dispatch(punchInAction(e)),
-  breakInAction: (e) => dispatch(breakInAction(e))
+  breakInAction: (e) => dispatch(breakInAction(e)),
   breakDurationCalAction: (e) => dispatch(breakDurationCalAction(e)),
 });
 // export default connect(mapStateToProps, mapDispatchToProps)(Header);
