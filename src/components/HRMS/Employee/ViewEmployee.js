@@ -56,26 +56,19 @@ class ViewEmployee extends Component {
     };
 
     componentDidMount() {
-        const { id } = this.props.match.params;
+        const { id, activeTab } = this.props.match.params;
         this.setState({
             employeeId: id
         })
-        this.setState({ activeTab: "calendar" })
+        this.setState({ activeTab: activeTab})
         this.fetchEmployeeDetails(id);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { employee, tab } = this.props.location.state || {};
-        if (employee && employee !== prevProps.location.state?.employee) {
-            this.setState({
-                employee: { ...this.state.employee, ...employee },
-                previewImage: `${process.env.REACT_APP_API_URL}/${employee?.profile || ""}`
-            });
-        }
-
-         // Watch for tab change even if pathname is same
-        if (tab && tab !== prevProps.location.state?.tab) {
-            this.setState({ activeTab: tab });
+        const { id, activeTab } = this.props.match.params;
+        // // Watch for tab change even if pathname is same
+        if (activeTab && activeTab !== prevState.activeTab) {
+            this.setState({ activeTab });
         }
     }
 

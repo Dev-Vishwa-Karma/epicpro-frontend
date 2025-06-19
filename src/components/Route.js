@@ -79,7 +79,7 @@ const Routes = [
         component: EditEmployee
     },
     {
-        path: "/view-employee/:id",
+        path: "/view-employee/:id/:activeTab",
         name: 'view-employee',
         exact: true,
         pageTitle: "View Employee",
