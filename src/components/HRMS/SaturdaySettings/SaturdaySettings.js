@@ -353,7 +353,7 @@ class SaturdaySettings extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { selectedYear, toggle, checkedDates, databaseCheckedDates } =
+    const { selectedYear, toggle } =
       this.state;
     const currentYear = new Date().getFullYear();
     const startYear = currentYear;

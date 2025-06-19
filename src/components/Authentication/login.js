@@ -167,9 +167,9 @@ export default class Login extends Component {
 									{passwordError && <div className="invalid-feedback">{passwordErrorMessage}</div>}
 								</div>
 								<div className="form-footer">
-									<a className="btn btn-primary btn-block" href="#" onClick={this.handleLoginIn}>
+									<button className="btn btn-primary btn-block" onClick={this.handleLoginIn}>
 										Click to login
-									</a>
+									</button>
 								</div>
 							</div>
 						</div>

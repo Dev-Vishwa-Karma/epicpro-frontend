@@ -3,9 +3,7 @@ import { connect } from 'react-redux';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import Fullcalender from '../../common/fullcalender';
-import moment from 'moment';
 import ReportModal from '../Report/ReportModal';
-
 
 class ViewEmployee extends Component {
     constructor(props) {
@@ -1080,9 +1078,6 @@ class ViewEmployee extends Component {
                                                             {/* Out Time Entry */}
                                                             {activity.activity_type === 'Break' && activity.out_time && (
                                                                 <>
-                                                                    <div className="duration text-center">
-                                                                        ------ {activity.duration} ------
-                                                                    </div>
                                                                     <div className="timeline_item ">
                                                                         <img
                                                                             className="tl_avatar"
@@ -1135,9 +1130,6 @@ class ViewEmployee extends Component {
                                                             {/* Out Time Entry */}
                                                             {activity.activity_type === 'Punch' && activity.out_time && (
                                                                 <>
-                                                                    <div className="duration text-center">
-                                                                        ------ {activity.duration} ------
-                                                                    </div>
                                                                     <div className="timeline_item ">
                                                                         <img
                                                                             className="tl_avatar"

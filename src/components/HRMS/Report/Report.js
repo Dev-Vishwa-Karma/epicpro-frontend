@@ -781,7 +781,6 @@ class Report extends Component {
 
     // Add new method for handling date changes
     handleDateChange = (date, type) => {
-        const { fromDate, toDate } = this.state;
         if (date) {
             const newDate = new Date(date);
             if (type === 'fromDate') {
@@ -805,7 +804,6 @@ class Report extends Component {
         const { fixNavbar } = this.props;
         const { 
             reports, 
-            error, 
             employeeData, 
             selectedStatus, 
             selectedEmployee, 
