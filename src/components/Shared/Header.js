@@ -116,13 +116,14 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          this.props.punchInAction(false);
-          this.props.breakInAction(false);
           this.setState({
             punchInTime: null,
           });
           clearInterval(this.state.timer);
           console.log('Successfully closed your breaks');
+          this.props.punchInAction(false);
+          this.props.breakInAction(false);
+          window.location.reload();
         } else {
           this.setState({
             errorMessage: data.message,
@@ -362,7 +363,7 @@ class Header extends Component {
     const workingTimeWithBreak = totalDuration - breakMinutesInNumber;
     const convertToFormattedTime = (minutes) => {
       const hours24 = Math.floor(minutes / 60); // Get the number of hours (24-hour format)
-      const remainingMinutes = minutes % 60; // Get the remaining minutes
+      const remainingMinutes = Math.floor(minutes % 60); // Get the remaining minutes
 
       // Format as hh:mm (24-hour format)
       return `${hours24.toString().padStart(2, "0")}:${remainingMinutes
@@ -510,7 +511,8 @@ class Header extends Component {
               detail: { report: newReport },
             })
           );
-
+          this.closeModal();
+        
           this.setState({
             successMessage: data.message,
             showError: false,
