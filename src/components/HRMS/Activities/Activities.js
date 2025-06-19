@@ -379,7 +379,7 @@ class Activities extends Component {
 
 	render() {
 		const { fixNavbar } = this.props;
-		const { activities, error, employeeData, selectedStatus, selectedEmployee, breakReason, loading, isBreakedIn } = this.state;
+		const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading } = this.state;
 		return (
 			<>
 			 {this.renderAlertMessages()}

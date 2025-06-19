@@ -300,7 +300,6 @@ class Employee extends Component {
     };
 
 	handleDateChange = (date, type) => {
-        const { fromDate, toDate } = this.state;
         if (date) {
             const newDate = new Date(date);
             if (type === 'fromDate') {
@@ -770,7 +769,7 @@ class Employee extends Component {
 	render() {
 		const { fixNavbar, /* statisticsOpen, statisticsClose */ } = this.props;
 			
-		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, cancelledLeaves, message, selectedEmployeeLeave, currentPageEmployees,  currentPageLeaves, dataPerPage, loading, fromDate, toDate, selectedLeaveEmployee } = this.state;
+		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee } = this.state;
 
 		// Handle empty employee data safely
 		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
@@ -790,18 +789,11 @@ class Employee extends Component {
 			return (b.id || 0) - (a.id || 0);
 		});
 
-		// Pagination Logic for Employees
-		const indexOfLastEmployee = this.state.currentPageEmployees * dataPerPage;
-		const indexOfFirstEmployee = indexOfLastEmployee - dataPerPage;
-		const currentEmployees = employeeList.slice(indexOfFirstEmployee, indexOfLastEmployee);
-		const totalPagesEmployees = Math.ceil(employeeList.length / dataPerPage);
-
 		// Pagination logic for employee leaves
 		const indexOfLastLeave = this.state.currentPageLeaves * dataPerPage;
 		const indexOfFirstLeave = indexOfLastLeave - dataPerPage;
 		const currentEmployeeLeaves = filteredLeaveList.slice(indexOfFirstLeave, indexOfLastLeave);
 		const totalPagesLeaves = Math.ceil(filteredLeaveList.length / dataPerPage);
-
 
 		return (
 			<>
@@ -1016,7 +1008,7 @@ class Employee extends Component {
                                                                 className="form-control"
                                                                 dateFormat="yyyy-MM-dd"
                                                                 placeholderText="From Date"
-                                                                //maxDate={new Date()}
+
                                                             />
                                                         </div>
                                                     </div>
