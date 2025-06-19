@@ -56,12 +56,15 @@ class Report extends Component {
     }
 
     componentDidMount() {
+        const today = new Date();
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0); // Set to start of day
+        today.setHours(0, 0, 0, 0); // Set to start of day
+        
         this.setState({ 
             fromDate: yesterday,
-            toDate: yesterday 
+            toDate: today 
         }, () => {
             this.fetchReports()
         });
@@ -497,7 +500,6 @@ class Report extends Component {
     };    
 
     openReportModal = (report) => {
-        if (!report) return;
         this.setState({ 
             selectedModalReport: report,
             report: report.report || '',
@@ -508,6 +510,7 @@ class Report extends Component {
             todays_total_hours: report.todays_total_hours || '',
             report_id: report.id,
             employee_id: report.employee_id || '',
+            editNotes: report.note || '',
         });
     };
 
@@ -718,6 +721,7 @@ class Report extends Component {
         let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?action=view&user_id=${selectedReportEmployee}`;
         
         const formatDate = (date) => {
+            if (!date) return '';
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0'); 
             const day = String(date.getDate()).padStart(2, '0'); 
@@ -735,12 +739,17 @@ class Report extends Component {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
+                // Sort reports to show most recent first
+                const sortedReports = data.data.sort((a, b) => {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+                
                 this.setState({ 
                         reports: data.data,
                         filteredReports: data.data,
                         loading: false,
                         currentPageReports: 1, 
-                        error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
+                        // error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
                     });
                 
             }else {
@@ -1021,19 +1030,7 @@ class Report extends Component {
                                                                                     title="Edit"
                                                                                     data-toggle="modal"
                                                                                     data-target="#editpunchOutReportModal"
-                                                                                    onClick={() => this.setState({
-                                                                                        selectedReport: report,
-                                                                                        report: report.report || '',
-                                                                                        start_time: report.start_time ? report.start_time : null,
-                                                                                        break_duration_in_minutes: report.break_duration_in_minutes || 0,
-                                                                                        end_time: report.end_time ? report.end_time : null,
-                                                                                        todays_working_hours: report.todays_working_hours || '',
-                                                                                        todays_total_hours: report.todays_total_hours || '',
-                                                                                        editNotes: report.note || '',
-                                                                                        report_id: report.id,
-                                                                                        employee_id: report.employee_id || '',
-                                                                                        error: { report: '', start_time: '', end_time: '', break_duration_in_minutes: '' }
-                                                                                    })}
+                                                                                    onClick={() => this.openReportModal(report)}
                                                                                 >
                                                                                     <i className="icon-pencil text-primary"></i>
                                                                                 </button>
@@ -1155,32 +1152,31 @@ class Report extends Component {
                                         <span aria-hidden="true">×</span>
                                     </button>
                                 </div>
+                                    {/* Edit Modal */}
+                                <div className="modal-body">
+                                    <div className="row">
 
-                                {selectedReport && (
-                                    <div className="modal-body">
-                                        <div className="row">
-
-                                            {/* Left side - Report TextArea */}
-                                            <div className="col-md-6">
-                                                <div className="form-group">
-                                                    <textarea
-                                                    className={`form-control ${this.state.error?.report ? "is-invalid" : ""}`}
-                                                    name='report'
-                                                    placeholder="Please provide the report."
-                                                    value={this.state.report || ''}
-                                                    onChange={(e) => this.handleChange('report', e.target.value)}
-                                                    rows="15"
-                                                    cols="50"
-                                                    />
-                                                    {this.state.error?.report && (
-                                                    <div className="invalid-feedback">{this.state.error.report}</div>
-                                                    )}
-                                                </div>
+                                        {/* Left side - Report TextArea */}
+                                        <div className="col-md-6">
+                                            <div className="form-group">
+                                                <textarea
+                                                className={`form-control ${this.state.error?.report ? "is-invalid" : ""}`}
+                                                name='report'
+                                                placeholder="Please provide the report."
+                                                value={this.state.report || ''}
+                                                onChange={(e) => this.handleChange('report', e.target.value)}
+                                                rows="15"
+                                                cols="50"
+                                                />
+                                                {this.state.error?.report && (
+                                                <div className="invalid-feedback">{this.state.error.report}</div>
+                                                )}
                                             </div>
+                                        </div>
 
-                                            {/* Right side - Form fields */}
-                                            <div className="col-md-6">
-                                                <div className="row">
+                                        {/* Right side - Form fields */}
+                                        <div className="col-md-6">
+                                            <div className="row">
 
                                                     {/* Start time */}
                                                     <div className="col-md-6">
@@ -1293,9 +1289,8 @@ class Report extends Component {
                                                 </div>
                                             </div>
 
-                                        </div>
                                     </div>
-                                )}
+                                </div>
 
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.closeReportModal}>Close</button>
