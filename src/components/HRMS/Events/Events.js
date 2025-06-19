@@ -40,7 +40,6 @@ class Events extends Component {
       leaveData: [],
 	  allEvents: [],
       showReportModal: false,
-	  selectedReport: null,
 	  defaultDate: new Date(),
       selectedReport: null,
 	  showDeleteModal: false,
@@ -84,7 +83,7 @@ class Events extends Component {
 
 	fetchWorkingHoursReports = () => {
 	let employeeId = window.user?.role !== 'admin' ?
-			this.state.calendarView == 'report' ? window.user.id: null : null;
+			this.state.calendarView === 'report' ? window.user.id: null : null;
 	if (!employeeId && !localStorage.getItem('empId')) {
 		return;
 	}
@@ -208,7 +207,7 @@ class Events extends Component {
 				.then((res) => res.json())
 				.then((data) => {
 					if (data.status === "success" && Array.isArray(data.data)) {
-						if(employee_id == ''){
+						if(employee_id === ''){
 							this.setState({ leaveData: [] });
 						}else{
 							this.setState({ leaveData: data.data });
@@ -584,10 +583,8 @@ fetchEvents = () => {
 	.then(data => {
 		if (data.status === 'success') {
 			const eventsData = data.data;
-			const currentYear = new Date().getFullYear();
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
-			const selectedYear = this.state.selectedYear;
 			
 			// Combine regular events with birthday events
 			if (eventsData && eventsData.length > 0) {
@@ -687,10 +684,9 @@ formatDateTimeAMPM = (timeString) => {
 
     render() {
         const { fixNavbar} = this.props;
-		const {events, selectedYear, showAddEventModal, loading, employees, logged_in_employee_role, selectedEmployeeIdForModal, selectedEmployeeIdForTodo, todos, workingHoursReports, calendarView } = this.state;
+		const {events, selectedYear, showAddEventModal, loading, employees, logged_in_employee_role, workingHoursReports, calendarView } = this.state;
 
 		// Dynamic generation of years (last 50 years to next 10 years)
-		const currentDate = new Date();
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth() + 1;
 		this.state.defaultDate = localStorage.getItem('startDate') ??
@@ -1040,7 +1036,6 @@ formatDateTimeAMPM = (timeString) => {
 																				padding: '2px 6px',
 																				fontSize: '0.75rem',
 																				lineHeight: 1,
-																				fontSize: '1.2rem'
 																				}}
 																			>
 																				<i className="fa fa-trash" aria-hidden="true" style={{color:"red"}}></i>

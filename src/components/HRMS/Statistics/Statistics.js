@@ -203,7 +203,6 @@ class Statistics extends Component {
       let current = new Date(from);
       while (current <= to) {
         if (current.getFullYear() === year && current.getMonth() + 1 === month) {
-          const dateKey = current.toISOString().split('T')[0]; // "YYYY-MM-DD"
           if (is_half_day === "1" || is_half_day === 1) {
             counts[employee_id] = (counts[employee_id] || 0) + 0.5;
           } else {
