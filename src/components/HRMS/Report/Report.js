@@ -1129,9 +1129,12 @@ class Report extends Component {
                                             <div className="col-md-12 mb-2">
                                                 <strong>Total Hours:</strong> {selectedModalReport.todays_total_hours?.slice(0, 5)}
                                             </div>
-                                            <div className="col-md-12 mb-2">
-                                                <strong>Note:</strong> {selectedModalReport.note}
-                                            </div>
+                                            {
+                                                selectedModalReport.note !== null &&
+                                                <div className="col-md-12 p-3 mb-2 alert alert-danger alert-dismissible fade show">
+                                                    <strong>Note:</strong> {selectedModalReport.note}
+                                                </div>
+                                            }
                                         </div>
                                     ) : (
                                         <p>No report data available.</p>
