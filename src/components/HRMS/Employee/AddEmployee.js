@@ -49,6 +49,7 @@ class AddEmployee extends Component {
       errorMessage: "",
       showError: false,
       visibilityPriority: 0,
+      statisticsVisibilityStatus: 0,
     };
 
     // Create refs for each file input
@@ -176,6 +177,7 @@ class AddEmployee extends Component {
       upworkProfile,
       resume,
       visibilityPriority,
+      statisticsVisibilityStatus
     } = this.state;
 
     const addEmployeeData = new FormData();
@@ -202,6 +204,8 @@ class AddEmployee extends Component {
     addEmployeeData.append("bank_name", bankName);
     addEmployeeData.append("ifsc_code", ifscCode);
     addEmployeeData.append("bank_address", bankAddress);
+    addEmployeeData.append("statistics_visibility_status", statisticsVisibilityStatus);
+
     salaryDetails.forEach((detail, index) => {
       addEmployeeData.append(
         `salaryDetails[${index}][source]`,
@@ -232,6 +236,7 @@ class AddEmployee extends Component {
     addEmployeeData.append("visibility_priority", visibilityPriority);
     addEmployeeData.append("logged_in_employee_id", id);
     addEmployeeData.append("logged_in_employee_role", role);
+
 
     fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=add`, {
       method: "POST",
@@ -410,6 +415,7 @@ class AddEmployee extends Component {
       instagram,
       upworkProfile,
       visibilityPriority,
+      statisticsVisibilityStatus
     } = this.state;
 
     // const { skillsFrontend, skillsBackend } = this.state;
@@ -1132,6 +1138,23 @@ class AddEmployee extends Component {
                             </select>
                           </div>
                         </div>
+                        {/* Visible statistics status */}
+                           <div className="col-md-6">
+                              <div className="form-group">
+                                  <label className="form-label">
+                                      Statistics Visibility Status
+                                  </label>
+                                  <select
+                                      className="form-control show-tick"
+                                      value={statisticsVisibilityStatus}
+                                      onChange={this.handleChange}
+                                      name="statisticsVisibilityStatus"
+                                  >
+                                      <option value="1">Active</option>
+                                      <option value="0">Inactive</option>
+                                  </select>
+                              </div>
+                          </div>
                         {/* Resume */}
                         <div className="col-md-12">
                           <div className="form-group">
