@@ -28,7 +28,6 @@ class Header extends Component {
       timer: null,
       punchInTime: null,
       elapsedTime: 0,
-      activities: [],
       totalBreakInMinutes: 0,
       isBreakedIn: false,
       successMessage: "",
@@ -120,7 +119,6 @@ class Header extends Component {
             punchInTime: null,
           });
           clearInterval(this.state.timer);
-          console.log('Successfully closed your breaks');
           this.props.punchInAction(false);
           this.props.breakInAction(false);
           window.location.reload();
@@ -189,42 +187,13 @@ class Header extends Component {
 
   getActivities = () => {
     fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?user_id=${window.user.id}`
+      `${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`
     )
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          const completedBreaks = data.data.filter(
-            (activity) =>
-              activity.activity_type === "Break" &&
-              activity.status === "completed" &&
-              this.formatToYMD(activity.complete_in_time) === this.formatToYMD(new Date())
-          );
-
-          const totalDurationInMinutes = completedBreaks.reduce(
-            (total, activity) => {
-              const duration = activity.duration || "";
-              const durationParts = duration.split(" ");
-
-              if (durationParts.length === 2) {
-                const timeValue = parseInt(durationParts[0]);
-                const timeUnit = durationParts[1].toLowerCase();
-
-                if (timeUnit.includes("sec")) {
-                  return total + timeValue / 60;
-                } else if (timeUnit.includes("min")) {
-                  return total + timeValue;
-                }
-              }
-              return total;
-            },
-            0
-          );
-
-          const totalBreakInMinutes = Math.round(totalDurationInMinutes);
-          this.props.breakDurationCalAction(totalBreakInMinutes);
+          this.props.breakDurationCalAction(data.data.break_duration);
           this.setState({
-            activities: data.data,
             loading: false,
           });
         } else {

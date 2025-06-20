@@ -132,9 +132,7 @@ class Activities extends Component {
 						showSuccess: true,
 					});
 					const breakDuration = this.props.breakDuration || 0;
-					const diff = new Date(data.data.breakOut).getTime() - new Date(data.data.breakIn).getTime();
-					const diffMins = Math.floor(diff / (1000 * 60)); 
-					this.props.breakDurationCalAction(breakDuration + diffMins);
+					this.props.breakDurationCalAction(breakDuration + data.data.break_duration);
 					setTimeout(this.dismissMessages, 3000);
 					this.componentDidMount();
 				} else {
