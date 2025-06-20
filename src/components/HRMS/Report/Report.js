@@ -51,6 +51,8 @@ class Report extends Component {
             loading: true,
             errorMessage: "",
             showError: false,
+            showSuccess: false,
+            successMessage: "",
         };
         this.reportMessageTimeout = null;
     }
@@ -689,30 +691,35 @@ class Report extends Component {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
-                this.setState({punchSuccess: data.message, isPunchedIn: false, showModal: false, report: '' });
-                //window.location.href = '/hr-report';
-                this.fetchReports();
+                this.setState({
+					successMessage: data.message,
+					showSuccess: true,
+					isPunchedIn: false, 
+                    showModal: false, 
+                    report: ''
+				});
 
+                this.fetchReports();
                 console.log("test");
                 document.querySelector("#editpunchOutReportModal .close").click();
-                // setTimeout(() => {
-                //     this.setState({ punchSuccess: null });
-                // }, 3000);
+                setTimeout(this.dismissMessages, 3000);
             } else {
-                                console.log("eoor");
-                this.setState({ punchError: data.message });
-                //window.location.href = '/hr-report';
-                setTimeout(() => {
-                    this.setState({ punchError: null });
-                }, 3000);
+                console.log("eoor");
+                this.setState({
+                    errorMessage: data.message,
+                    showError: true,
+                    showSuccess: false,
+                });
+               setTimeout(this.dismissMessages, 3000);
             }
         })
         .catch((error) => {
-                            console.log("fixed");
-            this.setState({ punchError: 'Something went wrong. Please try again.' });
-            setTimeout(() => {
-                this.setState({ punchError: null });
-            }, 3000);
+                this.setState({
+                    errorMessage: 'Something went wrong. Please try again.',
+                    showError: true,
+                    showSuccess: false,
+                });
+                setTimeout(this.dismissMessages, 3000);
         });
 	};
 
@@ -769,6 +776,8 @@ class Report extends Component {
     // Function to dismiss messages
     dismissMessages = () => {
         this.setState({
+            showSuccess: false,
+            successMessage: "",
             showError: false,
             errorMessage: "",
             error: { report: '', start_time: '', end_time: '', break_duration_in_minutes: '' },
@@ -819,7 +828,29 @@ class Report extends Component {
 
     handleNotesChange = (e) => {
     this.setState({ editNotes: e.target.value });
-}
+    }
+
+  renderAlertMessages = () => (
+    <>
+      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-circle-check me-2"></i>
+        {this.state.successMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
+      </div>
+
+      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-triangle-exclamation me-2"></i>
+        {this.state.errorMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
+      </div>
+    </>
+  );
 
 
     render() {
@@ -850,8 +881,6 @@ class Report extends Component {
             break_duration_in_minutes, 
             todays_working_hours, 
             end_time, 
-            punchError, 
-            punchSuccess, 
             currentPageReports, 
             dataPerPage,
             fromDate,
@@ -870,16 +899,11 @@ class Report extends Component {
         const totalPagesReports = Math.ceil(reportList.length / dataPerPage);
 
         return (
-            <>
+            <>  
+                {this.renderAlertMessages()}
                 <div>
                     <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
                         <div className="container-fluid">
-                            {/* Display activity success message */}
-                            {punchSuccess && (
-                                <div className="alert alert-success mb-0">{punchSuccess}</div>
-                            )}
-                            {/* Display error message */}
-                            {punchError && <div className="alert alert-danger mb-0">{punchError}</div>}
                             <div className="d-flex justify-content-between align-items-center">
                                 <ul className="nav nav-tabs page-header-tab">
                                 </ul>
