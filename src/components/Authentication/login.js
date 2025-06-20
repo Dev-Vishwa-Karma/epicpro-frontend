@@ -16,7 +16,7 @@ export default class Login extends Component {
 			loginError: false,
 			emailErrorMessage: '',
 			passwordErrorMessage: '',
-			loading: false, // State to manage the loader
+			loading: false,
 		};
 	}
 
@@ -40,7 +40,6 @@ export default class Login extends Component {
 			emailErrorMessage = 'Please enter a valid email address';
 		}
 
-		// Validate password
 		if (!password) {
 			passwordError = true;
 			passwordErrorMessage = 'Password is required';
@@ -53,7 +52,7 @@ export default class Login extends Component {
 				emailErrorMessage,
 				passwordErrorMessage,
 			});
-			return; // Prevent API call if validation fails
+			return;
 		}
 
 		// Start loader when the login process begins
@@ -75,44 +74,30 @@ export default class Login extends Component {
 
 				if (data.status === "success") {
 
-					// Store user data in local storage
 					localStorage.setItem('user', JSON.stringify(data.data));
 
-					// Update state with user data
-					this.setState({ user: data.data }, () => {
-					});
-
-					// Store user data in localstorage using authService
+					this.setState({ user: data.data });
 					authService.setUser(data.data);
 
-					// Call onLogin function from App.js
 					if (this.props.onLogin) {
 						this.props.onLogin(data.data);
 					}
 
-					// Redirect to the dashboard or another page
 					this.props.history.push('/');
 
 				} else {
 					this.setState({ loginError: data.message, emailError: false, passwordError: false });
-
-					// Hide the error message after 5 seconds
-					setTimeout(() => {
-						this.setState({ loginError: null });
-					}, 5000);
+					setTimeout(() => { this.setState({ loginError: null })}, 5000);
 				}
 			})
 			.catch((error) => {
-				// Stop loader in case of error
 				this.setState({ loading: false });
 				this.setState({ loginError: 'Something went wrong. Please try again.', emailError: false, passwordError: false });
 				console.error("Error:", error);
-				// Hide the error message after 5 seconds
 				setTimeout(() => {
 					this.setState({ loginError: null });
 				}, 5000);
 			});
-
 	};
 
 	// Handle input change
