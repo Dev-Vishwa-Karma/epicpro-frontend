@@ -49,6 +49,7 @@ class EditEmployee extends Component {
             resume: '',
             resumeUrl: '',
             visibilityPriority: 0,
+            statisticsVisibilityStatus:0,
             status: true,
             selectedEmployee: '',
             successMessage: "",
@@ -128,8 +129,10 @@ class EditEmployee extends Component {
                     skillsFrontend: uniqueFrontendSkills,
                     skillsBackend: uniqueBackendSkills,
                     visibilityPriority: employee.visibility_priority || 0,
+                    statisticsVisibilityStatus: employee.statistics_visibility_status,
                     status: employee.status,
                 });
+
             } else {
                 console.error("Failed to fetch employee data.");
             }
@@ -278,6 +281,7 @@ class EditEmployee extends Component {
             upworkProfile,
             resume,
             visibilityPriority,
+            statisticsVisibilityStatus,
             status
         } = this.state;
 
@@ -326,6 +330,7 @@ class EditEmployee extends Component {
         updateEmployeeData.append('upwork_profile_url', upworkProfile);
         updateEmployeeData.append('resume', resume);
         updateEmployeeData.append('visibility_priority', visibilityPriority);
+        updateEmployeeData.append('statistics_visibility_status', statisticsVisibilityStatus);
         updateEmployeeData.append('status', status);
         
         updateEmployeeData.append("logged_in_employee_id", id);
@@ -438,7 +443,7 @@ class EditEmployee extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, status} = this.state;
+        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status} = this.state;
         // Frontend and Backend Skill Options
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
@@ -1092,6 +1097,24 @@ class EditEmployee extends Component {
                                                             {i}
                                                             </option>
                                                         ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                {/* Visible statistics status */}
+                                                <div className="col-md-6">
+                                                    <div className="form-group">
+                                                        <label className="form-label">
+                                                            Statistics Visibility Status
+                                                        </label>
+                                                        <select
+                                                            className="form-control show-tick"
+                                                            value={statisticsVisibilityStatus}
+                                                            onChange={this.handleChange}
+                                                            name="statisticsVisibilityStatus"
+                                                            id='statisticsVisibilityStatus'
+                                                        >
+                                                            <option value="1">Active</option>
+                                                            <option value="0">Inactive</option>
                                                         </select>
                                                     </div>
                                                 </div>

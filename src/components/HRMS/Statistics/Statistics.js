@@ -36,7 +36,16 @@ class Statistics extends Component {
   };
 
   getEmployees = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee&status=1`)
+    const { selectedYear, selectedMonth } = this.state;
+    const queryParams = new URLSearchParams({
+      action: 'view',
+      role: 'employee',
+      status: 1,
+      year: selectedYear,
+      month: selectedMonth,
+    });
+
+    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?${queryParams.toString()}`)
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
@@ -142,7 +151,7 @@ class Statistics extends Component {
   
   handleYearChange = (e) => {
     const year = parseInt(e.target.value);
-    this.setState({ selectedYear: year }, this.getAlternateSaturdays);
+    this.setState({ selectedYear: year }, this.getAlternateSaturdays, this.getEmployees());
   };
 
   handleMonthChange = (e) => {
@@ -151,6 +160,7 @@ class Statistics extends Component {
     this.setState({ selectedMonth: month }, () => {
       this.getAlternateSaturdays();  
       this.getReports();
+      this.getEmployees();
     });
   };
 
@@ -428,9 +438,10 @@ class Statistics extends Component {
                             if(!isMissingReport){
                               leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) - (isHalfDayLeave ? 0.5 : 1);
                             }else{
-                              cellStyle = isHalfDayLeave
+                              cellStyle = isHalfDayLeave && !isMissingReport
                               ? { backgroundColor: "#00ffff", color: "#000" } // Cyan for half-day
                               : { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
+                                leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) + 0.5;
                             }
                           } else if (isMissingReport && !highlightRow && currentDate < today) {
                             // Missing report and it is not alternae sat,sun or hoilday
