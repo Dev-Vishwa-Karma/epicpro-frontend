@@ -1231,6 +1231,7 @@ class Report extends Component {
                                                             dateFormat="h:mm aa"
                                                             placeholderText="Select End time"
                                                             className={`form-control ${this.state.error?.end_time ? "is-invalid" : ""}`}
+                                                            disabled={window.user.role !== 'admin' && window.user.role !== 'super_admin'}
                                                             />
                                                             {this.state.error?.end_time && (
                                                             <div className="invalid-feedback d-block">{this.state.error.end_time}</div>
