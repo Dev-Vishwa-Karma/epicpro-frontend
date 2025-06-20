@@ -51,17 +51,22 @@ class Report extends Component {
             loading: true,
             errorMessage: "",
             showError: false,
+            showSuccess: false,
+            successMessage: "",
         };
         this.reportMessageTimeout = null;
     }
 
     componentDidMount() {
+        const today = new Date();
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0); // Set to start of day
+        today.setHours(0, 0, 0, 0); // Set to start of day
+        
         this.setState({ 
             fromDate: yesterday,
-            toDate: yesterday 
+            toDate: today 
         }, () => {
             this.fetchReports()
         });
@@ -497,7 +502,6 @@ class Report extends Component {
     };    
 
     openReportModal = (report) => {
-        if (!report) return;
         this.setState({ 
             selectedModalReport: report,
             report: report.report || '',
@@ -508,6 +512,7 @@ class Report extends Component {
             todays_total_hours: report.todays_total_hours || '',
             report_id: report.id,
             employee_id: report.employee_id || '',
+            editNotes: report.note || '',
         });
     };
 
@@ -686,30 +691,35 @@ class Report extends Component {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
-                this.setState({punchSuccess: data.message, isPunchedIn: false, showModal: false, report: '' });
-                //window.location.href = '/hr-report';
-                this.fetchReports();
+                this.setState({
+					successMessage: data.message,
+					showSuccess: true,
+					isPunchedIn: false, 
+                    showModal: false, 
+                    report: ''
+				});
 
+                this.fetchReports();
                 console.log("test");
                 document.querySelector("#editpunchOutReportModal .close").click();
-                // setTimeout(() => {
-                //     this.setState({ punchSuccess: null });
-                // }, 3000);
+                setTimeout(this.dismissMessages, 3000);
             } else {
-                                console.log("eoor");
-                this.setState({ punchError: data.message });
-                //window.location.href = '/hr-report';
-                setTimeout(() => {
-                    this.setState({ punchError: null });
-                }, 3000);
+                console.log("eoor");
+                this.setState({
+                    errorMessage: data.message,
+                    showError: true,
+                    showSuccess: false,
+                });
+               setTimeout(this.dismissMessages, 3000);
             }
         })
         .catch((error) => {
-                            console.log("fixed");
-            this.setState({ punchError: 'Something went wrong. Please try again.' });
-            setTimeout(() => {
-                this.setState({ punchError: null });
-            }, 3000);
+                this.setState({
+                    errorMessage: 'Something went wrong. Please try again.',
+                    showError: true,
+                    showSuccess: false,
+                });
+                setTimeout(this.dismissMessages, 3000);
         });
 	};
 
@@ -718,6 +728,7 @@ class Report extends Component {
         let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?action=view&user_id=${selectedReportEmployee}`;
         
         const formatDate = (date) => {
+            if (!date) return '';
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0'); 
             const day = String(date.getDate()).padStart(2, '0'); 
@@ -735,12 +746,17 @@ class Report extends Component {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
+                // Sort reports to show most recent first
+                const sortedReports = data.data.sort((a, b) => {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+                
                 this.setState({ 
                         reports: data.data,
                         filteredReports: data.data,
                         loading: false,
                         currentPageReports: 1, 
-                        error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
+                        // error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
                     });
                 
             }else {
@@ -760,6 +776,8 @@ class Report extends Component {
     // Function to dismiss messages
     dismissMessages = () => {
         this.setState({
+            showSuccess: false,
+            successMessage: "",
             showError: false,
             errorMessage: "",
             error: { report: '', start_time: '', end_time: '', break_duration_in_minutes: '' },
@@ -810,7 +828,29 @@ class Report extends Component {
 
     handleNotesChange = (e) => {
     this.setState({ editNotes: e.target.value });
-}
+    }
+
+  renderAlertMessages = () => (
+    <>
+      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-circle-check me-2"></i>
+        {this.state.successMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
+      </div>
+
+      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-triangle-exclamation me-2"></i>
+        {this.state.errorMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
+      </div>
+    </>
+  );
 
 
     render() {
@@ -841,8 +881,6 @@ class Report extends Component {
             break_duration_in_minutes, 
             todays_working_hours, 
             end_time, 
-            punchError, 
-            punchSuccess, 
             currentPageReports, 
             dataPerPage,
             fromDate,
@@ -861,16 +899,11 @@ class Report extends Component {
         const totalPagesReports = Math.ceil(reportList.length / dataPerPage);
 
         return (
-            <>
+            <>  
+                {this.renderAlertMessages()}
                 <div>
                     <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
                         <div className="container-fluid">
-                            {/* Display activity success message */}
-                            {punchSuccess && (
-                                <div className="alert alert-success mb-0">{punchSuccess}</div>
-                            )}
-                            {/* Display error message */}
-                            {punchError && <div className="alert alert-danger mb-0">{punchError}</div>}
                             <div className="d-flex justify-content-between align-items-center">
                                 <ul className="nav nav-tabs page-header-tab">
                                 </ul>
@@ -1021,19 +1054,7 @@ class Report extends Component {
                                                                                     title="Edit"
                                                                                     data-toggle="modal"
                                                                                     data-target="#editpunchOutReportModal"
-                                                                                    onClick={() => this.setState({
-                                                                                        selectedReport: report,
-                                                                                        report: report.report || '',
-                                                                                        start_time: report.start_time ? report.start_time : null,
-                                                                                        break_duration_in_minutes: report.break_duration_in_minutes || 0,
-                                                                                        end_time: report.end_time ? report.end_time : null,
-                                                                                        todays_working_hours: report.todays_working_hours || '',
-                                                                                        todays_total_hours: report.todays_total_hours || '',
-                                                                                        editNotes: report.note || '',
-                                                                                        report_id: report.id,
-                                                                                        employee_id: report.employee_id || '',
-                                                                                        error: { report: '', start_time: '', end_time: '', break_duration_in_minutes: '' }
-                                                                                    })}
+                                                                                    onClick={() => this.openReportModal(report)}
                                                                                 >
                                                                                     <i className="icon-pencil text-primary"></i>
                                                                                 </button>
@@ -1158,32 +1179,31 @@ class Report extends Component {
                                         <span aria-hidden="true">×</span>
                                     </button>
                                 </div>
+                                    {/* Edit Modal */}
+                                <div className="modal-body">
+                                    <div className="row">
 
-                                {selectedReport && (
-                                    <div className="modal-body">
-                                        <div className="row">
-
-                                            {/* Left side - Report TextArea */}
-                                            <div className="col-md-6">
-                                                <div className="form-group">
-                                                    <textarea
-                                                    className={`form-control ${this.state.error?.report ? "is-invalid" : ""}`}
-                                                    name='report'
-                                                    placeholder="Please provide the report."
-                                                    value={this.state.report || ''}
-                                                    onChange={(e) => this.handleChange('report', e.target.value)}
-                                                    rows="15"
-                                                    cols="50"
-                                                    />
-                                                    {this.state.error?.report && (
-                                                    <div className="invalid-feedback">{this.state.error.report}</div>
-                                                    )}
-                                                </div>
+                                        {/* Left side - Report TextArea */}
+                                        <div className="col-md-6">
+                                            <div className="form-group">
+                                                <textarea
+                                                className={`form-control ${this.state.error?.report ? "is-invalid" : ""}`}
+                                                name='report'
+                                                placeholder="Please provide the report."
+                                                value={this.state.report || ''}
+                                                onChange={(e) => this.handleChange('report', e.target.value)}
+                                                rows="15"
+                                                cols="50"
+                                                />
+                                                {this.state.error?.report && (
+                                                <div className="invalid-feedback">{this.state.error.report}</div>
+                                                )}
                                             </div>
+                                        </div>
 
-                                            {/* Right side - Form fields */}
-                                            <div className="col-md-6">
-                                                <div className="row">
+                                        {/* Right side - Form fields */}
+                                        <div className="col-md-6">
+                                            <div className="row">
 
                                                     {/* Start time */}
                                                     <div className="col-md-6">
@@ -1238,6 +1258,7 @@ class Report extends Component {
                                                             dateFormat="h:mm aa"
                                                             placeholderText="Select End time"
                                                             className={`form-control ${this.state.error?.end_time ? "is-invalid" : ""}`}
+                                                            disabled={window.user.role !== 'admin' && window.user.role !== 'super_admin'}
                                                             />
                                                             {this.state.error?.end_time && (
                                                             <div className="invalid-feedback d-block">{this.state.error.end_time}</div>
@@ -1296,9 +1317,8 @@ class Report extends Component {
                                                 </div>
                                             </div>
 
-                                        </div>
                                     </div>
-                                )}
+                                </div>
 
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.closeReportModal}>Close</button>
