@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import authService from "../../Authentication/authService";
+import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -15,34 +16,15 @@ class Dashboard extends Component {
 			projects: [],
 			loading: true,
 			showBirthdayBannerModal: false,
-			defaultProfileUrl: true,
-			birthdayMessage: '',
-			dontShowAgain: false
 		};
 	}
 
 	componentDidMount() {
-		var loggedInUser = JSON.parse(localStorage.getItem('user')); // Get logged-in user details
-
-		const isMale = this.state.user.gender === 'male';
-		this.setState({
-			defaultProfileUrl : isMale ? '../../assets/images/sm/avatar2.jpg' : '../../assets/images/sm/avatar1.jpg',
-		});
-
+		var loggedInUser = authService.getUser();
 		const todayMD = new Date().toISOString().slice(5, 10);
 		const dob = loggedInUser.dob?.slice(5, 10);
 
 		if (localStorage.getItem("isBirthdayBannerVisible") !== 'false' && dob === todayMD) {
-			const messages = [
-				"Wishing you an incredible year filled with success, happiness, and health!",
-				"May your day be as amazing as you are!",
-				"Cheers to another year of greatness!",
-				"Enjoy your special day to the fullest!",
-				"May your birthday be filled with laughter and love!",
-			];
-			const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-		    this.setState({ birthdayMessage: randomMessage });
-
 			this.openBirthdayBannerModel();
 		}
 
@@ -104,10 +86,6 @@ class Dashboard extends Component {
     };
 
 	closeBirthdayBannerModal = () => {
-		if (this.state.dontShowAgain) {
-    		localStorage.setItem("isBirthdayBannerVisible", 'false');
-  		}
-
 		this.setState({
 			showBirthdayBannerModal: false,
 		});
@@ -117,9 +95,39 @@ class Dashboard extends Component {
 		this.setState({ dontShowAgain: e.target.checked });
 	};
 
+	renderStatCards() {
+		const user = authService.getUser();
+		if (!(user.role === 'admin' || user.role === 'super_admin')) return null;
+
+		const items = [
+			{ label: 'Users', class_color: 'green', count: this.state.totalUsers, icon: 'users', link: '/hr-users' },
+			{ label: 'Employees', class_color: 'pink', count: this.state.totalEmployees, icon: 'users', link: '/hr-employee' },
+			{ label: 'Holidays', class_color: 'info', count: this.state.totalHolidays, icon: 'like', link: '/hr-holidays' },
+			{ label: 'Events', class_color: 'orange', count: this.state.totalEvents, icon: 'calendar', link: '/hr-events' },
+			{ label: 'Report', class_color: null, count: null, icon: 'pie-chart', link: '/hr-report' },
+		];
+
+		return (
+			<div className="row clearfix justify-content-start">
+				{items.map(({ label, class_color, count, icon, link }) => (
+					<div className="col-6 col-md-4 col-xl-1_7" key={label}>
+						<div className="card">
+							<div className="card-body ribbon">
+							{count !== null && <div className={`ribbon-box ${class_color}`}>{count}</div>}
+							<Link to={link} className="my_sort_cut text-muted">
+								<i className={`icon-${icon}`} />
+								<span>{label}</span>
+							</Link>
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
+		);
+	}
 	render() {
 		const { fixNavbar } = this.props;
-		const { totalUsers, totalEmployees, totalHolidays, totalEvents, user, projects, message, loading, showBirthdayBannerModal } = this.state;
+		const { user, projects, message, loading, showBirthdayBannerModal} = this.state;
 		return (
 			<>
 				<div>
@@ -133,100 +141,12 @@ class Dashboard extends Component {
 								</div>
 							</div>
 							{(user.role === "admin" || user.role === "super_admin") && (
-								<div className="row clearfix justify-content-start">
-									<div className="col-6 col-md-4 col-xl-1_7">
-										<div className="card">
-											<div className="card-body ribbon">
-												<div className="ribbon-box green">{totalUsers}</div>
-												{user.role === "admin" || user.role === "super_admin" ? (
-													<Link to="/hr-users" className="my_sort_cut text-muted">
-														<i className="icon-users" />
-														<span>Users</span>
-													</Link>
-												) : (
-													<div className="my_sort_cut text-muted">
-														<i className="icon-users" />
-														<span>Users</span>
-													</div>
-												)}
-											</div>
-										</div>
-									</div>
-									<div className="col-6 col-md-4 col-xl-1_7">
-										<div className="card">
-											<div className="card-body ribbon">
-												<div className="ribbon-box pink">{totalEmployees}</div>
-												<Link to="/hr-employee" className="my_sort_cut text-muted">
-													<i className="icon-users" />
-													<span>Employees</span>
-												</Link>
-											</div>
-										</div>
-									</div>
-									<div className="col-6 col-md-4 col-xl-1_7">
-										<div className="card">
-											<div className="card-body ribbon">
-											<div className="ribbon-box info">{totalHolidays}</div>
-												<Link to="/hr-holidays" className="my_sort_cut text-muted">
-													<i className="icon-like" />
-													<span>Holidays</span>
-												</Link>
-											</div>
-										</div>
-									</div>
-									<div className="col-6 col-md-4 col-xl-1_7">
-										<div className="card">
-											<div className="card-body ribbon">
-												<div className="ribbon-box orange">{totalEvents}</div>
-												<Link to="/hr-events" className="my_sort_cut text-muted">
-													<i className="icon-calendar" />
-													<span>Events</span>
-												</Link>
-											</div>
-										</div>
-									</div>
-									<div className="col-6 col-md-4 col-xl-1_7">
-										<div className="card">
-											<div className="card-body">
-												<Link to="/hr-report" className="my_sort_cut text-muted">
-													<i className="icon-pie-chart" />
-													<span>Report</span>
-												</Link>
-											</div>
-										</div>
-									</div>
-								</div>
+					            this.renderStatCards()
 							)}
 						</div>
 					</div>
 					<div className="section-body">
 						<div className="container-fluid">
-							<div className="row clearfix row-deck">
-								<div className="col-xl-12 col-lg-12 col-md-12">
-									<div className="card">
-										{/* <div className="card-header">
-											<h3 className="card-title">Employee Structure</h3>
-										</div>
-										<div className="card-body text-center">
-											<Columnchart></Columnchart>
-
-										</div> */}
-
-										{/* <div className="card-body text-center">
-												<div className="row clearfix">
-													<div className="col-6">
-														<h6 className="mb-0">50</h6>
-														<small className="text-muted">Male</small>
-													</div>
-													<div className="col-6">
-														<h6 className="mb-0">17</h6>
-														<small className="text-muted">Female</small>
-													</div>
-												</div>
-											</div> */}
-									</div>
-								</div>
-							</div>
 							<div className="row clearfix">
 								<div className="col-12 col-sm-12">
 									<div className="card">
@@ -276,7 +196,7 @@ class Dashboard extends Component {
 																	</tr>
 																))
 															): (
-																!message && <tr><td colSpan={5} class="text-center">Projects not available</td></tr>
+																!message && <tr><td colSpan={5} className="text-center">Projects not available</td></tr>
 															)}
 														</tbody>
 													</table>
@@ -291,73 +211,15 @@ class Dashboard extends Component {
 				</div>
 				{/* Modal for show birthday banner */}
 				{showBirthdayBannerModal && (
-				<div
-					className="modal fade show d-block"
-					id="birthdayBannerModal"
-					tabIndex="-1"
-					role="dialog"
-					style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
-					>
-					<div className="modal-dialog modal-dialog-centered" role="document">
-						<div className="modal-content text-center p-4" style={{ borderRadius: '15px', background: 'linear-gradient(to right, #ffecd2, #fcb69f)' }}>
-						
-							{/* Modal Header */}
-							<div className="modal-header border-0">
-								<h5 className="modal-title w-100 text-dark display-6 fw-bold">🎉 Happy Birthday! 🎂 </h5>
-							</div>
-
-							{/* Modal Body */}
-							<div className="modal-body">
-								<img
-									src={this.state.user.profile || this.state.defaultProfileUrl}
-									alt={this.state.user.first_name}
-									className="rounded-circle shadow mb-3"
-									width="130"
-									height="130"
-								/>
-								<h3 className="fw-bold text-dark mb-2">{ this.state.user.first_name } {this.state.user.last_name}</h3>
-								<p className="lead text-dark">
-									{this.state.birthdayMessage}
-								</p>
-								<p className="text-muted small mt-3">
-								— From all of us at <strong>Profilics Systems PVT. LTD.</strong>
-								</p>
-								<div className="form-check mt-4">
-									<input
-										className="form-check-input"
-										type="checkbox"
-										id="dontShowAgain"
-										onChange={this.handleCheckboxChange}
-										checked={this.state.dontShowAgain}
-										/>
-									<label className="form-check-label" htmlFor="dontShowAgain">
-										Don’t show this again
-									</label>
-								</div>
-							</div>
-
-							{/* Modal Footer */}
-							<div className="modal-footer border-0 justify-content-center">
-								<button
-								type="button"
-								className="btn btn-outline-dark px-4"
-								onClick={this.closeBirthdayBannerModal}
-								>
-								Thank You
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-
+					<BirthdayBannerModal 
+						visible={showBirthdayBannerModal}
+						user={user}
+						onClose={this.closeBirthdayBannerModal}
+					/>
 				)}
 			</>
 		);
 	}
 }
-const mapStateToProps = state => ({
-	fixNavbar: state.settings.isFixNavbar
-})
-
-const mapDispatchToProps = dispatch => ({})
-export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);
+const mapStateToProps = s => ({ fixNavbar: s.settings.isFixNavbar})
+export default connect(mapStateToProps)(Dashboard);
