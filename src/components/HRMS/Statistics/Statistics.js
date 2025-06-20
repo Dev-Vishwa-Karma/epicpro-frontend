@@ -43,6 +43,7 @@ class Statistics extends Component {
       status: 1,
       year: selectedYear,
       month: selectedMonth,
+      statistics_visibility_status: 'statistics_visibility_status'
     });
 
     fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?${queryParams.toString()}`)
