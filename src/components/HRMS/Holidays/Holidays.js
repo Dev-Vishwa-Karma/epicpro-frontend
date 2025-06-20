@@ -24,7 +24,8 @@ class Holidays extends Component {
       		showError: false,
 			currentPage: 1,
 			dataPerPage: 10,
-			loading: true
+			loading: true,
+			ButtonLoading: false,
 		};
 	}
 
@@ -148,7 +149,7 @@ class Holidays extends Component {
 	addHoliday = (e) => {
 		// Prevent default form submission behavior
 		e.preventDefault();
-
+		this.setState({ ButtonLoading: true });
 		// Reset selectedHoliday before adding a new event
 		if (this.state.selectedHoliday) {
 			this.setState({
@@ -185,6 +186,7 @@ class Holidays extends Component {
 							successMessage: 'Holiday added successfully',
 							showSuccess: true,
 							errors: {}, // Clear errors
+							ButtonLoading: false,
 						};
 					});
 
@@ -198,7 +200,8 @@ class Holidays extends Component {
 				} else {
 					this.setState({
 						errorMessage: "Failed to add holiday",
-						showError: true
+						showError: true,
+						ButtonLoading: false,
 					});
 
 					// Auto-hide error message after 3 seconds
@@ -210,7 +213,14 @@ class Holidays extends Component {
 					}, 3000);
 				}
 			})
-			.catch((error) => console.error("Error:", error));
+			.catch((error) => {
+				console.error("Error:", error);
+				this.setState({
+					errorMessage: "Failed to add holiday",
+					showError: true,
+					ButtonLoading: false,
+				});
+			});
 		}
     };
 
@@ -629,7 +639,11 @@ class Holidays extends Component {
 									<button
 										type="submit"
 										className="btn btn-primary"
+										disabled={this.state.ButtonLoading}
 									>
+										{this.state.ButtonLoading ? (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										) : null}
 										Add Holiday
 									</button>
 								</div>

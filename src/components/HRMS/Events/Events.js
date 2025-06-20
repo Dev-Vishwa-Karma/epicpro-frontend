@@ -45,6 +45,7 @@ class Events extends Component {
 	  showDeleteModal: false,
 	  eventIdToDelete: null,
 	  alternateSatudays: [],
+      ButtonLoading: false,
 	};
 	localStorage.removeItem('empId');
 	localStorage.removeItem('startDate');
@@ -341,7 +342,7 @@ handleYearChange = (event) => {
 	addEvent = (e) => {
 		// Prevent default form submission behavior
 		e.preventDefault();
-
+		this.setState({ ButtonLoading: true });
 		// Reset selectedEvent before adding a new event
 		if (this.state.selectedEvent) {
 			this.setState({
@@ -381,6 +382,7 @@ handleYearChange = (event) => {
 							successMessage: data.message,
 							showSuccess: true,
 							errors: {}, // Clear errors
+							ButtonLoading: false,
 						};
 					});
 
@@ -394,7 +396,8 @@ handleYearChange = (event) => {
 				} else {
 					this.setState({
 						errorMessage: "Failed to add event",
-						showError: true
+						showError: true,
+						ButtonLoading: false,
 					});
 
 					// Auto-hide error message after 3 seconds
@@ -406,9 +409,14 @@ handleYearChange = (event) => {
 					}, 3000);
 				}
 			})
-			.catch((error) => console.error("Error:", error));
+			.catch((error) => {
+				console.error("Error:", error);
+				this.setState({ ButtonLoading: false });
+			});
+		} else {
+			this.setState({ ButtonLoading: false });
 		}
-    };
+	};
 
 	// add handle events delete
 	handleDeleteEvent = (eventId) => {
@@ -1230,7 +1238,11 @@ formatDateTimeAMPM = (timeString) => {
 										<button
 											type="submit"
 											className="btn btn-primary"
+											disabled={this.state.ButtonLoading}
 										>
+											{this.state.ButtonLoading ? (
+												<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+											) : null}
 											Add Event
 										</button>
 									</div>

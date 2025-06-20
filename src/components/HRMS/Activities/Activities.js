@@ -19,6 +19,7 @@ class Activities extends Component {
             showSuccess: false,
             errorMessage: "",
             showError: false,
+            ButtonLoading: false,
 		};
 	}
 
@@ -111,6 +112,7 @@ class Activities extends Component {
 	};
 
 	handleBreakOut = () => {
+		this.setState({ ButtonLoading: true });
 		const formData = new FormData();
 		formData.append('employee_id', window.user.id);
 		formData.append('activity_type', 'Break');
@@ -124,6 +126,7 @@ class Activities extends Component {
 		})
 			.then((response) => response.json())
 			.then((data) => {
+				this.setState({ ButtonLoading: false });
 				if (data.status === "success") {
 					this.setState({
 						isBreakedIn: true,
@@ -151,6 +154,7 @@ class Activities extends Component {
 						errorMessage: "Something went wrong. Please try again.",
 						showError: true,
 						showSuccess: false,
+						ButtonLoading: false,
 					});
 					setTimeout(this.dismissMessages, 3000);
 			});
@@ -166,7 +170,7 @@ class Activities extends Component {
 			}, 5000)
 			return;
 		}
-
+		this.setState({ ButtonLoading: true });
 		const formData = new FormData();
 		formData.append('employee_id', window.user.id);
 		formData.append('activity_type', 'Break');
@@ -180,6 +184,7 @@ class Activities extends Component {
 		})
 			.then((response) => response.json())
 			.then((data) => {
+				this.setState({ ButtonLoading: false });
 				if (data.status === "success") {
 					this.setState({
 						isBreakedIn: false,
@@ -205,6 +210,7 @@ class Activities extends Component {
 						errorMessage: "Something went wrong. Please try again.",
 						showError: true,
 						showSuccess: false,
+						ButtonLoading: false,
 					});
 					setTimeout(this.dismissMessages, 3000);
 			});
@@ -429,10 +435,10 @@ class Activities extends Component {
 													</button>
 												)}
 												{window.user.role === 'employee' && (
-													<button style={{ float: "right" }} className="btn btn-primary" onClick={this.state.isBreakedIn ? this.handleBreakOut : this.openbreakReasonModal} 
-													
-													//data-toggle={this.state.isBreakedIn ? "" : "modal"} 
-													/*data-target={this.state.isBreakedIn ? "" : "#addBreakReasonModal"} */>
+													<button style={{ float: "right" }} className="btn btn-primary" onClick={this.state.isBreakedIn ? this.handleBreakOut : this.openbreakReasonModal} disabled={this.state.ButtonLoading}>
+														{this.state.ButtonLoading ? (
+															<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+														) : null}
 														{this.state.isBreakedIn ? 'Break Out' : 'Break In'}
 													</button>
 												)}
@@ -661,7 +667,12 @@ class Activities extends Component {
 										</div>
 									</div>
 									<div className="modal-footer">
-										<button type="button" className="btn btn-primary" onClick={this.handleSaveBreakIn}>Save changes</button>
+										<button type="button" className="btn btn-primary" onClick={this.handleSaveBreakIn} disabled={this.state.ButtonLoading}>
+											{this.state.ButtonLoading ? (
+												<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+											) : null}
+											Save changes
+										</button>
 									</div>
 								</div>
 							</div>

@@ -51,6 +51,7 @@ class Report extends Component {
             loading: true,
             errorMessage: "",
             showError: false,
+            ButtonLoading: false,
         };
         this.reportMessageTimeout = null;
     }
@@ -804,8 +805,10 @@ class Report extends Component {
         }
     };
 
-    handleApplyFilters = () => {
+    handleApplyFilters = async () => {
+        this.setState({ ButtonLoading: true });
         this.fetchReports();
+        this.setState({ ButtonLoading: false });
     };
 
     handleNotesChange = (e) => {
@@ -942,7 +945,11 @@ class Report extends Component {
                                                                 type="button" 
                                                                 className="btn btn-primary btn-block"
                                                                 onClick={this.handleApplyFilters}
+                                                                disabled={this.state.ButtonLoading}
                                                             >
+                                                                {this.state.ButtonLoading ? (
+                                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                                                ) : null}
                                                                 Apply
                                                             </button>
                                                         </div>

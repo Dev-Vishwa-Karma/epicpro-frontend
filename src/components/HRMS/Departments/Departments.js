@@ -16,7 +16,8 @@ class departments extends Component {
             showSuccess: false,
             showError: false,
             errors: {},
-            loading: true
+            loading: true,
+            ButtonLoading: false,
 		};
 
         // Create a ref to scroll to the message container
@@ -98,7 +99,7 @@ class departments extends Component {
         if (!this.validateEditDepartmentForm()) {
             return; // Stop if validation fails
         }
-
+        this.setState({ ButtonLoading: true });
         const { selectedDepartment } = this.state;
         if (!selectedDepartment) return;
 
@@ -130,7 +131,8 @@ class departments extends Component {
                     return {
                         departmentData: updatedDepartmentData,
                         successMessage: 'Department updated successfully',
-						showSuccess: true
+						showSuccess: true,
+                        ButtonLoading: false
                     };
                 });
                 
@@ -152,7 +154,8 @@ class departments extends Component {
             } else {
                 this.setState({ 
 					errorMessage: "Failed to update department",
-					showError: true
+					showError: true,
+                    ButtonLoading: false
 				});
 
                 // Scroll to the message section
@@ -175,6 +178,7 @@ class departments extends Component {
             this.setState({
                 errorMessage: "Error updating department:", error,
                 showError: true,
+                ButtonLoading: false
             });
         });
     };
@@ -282,6 +286,7 @@ class departments extends Component {
         if (!this.validateDepartmentForm()) {
             return; // Stop execution if validation fails
         }
+        this.setState({ ButtonLoading: true });
 
         const addDepartmentFormData = new FormData();
         addDepartmentFormData.append('department_name', departmentName);
@@ -304,6 +309,7 @@ class departments extends Component {
                     errors:{},
                     successMessage: "Department added successfully!",
                     showSuccess: true,
+                    ButtonLoading: false
                 }));
                 // Close the modal
                 document.querySelector("#addDepartmentModal .close").click();
@@ -319,6 +325,7 @@ class departments extends Component {
                 this.setState({
                     errorMessage: "Failed to add department. Please try again.",
                     showError: true,
+                    ButtonLoading: false
                 });
 
 				// Auto-hide success message after 5 seconds
@@ -335,6 +342,7 @@ class departments extends Component {
             this.setState({
                 errorMessage: "An error occurred while adding the department.",
                 showError: true,
+                ButtonLoading: false
             });
         });
     };
@@ -578,7 +586,12 @@ class departments extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                    <button type="button" onClick={this.addDepartmentData} className="btn btn-primary">Save changes</button>
+                                    <button type="button" onClick={this.addDepartmentData} className="btn btn-primary" disabled={this.state.ButtonLoading}>
+                                        {this.state.ButtonLoading ? (
+                                            <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                        ) : null}
+                                        Save changes
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -632,7 +645,12 @@ class departments extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                    <button type="button" className="btn btn-primary" onClick={this.saveChanges}>Save changes</button>
+                                    <button type="button" className="btn btn-primary" onClick={this.saveChanges} disabled={this.state.ButtonLoading}>
+                                        {this.state.ButtonLoading ? (
+                                            <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                        ) : null}
+                                        Save changes
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -21,7 +21,8 @@ class Gallery extends Component {
             currentPage: 1,
             imagesPerPage: 8,
             sortOrder: "asc", // Default to newest first
-            loading: true
+            loading: true,
+            ButtonLoading: false,
         };
         this.fileInputRef = React.createRef();
     }
@@ -186,6 +187,7 @@ class Gallery extends Component {
             return isValid;
         }
 
+        this.setState({ ButtonLoading: true });
         // Prepare FormData to send images via AJAX
         const uploadImageData = new FormData();
         uploadImageData.append('employee_id', employeeIdToSend);
@@ -232,12 +234,14 @@ class Gallery extends Component {
                         showSuccess: false,
                         successMessage: '',
                         isModalOpen: false,
+                        ButtonLoading: false,
                     });
                 }, 3000);
             } else {
                 this.setState({
                     errorMessage: data.message || "Upload failed. Please try again.",
                     showError: true,
+                    ButtonLoading: false,
                 });
 
                 // Auto-hide error message after 3 seconds
@@ -255,6 +259,7 @@ class Gallery extends Component {
             this.setState({
                 errorMessage: "An error occurred during the image upload.",
                 showError: true,
+                ButtonLoading: false,
             });
 
             // Auto-hide error message after 3 seconds
@@ -435,7 +440,10 @@ class Gallery extends Component {
                                                             <button type="button" className="btn btn-secondary" onClick={this.closeModal}>
                                                                 Cancel
                                                             </button>
-                                                            <button type="button" className="btn btn-primary" onClick={this.submitImages}>
+                                                            <button type="button" className="btn btn-primary" onClick={this.submitImages} disabled={this.state.ButtonLoading}>
+                                                                {this.state.ButtonLoading ? (
+                                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                                                ) : null}
                                                                 Upload Images
                                                             </button>
                                                         </div>

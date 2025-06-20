@@ -49,6 +49,7 @@ class AddEmployee extends Component {
       errorMessage: "",
       showError: false,
       visibilityPriority: 0,
+      ButtonLoading: false,
     };
 
     // Create refs for each file input
@@ -136,6 +137,7 @@ class AddEmployee extends Component {
 
   addEmployee = async (e) => {
     e.preventDefault();
+    this.setState({ ButtonLoading: true });
     const { id, role } = window.user;
 
     const {
@@ -312,6 +314,9 @@ class AddEmployee extends Component {
         });
 
         // setTimeout(this.dismissMessages, 3000);
+      })
+      .finally(() => {
+        this.setState({ ButtonLoading: false });
       });
   };
 
@@ -1163,7 +1168,10 @@ class AddEmployee extends Component {
                       >
                         Back
                       </button>
-                      <button type="submit" className="btn btn-primary">
+                      <button type="submit" className="btn btn-primary" disabled={this.state.ButtonLoading}>
+                        {this.state.ButtonLoading ? (
+                          <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                        ) : null}
                         Add Employee
                       </button>
                     </div>
