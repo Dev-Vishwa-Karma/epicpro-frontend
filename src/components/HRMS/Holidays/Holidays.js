@@ -473,7 +473,14 @@ class Holidays extends Component {
 													<div className="loader" />
 												</div>
 											</div>
-										) : ( // Show Table after loading is false
+											// Show Message if no holidays found
+										) : holidays.length === 0 && !message ? (
+											<div className="text-center">
+												<div className="text-muted" style={{ fontSize: '1.1rem', padding: '2rem 0' }}>
+													Holidays data not found
+												</div>
+											</div>
+										) : (
 											<div className="card-body">
 												<div className="table-responsive">
 													<table className="table table_custom spacing5 border-style mb-0">
@@ -538,7 +545,7 @@ class Holidays extends Component {
 																	</tr>
 																))
 															): (
-																!message && <tr><td>Holidays data not found</td></tr>
+																message && <tr><td colSpan={logged_in_user_role === 'admin' || logged_in_user_role === 'super_admin' ? 4 : 3}>{message}</td></tr>
 															)}
 														</tbody>
 													</table>

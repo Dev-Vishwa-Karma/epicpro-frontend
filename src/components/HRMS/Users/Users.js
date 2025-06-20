@@ -28,7 +28,8 @@ class Users extends Component {
 			searchQuery: "",
 			currentPage: 1,
             dataPerPage: 10,
-			loading: true
+			loading: true,
+			ButtonLoading: false,
 		};
 	}
 
@@ -151,6 +152,7 @@ class Users extends Component {
 		addUserData.append('logged_in_employee_id', logged_in_employee_id);
 		addUserData.append('logged_in_employee_role', logged_in_employee_role);
 
+        this.setState({ ButtonLoading: true });
         // API call to add user
         fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=add`, {
             method: "POST",
@@ -190,6 +192,7 @@ class Users extends Component {
 				});
 				setTimeout(() => this.setState({ showError: false }), 3000);
             }
+            this.setState({ ButtonLoading: false });
         })
         .catch((error) => {
 			console.error("Error:", error);
@@ -198,6 +201,7 @@ class Users extends Component {
 				errorMessage: "An error occurred. Please try again later.",
 			});
 			setTimeout(() => this.setState({ showError: false }), 3000);
+			this.setState({ ButtonLoading: false });
 		});
     };
 
@@ -233,6 +237,7 @@ class Users extends Component {
         updateProfileData.append('logged_in_employee_id', logged_in_employee_id);
         updateProfileData.append('logged_in_employee_role', logged_in_employee_role);
 
+        this.setState({ ButtonLoading: true });
         // Example API call
         fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=edit&user_id=${selectedUser.id}`, {
             method: 'POST',
@@ -259,6 +264,7 @@ class Users extends Component {
 				});
 				setTimeout(() => this.setState({ showError: false }), 3000);
             }
+            this.setState({ ButtonLoading: false });
         })
 		.catch((error) => {
 			console.error("Error:", error);
@@ -266,6 +272,7 @@ class Users extends Component {
 				showError: true,
 				errorMessage: "An error occurred. Please try again later.",
 			});
+			this.setState({ ButtonLoading: false });
 		});
     };
 
@@ -953,7 +960,11 @@ class Users extends Component {
 														type="button"
 														className="btn btn-primary mr-2"
 														onClick={this.addUser}
+														disabled={this.state.ButtonLoading}
 													>
+														{this.state.ButtonLoading ? (
+															<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+														) : null}
 														Add
 													</button>
 													<button
@@ -1073,7 +1084,12 @@ class Users extends Component {
 									</div>
 									<div className="modal-footer">
 										<button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-										<button type="button" onClick={this.updateProfile} className="btn btn-primary">Update Profile</button>
+										<button type="button" onClick={this.updateProfile} className="btn btn-primary" disabled={this.state.ButtonLoading}>
+											{this.state.ButtonLoading ? (
+												<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+											) : null}
+											Update Profile
+										</button>
 									</div>
 								</form>
 							</div>

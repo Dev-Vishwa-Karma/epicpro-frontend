@@ -366,11 +366,57 @@ class Gallery extends Component {
                                                             </button>
                                                         </div>
                                                         <div className="modal-body">
-                                                            {/* Success and Error Messages */}
+                                                            {/* Success Message */}
                                                             {this.state.showSuccess && (
-                                                                <div className="alert alert-success">{this.state.successMessage}</div>
+                                                                <div 
+                                                                    className="alert alert-success alert-dismissible fade show"
+                                                                    role="alert"
+                                                                    style={{ 
+                                                                        position: "fixed", 
+                                                                        top: "20px", 
+                                                                        right: "20px", 
+                                                                        zIndex: 1050, 
+                                                                        minWidth: "250px", 
+                                                                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
+                                                                    }}
+                                                                >
+                                                                    <i className="fa-solid fa-circle-check me-2"></i>
+                                                                    {this.state.successMessage}
+                                                                    <button
+                                                                        type="button"
+                                                                        className="close"
+                                                                        aria-label="Close"
+                                                                        onClick={() => this.setState({ showSuccess: false })}
+                                                                    >
+                                                                    </button>
+                                                                </div>
                                                             )}
-                                                            
+                                                            {/* Error Message */}
+                                                            {this.state.showError && (
+                                                                <div 
+                                                                    className="alert alert-danger alert-dismissible fade show"
+                                                                    role="alert"
+                                                                    style={{ 
+                                                                        position: "fixed", 
+                                                                        top: "70px", 
+                                                                        right: "20px", 
+                                                                        zIndex: 1050, 
+                                                                        minWidth: "250px", 
+                                                                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
+                                                                    }}
+                                                                >
+                                                                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
+                                                                    {this.state.errorMessage}
+                                                                    <button
+                                                                        type="button"
+                                                                        className="close"
+                                                                        aria-label="Close"
+                                                                        onClick={() => this.setState({ showError: false })}
+                                                                    >
+                                                                    </button>
+                                                                </div>
+                                                            )}
+
                                                             {/* Employee Selection Section */}
                                                             {(window.user?.role === "admin" || window.user?.role === "super_admin") && (
                                                                 <div className="mt-3">
