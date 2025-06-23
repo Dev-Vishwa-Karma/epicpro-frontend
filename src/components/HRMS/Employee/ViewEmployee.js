@@ -57,9 +57,19 @@ class ViewEmployee extends Component {
             });
             const data = await response.json();
             if (data.status === "success") {
+                const profileImagePath = data.data[0].url.replace(/\\/g, '/');
                 const updatedImages = [...this.state.images, ...data.data];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
-                this.setState({ images: sortedImages });
+                this.setState({
+                    previewImage: `${process.env.REACT_APP_API_URL}/${profileImagePath}`,
+                    images: sortedImages,
+                    successMessage: "Image uploaded successfully!",
+                    showSuccess: true,
+                    errorMessage: "",
+                    showError: false,
+                    openFileSelectModel: false 
+                });
+                setTimeout(this.dismissMessages, 3000);
             }
         } catch (error) {
             console.error("Error uploading the image in gallery: ", error);
@@ -355,7 +365,6 @@ class ViewEmployee extends Component {
                      });
                 } else {
                     this.setState({ errorMessage: data.message, reports: [] });
-                     console.error('Error fetching reports for calendar:', data.message);
                      // Still generate events even if reports fetch fails, to show leaves/closures
                      const { reports, leaves } = this.state;
                      const calendarEventsData = this.generateCalendarEvents(reports, leaves);
@@ -364,7 +373,6 @@ class ViewEmployee extends Component {
             })
             .catch(err => {
                 this.setState({ error: 'Failed to fetch reports', reports: [] });
-                console.error('Error fetching reports for calendar:', err);
                  // Still generate events even if reports fetch fails, to show leaves/closures
                  const { reports, leaves } = this.state;
                  const calendarEventsData = this.generateCalendarEvents(reports, leaves);
@@ -387,7 +395,6 @@ class ViewEmployee extends Component {
                     });
                 } else {
                     this.setState({ errorMessage: data.message, leaves: [] });
-                     console.error('Error fetching leaves for calendar:', data.message);
                       // Still generate events even if leaves fetch fails, to show reports/closures
                      const { reports, leaves } = this.state;
                      const calendarEventsData = this.generateCalendarEvents(reports, leaves);
@@ -396,7 +403,6 @@ class ViewEmployee extends Component {
             })
             .catch(err => {
                 this.setState({ error: 'Failed to fetch leaves', leaves: [] });
-                console.error('Error fetching leaves for calendar:', err);
                  // Still generate events even if leaves fetch fails, to show reports/closures
                  const { reports, leaves } = this.state;
                  const calendarEventsData = this.generateCalendarEvents(reports, leaves);
@@ -1020,24 +1026,6 @@ class ViewEmployee extends Component {
                                         <div className="card">
                                             <div className="card-header">
                                                 <h3 className="card-title">Activity</h3>
-                                                {/* <div className="card-options">
-                                                    <a href="/#" className="card-options-collapse" data-toggle="card-collapse"><i className="fe fe-chevron-up" /></a>
-                                                    <a href="/#" className="card-options-fullscreen" data-toggle="card-fullscreen"><i className="fe fe-maximize" /></a>
-                                                    <a href="/#" className="card-options-remove" data-toggle="card-remove"><i className="fe fe-x" /></a>
-                                                    <div className="item-action dropdown ml-2">
-                                                        <a href="fake_url" data-toggle="dropdown"><i className="fe fe-more-vertical" /></a>
-                                                        <div className="dropdown-menu dropdown-menu-right">
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-eye" /> View Details </a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-share-alt" /> Share </a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-cloud-download" /> Download</a>
-                                                            <div className="dropdown-divider" />
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-copy" /> Copy to</a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-folder" /> Move to</a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-edit" /> Rename</a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-trash" /> Delete</a>
-                                                        </div>
-                                                    </div>
-                                                </div> */}
                                             </div>
                                             <div className="card-body">
                                                 {activities.length > 0 ? (
@@ -1063,7 +1051,7 @@ class ViewEmployee extends Component {
 
                                                                     <div className="msg">
                                                                         {activity.created_by && (
-                                                                            <a class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Created by System Admin</a>
+                                                                            <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Created by System Admin</a>
                                                                         )}
                                                                     </div>
                                                                 </div>
@@ -1088,7 +1076,7 @@ class ViewEmployee extends Component {
                                                                         </h6>
                                                                         <div className="msg">
                                                                             {activity.updated_by && (
-                                                                                <a class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Edited by System Admin</a>
+                                                                                <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Edited by System Admin</a>
                                                                             )}
                                                                         </div>
                                                                     </div>
@@ -1115,7 +1103,7 @@ class ViewEmployee extends Component {
 
                                                                     <div className="msg">
                                                                         {activity.created_by && (
-                                                                            <a class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Created by System Admin</a>
+                                                                            <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Created by System Admin</a>
                                                                         )}
                                                                     </div>
                                                                 </div>
@@ -1140,7 +1128,7 @@ class ViewEmployee extends Component {
                                                                         </h6>
                                                                         <div className="msg">
                                                                             {activity.updated_by && (
-                                                                                <a class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Edited by System Admin</a>
+                                                                                <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Edited by System Admin</a>
                                                                             )}
                                                                         </div>
                                                                     </div>
@@ -1566,7 +1554,7 @@ class ViewEmployee extends Component {
                 }
                     aria-label="Close"
                 >
-                    <i class="fa fa-times" data-toggle="tooltip" title="fa fa-times"></i>
+                    <i className="fa fa-times" data-toggle="tooltip" title="fa fa-times"></i>
                 </div>
             </div>
 

@@ -275,7 +275,7 @@ class Employee extends Component {
 
 	viewEmployee(employee, employeeId) {
 		this.props.history.push({
-			pathname: `/view-employee/${employeeId}`,
+			pathname: `/view-employee/${employeeId}/calendar`,
 		});
 	}
 
@@ -314,6 +314,15 @@ class Employee extends Component {
         }
     };
 
+	// Function to dismiss messages
+    dismissMessages = () => {
+        this.setState({
+            showSuccess: false,
+            successMessage: "",
+            showError: false,
+            errorMessage: "",
+        });
+    };
 
 	handleEmployeeChange = (event) => {
         this.setState({ selectedLeaveEmployee: event.target.value });
@@ -352,10 +361,6 @@ class Employee extends Component {
 	
 		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
 			method: "POST",  // Change method from DELETE to POST
-			headers: {
-				"Content-Type": "application/json",
-				method: "POST",
-			},
 			body: JSON.stringify({
 				user_id: deleteUser,
 				logged_in_employee_id: loggedInUserId,
@@ -387,8 +392,16 @@ class Employee extends Component {
 					deleteUser: null,  // Clear the deleteUser state
 				});
 				document.querySelector("#deleteEmployeeModal .close").click();
+				setTimeout(this.dismissMessages, 3000);
 			} else {
-				alert("Failed to delete employee.");
+				this.setState({
+					successMessage: '',
+					showSuccess: false,
+					showError: true,
+					errorMessage:"Failed to delete employee."
+				});
+				setTimeout(this.dismissMessages, 3000);
+				
 			}
 		})
 		.catch((error) => console.error("Error:", error));

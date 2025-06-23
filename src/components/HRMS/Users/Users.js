@@ -160,7 +160,11 @@ class Users extends Component {
         .then((data) => {
             if (data.status === "success") {
 				// Ensure 'users' is an array before updating it
-				const updatedUsers = [data.data, ...this.state.users];
+				const normalizedUser = {
+                    ...data.data,
+                    dob: data.data.dob || dob || ""
+                };
+                const updatedUsers = [normalizedUser, ...this.state.users];
 
 				// Generate next employee code based on the updated list
 				const nextEmployeeCode = this.generateNewUserCode(updatedUsers);

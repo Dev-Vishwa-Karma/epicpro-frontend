@@ -72,19 +72,21 @@ class departments extends Component {
         const namePattern = /^[a-zA-Z\s]+$/;
     
         // Department Name Validation
-        if (!selectedDepartment.department_name.trim()) {
+        const deptName = selectedDepartment.department_name ? selectedDepartment.department_name : "";
+        if (!deptName.trim()) {
             errors.department_name = "Department Name is required.";
             isValid = false;
-        } else if (!namePattern.test(selectedDepartment.department_name)) {
+        } else if (!namePattern.test(deptName)) {
             errors.department_name = "Department Name must only contain letters and spaces.";
             isValid = false;
         }
     
         // Department Head Validation
-        if (!selectedDepartment.department_head.trim()) {
+        const deptHead = selectedDepartment.department_head ? selectedDepartment.department_head : "";
+        if (!deptHead.trim()) {
             errors.department_head = "Department Head is required.";
             isValid = false;
-        } else if (!namePattern.test(selectedDepartment.department_head)) {
+        } else if (!namePattern.test(deptHead)) {
             errors.department_head = "Department Head must only contain letters and spaces.";
             isValid = false;
         }
@@ -92,7 +94,7 @@ class departments extends Component {
         this.setState({ errors });
         return isValid;
     };
-    
+
     // Save the changes (API call)
     saveChanges = () => {
         if (!this.validateEditDepartmentForm()) {
@@ -130,44 +132,21 @@ class departments extends Component {
                     return {
                         departmentData: updatedDepartmentData,
                         successMessage: 'Department updated successfully',
-						showSuccess: true
+						showSuccess: true,
+                        errorMessage: '',
+					    showError: false
                     };
                 });
-                
+                setTimeout(this.dismissMessages, 3000);
                 document.querySelector("#editDepartmentModal .close").click();
-
-                // Scroll to the message section
-				this.messageRef.current.scrollIntoView({
-					behavior: 'smooth',
-					block: 'start',
-				});
-
-                // Auto-hide success message after 5 seconds
-				setTimeout(() => {
-					this.setState({
-						showSuccess: false, 
-						successMessage: ''
-					});
-				}, 5000);
             } else {
                 this.setState({ 
 					errorMessage: "Failed to update department",
-					showError: true
+					showError: true,
+                    successMessage: '',
+					showSuccess: false,
 				});
-
-                // Scroll to the message section
-				this.messageRef.current.scrollIntoView({
-					behavior: 'smooth',
-					block: 'start',
-				});
-
-                // Auto-hide error message after 5 seconds
-				setTimeout(() => {
-					this.setState({
-						showError: false, 
-						errorMessage: ''
-					});
-				}, 5000);
+                setTimeout(this.dismissMessages, 3000);
             }
         })
         .catch((error) => {
@@ -175,7 +154,10 @@ class departments extends Component {
             this.setState({
                 errorMessage: "Error updating department:", error,
                 showError: true,
+                successMessage: '',
+				showSuccess: false,
             });
+            setTimeout(this.dismissMessages, 3000);
         });
     };
 
@@ -192,10 +174,6 @@ class departments extends Component {
       
         fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=delete&id=${departmentToDelete}`, {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            method: "POST",
-          },
         })
         .then((response) => response.json())
         .then((data) => {
@@ -204,34 +182,20 @@ class departments extends Component {
                 departmentData: prevState.departmentData.filter((d) => d.id !== departmentToDelete),
                 successMessage: "Department deleted successfully",
                 showSuccess: true,
+                errorMessage: '',
+			    showError: false,
 
             }));
             document.querySelector("#deleteDepartmentModal .close").click();
-
-            // Scroll to the message section
-            this.messageRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-            });
-
-            setTimeout(() => {
-                this.setState({ successMessage: null, showSuccess: false });
-            }, 3000);
+            setTimeout(this.dismissMessages, 3000);
         } else {
             this.setState({
                 errorMessage: "Failed to delete department",
-                showError: true
+                showError: true,
+                successMessage: '',
+                showSuccess: false,
             });
-
-            // Scroll to the message section
-            this.messageRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-            });
-
-            setTimeout(() => {
-                this.setState({ errorMessage: null, showError: false });
-            }, 3000);
+           setTimeout(this.dismissMessages, 3000);
         }
         })
         .catch((error) => console.error('Error:', error));
@@ -304,30 +268,19 @@ class departments extends Component {
                     errors:{},
                     successMessage: "Department added successfully!",
                     showSuccess: true,
+                    
                 }));
                 // Close the modal
                 document.querySelector("#addDepartmentModal .close").click();
 
-				// Auto-hide success message after 5 seconds
-				setTimeout(() => {
-					this.setState({
-						showSuccess: false, 
-						successMessage: ''
-					});
-				}, 5000);
+                setTimeout(this.dismissMessages, 3000);
             } else {
                 this.setState({
                     errorMessage: "Failed to add department. Please try again.",
                     showError: true,
                 });
 
-				// Auto-hide success message after 5 seconds
-				setTimeout(() => {
-					this.setState({
-						showError: false,
-						errorMessage: ''
-					});
-				}, 5000);
+                setTimeout(this.dismissMessages, 3000);
             }
         })
         .catch((error) => {
@@ -336,6 +289,7 @@ class departments extends Component {
                 errorMessage: "An error occurred while adding the department.",
                 showError: true,
             });
+            setTimeout(this.dismissMessages, 3000);
         });
     };
 
@@ -348,19 +302,44 @@ class departments extends Component {
         });
     };
 
-    dismissMessagesWithButton = (messageType) => {
-		if (messageType === 'success') {
-		  this.setState({ showSuccess: false, successMessage: '' });
-		} else if (messageType === 'error') {
-		  this.setState({ showError: false, errorMessage: '' });
-		}
-	};
+    // Function to dismiss messages
+    dismissMessages = () => {
+        this.setState({
+            showSuccess: false,
+            successMessage: "",
+            showError: false,
+            errorMessage: "",
+        });
+    };
+
+    renderAlertMessages = () => (
+    <>
+      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-circle-check me-2"></i>
+        {this.state.successMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
+      </div>
+
+      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-triangle-exclamation me-2"></i>
+        {this.state.errorMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
+      </div>
+    </>
+  );
 
     render() {
         const { fixNavbar } = this.props;
         const { departmentName, departmentHead, departmentData, selectedDepartment, message, loading } = this.state;
         return (
             <>
+            {this.renderAlertMessages()}
                 <div>
                     <div>
                         <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
@@ -391,34 +370,6 @@ class departments extends Component {
                                                 </div>
                                             </div>
                                             <div className="card-body">
-                                                {/* Show success and error messages */}
-                                                <div ref={this.messageRef}>
-                                                    {this.state.showSuccess && this.state.successMessage && (
-                                                        <div className="alert alert-success alert-dismissible fade show" role="alert">
-                                                            {this.state.successMessage}
-                                                            <button
-                                                            type="button"
-                                                            className="close"
-                                                            aria-label="Close"
-                                                            onClick={() => this.dismissMessagesWithButton('success')}
-                                                            >
-                                                            </button>
-                                                        </div>
-                                                    )}
-
-                                                    {this.state.showError && this.state.errorMessage && (
-                                                        <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                                                            {this.state.errorMessage}
-                                                            <button
-                                                            type="button"
-                                                            className="close"
-                                                            aria-label="Close"
-                                                            onClick={() => this.dismissMessagesWithButton('error')}
-                                                            >
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
                                                 <div className="table-responsive">
                                                     {loading ? (
                                                         <div className="card-body">
@@ -602,7 +553,7 @@ class departments extends Component {
                                                         <input 
                                                             type="text"
                                                             className={`form-control ${this.state.errors.department_name ? "is-invalid" : ""}`}
-                                                            value={selectedDepartment.department_name} onChange={this.handleInputChange}
+                                                            value={selectedDepartment.department_name || ''} onChange={this.handleInputChange}
                                                             name="department_name"
                                                         />
                                                         {this.state.errors.department_name && (
@@ -616,7 +567,7 @@ class departments extends Component {
                                                         <input
                                                             type="text"
                                                             className={`form-control ${this.state.errors.department_head ? "is-invalid" : ""}`}
-                                                            value={selectedDepartment.department_head} onChange={this.handleInputChange}
+                                                            value={selectedDepartment.department_head || ''} onChange={this.handleInputChange}
                                                             name="department_head"
                                                         />
                                                         {this.state.errors.department_head && (

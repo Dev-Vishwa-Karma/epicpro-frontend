@@ -633,7 +633,8 @@ handleReportClick = (report) => {
         break_duration_in_minutes: report.break_duration_in_minutes || 0,
         todays_working_hours: report.todays_working_hours || '',
         todays_total_hours: report.todays_total_hours || '',
-        created_at: report.created_at || ''
+        created_at: report.created_at || '',
+		note: report.note || ''
     };
 
     this.setState({
