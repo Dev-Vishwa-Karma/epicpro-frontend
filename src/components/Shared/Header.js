@@ -50,20 +50,19 @@ class Header extends Component {
   componentDidMount() {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-      window.user = user;
-      const { id, role } = window.user;
       this.setState({
         user: user,
-        userId: id,
-        userRole: role,
+        userId: user.id,
+        userRole: user.role,
+      }, () => { 
+        this.startTimerInterval();
+        this.getPunchInStatus();
+        this.getActivities();
       });
      
     }
 
     // Proceed with the punch-in status check
-    this.startTimerInterval();
-    this.getPunchInStatus();
-    this.getActivities();
   }
 
   componentWillUnmount() {
@@ -145,7 +144,7 @@ class Header extends Component {
 
   getPunchInStatus = () => {
     fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${window.user.id}`
+      `${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${this.state.userId}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -216,7 +215,7 @@ class Header extends Component {
 
   handlePunchIn = () => {
     const formData = new FormData();
-    formData.append("employee_id", window.user.id);
+    formData.append("employee_id", this.state.userId);
     formData.append("activity_type", "Punch");
     formData.append("description", null);
     formData.append("status", "active");
@@ -447,7 +446,7 @@ class Header extends Component {
       todays_total_hours,
     } = this.state;
     const formData = new FormData();
-    formData.append("employee_id", window.user.id);
+    formData.append("employee_id", this.state.userId);
     formData.append("report", report);
     formData.append("start_time", this.formatToMySQLDateTime(start_time));
     formData.append("break_duration_in_minutes", this.props.breakDuration);
@@ -522,7 +521,7 @@ class Header extends Component {
 
   afterPunchOut = () => {
     const formData = new FormData();
-    formData.append("employee_id", window.user.id);
+    formData.append("employee_id", this.state.userId);
     formData.append("activity_type", "Punch");
     formData.append("description", null);
     formData.append("status", "completed");
@@ -677,12 +676,7 @@ class Header extends Component {
                     <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                       <NavLink
                         to={{
-                          pathname: `/view-employee/${userId}`,
-                          state: {
-                            employee: user,
-                            employeeId: userId,
-                            tab: "profile",
-                          },
+                          pathname: `/view-employee/${userId}/profile`,
                         }}
                         className={`dropdown-item ${
                           currentTab === "profile" ? "active" : ""
@@ -696,12 +690,7 @@ class Header extends Component {
 
                       <NavLink
                         to={{
-                          pathname: "/view-employee",
-                          state: {
-                            employee: user,
-                            employeeId: userId,
-                            tab: "calendar",
-                          },
+                          pathname: `/view-employee/${userId}/calendar`,
                         }}
                         className={`dropdown-item ${
                           currentTab === "calendar" ? "active" : ""
@@ -715,12 +704,7 @@ class Header extends Component {
 
                       <NavLink
                         to={{
-                          pathname: "/view-employee",
-                          state: {
-                            employee: user,
-                            employeeId: userId,
-                            tab: "timeline",
-                          },
+                          pathname: `/view-employee/${userId}/timeline`,
                         }}
                         className={`dropdown-item ${
                           currentTab === "timeline" ? "active" : ""
