@@ -926,7 +926,9 @@ class ViewEmployee extends Component {
                                             role="tab"
                                             aria-controls="pills-calendar"
                                             aria-selected={this.state.activeTab === "calendar"}
-                                            onClick={() => this.setState({ activeTab: "calendar" })}
+                                            onClick={() => this.props.history.push({
+                                                pathname: `/view-employee/${this.state.employeeId}/calendar`
+                                            })}
                                         >
                                             Calendar
                                         </a>
@@ -940,7 +942,9 @@ class ViewEmployee extends Component {
                                             role="tab"
                                             aria-controls="pills-timeline"
                                             aria-selected={this.state.activeTab === "timeline"}
-                                            onClick={() => this.setState({ activeTab: "timeline" })}
+                                            onClick={() => this.props.history.push({
+                                                pathname: `/view-employee/${this.state.employeeId}/timeline`
+                                            })}
                                         >
                                             Timeline
                                         </a>
@@ -954,7 +958,9 @@ class ViewEmployee extends Component {
                                             role="tab"
                                             aria-controls="pills-profile"
                                             aria-selected={this.state.activeTab === "profile"}
-                                            onClick={() => this.setState({ activeTab: "profile" })}
+                                            onClick={() => this.props.history.push({
+                                                pathname: `/view-employee/${this.state.employeeId}/profile`
+                                            })}
                                         >
                                             Profile
                                         </a>
