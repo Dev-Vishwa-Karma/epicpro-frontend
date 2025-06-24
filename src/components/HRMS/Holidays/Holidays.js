@@ -462,6 +462,13 @@ class Holidays extends Component {
 												<div className="dimmer active mb-4">
 													<div className="loader" />
 												</div>
+											</div>	
+											// Show Message if no holidays found
+										) : holidays.length === 0 && !message ? (
+											<div className="text-center">
+												<div className="text-muted" style={{ fontSize: '1rem', padding: '2rem 0' }}>
+													Holidays data not found
+												</div>
 											</div>
 										) : ( // Show Table after loading is false
 											<div className="card-body">
