@@ -199,6 +199,7 @@ class Header extends Component {
           this.setState({
             loading: false,
           });
+          this.props.breakDurationCalAction(0);
           setTimeout(this.dismissMessages, 3000);
         }
       })
@@ -369,12 +370,11 @@ class Header extends Component {
   formatToMySQLDateTime(timeString) {
     const date = new Date();
     const [time, modifier] = timeString.split(" ");
-
     let [hours, minutes] = time.split(":").map((num) => parseInt(num, 10));
 
-    if (modifier === "PM" && hours < 12) {
+    if (["PM", 'pm'].includes(modifier) && hours < 12) {
       hours += 12;
-    } else if (modifier === "AM" && hours === 12) {
+    } else if (["AM",'am'].includes(modifier) && hours === 12) {
       hours = 0;
     }
 
