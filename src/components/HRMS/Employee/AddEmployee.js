@@ -50,6 +50,7 @@ class AddEmployee extends Component {
       showError: false,
       visibilityPriority: 0,
       statisticsVisibilityStatus: 0,
+      errors: {},
     };
 
     // Create refs for each file input
@@ -179,6 +180,21 @@ class AddEmployee extends Component {
       visibilityPriority,
       statisticsVisibilityStatus
     } = this.state;
+
+    // Name validation: only letters and spaces allowed
+    const namePattern = /^[A-Za-z ]+$/;
+    let errors = {};
+    let hasError = false;
+    if (!namePattern.test(firstName)) {
+      errors.firstName = "First name must not contain special characters or numbers.";
+      hasError = true;
+    }
+    if (!namePattern.test(lastName)) {
+      errors.lastName = "Last name must not contain special characters or numbers.";
+      hasError = true;
+    }
+    this.setState({ errors, showError: false, showSuccess: false });
+    if (hasError) return;
 
     const addEmployeeData = new FormData();
     addEmployeeData.append("department_id", selectedDepartment);
@@ -472,6 +488,9 @@ class AddEmployee extends Component {
                               onChange={this.handleChange}
                               required
                             />
+                            {this.state.errors.firstName && (
+                              <div className="invalid-feedback d-block">{this.state.errors.firstName}</div>
+                            )}
                           </div>
                         </div>
                         <div className="col-sm-6 col-md-6">
@@ -487,6 +506,9 @@ class AddEmployee extends Component {
                               onChange={this.handleChange}
                               required
                             />
+                            {this.state.errors.lastName && (
+                              <div className="invalid-feedback d-block">{this.state.errors.lastName}</div>
+                            )}
                           </div>
                         </div>
                         <div className="col-sm-6 col-md-4">
