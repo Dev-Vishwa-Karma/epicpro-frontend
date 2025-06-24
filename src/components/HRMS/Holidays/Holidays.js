@@ -37,7 +37,7 @@ class Holidays extends Component {
 		});
 
 		// Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/events.php`, {
+		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=view&event_type=holiday`, {
 			method: "GET",
 		})
 		.then(response => response.json())
