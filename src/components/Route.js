@@ -41,27 +41,36 @@ const Routes = [
         name: 'dashboard',
         exact: true,
         pageTitle: "HR Dashboard",
-        component: Dashboard
+        component: Dashboard,
+        roles: ['admin', 'super_admin', 'employee']
     },
     {
         path: "/hr-users",
         name: 'hr-users',
         exact: true,
         pageTitle: "Users",
-        component: Users
+        adminAccess: true,
+        component: Users,
+        roles: ['admin', 'super_admin']
+
     },
     {
         path: "/hr-department",
         name: 'department',
         exact: true,
         pageTitle: "Departments",
-        component: Departments
+        adminAccess: true,
+        component: Departments,
+        roles: ['admin', 'super_admin']
+
     },
     {
         path: "/hr-employee",
         name: 'employee',
         exact: true,
         pageTitle: "Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: Employee
     },
     {
@@ -69,6 +78,9 @@ const Routes = [
         name: 'add-employee',
         exact: true,
         pageTitle: "Add Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+
         component: AddEmployee
     },
     {
@@ -76,6 +88,7 @@ const Routes = [
         name: 'edit-employee',
         exact: true,
         pageTitle: "Edit Employee",
+        roles: ['admin', 'super_admin'],
         component: EditEmployee
     },
     {
@@ -83,6 +96,8 @@ const Routes = [
         name: 'view-employee',
         exact: true,
         pageTitle: "View Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin', 'employee'],
         component: ViewEmployee
     },
     {
@@ -90,6 +105,7 @@ const Routes = [
         name: 'holidays',
         exact: true,
         pageTitle: "Holidays",
+        roles: ['admin', 'super_admin', 'employee'],
         component: Holidays
     },
     {
@@ -97,27 +113,34 @@ const Routes = [
         name: 'events',
         exact: true,
         pageTitle: "Events",
-        component: Events
+        component: Events,
+        roles: ['admin', 'super_admin', 'employee']
     },
     {
         path: "/hr-activities",
         name: 'activities',
         exact: true,
         pageTitle: "Activities",
-        component: Activities
+        component: Activities,
+        roles: ['admin', 'super_admin', 'employee']
     },
     {
         path: "/hr-payroll",
         name: 'payroll',
         exact: true,
         pageTitle: "Payroll",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: Payroll
+
     },
     {
         path: "/hr-accounts",
         name: 'accounts',
         exact: true,
         pageTitle: "Accounts",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: Accounts
     },
     {
@@ -125,20 +148,24 @@ const Routes = [
         name: 'report',
         exact: true,
         pageTitle: "Report",
-        component: Report
+        component: Report,
+        roles: ['admin', 'super_admin', 'employee']
     },
     {
         path: "/gallery",
         name: 'gallery',
         exact: true,
         pageTitle: "Image Gallery",
-        component: Gallery
+        component: Gallery,
+        roles: ['admin', 'super_admin', 'employee']
     },
     {
         path: "/saturday-settings",
         name: 'saturday settings',
         exact: true,
         pageTitle: "Saturday Settings",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: SaturdaySettings
     },
     {
@@ -146,6 +173,8 @@ const Routes = [
         name: 'Statistics',
         exact: true,
         pageTitle: "Statistics",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: Statistics
     },
     // add new routes here
@@ -157,6 +186,7 @@ const Routes = [
         name: 'project-list',
         exact: true,
         pageTitle: "Project",
+        roles: ['admin', 'super_admin'],
         component: ProjectList
     },
 
@@ -165,6 +195,7 @@ const Routes = [
         name: 'project-clients',
         exact: true,
         pageTitle: "Clients",
+        roles: ['admin', 'super_admin'],
         component: Clients
     },
 
@@ -173,6 +204,7 @@ const Routes = [
         name: 'project-todo',
         exact: true,
         pageTitle: "Todo List",
+        roles: ['admin', 'super_admin'],
         component: TodoList
     },
 
@@ -183,6 +215,8 @@ const Routes = [
         name: 'jobportalDashboard',
         exact: true,
         pageTitle: "Job Dashboard",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: JobPortalDashboard
     },
     {
@@ -190,6 +224,8 @@ const Routes = [
         name: 'jobportalPositions',
         exact: true,
         pageTitle: "Job Positions",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: Positions
     },
     {
@@ -197,6 +233,8 @@ const Routes = [
         name: 'jobportalpplicants',
         exact: true,
         pageTitle: "Job Applicants",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: Applicants
     },
     {
@@ -204,13 +242,17 @@ const Routes = [
         name: 'jobportalResumes',
         exact: true,
         pageTitle: "Job Resumes",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
         component: Resumes
     },
     {
         path: "/jobportal-settings",
         name: 'jobportalSettings',
         exact: true,
+        adminAccess: true,
         pageTitle: "Job Settings",
+        roles: ['admin', 'super_admin'],
         component: Settings
     },
 
@@ -269,6 +311,7 @@ const Routes = [
         name: 'profile',
         exact: true,
         pageTitle: "My Profile",
+        roles: ['admin', 'super_admin'],
         component: Profile
     },
 ];
