@@ -455,7 +455,7 @@ class Activities extends Component {
 																		alt="fake_url"
 																	/>
 																	<span>
-																		<a href={() => false}>{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
+																		<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
 																		<small className="float-right text-right">
 																			{activity.in_time}
 																		</small>
@@ -484,7 +484,7 @@ class Activities extends Component {
 																			alt="fake_url"
 																		/>
 																		<span>
-																			<a href={() => false}>{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
+																			<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
 																			<small className="float-right text-right">
 																				{activity.out_time}
 																			</small>
@@ -510,7 +510,7 @@ class Activities extends Component {
 																		alt="fake_url"
 																	/>
 																	<span>
-																		<a href={() => false}>{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
+																		<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
 																		<small className="float-right text-right">
 																			{activity.in_time}
 																		</small>
@@ -536,7 +536,7 @@ class Activities extends Component {
 																			alt="fake_url"
 																		/>
 																		<span>
-																			<a href={() => false}>{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
+																			<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
 																			<small className="float-right text-right">
 																				{activity.out_time}
 																			</small>
