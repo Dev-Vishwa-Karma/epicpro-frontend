@@ -715,7 +715,7 @@ class Header extends Component {
                       >
                         <i className="dropdown-icon fe fe-activity" /> Timeline
                       </NavLink>
-                      {(window.user.role === 'admin' && window.user.role === 'super_admin') && (
+                      {(window.user.role === "admin" || window.user.role === "super_admin") && (
                         <NavLink
                           to={{
                             pathname: "/saturday-settings",

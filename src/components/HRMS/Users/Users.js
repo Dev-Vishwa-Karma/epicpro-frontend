@@ -28,7 +28,8 @@ class Users extends Component {
 			searchQuery: "",
 			currentPage: 1,
             dataPerPage: 10,
-			loading: true
+			loading: true,
+			errors: {}
 		};
 	}
 
@@ -130,11 +131,41 @@ class Users extends Component {
 
 	// Add user data API call
     addUser = () => {
-        const {logged_in_employee_id, logged_in_employee_role, employeeCode, firstName, lastName, email, selectedRole, dob, gender, mobileNo, selectedDepartment, confirmPassword} = this.state;
-
-        // Validate form inputs
-        if (!employeeCode || !firstName || !email ) {
+        const {logged_in_employee_id, logged_in_employee_role, employeeCode, firstName, lastName, email, selectedRole, dob, gender, mobileNo, selectedDepartment, password, confirmPassword} = this.state;
+        let errors = {};
+        // Validation for required fields
+        const namePattern = /^[A-Za-z\s]+$/;
+        if (!firstName || firstName.trim() === "") {
+            errors.firstName = "First Name is required.";
+        } else if (!namePattern.test(firstName)) {
+            errors.firstName = "First Name can only contain letters and spaces.";
+        }
+        if (!email || email.trim() === "") {
+            errors.email = "Email ID is required.";
+        }
+        if (!gender || gender.trim() === "") {
+            errors.gender = "Gender is required.";
+        }
+        if (!dob || dob.trim() === "") {
+            errors.dob = "DOB is required.";
+        }
+        if (!password || password.trim() === "") {
+            errors.password = "Password is required.";
+        }
+        if (!confirmPassword || confirmPassword.trim() === "") {
+            errors.confirmPassword = "Confirm Password is required.";
+        }
+        if (password && confirmPassword && password !== confirmPassword) {
+            errors.confirmPassword = "Passwords do not match.";
+        }
+        if (lastName && lastName.trim() !== "" && !namePattern.test(lastName)) {
+            errors.lastName = "Last Name can only contain letters and spaces.";
+        }
+        if (Object.keys(errors).length > 0) {
+            this.setState({ errors });
             return;
+        } else {
+            this.setState({ errors: {} });
         }
 
         const addUserData = new FormData();
@@ -225,6 +256,23 @@ class Users extends Component {
 	updateProfile = () => {
         const {logged_in_employee_id, logged_in_employee_role, selectedUser } = this.state;
         if (!selectedUser) return;
+
+        let errors = {};
+        const namePattern = /^[A-Za-z\s]+$/;
+        if (!selectedUser.first_name || selectedUser.first_name.trim() === "") {
+            errors.firstName = "First Name is required.";
+        } else if (!namePattern.test(selectedUser.first_name)) {
+            errors.firstName = "First Name can only contain letters and spaces.";
+        }
+        if (selectedUser.last_name && selectedUser.last_name.trim() !== "" && !namePattern.test(selectedUser.last_name)) {
+            errors.lastName = "Last Name can only contain letters and spaces.";
+        }
+        if (Object.keys(errors).length > 0) {
+            this.setState({ errors });
+            return;
+        } else {
+            this.setState({ errors: {} });
+        }
 
 		const updateProfileData = new FormData();
         // updateProfileData.append('employee_id', selectedUser.employeeId);
@@ -629,36 +677,45 @@ class Users extends Component {
 													<div className="form-group">
 														<input
 															type="text"
-															className="form-control"
+															className={`form-control${this.state.errors.firstName ? ' is-invalid' : ''}`}
 															placeholder="First Name *"
 															name='firstName'
 															value={this.state.firstName}
 															onChange={this.handleInputChangeForAddUser}
 														/>
+														{this.state.errors.firstName && (
+															<div className="invalid-feedback d-block">{this.state.errors.firstName}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-lg-6 col-md-6 col-sm-12">
 													<div className="form-group">
 														<input
 															type="text"
-															className="form-control"
+															className={`form-control${this.state.errors.lastName ? ' is-invalid' : ''}`}
 															placeholder="Last Name"
 															name='lastName'
 															value={this.state.lastName}
 															onChange={this.handleInputChangeForAddUser}
 														/>
+														{this.state.errors.lastName && (
+															<div className="invalid-feedback d-block">{this.state.errors.lastName}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-4 col-sm-12">
 													<div className="form-group">
 														<input
 															type="text"
-															className="form-control"
+															className={`form-control${this.state.errors.email ? ' is-invalid' : ''}`}
 															placeholder="Email ID *"
 															name='email'
 															value={this.state.email}
 															onChange={this.handleInputChangeForAddUser}
 														/>
+														{this.state.errors.email && (
+															<div className="invalid-feedback d-block">{this.state.errors.email}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-4 col-sm-12">
@@ -691,7 +748,7 @@ class Users extends Component {
                                                     <div className="form-group">
                                                         <select 
                                                             name="gender"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.gender ? ' is-invalid' : ''}`}
                                                             id='gender'
                                                             value={this.state.gender}
                                                             onChange={this.handleSelectChange}
@@ -701,6 +758,9 @@ class Users extends Component {
                                                             <option value="male" >Male</option>
                                                             <option value="female" >Female</option>
                                                         </select>
+                                                        {this.state.errors.gender && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.gender}</div>
+                                                        )}
                                                     </div>
                                                 </div>
 												
@@ -730,34 +790,43 @@ class Users extends Component {
                                                             id="dob"
                                                             name="dob"
 															title='dob'
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.dob ? ' is-invalid' : ''}`}
                                                             value={this.state.dob}
                                                             onChange={this.handleInputChangeForAddUser}
                                                         />
+                                                        {this.state.errors.dob && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
+                                                        )}
                                                     </div>
                                                 </div>
 												<div className="col-md-4 col-sm-12">
 													<div className="form-group">
 														<input
 															type="password"
-															className="form-control"
+															className={`form-control${this.state.errors.password ? ' is-invalid' : ''}`}
 															placeholder="Password"
 															name='password'
 															value={this.state.password}
 															onChange={this.handleInputChangeForAddUser}
 														/>
+														{this.state.errors.password && (
+															<div className="invalid-feedback d-block">{this.state.errors.password}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-4 col-sm-12">
 													<div className="form-group">
 														<input
 															type="password"
-															className="form-control"
+															className={`form-control${this.state.errors.confirmPassword ? ' is-invalid' : ''}`}
 															placeholder="Confirm Password"
 															name='confirmPassword'
 															value={this.state.confirmPassword}
 															onChange={this.handleInputChangeForAddUser}
 														/>
+														{this.state.errors.confirmPassword && (
+															<div className="invalid-feedback d-block">{this.state.errors.confirmPassword}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-12">
@@ -993,11 +1062,14 @@ class Users extends Component {
 														<label className="form-label">First Name</label>
 														<input
 															type="text"
-															className="form-control"
-															value={selectedUser?.first_name || ""} 
+															className={`form-control${this.state.errors.firstName ? ' is-invalid' : ''}`}
+															value={selectedUser?.first_name || ""}
 															onChange={this.handleInputChangeForEditUser}
-                                                            name="first_name"
+															name="first_name"
 														/>
+														{this.state.errors.firstName && (
+															<div className="invalid-feedback d-block">{this.state.errors.firstName}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-12">
@@ -1005,11 +1077,14 @@ class Users extends Component {
 														<label className="form-label">Last Name</label>
 														<input
 															type="text"
-															className="form-control"
-															value={selectedUser?.last_name || ""} 
+															className={`form-control${this.state.errors.lastName ? ' is-invalid' : ''}`}
+															value={selectedUser?.last_name || ""}
 															onChange={this.handleInputChangeForEditUser}
-                                                            name="last_name"
+															name="last_name"
 														/>
+														{this.state.errors.lastName && (
+															<div className="invalid-feedback d-block">{this.state.errors.lastName}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-12">

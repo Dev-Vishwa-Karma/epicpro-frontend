@@ -399,9 +399,9 @@ class Activities extends Component {
 														onChange={async (e) => {
 															const employeeId = e.target.value;
 															this.setState({ filterEmployeeId: employeeId, loading: true });
-															let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php`;
+															let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?is_timeline=true`;
 															if (employeeId) {
-																apiUrl += `?user_id=${employeeId}`;
+																apiUrl += `&user_id=${employeeId}`;
 															}
 															const res = await fetch(apiUrl);
 															const data = await res.json();
