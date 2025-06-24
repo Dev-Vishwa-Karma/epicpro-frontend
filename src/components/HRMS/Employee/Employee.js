@@ -293,7 +293,7 @@ class Employee extends Component {
 			});
 			setTimeout(() => {
 				this.fetchEmployeeLeaves();
-			}, 3000);
+			}, 1000);
 		}
 			
 

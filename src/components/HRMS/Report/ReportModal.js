@@ -111,9 +111,11 @@ class ReportModal extends Component {
 								<div className="col-md-12 mb-2">
 									<strong>Total Hours:</strong> {report.todays_total_hours?.slice(0, 5)}
 								</div>
+								{report.note && (
 								<div className="col-md-12 mb-2" style={{backgroundColor:'#fecaca', padding: '15px', borderRadius:'5px', color: '#8B3946'}}>
-                                        <strong>Note:</strong> {report.note || 'report not available'}
+                                        <strong>Note:</strong> {report.note}
                                 </div>
+								)}
 							</div>
 						</div>
 

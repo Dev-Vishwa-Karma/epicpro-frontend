@@ -11,3 +11,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.fc-more-popover .fc-event-container .fc-day-grid-event .fc-content{
+  color: #000;
+}
