@@ -1143,7 +1143,8 @@ class ViewEmployee extends Component {
                                                         </>
                                                     ))
                                                 ) : (
-                                                    errorMessage && <p>{errorMessage}</p>
+                                                    // errorMessage && <p>{errorMessage}</p>
+                                                    <div className="text-muted py-4">activities not found</div>
                                                 )}
                                             </div>
                                         </div>

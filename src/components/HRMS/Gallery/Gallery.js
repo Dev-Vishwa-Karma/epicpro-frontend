@@ -21,7 +21,8 @@ class Gallery extends Component {
             currentPage: 1,
             imagesPerPage: 8,
             sortOrder: "asc", // Default to newest first
-            loading: true
+            loading: true,
+            ButtonLoading: false,
         };
         this.fileInputRef = React.createRef();
     }
@@ -198,6 +199,7 @@ class Gallery extends Component {
             }
         });
 
+        this.setState({ ButtonLoading: true });
         // Send images using fetch or axios
         fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=add`, {
             method: 'POST',
@@ -227,13 +229,7 @@ class Gallery extends Component {
                 });
                 
                 // Auto-hide success message after 3 seconds
-                setTimeout(() => {
-                    this.setState({
-                        showSuccess: false,
-                        successMessage: '',
-                        isModalOpen: false,
-                    });
-                }, 3000);
+                setTimeout(this.dismissMessages, 3000);
             } else {
                 this.setState({
                     errorMessage: data.message || "Upload failed. Please try again.",
@@ -241,14 +237,9 @@ class Gallery extends Component {
                 });
 
                 // Auto-hide error message after 3 seconds
-                setTimeout(() => {
-                    this.setState({
-                        errorMessage: '',
-                        showError: false,
-                        isModalOpen: false,
-                    });
-                }, 3000);
+                setTimeout(this.dismissMessages, 3000);
             }
+            this.setState({ ButtonLoading: false });
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -258,12 +249,8 @@ class Gallery extends Component {
             });
 
             // Auto-hide error message after 3 seconds
-            setTimeout(() => {
-                this.setState({
-                    errorMessage: '',
-                    showError: false,
-                });
-            }, 3000);
+            setTimeout(this.dismissMessages, 3000);
+            this.setState({ ButtonLoading: false });
         });
     };
 
@@ -303,6 +290,38 @@ class Gallery extends Component {
             this.setState({ currentPage: newPage });
         }
     };
+
+     // Function to dismiss messages
+    dismissMessages = () => {
+        this.setState({
+            showSuccess: false,
+            successMessage: "",
+            showError: false,
+            errorMessage: "",
+        });
+    };
+
+    renderAlertMessages = () => (
+    <>
+      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 2000, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-circle-check me-2"></i>
+        {this.state.successMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
+      </div>
+
+      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
+        role="alert"
+        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
+      >
+        <i className="fa-solid fa-triangle-exclamation me-2"></i>
+        {this.state.errorMessage}
+        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
+      </div>
+    </>
+  );
     
     render() {
         const { fixNavbar } = this.props;
@@ -316,6 +335,7 @@ class Gallery extends Component {
         const totalPages = Math.ceil(filteredImages.length / imagesPerPage);
         return (
             <>
+            {this.renderAlertMessages()}
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
                     <div className="container-fluid">
                         <div className="row row-cards">
@@ -362,9 +382,9 @@ class Gallery extends Component {
                                                         </div>
                                                         <div className="modal-body">
                                                             {/* Success and Error Messages */}
-                                                            {this.state.showSuccess && (
+                                                            {/* {this.state.showSuccess && (
                                                                 <div className="alert alert-success">{this.state.successMessage}</div>
-                                                            )}
+                                                            )} */}
                                                             
                                                             {/* Employee Selection Section */}
                                                             {(window.user?.role === "admin" || window.user?.role === "super_admin") && (
@@ -435,7 +455,10 @@ class Gallery extends Component {
                                                             <button type="button" className="btn btn-secondary" onClick={this.closeModal}>
                                                                 Cancel
                                                             </button>
-                                                            <button type="button" className="btn btn-primary" onClick={this.submitImages}>
+                                                            <button type="button" className="btn btn-primary" onClick={this.submitImages} disabled={this.state.ButtonLoading}>
+                                                                {this.state.ButtonLoading ? (
+                                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                                                ) : null}
                                                                 Upload Images
                                                             </button>
                                                         </div>

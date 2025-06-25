@@ -29,7 +29,8 @@ class Users extends Component {
 			currentPage: 1,
             dataPerPage: 10,
 			loading: true,
-			errors: {}
+			errors: {},
+			ButtonLoading: false
 		};
 	}
 
@@ -131,6 +132,7 @@ class Users extends Component {
 
 	// Add user data API call
     addUser = () => {
+        this.setState({ ButtonLoading: true });
         const {logged_in_employee_id, logged_in_employee_role, employeeCode, firstName, lastName, email, selectedRole, dob, gender, mobileNo, selectedDepartment, password, confirmPassword} = this.state;
         let errors = {};
         // Validation for required fields
@@ -162,7 +164,7 @@ class Users extends Component {
             errors.lastName = "Last Name can only contain letters and spaces.";
         }
         if (Object.keys(errors).length > 0) {
-            this.setState({ errors });
+            this.setState({ errors, ButtonLoading: false });
             return;
         } else {
             this.setState({ errors: {} });
@@ -214,7 +216,8 @@ class Users extends Component {
 					password: "",
 					confirmPassword: "",
 					showSuccess: true,
-                	successMessage: "User added successfully!"
+                	successMessage: "User added successfully!",
+					ButtonLoading: false
                 }));
 
 				setTimeout(() => this.setState({ showSuccess: false }), 3000);
@@ -222,6 +225,7 @@ class Users extends Component {
 				this.setState({
 					showError: true,
 					errorMessage: "Failed to add user. Please try again.",
+					ButtonLoading: false,
 				});
 				setTimeout(() => this.setState({ showError: false }), 3000);
             }
@@ -231,6 +235,7 @@ class Users extends Component {
 			this.setState({
 				showError: true,
 				errorMessage: "An error occurred. Please try again later.",
+				ButtonLoading: false,
 			});
 			setTimeout(() => this.setState({ showError: false }), 3000);
 		});
@@ -1026,7 +1031,11 @@ class Users extends Component {
 														type="button"
 														className="btn btn-primary mr-2"
 														onClick={this.addUser}
+														disabled={this.state.ButtonLoading}
 													>
+														{this.state.ButtonLoading ? (
+															<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+														) : null}
 														Add
 													</button>
 													<button

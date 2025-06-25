@@ -96,6 +96,7 @@ class Employee extends Component {
 			fromDate: null,
 			toDate: null,
 			selectedLeaveEmployee: (window.user.role === 'admin' || window.user.role === 'super_admin') ? "" : window.user.id,
+			ButtonLoading: false
 		};
 	}
 	handleStatistics(e) {
@@ -245,7 +246,9 @@ class Employee extends Component {
     }
 
 	handleApplyFilters = () => {
+		this.setState({ ButtonLoading: true });
         this.fetchEmployeeLeaves();
+		setTimeout(() => this.setState({ ButtonLoading: false }), 3000);// Filtering takes about 1 second
     };
 		
 	goToEditEmployee(employee, employeeId) {
@@ -454,6 +457,8 @@ class Employee extends Component {
     addLeave = (event) => {
 		event.preventDefault();
 
+		this.setState({ ButtonLoading: true });
+
         const { employee_id, from_date, to_date, reason, status, halfDayCheckbox, logged_in_employee_role} = this.state;
 		
 		let errors = {};
@@ -466,7 +471,7 @@ class Employee extends Component {
   if (!status) { errors.status = "Status is required."; isValid = false; }
 
   if (!isValid) {
-    this.setState({ addLeaveErrors: errors, showError: true, errorMessage: "Please fill in all required fields." });
+    this.setState({ addLeaveErrors: errors, showError: true, errorMessage: "Please fill in all required fields.", ButtonLoading: false });
     setTimeout(() => this.setState({ showError: false }), 3000);
     return;
   } else {
@@ -522,7 +527,8 @@ class Employee extends Component {
 						status: "",
 						halfDayCheckbox: "",
 						showSuccess: true,
-						successMessage: data.message
+						successMessage: data.message,
+						ButtonLoading: false
 					};
 				});
 				document.querySelector("#addLeaveRequestModal .close").click();
@@ -531,6 +537,7 @@ class Employee extends Component {
 				this.setState({
 					showError: true,
 					errorMessage: data.message,
+					ButtonLoading: false
 				});
 				setTimeout(() => this.setState({ showError: false }), 3000);
             }
@@ -540,6 +547,7 @@ class Employee extends Component {
 			this.setState({
 				showError: true,
 				errorMessage: "An error occurred. Please try again later.",
+				ButtonLoading: false
 			});
 			setTimeout(() => this.setState({ showError: false }), 3000);
 		});
@@ -1065,7 +1073,9 @@ class Employee extends Component {
                                                                 type="button" 
                                                                 className="btn btn-primary btn-block"
                                                                 onClick={this.handleApplyFilters}
+																disabled={this.state.ButtonLoading}
                                                             >
+																{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
                                                                 Apply
                                                             </button>
                                                         </div>
@@ -1345,7 +1355,9 @@ class Employee extends Component {
 									type="button"
 									className="btn btn-primary"
 									onClick={this.addLeave}
+									disabled={this.state.ButtonLoading}
 								>
+									{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
 									Add Leave
 								</button>
 							</div>
