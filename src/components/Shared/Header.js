@@ -34,6 +34,8 @@ class Header extends Component {
       showSuccess: false,
       errorMessage: "",
       showError: false,
+      notifications: [],
+      loading: true
     };
   }
 
@@ -58,11 +60,21 @@ class Header extends Component {
         this.startTimerInterval();
         this.getPunchInStatus();
         this.getActivities();
+        this.fetchNotifications();
+        this.checkBirthdays(); 
+        this.startNotificationInterval();
       });
      
     }
 
     // Proceed with the punch-in status check
+  }
+
+
+  startNotificationInterval() {
+    this.notificationInterval = setInterval(() => {
+      this.fetchNotifications();
+    }, 20000);
   }
 
   componentWillUnmount() {
@@ -182,6 +194,76 @@ class Header extends Component {
         [field]: value ? "" : "This field is required.",
       },
     });
+  };
+
+  fetchNotifications = () => {
+    fetch(
+      `${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          console.log('data.data', data.data)
+          this.setState({ notifications: data.data, loading: false });
+        } else {
+          this.setState({
+            notifications:[],
+            loading: false,
+          });
+          setTimeout(this.dismissMessages, 3000);
+        }
+      })
+      .catch((err) => {
+        this.setState({
+          errorMessage: "Failed to fetch data",
+          showError: true,
+          showSuccess: false,
+          loading: false 
+        });
+        setTimeout(this.dismissMessages, 3000);
+        console.error(err);
+      });
+  };
+
+  checkBirthdays = () => {
+    fetch(
+      `${process.env.REACT_APP_API_URL}/notifications.php?action=birthday_notify`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          console.log('Birthday notifications processed successfully');
+          this.fetchNotifications(); // Re-fetch notifications in case new ones are added
+        } else {
+           console.error('Error checking birthdays:');
+        }
+      })
+      .catch((err) => {
+        console.error('Error checking birthdays:', err);
+      });
+  };
+
+  markAsRead = (notification_id) => {
+    console.log('notification_id',notification_id)
+    let apiUrl = `${process.env.REACT_APP_API_URL}/notifications.php?action=mark_read&user_id=${window.user.id}`;
+    if (notification_id) {
+        apiUrl += `&notification_id=${notification_id}`;
+    }
+
+    fetch(
+      apiUrl
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          this.fetchNotifications();
+        } else {
+          console.error('Error marking notification as read');
+        }
+      })
+      .catch((err) => {
+        console.error('Error marking notification as read', err);
+      });
   };
 
   getActivities = () => {
@@ -636,6 +718,7 @@ class Header extends Component {
       todays_working_hours,
       todays_total_hours,
       elapsedFormatted,
+      notifications
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
@@ -665,6 +748,60 @@ class Header extends Component {
                   </button>
                 )}
                 <div className="notification d-flex">
+                  <div className="dropdown d-flex">
+										<a
+											href="/#"
+											className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1"
+											data-toggle="dropdown"
+										>
+											<i className="fa fa-bell" />
+                       {notifications.length > 0 && (
+											    <span className="badge badge-primary nav-unread" />
+                      )}
+										</a>
+										<div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+											<ul className="list-unstyled feeds_widget">
+                        {notifications.length > 0 ? (
+                          notifications.map((notification, index) => { 
+                            const createdAt = new Date(notification.created_at); 
+                            const formattedDate = createdAt.toLocaleDateString();
+
+                            return (
+                              <li key={index} onClick={() => this.markAsRead(notification.id)}>                          
+                                <div className="feeds-body">
+                                  <h4 className="title text-danger">
+                                    {notification.title}{' '}
+                                    <small className="float-right text-muted"> {formattedDate}</small>
+                                  </h4>
+                                  <small> {notification.body}</small>
+                                </div>
+                              </li>
+                            );
+                          })
+                        ) : (
+                          <li>
+                            <div className="feeds-body">
+                              <h4 className="title text-danger">
+                                Notification not found
+                              </h4>
+                            </div>
+                          </li>
+                        )}
+											</ul>
+                      {notifications.length > 0 && (
+                        <>
+                          <div className="dropdown-divider" />
+                          <a
+                            href="#"
+                            className="dropdown-item text-center text-muted-dark readall"
+                            onClick={() => this.markAsRead()}
+                          >
+                            Mark all as read
+                          </a>
+                        </>
+                      )}
+                    </div>
+									</div> 
                   <div className="dropdown d-flex">
                     <a
                       href="/#"
