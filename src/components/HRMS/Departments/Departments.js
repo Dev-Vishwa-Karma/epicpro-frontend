@@ -177,6 +177,8 @@ class departments extends Component {
         const { departmentToDelete } = this.state;
       
         if (!departmentToDelete) return;
+
+        this.setState({ ButtonLoading: true });
       
         fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=delete&id=${departmentToDelete}`, {
           method: 'DELETE',
@@ -190,6 +192,7 @@ class departments extends Component {
                 showSuccess: true,
                 errorMessage: '',
 			    showError: false,
+                ButtonLoading: false,
 
             }));
             document.querySelector("#deleteDepartmentModal .close").click();
@@ -200,11 +203,18 @@ class departments extends Component {
                 showError: true,
                 successMessage: '',
                 showSuccess: false,
+                ButtonLoading: false,
             });
            setTimeout(this.dismissMessages, 3000);
         }
         })
-        .catch((error) => console.error('Error:', error));
+        .catch((error) => {
+			console.error("Error:", error);
+			this.setState({
+                ButtonLoading: false,
+			});
+		});
+        
     };
 
     // Handle input changes
@@ -621,7 +631,11 @@ class departments extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" >Cancel</button>
-                                    <button type="button" onClick={this.confirmDelete} className="btn btn-danger">Delete</button>
+                                    <button type="button" onClick={this.confirmDelete} className="btn btn-danger" isabled={this.state.ButtonLoading}>
+                                        {this.state.ButtonLoading && (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										)}
+                                        Delete</button>
                                 </div>
                             </div>
                         </div>

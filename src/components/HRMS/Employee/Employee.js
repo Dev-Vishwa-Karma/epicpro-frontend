@@ -361,6 +361,8 @@ class Employee extends Component {
 		const loggedInUserRole = role; // Get logged-in user role
 	
 		if (!deleteUser) return;
+
+		this.setState({ ButtonLoading: true });
 	
 		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
 			method: "POST",  // Change method from DELETE to POST
@@ -393,6 +395,7 @@ class Employee extends Component {
 					showSuccess: true,
 					currentPageEmployees: newPage, // Update currentPageEmployees to the new page
 					deleteUser: null,  // Clear the deleteUser state
+					ButtonLoading: false,
 				});
 				document.querySelector("#deleteEmployeeModal .close").click();
 				setTimeout(this.dismissMessages, 3000);
@@ -401,13 +404,19 @@ class Employee extends Component {
 					successMessage: '',
 					showSuccess: false,
 					showError: true,
-					errorMessage:"Failed to delete employee."
+					errorMessage:"Failed to delete employee.",
+					ButtonLoading: false,
 				});
 				setTimeout(this.dismissMessages, 3000);
 				
 			}
 		})
-		.catch((error) => console.error("Error:", error));
+		.catch((error) => {
+			console.error("Error:", error);
+			this.setState({
+                ButtonLoading: false,
+			});
+		});
 	};
 	
 
@@ -564,6 +573,8 @@ class Employee extends Component {
 		const { selectedEmployeeLeave } = this.state;
 		if (!selectedEmployeeLeave) return;
 
+		this.setState({ ButtonLoading: true });
+
 		const updateEmployeeLeaveData = new FormData();
 		updateEmployeeLeaveData.append('employee_id', selectedEmployeeLeave.employee_id);
 		updateEmployeeLeaveData.append('from_date', selectedEmployeeLeave.from_date);
@@ -599,7 +610,8 @@ class Employee extends Component {
 						rejectedLeaves,
 						cancelledLeaves,
 						showSuccess: true,
-						successMessage: data.message
+						successMessage: data.message,
+						ButtonLoading: false,
 					};
 				});
 
@@ -609,6 +621,7 @@ class Employee extends Component {
 				this.setState({
 					showError: true,
 					errorMessage: data.message,
+					ButtonLoading: false,
 				});
 				setTimeout(() => this.setState({ showError: false }), 3000);
 			}
@@ -618,6 +631,7 @@ class Employee extends Component {
 			this.setState({
 				showError: true,
 				errorMessage: "An error occurred. Please try again later.",
+				ButtonLoading: false,
 			});
 			setTimeout(() => this.setState({ showError: false }), 3000);
 		});
@@ -637,6 +651,8 @@ class Employee extends Component {
 			console.error("Employee leave ID is not found for deletion.");
 			return;
 		}
+
+        this.setState({ ButtonLoading: true });
 
         fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=delete&id=${deleteEmployeeLeave}`, {
           	method: 'DELETE',
@@ -672,7 +688,8 @@ class Employee extends Component {
 						cancelledLeaves,
 						currentPageLeaves: newPage,
 						showSuccess: true,
-						successMessage: data.message
+						successMessage: data.message,
+						ButtonLoading: false,
 					};
 				});
 				// Close the modal after deletion
@@ -682,6 +699,7 @@ class Employee extends Component {
 				this.setState({
 					showError: true,
 					errorMessage: data.message,
+					ButtonLoading: false,
 				});
 				setTimeout(() => this.setState({ showError: false }), 3000);
 			}
@@ -691,6 +709,7 @@ class Employee extends Component {
 			this.setState({
 				showError: true,
 				errorMessage: "An error occurred. Please try again later.",
+				ButtonLoading: false,
 			});
 			setTimeout(() => this.setState({ showError: false }), 3000);
 		});
@@ -1460,7 +1479,12 @@ class Employee extends Component {
 								</div>
 								<div className="modal-footer">
 									<button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-									<button type="button" onClick={this.updateEmployeeLeave} className="btn btn-primary">Save</button>
+									<button type="button" onClick={this.updateEmployeeLeave} className="btn btn-primary" disabled={this.state.ButtonLoading}>
+										{this.state.ButtonLoading && (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										)}
+										Save
+									</button>
 								</div>
 							</form>
 						</div>
@@ -1481,7 +1505,11 @@ class Employee extends Component {
 							</div>
 							<div className="modal-footer">
 								<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-								<button type="button" onClick={this.confirmDeleteForEmployeeLeave}  className="btn btn-danger">Delete</button>
+								<button type="button" onClick={this.confirmDeleteForEmployeeLeave}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
+									{this.state.ButtonLoading && (
+										<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+									)}
+									Delete</button>
 							</div>
 						</div>
 					</div>
@@ -1501,7 +1529,11 @@ class Employee extends Component {
 							</div>
 							<div className="modal-footer">
 								<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-								<button type="button" onClick={this.confirmDelete}  className="btn btn-danger">Delete</button>
+								<button type="button" onClick={this.confirmDelete}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
+									{this.state.ButtonLoading && (
+										<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+									)}
+									Delete</button>
 							</div>
 						</div>
 					</div>

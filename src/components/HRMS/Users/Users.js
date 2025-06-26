@@ -262,6 +262,8 @@ class Users extends Component {
         const {logged_in_employee_id, logged_in_employee_role, selectedUser } = this.state;
         if (!selectedUser) return;
 
+        this.setState({ ButtonLoading: true });
+
         let errors = {};
         const namePattern = /^[A-Za-z\s]+$/;
         if (!selectedUser.first_name || selectedUser.first_name.trim() === "") {
@@ -273,7 +275,7 @@ class Users extends Component {
             errors.lastName = "Last Name can only contain letters and spaces.";
         }
         if (Object.keys(errors).length > 0) {
-            this.setState({ errors });
+            this.setState({ errors, ButtonLoading: false });
             return;
         } else {
             this.setState({ errors: {} });
@@ -303,6 +305,7 @@ class Users extends Component {
                     return {
 						successMessage: "User updated successfully!",
 						showSuccess: true,
+                        ButtonLoading: false
                     };
                 });
 
@@ -313,6 +316,7 @@ class Users extends Component {
 				this.setState({
 					showError: true,
 					errorMessage: "Failed to update user. Please try again.",
+                    ButtonLoading: false
 				});
 				setTimeout(() => this.setState({ showError: false }), 3000);
             }
@@ -322,6 +326,7 @@ class Users extends Component {
 			this.setState({
 				showError: true,
 				errorMessage: "An error occurred. Please try again later.",
+                ButtonLoading: false
 			});
 		});
     };
@@ -336,6 +341,8 @@ class Users extends Component {
         const { deleteUser, currentPage, users, dataPerPage, logged_in_employee_id, logged_in_employee_role} = this.state;
       
         if (!deleteUser) return;
+
+		this.setState({ ButtonLoading: true });
 
 		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
           	method: 'DELETE',
@@ -371,6 +378,7 @@ class Users extends Component {
 					showSuccess: true,
 					currentPage: newPage, // Update currentPage to the new page
 					deleteUser: null,  // Clear the deleteUser state
+                    ButtonLoading: false,
 				});
 				document.querySelector("#deleteUserModal .close").click();
 
@@ -379,6 +387,7 @@ class Users extends Component {
 				this.setState({
 					showError: true,
 					errorMessage: "Failed to delete user. Please try again.",
+                    ButtonLoading: false,
 				});
 				// setTimeout(() => this.setState({ showError: false }), 3000);
 			}
@@ -388,6 +397,7 @@ class Users extends Component {
 			this.setState({
 				showError: true,
 				errorMessage: `An error occurred: ${error.message || error}`,
+                ButtonLoading: false,
 			});
 		});
     };
@@ -1161,7 +1171,12 @@ class Users extends Component {
 									</div>
 									<div className="modal-footer">
 										<button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-										<button type="button" onClick={this.updateProfile} className="btn btn-primary">Update Profile</button>
+										<button type="button" onClick={this.updateProfile} className="btn btn-primary" disabled={this.state.ButtonLoading}>
+											{this.state.ButtonLoading && (
+												<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+											)}
+											Update Profile
+										</button>
 									</div>
 								</form>
 							</div>
@@ -1182,7 +1197,12 @@ class Users extends Component {
 								</div>
 								<div className="modal-footer">
 									<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-									<button type="button" onClick={this.confirmDelete}  className="btn btn-danger">Delete</button>
+									<button type="button" onClick={this.confirmDelete}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
+										{this.state.ButtonLoading && (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										)}
+										Delete
+									</button>
 								</div>
 							</div>
 						</div>

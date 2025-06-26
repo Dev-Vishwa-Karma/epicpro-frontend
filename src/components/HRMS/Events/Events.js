@@ -45,7 +45,7 @@ class Events extends Component {
 	  showDeleteModal: false,
 	  eventIdToDelete: null,
 	  alternateSatudays: [],
-	  ButtonLoading: false,
+	  ButtonLoading: false
 	};
 	localStorage.removeItem('empId');
 	localStorage.removeItem('startDate');
@@ -421,13 +421,14 @@ handleYearChange = (event) => {
 
 	// add handle events delete
 	handleDeleteEvent = (eventId) => {
-		this.setState({ loading: true, showDeleteModal: false, eventIdToDelete: null });
+		this.setState({ ButtonLoading: true });
 		const eventToDelete = this.state.events.find(ev => ev.id === eventId);
 		if (!eventToDelete) {
 			this.setState({
 				errorMessage: 'Event not found',
 				showError: true,
-				loading: false
+				loading: false,
+				ButtonLoading: false,
 			});
 			return;
 		}
@@ -446,7 +447,8 @@ handleYearChange = (event) => {
 					events: prevState.events.filter(ev => ev.id !== eventId),
 					successMessage: 'Event deleted successfully!',
 					showSuccess: true,
-					loading: false
+					loading: false,
+					ButtonLoading: false
 				}));
 				setTimeout(() => this.setState({ showSuccess: false }), 2000);
 			} else {
@@ -457,7 +459,8 @@ handleYearChange = (event) => {
 			this.setState({
 				errorMessage: err.message || 'Failed to delete event',
 				showError: true,
-				loading: false
+				loading: false,
+				ButtonLoading: false
 			});
 			setTimeout(() => this.setState({ showError: false }), 2000);
 		});
@@ -1282,7 +1285,11 @@ formatDateTimeAMPM = (timeString) => {
 										type="button"
 										className="btn btn-danger"
 										onClick={() => this.handleDeleteEvent(this.state.eventIdToDelete)}
+										disabled={this.state.ButtonLoading}
 									>
+										{this.state.ButtonLoading && (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										)}
 										Delete
 									</button>
 								</div>
