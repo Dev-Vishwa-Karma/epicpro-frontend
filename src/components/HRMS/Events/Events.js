@@ -1001,12 +1001,20 @@ formatDateTimeAMPM = (timeString) => {
 											) : (
 												<div id="event-list" className="fc event_list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
 								{uniqueFilteredEvents2.length > 0 ? (
-															uniqueFilteredEvents2.map((event, index) => (
-										
-																<>
-																	{
-																		this.formatDate(event.event_date) >= this.formatDate(new Date()) ? 
-																			<div key={index} className="event-card card mb-0">
+															uniqueFilteredEvents2.map((event) => {
+																let key = '';
+																if (event.event_type === 'event') {
+																	key = event.event_name + '_' + event.event_date;
+																} else if (event.event_type === 'birthday') {
+																	key = 'birthday_' + event.id;
+																} else if (event.event_type === 'holiday') {
+																	key = 'holiday_' + event.id;
+																} else {
+																	key = event.id || event.event_name || Math.random();
+																}
+																return (
+																	this.formatDate(event.event_date) >= this.formatDate(new Date()) ?
+																		<div key={key} className="event-card card mb-0">
 																		<div className="d-flex justify-content-between align-items-center">
 																		<div
 																			className={`fc-event ${
@@ -1069,10 +1077,8 @@ formatDateTimeAMPM = (timeString) => {
 																		</div>
 																			</div> :
 																			null
-								}
-								</>
-									
-							))
+																);
+															})
 								) : (
 									<div className="fc-event bg-info" data-class="bg-info">
 									No events found for this year.

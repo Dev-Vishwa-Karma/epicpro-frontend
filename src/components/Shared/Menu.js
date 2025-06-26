@@ -1290,9 +1290,14 @@ class Menu extends Component {
 					<div className="page">
 						<Header dataFromParent={this.props.dataFromParent} dataFromSubParent={pageHeading[0].pageTitle} />
 						<Switch>
-							{Routes.map((layout, i) => {
-								return <Route key={i} exact={layout.exact} path={layout.path} component={layout.component}></Route>
-							})}
+							{Routes.map((layout, i) => (
+								<Route
+									key={i}
+									exact={layout.exact}
+									path={layout.path}
+									render={props => <layout.component {...props} />}
+								/>
+							))}
 							{/* <Dashboard action={this.handler} dataFromParent={'dark'} /> */}
 							{/* <Route exact path="/hr-users" component={Users}>
 					</Route>
