@@ -77,7 +77,7 @@ class Employee extends Component {
 			from_date: '',
 			to_date: '',
 			reason: '',
-			status: '',
+			status: 'approved',
 			halfDayCheckbox: 0,
 			selectedEmployeeLeave: '',
 			deleteEmployeeLeave: '',

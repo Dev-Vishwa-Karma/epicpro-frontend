@@ -757,19 +757,26 @@ class Report extends Component {
                         filteredReports: data.data,
                         loading: false,
                         currentPageReports: 1, 
-                        error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
+                        error: { ...this.state.error, report: '' }
                     });
                 
             }else {
-                this.setState({ 
-                    errorMessage: data.message || 'Failed to fetch reports',
-                    showError: true,
-                    error: { ...this.state.error, report: data.message || 'Failed to fetch reports' },
-                    loading: false,
-                    reports: [],
-                    filteredReports: []
-                });
-                setTimeout(this.dismissMessages, 3000);
+                if (data.message === 'Reports not available.') {
+                    this.setState({
+                        reports: [],
+                        filteredReports: [],
+                        loading: false,
+                    });
+                } else {
+                    this.setState({ 
+                        errorMessage: data.message || 'Failed to fetch reports',
+                        showError: true,
+                        loading: false,
+                        reports: [],
+                        filteredReports: []
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                }
             }
         });
     }
