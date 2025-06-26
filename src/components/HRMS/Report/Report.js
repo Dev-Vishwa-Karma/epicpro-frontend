@@ -53,6 +53,7 @@ class Report extends Component {
             showError: false,
             showSuccess: false,
             successMessage: "",
+            ButtonLoading: false,
         };
         this.reportMessageTimeout = null;
     }
@@ -756,7 +757,7 @@ class Report extends Component {
                         filteredReports: data.data,
                         loading: false,
                         currentPageReports: 1, 
-                        // error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
+                        error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
                     });
                 
             }else {
@@ -830,7 +831,9 @@ class Report extends Component {
     };
 
     handleApplyFilters = () => {
+        this.setState({ ButtonLoading: true });
         this.fetchReports();
+        this.setState({ ButtonLoading: false });
     };
 
     handleNotesChange = (e) => {
@@ -982,7 +985,11 @@ class Report extends Component {
                                                                 type="button" 
                                                                 className="btn btn-primary btn-block"
                                                                 onClick={this.handleApplyFilters}
+                                                                disabled={this.state.ButtonLoading}
                                                             >
+                                                                {this.state.ButtonLoading ? (
+                                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                                                ) : null}
                                                                 Apply
                                                             </button>
                                                         </div>

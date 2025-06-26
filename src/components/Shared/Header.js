@@ -203,7 +203,6 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          console.log('data.data', data.data)
           this.setState({ notifications: data.data, loading: false });
         } else {
           this.setState({
@@ -214,13 +213,6 @@ class Header extends Component {
         }
       })
       .catch((err) => {
-        this.setState({
-          errorMessage: "Failed to fetch data",
-          showError: true,
-          showSuccess: false,
-          loading: false 
-        });
-        setTimeout(this.dismissMessages, 3000);
         console.error(err);
       });
   };
@@ -244,7 +236,6 @@ class Header extends Component {
   };
 
   markAsRead = (notification_id) => {
-    console.log('notification_id',notification_id)
     let apiUrl = `${process.env.REACT_APP_API_URL}/notifications.php?action=mark_read&user_id=${window.user.id}`;
     if (notification_id) {
         apiUrl += `&notification_id=${notification_id}`;

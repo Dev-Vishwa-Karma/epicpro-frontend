@@ -51,6 +51,7 @@ class AddEmployee extends Component {
       visibilityPriority: 0,
       statisticsVisibilityStatus: 1,
       errors: {},
+      ButtonLoading: false,
     };
 
     // Create refs for each file input
@@ -138,6 +139,7 @@ class AddEmployee extends Component {
 
   addEmployee = async (e) => {
     e.preventDefault();
+    this.setState({ ButtonLoading: true });
     const { id, role } = window.user;
 
     const {
@@ -194,7 +196,10 @@ class AddEmployee extends Component {
       hasError = true;
     }
     this.setState({ errors, showError: false, showSuccess: false });
-    if (hasError) return;
+    if (hasError) {
+      this.setState({ ButtonLoading: false });
+      return;
+    }
 
     const addEmployeeData = new FormData();
     addEmployeeData.append("department_id", selectedDepartment);
@@ -307,6 +312,7 @@ class AddEmployee extends Component {
             successMessage: "Employee added successfully!",
             errorMessage: "",
             showError: false,
+            ButtonLoading: false,
           }));
 
           setTimeout(this.dismissMessages, 5000);
@@ -321,6 +327,7 @@ class AddEmployee extends Component {
             errorMessage: data.message || "Failed to add employee.",
             showError: true,
             showSuccess: false,
+            ButtonLoading: false,
           });
         }
       })
@@ -330,6 +337,7 @@ class AddEmployee extends Component {
           errorMessage: "An error occurred while adding the employee.",
           showError: true,
           showSuccess: false,
+          ButtonLoading: false,
         });
 
         // setTimeout(this.dismissMessages, 3000);
@@ -1208,7 +1216,10 @@ class AddEmployee extends Component {
                       >
                         Back
                       </button>
-                      <button type="submit" className="btn btn-primary">
+                      <button type="submit" className="btn btn-primary" disabled={this.state.ButtonLoading}>
+                        {this.state.ButtonLoading ? (
+                          <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                        ) : null}
                         Add Employee
                       </button>
                     </div>

@@ -45,6 +45,7 @@ class Events extends Component {
 	  showDeleteModal: false,
 	  eventIdToDelete: null,
 	  alternateSatudays: [],
+	  ButtonLoading: false
 	};
 	localStorage.removeItem('empId');
 	localStorage.removeItem('startDate');
@@ -341,7 +342,7 @@ handleYearChange = (event) => {
 	addEvent = (e) => {
 		// Prevent default form submission behavior
 		e.preventDefault();
-
+		this.setState({ ButtonLoading: true });
 		// Reset selectedEvent before adding a new event
 		if (this.state.selectedEvent) {
 			this.setState({
@@ -381,6 +382,7 @@ handleYearChange = (event) => {
 							successMessage: data.message,
 							showSuccess: true,
 							errors: {}, // Clear errors
+							ButtonLoading: false,
 						};
 					});
 
@@ -394,7 +396,8 @@ handleYearChange = (event) => {
 				} else {
 					this.setState({
 						errorMessage: "Failed to add event",
-						showError: true
+						showError: true,
+						ButtonLoading: false,
 					});
 
 					// Auto-hide error message after 3 seconds
@@ -406,19 +409,26 @@ handleYearChange = (event) => {
 					}, 3000);
 				}
 			})
-			.catch((error) => console.error("Error:", error));
+			// .catch((error) => console.error("Error:", error));
+			.catch((error) => {
+				console.error("Error:", error);
+				this.setState({
+					ButtonLoading: false,
+				});
+			});
 		}
     };
 
 	// add handle events delete
 	handleDeleteEvent = (eventId) => {
-		this.setState({ loading: true, showDeleteModal: false, eventIdToDelete: null });
+		this.setState({ ButtonLoading: true });
 		const eventToDelete = this.state.events.find(ev => ev.id === eventId);
 		if (!eventToDelete) {
 			this.setState({
 				errorMessage: 'Event not found',
 				showError: true,
-				loading: false
+				loading: false,
+				ButtonLoading: false,
 			});
 			return;
 		}
@@ -437,7 +447,8 @@ handleYearChange = (event) => {
 					events: prevState.events.filter(ev => ev.id !== eventId),
 					successMessage: 'Event deleted successfully!',
 					showSuccess: true,
-					loading: false
+					loading: false,
+					ButtonLoading: false
 				}));
 				setTimeout(() => this.setState({ showSuccess: false }), 2000);
 			} else {
@@ -448,7 +459,8 @@ handleYearChange = (event) => {
 			this.setState({
 				errorMessage: err.message || 'Failed to delete event',
 				showError: true,
-				loading: false
+				loading: false,
+				ButtonLoading: false
 			});
 			setTimeout(() => this.setState({ showError: false }), 2000);
 		});
@@ -992,12 +1004,20 @@ formatDateTimeAMPM = (timeString) => {
 											) : (
 												<div id="event-list" className="fc event_list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
 								{uniqueFilteredEvents2.length > 0 ? (
-															uniqueFilteredEvents2.map((event, index) => (
-										
-																<>
-																	{
-																		this.formatDate(event.event_date) >= this.formatDate(new Date()) ? 
-																			<div key={index} className="event-card card mb-0">
+															uniqueFilteredEvents2.map((event) => {
+																let key = '';
+																if (event.event_type === 'event') {
+																	key = event.event_name + '_' + event.event_date;
+																} else if (event.event_type === 'birthday') {
+																	key = 'birthday_' + event.id;
+																} else if (event.event_type === 'holiday') {
+																	key = 'holiday_' + event.id;
+																} else {
+																	key = event.id || event.event_name || Math.random();
+																}
+																return (
+																	this.formatDate(event.event_date) >= this.formatDate(new Date()) ?
+																		<div key={key} className="event-card card mb-0">
 																		<div className="d-flex justify-content-between align-items-center">
 																		<div
 																			className={`fc-event ${
@@ -1060,10 +1080,8 @@ formatDateTimeAMPM = (timeString) => {
 																		</div>
 																			</div> :
 																			null
-								}
-								</>
-									
-							))
+																);
+															})
 								) : (
 									<div className="fc-event bg-info" data-class="bg-info">
 									No events found for this year.
@@ -1228,7 +1246,11 @@ formatDateTimeAMPM = (timeString) => {
 										<button
 											type="submit"
 											className="btn btn-primary"
+											disabled={this.state.ButtonLoading}
 										>
+											{this.state.ButtonLoading ? (
+												<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+											) : null}
 											Add Event
 										</button>
 									</div>
@@ -1263,7 +1285,11 @@ formatDateTimeAMPM = (timeString) => {
 										type="button"
 										className="btn btn-danger"
 										onClick={() => this.handleDeleteEvent(this.state.eventIdToDelete)}
+										disabled={this.state.ButtonLoading}
 									>
+										{this.state.ButtonLoading && (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										)}
 										Delete
 									</button>
 								</div>

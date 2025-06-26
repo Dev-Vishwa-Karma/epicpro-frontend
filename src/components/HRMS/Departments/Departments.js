@@ -16,7 +16,8 @@ class departments extends Component {
             showSuccess: false,
             showError: false,
             errors: {},
-            loading: true
+            loading: true,
+            ButtonLoading: false
 		};
 
         // Create a ref to scroll to the message container
@@ -101,6 +102,8 @@ class departments extends Component {
             return; // Stop if validation fails
         }
 
+        this.setState({ ButtonLoading: true });
+
         const { selectedDepartment } = this.state;
         if (!selectedDepartment) return;
 
@@ -134,7 +137,8 @@ class departments extends Component {
                         successMessage: 'Department updated successfully',
 						showSuccess: true,
                         errorMessage: '',
-					    showError: false
+					    showError: false,
+                        ButtonLoading: false
                     };
                 });
                 setTimeout(this.dismissMessages, 3000);
@@ -145,6 +149,7 @@ class departments extends Component {
 					showError: true,
                     successMessage: '',
 					showSuccess: false,
+                    ButtonLoading: false
 				});
                 setTimeout(this.dismissMessages, 3000);
             }
@@ -156,6 +161,7 @@ class departments extends Component {
                 showError: true,
                 successMessage: '',
 				showSuccess: false,
+                ButtonLoading: false
             });
             setTimeout(this.dismissMessages, 3000);
         });
@@ -171,6 +177,8 @@ class departments extends Component {
         const { departmentToDelete } = this.state;
       
         if (!departmentToDelete) return;
+
+        this.setState({ ButtonLoading: true });
       
         fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=delete&id=${departmentToDelete}`, {
           method: 'DELETE',
@@ -184,6 +192,7 @@ class departments extends Component {
                 showSuccess: true,
                 errorMessage: '',
 			    showError: false,
+                ButtonLoading: false,
 
             }));
             document.querySelector("#deleteDepartmentModal .close").click();
@@ -194,11 +203,18 @@ class departments extends Component {
                 showError: true,
                 successMessage: '',
                 showSuccess: false,
+                ButtonLoading: false,
             });
            setTimeout(this.dismissMessages, 3000);
         }
         })
-        .catch((error) => console.error('Error:', error));
+        .catch((error) => {
+			console.error("Error:", error);
+			this.setState({
+                ButtonLoading: false,
+			});
+		});
+        
     };
 
     // Handle input changes
@@ -247,6 +263,8 @@ class departments extends Component {
             return; // Stop execution if validation fails
         }
 
+        this.setState({ ButtonLoading: true });
+
         const addDepartmentFormData = new FormData();
         addDepartmentFormData.append('department_name', departmentName);
         addDepartmentFormData.append('department_head', departmentHead);
@@ -268,7 +286,7 @@ class departments extends Component {
                     errors:{},
                     successMessage: "Department added successfully!",
                     showSuccess: true,
-                    
+                    ButtonLoading: false
                 }));
                 // Close the modal
                 document.querySelector("#addDepartmentModal .close").click();
@@ -278,6 +296,7 @@ class departments extends Component {
                 this.setState({
                     errorMessage: "Failed to add department. Please try again.",
                     showError: true,
+                    ButtonLoading: false
                 });
 
                 setTimeout(this.dismissMessages, 3000);
@@ -288,6 +307,7 @@ class departments extends Component {
             this.setState({
                 errorMessage: "An error occurred while adding the department.",
                 showError: true,
+                ButtonLoading: false
             });
             setTimeout(this.dismissMessages, 3000);
         });
@@ -529,7 +549,10 @@ class departments extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                    <button type="button" onClick={this.addDepartmentData} className="btn btn-primary">Save changes</button>
+                                    <button type="button" onClick={this.addDepartmentData} className="btn btn-primary" disabled={this.state.ButtonLoading}>
+                                        {this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
+                                        Save changes
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -583,7 +606,10 @@ class departments extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                    <button type="button" className="btn btn-primary" onClick={this.saveChanges}>Save changes</button>
+                                    <button type="button" className="btn btn-primary" onClick={this.saveChanges} disabled={this.state.ButtonLoading}>
+                                        {this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
+                                        Save changes
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -605,7 +631,11 @@ class departments extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" >Cancel</button>
-                                    <button type="button" onClick={this.confirmDelete} className="btn btn-danger">Delete</button>
+                                    <button type="button" onClick={this.confirmDelete} className="btn btn-danger" isabled={this.state.ButtonLoading}>
+                                        {this.state.ButtonLoading && (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										)}
+                                        Delete</button>
                                 </div>
                             </div>
                         </div>
