@@ -19,6 +19,7 @@ class Activities extends Component {
             showSuccess: false,
             errorMessage: "",
             showError: false,
+			ButtonLoading: false
 		};
 	}
 
@@ -155,9 +156,9 @@ class Activities extends Component {
 	};
 
 	handleSaveBreakIn = () => {
-
+		this.setState({ ButtonLoading: true });
 		if (!this.state.breakReason) {
-			this.setState({ activityError: 'Please provide the reason for your break' });
+			this.setState({ activityError: 'Please provide the reason for your break', ButtonLoading: false });
 			// Hide the error message after 5 seconds
 			setTimeout(() => {
 				this.setState({ activityError: null });
@@ -185,6 +186,7 @@ class Activities extends Component {
 						successMessage : data.message,
 						showError: false,
 						showSuccess: true,
+						ButtonLoading: false
 					});
 					setTimeout(this.dismissMessages, 3000);
 					document.querySelector("#addBreakReasonModal .close").click();
@@ -194,6 +196,7 @@ class Activities extends Component {
 						errorMessage: data.message,
 						showError: true,
 						showSuccess: false,
+						ButtonLoading: false
 					});
 					setTimeout(this.dismissMessages, 3000);
 				}
@@ -203,6 +206,7 @@ class Activities extends Component {
 						errorMessage: "Something went wrong. Please try again.",
 						showError: true,
 						showSuccess: false,
+						ButtonLoading: false
 					});
 					setTimeout(this.dismissMessages, 3000);
 			});
@@ -226,13 +230,14 @@ class Activities extends Component {
 
 	addActivityForEmployee = () => {
 		const { selectedEmployee, selectedStatus, breakReason } = this.state;
-
+		this.setState({ ButtonLoading: true });
 		// Validate form inputs
 		if (!selectedEmployee && !selectedStatus) {
 			this.setState({
 				errorMessage: "Please select an employee and status",
 				showError: true,
 				showSuccess: false,
+				ButtonLoading: false
 			});
 			return;
 		}
@@ -242,6 +247,7 @@ class Activities extends Component {
 				errorMessage: "Please select an employee",
 				showError: true,
 				showSuccess: false,
+				ButtonLoading: false
 			});
 			setTimeout(this.dismissMessages, 3000);
 			return;
@@ -252,6 +258,7 @@ class Activities extends Component {
 				errorMessage: "Please select a status",
 				showError: true,
 				showSuccess: false,
+				ButtonLoading: false
 			});
 			setTimeout(this.dismissMessages, 3000);
 			return;
@@ -262,6 +269,7 @@ class Activities extends Component {
 				errorMessage: "Please enter the reason for break",
 				showError: true,
 				showSuccess: false,
+				ButtonLoading: false
 			});
 			setTimeout(this.dismissMessages, 3000);
 			return;
@@ -285,7 +293,7 @@ class Activities extends Component {
 			.then((response) => response.json())
 			.then((data) => {
 				// Stop loader when API response is received
-				this.setState({ loading: false });
+				this.setState({ loading: false, ButtonLoading: false });
 
 				if (data.status === "success") {
 					this.setState({
@@ -307,7 +315,7 @@ class Activities extends Component {
 				}
 			})
 			.catch((error) => {
-				this.setState({ loading: false });
+				this.setState({ loading: false, ButtonLoading: false });
 				this.setState({
 					errorMessage: "Something went wrong. Please try again.",
 					showError: true,
@@ -619,7 +627,10 @@ class Activities extends Component {
 										</div>
 									</div>
 									<div className="modal-footer">
-										<button type="button" className="btn btn-primary" onClick={this.addActivityForEmployee}>Save changes</button>
+										<button type="button" className="btn btn-primary" onClick={this.addActivityForEmployee} disabled={this.state.ButtonLoading}>
+											{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
+											Save changes
+										</button>
 									</div>
 								</div>
 							</div>
@@ -659,7 +670,10 @@ class Activities extends Component {
 										</div>
 									</div>
 									<div className="modal-footer">
-										<button type="button" className="btn btn-primary" onClick={this.handleSaveBreakIn}>Save changes</button>
+										<button type="button" className="btn btn-primary" onClick={this.handleSaveBreakIn} disabled={this.state.ButtonLoading}>
+											{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
+											Save changes
+										</button>
 									</div>
 								</div>
 							</div>

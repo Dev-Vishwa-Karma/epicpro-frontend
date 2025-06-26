@@ -24,7 +24,8 @@ class Holidays extends Component {
       		showError: false,
 			currentPage: 1,
 			dataPerPage: 10,
-			loading: true
+			loading: true,
+			ButtonLoading: false
 		};
 	}
 
@@ -157,6 +158,7 @@ class Holidays extends Component {
 		}
 
 		if (this.validateForm(e)) {
+			this.setState({ ButtonLoading: true });
 			const { employee_id, event_name, event_date} = this.state;
 			const addHolidayData = new FormData();
 			addHolidayData.append('employee_id', employee_id);
@@ -170,6 +172,7 @@ class Holidays extends Component {
 			})
 			.then((response) => response.json())
 			.then((data) => {
+				this.setState({ ButtonLoading: false });
 				if (data.status === "success") {
 					this.setState((prevState) => {
 						const updatedHolidayData = [data.data, ...(prevState.holidays || []) ];
@@ -210,7 +213,10 @@ class Holidays extends Component {
 					}, 3000);
 				}
 			})
-			.catch((error) => console.error("Error:", error));
+			.catch((error) => {
+				this.setState({ ButtonLoading: false });
+				console.error("Error:", error);
+			});
 		}
     };
 
@@ -244,6 +250,8 @@ class Holidays extends Component {
 			return;
 		}
 
+        this.setState({ ButtonLoading: true });
+
         const { selectedHoliday } = this.state;
         if (!selectedHoliday) return;
 
@@ -260,6 +268,7 @@ class Holidays extends Component {
         })
         .then((response) => response.json())
         .then((data) => {
+            this.setState({ ButtonLoading: false });
             if (data.status === "success") {
                 this.setState((prevState) => {
                     // Update the existing department in the array
@@ -300,7 +309,10 @@ class Holidays extends Component {
 				}, 3000);
             }
         })
-        .catch((error) => console.error('Error updating holiday:', error));
+        .catch((error) => {
+            this.setState({ ButtonLoading: false });
+            console.error('Error updating holiday:', error);
+        });
     };
 
 	// Code for delete holidays
@@ -314,6 +326,8 @@ class Holidays extends Component {
         const { deleteHoliday, currentPage, holidays, dataPerPage } = this.state;
       
         if (!deleteHoliday) return;
+
+		this.setState({ ButtonLoading: true });
 
 		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=delete&event_id=${deleteHoliday}`, {
           	method: 'DELETE',
@@ -341,6 +355,7 @@ class Holidays extends Component {
 					showSuccess: true,
 					currentPage: newPage, // Update currentPage to the new page
 					deleteHoliday: null,  // Clear the deleteHoliday state
+					ButtonLoading: false,
 				});
 
 				document.querySelector("#deleteHolidayModal .close").click();
@@ -354,7 +369,8 @@ class Holidays extends Component {
 			} else {
 				this.setState({
 					errorMessage: "Failed to delete holiday",
-					showError: true
+					showError: true,
+					ButtonLoading: false,
 				});
 
 				setTimeout(() => {
@@ -365,7 +381,12 @@ class Holidays extends Component {
 				}, 3000);
 			}
         })
-        .catch((error) => console.error('Error:', error));
+        .catch((error) => {
+			console.error("Error:", error);
+			this.setState({
+                ButtonLoading: false,
+			});
+		});
     };
 
 	// Handle Pagination
@@ -636,7 +657,9 @@ class Holidays extends Component {
 									<button
 										type="submit"
 										className="btn btn-primary"
+										disabled={this.state.ButtonLoading}
 									>
+										{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
 										Add Holiday
 									</button>
 								</div>
@@ -705,7 +728,11 @@ class Holidays extends Component {
 									<button
 										type="submit"
 										className="btn btn-primary"
+										disabled={this.state.ButtonLoading}
 									>
+										{this.state.ButtonLoading && (
+											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+										)}
 										Update Holiday
 									</button>
 								</div>
@@ -728,8 +755,12 @@ class Holidays extends Component {
 								</div>
 							</div>
 							<div className="modal-footer">
-								<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-								<button type="button" onClick={this.confirmDelete}  className="btn btn-danger">Delete</button>
+								<button type="button" className="btn btn-secondary" data-dismiss="modal" >Cancel</button>
+								<button type="button" onClick={this.confirmDelete}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
+									{this.state.ButtonLoading && (
+										<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+									)}
+									Delete</button>
 							</div>
 						</div>
 					</div>

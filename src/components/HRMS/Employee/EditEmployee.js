@@ -57,6 +57,7 @@ class EditEmployee extends Component {
             errorMessage: "",
             showError: false,
             errors: {},
+            ButtonLoading: false,
         };
     }
 
@@ -299,7 +300,12 @@ class EditEmployee extends Component {
           hasError = true;
         }
         this.setState({ errors, showError: false, showSuccess: false });
-        if (hasError) return;
+        if (hasError) {
+          this.setState({ ButtonLoading: false });
+          return;
+        }
+
+        this.setState({ ButtonLoading: true });
 
 		const updateEmployeeData = new FormData();
         updateEmployeeData.append('department_id', selectedDepartment)
@@ -376,6 +382,7 @@ class EditEmployee extends Component {
                         successMessage: "Employee updated successfully!",
                         errorMessage: "",
                         showError: false,
+                        ButtonLoading: false,
                     };
                 });
     
@@ -386,6 +393,7 @@ class EditEmployee extends Component {
                     errorMessage: data.message || "Failed to update employee.",
                     showError: true,
                     showSuccess: false,
+                    ButtonLoading: false,
                 });
             }
         })
@@ -395,6 +403,7 @@ class EditEmployee extends Component {
                 errorMessage: "An error occurred while updating the employee.",
                 showError: true,
                 showSuccess: false,
+                ButtonLoading: false,
             });
 
             // setTimeout(this.dismissMessages, 3000);
@@ -1193,7 +1202,12 @@ class EditEmployee extends Component {
                                         </div>
                                         <div className="card-footer text-right" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                                             <button type="button" className="btn btn-secondary" onClick={this.handleBack}>Back</button>
-                                            <button type="button" className="btn btn-primary" onClick={this.updateEmployee}>Update Employee</button>
+                                            <button type="button" className="btn btn-primary" onClick={this.updateEmployee} disabled={this.state.ButtonLoading}>
+                                                {this.state.ButtonLoading && (
+                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                                )}
+                                                Update Employee
+                                            </button>
                                         </div>
                                     {/* </form> */}
                                 </div>
