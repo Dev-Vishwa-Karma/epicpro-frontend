@@ -132,8 +132,9 @@ class Activities extends Component {
 						showError: false,
 						showSuccess: true,
 					});
-					const breakDuration = this.props.breakDuration || 0;
-					this.props.breakDurationCalAction(breakDuration + data.data.break_duration);
+					this.breakCalculation()
+					// const breakDuration = this.props.breakDuration || 0;
+					// this.props.breakDurationCalAction(breakDuration + data.data.break_duration);
 					setTimeout(this.dismissMessages, 3000);
 					this.componentDidMount();
 				} else {
@@ -154,6 +155,21 @@ class Activities extends Component {
 					setTimeout(this.dismissMessages, 3000);
 			});
 	};
+
+	breakCalculation = () => {
+		fetch(
+			`${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`
+			)
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.status === "success") {
+					this.props.breakDurationCalAction(data.data.break_duration);
+				}
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+	}
 
 	handleSaveBreakIn = () => {
 		this.setState({ ButtonLoading: true });
