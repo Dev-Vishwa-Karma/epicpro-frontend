@@ -423,12 +423,6 @@ class ViewEmployee extends Component {
                         previewImage: data.data.profile ? `${process.env.REACT_APP_API_URL}/${data.data.profile}` : prevState.previewImage
                     }));
 
-                    console.log(
-                        data
-                    );
-                    
-                    
-
                     const isAdmin = data.data.role === 'super_admin' || data.data.role === 'admin';
                     if (!isAdmin) {
                         this.loadEmployeeData();
