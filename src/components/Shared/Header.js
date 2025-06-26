@@ -198,7 +198,7 @@ class Header extends Component {
 
   fetchNotifications = () => {
     fetch(
-      `${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}`
+      `${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}&limit=5`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -233,7 +233,7 @@ class Header extends Component {
       .then((data) => {
         if (data.status === "success") {
           console.log('Birthday notifications processed successfully');
-          this.fetchNotifications(); // Re-fetch notifications in case new ones are added
+          this.fetchNotifications();
         } else {
            console.error('Error checking birthdays:');
         }
@@ -755,8 +755,8 @@ class Header extends Component {
 											data-toggle="dropdown"
 										>
 											<i className="fa fa-bell" />
-                       {notifications.length > 0 && (
-											    <span className="badge badge-primary nav-unread" />
+                      {notifications.filter(notification => notification.read === 0).length > 0 && (
+                        <span className="badge badge-primary nav-unread" />
                       )}
 										</a>
 										<div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
@@ -767,9 +767,14 @@ class Header extends Component {
                             const formattedDate = createdAt.toLocaleDateString();
 
                             return (
-                              <li key={index} onClick={() => this.markAsRead(notification.id)}>                          
+                              <li 
+                                key={index}  
+                                className={`${notification.read === 0 ? '' : ''}`}   
+                                style={{ backgroundColor: notification.read === 0 ? '#E8E9E9' : 'transparent' }} 
+                                onClick={() => this.markAsRead(notification.id)}
+                              >                          
                                 <div className="feeds-body">
-                                  <h4 className="title text-danger">
+                                  <h4 className={`title text-danger ${notification.read === 0 ? 'font-weight-bold' : ''}`}>
                                     {notification.title}{' '}
                                     <small className="float-right text-muted"> {formattedDate}</small>
                                   </h4>
