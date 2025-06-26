@@ -414,7 +414,7 @@ class Users extends Component {
 	// Add searching user by name and email
 	handleSearch = (event) => {
         const query = event.target.value.toLowerCase(); // Get search input
-        this.setState({ searchQuery: query }, () => {
+        this.setState({ searchUser: query }, () => {
 			if (query === "") {
 				// If search is empty, reset users to the original list
 				this.setState({ users: this.state.allUsers, currentPage: 1 });
