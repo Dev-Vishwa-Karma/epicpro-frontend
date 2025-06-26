@@ -757,7 +757,7 @@ class Report extends Component {
                         filteredReports: data.data,
                         loading: false,
                         currentPageReports: 1, 
-                        error: { ...this.state.error, report: data.message || 'Failed to fetch reports' }
+                        error: { ...this.state.error, report: '' }
                     });
                 
             }else {
