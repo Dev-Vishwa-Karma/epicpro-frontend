@@ -49,7 +49,7 @@ class AddEmployee extends Component {
       errorMessage: "",
       showError: false,
       visibilityPriority: 0,
-      statisticsVisibilityStatus: 0,
+      statisticsVisibilityStatus: 1,
       errors: {},
     };
 
