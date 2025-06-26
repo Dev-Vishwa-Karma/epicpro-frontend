@@ -25,7 +25,7 @@ class Users extends Component {
 			},
 			deleteUser: null,
 			error: null,
-			searchQuery: "",
+			searchUser: "",
 			currentPage: 1,
             dataPerPage: 10,
 			loading: true,
@@ -541,8 +541,8 @@ class Users extends Component {
 														type="text"
 														className="form-control"
 														placeholder="Search user..."
-														name="s"
-														value={this.state.searchQuery}
+														name="search"
+														value={this.state.searchUser}
 														onChange={this.handleSearch}
 													/>
 												</div>
