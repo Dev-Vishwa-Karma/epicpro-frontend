@@ -18,7 +18,7 @@ import {
 	statisticsCloseAction, friendListCloseAction, toggleLeftMenuAction
 } from '../../actions/settingsAction';
 import Routes from '../Route';
-
+import ProtectedRoute from '../ProtectedRoutes'; // Import the ProtectedRoute component
 
 const masterNone = {
 	display: 'none',
@@ -27,6 +27,8 @@ const masterNone = {
 const masterBlock = {
 	display: 'block',
 };
+
+// const adminAccessURL -
 
 class Menu extends Component {
 	constructor(props) {
@@ -1290,14 +1292,21 @@ class Menu extends Component {
 					<div className="page">
 						<Header dataFromParent={this.props.dataFromParent} dataFromSubParent={pageHeading[0].pageTitle} />
 						<Switch>
-							{Routes.map((layout, i) => (
-								<Route
-									key={i}
-									exact={layout.exact}
-									path={layout.path}
-									render={props => <layout.component {...props} />}
+							{Routes.map((layout, i) => {
+							// Use ProtectedRoute if roles are defined, otherwise use Route
+							const RouteComponent = layout.roles ? ProtectedRoute : Route;
+							
+							return (
+								<RouteComponent
+								key={i}
+								exact={layout.exact}
+								path={layout.path}
+								component={layout.component}
+								roles={layout.roles || []} // Pass roles (empty array for public routes)
+								currentUser={this.state.currentUser} // Pass currentUser
 								/>
-							))}
+							);
+							})}
 							{/* <Dashboard action={this.handler} dataFromParent={'dark'} /> */}
 							{/* <Route exact path="/hr-users" component={Users}>
 					</Route>

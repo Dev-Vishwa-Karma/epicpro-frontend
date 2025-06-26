@@ -926,9 +926,7 @@ class ViewEmployee extends Component {
                                             role="tab"
                                             aria-controls="pills-calendar"
                                             aria-selected={this.state.activeTab === "calendar"}
-                                            onClick={() => this.props.history.push({
-                                                pathname: `/view-employee/${this.state.employeeId}/calendar`
-                                            })}
+                                            onClick={() => this.setState({ activeTab: "calendar" })}
                                         >
                                             Calendar
                                         </a>
@@ -942,9 +940,7 @@ class ViewEmployee extends Component {
                                             role="tab"
                                             aria-controls="pills-timeline"
                                             aria-selected={this.state.activeTab === "timeline"}
-                                            onClick={() => this.props.history.push({
-                                                pathname: `/view-employee/${this.state.employeeId}/timeline`
-                                            })}
+                                            onClick={() => this.setState({ activeTab: "timeline" })}
                                         >
                                             Timeline
                                         </a>
@@ -958,9 +954,7 @@ class ViewEmployee extends Component {
                                             role="tab"
                                             aria-controls="pills-profile"
                                             aria-selected={this.state.activeTab === "profile"}
-                                            onClick={() => this.props.history.push({
-                                                pathname: `/view-employee/${this.state.employeeId}/profile`
-                                            })}
+                                            onClick={() => this.setState({ activeTab: "profile" })}
                                         >
                                             Profile
                                         </a>
@@ -1036,7 +1030,7 @@ class ViewEmployee extends Component {
                                             <div className="card-body">
                                                 {activities.length > 0 ? (
                                                     activities.map((activity, index) => (
-                                                        <>
+                                                        <div key={index}>
                                                             {/* In Time Entry */}
                                                             {activity.activity_type === 'Break' && (
                                                                 <div className="timeline_item ">
@@ -1140,7 +1134,7 @@ class ViewEmployee extends Component {
                                                                     </div>
                                                                 </>
                                                             )}
-                                                        </>
+                                                        </div>
                                                     ))
                                                 ) : (
                                                     // errorMessage && <p>{errorMessage}</p>
