@@ -203,7 +203,6 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          console.log('data.data', data.data)
           this.setState({ notifications: data.data, loading: false });
         } else {
           this.setState({
