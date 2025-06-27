@@ -172,8 +172,6 @@ class ProjectList extends Component {
                 updatedTeamMembers = updatedTeamMembers.filter((id) => id !== value);
             }
     
-            console.log("Updated Team Members:", updatedTeamMembers); // Debugging
-    
             return { teamMembers: updatedTeamMembers };
         });
     };    

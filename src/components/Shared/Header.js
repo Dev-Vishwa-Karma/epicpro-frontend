@@ -224,7 +224,6 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          console.log('Birthday notifications processed successfully');
           this.fetchNotifications();
         } else {
            console.error('Error checking birthdays:');
@@ -306,13 +305,12 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          const punchInTime = new Date();
+          const currentTime = new Date();
 
           this.setState(
             {
-              punchInTime,
-              elapsedTime: 0,
-              start_time: punchInTime.toLocaleTimeString([], {
+              punchInTime: currentTime,
+              start_time: currentTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
@@ -320,12 +318,10 @@ class Header extends Component {
               successMessage: data.message,
               showError: false,
               showSuccess: true,
-            },
-            () => {
-              this.startTimerInterval(punchInTime, false);
-            }
-          );
-          setTimeout(this.dismissMessages, 3000);
+            }          );
+
+            this.startTimerInterval(currentTime, false);
+            setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
             errorMessage: data.message,
@@ -566,6 +562,7 @@ class Header extends Component {
 
           this.props.punchInAction(false);
           this.props.breakDurationCalAction(0);
+          clearInterval(this.state.timer);
           setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
@@ -820,34 +817,37 @@ class Header extends Component {
                       >
                         <i className="dropdown-icon fe fe-user" /> Profile
                       </NavLink>
+                        {(window.user.role === "employee") && (
+                          <NavLink
+                            to={{
+                              pathname: `/view-employee/${userId}/calendar`,
+                            }}
+                            className={`dropdown-item ${
+                              currentTab === "calendar" ? "active" : ""
+                            }`}
+                            isActive={(match, location) =>
+                              location?.state?.tab === "calendar"
+                            }
+                          >
+                            <i className="dropdown-icon fe fe-calendar" /> Calendar
+                          </NavLink>
+                       )}
+                       {(window.user.role === "employee") && (
+                          <NavLink
+                            to={{
+                              pathname: `/view-employee/${userId}/timeline`,
+                            }}
+                            className={`dropdown-item ${
+                              currentTab === "timeline" ? "active" : ""
+                            }`}
+                            isActive={(match, location) =>
+                              location?.state?.tab === "timeline"
+                            }
+                          >
+                            <i className="dropdown-icon fe fe-activity" /> Timeline
+                          </NavLink>
+                        )}
 
-                      <NavLink
-                        to={{
-                          pathname: `/view-employee/${userId}/calendar`,
-                        }}
-                        className={`dropdown-item ${
-                          currentTab === "calendar" ? "active" : ""
-                        }`}
-                        isActive={(match, location) =>
-                          location?.state?.tab === "calendar"
-                        }
-                      >
-                        <i className="dropdown-icon fe fe-calendar" /> Calendar
-                      </NavLink>
-
-                      <NavLink
-                        to={{
-                          pathname: `/view-employee/${userId}/timeline`,
-                        }}
-                        className={`dropdown-item ${
-                          currentTab === "timeline" ? "active" : ""
-                        }`}
-                        isActive={(match, location) =>
-                          location?.state?.tab === "timeline"
-                        }
-                      >
-                        <i className="dropdown-icon fe fe-activity" /> Timeline
-                      </NavLink>
                       {(window.user.role === "admin" || window.user.role === "super_admin") && (
                         <NavLink
                           to={{
@@ -871,10 +871,6 @@ class Header extends Component {
                       )}
 
                       <div className="dropdown-divider" />
-                      <a className="dropdown-item">
-                        <i className="dropdown-icon fe fe-help-circle" /> Need
-                        help?
-                      </a>
                       <NavLink
                         to="/login"
                         className="dropdown-item"

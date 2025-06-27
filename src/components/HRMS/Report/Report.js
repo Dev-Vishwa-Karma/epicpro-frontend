@@ -701,11 +701,9 @@ class Report extends Component {
 				});
 
                 this.fetchReports();
-                console.log("test");
                 document.querySelector("#editpunchOutReportModal .close").click();
                 setTimeout(this.dismissMessages, 3000);
             } else {
-                console.log("eoor");
                 this.setState({
                     errorMessage: data.message,
                     showError: true,

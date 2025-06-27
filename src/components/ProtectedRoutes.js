@@ -6,10 +6,6 @@ class ProtectedRoute extends Component {
   isAuthorized = () => {
       const { roles } = this.props;
       const currentUser = window.user
-      console.log(
-          roles
-      );
-      
     return roles?.length === 0 || roles?.includes(currentUser?.role);
   };
 

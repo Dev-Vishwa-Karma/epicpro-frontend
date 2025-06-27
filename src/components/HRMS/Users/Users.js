@@ -25,7 +25,7 @@ class Users extends Component {
 			},
 			deleteUser: null,
 			error: null,
-			searchQuery: "",
+			searchUser: "",
 			currentPage: 1,
             dataPerPage: 10,
 			loading: true,
@@ -414,7 +414,7 @@ class Users extends Component {
 	// Add searching user by name and email
 	handleSearch = (event) => {
         const query = event.target.value.toLowerCase(); // Get search input
-        this.setState({ searchQuery: query }, () => {
+        this.setState({ searchUser: query }, () => {
 			if (query === "") {
 				// If search is empty, reset users to the original list
 				this.setState({ users: this.state.allUsers, currentPage: 1 });
@@ -541,8 +541,8 @@ class Users extends Component {
 														type="text"
 														className="form-control"
 														placeholder="Search user..."
-														name="s"
-														value={this.state.searchQuery}
+														name="search"
+														value={this.state.searchUser}
 														onChange={this.handleSearch}
 													/>
 												</div>
