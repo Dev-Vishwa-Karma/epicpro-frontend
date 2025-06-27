@@ -14,10 +14,21 @@ class ViewEmployee extends Component {
                 last_name: "",
                 email: "",
                 mobile_no1: "",
+                mobile_no2: "",
+                gender:"",
                 dob: "",
                 address_line1: "",
-                about_me: ""
+                address_line2: "",
+                about_me: "",
+                department_id: "",
+                joining_date:"",
+                emergency_contact1: '',
+                emergency_contact2: '',
+                emergency_contact3: '',
             },
+            skillsFrontend: [],
+            skillsBackend: [],
+            departments: [],
             employeeId: null,
             selectedImage: null,
             previewImage: null,
@@ -147,6 +158,7 @@ class ViewEmployee extends Component {
         this.setState({ activeTab: activeTab})
         this.fetchEmployeeDetails(id);
         this.getEmployeeGallery(id);
+        this.getDepartments();
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -156,6 +168,18 @@ class ViewEmployee extends Component {
             this.setState({ activeTab });
         }
     
+    }
+
+    getDepartments = () => {
+        // Get department data from departments table
+		fetch(`${process.env.REACT_APP_API_URL}/departments.php`, {
+            method: "GET"
+        })
+        .then(response => response.json())
+        .then(data => {
+			this.setState({ departments: data.data });
+        })
+        .catch(error => console.error("Error fetching departments:", error));
     }
 
     formatDate = (date) => {
@@ -423,6 +447,17 @@ class ViewEmployee extends Component {
                         previewImage: data.data.profile ? `${process.env.REACT_APP_API_URL}/${data.data.profile}` : prevState.previewImage
                     }));
 
+                    const skillsFrontend = this.parseSkills(this.state.employee.frontend_skills);
+                    const skillsBackend = this.parseSkills(this.state.employee.backend_skills);
+
+                    // Remove duplicates between frontend and backend
+                    const uniqueFrontendSkills = skillsFrontend.filter(skill => !skillsBackend.includes(skill));
+                    const uniqueBackendSkills = skillsBackend.filter(skill => !skillsFrontend.includes(skill));
+                    this.setState({
+                        skillsFrontend: uniqueFrontendSkills,
+                        skillsBackend: uniqueBackendSkills,
+                    });
+
                     const isAdmin = data.data.role === 'super_admin' || data.data.role === 'admin';
                     if (!isAdmin) {
                         this.loadEmployeeData();
@@ -434,6 +469,44 @@ class ViewEmployee extends Component {
             })
             .catch((error) => console.error("Error fetching employee details:", error));
     };
+
+    /**
+     * Parses skills data from string or array.
+     */
+    parseSkills(skills) {
+        if (typeof skills === 'string') {
+            return skills.replace(/["[\]]/g, '').split(',').map(skill => skill.trim());
+        }
+        return Array.isArray(skills) ? skills : [];
+    }
+
+    handleSkillChange = (event, fieldName) => {
+        const { value, checked } = event.target;
+    
+        // Check which field we're updating (frontend or backend)
+        this.setState((prevState) => {
+            let updatedSkills = fieldName === 'frontend' 
+                ? [...prevState.skillsFrontend] 
+                : [...prevState.skillsBackend];
+    
+            if (checked) {
+                // Add the skill if not already in the array
+                if (!updatedSkills.includes(value)) {
+                    updatedSkills.push(value);
+                }
+            } else {
+                // Remove the skill if checkbox is unchecked
+                updatedSkills = updatedSkills.filter((skill) => skill !== value);
+            }
+    
+            // Return the updatdepartmented state for the specific field
+            return {
+                [fieldName === 'frontend' ? 'skillsFrontend' : 'skillsBackend']: updatedSkills,
+            };
+        }, () => {
+            console.log(fieldName === 'frontend' ? 'Updated skillsFrontend' : 'Updated skillsBackend', this.state[fieldName === 'frontend' ? 'skillsFrontend' : 'skillsBackend']);
+        });
+    }; 
 
     
     fetchWorkingHoursReports = (employeeId) => {
@@ -583,7 +656,7 @@ class ViewEmployee extends Component {
     };
 
     updateProfile = () => {
-        const { employee } = this.state;
+        const { employee, skillsFrontend,skillsBackend } = this.state;
 
         // Get the logged-in user from localStorage
         const storedUser = window.user || JSON.parse(localStorage.getItem("user"));
@@ -607,9 +680,19 @@ class ViewEmployee extends Component {
         appendField("first_name", employee.first_name);
         appendField("last_name", employee.last_name);
         appendField("email", employee.email);
+        appendField("gender", employee.gender);
+        appendField("department_id", employee.department_id);
+        appendField("joining_date", employee.joining_date);
         appendField("mobile_no1", employee.mobile_no1);
+        appendField('mobile_no2',employee.mobile_no2);
         appendField("dob", employee.dob);
         appendField("address_line1", employee.address_line1);
+        appendField("address_line2", employee.address_line2);
+        appendField('emergency_contact1', employee.emergency_contact1);
+        appendField('emergency_contact2', employee.emergency_contact2);
+        appendField('emergency_contact3', employee.emergency_contact3);
+        appendField('frontend_skills', JSON.stringify(skillsFrontend));
+        appendField('backend_skills', JSON.stringify(skillsBackend));
         appendField("about_me", employee.about_me);
 
         // Preserve social media URLs even if not updated
@@ -747,7 +830,9 @@ class ViewEmployee extends Component {
 
     render() {
         const { fixNavbar} = this.props;
-        const {employee, activities, errorMessage, calendarEventsData, openFileSelectModel} = this.state;
+        const {employee, activities, errorMessage, calendarEventsData, openFileSelectModel, skillsFrontend, skillsBackend} = this.state;
+        const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
+        const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
         // Handle case where employee data is not available
         if (!employee) {
             return <p>Loading employee details...</p>;
@@ -1170,6 +1255,7 @@ class ViewEmployee extends Component {
                                                                 className="form-control" placeholder="First Name"
                                                                 value={employee.first_name || ""}
                                                                 onChange={this.handleProfileChange}
+                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -1183,6 +1269,7 @@ class ViewEmployee extends Component {
                                                                 placeholder="Last Name"
                                                                 value={employee.last_name || ""}
                                                                 onChange={this.handleProfileChange}
+                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -1196,10 +1283,11 @@ class ViewEmployee extends Component {
                                                                 placeholder="Email"
                                                                 value={employee.email || ""}
                                                                 onChange={this.handleProfileChange}
+                                                                required
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-sm-4 col-md-4">
+                                                    {/* <div className="col-sm-4 col-md-4">
                                                         <div className="form-group">
                                                             <label className="form-label">Mobile No</label>
                                                             <input
@@ -1212,8 +1300,25 @@ class ViewEmployee extends Component {
                                                                 onChange={this.handleProfileChange}
                                                             />
                                                         </div>
-                                                    </div>
+                                                    </div> */}
                                                     <div className="col-sm-4 col-md-4">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Gender</label>
+                                                            <select 
+                                                                name="gender"
+                                                                className="form-control"
+                                                                id='gender'
+                                                                value={employee.gender || ""}
+                                                                onChange={this.handleProfileChange}
+                                                                required
+                                                            >
+                                                                <option value="">Select Gender</option>
+                                                                <option value="male" >Male</option>
+                                                                <option value="female" >Female</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-md-4 col-sm-12">
                                                         <div className="form-group">
                                                             <label className="form-label">DOB</label>
                                                             <input
@@ -1223,22 +1328,181 @@ class ViewEmployee extends Component {
                                                                 className="form-control"
                                                                 value={employee.dob || ""}
                                                                 onChange={this.handleProfileChange}
+                                                                required
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-12">
+                                                    <div className="col-sm-6 col-md-6">
+                                                        <label className="form-label">Select Department</label>
                                                         <div className="form-group">
-                                                            <label className="form-label">Address</label>
-                                                            <input
-                                                                type="text"
-                                                                name='address_line1'
-                                                                className="form-control"
-                                                                placeholder="Home Address"
-                                                                value={employee.address_line1 || ""}
+                                                            <select
+                                                                className="form-control show-tick"
+                                                                value={employee.department_id || ""}
                                                                 onChange={this.handleProfileChange}
-                                                            />
+                                                                name="department_id"
+                                                                disabled={window.user && (window.user.role === 'employee')}
+                                                            >
+                                                                <option value="">Select Department</option>
+                                                                {this.state.departments.map((dept) => (
+                                                                    <option key={dept.id} value={dept.id}>
+                                                                        {dept.department_name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
                                                         </div>
                                                     </div>
+                                                    <div className="col-sm-6 col-md-6">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Joining Date</label>
+                                                        <input
+                                                            type="date"
+                                                            id="joining_date"
+                                                            name="joining_date"
+                                                            className="form-control"
+                                                            value={employee.joining_date || ""}
+                                                            onChange={this.handleProfileChange}
+                                                            disabled={window.user && (window.user.role === 'employee')}
+                                                        />
+                                                    </div>
+                                                    </div>
+                                                    <div className="col-sm-6 col-md-6">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Mobile No (1)</label>
+                                                        <input
+                                                            type="tel"
+                                                            name="mobile_no1"
+                                                            id="mobile_no1"
+                                                            className="form-control"
+                                                            placeholder="Enter Mobile No"
+                                                            value={employee.mobile_no1 || ""}
+                                                            onChange={this.handleProfileChange}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-sm-6 col-md-6">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Mobile No (2)</label>
+                                                        <input
+                                                            type="tel"
+                                                            name="mobile_no2"
+                                                            id="mobile_no2"
+                                                            className="form-control"
+                                                            placeholder="Enter Mobile No"
+                                                            value={employee.mobile_no2 || ""}
+                                                            onChange={this.handleProfileChange}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-12">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Address Line 1</label>
+                                                        <input
+                                                            type="text"
+                                                            name="address_line1"
+                                                            id="address_line1"
+                                                            className="form-control"
+                                                            placeholder="Enter Address Line 1"
+                                                            value={employee.address_line1 || ""}
+                                                            onChange={this.handleProfileChange}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-12">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Address Line 2</label>
+                                                        <input
+                                                            type="text"
+                                                            name="address_line2"
+                                                            id="address_line2"
+                                                            className="form-control"
+                                                            placeholder="Enter Address Line 2"
+                                                            value={employee.address_line2 || ""}
+                                                            onChange={this.handleProfileChange}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-sm-6 col-md-4 mb-4">
+                                                    <label className="form-label">Emergency Contact 1</label>
+                                                    <input
+                                                        type="tel"
+                                                        name="emergency_contact1"
+                                                        id="emergency_contact1"
+                                                        className="form-control"
+                                                        placeholder="Enter Emergency Contact"
+                                                        value={employee.emergency_contact1}
+                                                        onChange={this.handleProfileChange}
+                                                    />
+                                                </div>
+                                                <div className="col-sm-6 col-md-4 mb-4">
+                                                    <label className="form-label">Emergency Contact 2</label>
+                                                    <input
+                                                        type="tel"
+                                                        name="emergency_contact2"
+                                                        id="emergency_contact2"
+                                                        className="form-control"
+                                                        placeholder="Enter Emergency Contact"
+                                                        value={employee.emergency_contact2}
+                                                        onChange={this.handleProfileChange}
+                                                    />
+                                                </div>
+                                                <div className="col-sm-6 col-md-4 mb-4">
+                                                    <label className="form-label">Emergency Contact 3</label>
+                                                    <input
+                                                        type="tel"
+                                                        name="emergency_contact3"
+                                                        id="emergency_contact3"
+                                                        className="form-control"
+                                                        placeholder="Enter Emergency Contact"
+                                                        value={employee.emergency_contact3}
+                                                        onChange={this.handleProfileChange}
+                                                    />
+                                                </div>
+                                                
+                                                {/* Frontend Skills */}
+                                                <div className="row mb-4">
+                                                    <h5 className="w-100">Skills</h5>
+                                                    <div className="col-sm-6 col-md-12">
+                                                        <label className="form-label">Frontend</label>
+                                                        <div className="d-flex flex-wrap">
+                                                            {frontendSkills.map((skill) => (
+                                                                <label key={skill} className="colorinput mr-3 mb-2">
+                                                                    <input
+                                                                        name="color"
+                                                                        type="checkbox"
+                                                                        value={skill}
+                                                                        checked={skillsFrontend.includes(skill)}
+                                                                        onChange={(e) => this.handleSkillChange(e, 'frontend')}
+                                                                        className="colorinput-input"
+                                                                    />
+                                                                    <span className="colorinput-color bg-blue" />
+                                                                    <span className={`ml-2 tag tag-${this.getColor(skill)} py-1 px-2`}>{skill}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Backend Skills */}
+                                                    <div className="col-sm-6 col-md-12">
+                                                        <label className="form-label">Backend</label>
+                                                        <div className="d-flex flex-wrap">
+                                                            {backendSkills.map((skill) => (
+                                                                <label key={skill} className="colorinput mr-3 mb-2">
+                                                                    <input
+                                                                        name="color"
+                                                                        type="checkbox"
+                                                                        value={skill}
+                                                                        checked={skillsBackend.includes(skill)}
+                                                                        onChange={(e) => this.handleSkillChange(e, 'backend')}
+                                                                        className="colorinput-input"
+                                                                    />
+                                                                    <span className="colorinput-color bg-blue" />
+                                                                    <span className={`ml-2 tag tag-${this.getColor(skill)} py-1 px-2`}>{skill}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                      
                                                     <div className="col-md-12">
                                                         <div className="form-group mb-0">
                                                             <label className="form-label">About Me</label>
@@ -1639,6 +1903,25 @@ class ViewEmployee extends Component {
             </>
         )
     }
+
+      getColor(skill) {
+            const colors = {
+            HTML: "pink",
+            CSS: "blue",
+            JavaScript: "yellow",
+            React: "cyan",
+            Angular: "red",
+            Vue: "green",
+            PHP: "pink",
+            Laravel: "blue",
+            Python: "yellow",
+            "Node.js": "cyan",
+            Symfony: "red",
+            Django: "purple",
+            "Ruby on Rails": "orange",
+            };
+            return colors[skill] || "gray";
+        }
 }
 
 const mapStateToProps = state => ({
