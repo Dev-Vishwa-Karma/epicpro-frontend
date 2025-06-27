@@ -226,16 +226,7 @@ class Menu extends Component {
 						"label": "Events",
 						"to": "/hr-events"
 					},
-					/* {
-						"id": 10,
-						"label": "Payroll",
-						"to": "/hr-payroll"
-					}, */
-					/* {
-						"id": 11,
-						"label": "Accounts",
-						"to": "/hr-accounts"
-					}, */
+				
 					{
 						"id": 12,
 						"label": "Reports",
@@ -248,87 +239,7 @@ class Menu extends Component {
 					},
 				]
 			},
-			/* {
-				"id": 13,
-				"icon": "icon-cup",
-				"label": "Project",
-				content: [
-					{
-						"id": 15,
-						"label": "Project List",
-						"to": "/project-list"
-					},
-					{
-						"id": 19,
-						"label": "Clients",
-						"to": "/project-clients"
-					},
-					{
-						"id": 20,
-						"label": "Todo List",
-						"to": "/project-todo"
-					}
-				]
-			}, */
-			/* {
-				"id": 21,
-				"icon": "icon-briefcase",
-				"label": "Job Portal",
-				content: [
-					{
-						"id": 22,
-						"label": "Job Dashboard",
-						"to": "/jobportal-dashboard"
-					},
-					{
-						"id": 23,
-						"label": "Positions",
-						"to": "/jobportal-positions"
-					},
-					{
-						"id": 24,
-						"label": "Applicant",
-						"to": "/jobportal-applicants"
-					},
-					{
-						"id": 25,
-						"label": "Resumes",
-						"to": "/jobportal-resumes"
-					},
-					{
-						"id": 26,
-						"label": "Settings",
-						"to": "/jobportal-settings"
-					}
-				]
-			}, */
-			/* {
-				"id": 27,
-				"icon": "icon-lock",
-				"label": "Authentication",
-				content: [
-					{
-						"id": 28,
-						"label": "Login",
-						"to": "/login"
-					},
-					{
-						"id": 30,
-						"label": "Forgot Password",
-						"to": "/forgotpassword"
-					},
-					{
-						"id": 31,
-						"label": "404 error",
-						"to": "/notfound"
-					},
-					{
-						"id": 32,
-						"label": "500 Error",
-						"to": "/internalserver"
-					}
-				]
-			}, */
+			
 		];
 
 		// Only super admin or admin can see report
@@ -413,35 +324,35 @@ class Menu extends Component {
 					}
 
 
-					// Add the "Payroll" for admin/super_admin item to the HRMS section after the Events item
-					const payroll = {
-						"id": 10,
-						"label": "Payroll",
-						"to": "/hr-payroll"
-					};
+					// // Add the "Payroll" for admin/super_admin item to the HRMS section after the Events item
+					// const payroll = {
+					// 	"id": 10,
+					// 	"label": "Payroll",
+					// 	"to": "/hr-payroll"
+					// };
 
-					// Find the index of "Events" (id: 5)
-					const eventsIndex = hrmsSection.content.findIndex(item => item.id === 9);
+					// // Find the index of "Events" (id: 5)
+					// const eventsIndex = hrmsSection.content.findIndex(item => item.id === 9);
 
-					if (eventsIndex !== -1) {
-						// Insert "Employee" before "Activities"
-						hrmsSection.content.splice(eventsIndex + 1, 0, payroll);
-					}
+					// if (eventsIndex !== -1) {
+					// 	// Insert "Employee" before "Activities"
+					// 	hrmsSection.content.splice(eventsIndex + 1, 0, payroll);
+					// }
 
-					// Add the "Accounts" for admin/super_admin item to the HRMS section after the Payroll item
-					const accounts = {
-						"id": 11,
-						"label": "Accounts",
-						"to": "/hr-accounts"
-					};
+					// // Add the "Accounts" for admin/super_admin item to the HRMS section after the Payroll item
+					// const accounts = {
+					// 	"id": 11,
+					// 	"label": "Accounts",
+					// 	"to": "/hr-accounts"
+					// };
 
-					// Find the index of "Payroll" (id: 10)
-					const payrollIndex = hrmsSection.content.findIndex(item => item.id === 10);
+					// // Find the index of "Payroll" (id: 10)
+					// const payrollIndex = hrmsSection.content.findIndex(item => item.id === 10);
 
-					if (payrollIndex !== -1) {
-						// Insert "Employee" before "Activities"
-						hrmsSection.content.splice(payrollIndex + 1, 0, accounts);
-					}
+					// if (payrollIndex !== -1) {
+					// 	// Insert "Employee" before "Activities"
+					// 	hrmsSection.content.splice(payrollIndex + 1, 0, accounts);
+					// }
 				}
 
 				// Find the index of "Projects section"
@@ -513,40 +424,40 @@ class Menu extends Component {
 					});
 				}
 
-				// Find the index of "authentication section"
-				const authenticationSection = content.find(item => item.id === 27);
+				// // Find the index of "authentication section"
+				// const authenticationSection = content.find(item => item.id === 27);
 
-				if (!authenticationSection) {
-					content.push(
-						{
-							"id": 27,
-							"icon": "icon-lock",
-							"label": "Authentication",
-							content: [
-								{
-									"id": 28,
-									"label": "Login",
-									"to": "/login"
-								},
-								{
-									"id": 30,
-									"label": "Forgot Password",
-									"to": "/forgotpassword"
-								},
-								{
-									"id": 31,
-									"label": "404 error",
-									"to": "/notfound"
-								},
-								{
-									"id": 32,
-									"label": "500 Error",
-									"to": "/internalserver"
-								}
-							]
-						}
-					);
-				}
+				// if (!authenticationSection) {
+				// 	content.push(
+				// 		{
+				// 			"id": 27,
+				// 			"icon": "icon-lock",
+				// 			"label": "Authentication",
+				// 			content: [
+				// 				{
+				// 					"id": 28,
+				// 					"label": "Login",
+				// 					"to": "/login"
+				// 				},
+				// 				{
+				// 					"id": 30,
+				// 					"label": "Forgot Password",
+				// 					"to": "/forgotpassword"
+				// 				},
+				// 				{
+				// 					"id": 31,
+				// 					"label": "404 error",
+				// 					"to": "/notfound"
+				// 				},
+				// 				{
+				// 					"id": 32,
+				// 					"label": "500 Error",
+				// 					"to": "/internalserver"
+				// 				}
+				// 			]
+				// 		}
+				// 	);
+				// }
 			}
 		}
 
@@ -570,28 +481,13 @@ class Menu extends Component {
 										<i className="fe fe-command brand-logo" />
 									</NavLink>
 									<div className="dropdown">
-										{/* <NavLink to="/page-search" className="nav-link icon">
-											<i className="fa fa-search" />
-										</NavLink> */}
 										<NavLink to="/hr-events" className="nav-link icon app_inbox">
 											<i className="fa fa-calendar" />
 										</NavLink>
-										{/* <NavLink to="/app-contact" className="nav-link icon xs-hide">
-											<i className="fa fa-id-card-o" />
-										</NavLink> */}
 									</div>
 								</div>
 								<div className="hright">
 									<div className="dropdown">
-										{/* <a href="#!" class="nav-link icon theme_btn">
-										<i
-											class="fa fa-paint-brush"
-											data-toggle="tooltip"
-											data-placement="right"
-											title="Themes"
-										></i>
-									</a> */}
-
 										{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
 											<div>
 												<span className="nav-link icon settingbar" onClick={this.toggleRightSidebar}>
@@ -1307,187 +1203,6 @@ class Menu extends Component {
 								/>
 							);
 							})}
-							{/* <Dashboard action={this.handler} dataFromParent={'dark'} /> */}
-							{/* <Route exact path="/hr-users" component={Users}>
-					</Route>
-					<Route exact path="/hr-department">
-						<Departments dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/hr-employee">
-						<Employee dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/hr-events">
-						<Events dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/hr-holidays">
-						<Holidays dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/hr-activities">
-						<Activities dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/hr-payroll">
-						<Payroll dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/hr-accounts">
-						<Accounts dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/hr-report">
-						<Report dataFromParent={'dark'} />
-					</Route>
-
-					<Route exact path="/project-dashboard">
-						<ProjectDashboard dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/project-list">
-						<ProjectList dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/project-taskboard">
-						<Taskboard dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/project-ticket">
-						<TicketList dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/project-ticket-details">
-						<TicketDetails dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/project-clients">
-						<Clients dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/project-todo">
-						<TodoList dataFromParent={'dark'} />
-					</Route>
-
-					<Route exact path="/jobportal-dashboard">
-						<JobPortalDashboard dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/jobportal-applicants">
-						<Applicants dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/jobportal-positions">
-						<Positions dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/jobportal-resumes">
-						<Resumes dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/jobportal-settings">
-						<Settings dataFromParent={'dark'} />
-					</Route>
-
-					<Route path="/login" component={Login} />
-					<Route path="/signup" component={SignUp} />
-					<Route path="/forgotpassword" component={ForgotPassword} />
-					<Route path="/notfound" component={NotFound} />
-					<Route path="/internalserver" component={InternalServer} />
-
-					<Route exact path="/icons">
-						<Icons dataFromParent={''} />
-					</Route>
-					<Route exact path="/icons-feather">
-						<IconsFeather dataFromParent={''} />
-					</Route>
-					<Route exact path="/icons-line">
-						<IconsLine dataFromParent={''} />
-					</Route>
-					<Route exact path="/icons-flag">
-						<IconsFlags dataFromParent={''} />
-					</Route>
-					<Route exact path="/icons-payments">
-						<IconsPayments dataFromParent={''} />
-					</Route>
-
-					<Route exact path="/charts">
-						<Charts dataFromParent={''} />
-					</Route>
-					<Route exact path="/charts-e">
-						<ChartsE dataFromParent={''} />
-					</Route>
-					<Route exact path="/charts-c3">
-						<ChartsC3 dataFromParent={''} />
-					</Route>
-					<Route exact path="/charts-knob">
-						<ChartsKnob dataFromParent={''} />
-					</Route>
-					<Route exact path="/charts-sparkline">
-						<ChartsSparkline dataFromParent={''} />
-					</Route>
-
-					<Route exact path="/forms">
-						<Forms dataFromParent={''} />
-					</Route>
-					<Route exact path="/form-advanced">
-						<FormAdvanced dataFromParent={''} />
-					</Route>
-					<Route exact path="/form-validation">
-						<FormValidation dataFromParent={''} />
-					</Route>
-					<Route exact path="/form-wizard">
-						<FormWizard dataFromParent={''} />
-					</Route>
-					<Route exact path="/form-summernote">
-						<FormSummernote dataFromParent={''} />
-					</Route>
-
-					<Route exact path="/gallery">
-						<Gallery dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/maps">
-						<Maps dataFromParent={'dark'} />
-					</Route> */}
-
-							{/* <Route exact path="/tables">
-						<Tables dataFromParent={''} />
-					</Route>
-					<Route exact path="/tables-datatable">
-						<DataTables dataFromParent={''} />
-					</Route>
-					<Route exact path="/tables-color">
-						<TablesColor dataFromParent={''} />
-					</Route>
-					<Route exact path="/tables-basic">
-						<TablesBasic dataFromParent={''} />
-					</Route>
-
-					<Route exact path="/widgets">
-						<Widgets dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/w-card">
-						<WCard dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/w-statistics">
-						<WStatistics dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/w-data">
-						<WData dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/w-social">
-						<WSocial dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/w-other">
-						<WOther dataFromParent={'dark'} />
-					</Route>
-
-					<Route exact path="/page-search">
-						<Search dataFromParent={''} />
-					</Route>
-					<Route exact path="/profile">
-						<Profile dataFromParent={'dark'} />
-					</Route>
-
-					<Route exact path="/app-calendar">
-						<AppCalender dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/app-contact">
-						<AppContact dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/app-chat">
-						<AppChart dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/app-filemanager">
-						<AppFileManager dataFromParent={'dark'} />
-					</Route>
-					<Route exact path="/app-setting">
-						<AppSetting dataFromParent={'dark'} />
-					</Route> */}
 						</Switch>
 						<Footer />
 					</div>
