@@ -996,6 +996,7 @@ class ViewEmployee extends Component {
                         <div className="row clearfix">
                             <div className="col-12">
                                 <ul className="nav nav-tabs mb-3" id="pills-tab" role="tablist">
+                                {(window.user.role === "employee") && (
                                     <li className="nav-item">
                                         <a
                                             className={`nav-link ${this.state.activeTab === "calendar" ? "active" : ""}`}
@@ -1010,6 +1011,8 @@ class ViewEmployee extends Component {
                                             Calendar
                                         </a>
                                     </li>
+                                    )}
+                                    {(window.user.role === "employee") && (
                                     <li className="nav-item">
                                         <a
                                             className={`nav-link ${this.state.activeTab === "timeline" ? "active" : ""}`}
@@ -1024,6 +1027,7 @@ class ViewEmployee extends Component {
                                             Timeline
                                         </a>
                                     </li>
+                                     )}
                                     <li className="nav-item">
                                         <a
                                             className={`nav-link ${this.state.activeTab === "profile" ? "active" : ""}`}
