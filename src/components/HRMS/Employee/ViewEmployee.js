@@ -658,6 +658,41 @@ class ViewEmployee extends Component {
     updateProfile = () => {
         const { employee, skillsFrontend,skillsBackend } = this.state;
 
+        // Validation for required fields
+        const namePattern = /^[A-Za-z\s]+$/;
+        let errors = {};
+        if (!employee.first_name || employee.first_name.trim() === "") {
+            errors.first_name = "First Name is required.";
+        } else if (!namePattern.test(employee.first_name)) {
+            errors.first_name = "First Name must not contain special characters or numbers.";
+        }
+        if (!employee.last_name || employee.last_name.trim() === "") {
+            errors.last_name = "Last Name is required.";
+        } else if (!namePattern.test(employee.last_name)) {
+            errors.last_name = "Last Name must not contain special characters or numbers.";
+        }
+        if (!employee.email || employee.email.trim() === "") {
+            errors.email = "Email address is required.";
+        }
+        if (!employee.gender || employee.gender.trim() === "") {
+            errors.gender = "Gender is required.";
+        }
+        if (!employee.department_id || employee.department_id === "") {
+            errors.department_id = "Department is required.";
+        }
+        if (!employee.dob || employee.dob.trim() === "") {
+            errors.dob = "DOB is required.";
+        }
+        if (!employee.joining_date || employee.joining_date.trim() === "") {
+            errors.joining_date = "Joining Date is required.";
+        }
+        if (Object.keys(errors).length > 0) {
+            this.setState({ errors });
+            return;
+        } else {
+            this.setState({ errors: {} });
+        }
+
         // Get the logged-in user from localStorage
         const storedUser = window.user || JSON.parse(localStorage.getItem("user"));
         if (!storedUser || !storedUser.id) {
@@ -1256,11 +1291,14 @@ class ViewEmployee extends Component {
                                                             <input
                                                                 type="text"
                                                                 name='first_name'
-                                                                className="form-control" placeholder="First Name"
+                                                                className={`form-control${this.state.errors && this.state.errors.first_name ? ' is-invalid' : ''}`} placeholder="First Name"
                                                                 value={employee.first_name || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
                                                             />
+                                                            {this.state.errors && this.state.errors.first_name && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.first_name}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-sm-6 col-md-6">
@@ -1269,12 +1307,15 @@ class ViewEmployee extends Component {
                                                             <input
                                                                 type="text"
                                                                 name='last_name'
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors && this.state.errors.last_name ? ' is-invalid' : ''}`}
                                                                 placeholder="Last Name"
                                                                 value={employee.last_name || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
                                                             />
+                                                            {this.state.errors && this.state.errors.last_name && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.last_name}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
@@ -1283,12 +1324,15 @@ class ViewEmployee extends Component {
                                                             <input
                                                                 type="email"
                                                                 name='email'
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors && this.state.errors.email ? ' is-invalid' : ''}`}
                                                                 placeholder="Email"
                                                                 value={employee.email || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
                                                             />
+                                                            {this.state.errors && this.state.errors.email && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.email}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     {/* <div className="col-sm-4 col-md-4">
@@ -1310,7 +1354,7 @@ class ViewEmployee extends Component {
                                                             <label className="form-label">Gender</label>
                                                             <select 
                                                                 name="gender"
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors && this.state.errors.gender ? ' is-invalid' : ''}`}
                                                                 id='gender'
                                                                 value={employee.gender || ""}
                                                                 onChange={this.handleProfileChange}
@@ -1320,6 +1364,9 @@ class ViewEmployee extends Component {
                                                                 <option value="male" >Male</option>
                                                                 <option value="female" >Female</option>
                                                             </select>
+                                                            {this.state.errors && this.state.errors.gender && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.gender}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-md-4 col-sm-12">
@@ -1329,18 +1376,21 @@ class ViewEmployee extends Component {
                                                                 type="date"
                                                                 id="dob"
                                                                 name="dob"
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors && this.state.errors.dob ? ' is-invalid' : ''}`}
                                                                 value={employee.dob || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
                                                             />
+                                                            {this.state.errors && this.state.errors.dob && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-sm-6 col-md-6">
                                                         <label className="form-label">Select Department</label>
                                                         <div className="form-group">
                                                             <select
-                                                                className="form-control show-tick"
+                                                                className={`form-control show-tick${this.state.errors && this.state.errors.department_id ? ' is-invalid' : ''}`}
                                                                 value={employee.department_id || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 name="department_id"
@@ -1353,6 +1403,9 @@ class ViewEmployee extends Component {
                                                                     </option>
                                                                 ))}
                                                             </select>
+                                                            {this.state.errors && this.state.errors.department_id && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.department_id}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-sm-6 col-md-6">
@@ -1362,11 +1415,14 @@ class ViewEmployee extends Component {
                                                             type="date"
                                                             id="joining_date"
                                                             name="joining_date"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors && this.state.errors.joining_date ? ' is-invalid' : ''}`}
                                                             value={employee.joining_date || ""}
                                                             onChange={this.handleProfileChange}
                                                             disabled={window.user && (window.user.role === 'employee')}
                                                         />
+                                                        {this.state.errors && this.state.errors.joining_date && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.joining_date}</div>
+                                                        )}
                                                     </div>
                                                     </div>
                                                     <div className="col-sm-6 col-md-6">
