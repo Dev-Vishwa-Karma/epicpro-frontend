@@ -224,7 +224,6 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          console.log('Birthday notifications processed successfully');
           this.fetchNotifications();
         } else {
            console.error('Error checking birthdays:');
@@ -306,13 +305,12 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          const punchInTime = new Date();
+          const currentTime = new Date();
 
           this.setState(
             {
-              punchInTime,
-              elapsedTime: 0,
-              start_time: punchInTime.toLocaleTimeString([], {
+              punchInTime: currentTime,
+              start_time: currentTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
@@ -320,12 +318,10 @@ class Header extends Component {
               successMessage: data.message,
               showError: false,
               showSuccess: true,
-            },
-            () => {
-              this.startTimerInterval(punchInTime, false);
-            }
-          );
-          setTimeout(this.dismissMessages, 3000);
+            }          );
+
+            this.startTimerInterval(currentTime, false);
+            setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
             errorMessage: data.message,
@@ -566,6 +562,7 @@ class Header extends Component {
 
           this.props.punchInAction(false);
           this.props.breakDurationCalAction(0);
+          clearInterval(this.state.timer);
           setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
