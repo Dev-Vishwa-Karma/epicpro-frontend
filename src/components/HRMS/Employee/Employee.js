@@ -277,9 +277,16 @@ class Employee extends Component {
 	}
 
 	viewEmployee(employee, employeeId) {
-		this.props.history.push({
-			pathname: `/view-employee/${employeeId}/calendar`,
-		});
+		if (window.user.role === 'super_admin' || window.user.role === 'admin') {
+			this.props.history.push({
+				pathname: `/view-employee/${employeeId}/profile`,
+			});
+		}
+		else {
+			this.props.history.push({
+				pathname: `/view-employee/${employeeId}/calendar`,
+			});
+		}
 	}
 
 	// Function to handle tab change
