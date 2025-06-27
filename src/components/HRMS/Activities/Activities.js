@@ -19,7 +19,9 @@ class Activities extends Component {
             showSuccess: false,
             errorMessage: "",
             showError: false,
-			ButtonLoading: false
+			ButtonLoading: false,
+			filterFromDate: "",
+			filterToDate: "",
 		};
 	}
 
@@ -326,6 +328,35 @@ class Activities extends Component {
 			});
 	};
 
+	// Add filter handler
+	handleApplyFilter = async () => {
+		this.setState({ loading: true });
+		const { filterFromDate, filterToDate, filterEmployeeId } = this.state;
+		let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true`;
+
+		if (filterEmployeeId) {
+			apiUrl += `&user_id=${filterEmployeeId}`;
+		}
+		if (filterFromDate) {
+			apiUrl += `&from_date=${filterFromDate}`;
+		}
+		if (filterToDate) {
+			apiUrl += `&to_date=${filterToDate}`;
+		}
+
+		try {
+			const response = await fetch(apiUrl);
+			const data = await response.json();
+			if (data.status === "success") {
+				this.setState({ activities: data.data, loading: false });
+			} else {
+				this.setState({ activities: [], loading: false, error: data.message });
+			}
+		} catch (err) {
+			this.setState({ activities: [], loading: false, error: "Failed to fetch data" });
+		}
+	};
+
 	// Render function for Bootstrap toast messages
     renderAlertMessages = () => {
         return (
@@ -392,42 +423,78 @@ class Activities extends Component {
 				{/* <link rel="stylesheet" href="../assets/plugins/summernote/dist/summernote.css" /> */}
 				<div>
 					<div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
+
+						{/* Filter Section */}
+						<div className='container'>
+							<div className="card mb-3">
+								<div className="card-body">
+									<div className="row">
+										<div className="col-md-3">
+											<label>From Date</label>
+											<input
+											type="date"
+											className="form-control"
+											value={this.state.filterFromDate}
+											onChange={(e) => this.setState({ filterFromDate: e.target.value })}
+											/>
+										</div>
+										<div className="col-md-3">
+											<label>To Date</label>
+											<input
+											type="date"
+											className="form-control"
+											value={this.state.filterToDate}
+											onChange={(e) => this.setState({ filterToDate: e.target.value })}
+											/>
+										</div>
+										{(window.user.role === "admin" || window.user.role === "super_admin") && (
+											<div className="col-md-3">
+											<label>Employee</label>
+											<select
+												className="form-control"
+												value={this.state.filterEmployeeId}
+												onChange={(e) =>
+												this.setState({ filterEmployeeId: e.target.value })
+												}
+											>
+												<option value="">All Employees</option>
+												{this.state.employeeData.map((emp) => (
+												<option key={emp.id} value={emp.id}>
+													{emp.first_name} {emp.last_name}
+												</option>
+												))}
+											</select>
+											</div>
+										)}
+										<div
+											className={
+											window.user.role === "admin" || window.user.role === "super_admin"
+												? "col-md-3"
+												: "col-md-4"
+											}
+										>
+											<button
+											className="btn btn-primary"
+											style={{ marginTop: 34 }}
+											onClick={this.handleApplyFilter}
+											>
+											Apply
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+												
 						<div className="container-fluid">
 							<div className="row clearfix">
 								<div className="col-md-12">
 									<div className="card">
 										<div className="card-header bline d-flex justify-content-between align-items-center">
 											<h3 className="card-title">Timeline Activity</h3>
-											<div className="d-flex align-items-center">
-												{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
-													<select
-														className="form-control mr-2"
-														style={{ minWidth: 200 }}
-														value={this.state.filterEmployeeId}
-														onChange={async (e) => {
-															const employeeId = e.target.value;
-															this.setState({ filterEmployeeId: employeeId, loading: true });
-															let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?is_timeline=true`;
-															if (employeeId) {
-																apiUrl += `&user_id=${employeeId}`;
-															}
-															const res = await fetch(apiUrl);
-															const data = await res.json();
-															if (data.status === 'success') {
-																this.setState({ activities: data.data, loading: false });
-															} else {
-																this.setState({ activities: [], loading: false });
-															}
-														}}
-													>
-														<option value="">All Employees</option>
-														{this.state.employeeData.map(emp => (
-															<option key={emp.id} value={emp.id}>
-																{emp.first_name} {emp.last_name}
-															</option>
-														))}
-													</select>
-												)}
+											<div className="d-flex align-items-center">					
+												{/* End Filter Section */}
 												{/* Existing Add button */}
 												{window.user.role !== 'employee' && (
 													<button style={{ float: "right" }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal">
@@ -452,116 +519,179 @@ class Activities extends Component {
 											<div className="card-body">
 												<div className="summernote"></div>
 												{activities.length > 0 ? (
-													activities.map((activity, index) => (
-														<>
-															{/* In Time Entry */}
-															{activity.type === 'Break_in' && (
-																<div className="timeline_item ">
-																	<img
-																		className="tl_avatar"
-																		src="../assets/images/xs/avatar1.jpg"
-																		alt="fake_url"
-																	/>
-																	<span>
-																		<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
-																		<small className="float-right text-right">
-																			{activity.in_time}
-																		</small>
-																	</span>
-																	<h6 className="font600">
-																		(Break In) {activity.description}
-																	</h6>
-
-																	<div className="msg">
-																		{activity.created_by && (
-																			<a href={() => false} class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Created by System Admin</a>
-																		)}
+													activities.map((activity, index) => {
+														const profilePic = activity.profile
+															? `${process.env.REACT_APP_API_URL}/${activity.profile}`
+															: "../assets/images/xs/avatar1.jpg";
+														// Date Seperation
+														let showSeparator = false;
+														function getDateStr(activity) {
+															const dateTime = activity.complete_in_time || activity.complete_out_time;
+															if (!dateTime) return 'Unknown Date';
+															return dateTime.split(' ')[0];
+														}
+														function getDisplayDateLabel(dateStr, isFirst) {
+															if (!dateStr || dateStr === 'Unknown Date') {
+																return isFirst ? '' : '';
+															}
+															const date = new Date(dateStr);
+															if (isNaN(date.getTime())) {
+																return isFirst ? '' : '';
+															}
+															const today = new Date();
+															const yesterday = new Date();
+															yesterday.setDate(today.getDate() - 1);
+															function stripTime(d) {
+																return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+															}
+															const dateNoTime = stripTime(date);
+															const todayNoTime = stripTime(today);
+															const yesterdayNoTime = stripTime(yesterday);
+															if (dateNoTime.getTime() === todayNoTime.getTime()) return '';
+															if (dateNoTime.getTime() === yesterdayNoTime.getTime()) return 'Yesterday';
+															return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+														}
+														const currentDateStr = getDateStr(activity);
+														let displayDate = '';
+														if (index > 0) {
+															const prevDateStr = getDateStr(activities[index - 1]);
+															if (currentDateStr !== prevDateStr) {
+																showSeparator = true;
+																displayDate = getDisplayDateLabel(currentDateStr, false);
+															}
+														} else {
+															showSeparator = true;
+															displayDate = getDisplayDateLabel(currentDateStr, true);
+														}
+														return (
+															<>
+																{showSeparator && displayDate && (
+																	<div style={{
+																		display: 'flex',
+																		alignItems: 'center',
+																		margin: '32px 0',
+																		width: '100%',
+																	}}>
+																		<div style={{ flex: 1, borderBottom: '1px solid #e5e7eb' }} />
+																		<div style={{
+																		margin: '0 12px',
+																		padding: '6px 12px',
+																		border: '1px solid #e5e7eb',
+																		borderRadius: '999px',
+																		background: '#fff',
+																		color: '#4b5563',
+																		fontSize: '0.9rem',
+																		fontWeight: 500
+																		}}>
+																		<i className="fa fa-calendar-alt" style={{ marginRight: 6, color: '#9ca3af' }}></i>
+																		{displayDate}
+																		</div>
+																		<div style={{ flex: 1, borderBottom: '1px solid #e5e7eb' }} />
 																	</div>
-																</div>
-															)}
-															{/* Out Time Entry */}
-															{activity.type === 'Break_out' && (
-																<>
-																	{/* <div className="duration text-center">
-																		------ {activity.duration} ------
-																	</div> */}
+																	)}
+
+																{/* In Time Entry */}
+																{activity.type === 'Break_in' && (
 																	<div className="timeline_item ">
 																		<img
 																			className="tl_avatar"
-																			src="../assets/images/xs/avatar1.jpg"
-																			alt="fake_url"
+																			src={profilePic}
+																			alt={`${activity.first_name} ${activity.last_name}`}
 																		/>
 																		<span>
-																			<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
+																			<a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
+																			<span className="mx-2">|</span>
+																			<span className="text-secondary">Break In</span>
+																			<small className="float-right text-right">
+																				{activity.in_time}
+																			</small>
+																		</span>
+																		<h6 className="text-secondary">
+																			{activity.description}
+																		</h6>
+																		<div className="msg" style={{marginTop:"-8px"}}>
+																				{activity.created_by && (
+																					<a href={() => false} className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Created by System Admin</a>
+																				)}
+																		</div>
+																	</div>
+																)}
+																{/* Out Time Entry */}
+																{activity.type === 'Break_out' && (
+																	<>
+																		<div className="timeline_item ">
+																			<img
+																				className="tl_avatar"
+																				src={profilePic}
+																				alt={`${activity.first_name} ${activity.last_name}`}
+																			/>
+																			<span>
+																				<a style={{fontWeight:"800"}} href="#">{activity.first_name} {activity.last_name}</a>
+																				<span className="mx-2">|</span>
+																				<span className="text-secondary">Break Out</span>
+																				<small className="float-right text-right">
+																					{activity.out_time}
+																				</small>
+																			</span>
+																			<div className="msg" style={{marginTop:"-1px"}}>
+																				{activity.updated_by && (
+																					<a href={() => false} className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Edited by System Admin</a>
+																				)}
+																			</div>
+																		</div>
+																	</>
+																)}
+
+																{/* In Time Entry Punch */}
+																{activity.type === 'Punch_in' && (
+																	<div className="timeline_item ">
+																		<img
+																			className="tl_avatar"
+																			src={profilePic}
+																			alt={`${activity.first_name} ${activity.last_name}`}
+																		/>
+																		<span>
+																			<a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
+																			<span className="mx-2">|</span>
+																			<span className="text-secondary">Punch In</span>
+																			<small className="float-right text-right">
+																				{activity.in_time}
+																			</small>
+																		</span>
+																		<div className="msg" style={{marginTop:"-8px"}}>
+																				{activity.created_by && (
+																					<a href={() => false} className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Created by System Admin</a>
+																				)}
+																		</div>
+																	</div>
+																)}
+																{/* Out Time Entry */}
+																{activity.type === 'Punch_out' && (
+																	<div className="timeline_item ">
+																		<img
+																			className="tl_avatar"
+																			src={profilePic}
+																			alt={`${activity.first_name} ${activity.last_name}`}
+																		/>
+																		<span>
+																			<a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
+																			<span className="mx-2">|</span>
+																			<span className="text-secondary">Punch Out</span>
 																			<small className="float-right text-right">
 																				{activity.out_time}
 																			</small>
 																		</span>
-																		<h6 className="font600">
-																			Break out
-																		</h6>
-																		<div className="msg">
-																			{activity.updated_by && (
-																				<a href={() => false} class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Edited by System Admin</a>
-																			)}
+																		<div className="msg" style={{marginTop:"-5px"}}>
+																				{activity.updated_by && (
+																					<a href={() => false} className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Edited by System Admin</a>
+																				)}
 																		</div>
 																	</div>
-																</>
-															)}
-
-															{/* In Time Entry Punch */}
-															{activity.type === 'Punch_in' && (
-																<div className="timeline_item ">
-																	<img
-																		className="tl_avatar"
-																		src="../assets/images/xs/avatar1.jpg"
-																		alt="fake_url"
-																	/>
-																	<span>
-																		<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
-																		<small className="float-right text-right">
-																			{activity.in_time}
-																		</small>
-																	</span>
-																	<h6 className="font600">
-																		has started his day
-																	</h6>
-
-																	<div className="msg">
-																		{activity.created_by && (
-																			<a href={() => false} class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Created by System Admin</a>
-																		)}
-																	</div>
-																</div>
-															)}
-															{/* Out Time Entry */}
-															{activity.type === 'Punch_out' && (
-																<>
-																	<div className="timeline_item ">
-																		<img
-																			className="tl_avatar"
-																			src="../assets/images/xs/avatar1.jpg"
-																			alt="fake_url"
-																		/>
-																		<span>
-																			<a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
-																			<small className="float-right text-right">
-																				{activity.out_time}
-																			</small>
-																		</span>
-																		<h6 className="font600">
-																			has ended his day
-																		</h6>
-																		<div className="msg">
-																			{activity.updated_by && (
-																				<a href={() => false} class="mr-20 text-muted"><i class="fa fa-user text-pink"></i> Edited by System Admin</a>
-																			)}
-																		</div>
-																	</div>
-																</>
-															)}
-														</>
-													))
+																)}
+															</>
+															
+														);
+													})
 												) : (
 													<div className="text-center text-muted py-4">activities not found</div>
 												)}
