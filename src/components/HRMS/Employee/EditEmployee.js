@@ -288,21 +288,40 @@ class EditEmployee extends Component {
         } = this.state;
 
         // Name validation: only letters and spaces allowed
-        const namePattern = /^[A-Za-z ]+$/;
+        const namePattern = /^[A-Za-z\s]+$/;
         let errors = {};
-        let hasError = false;
-        if (!namePattern.test(firstName)) {
-          errors.firstName = "First name must not contain special characters or numbers.";
-          hasError = true;
+        // Required field validation
+        if (!firstName || firstName.trim() === "") {
+        errors.firstName = "First Name is required.";
+        } else if (!namePattern.test(firstName)) {
+        errors.firstName = "First Name must not contain special characters or numbers.";
         }
-        if (!namePattern.test(lastName)) {
-          errors.lastName = "Last name must not contain special characters or numbers.";
-          hasError = true;
+        if (!lastName || lastName.trim() === "") {
+        errors.lastName = "Last Name is required.";
+        } else if (!namePattern.test(lastName)) {
+        errors.lastName = "Last Name must not contain special characters or numbers.";
         }
-        this.setState({ errors, showError: false, showSuccess: false });
-        if (hasError) {
-          this.setState({ ButtonLoading: false });
-          return;
+        if (!email || email.trim() === "") {
+        errors.email = "Email address is required.";
+        }
+        if (!selectedDepartment || selectedDepartment === "") {
+        errors.selectedDepartment = "Department is required.";
+        }
+        if (!gender || gender.trim() === "") {
+        errors.gender = "Gender is required.";
+        }
+        if (!dob || dob.trim() === "") {
+        errors.dob = "DOB is required.";
+        }
+        if (!joiningDate || joiningDate.trim() === "") {
+        errors.joiningDate = "Joining Date is required.";
+        }
+        // Show errors if any
+        if (Object.keys(errors).length > 0) {
+        this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false });
+        return;
+        } else {
+        this.setState({ errors: {} });
         }
 
         this.setState({ ButtonLoading: true });
@@ -492,11 +511,10 @@ class EditEmployee extends Component {
                                                             type="text"
                                                             name="firstName"
                                                             id="firstName"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.firstName ? ' is-invalid' : ''}`}
                                                             placeholder="Enter First Name"
                                                             value={firstName}
                                                             onChange={this.handleChange}
-                                                            required
                                                         />
                                                         {this.state.errors.firstName && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.firstName}</div>
@@ -510,11 +528,10 @@ class EditEmployee extends Component {
                                                             type="text"
                                                             name="lastName"
                                                             id='lastName'
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.lastName ? ' is-invalid' : ''}`}
                                                             placeholder="Enter Last Name"
                                                             value={lastName}
                                                             onChange={this.handleChange}
-                                                            required
                                                         />
                                                         {this.state.errors.lastName && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.lastName}</div>
@@ -528,12 +545,14 @@ class EditEmployee extends Component {
                                                             type="email"
                                                             name="email"
                                                             id='email'
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.email ? ' is-invalid' : ''}`}
                                                             placeholder="Enter Email Address"
                                                             value={email}
                                                             onChange={this.handleChange}
-                                                            required
                                                         />
+                                                        {this.state.errors.email && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.email}</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="col-sm-6 col-md-4">
@@ -541,23 +560,25 @@ class EditEmployee extends Component {
                                                         <label className="form-label">Gender</label>
                                                         <select 
                                                             name="gender"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.gender ? ' is-invalid' : ''}`}
                                                             id='gender'
                                                             value={gender}
                                                             onChange={this.handleChange}
-                                                            required
                                                         >
                                                             <option value="">Select Gender</option>
                                                             <option value="male" >Male</option>
                                                             <option value="female" >Female</option>
                                                         </select>
+                                                        {this.state.errors.gender && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.gender}</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="col-md-4 col-sm-12">
                                                     <label className="form-label">Select Department</label>
 													<div className="form-group">
 														<select
-															className="form-control show-tick"
+															className={`form-control show-tick${this.state.errors.selectedDepartment ? ' is-invalid' : ''}`}
 															value={this.state.selectedDepartment}
 															onChange={this.handleChange}
 															name="selectedDepartment"
@@ -569,6 +590,9 @@ class EditEmployee extends Component {
 																</option>
 															))}
 														</select>
+                                                        {this.state.errors.selectedDepartment && (
+                                                         <div className="invalid-feedback d-block">{this.state.errors.selectedDepartment}</div>
+                                                        )}
 													</div>
 												</div>
                                                 <div className="col-sm-6 col-md-4">
@@ -578,11 +602,13 @@ class EditEmployee extends Component {
                                                             type="date"
                                                             id="dob"
                                                             name="dob"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.dob ? ' is-invalid' : ''}`}
                                                             value={dob}
                                                             onChange={this.handleChange}
-                                                            required
                                                         />
+                                                        {this.state.errors.dob && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="col-sm-6 col-md-4">
@@ -592,11 +618,13 @@ class EditEmployee extends Component {
                                                             type="date"
                                                             id="joiningDate"
                                                             name="joiningDate"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.joiningDate ? ' is-invalid' : ''}`}
                                                             value={joiningDate}
                                                             onChange={this.handleChange}
-                                                            required
                                                         />
+                                                        {this.state.errors.joiningDate && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.joiningDate}</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="col-sm-6 col-md-4">
