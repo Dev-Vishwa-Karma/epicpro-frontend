@@ -15,6 +15,7 @@ class ViewEmployee extends Component {
                 email: "",
                 mobile_no1: "",
                 mobile_no2: "",
+                password: "",
                 gender:"",
                 dob: "",
                 address_line1: "",
@@ -720,6 +721,7 @@ class ViewEmployee extends Component {
         appendField("joining_date", employee.joining_date);
         appendField("mobile_no1", employee.mobile_no1);
         appendField('mobile_no2',employee.mobile_no2);
+        appendField("password", employee.password);
         appendField("dob", employee.dob);
         appendField("address_line1", employee.address_line1);
         appendField("address_line2", employee.address_line2);
@@ -1425,7 +1427,7 @@ class ViewEmployee extends Component {
                                                         )}
                                                     </div>
                                                     </div>
-                                                    <div className="col-sm-6 col-md-6">
+                                                    <div className="col-sm-4 col-md-4">
                                                     <div className="form-group">
                                                         <label className="form-label">Mobile No (1)</label>
                                                         <input
@@ -1439,7 +1441,7 @@ class ViewEmployee extends Component {
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="col-sm-6 col-md-6">
+                                                <div className="col-sm-4 col-md-4">
                                                     <div className="form-group">
                                                         <label className="form-label">Mobile No (2)</label>
                                                         <input
@@ -1449,6 +1451,20 @@ class ViewEmployee extends Component {
                                                             className="form-control"
                                                             placeholder="Enter Mobile No"
                                                             value={employee.mobile_no2 || ""}
+                                                            onChange={this.handleProfileChange}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="col-sm-4 col-md-4">
+                                                    <div className="form-group">
+                                                        <label className="form-label">Password</label>
+                                                        <input
+                                                            type="password"
+                                                            name="password"
+                                                            id="password"
+                                                            className="form-control"
+                                                            placeholder="password"
+                                                            value={employee.password || ""}
                                                             onChange={this.handleProfileChange}
                                                         />
                                                     </div>
