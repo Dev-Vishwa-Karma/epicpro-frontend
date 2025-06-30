@@ -698,7 +698,7 @@ class EditEmployee extends Component {
                                                                 id="password"
                                                                 className="form-control"
                                                                 placeholder="Enter New Password"
-                                                                value={password}
+                                                                // value={password}
                                                                 onChange={this.handleChange}
                                                             />
                                                         </div>

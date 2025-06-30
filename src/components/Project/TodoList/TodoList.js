@@ -366,14 +366,54 @@ class TodoList extends Component {
                                                                         </span>
                                                                     </td>
                                                                     <td>
-                                                                        <span
-                                                                            className="avatar avatar-blue add-space"
-                                                                            data-toggle="tooltip"
-                                                                            data-placement="top"
-                                                                            title={`${todo.first_name} ${todo.last_name}`}
-                                                                        >
-                                                                            {todo.first_name.charAt(0).toUpperCase()}{todo.last_name.charAt(0).toUpperCase()}
-                                                                        </span>
+                                                                        {todo.profile ? (
+                                                                            <img 
+                                                                                src={`${process.env.REACT_APP_API_URL}/${todo.profile}`} 
+                                                                                className="avatar avatar-blue add-space" 
+                                                                                alt={`${todo.first_name} ${todo.last_name}`}
+                                                                                data-toggle="tooltip" 
+                                                                                data-placement="top" 
+                                                                                title={`${todo.first_name} ${todo.last_name}`}
+                                                                                style={{
+                                                                                    width: '40px', 
+                                                                                    height: '40px', 
+                                                                                    borderRadius: '50%', 
+                                                                                    objectFit: 'cover'
+                                                                                }}
+                                                                                onError={(e) => {
+                                                                                    e.target.style.display = 'none';
+                                                                                    const initialsSpan = document.createElement('span');
+                                                                                    initialsSpan.className = 'avatar avatar-blue add-space';
+                                                                                    initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                                                                    initialsSpan.setAttribute('data-placement', 'top');
+                                                                                    initialsSpan.setAttribute('title', `${todo.first_name} ${todo.last_name}`);
+                                                                                    initialsSpan.style.display = 'inline-flex';
+                                                                                    initialsSpan.style.alignItems = 'center';
+                                                                                    initialsSpan.style.justifyContent = 'center';
+                                                                                    initialsSpan.style.width = '40px';
+                                                                                    initialsSpan.style.height = '40px';
+                                                                                    initialsSpan.textContent = 
+                                                                                    `${todo.first_name.charAt(0).toUpperCase()}${todo.last_name.charAt(0).toUpperCase()}`;
+                                                                                    e.target.parentNode.appendChild(initialsSpan);
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <span
+                                                                                className="avatar avatar-blue add-space"
+                                                                                data-toggle="tooltip"
+                                                                                data-placement="top"
+                                                                                title={`${todo.first_name} ${todo.last_name}`}
+                                                                                style={{
+                                                                                    width: '40px',
+                                                                                    height: '40px',
+                                                                                    display: 'inline-flex',
+                                                                                    alignItems: 'center',
+                                                                                    justifyContent: 'center'
+                                                                                }}
+                                                                            >
+                                                                                {todo.first_name.charAt(0).toUpperCase()}{todo.last_name.charAt(0).toUpperCase()}
+                                                                            </span>
+                                                                        )}
                                                                     </td>
                                                                 </tr>
                                                             ))
