@@ -19,6 +19,7 @@ class EditEmployee extends Component {
             joiningDate: '',
             mobile1: '',
             mobile2: '',
+            password: '', // Added password field
             address1: '',
             address2: '',
             emergencyContact1: '',
@@ -106,6 +107,7 @@ class EditEmployee extends Component {
                     joiningDate: employee.joining_date,
                     mobile1: employee.mobile_no1,
                     mobile2: employee.mobile_no2,
+                    password: employee.password,
                     address1: employee.address_line1,
                     address2: employee.address_line2,
                     emergencyContact1: employee.emergency_contact1,
@@ -258,6 +260,7 @@ class EditEmployee extends Component {
             joiningDate,
             mobile1,
             mobile2,
+            password,
             address1,
             address2,
             emergencyContact1,
@@ -337,6 +340,7 @@ class EditEmployee extends Component {
         updateEmployeeData.append('joining_date',joiningDate);
         updateEmployeeData.append('mobile_no1',mobile1);
         updateEmployeeData.append('mobile_no2',mobile2);
+        updateEmployeeData.append('password', password);
         updateEmployeeData.append('address_line1', address1);
         updateEmployeeData.append('address_line2', address2);
         updateEmployeeData.append('emergency_contact1', emergencyContact1);
@@ -487,7 +491,7 @@ class EditEmployee extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status} = this.state;
+        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status} = this.state;
         // Frontend and Backend Skill Options
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
@@ -685,6 +689,20 @@ class EditEmployee extends Component {
                                                         />
                                                     </div>
                                                 </div>
+                                                    <div className="col-sm-6 col-md-4">
+                                                        <div className="form-group">
+                                                            <label className="form-label">Password</label>
+                                                            <input
+                                                                type="password"
+                                                                name="password"
+                                                                id="password"
+                                                                className="form-control"
+                                                                placeholder="Enter New Password"
+                                                                value={password}
+                                                                onChange={this.handleChange}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 <div className="col-md-12">
                                                     <div className="form-group">
                                                         <label className="form-label">Address Line 1</label>
