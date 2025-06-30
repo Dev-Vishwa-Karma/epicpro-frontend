@@ -4,6 +4,11 @@ import { breakInAction, breakDurationCalAction } from '../../../actions/settings
 class Activities extends Component {
 	constructor(props) {
 		super(props);
+		const today = new Date();
+		const yyyy = today.getFullYear();
+		const mm = String(today.getMonth() + 1).padStart(2, '0');
+		const dd = String(today.getDate()).padStart(2, '0');
+		const todayStr = `${yyyy}-${mm}-${dd}`;
 		this.state = {
 			activities: [],
 			error: null,
@@ -20,8 +25,8 @@ class Activities extends Component {
             errorMessage: "",
             showError: false,
 			ButtonLoading: false,
-			filterFromDate: "",
-			filterToDate: "",
+			filterFromDate: todayStr,
+			filterToDate: todayStr,
 		};
 	}
 
@@ -35,32 +40,7 @@ class Activities extends Component {
     };
 
 	componentDidMount() {
-		let apiUrl = '';
-
-		if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-			apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?is_timeline=true`;
-		}
-		else {
-			apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?user_id=${window.user.id}&is_timeline=true`;
-		}
-
-		fetch(apiUrl, {
-			method: "GET",
-		})
-			.then(response => response.json())
-			.then(data => {
-				if (data.status === 'success') {
-					this.setState({ activities: data.data, loading: false });
-				} else {
-					this.setState({ error: data.message, loading: false });
-				}
-			})
-			.catch(err => {
-				this.setState({ error: 'Failed to fetch data' });
-				console.error(err);
-			});
-
-		/** Get employees list */
+		// Fetch employees list
 		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
 			method: "GET",
 		})
@@ -77,7 +57,7 @@ class Activities extends Component {
 				console.error(err);
 			});
 
-		/** Get employees list */
+		// Fetch break status
 		fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=get_break_status&user_id=${window.user.id}`)
 			.then(response => response.json())
 			.then(data => {
@@ -93,6 +73,9 @@ class Activities extends Component {
 				this.setState({ error: 'Failed to fetch data' });
 				console.error(err);
 			});
+
+		// Fetch today's activities by default
+		this.handleApplyFilter();
 	}
 
 	openbreakReasonModal = () => {
@@ -350,8 +333,13 @@ class Activities extends Component {
 		const { filterFromDate, filterToDate, filterEmployeeId } = this.state;
 		let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true`;
 
-		if (filterEmployeeId) {
-			apiUrl += `&user_id=${filterEmployeeId}`;
+		// Only employee to filter their own activities
+		if (window.user.role === 'employee') {
+			apiUrl += `&user_id=${window.user.id}`;
+		} else {
+			if (filterEmployeeId) {
+				apiUrl += `&user_id=${filterEmployeeId}`;
+			}
 		}
 		if (filterFromDate) {
 			apiUrl += `&from_date=${filterFromDate}`;
@@ -441,7 +429,7 @@ class Activities extends Component {
 					<div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
 
 						{/* Filter Section */}
-						<div className='container'>
+						<div className='container-fluid'>
 							<div className="card mb-3">
 								<div className="card-body">
 									<div className="row">
