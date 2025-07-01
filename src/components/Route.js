@@ -30,9 +30,6 @@ import AppCalendar from './AppPages/AppCalendar';
 import AppContact from './AppPages/AppContact';
 import AppSetting from './AppPages/AppSetting';
 import Login from './Authentication/login';
-import ForgotPassword from './Authentication/forgotpassword';
-import NotFound from './Authentication/404';
-import InternalServer from './Authentication/500';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
 
 const Routes = [
@@ -263,27 +260,6 @@ const Routes = [
         exact: true,
         pageTitle: "Tables",
         component: Login
-    },
-    {
-        path: "/forgotpassword",
-        name: 'forgotpassword',
-        exact: true,
-        pageTitle: "Tables",
-        component: ForgotPassword
-    },
-    {
-        path: "/notfound",
-        name: 'notfound',
-        exact: true,
-        pageTitle: "Tables",
-        component: NotFound
-    },
-    {
-        path: "/internalserver",
-        name: 'internalserver',
-        exact: true,
-        pageTitle: "Tables",
-        component: InternalServer
     },
     {
         path: "/app-calendar",

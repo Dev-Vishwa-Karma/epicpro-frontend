@@ -745,11 +745,7 @@ class Report extends Component {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                // Sort reports to show most recent first
-                const sortedReports = data.data.sort((a, b) => {
-                    return new Date(b.created_at) - new Date(a.created_at);
-                });
-                
+
                 this.setState({ 
                         reports: data.data,
                         filteredReports: data.data,
@@ -880,12 +876,9 @@ class Report extends Component {
             existingActivityOutTime, 
             existingActivitySatus, 
             editReportByAdminError, 
-            selectedReport, 
             loading, 
-            report, 
             start_time, 
             todays_total_hours, 
-            note,
             break_duration_in_minutes, 
             todays_working_hours, 
             end_time, 
