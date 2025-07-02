@@ -3,9 +3,6 @@ import { connect } from 'react-redux';
 import './App.css';
 import Layout from './components/Shared/Layout';
 import Login from './components/Authentication/login';
-import ForgotPassword from './components/Authentication/forgotpassword';
-import NotFound from './components/Authentication/404';
-import InternalServer from './components/Authentication/500';
 import authService from "./components/Authentication/authService";
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 
@@ -33,6 +30,7 @@ class App extends Component {
         authService.logout();  // Remove user from localStorage
         this.setState({ user: null });
     };
+
 	render() {
 		const { user } = this.state;
 		const { darkMode, boxLayout, darkSidebar, iconColor, gradientColor, rtl, fontType } = this.props
@@ -43,24 +41,13 @@ class App extends Component {
 						<Route path="/login">
 							{user ? <Redirect to="/" /> : <Login onLogin={this.handleLogin} />}
 						</Route>
-						{/* <Route path="/login" component={Login} /> */}
-						<Route path="/forgotpassword" component={ForgotPassword} />
-						<Route path="/notfound" component={NotFound} />
-						<Route path="/internalserver" component={InternalServer} />
 						<Route path="/">
 							{user ? <Route component={Layout} /> : <Redirect to="/login" />}
 						</Route>
-						{/* <Route component={Layout} /> */}
 					</Switch>
 				</Router>
 			</div>
 		);
-		// let navHeader = this.state.visibility ? <Layout /> : <Login />;
-		// return (
-		//   <div>
-		//       {navHeader}
-		//   </div>
-		// )
 	}
 }
 const mapStateToProps = state => ({
