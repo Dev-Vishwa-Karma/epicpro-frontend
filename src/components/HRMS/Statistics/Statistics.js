@@ -368,7 +368,7 @@ class Statistics extends Component {
               <div className="loader" />
             </div>
 							) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div style={{ overflowX: 'auto',scrollbarWidth: 'thin', scrollbarColor: '#a2c4c9 #ffffff',scrollBehavior: 'smooth' }}>
               <table className="table table-bordered table-sm text-center" style={{ minWidth: '600px' }}>
                 <thead style={{backgroundColor: "#a2c4c9"}}>
                   <tr>
