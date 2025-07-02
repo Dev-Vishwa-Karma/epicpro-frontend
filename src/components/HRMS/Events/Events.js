@@ -531,7 +531,7 @@ formatDate = (date) => {
     let currentDate = new Date(startDate);
 
 	
-	while (currentDate <= today && currentDate <= endDate) {
+	while (currentDate < today && currentDate <= endDate) {
 		const dateStr = this.formatDate(currentDate);
 		
 		const hasReport = this.hasReportForDate(dateStr, workingHoursReports);

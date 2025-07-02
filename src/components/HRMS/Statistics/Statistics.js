@@ -439,7 +439,7 @@ class Statistics extends Component {
                             if(!isMissingReport){
                               leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) - (isHalfDayLeave ? 0.5 : 1);
                             }else{
-                              cellStyle = isHalfDayLeave && !isMissingReport
+                              cellStyle = isHalfDayLeave && isMissingReport
                               ? { backgroundColor: "#00ffff", color: "#000" } // Cyan for half-day
                               : { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
                                 leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) + 0.5;

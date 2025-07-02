@@ -460,13 +460,13 @@ class Employee extends Component {
     };
 
 	handleInputChangeForEditEmployeeLeave = (event) => {
-		const { name, value } = event.target;
+		const { name, value, type, checked, } = event.target;
 		this.setState((prevState) => ({
-            selectedEmployeeLeave: {
-                ...prevState.selectedEmployeeLeave,
-                [name]: value, // Dynamically update the field
-            },
-        }));
+			selectedEmployeeLeave: {
+				...prevState.selectedEmployeeLeave,
+				[name]: type === 'checkbox' ? (checked ? '1' : '0') : value,
+			},
+		}));
 	}
 
 	// API endpoint to add employee leave data
@@ -588,6 +588,7 @@ class Employee extends Component {
 		updateEmployeeLeaveData.append('to_date', selectedEmployeeLeave.to_date);
 		updateEmployeeLeaveData.append('reason', selectedEmployeeLeave.reason);
         updateEmployeeLeaveData.append('status', selectedEmployeeLeave.status);
+		updateEmployeeLeaveData.append('is_half_day', selectedEmployeeLeave.is_half_day);
 
 		// Example API call
 		fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=edit&id=${selectedEmployeeLeave.id}`, {
@@ -1124,6 +1125,7 @@ class Employee extends Component {
 																	<th>Name</th>
 																	<th>Date</th>
 																	<th>Reason</th>
+																	<th>Leave On</th>
 																	<th>Status</th>
 																	<th>Action</th>
 																</tr>
@@ -1162,6 +1164,29 @@ class Employee extends Component {
                                                                             )}
 																			</td>
 																			<td>{leave.reason}</td>
+																																														<td>
+																				<span className={
+																				`tag ${
+																					leave.is_half_day === '1'
+																					? 'tag-blue'
+																					: leave.is_half_day === '0'
+																					? 'tag-red'
+																					: ''
+																				}`
+																				}>
+																				<span className={
+																					`tag ${
+																						leave.is_half_day === '1'
+																						? 'tag-blue'
+																						: leave.is_half_day === '0'
+																						? 'tag-red'
+																						: ''
+																					}`
+																					}>
+																					{leave.is_half_day === '1' ? 'Half Day' : 'Full Day'}
+																					</span>
+																				</span>
+																			</td>
 																			<td>
 																				<span className={
 																					`tag ${
@@ -1411,6 +1436,26 @@ class Employee extends Component {
 												onChange={this.handleInputChangeForEditEmployeeLeave}
 												name="employee_id"
 											/>
+											{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
+												<div className="col-md-12">
+													<div className="form-group">
+														<label className="form-label">Select Employee</label>
+														<select 
+															name="employee_id"
+															className="form-control"
+															onChange={this.handleInputChangeForEditEmployeeLeave}
+															value={selectedEmployeeLeave?.employee_id || ""} 
+														>
+															<option value="">Select Employee</option>
+															{this.state.employeeData.map((emp) => (
+																<option key={emp.id} value={emp.id}>
+																	{emp.first_name} {emp.last_name}
+																</option>
+															))}
+														</select>
+													</div>
+												</div>
+											)}
 											<div className="col-md-6">
 												<div className="form-group">
 													<label className="form-label">From Date</label>
@@ -1477,6 +1522,21 @@ class Employee extends Component {
 															</>
 														)}
 													</select>
+												</div>
+											</div>
+											<div className="col-md-12">
+												<div className="form-group form-check">
+													<input
+														name='is_half_day'
+														className="form-check-input"
+														type="checkbox"
+														id="halfDayCheckbox"
+														checked={selectedEmployeeLeave?.is_half_day === '1'}
+														onChange={this.handleInputChangeForEditEmployeeLeave}
+													/>
+													<label className="form-label" htmlFor="halfDayCheckbox">
+														Half day
+													</label>
 												</div>
 											</div>
 										</div>

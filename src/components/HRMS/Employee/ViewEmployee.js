@@ -191,14 +191,14 @@ class ViewEmployee extends Component {
         this.getDepartments();
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        const { id, activeTab } = this.props.match.params;
-        // // Watch for tab change even if pathname is same
-        if (activeTab && activeTab !== prevState.activeTab) {
-            this.setState({ activeTab });
-        }
-    
-    }
+    // componentDidUpdate(prevProps, prevState) {
+    //     const { id, activeTab } = this.props.match.params;
+    //     // // Watch for tab change even if pathname is same
+    //     if (activeTab && activeTab !== prevState.activeTab) {
+    //          console.log('prevState.activeTab',prevState.activeTab)
+    //         this.setState({ activeTab });
+    //     }
+    // }
 
     getDepartments = () => {
         // Get department data from departments table
