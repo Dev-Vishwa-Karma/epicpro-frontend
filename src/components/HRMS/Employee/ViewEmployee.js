@@ -1492,8 +1492,8 @@ class ViewEmployee extends Component {
                                                             name="password"
                                                             id="password"
                                                             className="form-control"
-                                                            placeholder="password"
-                                                            value={employee.password || ""}
+                                                            placeholder=" Enter password"
+                                                            // value={employee.password || ""}
                                                             onChange={this.handleProfileChange}
                                                         />
                                                     </div>

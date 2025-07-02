@@ -179,14 +179,27 @@ class Dashboard extends Component {
 																		<td>
 																			<ul className="list-unstyled team-info sm margin-0 w150">
 																				{project.team_members.map((member, index) => (
-																					<li key={index} data-toggle="tooltip" data-placement="top" title={`${member.first_name} ${member.last_name}`}
-																					style={{
-																						marginLeft:"3px"
-																					}}
+																					<li key={index} data-toggle="tooltip" data-placement="top" 
+																						title={`${member.first_name} ${member.last_name}`}
+																						style={{ marginLeft: "3px" }}
 																					>
-																						<span className="avatar avatar-blue add-space">
-																							{member.first_name.charAt(0).toUpperCase()}{member.last_name.charAt(0).toUpperCase()}
-																						</span>
+																						{member.profile ? (
+																							<img 
+																								src={`${process.env.REACT_APP_API_URL}/${member.profile}`} 
+																								alt={`${member.first_name} ${member.last_name}`}
+																								className="avatar avatar-blue add-space"
+																								style={{
+																									width: '35px',
+																									height: '35px',
+																									objectFit: 'cover',
+																									borderRadius: '50%'
+																								}}
+																							/>
+																						) : (
+																							<span className="avatar avatar-blue add-space">
+																								{member.first_name.charAt(0).toUpperCase()}{member.last_name.charAt(0).toUpperCase()}
+																							</span>
+																						)}
 																					</li>
 																				))}
 																			</ul>
