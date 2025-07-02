@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
+import ActivitiesTime from '../Activities/ActivitiesTime';
 import ReactCropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 
@@ -1172,125 +1173,7 @@ class ViewEmployee extends Component {
                                         </div>
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "timeline" ? "show active" : ""}`} id="pills-timeline" role="tabpanel" aria-labelledby="pills-timeline-tab">
-                                        <div className="card">
-                                            <div className="card-header">
-                                                <h3 className="card-title">Activity</h3>
-                                            </div>
-                                            <div className="card-body">
-                                                {activities.length > 0 ? (
-                                                    activities.map((activity, index) => (
-                                                        <div key={index}>
-                                                            {/* In Time Entry */}
-                                                            {activity.activity_type === 'Break' && (
-                                                                <div className="timeline_item ">
-                                                                    <img
-                                                                        className="tl_avatar"
-                                                                        src="../assets/images/xs/avatar1.jpg"
-                                                                        alt="fake_url"
-                                                                    />
-                                                                    <span>
-                                                                        <a>{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
-                                                                        <small className="float-right text-right">
-                                                                            {activity.in_time}
-                                                                        </small>
-                                                                    </span>
-                                                                    <h6 className="font600">
-                                                                        (Break In) {activity.description}
-                                                                    </h6>
-
-                                                                    <div className="msg">
-                                                                        {activity.created_by && (
-                                                                            <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Created by System Admin</a>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {/* Out Time Entry */}
-                                                            {activity.activity_type === 'Break' && activity.out_time && (
-                                                                <>
-                                                                    <div className="timeline_item ">
-                                                                        <img
-                                                                            className="tl_avatar"
-                                                                            src="../assets/images/xs/avatar1.jpg"
-                                                                            alt="fake_url"
-                                                                        />
-                                                                        <span>
-                                                                            <a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
-                                                                            <small className="float-right text-right">
-                                                                                {activity.out_time}
-                                                                            </small>
-                                                                        </span>
-                                                                        <h6 className="font600">
-                                                                            Break out
-                                                                        </h6>
-                                                                        <div className="msg">
-                                                                            {activity.updated_by && (
-                                                                                <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Edited by System Admin</a>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                </>
-                                                            )}
-
-                                                            {/* In Time Entry Punch */}
-                                                            {activity.activity_type === 'Punch' && (
-                                                                <div className="timeline_item ">
-                                                                    <img
-                                                                        className="tl_avatar"
-                                                                        src="../assets/images/xs/avatar1.jpg"
-                                                                        alt="fake_url"
-                                                                    />
-                                                                    <span>
-                                                                        <a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
-                                                                        <small className="float-right text-right">
-                                                                            {activity.in_time}
-                                                                        </small>
-                                                                    </span>
-                                                                    <h6 className="font600">
-                                                                        has started his day
-                                                                    </h6>
-
-                                                                    <div className="msg">
-                                                                        {activity.created_by && (
-                                                                            <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Created by System Admin</a>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {/* Out Time Entry */}
-                                                            {activity.activity_type === 'Punch' && activity.out_time && (
-                                                                <>
-                                                                    <div className="timeline_item ">
-                                                                        <img
-                                                                            className="tl_avatar"
-                                                                            src="../assets/images/xs/avatar1.jpg"
-                                                                            alt="fake_url"
-                                                                        />
-                                                                        <span>
-                                                                            <a href="#">{activity.first_name} {activity.last_name}</a> {/* {activity.location} */}
-                                                                            <small className="float-right text-right">
-                                                                                {activity.out_time}
-                                                                            </small>
-                                                                        </span>
-                                                                        <h6 className="font600">
-                                                                            has ended his day
-                                                                        </h6>
-                                                                        <div className="msg">
-                                                                            {activity.updated_by && (
-                                                                                <a className="mr-20 text-muted"><i className="fa fa-user text-pink"></i> Edited by System Admin</a>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    // errorMessage && <p>{errorMessage}</p>
-                                                    <div className="text-muted py-4">activities not found</div>
-                                                )}
-                                            </div>
-                                        </div>
+                                        <ActivitiesTime viewMode={false} viewModeOne={true} employeeId={this.state.employeeId} />
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "profile" ? "show active" : ""}`} id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
                                         <div className="card">

@@ -310,6 +310,9 @@ class TodoList extends Component {
                                                             {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                 <button type="button" className="btn btn-info btn-sm" data-toggle="modal" data-target="#addTodoModal">Add New</button>
                                                             )}
+                                                            {(logged_in_employee_role === "employee") && (
+                                                                <p className="w150">Task</p>
+                                                            )}
                                                         </th>
                                                         <th className="w150 text-right">Due</th>
                                                         <th className="w100">Priority</th>
