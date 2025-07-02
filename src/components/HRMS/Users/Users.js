@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
+let searchTimeout = null;
+
 class Users extends Component {
 	constructor(props) {
 		super(props);
@@ -411,26 +413,55 @@ class Users extends Component {
         }
     };
 
-	// Add searching user by name and email
 	handleSearch = (event) => {
-        const query = event.target.value.toLowerCase(); // Get search input
-        this.setState({ searchUser: query }, () => {
-			if (query === "") {
-				// If search is empty, reset users to the original list
-				this.setState({ users: this.state.allUsers, currentPage: 1 });
-			} else {
-				const filtered = this.state.allUsers.filter(user => {
-					return (
-						user.first_name.toLowerCase().includes(query) ||
-						user.last_name.toLowerCase().includes(query) ||
-						`${user.first_name.toLowerCase()} ${user.last_name.toLowerCase()}`.includes(query) ||  
-						user.email.toLowerCase().includes(query)
-					);
+		const query = event.target.value;
+		this.setState({ searchUser: query });
+
+		// Clear previous timeout
+		if (this.searchTimeout) clearTimeout(this.searchTimeout);
+
+		this.searchTimeout = setTimeout(() => {
+			const { searchUser } = this.state;
+			const searchParam = searchUser.trim();
+			
+			// If search is empty, fetch all admins (or whatever default you want)
+			const url = `${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=admin&search=${encodeURIComponent(searchParam)}`;
+
+			this.setState({ loading: true });
+
+			fetch(url, { method: "GET" })
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					return response.json();
+				})
+				.then(data => {
+					if (data.status === 'success') {
+						this.setState({
+							users: data.data,
+							allUsers: data.data,
+							currentPage: 1,
+							loading: false
+						});
+					} else {
+						this.setState({ 
+							users: [], 
+							loading: false,
+							error: data.message || 'No results found'
+						});
+					}
+				})
+				.catch(err => {
+					this.setState({ 
+						users: [], 
+						loading: false,
+						error: 'Failed to perform search. Please try again.'
+					});
+					console.error('Search error:', err);
 				});
-				this.setState({ users: filtered, currentPage: 1 });
-			}
-        });
-    };
+			}, 500);
+	};
 
 	// Render function for success and error messages
     renderAlertMessages = () => {

@@ -212,6 +212,9 @@ class AddEmployee extends Component {
     if (!joiningDate || joiningDate.trim() === "") {
       errors.joiningDate = "Joining Date is required.";
     }
+    if (!Number.isInteger(Number(visibilityPriority)) || Number(visibilityPriority) < 0) {
+      errors.visibilityPriority = "Visibility Priority must valid integer.";
+    }
     // Show errors if any
     if (Object.keys(errors).length > 0) {
       this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false });
@@ -1179,22 +1182,22 @@ class AddEmployee extends Component {
                         {/* Visible status */}
                         <div className="col-md-6">
                           <div className="form-group">
-                            <label className="form-label">
-                              Visibility Priority
-                            </label>
-                            <select
-                              className="form-control show-tick"
-                              value={visibilityPriority}
-                              onChange={this.handleChange}
-                              name="visibilityPriority"
-                            >
-                              {[...Array(11)].map((_, i) => (
-                                <option key={i} value={i}>
-                                  {i}
-                                </option>
-                              ))}
-                            </select>
+                                <label className="form-label">
+                                  Visibility Priority
+                                </label>
+                                <input
+                                  type="text"
+                                  name="visibilityPriority"
+                                  id="visibilityPriority"
+                                  className={`form-control${this.state.errors.visibilityPriority ? ' is-invalid' : ''}`}
+                                  value={visibilityPriority}
+                                  onChange={this.handleChange}
+                                />
+                                {this.state.errors.visibilityPriority && (
+                                  <div className="invalid-feedback d-block">{this.state.errors.visibilityPriority}</div>
+                                )}
                           </div>
+                       
                         </div>
                         {/* Visible statistics status */}
                            <div className="col-md-6">

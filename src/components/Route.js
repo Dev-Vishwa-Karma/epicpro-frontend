@@ -201,7 +201,7 @@ const Routes = [
         name: 'project-todo',
         exact: true,
         pageTitle: "Todo List",
-        roles: ['admin', 'super_admin'],
+        roles: ['admin', 'super_admin', 'employee'],
         component: TodoList
     },
 

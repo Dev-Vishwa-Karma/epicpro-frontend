@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
+import ReactCropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
 
 class ViewEmployee extends Component {
     constructor(props) {
@@ -46,9 +48,12 @@ class ViewEmployee extends Component {
             selectedReport: null,
             alternateSatudays: [],
             openFileSelectModel: false,
-            images: [],        
+            images: [],   
+            showGallery: true,
+            croppperPreviewImage: null,
+            profileImage: null
         };
-
+        this.cropperRef = React.createRef();
         localStorage.removeItem('empId');
         localStorage.removeItem('startDate');
         localStorage.removeItem('eventStartDate');
@@ -57,7 +62,38 @@ class ViewEmployee extends Component {
         localStorage.removeItem('defaultView');
     }
 
+    toDataURL = async (url) => {
+        console.log(
+            
+        );
+        
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=view_image&img=${url}`);
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    };
+
+    blobToFile = (blob, fileName) => {
+    return new File([blob], fileName, {
+        type: blob.type,
+        lastModified: Date.now()
+    });
+    };
+
     handleFileChange = async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            this.setState({ croppperPreviewImage: reader.result });
+            this.saveCroppedImage();
+            
+        };
+        reader.readAsDataURL(file);
+        }
         try {
             const file = event.target.files[0];
             const uploadImageData = new FormData();
@@ -69,8 +105,41 @@ class ViewEmployee extends Component {
             });
             const data = await response.json();
             if (data.status === "success") {
-                const profileImagePath = data.data[0].url.replace(/\\/g, '/');
                 const updatedImages = [...this.state.images, ...data.data];
+                const sortedImages = this.sortImages(updatedImages, 'desc');
+                this.setState({
+                    images: sortedImages,
+                    successMessage: "",
+                    showSuccess: false,
+                    errorMessage: "",
+                    showError: false
+                });
+            }
+        } catch (error) {
+            console.error("Error uploading the image in gallery: ", error);
+
+        }
+    }
+
+    saveCroppedImage = () => {
+        this.setState({ showGallery: false});
+    };
+
+    handleSave = async () => {
+        const croppedImage = this.cropper.getCroppedCanvas().toDataURL();
+        try {
+            const uploadImageData = new FormData();
+            uploadImageData.append('employee_id', this.state.employeeId);
+            uploadImageData.append('created_by', window.user.id);
+            uploadImageData.append('image', croppedImage);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=profile-update`, {
+                method: 'POST', body: uploadImageData
+            });
+            const data = await response.json();
+            if (data.status === "success") {
+                const profileImagePath = data.data.url.replace(/\\/g, '/');
+                console.log('data.data',data.data)
+                const updatedImages = [...this.state.images];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
                 this.setState({
                     previewImage: `${process.env.REACT_APP_API_URL}/${profileImagePath}`,
@@ -79,57 +148,17 @@ class ViewEmployee extends Component {
                     showSuccess: true,
                     errorMessage: "",
                     showError: false,
-                    openFileSelectModel: false 
+                    openFileSelectModel: false,
+                    showGallery: true
                 });
                 setTimeout(this.dismissMessages, 3000);
-            }
-        } catch (error) {
-            console.error("Error uploading the image in gallery: ", error);
-
-        }
-    }
-
-    handleSave = async () => {
-
-        try {
-            const { id, role } = window.user;
-            const { employeeId } = this.state;
-            const formData = new FormData();
-            formData.append("employee_id", employeeId);
-            formData.append("logged_in_employee_id", id);
-            formData.append('logged_in_employee_role', role); // Logged-in employee role
-            formData.append("profileUrl", this.state.selectedImage);
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=edit&user_id=${employeeId}`, {
-                method: "POST",
-                body: formData,
-            })
-            const data = await response.json();
-            if (data.status === "success") {
-                // Correct the image path and set the previewImage state
-                const profileImagePath = data.data.profile.replace(/\\/g, '/');
-
-                // Update the previewImage state correctly
-                this.setState((prevState) => ({
-                    previewImage: `${process.env.REACT_APP_API_URL}/${profileImagePath}`,
-                    employee: {
-                        ...prevState.employee,
-                        profile: profileImagePath // Update the profile in employee data
-                    },
-                    successMessage: "Image uploaded successfully!",
-                    showSuccess: true,
-                    errorMessage: "",
-                    showError: false,
-                    selectedImage: null
-                }));
-                setTimeout(this.dismissMessages, 3000);
-            } else {
+            } else{
                 this.setState({
-                    errorMessage: "Image upload failed!",
+                    errorMessage: "An error occurred while uploading the image. Check your image size",
                     showError: true,
                     showSuccess: false,
-                });
+            });
             }
-            this.setState({ openFileSelectModel: false });
             document.body.style.overflow = 'auto';
         } catch (error) {
             console.error("Error uploading image:", error);
@@ -162,14 +191,14 @@ class ViewEmployee extends Component {
         this.getDepartments();
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        const { id, activeTab } = this.props.match.params;
-        // // Watch for tab change even if pathname is same
-        if (activeTab && activeTab !== prevState.activeTab) {
-            this.setState({ activeTab });
-        }
-    
-    }
+    // componentDidUpdate(prevProps, prevState) {
+    //     const { id, activeTab } = this.props.match.params;
+    //     // // Watch for tab change even if pathname is same
+    //     if (activeTab && activeTab !== prevState.activeTab) {
+    //          console.log('prevState.activeTab',prevState.activeTab)
+    //         this.setState({ activeTab });
+    //     }
+    // }
 
     getDepartments = () => {
         // Get department data from departments table
@@ -867,7 +896,7 @@ class ViewEmployee extends Component {
 
     render() {
         const { fixNavbar} = this.props;
-        const {employee, activities, errorMessage, calendarEventsData, openFileSelectModel, skillsFrontend, skillsBackend} = this.state;
+        const {employee, activities, errorMessage, calendarEventsData, openFileSelectModel, skillsFrontend, skillsBackend, showGallery} = this.state;
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
         // Handle case where employee data is not available
@@ -1463,8 +1492,8 @@ class ViewEmployee extends Component {
                                                             name="password"
                                                             id="password"
                                                             className="form-control"
-                                                            placeholder="password"
-                                                            value={employee.password || ""}
+                                                            placeholder=" Enter password"
+                                                            // value={employee.password || ""}
                                                             onChange={this.handleProfileChange}
                                                         />
                                                     </div>
@@ -1861,121 +1890,164 @@ class ViewEmployee extends Component {
                     </div>
                 </div>
                 {openFileSelectModel && (
-                <div
-    className="modal fade show d-block"
-    id="birthdayBannerModal"
-    tabIndex="-1"
-    role="dialog"
-    style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
->
-    <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '650px' }}>
-        <div className="modal-content rounded-3" style={{
-							maxHeight: '90vh',
-							display: 'flex',
-							flexDirection: 'column'
-						}}>
-            {/* Modal Header */}
-            <div className="modal-header border-b-2 pb-0">
-                <h5 className="modal-title w-100 text-center fw-bold fs-5 text-dark">
-                    Select Your Profile Picture
-                </h5>
-                <div 
-                    className="btn btn-close" 
+                    <div
+                        className="modal fade show d-block"
+                        id="birthdayBannerModal"
+                        tabIndex="-1"
+                        role="dialog"
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+                    >
+                        <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '650px' }}>
+                            <div className="modal-content rounded-3" style={{
+                                maxHeight: '90vh',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                {/* Modal Header */}
+                                <div className="modal-header border-b-2 pb-0">
+                                    <h5 className="modal-title w-100 text-center fw-bold fs-5 text-dark">
+                                        {!showGallery ? "Crop" : "Select"} Your Profile Picture
+                                    </h5>
+                                    <div 
+                                        className="btn btn-close" 
                                         onClick={() => {
-                                            this.setState({ openFileSelectModel: false });
-                                             document.body.style.overflow = 'auto';
-                                            
-                                        } 
-                }
-                    aria-label="Close"
-                >
-                    <i className="fa fa-times" data-toggle="tooltip" title="fa fa-times"></i>
-                </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="modal-body py-4" style={{
-								overflowY: 'auto',
-								flex: '1 1 auto'
-							}}>
-                <div className="mb-3">
-                    <p className="text-muted text-center mb-4">
-                        Choose from existing images or upload a new one
-                    </p>
-                    
-                    <div className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start">
-                        {this.state.images.map((image, index) => (
-                            <div key={index} className="position-relative cursor-pointer mr-2">
-                                <label className="d-block mb-0 pointer">
-                                    <input 
-                                        name="imagecheck" 
-                                        type="radio" 
-                                        value={image.url} 
-                                        className="d-none" 
-                                        onChange={() => this.setState({ selectedImage: image.url })}
-                                    />
-                                    <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
-                                        <img 
-                                            src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
-                                            alt="Profile option" 
-                                            className="img-fluid rounded-1" 
-                                            style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                                        />
-                                    </div>
-                                </label>
-                            </div>
-                        ))}
-                        
-                        <label className="cursor-pointer">
-                            <div className="border rounded-2 mt-1 ml-1 border-dashed hover-bg-light">
-                                <div 
-                                    style={{
-                                        width: '80px',
-                                        height: '80px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: '#6c757d'
-                                    }}
-                                >
-                                    <i className="fe fe-plus fs-4" />
-                                </div>
-                                <input 
-                                    type="file" 
-                                    className="d-none" 
-                                    accept="image/*"
-                                    onChange={this.handleFileChange}
-                                />
-                            </div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="modal-footer border-b-2 pt-2 d-flex justify-content-end">
-                <button
-                    className="btn btn-outline-secondary me-3 px-4"
-                                        onClick={() => {
-                                            this.setState({ openFileSelectModel: false })
-                                             document.body.style.overflow = 'auto';
-                                        
+                                            this.setState({ openFileSelectModel: false,showGallery:true });
+                                            document.body.style.overflow = 'auto';
                                         }}
-                >
-                    Cancel
-                </button>
-                <button
-                    className="btn btn-primary px-4"
-                    onClick={this.handleSave}
-                    disabled={!this.state.selectedImage}
-                >
-                    Save Changes
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-				)}
+                                        aria-label="Close"
+                                    >
+                                        <i className="fa fa-times" data-toggle="tooltip" title="fa fa-times"></i>
+                                    </div>
+                                </div>
+
+                                {/* Modal Body */}
+                                <div className="modal-body py-4" style={{
+                                    overflowY: 'auto',
+                                    flex: '1 1 auto',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <div className="mb-3 w-100">
+                                        <p className="text-muted text-center mb-4">
+                                            {!showGallery ? "Crop your profile image" : "Choose from existing images or upload a new one"}
+                                        </p>
+
+                                        {!showGallery && (
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                minHeight: '400px'
+                                            }}>
+                                                <div style={{ width: '400px', height: '400px' }}>
+                                                    {this.state.croppperPreviewImage && (
+                                                        <ReactCropper
+                                                            ref={(cropper) => (this.cropper = cropper)}
+                                                            src={this.state.croppperPreviewImage}
+                                                            style={{ height: 400, width: '100%' }}
+                                                            aspectRatio={1}
+                                                            guides={false}
+                                                            scalable={false}
+                                                            checkCrossOrigin={false}
+                                                            crossOrigin="anonymous" 
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {showGallery && (
+                                            <div className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start">
+                                                {this.state.images.map((image, index) => (
+                                                    <div key={index} className="position-relative cursor-pointer mr-2">
+                                                        <label className="d-block mb-0 pointer">
+                                                            <input 
+                                                                name="imagecheck" 
+                                                                type="radio" 
+                                                                value={image.url} 
+                                                                className="d-none" 
+                                                                onChange={async () => {
+                                                                    const imageUrl = process.env.REACT_APP_API_URL + '/' + image.url;
+                                                                    const dataUrl = await this.toDataURL(imageUrl);
+                                                                    this.setState({
+                                                                        selectedImage: image.url,
+                                                                        croppperPreviewImage: dataUrl
+                                                                    });
+                                                                }}
+                                                            />
+                                                            <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
+                                                                <img 
+                                                                    src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
+                                                                    alt="Profile option" 
+                                                                    className="img-fluid rounded-1" 
+                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                                                />
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                                
+                                                <label className="cursor-pointer">
+                                                    <div className="border rounded-2 mt-1 ml-1 border-dashed hover-bg-light">
+                                                        <div 
+                                                            style={{
+                                                                width: '80px',
+                                                                height: '80px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                color: '#6c757d'
+                                                            }}
+                                                        >
+                                                            <i className="fe fe-plus fs-4" />
+                                                        </div>
+                                                        <input 
+                                                            type="file" 
+                                                            className="d-none" 
+                                                            accept="image/*"
+                                                            onChange={this.handleFileChange}
+                                                        />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Modal Footer */}
+                                <div className="modal-footer border-b-2 pt-2 d-flex justify-content-end">
+                                    <button
+                                        className="btn btn-outline-secondary me-3 px-4"
+                                        onClick={() => {
+                                            this.setState({ openFileSelectModel: false,showGallery:true });
+                                            document.body.style.overflow = 'auto';
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    {showGallery && (
+                                        <button
+                                            className="btn btn-primary px-4"
+                                            onClick={this.saveCroppedImage}
+                                            disabled={!this.state.selectedImage}
+                                        >
+                                            Next
+                                        </button>
+                                    )}
+                                    {!showGallery && (
+                                        <button
+                                            className="btn btn-primary px-4"
+                                            onClick={this.handleSave}
+                                        >
+                                            Save Changes
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </>
         )
     }
