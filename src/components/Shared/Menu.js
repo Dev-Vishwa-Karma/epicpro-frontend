@@ -237,6 +237,11 @@ class Menu extends Component {
 						"label": "Gallery",
 						"to": "/gallery",
 					},
+					{
+						"id": 20,
+						"label": "Todo List",
+						"to": "/project-todo"
+					}
 				]
 			},
 			

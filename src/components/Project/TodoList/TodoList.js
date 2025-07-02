@@ -286,7 +286,13 @@ class TodoList extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, selectedEmployeeId, employees } = this.state;
+        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees } = this.state;
+
+        // Filter todos: employees see only their own, admins see all
+        const visibleTodos = (logged_in_employee_role === "employee")
+            ? todos.filter(todo => String(todo.employee_id) === String(logged_in_employee_id))
+            : todos;
+
         return (
             <>
                 {this.renderAlertMessages()} {/* Show Toast Messages */}
@@ -301,7 +307,9 @@ class TodoList extends Component {
                                                 <thead>
                                                     <tr>
                                                         <th>
-                                                            <button type="button" className="btn btn-info btn-sm" data-toggle="modal" data-target="#addTodoModal">Add New</button>
+                                                            {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                                                <button type="button" className="btn btn-info btn-sm" data-toggle="modal" data-target="#addTodoModal">Add New</button>
+                                                            )}
                                                         </th>
                                                         <th className="w150 text-right">Due</th>
                                                         <th className="w100">Priority</th>
@@ -321,8 +329,8 @@ class TodoList extends Component {
                                                     </tbody>
                                                 ) : (
                                                     <tbody>
-                                                        {todos && todos.length > 0 ? (
-                                                            todos.map((todo, index) => (
+                                                        {visibleTodos && visibleTodos.length > 0 ? (
+                                                            visibleTodos.map((todo, index) => (
                                                                 <tr key={index+1}>
                                                                     <td>
                                                                         <label className="custom-control custom-checkbox">
@@ -380,22 +388,7 @@ class TodoList extends Component {
                                                                                     borderRadius: '50%', 
                                                                                     objectFit: 'cover'
                                                                                 }}
-                                                                                onError={(e) => {
-                                                                                    e.target.style.display = 'none';
-                                                                                    const initialsSpan = document.createElement('span');
-                                                                                    initialsSpan.className = 'avatar avatar-blue add-space';
-                                                                                    initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                                                                    initialsSpan.setAttribute('data-placement', 'top');
-                                                                                    initialsSpan.setAttribute('title', `${todo.first_name} ${todo.last_name}`);
-                                                                                    initialsSpan.style.display = 'inline-flex';
-                                                                                    initialsSpan.style.alignItems = 'center';
-                                                                                    initialsSpan.style.justifyContent = 'center';
-                                                                                    initialsSpan.style.width = '40px';
-                                                                                    initialsSpan.style.height = '40px';
-                                                                                    initialsSpan.textContent = 
-                                                                                    `${todo.first_name.charAt(0).toUpperCase()}${todo.last_name.charAt(0).toUpperCase()}`;
-                                                                                    e.target.parentNode.appendChild(initialsSpan);
-                                                                                }}
+                                                                                
                                                                             />
                                                                         ) : (
                                                                             <span

@@ -194,16 +194,6 @@ class Dashboard extends Component {
 																									objectFit: 'cover',
 																									borderRadius: '50%'
 																								}}
-																								onError={(e) => {
-																									e.target.onerror = null;
-																									e.target.style.display = 'none';
-																									// This will display default avatar
-																									e.target.parentNode.innerHTML = `
-																										<span class="avatar avatar-blue add-space">
-																											${member.first_name.charAt(0).toUpperCase()}${member.last_name.charAt(0).toUpperCase()}
-																										</span>
-																									`;
-																								}}
 																							/>
 																						) : (
 																							<span className="avatar avatar-blue add-space">
