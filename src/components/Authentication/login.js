@@ -63,7 +63,7 @@ export default class Login extends Component {
 		formData.append('password', password);
 
 		// API call to add break
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=check-login`, {
+		fetch(`${process.env.REACT_APP_API_URL}/login.php?action=check-login`, {
 			method: "POST",
 			body: formData,
 		})
