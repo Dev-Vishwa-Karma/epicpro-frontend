@@ -103,7 +103,6 @@ class ViewEmployee extends Component {
             const data = await response.json();
             if (data.status === "success") {
                 const profileImagePath = data.data.url.replace(/\\/g, '/');
-                console.log('data.data',data.data)
                 const updatedImages = [...this.state.images];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
                 this.setState({
