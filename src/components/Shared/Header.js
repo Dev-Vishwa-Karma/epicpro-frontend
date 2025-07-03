@@ -804,9 +804,10 @@ class Header extends Component {
                       <i className="fa fa-user" />
                     </a>
                     <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                    {(window.user.role !== "employee") && (
                       <NavLink
                         to={{
-                          pathname: `/view-employee/${userId}/profile`,
+                          pathname: `/view-employee/${userId}`,
                         }}
                         className={`dropdown-item ${
                           currentTab === "profile" ? "active" : ""
@@ -817,6 +818,22 @@ class Header extends Component {
                       >
                         <i className="dropdown-icon fe fe-user" /> Profile
                       </NavLink>
+                    )}
+                        {(window.user.role === "employee") && (
+                        <NavLink
+                          to={{
+                            pathname: `/view-employee/${userId}/profile`,
+                          }}
+                          className={`dropdown-item ${
+                            currentTab === "profile" ? "active" : ""
+                          }`}
+                          isActive={(match, location) =>
+                            location?.state?.tab === "profile"
+                          }
+                        >
+                          <i className="dropdown-icon fe fe-user" /> Profile
+                        </NavLink>                        
+                        )}
                         {(window.user.role === "employee") && (
                           <NavLink
                             to={{

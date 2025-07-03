@@ -98,6 +98,15 @@ const Routes = [
         component: ViewEmployee
     },
     {
+        path: "/view-employee/:id",
+        name: 'view-employee',
+        exact: true,
+        pageTitle: "View Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: ViewEmployee
+    },
+    {
         path: "/hr-holidays",
         name: 'holidays',
         exact: true,

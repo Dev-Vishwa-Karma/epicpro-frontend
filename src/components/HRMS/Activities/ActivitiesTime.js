@@ -42,7 +42,7 @@ class ActivitiesTime extends Component {
 
     componentDidMount() {
         // Fetch employees list
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
+        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
         method: "GET",
         })
         .then(response => response.json())
@@ -79,6 +79,15 @@ class ActivitiesTime extends Component {
 
         // Fetch today's activities by default
         this.handleApplyFilter();
+    }
+
+    componentDidUpdate(prevProps)
+    {
+        if (prevProps.selectedEmployeeId != this.props.selectedEmployeeId) {
+            if (this.props.selectedEmployeeId) {
+                this.handleApplyFilter();
+            }
+        }
     }
 
     openbreakReasonModal = () => {
@@ -322,10 +331,10 @@ class ActivitiesTime extends Component {
         const { filterFromDate, filterToDate, filterEmployeeId } = this.state;
         let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true`;
 
-        if (this.props.viewMode && this.props.employeeId) {
-        apiUrl += `&user_id=${this.props.employeeId}`;
+        if (!this.props.viewMode && this.props.selectedEmployeeId) {
+            apiUrl += `&user_id=${this.props.selectedEmployeeId}`;
         } else if (window.user.role === 'employee') {
-        apiUrl += `&user_id=${window.user.id}`;
+            apiUrl += `&user_id=${window.user.id}`;
         } else {
         if (filterEmployeeId) {
             apiUrl += `&user_id=${filterEmployeeId}`;
@@ -414,7 +423,7 @@ class ActivitiesTime extends Component {
             {this.renderAlertMessages()}
             <>
             {/* Filter Section */}
-            {!viewMode && (
+            {/* {!viewMode && ( */}
                 <div className='container-fluid'>
                 <div className="card mb-3">
                     <div className="card-body">
@@ -437,7 +446,7 @@ class ActivitiesTime extends Component {
                             onChange={(e) => this.setState({ filterToDate: e.target.value })}
                         />
                         </div>
-                        {(window.user.role === "admin" || window.user.role === "super_admin") && (
+                        {(this.props.viewMode && (window.user.role === "admin" || window.user.role === "super_admin")) && (
                         <div className="col-md-3">
                             <label>Employee</label>
                             <select
@@ -475,7 +484,7 @@ class ActivitiesTime extends Component {
                     </div>
                 </div>
                 </div>
-            )}
+            {/* )} */}
                                         
             <div className="container-fluid">
                 <div className="row clearfix">
@@ -694,7 +703,7 @@ class ActivitiesTime extends Component {
             </>
 
             {/* Add Break Modal */}
-            {!viewMode && window.user.role !== 'employee' && (
+            {viewMode && window.user.role !== 'employee' && (
             <div className="modal fade" id="addBreakModal" tabIndex={-1} role="dialog" aria-labelledby="addBreakModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                 <div className="modal-dialog" role="dialog">
                 <div className={`modal-content ${loading ? 'dimmer active' : 'dimmer'}`}>
