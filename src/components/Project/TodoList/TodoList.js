@@ -7,6 +7,8 @@ class TodoList extends Component {
 		this.state = {
 			todos: [],
             employees: [],
+            showOverdueModal: false,
+            selectedTodo: null,
 			showAddTodoModal: false,
             selectedEmployeeId: '',
 			logged_in_employee_id: null,
@@ -216,6 +218,26 @@ class TodoList extends Component {
         });
     };
 
+    handleCheckboxClick = (todo) => {
+        if (this.state.logged_in_employee_role === 'employee') {
+            if (todo.todoStatus === 'completed') {
+                // If todo is completed, unchecking will set to pending
+                this.setState({ 
+                    showOverdueModal: true, 
+                    selectedTodo: todo,
+                    isUnchecking: true 
+                });
+            } else {
+                // If todo is not completed, checking will set to completed
+                this.setState({ 
+                    showOverdueModal: true, 
+                    selectedTodo: todo,
+                    isUnchecking: false 
+                });
+            }
+        }
+    };
+
     // Reset form errors when modal is closed
     resetFormErrors = () => {
         this.setState({
@@ -284,6 +306,72 @@ class TodoList extends Component {
         );
     };
 
+    closeModal = () => {
+        this.setState({ showOverdueModal: false, selectedTodo: null });
+    };
+
+    handleUpdateTodo = () => {
+        const { selectedTodo, logged_in_employee_id, isUnchecking } = this.state;
+        if (!selectedTodo) return;
+
+        const newStatus = isUnchecking ? 'pending' : 'completed';
+        const successMessage = isUnchecking 
+            ? 'Todo status changed to pending!' 
+            : 'Todo marked as completed!';
+
+        const formData = new FormData();
+        formData.append('id', selectedTodo.id);
+        formData.append('status', newStatus);
+        formData.append('logged_in_employee_id', logged_in_employee_id);
+
+        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=update`, {
+            method: "POST",
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                this.setState(prevState => ({
+                    todos: prevState.todos.map(todo =>
+                        todo.id === selectedTodo.id
+                            ? { ...todo, todoStatus: newStatus }
+                            : todo
+                    ),
+                    showOverdueModal: false,
+                    selectedTodo: null,
+                    isUnchecking: false,
+                    successMessage: successMessage,
+                    showSuccess: true
+                }));
+                
+                setTimeout(() => {
+                    this.setState({
+                        showSuccess: false,
+                        successMessage: ''
+                    });
+                }, 3000);
+            } else {
+                this.setState({ 
+                    showError: true, 
+                    errorMessage: 'Failed to update todo status',
+                    showOverdueModal: false, 
+                    selectedTodo: null,
+                    isUnchecking: false
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            this.setState({ 
+                showError: true, 
+                errorMessage: 'An error occurred while updating the todo',
+                showOverdueModal: false, 
+                selectedTodo: null,
+                isUnchecking: false
+            });
+        });
+    };
+
     render() {
         const { fixNavbar } = this.props;
         const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees } = this.state;
@@ -334,10 +422,20 @@ class TodoList extends Component {
                                                     <tbody>
                                                         {visibleTodos && visibleTodos.length > 0 ? (
                                                             visibleTodos.map((todo, index) => (
-                                                                <tr key={index+1}>
+                                                                <tr key={index+1} style={
+                                                                    (logged_in_employee_role !== 'employee' && todo.hidden_for_employee)
+                                                                        ? { textDecoration: 'line-through', opacity: 0.6 }
+                                                                        : {}
+                                                                }>
                                                                     <td>
                                                                         <label className="custom-control custom-checkbox">
-                                                                            <input type="checkbox" className="custom-control-input" name="example-checkbox1" defaultValue="option1" /* defaultChecked */ />
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                className="custom-control-input"
+                                                                                name="example-checkbox1"
+                                                                                checked={todo.todoStatus === 'completed'}
+                                                                                onChange={() => this.handleCheckboxClick(todo)}
+                                                                            />
                                                                             <span className="custom-control-label">{todo.title}</span>
                                                                         </label>
                                                                     </td>
@@ -556,6 +654,38 @@ class TodoList extends Component {
                         </div>
                     </div>
                 </div>
+
+                {/* Overdue Modal */}
+                {this.state.showOverdueModal && (
+                    <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
+                        <div className="modal-dialog" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header" style={{ display: 'none' }}>
+                                    <button type="button" className="close" onClick={this.closeModal}>
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="row clearfix">
+                                        <p>
+                                            {this.state.isUnchecking 
+                                                ? "Do you want to mark this task as pending?"
+                                                : "Do you want to mark this task as completed?"}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={this.closeModal}>
+                                        Cancel
+                                    </button>
+                                    <button type="button" className="btn btn-danger" onClick={this.handleUpdateTodo}>
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </>
         )
     }

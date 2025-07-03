@@ -513,7 +513,7 @@ class ActivitiesTime extends Component {
                             activities.map((activity, index) => {
                             const profilePic = activity.profile
                                 ? `${process.env.REACT_APP_API_URL}/${activity.profile}`
-                                : "../assets/images/xs/avatar1.jpg";
+                                : null;
                             // Date Seperation
                             let showSeparator = false;
                             function getDateStr(activity) {
