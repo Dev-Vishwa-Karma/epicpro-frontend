@@ -71,7 +71,6 @@ class CalendarWithTabs extends Component {
             })
             this.setState({ activeTab: this.props.activeTab })
             if (this.props.employeeId) {
-                console.log("this.props.employeeId", this.props.employeeId);
                 this.fetchEmployeeDetails(this.props.employeeId);
                 this.getDepartments();
             }
