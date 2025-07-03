@@ -584,11 +584,66 @@ class ActivitiesTime extends Component {
                                 {/* In Time Entry */}
                                 {activity.type === 'Break_in' && (
                                     <div className="timeline_item ">
-                                    <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
                                     />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                     <span>
                                         <a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>
@@ -611,11 +666,66 @@ class ActivitiesTime extends Component {
                                 {activity.type === 'Break_out' && (
                                     <>
                                     <div className="timeline_item ">
-                                        <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
-                                        />
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
+                                    />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                         <span>
                                         <a style={{fontWeight:"800"}} href="#">{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>
@@ -636,11 +746,66 @@ class ActivitiesTime extends Component {
                                 {/* In Time Entry Punch */}
                                 {activity.type === 'Punch_in' && (
                                     <div className="timeline_item ">
-                                    <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
                                     />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                     <span>
                                         <a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>
@@ -659,11 +824,66 @@ class ActivitiesTime extends Component {
                                 {/* Out Time Entry */}
                                 {activity.type === 'Punch_out' && (
                                     <div className="timeline_item ">
-                                    <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
                                     />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                     <span>
                                         <a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>

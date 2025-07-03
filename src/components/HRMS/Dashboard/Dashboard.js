@@ -194,6 +194,16 @@ class Dashboard extends Component {
 																									objectFit: 'cover',
 																									borderRadius: '50%'
 																								}}
+																								onError={(e) => {
+																									e.target.style.display = 'none';
+																									const initialsSpan = document.createElement('span');
+																									initialsSpan.className = 'avatar avatar-blue add-space';
+																									initialsSpan.setAttribute('data-toggle', 'tooltip');
+																									initialsSpan.setAttribute('data-placement', 'top');
+																									initialsSpan.setAttribute('title', `${member.first_name} ${member.last_name}`);
+																									initialsSpan.textContent = `${member.first_name.charAt(0).toUpperCase()}${member.last_name.charAt(0).toUpperCase()}`;
+																									e.target.parentNode.appendChild(initialsSpan);
+																								}}
 																							/>
 																						) : (
 																							<span className="avatar avatar-blue add-space">
