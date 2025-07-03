@@ -972,13 +972,43 @@ class Employee extends Component {
 																				{(index + 1).toString().padStart(2, '0')}
 																			</td>
 																			<td className="d-flex">
-																				<span
-																					className="avatar avatar-blue"
-																					data-toggle="tooltip"
-																					data-original-title="Avatar Name"
-																				>
-																					{employee.first_name.charAt(0).toUpperCase()}{employee.last_name.charAt(0).toUpperCase()}
-																				</span>
+																				
+																		{employee.profile ? (
+																			<img
+																				src={`${process.env.REACT_APP_API_URL}/${employee.profile}`}
+																				className="avatar avatar-blue add-space me-2"
+																				alt={`${employee.first_name} ${employee.last_name}`}
+																				title={`${employee.first_name} ${employee.last_name}`}
+																				onError={(e) => {
+																				e.target.style.display = 'none';
+																				const initialsSpan = document.createElement('span');
+																				initialsSpan.className = 'avatar avatar-blue add-space me-2';
+																				initialsSpan.setAttribute('title', `${employee.first_name} ${employee.last_name}`);
+																				initialsSpan.textContent = `${employee.first_name.charAt(0).toUpperCase()}${employee.last_name.charAt(0).toUpperCase()}`;
+																				e.target.parentNode.insertBefore(initialsSpan, e.target.nextSibling);
+																				initialsSpan.style.display = 'inline-flex';
+																				initialsSpan.style.alignItems = 'center';
+																				initialsSpan.style.justifyContent = 'center';
+																				initialsSpan.style.width = '35px';
+																				initialsSpan.style.height = '35px';
+																				}}
+																			/>
+																			) : (
+																			<span
+																				className="avatar avatar-blue add-space me-2"
+																				title={`${employee.first_name} ${employee.last_name}`}
+																				style={{
+																				width: '35px',
+																				height: '35px',
+																				display: 'inline-flex',
+																				alignItems: 'center',
+																				justifyContent: 'center',
+																				}}
+																			>
+																				{`${employee.first_name.charAt(0).toUpperCase()}${employee.last_name.charAt(0).toUpperCase()}`}
+																			</span>
+																			)}
+
 																				<div className="ml-3">
 																					<h6 className="mb-0">
 																						{`${employee.first_name} ${employee.last_name}`}
