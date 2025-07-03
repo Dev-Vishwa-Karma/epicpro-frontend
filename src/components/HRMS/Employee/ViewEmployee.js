@@ -338,7 +338,7 @@ class ViewEmployee extends Component {
             }
         });
 
-        while (this.formatDate(currentDate) <= this.formatDate(today) && this.formatDate(currentDate) <= this.formatDate(endDate)) {
+        while (this.formatDate(currentDate) < this.formatDate(today) && this.formatDate(currentDate) <= this.formatDate(endDate)) {
             const dateStr = currentDate.toISOString().split("T")[0];
             const hasReport = reportsForMissing.some((report) => report.created_at?.split(" ")[0] === dateStr);
             if (!hasReport) {
