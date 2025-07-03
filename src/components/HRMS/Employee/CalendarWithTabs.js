@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
 import ActivitiesTime from '../Activities/ActivitiesTime';
-
+import AlertMessages from '../../common/AlertMessages';
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
@@ -611,62 +611,6 @@ class CalendarWithTabs extends Component {
             });
     };
 
-    // Render function for Bootstrap toast messages
-    renderAlertMessages = () => {
-        return (
-
-            <>
-                {/* Add the alert for success messages */}
-                <div
-                    className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
-                    role="alert"
-                    style={{
-                        position: "fixed",
-                        top: "20px",
-                        right: "20px",
-                        zIndex: 1050,
-                        minWidth: "250px",
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
-                    }}
-                >
-                    <i className="fa-solid fa-circle-check me-2"></i>
-                    {this.state.successMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showSuccess: false })}
-                    >
-                    </button>
-                </div>
-
-                {/* Add the alert for error messages */}
-                <div
-                    className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
-                    role="alert"
-                    style={{
-                        position: "fixed",
-                        top: "20px",
-                        right: "20px",
-                        zIndex: 1050,
-                        minWidth: "250px",
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
-                    }}
-                >
-                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
-                    {this.state.errorMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showError: false })}
-                    >
-                    </button>
-                </div>
-            </>
-        );
-    };
-
     handleEventClick = (eventInfo) => {
         // The event data is directly in the eventInfo object
         const report = eventInfo.report;
@@ -687,7 +631,7 @@ class CalendarWithTabs extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { employee, calendarEventsData, skillsFrontend, skillsBackend } = this.state;
+        const { employee, calendarEventsData, skillsFrontend, skillsBackend, showSuccess,successMessage,showError, errorMessage } = this.state;
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
         // Handle case where employee data is not available
@@ -704,7 +648,14 @@ class CalendarWithTabs extends Component {
 
         return (
             <>
-                {this.renderAlertMessages()} {/* Show Toast Messages */}
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
 
                 {this.state.showReportModal && this.state.selectedReport && (
                     <ReportModal

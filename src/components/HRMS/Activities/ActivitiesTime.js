@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { breakInAction, breakDurationCalAction } from '../../../actions/settingsAction';
-
+import AlertMessages from '../../common/AlertMessages';
 class ActivitiesTime extends Component {
     constructor(props) {
         super(props);
@@ -361,66 +361,20 @@ class ActivitiesTime extends Component {
         }
     };
 
-    //   Add the alert for success messages
-    renderAlertMessages = () => {
-        return (
-        <>
-            <div 
-            className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
-            role="alert" 
-            style={{ 
-                position: "fixed", 
-                top: "20px", 
-                right: "20px", 
-                zIndex: 1050, 
-                minWidth: "250px", 
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-            }}
-            >
-            <i className="fa-solid fa-circle-check me-2"></i>
-            {this.state.successMessage}
-            <button
-                type="button"
-                className="close"
-                aria-label="Close"
-                onClick={() => this.setState({ showSuccess: false })}
-            >
-            </button>
-            </div>
-
-            <div 
-            className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
-            role="alert" 
-            style={{ 
-                position: "fixed", 
-                top: "20px", 
-                right: "20px", 
-                zIndex: 1050, 
-                minWidth: "250px", 
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-            }}
-            >
-            <i className="fa-solid fa-triangle-exclamation me-2"></i>
-            {this.state.errorMessage}
-            <button
-                type="button"
-                className="close"
-                aria-label="Close"
-                onClick={() => this.setState({ showError: false })}
-            >
-            </button>
-            </div>
-        </>
-        );
-    };
-
     render() {
-        const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading } = this.state;
+        const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess,successMessage,showError, errorMessage } = this.state;
         const { viewMode, viewModeOne } = this.props;
 
         return (
-        <>
-            {this.renderAlertMessages()}
+             <>
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
             <>
             {/* Filter Section */}
             {/* {!viewMode && ( */}
