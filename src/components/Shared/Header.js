@@ -187,13 +187,13 @@ class Header extends Component {
   };
 
   handleChange = (field, value) => {
-    this.setState({
+    this.setState(prevState => ({
       [field]: value,
       error: {
-        ...this.state.error,
-        [field]: value ? "" : "This field is required.",
+        ...prevState.error,
+        [field]: ""
       },
-    });
+    }));
   };
 
   fetchNotifications = () => {
@@ -731,6 +731,7 @@ class Header extends Component {
                     onClick={
                       isPunchedIn ? this.handlePunchOut : this.handlePunchIn
                     }
+                    style={{width: "190px", height: "35px", fontSize: "14px"}}
                   >
                     {isPunchedIn ? `Punch Out : ${elapsedFormatted}` : "Punch In"}
                   </button>
