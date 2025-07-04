@@ -60,7 +60,6 @@ class Activities extends Component {
         });
 
         // Fetch break status if not in view mode
-        if (!this.props.viewMode) {
         fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=get_break_status&user_id=${window.user.id}`)
             .then(response => response.json())
             .then(data => {
@@ -76,7 +75,6 @@ class Activities extends Component {
             this.setState({ error: 'Failed to fetch data' });
             console.error(err);
             });
-        }
 
         // Fetch today's activities by default
         this.handleApplyFilter();
@@ -332,7 +330,7 @@ class Activities extends Component {
         const { filterFromDate, filterToDate, filterEmployeeId } = this.state;
         let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true`;
 
-        if (!this.props.viewMode && this.props.selectedEmployeeId) {
+        if (this.props.selectedEmployeeId) {
             apiUrl += `&user_id=${this.props.selectedEmployeeId}`;
         } else if (window.user.role === 'employee') {
             apiUrl += `&user_id=${window.user.id}`;
@@ -364,7 +362,6 @@ class Activities extends Component {
 
     render() {
         const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess,successMessage,showError, errorMessage } = this.state;
-        const { viewMode, viewModeOne } = this.props;
 
         return (
              <>
@@ -377,8 +374,6 @@ class Activities extends Component {
                     setShowError={(val) => this.setState({ showError: val })}
                 />
             <>
-            {/* Filter Section */}
-            {/* {!viewMode && ( */}
                 <div className='container-fluid'>
                 <div className="card mb-3">
                     <div className="card-body">
@@ -401,7 +396,7 @@ class Activities extends Component {
                             onChange={(e) => this.setState({ filterToDate: e.target.value })}
                         />
                         </div>
-                        {(this.props.viewMode && (window.user.role === "admin" || window.user.role === "super_admin")) && (
+                        {((window.user.role === "admin" || window.user.role === "super_admin")) && (
                         <div className="col-md-3">
                             <label>Employee</label>
                             <select
@@ -439,7 +434,6 @@ class Activities extends Component {
                     </div>
                 </div>
                 </div>
-            {/* )} */}
                                         
             <div className="container-fluid">
                 <div className="row clearfix">
@@ -447,7 +441,7 @@ class Activities extends Component {
                     <div className="card">
                     <div className="card-header bline d-flex justify-content-between align-items-center">
                         <h3 className="card-title">Timeline Activity</h3>
-                        {!viewModeOne && (
+                        
                         <div className="d-flex align-items-center">                    
                             {window.user.role !== 'employee' && (
                             <button style={{ float: "right" }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal">
@@ -464,7 +458,6 @@ class Activities extends Component {
                             </button>
                             )}
                         </div>
-                        )}
                     </div>
                     {loading ? (
                         <div className="dimmer active p-5">
@@ -878,7 +871,7 @@ class Activities extends Component {
             </>
 
             {/* Add Break Modal */}
-            {viewMode && window.user.role !== 'employee' && (
+            {window.user.role !== 'employee' && (
             <div className="modal fade" id="addBreakModal" tabIndex={-1} role="dialog" aria-labelledby="addBreakModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                 <div className="modal-dialog" role="dialog">
                 <div className={`modal-content ${loading ? 'dimmer active' : 'dimmer'}`}>
