@@ -3,6 +3,7 @@ import CountUp from 'react-countup';
 import { connect } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import AlertMessages from '../../common/AlertMessages';
 import {
 	statisticsAction,
 	statisticsCloseAction
@@ -759,65 +760,12 @@ class Employee extends Component {
         });
     };
 
-	// Render function for success and error messages
-    renderAlertMessages = () => {
-        return (
-            <>
-                {/* Add the alert for success messages */}
-                <div 
-                    className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-circle-check me-2"></i>
-                    {this.state.successMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showSuccess: false })}
-                    >
-                    </button>
-                </div>
 
-                {/* Add the alert for error messages */}
-                <div 
-                    className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
-                    {this.state.errorMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showError: false })}
-                    >
-                    </button>
-                </div>
-            </>
-        );
-    };
 
 	render() {
 		const { fixNavbar, /* statisticsOpen, statisticsClose */ } = this.props;
 			
-		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee } = this.state;
+		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee, showSuccess, successMessage, showError, errorMessage  } = this.state;
 
 		// Handle empty employee data safely
 		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
@@ -845,7 +793,14 @@ class Employee extends Component {
 
 		return (
 			<>
-				{this.renderAlertMessages()} {/* Show Messages */}
+				<AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
 				<div>
 					<div>
 						<div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>

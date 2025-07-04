@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-
+import AlertMessages from '../../common/AlertMessages';
 class departments extends Component {
     constructor(props) {
 		super(props);
@@ -332,34 +332,19 @@ class departments extends Component {
         });
     };
 
-    renderAlertMessages = () => (
-    <>
-      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-circle-check me-2"></i>
-        {this.state.successMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
-      </div>
-
-      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-triangle-exclamation me-2"></i>
-        {this.state.errorMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
-      </div>
-    </>
-  );
-
     render() {
         const { fixNavbar } = this.props;
-        const { departmentName, departmentHead, departmentData, selectedDepartment, message, loading } = this.state;
+        const { departmentName, departmentHead, departmentData, selectedDepartment, message, loading,showSuccess,successMessage,showError,errorMessage} = this.state;
         return (
             <>
-            {this.renderAlertMessages()}
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
                 <div>
                     <div>
                         <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
@@ -631,7 +616,7 @@ class departments extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal" >Cancel</button>
-                                    <button type="button" onClick={this.confirmDelete} className="btn btn-danger" isabled={this.state.ButtonLoading}>
+                                    <button type="button" onClick={this.confirmDelete} className="btn btn-danger" disabled={this.state.ButtonLoading}>
                                         {this.state.ButtonLoading && (
 											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
 										)}

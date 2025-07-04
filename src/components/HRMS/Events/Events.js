@@ -149,7 +149,7 @@ class Events extends Component {
 	};
 
 	fetchEmployees = () => {
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
+		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
 			method: "GET",
 		})
 			.then(response => response.json())
