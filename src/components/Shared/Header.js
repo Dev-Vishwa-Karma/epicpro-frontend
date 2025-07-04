@@ -4,6 +4,7 @@ import { withRouter, NavLink } from "react-router-dom";
 import authService from "../Authentication/authService";
 import "react-datepicker/dist/react-datepicker.css";
 import { breakInAction, punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
+import api from "../../api/axios";
 
 class Header extends Component {
   constructor(props) {
@@ -58,23 +59,24 @@ class Header extends Component {
         userRole: user.role,
       }, () => { 
         this.startTimerInterval();
-        this.getPunchInStatus();
-        this.getActivities();
+        if (user.role === 'employee') {
+          this.getPunchInStatus();
+          this.getActivities();
+        }
+
         this.fetchNotifications();
         this.checkBirthdays(); 
         this.startNotificationInterval();
       });
      
     }
-
-    // Proceed with the punch-in status check
   }
 
 
   startNotificationInterval() {
     this.notificationInterval = setInterval(() => {
       this.fetchNotifications();
-    }, 20000);
+    }, 40000);
   }
 
   componentWillUnmount() {
@@ -122,28 +124,28 @@ class Header extends Component {
 
   autoCloseActivities = (punchInTime) => {
     const punchInTimeDate = punchInTime.toISOString().split('T')[0];
-    fetch(`${process.env.REACT_APP_API_URL}/auto_close_breaks.php?user_id=${window.user.id}&date=${punchInTimeDate}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.setState({
-            punchInTime: null,
-          });
-          clearInterval(this.state.timer);
-          this.props.punchInAction(false);
-          this.props.breakInAction(false);
-          window.location.reload();
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-            loading: false,
-          });
-          setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((err) => {
+		api.get(`${process.env.REACT_APP_API_URL}/auto_close_breaks.php?user_id=${window.user.id}&date=${punchInTimeDate}`)
+		.then(response => {
+			let data = response.data;
+      if (data.status === "success") {
+        this.setState({
+          punchInTime: null,
+        });
+        clearInterval(this.state.timer);
+        this.props.punchInAction(false);
+        this.props.breakInAction(false);
+        window.location.reload();
+      } else {
+        this.setState({
+          errorMessage: data.message,
+          showError: true,
+          showSuccess: false,
+          loading: false,
+        });
+        setTimeout(this.dismissMessages, 3000);
+      }
+		})
+    .catch((err) => {
         this.setState({
           errorMessage: "Failed to fetch data",
           showError: true,
@@ -151,31 +153,29 @@ class Header extends Component {
         });
         setTimeout(this.dismissMessages, 3000);
         console.error(err);
-      });
+    });
   }
 
   getPunchInStatus = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${this.state.userId}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          const inTime = new Date(data.data[0].in_time);
-          this.props.punchInAction(true);
-          this.setState({
-            punchInTime: inTime,
-            start_time: inTime.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            }),
-          });
-          this.startTimerInterval(inTime);
-        } else {
-          this.props.punchInAction(false);
-        }
-      })
+    api.get(`${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${this.state.userId}`)
+    .then(response => {
+      let data = response.data;
+      if (data.status === "success") {
+        const inTime = new Date(data.data[0].in_time);
+        this.props.punchInAction(true);
+        this.setState({
+          punchInTime: inTime,
+          start_time: inTime.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+        });
+        this.startTimerInterval(inTime);
+      } else {
+        this.props.punchInAction(false);
+      }
+    })
       .catch((error) => {
         this.setState({
           errorMessage: "Something went wrong. Please try again.",
@@ -197,12 +197,10 @@ class Header extends Component {
   };
 
   fetchNotifications = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}&limit=5`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
+		api.get(`${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}&limit=5`)
+		.then(response => {
+			let data = response.data;
+	      if (data.status === "success") {
           this.setState({ notifications: data.data, loading: false });
         } else {
           this.setState({
@@ -211,27 +209,25 @@ class Header extends Component {
           });
           setTimeout(this.dismissMessages, 3000);
         }
-      })
-      .catch((err) => {
+		})
+    .catch((err) => {
         console.error(err);
-      });
+    });
   };
 
   checkBirthdays = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/notifications.php?action=birthday_notify`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
+		api.get(`${process.env.REACT_APP_API_URL}/notifications.php?action=birthday_notify`)
+		.then(response => {
+			let data = response.data;
+			if (data.status === "success") {
           this.fetchNotifications();
-        } else {
-           console.error('Error checking birthdays:');
-        }
-      })
-      .catch((err) => {
+      } else {
+          console.error('Error checking birthdays:');
+      }
+		})
+    .catch((err) => {
         console.error('Error checking birthdays:', err);
-      });
+    });
   };
 
   markAsRead = (notification_id) => {
@@ -240,50 +236,46 @@ class Header extends Component {
         apiUrl += `&notification_id=${notification_id}`;
     }
 
-    fetch(
-      apiUrl
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.fetchNotifications();
-        } else {
-          console.error('Error marking notification as read');
-        }
-      })
-      .catch((err) => {
+    api.get(apiUrl)
+		.then(response => {
+			let data = response.data;
+      if (data.status === "success") {
+        this.fetchNotifications();
+      } else {
+        console.error('Error marking notification as read');
+      }
+		})
+    .catch((err) => {
         console.error('Error marking notification as read', err);
-      });
+    });
   };
 
   getActivities = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.props.breakDurationCalAction(data.data.break_duration);
-          this.setState({
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-          this.props.breakDurationCalAction(0);
-          setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((err) => {
+    api.get(`${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`)
+		.then(response => {
+			let data = response.data;
+      if (data.status === "success") {
+        this.props.breakDurationCalAction(data.data.break_duration);
         this.setState({
-          errorMessage: "Failed to fetch data",
-          showError: true,
-          showSuccess: false,
+          loading: false,
         });
+      } else {
+        this.setState({
+          loading: false,
+        });
+        this.props.breakDurationCalAction(0);
         setTimeout(this.dismissMessages, 3000);
-        console.error(err);
+      }
+		})
+    .catch((err) => {
+      this.setState({
+        errorMessage: "Failed to fetch data",
+        showError: true,
+        showSuccess: false,
       });
+      setTimeout(this.dismissMessages, 3000);
+      console.error(err);
+    });
   };
 
   handlePunchIn = () => {
@@ -295,51 +287,47 @@ class Header extends Component {
 
     this.props.punchInAction(true);
     // Proceed with punch-in API call
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      {
-        method: "POST",
-        body: formData,
-      }
+    api.post(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
+      formData
     )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          const currentTime = new Date();
+		.then(response => {
+			let data = response.data;
+      if (data.status === "success") {
+        const currentTime = new Date();
 
-          this.setState(
-            {
-              punchInTime: currentTime,
-              start_time: currentTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              }),
-              successMessage: data.message,
-              showError: false,
-              showSuccess: true,
-            }          );
+        this.setState(
+          {
+            punchInTime: currentTime,
+            start_time: currentTime.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            }),
+            successMessage: data.message,
+            showError: false,
+            showSuccess: true,
+          }          );
 
-            this.startTimerInterval(currentTime, false);
-            setTimeout(this.dismissMessages, 3000);
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-          });
-          this.props.punchInAction(false);
+          this.startTimerInterval(currentTime, false);
           setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((error) => {
+      } else {
         this.setState({
-          errorMessage: "Something went wrong. Please try again.",
+          errorMessage: data.message,
           showError: true,
           showSuccess: false,
         });
+        this.props.punchInAction(false);
         setTimeout(this.dismissMessages, 3000);
+      }
+		})
+    .catch((error) => {
+      this.setState({
+        errorMessage: "Something went wrong. Please try again.",
+        showError: true,
+        showSuccess: false,
       });
+      setTimeout(this.dismissMessages, 3000);
+    });
   };
 
   handlePunchOut = () => {
@@ -530,63 +518,59 @@ class Header extends Component {
     );
 
     // API call to save the report and punch-out
-    fetch(
-      `${process.env.REACT_APP_API_URL}/reports.php?action=add-report-by-user`,
-      {
-        method: "POST",
-        body: formData,
-      }
+    api.post(`${process.env.REACT_APP_API_URL}/reports.php?action=add-report-by-user`,
+      formData
     )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          const newReport = data.data;
+		.then(response => {
+			let data = response.data;
+      if (data.status === "success") {
+        const newReport = data.data;
 
-          // Dispatch the custom event with new report
-          window.dispatchEvent(
-            new CustomEvent("reportMessage", {
-              detail: { report: newReport },
-            })
-          );
-          this.closeModal();
-        
-          this.setState({
-            successMessage: data.message,
-            showError: false,
-            showSuccess: true,
-            showModal: false,
-            report: "",
-            isReportSubmitting: false,
-            isReportSubmitted: true, //disable after submit
-          });
-
-          this.props.punchInAction(false);
-          this.props.breakDurationCalAction(0);
-          clearInterval(this.state.timer);
-          setTimeout(this.dismissMessages, 3000);
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-            isReportSubmitting: false,
-          });
-
-          this.props.punchInAction(true);
-          setTimeout(this.dismissMessages, 3000);
-
-        }
-      })
-      .catch((error) => {
+        // Dispatch the custom event with new report
+        window.dispatchEvent(
+          new CustomEvent("reportMessage", {
+            detail: { report: newReport },
+          })
+        );
+        this.closeModal();
+      
         this.setState({
-          errorMessage: "Something went wrong. Please try again.",
+          successMessage: data.message,
+          showError: false,
+          showSuccess: true,
+          showModal: false,
+          report: "",
+          isReportSubmitting: false,
+          isReportSubmitted: true, //disable after submit
+        });
+
+        this.props.punchInAction(false);
+        this.props.breakDurationCalAction(0);
+        clearInterval(this.state.timer);
+        setTimeout(this.dismissMessages, 3000);
+      } else {
+        this.setState({
+          errorMessage: data.message,
           showError: true,
           showSuccess: false,
           isReportSubmitting: false,
         });
-        this.props.punchInAction(false);
+
+        this.props.punchInAction(true);
         setTimeout(this.dismissMessages, 3000);
+
+      }
+		})
+    .catch((error) => {
+      this.setState({
+        errorMessage: "Something went wrong. Please try again.",
+        showError: true,
+        showSuccess: false,
+        isReportSubmitting: false,
       });
+      this.props.punchInAction(false);
+      setTimeout(this.dismissMessages, 3000);
+    });
   };
 
   afterPunchOut = () => {
@@ -597,39 +581,35 @@ class Header extends Component {
     formData.append("status", "completed");
 
     // API call to add break
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      {
-        method: "POST",
-        body: formData,
-      }
+    api.post(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
+      formData
     )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.setState({
-            successMessage: data.message,
-            showError: false,
-            showSuccess: true,
-          });
-          setTimeout(this.dismissMessages, 3000);
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-          });
-          setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((error) => {
+    .then(response => {
+      let data = response.data;
+      if (data.status === "success") {
         this.setState({
-          errorMessage: error.message,
+          successMessage: data.message,
+          showError: false,
+          showSuccess: true,
+        });
+        setTimeout(this.dismissMessages, 3000);
+      } else {
+        this.setState({
+          errorMessage: data.message,
           showError: true,
           showSuccess: false,
         });
         setTimeout(this.dismissMessages, 3000);
+      }
+    })
+    .catch((error) => {
+      this.setState({
+        errorMessage: error.message,
+        showError: true,
+        showSuccess: false,
       });
+      setTimeout(this.dismissMessages, 3000);
+    });
   };
 
   // Handle logout functionality
