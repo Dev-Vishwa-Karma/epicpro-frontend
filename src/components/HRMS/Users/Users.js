@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-let searchTimeout = null;
-
 class Users extends Component {
 	constructor(props) {
 		super(props);

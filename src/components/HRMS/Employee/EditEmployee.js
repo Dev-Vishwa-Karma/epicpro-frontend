@@ -494,7 +494,7 @@ class EditEmployee extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status} = this.state;
+        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status} = this.state;
         // Frontend and Backend Skill Options
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
