@@ -91,6 +91,10 @@ class ViewEmployee extends Component {
         this.setState({ showGallery: false});
     };
 
+    handleBack = () => {
+        this.setState({ showGallery: true});
+    }
+
     handleSave = async () => {
         const croppedImage = this.cropper.getCroppedCanvas().toDataURL();
         try {
@@ -259,7 +263,7 @@ class ViewEmployee extends Component {
                                             {/* Profile Image */}
                                             <img
                                                 className="card-profile-img"
-                                                src={this.state.previewImage}
+                                                src={this.state.previewImage || '/assets/images/sm/avatar4.jpg'}
                                                 alt="Profile"
                                                 style={{
                                                     borderRadius: "50%",
@@ -444,6 +448,14 @@ class ViewEmployee extends Component {
                                             disabled={!this.state.selectedImage}
                                         >
                                             Next
+                                        </button>
+                                    )}
+                                    {!showGallery && (
+                                        <button
+                                            className="btn btn-primary px-4"
+                                            onClick={this.handleBack}
+                                        >
+                                            Back
                                         </button>
                                     )}
                                     {!showGallery && (
