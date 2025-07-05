@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
+import TextEditor from '../../common/TextEditor';
 
 class Report extends Component {
 
@@ -1125,9 +1126,10 @@ class Report extends Component {
                                                 </div>
                                             )}
                                             <div className="col-md-12 mb-4">
-                                                <div className="multiline-text" >
-                                                    {selectedModalReport?.report || ''}
-                                                </div>
+                                                <div
+                                                    className="multiline-text"
+                                                    dangerouslySetInnerHTML={{ __html: selectedModalReport?.report || '' }}
+                                                />
                                             </div>
                                             <div className="col-md-12 mb-2">
                                                 <strong>Start Time:</strong> {this.formatDateTimeAMPM(selectedModalReport.start_time)}
@@ -1180,18 +1182,12 @@ class Report extends Component {
                                         {/* Left side - Report TextArea */}
                                         <div className="col-md-6">
                                             <div className="form-group">
-                                                <textarea
-                                                className={`form-control ${this.state.error?.report ? "is-invalid" : ""}`}
-                                                name='report'
-                                                placeholder="Please provide the report."
-                                                value={this.state.report || ''}
-                                                onChange={(e) => this.handleChange('report', e.target.value)}
-                                                rows="15"
-                                                cols="50"
-                                                />
-                                                {this.state.error?.report && (
-                                                <div className="invalid-feedback">{this.state.error.report}</div>
-                                                )}
+                                                <TextEditor
+                                                    name="report"
+                                                    value={this.state.report || ''}
+                                                    onChange={(value) => this.handleChange('report', value)}
+                                                    error={this.state.error?.report}
+                                                    />
                                             </div>
                                         </div>
 
