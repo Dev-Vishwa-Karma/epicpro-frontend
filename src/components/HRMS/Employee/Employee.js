@@ -524,6 +524,7 @@ class Employee extends Component {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
+				data.data.is_half_day = data.data.is_half_day.toString();
 				this.setState((prevState) => {
 					const updatedEmployeeLeavesData = [...(prevState.employeeLeavesData || []), data.data];
 					

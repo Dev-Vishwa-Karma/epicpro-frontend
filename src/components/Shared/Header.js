@@ -76,6 +76,7 @@ class Header extends Component {
   startNotificationInterval() {
     this.notificationInterval = setInterval(() => {
       this.fetchNotifications();
+      this.checkBirthdays();
     }, 20000);
   }
 
