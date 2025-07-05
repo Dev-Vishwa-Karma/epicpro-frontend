@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { breakInAction, breakDurationCalAction } from '../../../actions/settingsAction';
+import AlertMessages from '../../common/AlertMessages';
+import { ActivitiesService } from '../../../services/ActivitiesService';
 
 class ActivitiesTime extends Component {
     constructor(props) {
@@ -42,10 +44,7 @@ class ActivitiesTime extends Component {
 
     componentDidMount() {
         // Fetch employees list
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
-        method: "GET",
-        })
-        .then(response => response.json())
+        ActivitiesService.getActivitiesDetails()
         .then(data => {
             if (data.status === 'success') {
             this.setState({ employeeData: data.data });
@@ -60,8 +59,7 @@ class ActivitiesTime extends Component {
 
         // Fetch break status if not in view mode
         if (!this.props.viewMode) {
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=get_break_status&user_id=${window.user.id}`)
-            .then(response => response.json())
+            ActivitiesService.getBreakStatus(window.user.id)
             .then(data => {
             if (data.status === 'success') {
                 this.setState({ isBreakedIn: true });
@@ -79,6 +77,15 @@ class ActivitiesTime extends Component {
 
         // Fetch today's activities by default
         this.handleApplyFilter();
+    }
+
+    componentDidUpdate(prevProps)
+    {
+        if (prevProps.selectedEmployeeId != this.props.selectedEmployeeId) {
+            if (this.props.selectedEmployeeId) {
+                this.handleApplyFilter();
+            }
+        }
     }
 
     openbreakReasonModal = () => {
@@ -106,11 +113,7 @@ class ActivitiesTime extends Component {
         formData.append('description', null);
         formData.append('status', 'completed');
 
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`, {
-        method: "POST",
-        body: formData,
-        })
-        .then((response) => response.json())
+        ActivitiesService.addActivityByUser(formData)
         .then((data) => {
             if (data.status === "success") {
             this.setState({
@@ -142,10 +145,7 @@ class ActivitiesTime extends Component {
     };
 
     breakCalculation = () => {
-        fetch(
-        `${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`
-        )
-        .then((response) => response.json())
+        ActivitiesService.breakCalculation(window.user.id)
         .then((data) => {
             if (data.status === "success") {
             this.props.breakDurationCalAction(data.data.break_duration);
@@ -172,11 +172,7 @@ class ActivitiesTime extends Component {
         formData.append('description', this.state.breakReason);
         formData.append('status', 'active');
 
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`, {
-        method: "POST",
-        body: formData,
-        })
-        .then((response) => response.json())
+        ActivitiesService.addActivityByUser(formData)
         .then((data) => {
             if (data.status === "success") {
             this.setState({
@@ -279,11 +275,7 @@ class ActivitiesTime extends Component {
         formData.append('created_by', window.user.id);
         formData.append('updated_by', window.user.id);
 
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-admin`, {
-        method: "POST",
-        body: formData,
-        })
-        .then((response) => response.json())
+        ActivitiesService.addActivityByAdmin(formData)
         .then((data) => {
             this.setState({ loading: false, ButtonLoading: false });
 
@@ -320,28 +312,24 @@ class ActivitiesTime extends Component {
     handleApplyFilter = async () => {
         this.setState({ loading: true });
         const { filterFromDate, filterToDate, filterEmployeeId } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true`;
-
-        if (this.props.viewMode && this.props.employeeId) {
-        apiUrl += `&user_id=${this.props.employeeId}`;
+        let params = {};
+        if (!this.props.viewMode && this.props.selectedEmployeeId) {
+            params.user_id = this.props.selectedEmployeeId;
         } else if (window.user.role === 'employee') {
-        apiUrl += `&user_id=${window.user.id}`;
+            params.user_id = window.user.id;
         } else {
-        if (filterEmployeeId) {
-            apiUrl += `&user_id=${filterEmployeeId}`;
+            if (filterEmployeeId) {
+                params.user_id = filterEmployeeId;
+            }
         }
-        }
-        
         if (filterFromDate) {
-        apiUrl += `&from_date=${filterFromDate}`;
+            params.from_date = filterFromDate;
         }
         if (filterToDate) {
-        apiUrl += `&to_date=${filterToDate}`;
+            params.to_date = filterToDate;
         }
-
         try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const data = await ActivitiesService.getActivitiesTimeline(params);
         if (data.status === "success") {
             this.setState({ activities: data.data, loading: false });
         } else {
@@ -352,69 +340,23 @@ class ActivitiesTime extends Component {
         }
     };
 
-    //   Add the alert for success messages
-    renderAlertMessages = () => {
-        return (
-        <>
-            <div 
-            className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
-            role="alert" 
-            style={{ 
-                position: "fixed", 
-                top: "20px", 
-                right: "20px", 
-                zIndex: 1050, 
-                minWidth: "250px", 
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-            }}
-            >
-            <i className="fa-solid fa-circle-check me-2"></i>
-            {this.state.successMessage}
-            <button
-                type="button"
-                className="close"
-                aria-label="Close"
-                onClick={() => this.setState({ showSuccess: false })}
-            >
-            </button>
-            </div>
-
-            <div 
-            className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
-            role="alert" 
-            style={{ 
-                position: "fixed", 
-                top: "20px", 
-                right: "20px", 
-                zIndex: 1050, 
-                minWidth: "250px", 
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-            }}
-            >
-            <i className="fa-solid fa-triangle-exclamation me-2"></i>
-            {this.state.errorMessage}
-            <button
-                type="button"
-                className="close"
-                aria-label="Close"
-                onClick={() => this.setState({ showError: false })}
-            >
-            </button>
-            </div>
-        </>
-        );
-    };
-
     render() {
-        const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading } = this.state;
+        const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess,successMessage,showError, errorMessage } = this.state;
         const { viewMode, viewModeOne } = this.props;
 
         return (
-        <>
-            {this.renderAlertMessages()}
+             <>
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
             <>
             {/* Filter Section */}
-            {!viewMode && (
+            {/* {!viewMode && ( */}
                 <div className='container-fluid'>
                 <div className="card mb-3">
                     <div className="card-body">
@@ -437,7 +379,7 @@ class ActivitiesTime extends Component {
                             onChange={(e) => this.setState({ filterToDate: e.target.value })}
                         />
                         </div>
-                        {(window.user.role === "admin" || window.user.role === "super_admin") && (
+                        {(this.props.viewMode && (window.user.role === "admin" || window.user.role === "super_admin")) && (
                         <div className="col-md-3">
                             <label>Employee</label>
                             <select
@@ -475,7 +417,7 @@ class ActivitiesTime extends Component {
                     </div>
                 </div>
                 </div>
-            )}
+            {/* )} */}
                                         
             <div className="container-fluid">
                 <div className="row clearfix">
@@ -513,7 +455,7 @@ class ActivitiesTime extends Component {
                             activities.map((activity, index) => {
                             const profilePic = activity.profile
                                 ? `${process.env.REACT_APP_API_URL}/${activity.profile}`
-                                : "../assets/images/xs/avatar1.jpg";
+                                : null;
                             // Date Seperation
                             let showSeparator = false;
                             function getDateStr(activity) {
@@ -584,11 +526,66 @@ class ActivitiesTime extends Component {
                                 {/* In Time Entry */}
                                 {activity.type === 'Break_in' && (
                                     <div className="timeline_item ">
-                                    <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
                                     />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                     <span>
                                         <a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>
@@ -611,11 +608,66 @@ class ActivitiesTime extends Component {
                                 {activity.type === 'Break_out' && (
                                     <>
                                     <div className="timeline_item ">
-                                        <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
-                                        />
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
+                                    />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                         <span>
                                         <a style={{fontWeight:"800"}} href="#">{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>
@@ -636,11 +688,66 @@ class ActivitiesTime extends Component {
                                 {/* In Time Entry Punch */}
                                 {activity.type === 'Punch_in' && (
                                     <div className="timeline_item ">
-                                    <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
                                     />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                     <span>
                                         <a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>
@@ -659,11 +766,66 @@ class ActivitiesTime extends Component {
                                 {/* Out Time Entry */}
                                 {activity.type === 'Punch_out' && (
                                     <div className="timeline_item ">
-                                    <img
-                                        className="tl_avatar"
-                                        src={profilePic}
+                                {profilePic ? (
+                                    <img 
+                                        src={profilePic} 
+                                        className="avatar avatar-blue add-space tl_avatar" 
                                         alt={`${activity.first_name} ${activity.last_name}`}
+                                        data-toggle="tooltip" 
+                                        data-placement="top" 
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                        }}
+                                        onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const initialsSpan = document.createElement('span');
+                                        initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
+                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                        initialsSpan.setAttribute('data-placement', 'top');
+                                        initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
+                                        initialsSpan.style.display = 'inline-flex';
+                                        initialsSpan.style.alignItems = 'center';
+                                        initialsSpan.style.justifyContent = 'center';
+                                        initialsSpan.style.width = '35px';
+                                        initialsSpan.style.height = '35px';
+                                        initialsSpan.style.borderRadius = '50%';
+                                        initialsSpan.style.background = '#C5C4C8';
+                                        initialsSpan.style.color = '#fff';
+                                        initialsSpan.style.fontWeight = '600';
+                                        initialsSpan.style.border = '2px solid #f5f5f5';
+                                        initialsSpan.textContent = 
+                                            `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
+                                        e.target.parentNode.appendChild(initialsSpan);
+                                        }}
                                     />
+                                    ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space tl_avatar"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title={`${activity.first_name} ${activity.last_name}`}
+                                        style={{
+                                        width: '35px',
+                                        height: '35px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        background: '#C5C4C8',
+                                        color: '#fff',
+                                        fontWeight: '600',
+                                        border: '2px solid #f5f5f5',
+                                        textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
+                                    </span>
+                                    )}
                                     <span>
                                         <a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
                                         <span className="mx-2">|</span>
@@ -694,7 +856,7 @@ class ActivitiesTime extends Component {
             </>
 
             {/* Add Break Modal */}
-            {!viewMode && window.user.role !== 'employee' && (
+            {viewMode && window.user.role !== 'employee' && (
             <div className="modal fade" id="addBreakModal" tabIndex={-1} role="dialog" aria-labelledby="addBreakModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                 <div className="modal-dialog" role="dialog">
                 <div className={`modal-content ${loading ? 'dimmer active' : 'dimmer'}`}>

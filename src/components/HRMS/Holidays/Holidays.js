@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import HolidaysService from '../../../services/HolidaysService';
 
 class Holidays extends Component {
 	constructor(props) {
@@ -38,14 +39,11 @@ class Holidays extends Component {
 		});
 
 		// Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=view&event_type=holiday`, {
-			method: "GET",
-		})
-		.then(response => response.json())
-		.then(data => {
-			if (data.status === 'success') {
-				const holidaysData = data.data;
-				const today = new Date(); // Get today's date
+		HolidaysService.getHolidays()
+			.then(data => {
+				if (data.status === 'success') {
+					const holidaysData = data.data;
+					const today = new Date(); // Get today's date
 
 				// Filter only holidays and exclude past holidays
             	const upcomingHolidays = holidaysData.filter(holiday => holiday.event_type === 'holiday' && new Date(holiday.event_date) >= today) 
@@ -147,7 +145,6 @@ class Holidays extends Component {
 	};
 
 	addHoliday = (e) => {
-		// Prevent default form submission behavior
 		e.preventDefault();
 
 		// Reset selectedHoliday before adding a new event
@@ -166,11 +163,7 @@ class Holidays extends Component {
 			addHolidayData.append('event_date', event_date);
 			addHolidayData.append('event_type', 'holiday');
 			// API call to add employee leave
-			fetch(`${process.env.REACT_APP_API_URL}/events.php?action=add`, {
-				method: "POST",
-				body: addHolidayData,
-			})
-			.then((response) => response.json())
+			HolidaysService.addHoliday(addHolidayData)
 			.then((data) => {
 				this.setState({ ButtonLoading: false });
 				if (data.status === "success") {
@@ -262,11 +255,7 @@ class Holidays extends Component {
 		updateHolidayData.append('event_type', 'holiday');
 
         // Example API call
-        fetch(`${process.env.REACT_APP_API_URL}/events.php?action=edit&event_id=${selectedHoliday.id}`, {
-            method: 'POST',
-            body: updateHolidayData,
-        })
-        .then((response) => response.json())
+        HolidaysService.updateHoliday(selectedHoliday.id, updateHolidayData)
         .then((data) => {
             this.setState({ ButtonLoading: false });
             if (data.status === "success") {
@@ -294,7 +283,6 @@ class Holidays extends Component {
 				}, 3000);
             } else {
 				document.querySelector("#editHolidayModal .close").click();
-
 				this.setState({ 
 					errorMessage: "Failed to update holiday",
 					showError: true
@@ -329,10 +317,7 @@ class Holidays extends Component {
 
 		this.setState({ ButtonLoading: true });
 
-		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=delete&event_id=${deleteHoliday}`, {
-          	method: 'DELETE',
-        })
-        .then((response) => response.json())
+		HolidaysService.deleteHoliday(deleteHoliday)
         .then((data) => {
 			if (data.status === "success") {
 				// Update holidays state after deletion

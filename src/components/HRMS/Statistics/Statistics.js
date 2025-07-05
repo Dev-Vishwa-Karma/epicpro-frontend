@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import AlertMessages from "../../common/AlertMessages";
+import StatisticService from '../../../services/StatisticService';
 
 class Statistics extends Component {
   constructor(props) {
@@ -37,17 +39,10 @@ class Statistics extends Component {
 
   getEmployees = () => {
     const { selectedYear, selectedMonth } = this.state;
-    const queryParams = new URLSearchParams({
-      action: 'view',
-      role: 'employee',
-      status: 1,
-      year: selectedYear,
-      month: selectedMonth,
-      statistics_visibility_status: 'statistics_visibility_status'
-    });
-
-    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?${queryParams.toString()}`)
-      .then(response => response.json())
+    StatisticService.getEmployees({ 
+      year: selectedYear, 
+      month: selectedMonth 
+    })
       .then(data => {
         if (data.status === 'success') {
           this.setState({ employeesData: data.data, isLoading: false });
@@ -67,9 +62,7 @@ class Statistics extends Component {
     const lastDay = new Date(selectedYear, selectedMonth, 0);
     const fromDate = firstDay.toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
     const toDate = lastDay.toISOString().split('T')[0]; 
-
-    fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=view&from_date=${fromDate}&to_date=${toDate}`)
-      .then(response => response.json())
+    StatisticService.getReports({ fromDate, toDate })
       .then(data => {
         if (data.status === 'success') {
           this.setState({ reportsData: data.data, isLoading: false });
@@ -84,8 +77,7 @@ class Statistics extends Component {
   }
 
   getleaves = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&status=approved`)
-      .then(response => response.json())
+    StatisticService.getLeaves()
       .then(data => {
         if (data.status === 'success') {
           this.setState({ leavesData: data.data, isLoading: false });
@@ -101,18 +93,12 @@ class Statistics extends Component {
 
   getAlternateSaturdays = async () => {
     const { selectedYear, selectedMonth } = this.state;
-
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${selectedYear}&month=${selectedMonth}`
-      );
-      const data = await response.json();
-
+      const data = await StatisticService.getAlternateSaturdays({ year: selectedYear, month: selectedMonth });
       if (data.status === "success" && Array.isArray(data.data) && data.data.length > 0) {
         // The date is a stringified JSON array, so parse it
         const alternateDatesRaw = data.data[0].date; // e.g. '["Sat June 7 2025", "Sat June 21 2025"]'
         const parsedDates = JSON.parse(alternateDatesRaw);
-
         // Convert those strings to date keys like 'YYYY-MM-DD' for easy comparison
         const alternateSaturdayData = parsedDates.map(dateStr => {
           const d = new Date(dateStr);
@@ -121,7 +107,6 @@ class Statistics extends Component {
           const dd = d.getDate().toString().padStart(2, "0");
           return `${yyyy}-${mm}-${dd}`;
         });
-
         this.setState({ alternateSaturdayData });
       } else {
         this.setState({ alternateSaturdayData: [] });
@@ -134,8 +119,7 @@ class Statistics extends Component {
 
   getHolidays = () => {
     this.setState({ isLoading: true })
-    fetch(`${process.env.REACT_APP_API_URL}/events.php?action=view&event_type=holiday`)
-      .then(response => response.json())
+    StatisticService.getHolidays()
       .then(data => {
         if (data.status === 'success') {
           const holidayDates = data.data.map(item => item.event_date); // Using 'event_date' field directly
@@ -291,34 +275,10 @@ class Statistics extends Component {
     });
     return extraWorkCounts;
   };
-  
-
-  
-  renderAlertMessages = () => (
-    <>
-      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-circle-check me-2"></i>
-        {this.state.successMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
-      </div>
-
-      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-triangle-exclamation me-2"></i>
-        {this.state.errorMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
-      </div>
-    </>
-  );
 
   render() {
     const { fixNavbar } = this.props;
-    const { selectedYear, selectedMonth, employeesData, leavesData, alternateSaturdayData, holidaysData, isLoading} = this.state;
+    const { selectedYear, selectedMonth, employeesData, leavesData, alternateSaturdayData, holidaysData, isLoading, showSuccess, successMessage, showError, errorMessage} = this.state;
     const monthDays = this.getAllDatesOfMonth(selectedYear, selectedMonth);
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
@@ -329,7 +289,14 @@ class Statistics extends Component {
   
     return (
       <>
-        {this.renderAlertMessages()}
+        <AlertMessages
+            showSuccess={showSuccess}
+            successMessage={successMessage}
+            showError={showError}
+            errorMessage={errorMessage}
+            setShowSuccess={(val) => this.setState({ showSuccess: val })}
+            setShowError={(val) => this.setState({ showError: val })}
+        />
   
         <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
           <div className="container-fluid">

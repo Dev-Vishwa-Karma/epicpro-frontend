@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import AlertMessages from '../../common/AlertMessages';
+import ReportService from '../../../services/ReportService';
 
 class Report extends Component {
 
@@ -73,10 +75,7 @@ class Report extends Component {
         });
 
         /** Get employees list */
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
-            method: "GET",
-        })
-            .then(response => response.json())
+        ReportService.getEmployees()
             .then(data => {
                 if (data.status === 'success') {
                     this.setState({ employeeData: data.data });
@@ -254,12 +253,8 @@ class Report extends Component {
         formData.append('updated_by', window.user.id); //updated by admin
         formData.append('note', this.state.editNotes);
 
-        // API call to add break
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=edit-report-by-admin`, {
-            method: "POST",
-            body: formData,
-        })
-            .then((response) => response.json())
+        // API call to edit report by admin
+        ReportService.editReportByAdmin(formData)
             .then((data) => {
                 if (data.status === "success") {
                     this.setState({ reportSuccess: data.message });
@@ -281,7 +276,6 @@ class Report extends Component {
                     this.setState({ editReportByAdminError: null });
                 }, 5000);
             });
-
     };
 
     deleteReport = () => {
@@ -296,11 +290,8 @@ class Report extends Component {
             return;
         }
 
-        // API call to add break
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=delete&id=${activityId}&user_id=${window.user.id}`, {
-            method: 'DELETE'
-        })
-            .then((response) => response.json())
+        // API call to delete report
+        ReportService.deleteReport(activityId, window.user.id)
             .then((data) => {
                 if (data.status === "success") {
                     this.setState({ reportSuccess: data.message });
@@ -385,12 +376,8 @@ class Report extends Component {
         formData.append('updated_by', window.user.id); //updated by admin
         formData.append('note', this.state.editNotes);
 
-        // API call to add break
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-admin`, {
-            method: "POST",
-            body: formData,
-        })
-            .then((response) => response.json())
+        // API call to add report by admin
+        ReportService.addReportByAdmin(formData)
             .then((data) => {
                 if (data.status === "success") {
                     this.setState({ reportSuccess: data.message });
@@ -667,11 +654,9 @@ class Report extends Component {
 	};
 
     updateReport = () => {
-        // e.preventDefault();
         if (!this.validateUpdateReportForm()) {
             return;
         }
-
         const { report_id, report, start_time, break_duration_in_minutes, end_time, todays_working_hours, todays_total_hours, editNotes, selectedReport } = this.state;
 		const formData = new FormData();
         const finalStartTime = start_time || selectedReport.start_time;
@@ -683,13 +668,8 @@ class Report extends Component {
         formData.append("todays_working_hours", todays_working_hours);
         formData.append("todays_total_hours", todays_total_hours);
         formData.append("note", editNotes);
-
-		// API call to save the report and punch-out
-		fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=update-report-by-user&report_id=${report_id}`, {
-			method: "POST",
-			body: formData,
-		})
-        .then((response) => response.json())
+        // API call to update report by user
+        ReportService.updateReport(report_id, formData)
         .then((data) => {
             if (data.status === "success") {
                 this.setState({
@@ -699,7 +679,6 @@ class Report extends Component {
                     showModal: false, 
                     report: ''
 				});
-
                 this.fetchReports();
                 document.querySelector("#editpunchOutReportModal .close").click();
                 setTimeout(this.dismissMessages, 3000);
@@ -724,8 +703,6 @@ class Report extends Component {
 
     fetchReports = () => {
         const { fromDate, toDate, selectedReportEmployee } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?action=view&user_id=${selectedReportEmployee}`;
-        
         const formatDate = (date) => {
             if (!date) return '';
             const year = date.getFullYear();
@@ -733,19 +710,14 @@ class Report extends Component {
             const day = String(date.getDate()).padStart(2, '0'); 
             return `${year}-${month}-${day}`; 
         };
-
-        if (fromDate) {
-            apiUrl += `&from_date=${formatDate(fromDate)}`;
-        }
-        if (toDate) {
-            apiUrl += `&to_date=${formatDate(toDate)}`;
-        }
-
-        fetch(apiUrl)
-        .then(response => response.json())
+        const params = {
+            user_id: selectedReportEmployee,
+            from_date: fromDate ? formatDate(fromDate) : undefined,
+            to_date: toDate ? formatDate(toDate) : undefined
+        };
+        ReportService.fetchReports(params)
         .then(data => {
             if (data.status === 'success') {
-
                 this.setState({ 
                         reports: data.data,
                         filteredReports: data.data,
@@ -753,8 +725,7 @@ class Report extends Component {
                         currentPageReports: 1, 
                         error: { ...this.state.error, report: '' }
                     });
-                
-            }else {
+                } else {
                 if (data.message === 'Reports not available.') {
                     this.setState({
                         reports: [],
@@ -772,6 +743,16 @@ class Report extends Component {
                     setTimeout(this.dismissMessages, 3000);
                 }
             }
+            })
+            .catch(() => {
+                this.setState({
+                    errorMessage: 'Failed to fetch reports',
+                    showError: true,
+                    loading: false,
+                    reports: [],
+                    filteredReports: []
+                });
+                setTimeout(this.dismissMessages, 3000);
         });
     }
 
@@ -834,29 +815,6 @@ class Report extends Component {
     this.setState({ editNotes: e.target.value });
     }
 
-  renderAlertMessages = () => (
-    <>
-      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-circle-check me-2"></i>
-        {this.state.successMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
-      </div>
-
-      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-triangle-exclamation me-2"></i>
-        {this.state.errorMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
-      </div>
-    </>
-  );
-
-
     render() {
         const { fixNavbar } = this.props;
         const { 
@@ -887,7 +845,11 @@ class Report extends Component {
             fromDate,
             toDate,
             filteredReports,
-            selectedModalReport
+            selectedModalReport,
+            showSuccess, 
+            successMessage, 
+            showError, 
+            errorMessage
         } = this.state;
 
         // Handle empty employee data safely
@@ -901,7 +863,14 @@ class Report extends Component {
 
         return (
             <>  
-                {this.renderAlertMessages()}
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
                 <div>
                     <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
                         <div className="container-fluid">

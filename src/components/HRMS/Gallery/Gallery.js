@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
+import AlertMessages from '../../common/AlertMessages';
+import { GalleryService } from '../../../services/GalleryService';
 
 class Gallery extends Component {
     constructor(props) {
@@ -35,57 +37,45 @@ class Gallery extends Component {
                 sortOrder: "asc",
             });
         }
+        
         // Check if user is admin or superadmin
         if (role === 'admin' || role === 'super_admin') {
             // Fetch employees data if user is admin or super_admin
-            fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-                method: "GET",
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    this.setState({
-                        employees: data.status === 'success' ? data.data : [],
-                        loading: false
-                    });
-                } else {
-                    this.setState({ error: data.message, loading: false });
-                }
-            })
-            .catch(err => {
-                this.setState({ error: 'Failed to fetch employees data' });
-                console.error(err);
-            });
+            GalleryService.getEmployees()
+                .then(data => {
+                    if (data.status === 'success') {
+                        this.setState({
+                            employees: data.data || [],
+                            loading: false
+                        });
+                    } else {
+                        this.setState({ error: data.message, loading: false });
+                    }
+                })
+                .catch(err => {
+                    this.setState({ error: 'Failed to fetch employees data', loading: false });
+                    console.error(err);
+                });
         }
 
         // Fetch gallery data
-        let galleryUrl = `${process.env.REACT_APP_API_URL}/gallery.php?action=view`;
-        if (role === "employee") {
-            // Add employee ID param if role is employee
-            galleryUrl += `&id=${id}`;
-        }
-
-        // Fetch gallery data (as in the previous code)
-        fetch(galleryUrl, {
-            method: "GET",
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                this.setState({
-                    images: sortedImages,
-                    filteredImages: sortedImages,
-                    loading: false
-                });
-            } else {
-                this.setState({ message: data.message, loading: false });
-            }
-        })
-        .catch(err => {
-            this.setState({ message: 'Failed to fetch data', loading: false });
-            console.error(err);
-        });
+        GalleryService.getGalleryImages(role, id)
+            .then(data => {
+                if (data.status === 'success') {
+                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
+                    this.setState({
+                        images: sortedImages,
+                        filteredImages: sortedImages,
+                        loading: false
+                    });
+                } else {
+                    this.setState({ message: data.message, loading: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ message: 'Failed to fetch data', loading: false });
+                console.error(err);
+            });
     }
 
     openModal = () => {
@@ -187,71 +177,56 @@ class Gallery extends Component {
             return isValid;
         }
 
-        // Prepare FormData to send images via AJAX
-        const uploadImageData = new FormData();
-        uploadImageData.append('employee_id', employeeIdToSend);
-        uploadImageData.append('created_by', logged_in_employee_id);
-
-        // Ensure only image files are processed
-        selectedImages.forEach((image) => {
-            if (validImageTypes.includes(image.type)) {
-                uploadImageData.append('images[]', image);
-            }
-        });
-
         this.setState({ ButtonLoading: true });
-        // Send images using fetch or axios
-        fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=add`, {
-            method: 'POST',
-            body: uploadImageData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                // Reset file input field using ref
-                if (this.fileInputRef.current) {
-                    this.fileInputRef.current.value = "";
-                }
+        
+        // Use GalleryService to upload images
+        GalleryService.uploadImages(selectedImages, employeeIdToSend, logged_in_employee_id)
+            .then(data => {
+                if (data.status === "success") {
+                    // Reset file input field using ref
+                    if (this.fileInputRef.current) {
+                        this.fileInputRef.current.value = "";
+                    }
 
-                // Clear selected images and show success message
-                this.setState(prevState => {
-                    const updatedImages = [...prevState.images, ...data.data]; // Append new images
-                    const sortedImages = this.sortImages(updatedImages, prevState.sortOrder); // Sort images
+                    // Clear selected images and show success message
+                    this.setState(prevState => {
+                        const updatedImages = [...prevState.images, ...data.data]; // Append new images
+                        const sortedImages = this.sortImages(updatedImages, prevState.sortOrder); // Sort images
+                        
+                        return {
+                            successMessage: data.message,
+                            showSuccess: true,
+                            selectedImages: [],
+                            selectedEmployeeId: '',
+                            images: sortedImages,
+                            filteredImages: sortedImages // Apply sorting dynamically
+                        };
+                    });
                     
-                    return {
-                        successMessage: data.message,
-                        showSuccess: true,
-                        selectedImages: [],
-                        selectedEmployeeId: '',
-                        images: sortedImages,
-                        filteredImages: sortedImages // Apply sorting dynamically
-                    };
-                });
-                
-                // Auto-hide success message after 3 seconds
-                setTimeout(this.dismissMessages, 3000);
-            } else {
+                    // Auto-hide success message after 3 seconds
+                    setTimeout(this.dismissMessages, 3000);
+                } else {
+                    this.setState({
+                        errorMessage: data.message || "Upload failed. Please try again.",
+                        showError: true,
+                    });
+
+                    // Auto-hide error message after 3 seconds
+                    setTimeout(this.dismissMessages, 3000);
+                }
+                this.setState({ ButtonLoading: false });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
                 this.setState({
-                    errorMessage: data.message || "Upload failed. Please try again.",
+                    errorMessage: "An error occurred during the image upload.",
                     showError: true,
                 });
 
                 // Auto-hide error message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);
-            }
-            this.setState({ ButtonLoading: false });
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            this.setState({
-                errorMessage: "An error occurred during the image upload.",
-                showError: true,
+                this.setState({ ButtonLoading: false });
             });
-
-            // Auto-hide error message after 3 seconds
-            setTimeout(this.dismissMessages, 3000);
-            this.setState({ ButtonLoading: false });
-        });
     };
 
     // Handle Sort Order Change
@@ -300,32 +275,10 @@ class Gallery extends Component {
             errorMessage: "",
         });
     };
-
-    renderAlertMessages = () => (
-    <>
-      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 2000, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-circle-check me-2"></i>
-        {this.state.successMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
-      </div>
-
-      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-triangle-exclamation me-2"></i>
-        {this.state.errorMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
-      </div>
-    </>
-  );
     
     render() {
         const { fixNavbar } = this.props;
-        const { sortOrder, filteredImages, currentPage, imagesPerPage, employees, loading } = this.state;
+        const { sortOrder, filteredImages, currentPage, imagesPerPage, employees, loading, showSuccess, successMessage, showError, errorMessage} = this.state;
 
         // Pagination Logic
         const indexOfLastImage = currentPage * imagesPerPage;
@@ -335,7 +288,14 @@ class Gallery extends Component {
         const totalPages = Math.ceil(filteredImages.length / imagesPerPage);
         return (
             <>
-            {this.renderAlertMessages()}
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
                     <div className="container-fluid">
                         <div className="row row-cards">

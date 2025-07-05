@@ -5,7 +5,7 @@ class Activities extends Component {
   render() {
     return (
 		<div className={`section-body ${this.props.fixNavbar ? "marginTop" : ""} mt-3`}>
-      		<ActivitiesTime />
+      		<ActivitiesTime viewMode={true}/>
 	    </div>
     );
   }

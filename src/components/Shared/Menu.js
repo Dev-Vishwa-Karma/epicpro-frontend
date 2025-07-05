@@ -380,11 +380,11 @@ class Menu extends Component {
 									"label": "Clients",
 									"to": "/project-clients"
 								},
-								{
-									"id": 20,
-									"label": "Todo List",
-									"to": "/project-todo"
-								}
+								// {
+								// 	"id": 20,
+								// 	"label": "Todo List",
+								// 	"to": "/project-todo"
+								// }
 							]
 						},
 					);

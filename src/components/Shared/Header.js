@@ -4,7 +4,8 @@ import { withRouter, NavLink } from "react-router-dom";
 import authService from "../Authentication/authService";
 import "react-datepicker/dist/react-datepicker.css";
 import { breakInAction, punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
-import api from "../../api/axios";
+import HeaderService from "../../services/HeaderService";
+import AlertMessages from "../common/AlertMessages";
 
 class Header extends Component {
   constructor(props) {
@@ -124,9 +125,8 @@ class Header extends Component {
 
   autoCloseActivities = (punchInTime) => {
     const punchInTimeDate = punchInTime.toISOString().split('T')[0];
-		api.get(`${process.env.REACT_APP_API_URL}/auto_close_breaks.php?user_id=${window.user.id}&date=${punchInTimeDate}`)
-		.then(response => {
-			let data = response.data;
+		HeaderService.autoCloseActivities(window.user.id, punchInTimeDate)
+		.then(data => {
       if (data.status === "success") {
         this.setState({
           punchInTime: null,
@@ -157,9 +157,8 @@ class Header extends Component {
   }
 
   getPunchInStatus = () => {
-    api.get(`${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${this.state.userId}`)
-    .then(response => {
-      let data = response.data;
+    HeaderService.getPunchInStatus(this.state.userId)
+    .then(data => {
       if (data.status === "success") {
         const inTime = new Date(data.data[0].in_time);
         this.props.punchInAction(true);
@@ -187,19 +186,18 @@ class Header extends Component {
   };
 
   handleChange = (field, value) => {
-    this.setState({
+    this.setState(prevState => ({
       [field]: value,
       error: {
-        ...this.state.error,
-        [field]: value ? "" : "This field is required.",
+        ...prevState.error,
+        [field]: ""
       },
-    });
+    }));
   };
 
   fetchNotifications = () => {
-		api.get(`${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}&limit=5`)
-		.then(response => {
-			let data = response.data;
+		HeaderService.fetchNotifications(window.user.id, 5)
+		.then(data => {
 	      if (data.status === "success") {
           this.setState({ notifications: data.data, loading: false });
         } else {
@@ -216,9 +214,8 @@ class Header extends Component {
   };
 
   checkBirthdays = () => {
-		api.get(`${process.env.REACT_APP_API_URL}/notifications.php?action=birthday_notify`)
-		.then(response => {
-			let data = response.data;
+		HeaderService.checkBirthdays()
+		.then(data => {
 			if (data.status === "success") {
           this.fetchNotifications();
       } else {
@@ -231,14 +228,8 @@ class Header extends Component {
   };
 
   markAsRead = (notification_id) => {
-    let apiUrl = `${process.env.REACT_APP_API_URL}/notifications.php?action=mark_read&user_id=${window.user.id}`;
-    if (notification_id) {
-        apiUrl += `&notification_id=${notification_id}`;
-    }
-
-    api.get(apiUrl)
-		.then(response => {
-			let data = response.data;
+    HeaderService.markAsRead(window.user.id, notification_id)
+		.then(data => {
       if (data.status === "success") {
         this.fetchNotifications();
       } else {
@@ -251,9 +242,8 @@ class Header extends Component {
   };
 
   getActivities = () => {
-    api.get(`${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`)
-		.then(response => {
-			let data = response.data;
+    HeaderService.getActivities(window.user.id)
+		.then(data => {
       if (data.status === "success") {
         this.props.breakDurationCalAction(data.data.break_duration);
         this.setState({
@@ -279,19 +269,10 @@ class Header extends Component {
   };
 
   handlePunchIn = () => {
-    const formData = new FormData();
-    formData.append("employee_id", this.state.userId);
-    formData.append("activity_type", "Punch");
-    formData.append("description", null);
-    formData.append("status", "active");
-
     this.props.punchInAction(true);
     // Proceed with punch-in API call
-    api.post(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      formData
-    )
-		.then(response => {
-			let data = response.data;
+    HeaderService.punchIn(this.state.userId)
+		.then(data => {
       if (data.status === "success") {
         const currentTime = new Date();
 
@@ -502,27 +483,18 @@ class Header extends Component {
       todays_working_hours,
       todays_total_hours,
     } = this.state;
-    const formData = new FormData();
-    formData.append("employee_id", this.state.userId);
-    formData.append("report", report);
-    formData.append("start_time", this.formatToMySQLDateTime(start_time));
-    formData.append("break_duration_in_minutes", this.props.breakDuration);
-    formData.append("end_time", this.formatToMySQLDateTime(end_time));
-    formData.append(
-      "todays_working_hours",
-      this.formatToMySQLDateTime(todays_working_hours)
-    );
-    formData.append(
-      "todays_total_hours",
-      this.formatToMySQLDateTime(todays_total_hours)
-    );
 
     // API call to save the report and punch-out
-    api.post(`${process.env.REACT_APP_API_URL}/reports.php?action=add-report-by-user`,
-      formData
-    )
-		.then(response => {
-			let data = response.data;
+    HeaderService.addReport({
+      employee_id: this.state.userId,
+      report: report,
+      start_time: this.formatToMySQLDateTime(start_time),
+      break_duration_in_minutes: this.props.breakDuration,
+      end_time: this.formatToMySQLDateTime(end_time),
+      todays_working_hours: this.formatToMySQLDateTime(todays_working_hours),
+      todays_total_hours: this.formatToMySQLDateTime(todays_total_hours)
+    })
+		.then(data => {
       if (data.status === "success") {
         const newReport = data.data;
 
@@ -574,18 +546,8 @@ class Header extends Component {
   };
 
   afterPunchOut = () => {
-    const formData = new FormData();
-    formData.append("employee_id", this.state.userId);
-    formData.append("activity_type", "Punch");
-    formData.append("description", null);
-    formData.append("status", "completed");
-
-    // API call to add break
-    api.post(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      formData
-    )
-    .then(response => {
-      let data = response.data;
+    HeaderService.punchOut(this.state.userId)
+    .then(data => {
       if (data.status === "success") {
         this.setState({
           successMessage: data.message,
@@ -619,63 +581,6 @@ class Header extends Component {
     window.location.href = "/login";
   };
 
-  // Render function for Bootstrap toast messages
-  renderAlertMessages = () => {
-    return (
-      <>
-        {/* Add the alert for success messages */}
-        <div
-          className={`alert alert-success alert-dismissible fade show ${
-            this.state.showSuccess ? "d-block" : "d-none"
-          }`}
-          role="alert"
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            zIndex: 1050,
-            minWidth: "250px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <i className="fa-solid fa-circle-check me-2"></i>
-          {this.state.successMessage}
-          <button
-            type="button"
-            className="close"
-            aria-label="Close"
-            onClick={() => this.setState({ showSuccess: false })}
-          ></button>
-        </div>
-
-        {/* Add the alert for error messages */}
-        <div
-          className={`alert alert-danger alert-dismissible fade show ${
-            this.state.showError ? "d-block" : "d-none"
-          }`}
-          role="alert"
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            zIndex: 1050,
-            minWidth: "250px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <i className="fa-solid fa-triangle-exclamation me-2"></i>
-          {this.state.errorMessage}
-          <button
-            type="button"
-            className="close"
-            aria-label="Close"
-            onClick={() => this.setState({ showError: false })}
-          ></button>
-        </div>
-      </>
-    );
-  };
-
   render() {
     const { fixNavbar, darkHeader, isPunchedIn, breakDuration } = this.props;
     const {
@@ -686,13 +591,24 @@ class Header extends Component {
       todays_working_hours,
       todays_total_hours,
       elapsedFormatted,
-      notifications
+      notifications,
+      showSuccess,
+      successMessage, 
+      showError, 
+      errorMessage,
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
     return (
       <div>
-        {this.renderAlertMessages()}
+          <AlertMessages
+            showSuccess={showSuccess}
+            successMessage={successMessage}
+            showError={showError}
+            errorMessage={errorMessage}
+            setShowSuccess={(val) => this.setState({ showSuccess: val })}
+            setShowError={(val) => this.setState({ showError: val })}
+        		/>
         <div
           id="page_top"
           className={`section-body ${fixNavbar ? "sticky-top" : ""} ${
@@ -711,6 +627,7 @@ class Header extends Component {
                     onClick={
                       isPunchedIn ? this.handlePunchOut : this.handlePunchIn
                     }
+                    style={{width: "190px", height: "35px", fontSize: "14px"}}
                   >
                     {isPunchedIn ? `Punch Out : ${elapsedFormatted}` : "Punch In"}
                   </button>
@@ -784,9 +701,10 @@ class Header extends Component {
                       <i className="fa fa-user" />
                     </a>
                     <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                    {(window.user.role !== "employee") && (
                       <NavLink
                         to={{
-                          pathname: `/view-employee/${userId}/profile`,
+                          pathname: `/view-employee/${userId}`,
                         }}
                         className={`dropdown-item ${
                           currentTab === "profile" ? "active" : ""
@@ -797,6 +715,22 @@ class Header extends Component {
                       >
                         <i className="dropdown-icon fe fe-user" /> Profile
                       </NavLink>
+                    )}
+                        {(window.user.role === "employee") && (
+                        <NavLink
+                          to={{
+                            pathname: `/view-employee/${userId}/profile`,
+                          }}
+                          className={`dropdown-item ${
+                            currentTab === "profile" ? "active" : ""
+                          }`}
+                          isActive={(match, location) =>
+                            location?.state?.tab === "profile"
+                          }
+                        >
+                          <i className="dropdown-icon fe fe-user" /> Profile
+                        </NavLink>                        
+                        )}
                         {(window.user.role === "employee") && (
                           <NavLink
                             to={{

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import {
     boxAction, box2Action, box3Action, box4Action, box5Action, box6Action
 } from '../../../actions/settingsAction';
+import ProjectlistService from '../../../services/ProjectlistService';
 
 class ProjectList extends Component {
     constructor(props) {
@@ -69,10 +70,7 @@ class ProjectList extends Component {
         }
 
         // Fetch employees data
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
-            method: "GET",
-        })
-        .then(response => response.json())
+        ProjectlistService.getEmployees()
         .then(data => {
             if (data.status === 'success') {
                 this.setState({
@@ -90,10 +88,7 @@ class ProjectList extends Component {
 
 
         // Get projects data
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {
-            method: "GET",
-        })
-        .then(response => response.json())
+        ProjectlistService.getProjects(window.user.id, window.user.role)
         .then(data => {
             if (data.status === 'success') {
                 this.setState({
@@ -111,10 +106,7 @@ class ProjectList extends Component {
         });
 
         // Get clients data
-        fetch(`${process.env.REACT_APP_API_URL}/clients.php?action=view`, {
-            method: "GET",
-        })
-        .then(response => response.json())
+        ProjectlistService.getClients()
         .then(data => {
             if (data.status === 'success') {
                 this.setState({
@@ -262,13 +254,8 @@ class ProjectList extends Component {
         teamMembers.forEach((member) => {
             addProjectFormData.append('team_members[]', member);
         });
-
         // API call to add project
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=add`, {
-            method: "POST",
-            body: addProjectFormData,
-        })
-        .then((response) => response.json())
+        ProjectlistService.addProject(addProjectFormData)
         .then((data) => {
             if (data.success) {
                 // Update the project list

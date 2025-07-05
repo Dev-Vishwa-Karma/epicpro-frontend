@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { fetchTodosByEmployee } from '../../../services/EventsTodoService';
 
 class TodoList extends Component {
   constructor(props) {
@@ -10,7 +11,7 @@ class TodoList extends Component {
     };
   }
 
-  fetchTodos = (employeeId) => {
+  fetchTodos = async (employeeId) => {
     if (!employeeId) {
       this.setState({ todos: [] });
       return;
@@ -18,21 +19,13 @@ class TodoList extends Component {
 
     this.setState({ loading: true });
 
-    fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&employee_id=${employeeId}`, {
-      method: 'GET',
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === 'success' && Array.isArray(data.data)) {
-          this.setState({ todos: data.data, loading: false });
-        } else {
-          this.setState({ todos: [], loading: false });
-        }
-      })
-      .catch((error) => {
+    try {
+      const todos = await fetchTodosByEmployee(employeeId);
+      this.setState({ todos, loading: false });
+    } catch (error) {
         console.error('Error fetching todos:', error);
         this.setState({ todos: [], loading: false });
-      });
+      }
   };
 
   handleEmployeeSelection = (e) => {

@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
 import TodoList from './TodoList';
+import { EventService } from '../../../services/EventService';
+
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -77,24 +79,24 @@ class Events extends Component {
 		this.fetchEmployees();
 		this.fetchWorkingHoursReports(null);
 		const start_date = `${this.state.selectedYear}-01-01`;
-		const end_date = `${this.state.selectedYear}-12-31`;     
+		const end_date = `${this.state.selectedYear}-12-31`;
 		this.fetchLeaveData(id, start_date, end_date);
 		this.getAlternateSaturday();
 	}
 
-	fetchWorkingHoursReports = () => {
-	let employeeId = window.user?.role !== 'admin' ?
-			this.state.calendarView === 'report' ? window.user.id: null : null;
-	if (!employeeId && !localStorage.getItem('empId')) {
-		return;
-	}
-	if (!employeeId) {
-		employeeId = localStorage.getItem('empId');
-	}
-
+	fetchWorkingHoursReports = (employeeId = null) => {
+		let userId = employeeId;
+		if (!userId && window.user?.role !== 'admin') {
+			userId = this.state.calendarView === 'report' ? window.user.id : null;
+		}
+		if (!userId && !localStorage.getItem('empId')) {
+			return;
+		}
+		if (!userId) {
+			userId = localStorage.getItem('empId');
+		}
 	let startDate = localStorage.getItem('startDate');
 	let endDate = localStorage.getItem('endDate');
-
 	if (!startDate || !endDate) {
 		const now = new Date();
 		const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -103,22 +105,11 @@ class Events extends Component {
 		startDate = formatDate(firstDay);
 		endDate = formatDate(lastDay);
 	}
-
-	fetch(
-		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
-		{ method: 'GET' }
-	)
-		.then((response) => {
-		if (!response.ok) {
-			throw new Error('Network response was not ok');
-		}
-		return response.json();
-		})
-		.then((data) => {
-		// Defer state update
+		EventService.getWorkingHoursReports(userId, startDate, endDate)
+			.then(data => {
 		setTimeout(() => {
 			if (data.status === 'success') {
-			if (employeeId === '') {
+			if (userId === '') {
 				this.setState({ workingHoursReports: [] });
 			} else {
 				this.setState({
@@ -137,7 +128,6 @@ class Events extends Component {
 		})
 		.catch((err) => {
 		console.error('Error fetching working hours:', err);
-		// Defer state update
 		setTimeout(() => {
 			this.setState({
 			workingHoursReports: [],
@@ -149,10 +139,7 @@ class Events extends Component {
 	};
 
 	fetchEmployees = () => {
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
-			method: "GET",
-		})
-			.then(response => response.json())
+		EventService.getEmployees()
 			.then(data => {
 				if (data.status === 'success') {
 		
@@ -178,17 +165,12 @@ class Events extends Component {
 	};
 	fetchTodos = (employeeId) => {
 		if (!employeeId) {
-			this.setState({ todos: [] }); // Ensure todos is always an array
+			this.setState({ todos: [] });
 			return;
 		}
-	
 		this.setState({ loading: true });
-	
-		fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&employee_id=${employeeId}`, {
-			method: "GET",
-		})
-		.then((res) => res.json())
-		.then((data) => {
+		EventService.getTodos(employeeId)
+		.then(data => {
 			if (data.status === 'success' && Array.isArray(data.data)) {
 				this.setState({ todos: data.data, loading: false });
 			} else {
@@ -203,9 +185,7 @@ class Events extends Component {
 
 
 	fetchLeaveData = (employee_id, start_date, end_date) => {
-		  const url = `${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&start_date=${start_date}&end_date=${end_date}&employee_id=${employee_id}`;
-			fetch(url)
-				.then((res) => res.json())
+		EventService.getLeaveData(employee_id, start_date, end_date)
 				.then((data) => {
 					if (data.status === "success" && Array.isArray(data.data)) {
 						if(employee_id === ''){
@@ -325,18 +305,13 @@ handleYearChange = (event) => {
 	getAlternateSaturday = async () => {
 		const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
 		try {
-			const response = await fetch(
-				`${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${now.getFullYear()}`
-			);
-			const data = await response.json();
-
+			const data = await EventService.getAlternateSaturdays(now.getFullYear());
 			this.setState({
 				alternateSatudays: data?.data
 			})
-			
-		 } catch (error) {
-      console.error("Failed to fetch saved Saturdays:", error);
-    }
+		} catch (error) {
+	console.error("Failed to fetch saved Saturdays:", error);
+	}
 	}
 
 	addEvent = (e) => {
@@ -345,28 +320,19 @@ handleYearChange = (event) => {
 		this.setState({ ButtonLoading: true });
 		// Reset selectedEvent before adding a new event
 		if (this.state.selectedEvent) {
-			this.setState({
-				selectedEvent: null,
-			});
+			this.setState({ selectedEvent: null });
 		}
-
 		if (this.validateForm(e)) {
 			const { event_name, event_date, logged_in_employee_id } = this.state;
 
 			const addEventData = new FormData();
-			addEventData.append('employee_id', logged_in_employee_id); // Always use logged in user's ID
+			addEventData.append('employee_id', logged_in_employee_id);
 			addEventData.append('event_name', event_name);
 			addEventData.append('event_date', event_date);
 			addEventData.append('event_type', 'event');
 			addEventData.append('created_by', logged_in_employee_id);
-
-			// API call to add event
-			fetch(`${process.env.REACT_APP_API_URL}/events.php?action=add`, {
-				method: "POST",
-				body: addEventData,
-			})
-			.then((response) => response.json())
-			.then((data) => {
+			EventService.addEvent(addEventData)
+				.then(data => {
 				if (data.status === "success") {
 					this.setState((prevState) => {
 						const updatedEventData = [...(prevState.events || []), data.data];
@@ -385,7 +351,6 @@ handleYearChange = (event) => {
 							ButtonLoading: false,
 						};
 					});
-
 					// Auto-hide success message after 3 seconds
 					setTimeout(() => {
 						this.setState({
@@ -432,15 +397,7 @@ handleYearChange = (event) => {
 			});
 			return;
 		}
-		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=delete&event_id=${eventId}`, {
-			method: 'GET'
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
-			}
-			return response.json();
-		})
+		EventService.deleteEvent(eventId)
 		.then(data => {
 			if (data.status === 'success') {
 				this.setState(prevState => ({
@@ -584,18 +541,13 @@ fetchEvents = () => {
 			event_type: 'birthday',
 			employee_id: employee.id
 		};
-	}).filter(event => event !== null); // Remove null entries
-
-	fetch(`${process.env.REACT_APP_API_URL}/events.php?start_date=${startDate}&end_date=${endDate}`, {
-		method: "GET",
-	})
-	.then(response => response.json())
+	}).filter(event => event !== null);
+	EventService.getEvents(startDate, endDate)
 	.then(data => {
 		if (data.status === 'success') {
 			const eventsData = data.data;
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
-			
 			// Combine regular events with birthday events
 			if (eventsData && eventsData.length > 0) {
 				const allEvents = [...eventsData, ...birthdayEvents];
@@ -609,8 +561,6 @@ fetchEvents = () => {
 					loading: false
 				});
 			}
-			
-
 		} else {
 			this.setState({ message: data.message, loading: false });
 		}
