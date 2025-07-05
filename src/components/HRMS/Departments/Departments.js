@@ -1,23 +1,27 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
+import DepartmentModal from './DepartmentModal';
+import DeleteModal from '../../common/DeleteModal';
+import DepartmentTable from './DepartmentTable';
+import DepartmentGrid from './DepartmentGrid';
 class departments extends Component {
     constructor(props) {
 		super(props);
 		this.state = {
-            departmentName: "",
-            departmentHead: "",
-            departmentData: [], // To store the list of users
+            department_name: "",
+            department_head: "",
+            departmentData: [],
             selectedDepartment: null,
             departmentToDelete: null,
-		    // message: null, // To store error messages
 			successMessage: "",
             errorMessage: "",
             showSuccess: false,
             showError: false,
             errors: {},
             loading: true,
-            ButtonLoading: false
+            ButtonLoading: false,
+            showModal: false
 		};
 
         // Create a ref to scroll to the message container
@@ -42,9 +46,36 @@ class departments extends Component {
 		});
     }
 
+    // Handle Add button click
+    handleAddClick = () => {
+        this.setState({ 
+            showModal: true, 
+            selectedDepartment: null,
+            department_name: '', 
+            department_head: '', 
+            errors: {} 
+        });
+    }
+
     // Handle edit button click
     handleEditClick = (department) => {
-        this.setState({ selectedDepartment: department });
+    this.setState({
+        selectedDepartment: { ...department },
+        showModal: true,
+        errors: {}
+    });
+    };
+
+    getFormData = () => {
+        const { selectedDepartment } = this.state;
+        if (selectedDepartment) {
+            return selectedDepartment;
+        } else {
+            return {
+                department_name: this.state.department_name,
+                department_head: this.state.department_head
+            };
+        }
     };
 
     // Handle input change for editing fields
@@ -142,7 +173,7 @@ class departments extends Component {
                     };
                 });
                 setTimeout(this.dismissMessages, 3000);
-                document.querySelector("#editDepartmentModal .close").click();
+                this.onCloseAddEdit()
             } else {
                 this.setState({ 
 					errorMessage: "Failed to update department",
@@ -172,6 +203,15 @@ class departments extends Component {
             departmentToDelete: departmentId, // Save the department data
         });
     };
+
+    onCloseAddEdit = () => {
+        this.setState({ showModal: false,
+             selectedDepartment: null, 
+             department_name: '', 
+             department_head: '', 
+             errors: {} 
+            })
+    } 
       
     confirmDelete = () => {
         const { departmentToDelete } = this.state;
@@ -220,6 +260,7 @@ class departments extends Component {
     // Handle input changes
     handleInputChangeForAddDepartment = (event) => {
         const { name, value } = event.target;
+        console.log('name',name,value)
         this.setState({ 
             [name]: value,
             errors: { ...this.state.errors, [name]: "" }
@@ -228,26 +269,26 @@ class departments extends Component {
 
     // Validate Add Department Form
 	validateDepartmentForm = (e) => {
-		const { departmentName, departmentHead } = this.state;
+		const { department_name, department_head } = this.state;
         let errors = {};
         let isValid = true;
 
         // Department Name validation (only letters and spaces)
         const namePattern = /^[a-zA-Z\s]+$/;
-        if (!departmentName.trim()) {
-            errors.departmentName = "Department Name is required.";
+        if (!department_name.trim()) {
+            errors.department_name = "Department Name is required.";
             isValid = false;
-        } else if (!namePattern.test(departmentName)) {
-            errors.departmentName = "Department Name must only contain letters and spaces.";
+        } else if (!namePattern.test(department_name)) {
+            errors.department_name = "Department Name must only contain letters and spaces.";
             isValid = false;
         }
 
         // Department Head validation (only letters and spaces)
-        if (!departmentHead.trim()) {
-            errors.departmentHead = "Department Head is required.";
+        if (!department_head.trim()) {
+            errors.department_head = "Department Head is required.";
             isValid = false;
-        } else if (!namePattern.test(departmentHead)) {
-            errors.departmentHead = "Department Head must only contain letters and spaces.";
+        } else if (!namePattern.test(department_head)) {
+            errors.department_head = "Department Head must only contain letters and spaces.";
             isValid = false;
         }
 
@@ -257,7 +298,7 @@ class departments extends Component {
 
     // Add department data API call
     addDepartmentData = () => {
-        const { departmentName, departmentHead} = this.state;
+        const { department_name, department_head} = this.state;
 
         if (!this.validateDepartmentForm()) {
             return; // Stop execution if validation fails
@@ -266,8 +307,8 @@ class departments extends Component {
         this.setState({ ButtonLoading: true });
 
         const addDepartmentFormData = new FormData();
-        addDepartmentFormData.append('department_name', departmentName);
-        addDepartmentFormData.append('department_head', departmentHead);
+        addDepartmentFormData.append('department_name', department_name);
+        addDepartmentFormData.append('department_head', department_head);
 
         // API call to add department
         fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=add`, {
@@ -280,16 +321,15 @@ class departments extends Component {
                 // Update the department list
                 this.setState((prevState) => ({
                     departmentData: [...(prevState.departmentData || []), data.newDepartment], // Assuming the backend returns the new department
-                    departmentName: "",
-                    departmentHead: "",
+                    department_name: "",
+                    department_head: "",
                     numOfEmployees: "",
                     errors:{},
                     successMessage: "Department added successfully!",
                     showSuccess: true,
                     ButtonLoading: false
                 }));
-                // Close the modal
-                document.querySelector("#addDepartmentModal .close").click();
+                this.onCloseAddEdit();
 
                 setTimeout(this.dismissMessages, 3000);
             } else {
@@ -317,8 +357,8 @@ class departments extends Component {
     resetFormErrors = () => {
         this.setState({
             errors: {}, // Clear all error messages
-            departmentName: "",
-            departmentHead: ""
+            department_name: "",
+            department_head: ""
         });
     };
 
@@ -334,7 +374,7 @@ class departments extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { departmentName, departmentHead, departmentData, selectedDepartment, message, loading,showSuccess,successMessage,showError,errorMessage} = this.state;
+        const { department_name, department_head, departmentData, selectedDepartment, message, loading,showSuccess,successMessage,showError,errorMessage} = this.state;
         return (
             <>
                 <AlertMessages
@@ -355,7 +395,13 @@ class departments extends Component {
                                         <li className="nav-item"><a className="nav-link" id="Departments-tab" data-toggle="tab" href="#Departments-grid">Grid View</a></li>
                                     </ul>
                                     <div className="header-action">
-                                        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#addDepartmentModal"><i className="fe fe-plus mr-2" />Add</button>
+                                       <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => this.handleAddClick()}>
+                                        <i className="fe fe-plus mr-2" />
+                                        Add
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -368,263 +414,54 @@ class departments extends Component {
                                             <div className="card-header">
                                                 <h3 className="card-title">Departments List</h3>
                                                 <div className="card-options">
-                                                    {/* <div className="input-group">
-                                                        <input type="text" className="form-control form-control-sm" placeholder="Search something..." name="s" />
-                                                        <span className="input-group-btn ml-2"><button className="btn btn-icon" type="submit"><span className="fe fe-search" /></button></span>
-                                                    </div> */}
                                                 </div>
                                             </div>
                                             <div className="card-body">
-                                                <div className="table-responsive">
-                                                    {loading ? (
-                                                        <div className="card-body">
-                                                            <div className="dimmer active">
-                                                                <div className="loader" />
-                                                            </div>
+                                                {loading ? (
+                                                    <div className="card-body">
+                                                        <div className="dimmer active">
+                                                            <div className="loader" />
                                                         </div>
-                                                    ) : ( // Show Table after loading is false
-                                                        <table className="table table-striped table-vcenter table-hover mb-0">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>#</th>
-                                                                    <th>Department Name</th>
-                                                                    <th>Department Head</th>
-                                                                    <th>Total Employee</th>
-                                                                    <th>Action</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {departmentData.length > 0 ? (
-                                                                    departmentData.map((department, index) => (
-                                                                        <tr key={index}>
-                                                                            <td>{index + 1}</td>
-                                                                            <td>
-                                                                                <div className="font-15">{department.department_name}</div>
-                                                                            </td>
-                                                                            <td>{department.department_head}</td>
-                                                                            <td>{department.total_employee}</td>
-                                                                            <td>
-                                                                                <button 
-                                                                                    type="button"
-                                                                                    className="btn btn-icon"
-                                                                                    title="Edit"
-                                                                                    data-toggle="modal"
-                                                                                    data-target="#editDepartmentModal"
-                                                                                    onClick={() => this.handleEditClick(department)}
-                                                                                >
-                                                                                    <i className="fa fa-edit" />
-                                                                                </button>
-                                                                                <button 
-                                                                                    type="button"
-                                                                                    className="btn btn-icon btn-sm js-sweetalert"
-                                                                                    title="Delete"
-                                                                                    data-type="confirm"
-                                                                                    onClick={() => this.openModal(department.id)}
-                                                                                    data-toggle="modal"
-                                                                                    data-target="#deleteDepartmentModal"
-                                                                                >
-                                                                                    <i className="fa fa-trash-o text-danger" />
-                                                                                </button>
-                                                                            </td>
-                                                                        </tr>
-                                                                    ))
-                                                                ): (
-                                                                    !message && <tr><td>Department not found</td></tr>
-                                                                )}
-                                                            </tbody>
-                                                        </table>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                ) : (
+                                                    <DepartmentTable 
+                                                        departmentData={departmentData} 
+                                                        message={message}
+                                                        onEditClick={this.handleEditClick} 
+                                                        onDeleteClick={this.openModal} 
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                     </div>
                                     <div className="tab-pane fade" id="Departments-grid" role="tabpanel">
-                                        <div className="row clearfix">
-                                            {departmentData.length > 0 ? (
-                                                departmentData.map((department, index) => (
-                                                    <div className="col-lg-3 col-md-6" key={index}>
-                                                        <div className="card">
-                                                            <div className="card-body text-center">
-                                                                <img className="img-thumbnail rounded-circle avatar-xxl" src="../assets/images/sm/avatar2.jpg" alt="fake_url" />
-                                                                <h6 className="mt-3">{department.department_head}</h6>
-                                                                <div className="text-center text-muted mb-2">{department.department_name}</div>
-                                                                <div className="text-center text-muted mb-3">Total Employee : {department.total_employee}</div>
-                                                                <button 
-                                                                    type="button"
-                                                                    className="btn btn-icon btn-outline-primary mr-2"
-                                                                    title="Edit"
-                                                                    data-toggle="modal"
-                                                                    data-target="#editDepartmentModal"
-                                                                    onClick={() => this.handleEditClick(department)}
-                                                                >
-                                                                    <i className="fa fa-pencil" />
-                                                                </button>
-                                                                <button 
-                                                                    type="button"
-                                                                    className="btn btn-icon btn-outline-danger"
-                                                                    title="Delete"
-                                                                    data-type="confirm"
-                                                                    onClick={() => this.openModal(department.id)}
-                                                                    data-toggle="modal"
-                                                                    data-target="#deleteDepartmentModal"
-                                                                >
-                                                                    <i className="fa fa-trash" />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ): (
-                                                <div>
-                                                    <span colSpan="2">Department not found</span>
-                                                </div>
-                                            )}
-                                        </div>
+                                         <DepartmentGrid
+                                            departmentData={departmentData}
+                                            onEditClick={this.handleEditClick}
+                                            onDeleteClick={this.openModal}
+                                        />
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
-                    {/* Add Department Modal */}
-                    <div className="modal fade" id="addDepartmentModal" tabIndex={-1} role="dialog" aria-labelledby="addDepartmentModalLabel" data-backdrop="static" 
-                    data-keyboard="false">
-                        <div className="modal-dialog" role="document">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="addDepartmentModalLabel">Add Departments</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.resetFormErrors}><span aria-hidden="true">×</span></button>
-                                </div>
-                                <div className="modal-body">
-                                    <div className="row clearfix">
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label" htmlFor="departmentName">Department Name</label>
-                                                <input
-                                                    type="text"
-                                                    // className="form-control"
-												    className={`form-control ${this.state.errors.departmentName ? "is-invalid" : ""}`}
-                                                    placeholder="Departments Name"
-                                                    name="departmentName"
-                                                    value={departmentName}
-                                                    onChange={this.handleInputChangeForAddDepartment}
-                                                />
-                                                {this.state.errors.departmentName && (
-                                                    <small className="invalid-feedback">{this.state.errors.departmentName}</small>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label" htmlFor="departmentHead">Department Head</label>
-                                                <input
-                                                    type="text"
-                                                    className={`form-control ${this.state.errors.departmentHead ? "is-invalid" : ""}`}
-                                                    placeholder="Departments Head"
-                                                    name="departmentHead"
-                                                    value={departmentHead}
-                                                    onChange={this.handleInputChangeForAddDepartment}
-                                                />
-                                                {this.state.errors.departmentHead && (
-                                                    <small className="invalid-feedback">{this.state.errors.departmentHead}</small>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                    <button type="button" onClick={this.addDepartmentData} className="btn btn-primary" disabled={this.state.ButtonLoading}>
-                                        {this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-                                        Save changes
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Edit Department Modal */}
-                    <div className="modal fade" id="editDepartmentModal" tabIndex={-1} role="dialog" aria-labelledby="editDepartmentModalLabel" data-backdrop="static" data-keyboard="false">
-                        <div className="modal-dialog" role="document">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="editDepartmentModalLabel">Edit Departments</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.resetFormErrors}><span aria-hidden="true">×</span></button>
-                                </div>
-                                <div className="modal-body">
-                                    {selectedDepartment ? (
-                                        <>
-                                            <div className="row clearfix">
-                                                <div className="col-md-12">
-                                                    <div className="form-group">
-                                                        <label className="form-label" htmlFor='department_name'>Departments Name</label>
-                                                        <input 
-                                                            type="text"
-                                                            className={`form-control ${this.state.errors.department_name ? "is-invalid" : ""}`}
-                                                            value={selectedDepartment.department_name || ''} onChange={this.handleInputChange}
-                                                            name="department_name"
-                                                        />
-                                                        {this.state.errors.department_name && (
-                                                            <small className="invalid-feedback">{this.state.errors.department_name}</small>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="col-md-12">
-                                                    <div className="form-group">
-                                                        <label className="form-label">Departments Head</label>
-                                                        <input
-                                                            type="text"
-                                                            className={`form-control ${this.state.errors.department_head ? "is-invalid" : ""}`}
-                                                            value={selectedDepartment.department_head || ''} onChange={this.handleInputChange}
-                                                            name="department_head"
-                                                        />
-                                                        {this.state.errors.department_head && (
-                                                            <small className="invalid-feedback">{this.state.errors.department_head}</small>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <p>Department data not found.</p>
-                                    )}
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                    <button type="button" className="btn btn-primary" onClick={this.saveChanges} disabled={this.state.ButtonLoading}>
-                                        {this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-                                        Save changes
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Delete Department Model */}
-                    <div 
-                        className="modal fade" id="deleteDepartmentModal" tabIndex={-1} role="dialog" aria-labelledby="deleteDepartmentModalLabel"
-                    >
-                        <div className="modal-dialog" role="document">
-                            <div className="modal-content">
-                                <div className="modal-header" style={{ display: 'none' }}>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                                </div>
-                                <div className="modal-body">
-                                    <div className="row clearfix">
-                                        <p>Are you sure you want to delete the department?</p>
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal" >Cancel</button>
-                                    <button type="button" onClick={this.confirmDelete} className="btn btn-danger" disabled={this.state.ButtonLoading}>
-                                        {this.state.ButtonLoading && (
-											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-										)}
-                                        Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <DepartmentModal
+                        isEdit={!!selectedDepartment}
+                        show={this.state.showModal}
+                        modalId="departmentModal"
+                        onClose= {this.onCloseAddEdit}
+                        onSubmit={selectedDepartment ? this.saveChanges : this.addDepartmentData}
+                        onChange={selectedDepartment ? this.handleInputChange : this.handleInputChangeForAddDepartment}
+                        formData={this.getFormData()}
+                        errors={this.state.errors}
+                        loading={this.state.ButtonLoading}
+                    />
+                    <DeleteModal
+                        onConfirm={this.confirmDelete}
+                        isLoading={this.state.ButtonLoading}
+                        deleteBody='Are you sure you want to delete the Department?'
+                        modalId="deleteDepartmentModal"
+                    />
                 </div>
             </>
         )
