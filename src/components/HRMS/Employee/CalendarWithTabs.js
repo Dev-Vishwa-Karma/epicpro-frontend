@@ -7,6 +7,7 @@ import AlertMessages from '../../common/AlertMessages';
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
+        const todayStr = this.formatDate(new Date());
         this.state = {
             employee: {
                 first_name: "",
@@ -45,6 +46,8 @@ class CalendarWithTabs extends Component {
             selectedReport: null,
             alternateSatudays: [],
             images: [],
+            filterFromDate: todayStr,
+            filterToDate: todayStr,
         };
         localStorage.removeItem('empId');
         localStorage.removeItem('startDate');
@@ -73,18 +76,10 @@ class CalendarWithTabs extends Component {
             if (this.props.employeeId) {
                 this.fetchEmployeeDetails(this.props.employeeId);
                 this.getDepartments();
+                this.handleApplyFilter();
             }
         }
     }
-
-    // componentDidUpdate(prevProps, prevState) {
-    //     const { id, activeTab } = this.props.match.params;
-    //     // // Watch for tab change even if pathname is same
-    //     if (activeTab && activeTab !== prevState.activeTab) {
-    //          console.log('prevState.activeTab',prevState.activeTab)
-    //         this.setState({ activeTab });
-    //     }
-    // }
 
     getDepartments = () => {
         // Get department data from departments table
@@ -105,25 +100,6 @@ class CalendarWithTabs extends Component {
         const day = (`0${d.getDate()}`).slice(-2);
         return `${year}-${month}-${day}`;
     };
-
-    // Common fetch function
-    fetchData = (url, onSuccessKey) => {
-        fetch(url, {
-            method: "GET",
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    this.setState({ [onSuccessKey]: data.data });
-                } else {
-                    this.setState({ errorMessage: data.message });
-                }
-            })
-            .catch(err => {
-                this.setState({ error: 'Failed to fetch data' });
-                console.error(err);
-            });
-    }
 
     generateCalendarEvents = (reports, leaves) => {
         const missingReportEvents = [];
@@ -255,9 +231,6 @@ class CalendarWithTabs extends Component {
         const currentEmployeeId = employeeId;
 
         if (currentEmployeeId) {
-            // Fetch activities
-            this.fetchData(`${baseUrl}/activities.php?user_id=${currentEmployeeId}`, 'activities');
-
             // Fetch reports
             fetch(`${baseUrl}/reports.php?user_id=${currentEmployeeId}&from_date=${startDate}&to_date=${endDate}`, {
                 method: "GET",
@@ -461,8 +434,6 @@ class CalendarWithTabs extends Component {
             });
     };
 
-
-
     // Update profile
     handleProfileChange = (event) => {
         const { name, value } = event.target;
@@ -629,9 +600,33 @@ class CalendarWithTabs extends Component {
         });
     };
 
+    handleApplyFilter = async () => {
+        this.setState({ loading: true });
+        const { filterFromDate, filterToDate } = this.state;
+        let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true&user_id=${this.props.employeeId}`;
+    
+        if (filterFromDate) {
+            apiUrl += `&from_date=${filterFromDate}`;
+        }
+        if (filterToDate) {
+            apiUrl += `&to_date=${filterToDate}`;
+        }
+
+        try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        if (data.status === "success") {
+            this.setState({ activities: data.data, loading: false });
+        } else {
+            this.setState({ activities: [], loading: false, error: data.message });
+        }
+        } catch (err) {
+        this.setState({ activities: [], loading: false, error: "Failed to fetch data" });
+        }
+    };
+
     render() {
-        const { fixNavbar } = this.props;
-        const { employee, calendarEventsData, skillsFrontend, skillsBackend, showSuccess,successMessage,showError, errorMessage } = this.state;
+        const { activities, employee, calendarEventsData, skillsFrontend, skillsBackend, showSuccess,successMessage,showError, errorMessage } = this.state;
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
         // Handle case where employee data is not available
@@ -666,8 +661,7 @@ class CalendarWithTabs extends Component {
                     />
                 )}
 
-
-                <div className="section-body  py-4">
+                <div className="section-body py-4">
                     <div className="container-fluid">
                         <div className="row clearfix">
                             <div className="col-12">
@@ -718,9 +712,6 @@ class CalendarWithTabs extends Component {
                                             Profile
                                         </a>
                                     </li>
-                                    {/* <li className="nav-item">
-                                        <a className="nav-link" id="pills-blog-tab" data-toggle="pill" href="#pills-blog" role="tab" aria-controls="pills-blog" aria-selected="true">Blog</a>
-                                    </li> */}
                                 </ul>
                             </div>
                             <div className="col-lg-12 col-md-12">
@@ -766,29 +757,53 @@ class CalendarWithTabs extends Component {
                                         </div>
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "timeline" ? "show active" : ""}`} id="pills-timeline" role="tabpanel" aria-labelledby="pills-timeline-tab">
-                                        <ActivitiesTime viewMode={false} viewModeOne={true} selectedEmployeeId={this.state.employeeId} />
+                                        {/* <div className='container-fluid'> */}
+                                            <div className="card mb-3">
+                                                <div className="card-body">
+                                                    <div className="row">
+                                                        <div className="col-md-3">
+                                                            <label>From Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control"
+                                                                value={this.state.filterFromDate}
+                                                                onChange={(e) => this.setState({ filterFromDate: e.target.value })}
+                                                            />
+                                                        </div>
+                                                        <div className="col-md-3">
+                                                            <label>To Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control"
+                                                                value={this.state.filterToDate}
+                                                                onChange={(e) => this.setState({ filterToDate: e.target.value })}
+                                                            />
+                                                        </div>
+                                                            <div
+                                                            className={
+                                                                window.user.role === "admin" || window.user.role === "super_admin"
+                                                                ? "col-md-3"
+                                                                : "col-md-4"
+                                                            }
+                                                            >
+                                                            <button
+                                                                className="btn btn-primary"
+                                                                style={{ marginTop: 34 }}
+                                                                onClick={this.handleApplyFilter}
+                                                            >
+                                                                Apply
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                            
+                                        <ActivitiesTime activities = { activities } />
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "profile" ? "show active" : ""}`} id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
                                         <div className="card">
                                             <div className="card-header">
                                                 <h3 className="card-title">Edit Profile</h3>
-                                                {/* <div className="card-options">
-                                                    <a href="/#" className="card-options-fullscreen" data-toggle="card-fullscreen"><i className="fe fe-maximize" /></a>
-                                                    <a href="/#" className="card-options-remove" data-toggle="card-remove"><i className="fe fe-x" /></a>
-                                                    <div className="item-action dropdown ml-2">
-                                                        <a href="fake_url" data-toggle="dropdown"><i className="fe fe-more-vertical" /></a>
-                                                        <div className="dropdown-menu dropdown-menu-right">
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-eye" /> View Details </a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-share-alt" /> Share </a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-cloud-download" /> Download</a>
-                                                            <div className="dropdown-divider" />
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-copy" /> Copy to</a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-folder" /> Move to</a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-edit" /> Rename</a>
-                                                            <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-trash" /> Delete</a>
-                                                        </div>
-                                                    </div>
-                                                </div> */}
                                             </div>
                                             <div className="card-body">
                                                 <div className="row clearfix">
@@ -842,20 +857,6 @@ class CalendarWithTabs extends Component {
                                                             )}
                                                         </div>
                                                     </div>
-                                                    {/* <div className="col-sm-4 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Mobile No</label>
-                                                            <input
-                                                                type="tel"
-                                                                name="mobile_no1"
-                                                                id="mobile_no1"
-                                                                className="form-control"
-                                                                placeholder="Enter Mobile No"
-                                                                value={employee.mobile_no1 || ""}
-                                                                onChange={this.handleProfileChange}
-                                                            />
-                                                        </div>
-                                                    </div> */}
                                                     <div className="col-sm-4 col-md-4">
                                                         <div className="form-group">
                                                             <label className="form-label">Gender</label>
@@ -1097,271 +1098,8 @@ class CalendarWithTabs extends Component {
                                             </div>
                                         </div>
                                     </div>
-                                    {/* <div className="tab-pane fade" id="pills-blog" role="tabpanel" aria-labelledby="pills-blog-tab">
-                                        <div className="card">
-                                            <div className="card-body">
-                                                <div className="new_post">
-                                                    <div className="form-group">
-                                                        <textarea rows={4} className="form-control no-resize" placeholder="Please type what you want..." defaultValue={""} />
-                                                    </div>
-                                                    <div className="mt-4 text-right">
-                                                        <button className="btn btn-warning"><i className="icon-link" /></button>
-                                                        <button className="btn btn-warning"><i className="icon-camera" /></button>
-                                                        <button className="btn btn-primary">Post</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="card blog_single_post">
-                                            <div className="img-post">
-                                                <img className="d-block img-fluid" src="../assets/images/gallery/6.jpg" alt="First slide" />
-                                            </div>
-                                            <div className="card-body">
-                                                <h4><a href="/#">All photographs are accurate</a></h4>
-                                                <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal</p>
-                                            </div>
-                                            <div className="footer">
-                                                <div className="actions">
-                                                    <a href="fake_url;" className="btn btn-outline-secondary">Continue Reading</a>
-                                                </div>
-                                                <ul className="stats list-unstyled">
-                                                    <li><a href="fake_url;">General</a></li>
-                                                    <li><a href="fake_url;" className="icon-heart"> 28</a></li>
-                                                    <li><a href="fake_url;" className="icon-bubbles"> 128</a></li>
-                                                </ul>
-                                            </div>
-                                            <ul className="list-group card-list-group">
-                                                <li className="list-group-item py-5">
-                                                    <div className="media">
-                                                        <img className="media-object avatar avatar-md mr-4" src="../assets/images/xs/avatar3.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <div className="media-heading">
-                                                                <small className="float-right text-muted">4 min</small>
-                                                                <h5>Peter Richards</h5>
-                                                            </div>
-                                                            <div>
-                                                                Aenean lacinia bibendum nulla sed consectetur. Vestibulum id ligula porta felis euismod semper. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras
-                                                                justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Cum sociis natoque penatibus et magnis dis parturient montes,
-                                                                nascetur ridiculus mus.
-                                                        </div>
-                                                            <ul className="media-list">
-                                                                <li className="media mt-4">
-                                                                    <img className="media-object avatar mr-4" src="../assets/images/xs/avatar1.jpg" alt="fake_url" />
-                                                                    <div className="media-body">
-                                                                        <strong>Debra Beck: </strong>
-                                                                        Donec id elit non mi porta gravida at eget metus. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec ullamcorper nulla non metus
-                                                                        auctor fringilla. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Sed posuere consectetur est at lobortis.
-                                                                    </div>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div className="card blog_single_post">
-                                            <div className="img-post">
-                                                <img className="d-block img-fluid" src="../assets/images/gallery/4.jpg" alt="First slide" />
-                                            </div>
-                                            <div className="card-body">
-                                                <h4><a href="/#">All photographs are accurate</a></h4>
-                                                <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal</p>
-                                            </div>
-                                            <div className="footer">
-                                                <div className="actions">
-                                                    <a href="fake_url;" className="btn btn-outline-secondary">Continue Reading</a>
-                                                </div>
-                                                <ul className="stats list-unstyled">
-                                                    <li><a href="fake_url;">General</a></li>
-                                                    <li><a href="fake_url;" className="icon-heart"> 28</a></li>
-                                                    <li><a href="fake_url;" className="icon-bubbles"> 128</a></li>
-                                                </ul>
-                                            </div>
-                                            <ul className="list-group card-list-group">
-                                                <li className="list-group-item py-5">
-                                                    <div className="media">
-                                                        <img className="media-object avatar avatar-md mr-4" src="../assets/images/xs/avatar7.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <div className="media-heading">
-                                                                <small className="float-right text-muted">12 min</small>
-                                                                <h5>Peter Richards</h5>
-                                                            </div>
-                                                            <div>
-                                                                Donec id elit non mi porta gravida at eget metus. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Cum sociis natoque penatibus et magnis dis
-                                                                parturient montes, nascetur ridiculus mus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                                <li className="list-group-item py-5">
-                                                    <div className="media">
-                                                        <img className="media-object avatar avatar-md mr-4" src="../assets/images/xs/avatar6.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <div className="media-heading">
-                                                                <small className="float-right text-muted">34 min</small>
-                                                                <h5>Peter Richards</h5>
-                                                            </div>
-                                                            <div>
-                                                                Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Aenean eu leo quam. Pellentesque ornare sem lacinia quam
-                                                                venenatis vestibulum. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-                                                            </div>
-                                                            <ul className="media-list">
-                                                                <li className="media mt-4">
-                                                                    <img className="media-object avatar mr-4" src="../assets/images/xs/avatar5.jpg" alt="fake_url" />
-                                                                    <div className="media-body">
-                                                                        <strong>Wayne Holland: </strong>
-                                                                        Donec id elit non mi porta gravida at eget metus. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec ullamcorper nulla non metus
-                                                                        auctor fringilla. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Sed posuere consectetur est at lobortis.
-                                                                    </div>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div> */}
                                 </div>
                             </div>
-                            {/* <div className="col-lg-4 col-md-12">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <div className="widgets1">
-                                            <div className="icon">
-                                                <i className="icon-trophy text-success font-30" />
-                                            </div>
-                                            <div className="details">
-                                                <h6 className="mb-0 font600">Total Earned</h6>
-                                                <span className="mb-0">$96K +</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="card">
-                                    <div className="card-body">
-                                        <div className="widgets1">
-                                            <div className="icon">
-                                                <i className="icon-heart text-warning font-30" />
-                                            </div>
-                                            <div className="details">
-                                                <h6 className="mb-0 font600">Total Likes</h6>
-                                                <span className="mb-0">6,270</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="card">
-                                    <div className="card-body">
-                                        <div className="widgets1">
-                                            <div className="icon">
-                                                <i className="icon-handbag text-danger font-30" />
-                                            </div>
-                                            <div className="details">
-                                                <h6 className="mb-0 font600">Delivered</h6>
-                                                <span className="mb-0">720 Delivered</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="card">
-                                    <div className="card-body">
-                                        <div className="widgets1">
-                                            <div className="icon">
-                                                <i className="icon-user text-primary font-30" />
-                                            </div>
-                                            <div className="details">
-                                                <h6 className="mb-0 font600">Jobs</h6>
-                                                <span className="mb-0">614</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="card">
-                                    <div className="card-header">
-                                        <h3 className="card-title">Followers</h3>
-                                        <div className="card-options">
-                                            <a href="/#" className="card-options-collapse" data-toggle="card-collapse"><i className="fe fe-chevron-up" /></a>
-                                            <a href="/#" className="card-options-remove" data-toggle="card-remove"><i className="fe fe-x" /></a>
-                                        </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <ul className="right_chat list-unstyled mb-0">
-                                            <li className="online">
-                                                <a href="fake_url;">
-                                                    <div className="media">
-                                                        <img className="media-object " src="../assets/images/xs/avatar4.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <span className="name">Donald Gardner</span>
-                                                            <span className="message">Designer, Blogger</span>
-                                                            <span className="badge badge-outline status" />
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li className="offline">
-                                                <a href="fake_url;">
-                                                    <div className="media">
-                                                        <img className="media-object " src="../assets/images/xs/avatar1.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <span className="name">Nancy Flanary</span>
-                                                            <span className="message">Art director, Movie Cut</span>
-                                                            <span className="badge badge-outline status" />
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li className="online">
-                                                <a href="fake_url;">
-                                                    <div className="media">
-                                                        <img className="media-object " src="../assets/images/xs/avatar3.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <span className="name">Phillip Smith</span>
-                                                            <span className="message">Writter, Mag Editor</span>
-                                                            <span className="badge badge-outline status" />
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li className="online">
-                                                <a href="fake_url;">
-                                                    <div className="media">
-                                                        <img className="media-object " src="../assets/images/xs/avatar4.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <span className="name">Donald Gardner</span>
-                                                            <span className="message">Designer, Blogger</span>
-                                                            <span className="badge badge-outline status" />
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li className="offline">
-                                                <a href="fake_url;">
-                                                    <div className="media">
-                                                        <img className="media-object " src="../assets/images/xs/avatar1.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <span className="name">Nancy Flanary</span>
-                                                            <span className="message">Art director, Movie Cut</span>
-                                                            <span className="badge badge-outline status" />
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li className="online">
-                                                <a href="fake_url;">
-                                                    <div className="media">
-                                                        <img className="media-object " src="../assets/images/xs/avatar3.jpg" alt="fake_url" />
-                                                        <div className="media-body">
-                                                            <span className="name">Phillip Smith</span>
-                                                            <span className="message">Writter, Mag Editor</span>
-                                                            <span className="badge badge-outline status" />
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div> */}
                         </div>
                     </div>
                 </div>
