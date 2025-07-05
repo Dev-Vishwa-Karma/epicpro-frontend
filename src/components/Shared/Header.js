@@ -5,6 +5,8 @@ import authService from "../Authentication/authService";
 import "react-datepicker/dist/react-datepicker.css";
 import { breakInAction, punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
 import AlertMessages from "../common/AlertMessages";
+import TextEditor from "../common/TextEditor";
+
 class Header extends Component {
   constructor(props) {
     super(props);
@@ -892,22 +894,11 @@ class Header extends Component {
                     {/* Left side: Report TextArea */}
                     <div className="col-md-6">
                       <div className="form-group">
-                        <textarea
-                          className={`form-control ${
-                            this.state.error.report ? "is-invalid" : ""
-                          }`}
-                          placeholder="Please provide the report."
-                          value={report}
-                          onChange={(e) =>
-                            this.handleChange("report", e.target.value)
-                          }
-                          rows="15"
-                        />
-                        {this.state.error.report && (
-                          <div className="invalid-feedback">
-                            {this.state.error.report}
-                          </div>
-                        )}
+                          <TextEditor
+                            value={this.state.report}
+                            onChange={(value) => this.handleChange("report", value)}
+                            error={this.state.error.report}
+                          />                        
                       </div>
                     </div>
 
