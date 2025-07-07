@@ -228,8 +228,6 @@ class Header extends Component {
       .then((data) => {
         if (data.status === "success") {
           this.fetchNotifications();
-        } else {
-           console.error('Error checking birthdays:');
         }
       })
       .catch((err) => {
