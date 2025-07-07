@@ -975,7 +975,7 @@ class CalendarWithTabs extends Component {
                                                                 id="password"
                                                                 className="form-control"
                                                                 placeholder=" Enter password"
-                                                                // value={employee.password || ""}
+                                                                value={employee.password || ""}
                                                                 onChange={this.handleProfileChange}
                                                             />
                                                         </div>

@@ -108,7 +108,6 @@ class EditEmployee extends Component {
                     joiningDate: employee.joining_date,
                     mobile1: employee.mobile_no1,
                     mobile2: employee.mobile_no2,
-                    password: employee.password,
                     address1: employee.address_line1,
                     address2: employee.address_line2,
                     emergencyContact1: employee.emergency_contact1,
@@ -344,7 +343,9 @@ class EditEmployee extends Component {
         updateEmployeeData.append('joining_date',joiningDate);
         updateEmployeeData.append('mobile_no1',mobile1);
         updateEmployeeData.append('mobile_no2',mobile2);
-        updateEmployeeData.append('password', password);
+        if (password && password.trim() !== "") {
+            updateEmployeeData.append('password', password);
+        }
         updateEmployeeData.append('address_line1', address1);
         updateEmployeeData.append('address_line2', address2);
         updateEmployeeData.append('emergency_contact1', emergencyContact1);
@@ -412,7 +413,7 @@ class EditEmployee extends Component {
                         ButtonLoading: false,
                     };
                 });
-    
+                this.setState({ password:"" });
                 setTimeout(this.dismissMessages, 5000);
             } else {
                 console.error("Failed to update employee. Response:", data);
@@ -653,7 +654,7 @@ class EditEmployee extends Component {
                                                                 id="password"
                                                                 className="form-control"
                                                                 placeholder="Enter New Password"
-                                                                // value={password}
+                                                                value={password}
                                                                 onChange={this.handleChange}
                                                             />
                                                         </div>
