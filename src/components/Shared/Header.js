@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { breakInAction, punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
 import AlertMessages from "../common/AlertMessages";
 import TextEditor from "../common/TextEditor";
+import DueTasksAlert from "../common/DueTasksAlert";
 
 class Header extends Component {
   constructor(props) {
@@ -37,7 +38,10 @@ class Header extends Component {
       errorMessage: "",
       showError: false,
       notifications: [],
-      loading: true
+      loading: true,
+      is_task_due_today:false,
+      showDueAlert:true,
+      dueTasks:[],
     };
   }
 
@@ -656,7 +660,10 @@ class Header extends Component {
       showSuccess,
       successMessage, 
       showError, 
-      errorMessage
+      errorMessage,
+      is_task_due_today,
+      showDueAlert,
+      dueTasks
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
@@ -1011,6 +1018,12 @@ class Header extends Component {
               </div>
             </div>
           </div>
+        )}
+        {is_task_due_today && showDueAlert && dueTasks?.length > 0 && (
+          <DueTasksAlert
+            dueTasks={dueTasks}
+            onClose={() => this.setState({ showDueAlert: false })}
+          />
         )}
       </div>
     );
