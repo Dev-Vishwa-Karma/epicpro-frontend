@@ -3,6 +3,8 @@ import CountUp from 'react-countup';
 import { connect } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import AlertMessages from '../../common/AlertMessages';
+import DeleteModal from '../../common/DeleteModal';
 import {
 	statisticsAction,
 	statisticsCloseAction
@@ -522,6 +524,7 @@ class Employee extends Component {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
+				data.data.is_half_day = data.data.is_half_day.toString();
 				this.setState((prevState) => {
 					const updatedEmployeeLeavesData = [...(prevState.employeeLeavesData || []), data.data];
 					
@@ -759,65 +762,12 @@ class Employee extends Component {
         });
     };
 
-	// Render function for success and error messages
-    renderAlertMessages = () => {
-        return (
-            <>
-                {/* Add the alert for success messages */}
-                <div 
-                    className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-circle-check me-2"></i>
-                    {this.state.successMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showSuccess: false })}
-                    >
-                    </button>
-                </div>
 
-                {/* Add the alert for error messages */}
-                <div 
-                    className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
-                    {this.state.errorMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showError: false })}
-                    >
-                    </button>
-                </div>
-            </>
-        );
-    };
 
 	render() {
 		const { fixNavbar, /* statisticsOpen, statisticsClose */ } = this.props;
 			
-		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee } = this.state;
+		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee, showSuccess, successMessage, showError, errorMessage  } = this.state;
 
 		// Handle empty employee data safely
 		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
@@ -845,7 +795,14 @@ class Employee extends Component {
 
 		return (
 			<>
-				{this.renderAlertMessages()} {/* Show Messages */}
+				<AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
 				<div>
 					<div>
 						<div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
@@ -972,13 +929,43 @@ class Employee extends Component {
 																				{(index + 1).toString().padStart(2, '0')}
 																			</td>
 																			<td className="d-flex">
-																				<span
-																					className="avatar avatar-blue"
-																					data-toggle="tooltip"
-																					data-original-title="Avatar Name"
-																				>
-																					{employee.first_name.charAt(0).toUpperCase()}{employee.last_name.charAt(0).toUpperCase()}
-																				</span>
+																				
+																		{employee.profile ? (
+																			<img
+																				src={`${process.env.REACT_APP_API_URL}/${employee.profile}`}
+																				className="avatar avatar-blue add-space me-2"
+																				alt={`${employee.first_name} ${employee.last_name}`}
+																				title={`${employee.first_name} ${employee.last_name}`}
+																				onError={(e) => {
+																				e.target.style.display = 'none';
+																				const initialsSpan = document.createElement('span');
+																				initialsSpan.className = 'avatar avatar-blue add-space me-2';
+																				initialsSpan.setAttribute('title', `${employee.first_name} ${employee.last_name}`);
+																				initialsSpan.textContent = `${employee.first_name.charAt(0).toUpperCase()}${employee.last_name.charAt(0).toUpperCase()}`;
+																				e.target.parentNode.insertBefore(initialsSpan, e.target.nextSibling);
+																				initialsSpan.style.display = 'inline-flex';
+																				initialsSpan.style.alignItems = 'center';
+																				initialsSpan.style.justifyContent = 'center';
+																				initialsSpan.style.width = '35px';
+																				initialsSpan.style.height = '35px';
+																				}}
+																			/>
+																			) : (
+																			<span
+																				className="avatar avatar-blue add-space me-2"
+																				title={`${employee.first_name} ${employee.last_name}`}
+																				style={{
+																				width: '35px',
+																				height: '35px',
+																				display: 'inline-flex',
+																				alignItems: 'center',
+																				justifyContent: 'center',
+																				}}
+																			>
+																				{`${employee.first_name.charAt(0).toUpperCase()}${employee.last_name.charAt(0).toUpperCase()}`}
+																			</span>
+																			)}
+
 																				<div className="ml-3">
 																					<h6 className="mb-0">
 																						{`${employee.first_name} ${employee.last_name}`}
@@ -1559,52 +1546,20 @@ class Employee extends Component {
 				</div>
 
 				{/* Delete Leave Request Modal */}
-				<div className="modal fade" id="deleteLeaveRequestModal" tabIndex={-1} role="dialog" aria-labelledby="deleteLeaveRequestLabel">
-					<div className="modal-dialog" role="document">
-						<div className="modal-content">
-							<div className="modal-header" style={{ display: 'none' }}>
-								<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-							</div>
-							<div className="modal-body">
-								<div className="row clearfix">
-									<p>Are you sure you want to delete the leave?</p>
-								</div>
-							</div>
-							<div className="modal-footer">
-								<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-								<button type="button" onClick={this.confirmDeleteForEmployeeLeave}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
-									{this.state.ButtonLoading && (
-										<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-									)}
-									Delete</button>
-							</div>
-						</div>
-					</div>
-				</div>
+				<DeleteModal
+					onConfirm={this.confirmDeleteForEmployeeLeave}
+					isLoading={this.state.ButtonLoading}
+					deleteBody='Are you sure you want to delete the leave?'
+					modalId="deleteLeaveRequestModal"
+				/>
 
 				{/* Delete Employee Model */}
-				<div className="modal fade" id="deleteEmployeeModal" tabIndex={-1} role="dialog" aria-labelledby="deleteEmployeeModalLabel">
-					<div className="modal-dialog" role="document">
-						<div className="modal-content">
-							<div className="modal-header" style={{ display: 'none' }}>
-								<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-							</div>
-							<div className="modal-body">
-								<div className="row clearfix">
-									<p>Are you sure you want to delete the employee?</p>
-								</div>
-							</div>
-							<div className="modal-footer">
-								<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-								<button type="button" onClick={this.confirmDelete}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
-									{this.state.ButtonLoading && (
-										<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-									)}
-									Delete</button>
-							</div>
-						</div>
-					</div>
-				</div>
+				<DeleteModal
+					onConfirm={this.confirmDelete}
+					isLoading={this.state.ButtonLoading}
+					deleteBody='Are you sure you want to delete the employee?'
+					modalId="deleteEmployeeModal"
+				/>
 			</>
 		);
 	}

@@ -5,6 +5,8 @@ import authService from "../Authentication/authService";
 import "react-datepicker/dist/react-datepicker.css";
 import { breakInAction, punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
 import api from "../../api/axios";
+import AlertMessages from "../common/AlertMessages";
+import TextEditor from "../common/TextEditor";
 
 class Header extends Component {
   constructor(props) {
@@ -187,13 +189,13 @@ class Header extends Component {
   };
 
   handleChange = (field, value) => {
-    this.setState({
+    this.setState(prevState => ({
       [field]: value,
       error: {
-        ...this.state.error,
-        [field]: value ? "" : "This field is required.",
+        ...prevState.error,
+        [field]: ""
       },
-    });
+    }));
   };
 
   fetchNotifications = () => {
@@ -221,11 +223,9 @@ class Header extends Component {
 			let data = response.data;
 			if (data.status === "success") {
           this.fetchNotifications();
-      } else {
-          console.error('Error checking birthdays:');
-      }
-		})
-    .catch((err) => {
+        }
+      })
+      .catch((err) => {
         console.error('Error checking birthdays:', err);
     });
   };
@@ -619,63 +619,6 @@ class Header extends Component {
     window.location.href = "/login";
   };
 
-  // Render function for Bootstrap toast messages
-  renderAlertMessages = () => {
-    return (
-      <>
-        {/* Add the alert for success messages */}
-        <div
-          className={`alert alert-success alert-dismissible fade show ${
-            this.state.showSuccess ? "d-block" : "d-none"
-          }`}
-          role="alert"
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            zIndex: 1050,
-            minWidth: "250px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <i className="fa-solid fa-circle-check me-2"></i>
-          {this.state.successMessage}
-          <button
-            type="button"
-            className="close"
-            aria-label="Close"
-            onClick={() => this.setState({ showSuccess: false })}
-          ></button>
-        </div>
-
-        {/* Add the alert for error messages */}
-        <div
-          className={`alert alert-danger alert-dismissible fade show ${
-            this.state.showError ? "d-block" : "d-none"
-          }`}
-          role="alert"
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            zIndex: 1050,
-            minWidth: "250px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <i className="fa-solid fa-triangle-exclamation me-2"></i>
-          {this.state.errorMessage}
-          <button
-            type="button"
-            className="close"
-            aria-label="Close"
-            onClick={() => this.setState({ showError: false })}
-          ></button>
-        </div>
-      </>
-    );
-  };
-
   render() {
     const { fixNavbar, darkHeader, isPunchedIn, breakDuration } = this.props;
     const {
@@ -686,13 +629,24 @@ class Header extends Component {
       todays_working_hours,
       todays_total_hours,
       elapsedFormatted,
-      notifications
+      notifications,
+      showSuccess,
+      successMessage, 
+      showError, 
+      errorMessage
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
     return (
       <div>
-        {this.renderAlertMessages()}
+          <AlertMessages
+            showSuccess={showSuccess}
+            successMessage={successMessage}
+            showError={showError}
+            errorMessage={errorMessage}
+            setShowSuccess={(val) => this.setState({ showSuccess: val })}
+            setShowError={(val) => this.setState({ showError: val })}
+        		/>
         <div
           id="page_top"
           className={`section-body ${fixNavbar ? "sticky-top" : ""} ${
@@ -711,6 +665,7 @@ class Header extends Component {
                     onClick={
                       isPunchedIn ? this.handlePunchOut : this.handlePunchIn
                     }
+                    style={{width: "190px", height: "35px", fontSize: "14px"}}
                   >
                     {isPunchedIn ? `Punch Out : ${elapsedFormatted}` : "Punch In"}
                   </button>
@@ -784,9 +739,10 @@ class Header extends Component {
                       <i className="fa fa-user" />
                     </a>
                     <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                    {(window.user.role !== "employee") && (
                       <NavLink
                         to={{
-                          pathname: `/view-employee/${userId}/profile`,
+                          pathname: `/view-employee/${userId}`,
                         }}
                         className={`dropdown-item ${
                           currentTab === "profile" ? "active" : ""
@@ -797,6 +753,22 @@ class Header extends Component {
                       >
                         <i className="dropdown-icon fe fe-user" /> Profile
                       </NavLink>
+                    )}
+                        {(window.user.role === "employee") && (
+                        <NavLink
+                          to={{
+                            pathname: `/view-employee/${userId}/profile`,
+                          }}
+                          className={`dropdown-item ${
+                            currentTab === "profile" ? "active" : ""
+                          }`}
+                          isActive={(match, location) =>
+                            location?.state?.tab === "profile"
+                          }
+                        >
+                          <i className="dropdown-icon fe fe-user" /> Profile
+                        </NavLink>                        
+                        )}
                         {(window.user.role === "employee") && (
                           <NavLink
                             to={{
@@ -900,22 +872,11 @@ class Header extends Component {
                     {/* Left side: Report TextArea */}
                     <div className="col-md-6">
                       <div className="form-group">
-                        <textarea
-                          className={`form-control ${
-                            this.state.error.report ? "is-invalid" : ""
-                          }`}
-                          placeholder="Please provide the report."
-                          value={report}
-                          onChange={(e) =>
-                            this.handleChange("report", e.target.value)
-                          }
-                          rows="15"
-                        />
-                        {this.state.error.report && (
-                          <div className="invalid-feedback">
-                            {this.state.error.report}
-                          </div>
-                        )}
+                          <TextEditor
+                            value={this.state.report}
+                            onChange={(value) => this.handleChange("report", value)}
+                            error={this.state.error.report}
+                          />                        
                       </div>
                     </div>
 

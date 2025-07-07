@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import AlertMessages from '../../common/AlertMessages';
+import TextEditor from '../../common/TextEditor';
 
 class Report extends Component {
 
@@ -834,29 +836,6 @@ class Report extends Component {
     this.setState({ editNotes: e.target.value });
     }
 
-  renderAlertMessages = () => (
-    <>
-      <div className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-circle-check me-2"></i>
-        {this.state.successMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showSuccess: false })}></button>
-      </div>
-
-      <div className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`}
-        role="alert"
-        style={{ position: "fixed", top: "20px", right: "20px", zIndex: 1050, minWidth: "250px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}
-      >
-        <i className="fa-solid fa-triangle-exclamation me-2"></i>
-        {this.state.errorMessage}
-        <button type="button" className="close" onClick={() => this.setState({ showError: false })}></button>
-      </div>
-    </>
-  );
-
-
     render() {
         const { fixNavbar } = this.props;
         const { 
@@ -887,7 +866,11 @@ class Report extends Component {
             fromDate,
             toDate,
             filteredReports,
-            selectedModalReport
+            selectedModalReport,
+            showSuccess, 
+            successMessage, 
+            showError, 
+            errorMessage
         } = this.state;
 
         // Handle empty employee data safely
@@ -901,7 +884,14 @@ class Report extends Component {
 
         return (
             <>  
-                {this.renderAlertMessages()}
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
                 <div>
                     <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
                         <div className="container-fluid">
@@ -1136,9 +1126,10 @@ class Report extends Component {
                                                 </div>
                                             )}
                                             <div className="col-md-12 mb-4">
-                                                <div className="multiline-text" >
-                                                    {selectedModalReport?.report || ''}
-                                                </div>
+                                                <div
+                                                    className="multiline-text"
+                                                    dangerouslySetInnerHTML={{ __html: selectedModalReport?.report || '' }}
+                                                />
                                             </div>
                                             <div className="col-md-12 mb-2">
                                                 <strong>Start Time:</strong> {this.formatDateTimeAMPM(selectedModalReport.start_time)}
@@ -1191,18 +1182,12 @@ class Report extends Component {
                                         {/* Left side - Report TextArea */}
                                         <div className="col-md-6">
                                             <div className="form-group">
-                                                <textarea
-                                                className={`form-control ${this.state.error?.report ? "is-invalid" : ""}`}
-                                                name='report'
-                                                placeholder="Please provide the report."
-                                                value={this.state.report || ''}
-                                                onChange={(e) => this.handleChange('report', e.target.value)}
-                                                rows="15"
-                                                cols="50"
-                                                />
-                                                {this.state.error?.report && (
-                                                <div className="invalid-feedback">{this.state.error.report}</div>
-                                                )}
+                                                <TextEditor
+                                                    name="report"
+                                                    value={this.state.report || ''}
+                                                    onChange={(value) => this.handleChange('report', value)}
+                                                    error={this.state.error?.report}
+                                                    />
                                             </div>
                                         </div>
 

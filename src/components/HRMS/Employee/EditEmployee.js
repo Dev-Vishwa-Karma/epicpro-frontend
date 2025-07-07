@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import AlertMessages from '../../common/AlertMessages';
 
 class EditEmployee extends Component {
     constructor(props) {
@@ -436,72 +437,23 @@ class EditEmployee extends Component {
         });
     }
 
-    // Render function for Bootstrap toast messages
-    renderAlertMessages = () => {
-        return (
-            
-            <>
-                {/* Add the alert for success messages */}
-                <div 
-                    className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-circle-check me-2"></i>
-                    {this.state.successMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showSuccess: false })}
-                    >
-                    </button>
-                </div>
-
-                {/* Add the alert for error messages */}
-                <div 
-                    className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
-                    {this.state.errorMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showError: false })}
-                    >
-                    </button>
-                </div>
-            </>
-        );
-    };
-
     render() {
         const { fixNavbar } = this.props;
-        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status} = this.state;
+        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status, showSuccess,successMessage,showError, errorMessage } = this.state;
         // Frontend and Backend Skill Options
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
         return (
             <>
                 {/* Show success and error Messages */}
-                {this.renderAlertMessages()}
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
                 <div>
                     <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
                         <div className="container-fluid">

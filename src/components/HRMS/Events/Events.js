@@ -149,7 +149,7 @@ class Events extends Component {
 	};
 
 	fetchEmployees = () => {
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
+		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
 			method: "GET",
 		})
 			.then(response => response.json())
@@ -1271,6 +1271,12 @@ formatDateTimeAMPM = (timeString) => {
 				)}
 
 				{this.state.showDeleteModal && (
+					// <DeleteModal
+                    //     onConfirm={this.handleDeleteEvent(this.state.eventIdToDelete)}
+                    //     isLoading={this.state.ButtonLoading}
+                    //     deleteBody='Are you sure you want to delete this event?'
+                    //     modalId=""
+                    // />
 					<div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
 						<div className="modal-dialog" role="document">
 							<div className="modal-content">
