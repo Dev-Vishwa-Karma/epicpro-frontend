@@ -300,9 +300,11 @@ class CalendarWithTabs extends Component {
             .then((response) => response.json())
             .then((data) => {
                 if (data.status === "success") {
+                     const { password, ...employeeData } = data.data;
+
                     this.setState(prevState => ({
-                        employee: { ...prevState.employee, ...data.data }, // Merge new data
-                        previewImage: data.data.profile ? `${process.env.REACT_APP_API_URL}/${data.data.profile}` : prevState.previewImage
+                        employee: { ...prevState.employee, ...employeeData }, // Merge new data excluding password
+                        previewImage: employeeData.profile ? `${process.env.REACT_APP_API_URL}/${employeeData.profile}` : prevState.previewImage
                     }));
                     
                     const skillsFrontend = this.parseSkills(this.state.employee.frontend_skills);
@@ -512,7 +514,10 @@ class CalendarWithTabs extends Component {
         appendField("joining_date", employee.joining_date);
         appendField("mobile_no1", employee.mobile_no1);
         appendField('mobile_no2', employee.mobile_no2);
-        appendField("password", employee.password);
+        console.log('employee.password',employee.password)
+        if(employee.password !== "" && employee.password !== undefined){
+            appendField("password", employee.password);
+        }
         appendField("dob", employee.dob);
         appendField("address_line1", employee.address_line1);
         appendField("address_line2", employee.address_line2);
