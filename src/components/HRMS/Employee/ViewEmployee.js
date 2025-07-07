@@ -50,13 +50,15 @@ class ViewEmployee extends Component {
     };
 
     handleFileChange = async (event) => {
+        this.setState({
+            selectedImage:null
+        });
         const file = event.target.files[0];
         if (file) {
         const reader = new FileReader();
         reader.onloadend = () => {
-            this.setState({ croppperPreviewImage: reader.result });
-            this.saveCroppedImage();
-            
+            //this.setState({ croppperPreviewImage: reader.result });
+           // this.saveCroppedImage();
         };
         reader.readAsDataURL(file);
         }
@@ -75,11 +77,12 @@ class ViewEmployee extends Component {
                 const sortedImages = this.sortImages(updatedImages, 'desc');
                 this.setState({
                     images: sortedImages,
-                    successMessage: "",
-                    showSuccess: false,
+                    successMessage: "Image uploaded successfully!",
+                    showSuccess: true,
                     errorMessage: "",
-                    showError: false
+                    showError: false,
                 });
+                setTimeout(this.dismissMessages, 3000);
             }
         } catch (error) {
             console.error("Error uploading the image in gallery: ", error);
@@ -326,7 +329,7 @@ class ViewEmployee extends Component {
                                     <div 
                                         className="btn btn-close" 
                                         onClick={() => {
-                                            this.setState({ openFileSelectModel: false,showGallery:true });
+                                            this.setState({ openFileSelectModel: false,showGallery:true, selectedImage:null });
                                             document.body.style.overflow = 'auto';
                                         }}
                                         aria-label="Close"
@@ -375,7 +378,7 @@ class ViewEmployee extends Component {
                                         {showGallery && (
                                             <div className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start">
                                                 {this.state.images.map((image, index) => (
-                                                    <div key={index} className="position-relative cursor-pointer mr-2">
+                                                    <div key={index} className="position-relative  mr-2">
                                                         <label className="d-block mb-0 pointer">
                                                             <input 
                                                                 name="imagecheck" 
@@ -396,7 +399,7 @@ class ViewEmployee extends Component {
                                                                     src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
                                                                     alt="Profile option" 
                                                                     className="img-fluid rounded-1" 
-                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover',cursor: 'pointer'}}
                                                                 />
                                                             </div>
                                                         </label>
@@ -412,7 +415,9 @@ class ViewEmployee extends Component {
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 justifyContent: 'center',
-                                                                color: '#6c757d'
+                                                                color: '#6c757d',
+                                                                cursor: 'pointer'
+
                                                             }}
                                                         >
                                                             <i className="fe fe-plus fs-4" />
@@ -435,7 +440,7 @@ class ViewEmployee extends Component {
                                     <button
                                         className="btn btn-outline-secondary me-3 px-4"
                                         onClick={() => {
-                                            this.setState({ openFileSelectModel: false,showGallery:true });
+                                            this.setState({ openFileSelectModel: false,showGallery:true ,selectedImage:null });
                                             document.body.style.overflow = 'auto';
                                         }}
                                     >
@@ -447,7 +452,7 @@ class ViewEmployee extends Component {
                                             onClick={this.saveCroppedImage}
                                             disabled={!this.state.selectedImage}
                                         >
-                                            Next
+                                            Select & Crop
                                         </button>
                                     )}
                                     {!showGallery && (

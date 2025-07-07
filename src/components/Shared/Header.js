@@ -69,6 +69,7 @@ class Header extends Component {
         this.fetchNotifications();
         this.checkBirthdays(); 
         this.startNotificationInterval();
+        this.checktodayDueDate();
       });
      
     }
@@ -87,6 +88,26 @@ class Header extends Component {
   componentWillUnmount() {
     clearInterval(this.state.timer);
   }
+
+  checktodayDueDate = () => {
+    fetch(
+      `${process.env.REACT_APP_API_URL}/project_todo.php?action=due_today_check&user_id=${window.user.id}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          console.log('before data',data.data.has_due_today)
+            this.setState({
+              is_task_due_today: data.data.has_due_today,
+              dueTasks:data.data.tasks
+            });
+            console.log('after data',this.state.is_task_due_today)
+        } 
+      })
+      .catch((err) => {
+        console.error('Error checking birthdays:', err);
+      });
+  };
 
   startTimerInterval = (punchInTime, isAutoClose = true) => {
     if(punchInTime){
@@ -731,7 +752,7 @@ class Header extends Component {
                                     {notification.title}{' '}
                                     <small className="float-right text-muted"> {formattedDate}</small>
                                   </h4>
-                                  <small> {notification.body}</small>
+                                  <small className="notification-body"> {notification.body}</small>
                                 </div>
                               </li>
                             );
@@ -1025,7 +1046,15 @@ class Header extends Component {
             onClose={() => this.setState({ showDueAlert: false })}
           />
         )}
+        <style>
+          {`
+            .notification-body {
+                overflow: visible !important;
+            }
+          `}
+      </style>
       </div>
+      
     );
   }
 }
