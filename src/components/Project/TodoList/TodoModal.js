@@ -89,29 +89,30 @@ const TodoModal = ({
                   
 
                   {/* Show dropdown only for admin */}
-                  {(loggedInEmployeeRole === "admin" || loggedInEmployeeRole === "super_admin") && (
-                    <div className="col-md-12 col-sm-12">
-                      <label htmlFor="selectedEmployeeId" className="form-label font-weight-bold">Select Employee</label>
-                      <select
-                        name="selectedEmployeeId"
-                        id="selectedEmployeeId"
-                        className={`form-control ${errors.selectedEmployeeId ? "is-invalid" : ""}`}
-                        value={selectedEmployeeId}
-                        onChange={onChange}
-                      >
-                        <option value="">Select an Employee</option>
-                        <option value="all">All Employees</option>
-                        {employees.map((employee) => (
-                          <option key={employee.id} value={employee.id}>
-                            {employee.first_name} {employee.last_name}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.selectedEmployeeId && (
-                        <small className="invalid-feedback">{errors.selectedEmployeeId}</small>
-                      )}
-                    </div>
-                  )}
+                  {/* Show dropdown only for admin and only when not in edit mode */}
+                    {(loggedInEmployeeRole === "admin" || loggedInEmployeeRole === "super_admin") && !isEdit && (
+                      <div className="col-md-12 col-sm-12">
+                        <label htmlFor="selectedEmployeeId" className="form-label font-weight-bold">Select Employee</label>
+                        <select
+                          name="selectedEmployeeId"
+                          id="selectedEmployeeId"
+                          className={`form-control ${errors.selectedEmployeeId ? "is-invalid" : ""}`}
+                          value={selectedEmployeeId}
+                          onChange={onChange}
+                        >
+                          <option value="">Select an Employee</option>
+                          <option value="all">All Employees</option>
+                          {employees.map((employee) => (
+                            <option key={employee.id} value={employee.id}>
+                              {employee.first_name} {employee.last_name}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.selectedEmployeeId && (
+                          <small className="invalid-feedback">{errors.selectedEmployeeId}</small>
+                        )}
+                      </div>
+                    )}
                 </div>
               </div>
 

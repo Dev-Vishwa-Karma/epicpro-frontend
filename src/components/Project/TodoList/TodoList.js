@@ -14,6 +14,7 @@ class TodoList extends Component {
             selectedTodo: null,
 			showAddTodoModal: false,
             showEditModal: false,
+            showDeleteModal:false,
             selectedEmployeeId: '',
 			logged_in_employee_id: null,
             logged_in_employee_role: null,
@@ -135,10 +136,10 @@ class TodoList extends Component {
         }
 
         // Employee selection validation (only for admin/super_admin)
-        if ((logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && !selectedEmployeeId.trim()) {
-            errors.selectedEmployeeId = "Please select an employee to assign todo.";
-            isValid = false;
-        }
+        // if ((logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && !selectedEmployeeId.trim()) {
+        //     errors.selectedEmployeeId = "Please select an employee to assign todo.";
+        //     isValid = false;
+        // }
 
         this.setState({ errors });
         return isValid;
@@ -146,7 +147,7 @@ class TodoList extends Component {
 
     // Add Todo data API call
     addTodoData = () => {
-		const { logged_in_employee_id, logged_in_employee_role, title, due_date, priority, selectedEmployeeId } = this.state;
+        const { logged_in_employee_id, logged_in_employee_role, title, due_date, priority, selectedEmployeeId } = this.state;
 
         if (!this.validateAddTodoForm()) {
             return; // Stop execution if validation fails
@@ -154,8 +155,8 @@ class TodoList extends Component {
 
         // Determine the correct employee_id
         const employee_id = (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") 
-        ? selectedEmployeeId 
-        : logged_in_employee_id;
+            ? selectedEmployeeId 
+            : logged_in_employee_id;
 
         const addTodoFormData = new FormData();
         addTodoFormData.append('employee_id', employee_id);
@@ -173,38 +174,58 @@ class TodoList extends Component {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === 'success') {
-                // Update the department list
-                this.setState((prevState) => ({
-                    todos: [data.data, ...(prevState.todos || [])],
-                    title: "",
-                    due_date: "",
-                    priority: "",
-                    selectedEmployeeId: "",
-                    errors:{},
-                    successMessage: "Todo added successfully!",
-                    showSuccess: true,
-                    showAddTodoModal: false
-                }));
-                // Close the modal
-                // document.querySelector("#addTodoModal .close").click();
+                // Fetch the updated todo list
+                fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {
+                    method: "GET",
+                })
+                .then(response => response.json())
+                .then(updatedData => {
+                    if (updatedData.status === 'success') {
+                        this.setState({
+                            todos: updatedData.data,
+                            title: "",
+                            due_date: "",
+                            priority: "",
+                            selectedEmployeeId: "",
+                            errors: {},
+                            successMessage: "Todo added successfully!",
+                            showSuccess: true,
+                            showAddTodoModal: false
+                        });
+                    } else {
+                        this.setState({
+                            errorMessage: "Todo added but failed to refresh the list.",
+                            showError: true,
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    this.setState({
+                        errorMessage: "Todo added but failed to refresh the list.",
+                        showError: true,
+                    });
+                });
 
-				// Auto-hide success message after 5 seconds
-				setTimeout(() => {
-					this.setState({
-						showSuccess: false, 
-						successMessage: ''
-					});
-				}, 3000);
+                // Auto-hide success message after 5 seconds
+                setTimeout(() => {
+                    this.setState({
+                        showSuccess: false, 
+                        successMessage: ''
+                    });
+                }, 3000);
             } else {
                 this.setState({
                     errorMessage: "Failed to add Todo. Please try again.",
                     showError: true,
                 });
 
-                this.setState({
-                    showError: false,
-                    errorMessage: ''
-                });
+                setTimeout(() => {
+                    this.setState({
+                        showError: false,
+                        errorMessage: ''
+                    });
+                }, 3000);
             }
         })
         .catch((error) => {
@@ -374,7 +395,7 @@ class TodoList extends Component {
         : logged_in_employee_id;
 
         const updateTodoFormData = new FormData();
-        updateTodoFormData.append('id', selectedTodo.id);
+        updateTodoFormData.append('todo_id', selectedTodo.id);
         updateTodoFormData.append('employee_id', employee_id);
         updateTodoFormData.append('title', title);
         updateTodoFormData.append('due_date', due_date);
@@ -449,16 +470,15 @@ class TodoList extends Component {
 
     handleDeleteTodo = () => {
     const { todoToDelete, logged_in_employee_id } = this.state;
-    
     if (!todoToDelete) return;
 
     this.setState({ ButtonLoading: true });
 
-    const formData = new FormData();
-    formData.append('id', todoToDelete.id);
-    formData.append('logged_in_employee_id', logged_in_employee_id);
+    // const formData = new FormData();
+    // formData.append('id', todoToDelete.id);
+    // formData.append('logged_in_employee_id', logged_in_employee_id);
 
-    fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete`, {
+    fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete&id=${todoToDelete.id}`, {
         method: "DELETE",
     })
     .then(response => response.json())
@@ -479,6 +499,9 @@ class TodoList extends Component {
                     successMessage: ''
                 });
             }, 3000);
+
+
+             console.log('Todo deleted successfully:', this.state.showDeleteModal);
         } else {
             this.setState({ 
                 showError: true, 
@@ -521,9 +544,9 @@ class TodoList extends Component {
         .then(data => {
             if (data.status === 'success') {
                 // Hide the modal using Bootstrap
-                if (window.$) {
-                    window.$('#deleteTodoModal').modal('hide');
-                }
+                // if (window.$) {
+                //     window.$('#deleteTodoModal').modal('hide');
+                // }
                 this.setState(prevState => ({
                     todos: prevState.todos.filter(todo => todo.id !== todoToDelete.id),
                     showDeleteModal: false,
@@ -541,9 +564,9 @@ class TodoList extends Component {
                 }, 3000);
             } else {
                 // Hide the modal using Bootstrap
-                if (window.$) {
-                    window.$('#deleteTodoModal').modal('hide');
-                }
+                // if (window.$) {
+                //     window.$('#deleteTodoModal').modal('hide');
+                // }
                 this.setState({ 
                     showError: true, 
                     errorMessage: data.message || 'Failed to delete todo',
@@ -556,9 +579,9 @@ class TodoList extends Component {
         .catch(error => {
             console.error("Error:", error);
             // Hide the modal using Bootstrap
-            if (window.$) {
-                window.$('#deleteTodoModal').modal('hide');
-            }
+            // if (window.$) {
+            //     window.$('#deleteTodoModal').modal('hide');
+            // }
             this.setState({ 
                 showError: true, 
                 errorMessage: 'An error occurred while deleting the todo',
@@ -576,7 +599,7 @@ class TodoList extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees, statusFilter, showSuccess, successMessage, showError, errorMessage } = this.state;
+        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees, statusFilter, showSuccess, successMessage, showError, errorMessage,showDeleteModal } = this.state;
 
         // Filter todos: employees see only their own, admins see all
         let visibleTodos = (logged_in_employee_role === "employee")
@@ -602,11 +625,19 @@ class TodoList extends Component {
                                  {/* Show Toast Messages */}
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
                     <div className="container-fluid">
+                        <div className="row">
                         {/* Status Filter for Admin/Super Admin */}
                         {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                            <div className="row mb-3">
-                                <div className="col-md-3">
-                                    <label htmlFor="statusFilter"><b>Status Filter:</b></label>
+                             
+                            	<div className="col-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <div className="row">
+										<div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+											<label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
+											Status:
+											</label>
+										
                                     <select
                                         id="statusFilter"
                                         className="form-control"
@@ -617,10 +648,14 @@ class TodoList extends Component {
                                         <option value="completed">Completed</option>
                                         {/* Add more statuses if needed */}
                                     </select>
+                            
+										</div>
+										</div>
+                                    </div>
                                 </div>
                             </div>
                         )}
-                        <div className="row">
+                       
                             <div className="col-12">
                                 <div className="card">
                                     <div className="card-body">
@@ -638,10 +673,11 @@ class TodoList extends Component {
                                                         </th>
                                                         <th className="w150 text-right">Due</th>
                                                         <th className="w100">Priority</th>
-                                                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                                     
+                                                        <th className="w80"><i className="icon-user" /></th>
+                                                           {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                         <th className="w150">Action</th>
                                                         )}
-                                                        <th className="w80"><i className="icon-user" /></th>
                                                     </tr>
                                                 </thead>
                                                 {loading ? (
@@ -663,71 +699,38 @@ class TodoList extends Component {
                                                                         ? { textDecoration: 'line-through', opacity: 0.6 }
                                                                         : {}
                                                                 }>
-                                                                    <td>
-                                                                        <label className="custom-control custom-checkbox">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="custom-control-input"
-                                                                                name="example-checkbox1"
-                                                                                checked={todo.todoStatus === 'completed'}
-                                                                                onChange={() => this.handleCheckboxClick(todo)}
-                                                                            />
-                                                                            <span className="custom-control-label">{todo.title}</span>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td className="text-right">
-                                                                        {new Date(todo.due_date).toLocaleString("en-US", {
-                                                                            day: "2-digit",
-                                                                            month: "short",
-                                                                            year: "numeric"
-                                                                        }).replace(",", "")}
-                                                                    </td>
-                                                                    <td>
-                                                                        <span className={`tag ml-0 mr-0 ${
-                                                                            todo.priority === "high"
-                                                                                ? "tag-danger"
-                                                                                : todo.priority === "medium"
-                                                                                ? "tag-warning"
-                                                                                : "tag-success"
-                                                                            }`}
-                                                                        >
-                                                                            {todo.priority.toUpperCase()}
-                                                                        </span>
-                                                                    </td>
-                                                                    {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                                                    <td>
-                                                                        <div className="d-flex align-items-center">
-                                                                                <>
-                                                                                    <button 
-                                                                                        className="btn btn-sm btn-icon mr-1"
-                                                                                        onClick={() => this.handleEditTodo(todo)}
-                                                                                        title="Edit"
-                                                                                    >
-                                                                                        <i className="fa fa-edit"></i>
-                                                                                    </button>
-                                                                                    <button 
-                                                                                        className="btn btn-sm btn-icon"
-                                                                                        onClick={() => {
-                                                                                            console.log('Delete button clicked');
-                                                                                            this.setState({ 
-                                                                                                showDeleteModal: true, 
-                                                                                                todoToDelete: todo 
-                                                                                            }, () => {
-                                                                                                console.log('State updated:', this.state.showDeleteModal, this.state.todoToDelete);
-                                                                                                // Show the modal using Bootstrap
-                                                                                                if (window.$) {
-                                                                                                    window.$('#deleteTodoModal').modal('show');
-                                                                                                }
-                                                                                            });
-                                                                                        }}
-                                                                                        title="Delete"
-                                                                                    >
-                                                                                        <i className="fa fa-trash"></i>
-                                                                                    </button>
-                                                                                </>
-                                                                        </div>
-                                                                    </td>
-                                                                    )}
+        <td>
+            <label className="custom-control custom-checkbox">
+                <input
+                    type="checkbox"
+                    className="custom-control-input"
+                    name="example-checkbox1"
+                    checked={todo.todoStatus === 'completed'}
+                    onChange={() => this.handleCheckboxClick(todo)}
+                />
+                <span className="custom-control-label">{todo.title}</span>
+            </label>
+        </td>
+        <td className="text-right">
+            {new Date(todo.due_date).toLocaleString("en-US", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }).replace(",", "")}
+        </td>
+        <td>
+            <span className={`tag ml-0 mr-0 ${
+                todo.priority === "high"
+                    ? "tag-danger"
+                    : todo.priority === "medium"
+                    ? "tag-warning"
+                    : "tag-success"
+                }`}
+            >
+                {todo.priority.toUpperCase()}
+            </span>
+        </td>
+    
                                                                     <td>
                                                                         {todo.profile ? (
                                                                             <img 
@@ -777,6 +780,43 @@ class TodoList extends Component {
                                                                             </span>
                                                                         )}
                                                                     </td>
+                                                                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                                                    <td>
+                                                                        <div className="d-flex align-items-center">
+                                                                                <>
+                                                                                            <button
+                                                                                                    type="button"
+                                                                                                    className="btn btn-icon"
+                                                                                                    title="Edit"
+                                                                                                
+                                                                                                    onClick={() => this.handleEditTodo(todo)}
+                                                                                                >
+                                                                                                    <i className="fa fa-edit" />
+                                                                                                </button>
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className="btn btn-icon btn-sm js-sweetalert"
+                                                                                                    title="Delete"
+                                                                                                    onClick={() => {
+                                                                                            console.log('Delete button clicked');
+                                                                                            this.setState({ 
+                                                                                                showDeleteModal: true, 
+                                                                                                todoToDelete: todo 
+                                                                                            }, () => {
+                                                                                                console.log('State updated:', this.state.showDeleteModal, this.state.todoToDelete);
+                                                                                                // Show the modal using Bootstrap
+                                                                                                if (window.$) {
+                                                                                                    window.$('#deleteTodoModal').modal('show');
+                                                                                                }
+                                                                                            });
+                                                                                        }}
+                                                                                                >
+                                                                                                    <i className="fa fa-trash-o text-danger" />
+                                                                                                </button>
+                                                                                </>
+                                                                        </div>
+                                                                    </td>
+                                                                    )}
                                                                 </tr>
                                                             ))
                                                         ): (
@@ -867,14 +907,14 @@ class TodoList extends Component {
 
                 {/* Delete Todo Modal */}
                 <DeleteModal
-                    show={this.state.showDeleteModal}
+                    show={showDeleteModal}
                     onConfirm={this.handleDeleteTodo}
-                    onClose={this.handleDeleteModalClose}  // Add this line
+                    onClose={this.handleDeleteModalClose}
                     isLoading={this.state.ButtonLoading}
                     deleteBody="Are you sure you want to delete this todo?"
                     modalId="deleteTodoModal"
                 />
-                {this.state.showDeleteModal && <div className="modal-backdrop fade show" />}
+                {showDeleteModal && <div className="modal-backdrop fade show" />}
             </>
         )
     }
