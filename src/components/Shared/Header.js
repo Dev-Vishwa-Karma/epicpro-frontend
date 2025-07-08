@@ -96,12 +96,10 @@ class Header extends Component {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          console.log('before data',data.data.has_due_today)
             this.setState({
               is_task_due_today: data.data.has_due_today,
               dueTasks:data.data.tasks
             });
-            console.log('after data',this.state.is_task_due_today)
         } 
       })
       .catch((err) => {
