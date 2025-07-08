@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import TodoModal from './TodoModal';
 import DeleteModal from '../../common/DeleteModal';
+import AlertMessages from '../../common/AlertMessages';
 
 class TodoList extends Component {
     constructor(props) {
@@ -25,7 +26,6 @@ class TodoList extends Component {
 				title: '',
         		due_date: '',
                 priority: '',
-                todoStatus: '',
                 selectedEmployeeId: '',
 			},
 			successMessage: "",
@@ -102,7 +102,7 @@ class TodoList extends Component {
 
     // Validate Add Department Form
 	validateAddTodoForm = (e) => {
-		const { title, due_date, priority, todoStatus, selectedEmployeeId, logged_in_employee_role } = this.state;
+		const { title, due_date, priority, selectedEmployeeId, logged_in_employee_role } = this.state;
         let errors = {};
         let isValid = true;
 
@@ -134,12 +134,6 @@ class TodoList extends Component {
             isValid = false;
         }
 
-        // Todo Status validation
-        if (!todoStatus.trim()) {
-            errors.todoStatus = "Please select todo status.";
-            isValid = false;
-        }
-
         // Employee selection validation (only for admin/super_admin)
         if ((logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && !selectedEmployeeId.trim()) {
             errors.selectedEmployeeId = "Please select an employee to assign todo.";
@@ -152,7 +146,7 @@ class TodoList extends Component {
 
     // Add Todo data API call
     addTodoData = () => {
-		const { logged_in_employee_id, logged_in_employee_role, title, due_date, priority, todoStatus, selectedEmployeeId } = this.state;
+		const { logged_in_employee_id, logged_in_employee_role, title, due_date, priority, selectedEmployeeId } = this.state;
 
         if (!this.validateAddTodoForm()) {
             return; // Stop execution if validation fails
@@ -168,7 +162,6 @@ class TodoList extends Component {
         addTodoFormData.append('title', title);
         addTodoFormData.append('due_date', due_date);
         addTodoFormData.append('priority', priority);
-        addTodoFormData.append('status', todoStatus);
         addTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
         addTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
@@ -186,7 +179,6 @@ class TodoList extends Component {
                     title: "",
                     due_date: "",
                     priority: "",
-                    todoStatus: "",
                     selectedEmployeeId: "",
                     errors:{},
                     successMessage: "Todo added successfully!",
@@ -251,7 +243,6 @@ class TodoList extends Component {
             title: todo.title,
             due_date: todo.due_date,
             priority: todo.priority,
-            todoStatus: todo.todoStatus,
             selectedEmployeeId: todo.employee_id
         });
     };
@@ -264,7 +255,6 @@ class TodoList extends Component {
             title: "",
             due_date: "",
             priority: "",
-            todoStatus: "",
             selectedEmployeeId: ""
         });
     };
@@ -277,7 +267,6 @@ class TodoList extends Component {
             title: "",
             due_date: "",
             priority: "",
-            todoStatus: "",
             selectedEmployeeId: ""
         });
     };
@@ -285,63 +274,7 @@ class TodoList extends Component {
     // Handle modal submit
     handleModalSubmit = () => {
         this.addTodoData();
-    };
-
-    // Render function for Bootstrap toast messages
-    renderAlertMessages = () => {
-        return (
-            
-            <>
-                {/* Add the alert for success messages */}
-                <div 
-                    className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-circle-check me-2"></i>
-                    {this.state.successMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showSuccess: false })}
-                    >
-                    </button>
-                </div>
-
-                {/* Add the alert for error messages */}
-                <div 
-                    className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
-                    role="alert" 
-                    style={{ 
-                        position: "fixed", 
-                        top: "20px", 
-                        right: "20px", 
-                        zIndex: 1050, 
-                        minWidth: "250px", 
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-                    }}
-                >
-                    <i className="fa-solid fa-triangle-exclamation me-2"></i>
-                    {this.state.errorMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
-                        onClick={() => this.setState({ showError: false })}
-                    >
-                    </button>
-                </div>
-            </>
-        );
-    };
+    };    
 
     closeModal = () => {
         this.setState({ showOverdueModal: false, selectedTodo: null });
@@ -361,7 +294,7 @@ class TodoList extends Component {
         formData.append('status', newStatus);
         formData.append('logged_in_employee_id', logged_in_employee_id);
 
-        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=update`, {
+        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=update_status`, {
             method: "POST",
             body: formData,
         })
@@ -418,7 +351,6 @@ class TodoList extends Component {
             title: "",
             due_date: "",
             priority: "",
-            todoStatus: "",
             selectedEmployeeId: ""
         });
     };
@@ -430,12 +362,13 @@ class TodoList extends Component {
 
     // Update Todo data API call
     updateTodoData = () => {
-        const { selectedTodo, logged_in_employee_id, logged_in_employee_role, title, due_date, priority, todoStatus, selectedEmployeeId } = this.state;
+        const { selectedTodo, logged_in_employee_id, logged_in_employee_role, title, due_date, priority, selectedEmployeeId } = this.state;
 
         if (!this.validateAddTodoForm()) {
-            return; 
+            return; // Stop execution if validation fails
         }
 
+        // Determine the correct employee_id
         const employee_id = (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") 
         ? selectedEmployeeId 
         : logged_in_employee_id;
@@ -446,7 +379,6 @@ class TodoList extends Component {
         updateTodoFormData.append('title', title);
         updateTodoFormData.append('due_date', due_date);
         updateTodoFormData.append('priority', priority);
-        updateTodoFormData.append('status', todoStatus);
         updateTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
         updateTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
@@ -462,13 +394,12 @@ class TodoList extends Component {
                 this.setState((prevState) => ({
                     todos: prevState.todos.map(todo =>
                         todo.id === selectedTodo.id
-                            ? { ...todo, title, due_date, priority, todoStatus, employee_id }
+                            ? { ...todo, title, due_date, priority,  employee_id }
                             : todo
                     ),
                     title: "",
                     due_date: "",
                     priority: "",
-                    todoStatus: "",
                     selectedEmployeeId: "",
                     errors:{},
                     successMessage: "Todo updated successfully!",
@@ -528,8 +459,7 @@ class TodoList extends Component {
     formData.append('logged_in_employee_id', logged_in_employee_id);
 
     fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete`, {
-        method: "POST",
-        body: formData,
+        method: "DELETE",
     })
     .then(response => response.json())
     .then(data => {
@@ -646,7 +576,7 @@ class TodoList extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees, statusFilter } = this.state;
+        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees, statusFilter, showSuccess, successMessage, showError, errorMessage } = this.state;
 
         // Filter todos: employees see only their own, admins see all
         let visibleTodos = (logged_in_employee_role === "employee")
@@ -660,7 +590,16 @@ class TodoList extends Component {
 
         return (
             <>
-                {this.renderAlertMessages()} {/* Show Toast Messages */}
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
+                                
+                                 {/* Show Toast Messages */}
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
                     <div className="container-fluid">
                         {/* Status Filter for Admin/Super Admin */}
@@ -864,7 +803,6 @@ class TodoList extends Component {
                         title: this.state.title,
                         due_date: this.state.due_date,
                         priority: this.state.priority,
-                        todoStatus: this.state.todoStatus,
                         selectedEmployeeId: this.state.selectedEmployeeId
                     }}
                     errors={this.state.errors}
@@ -917,7 +855,6 @@ class TodoList extends Component {
                         title: this.state.title,
                         due_date: this.state.due_date,
                         priority: this.state.priority,
-                        todoStatus: this.state.todoStatus,
                         selectedEmployeeId: this.state.selectedEmployeeId
                     }}
                     errors={this.state.errors}

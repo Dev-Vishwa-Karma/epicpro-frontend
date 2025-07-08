@@ -12,13 +12,11 @@ const TodoModal = ({
   modalId,
   employees = [],
   loggedInEmployeeRole = '',
-  onResetFormErrors
 }) => {
   const { 
     title = '', 
     due_date = '', 
     priority = '', 
-    todoStatus = '', 
     selectedEmployeeId = '' 
   } = formData;
 
@@ -69,7 +67,7 @@ const TodoModal = ({
                     </div>
                   </div>
                   
-                  <div className="col-md-6 col-sm-12">
+                  <div className="col-md-12 col-sm-12">
                     <div className="form-group">
                       <label className="form-label" htmlFor="priority">Priority</label>
                       <select
@@ -89,24 +87,6 @@ const TodoModal = ({
                     </div>
                   </div>
                   
-                  <div className="col-md-6 col-sm-12">
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="todoStatus">Status</label>
-                      <select
-                        className={`form-control ${errors.todoStatus ? "is-invalid" : ""}`}
-                        value={todoStatus}
-                        onChange={onChange}
-                        name="todoStatus"
-                      >
-                        <option value="">Select Todo Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
-                      </select>
-                      {errors.todoStatus && (
-                        <small className="invalid-feedback">{errors.todoStatus}</small>
-                      )}
-                    </div>
-                  </div>
 
                   {/* Show dropdown only for admin */}
                   {(loggedInEmployeeRole === "admin" || loggedInEmployeeRole === "super_admin") && (
