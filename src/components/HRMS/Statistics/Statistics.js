@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
+import dayjs from 'dayjs';
 
 class Statistics extends Component {
   constructor(props) {
@@ -203,6 +204,7 @@ class Statistics extends Component {
   }
 
   countLeavesPerEmployee = (leavesData, selectedYear, selectedMonth) => {
+    const { holidaysData, alternateSaturdayData } = this.state;
     const counts = {};
   
     leavesData.forEach((leave) => {
@@ -214,13 +216,21 @@ class Statistics extends Component {
   
       let current = new Date(from);
       while (current <= to) {
-        if (current.getFullYear() === year && current.getMonth() + 1 === month) {
-          if (is_half_day === "1" || is_half_day === 1) {
-            counts[employee_id] = (counts[employee_id] || 0) + 0.5;
-          } else {
-            counts[employee_id] = (counts[employee_id] || 0) + 1;
+        let formattedDate =  dayjs(new Date(current)).format('YYYY-MM-DD');
+        const isSunday = current.getDay() === 0;
+        const isAlternateSaturday = alternateSaturdayData.includes(formattedDate);
+        const isHoliday = holidaysData.includes(formattedDate)
+
+        if (!(isSunday || isAlternateSaturday || isHoliday)) {
+          if (current.getFullYear() === year && current.getMonth() + 1 === month) {
+            if (is_half_day === "1" || is_half_day === 1) {
+              counts[employee_id] = (counts[employee_id] || 0) + 0.5;
+            } else {
+              counts[employee_id] = (counts[employee_id] || 0) + 1;
+            }
           }
         }
+
         current.setDate(current.getDate() + 1);
       }
     });
@@ -236,7 +246,6 @@ class Statistics extends Component {
 
     monthDays.forEach(day => {
       const attendance = attendanceByDate[day.key] || {};
-
 
       employeesData.forEach(employee => {
         const rawHours = attendance[employee.id];
@@ -254,7 +263,7 @@ class Statistics extends Component {
           const [hours, minutes] = rawHours.split(":").map(Number);
           const totalHours = hours + minutes / 60;
 
-          if (!workedOnSpecialDay && totalHours > 4 && totalHours < 8) {
+          if (!workedOnSpecialDay && totalHours >= 4 && totalHours < 8) {
             halfLeaveCounts[employee.id] = (halfLeaveCounts[employee.id] || 0) + 0.5;
           }
         }
@@ -273,10 +282,9 @@ class Statistics extends Component {
       const isSunday = dateObj.getDay() === 0;
       const isAlternateSaturday = alternateSaturdayData.includes(day.key);
       const isHoliday = holidaysData.includes(day.key);
-  
       if (!isSunday && !isAlternateSaturday && !isHoliday) return;
-      const attendance = attendanceByDate[day.key] || {};
-      employeesData.forEach(employee => {
+        const attendance = attendanceByDate[day.key] || {};
+        employeesData.forEach(employee => {
         
         const rawHours = attendance[employee.id];
       

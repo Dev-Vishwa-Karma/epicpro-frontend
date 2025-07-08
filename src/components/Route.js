@@ -261,8 +261,6 @@ const Routes = [
         roles: ['admin', 'super_admin'],
         component: Settings
     },
-
-
     {
         path: "/login",
         name: 'login',
