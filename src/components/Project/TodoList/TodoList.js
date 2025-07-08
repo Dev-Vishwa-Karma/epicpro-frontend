@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
+import TodoModal from './TodoModal';
+import DeleteModal from '../../common/DeleteModal';
 
 class TodoList extends Component {
     constructor(props) {
@@ -10,6 +12,7 @@ class TodoList extends Component {
             showOverdueModal: false,
             selectedTodo: null,
 			showAddTodoModal: false,
+            showEditModal: false,
             selectedEmployeeId: '',
 			logged_in_employee_id: null,
             logged_in_employee_role: null,
@@ -17,6 +20,7 @@ class TodoList extends Component {
 			due_date: "",
             priority: "",
             todoStatus: "",
+            statusFilter: 'pending',
 			errors: {
 				title: '',
         		due_date: '',
@@ -28,7 +32,8 @@ class TodoList extends Component {
       		errorMessage: "",
 			showSuccess: false,
       		showError: false,
-			loading: true
+			loading: true,
+            ButtonLoading: false
 		}
 	}
 
@@ -186,9 +191,10 @@ class TodoList extends Component {
                     errors:{},
                     successMessage: "Todo added successfully!",
                     showSuccess: true,
+                    showAddTodoModal: false
                 }));
                 // Close the modal
-                document.querySelector("#addTodoModal .close").click();
+                // document.querySelector("#addTodoModal .close").click();
 
 				// Auto-hide success message after 5 seconds
 				setTimeout(() => {
@@ -219,7 +225,7 @@ class TodoList extends Component {
     };
 
     handleCheckboxClick = (todo) => {
-        if (this.state.logged_in_employee_role === 'employee') {
+        // if (this.state.logged_in_employee_role === 'employee') {
             if (todo.todoStatus === 'completed') {
                 // If todo is completed, unchecking will set to pending
                 this.setState({ 
@@ -234,9 +240,22 @@ class TodoList extends Component {
                     selectedTodo: todo,
                     isUnchecking: false 
                 });
-            }
+            // }
         }
     };
+
+    handleEditTodo = (todo) => {
+        this.setState({
+            selectedTodo: todo,
+            showEditModal: true,
+            title: todo.title,
+            due_date: todo.due_date,
+            priority: todo.priority,
+            todoStatus: todo.todoStatus,
+            selectedEmployeeId: todo.employee_id
+        });
+    };
+
 
     // Reset form errors when modal is closed
     resetFormErrors = () => {
@@ -248,6 +267,24 @@ class TodoList extends Component {
             todoStatus: "",
             selectedEmployeeId: ""
         });
+    };
+
+    // Handle modal close
+    handleModalClose = () => {
+        this.setState({
+            showAddTodoModal: false,
+            errors: {},
+            title: "",
+            due_date: "",
+            priority: "",
+            todoStatus: "",
+            selectedEmployeeId: ""
+        });
+    };
+
+    // Handle modal submit
+    handleModalSubmit = () => {
+        this.addTodoData();
     };
 
     // Render function for Bootstrap toast messages
@@ -372,20 +409,278 @@ class TodoList extends Component {
         });
     };
 
+    // Handle edit modal close
+    handleEditModalClose = () => {
+        this.setState({
+            showEditModal: false,
+            selectedTodo: null,
+            errors: {},
+            title: "",
+            due_date: "",
+            priority: "",
+            todoStatus: "",
+            selectedEmployeeId: ""
+        });
+    };
+
+    // Handle edit modal submit
+    handleEditModalSubmit = () => {
+        this.updateTodoData();
+    };
+
+    // Update Todo data API call
+    updateTodoData = () => {
+        const { selectedTodo, logged_in_employee_id, logged_in_employee_role, title, due_date, priority, todoStatus, selectedEmployeeId } = this.state;
+
+        if (!this.validateAddTodoForm()) {
+            return; 
+        }
+
+        const employee_id = (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") 
+        ? selectedEmployeeId 
+        : logged_in_employee_id;
+
+        const updateTodoFormData = new FormData();
+        updateTodoFormData.append('id', selectedTodo.id);
+        updateTodoFormData.append('employee_id', employee_id);
+        updateTodoFormData.append('title', title);
+        updateTodoFormData.append('due_date', due_date);
+        updateTodoFormData.append('priority', priority);
+        updateTodoFormData.append('status', todoStatus);
+        updateTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
+        updateTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
+
+        // API call to update todo
+        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=edit`, {
+            method: "POST",
+            body: updateTodoFormData,
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.status === 'success') {
+                // Update the todo list
+                this.setState((prevState) => ({
+                    todos: prevState.todos.map(todo =>
+                        todo.id === selectedTodo.id
+                            ? { ...todo, title, due_date, priority, todoStatus, employee_id }
+                            : todo
+                    ),
+                    title: "",
+                    due_date: "",
+                    priority: "",
+                    todoStatus: "",
+                    selectedEmployeeId: "",
+                    errors:{},
+                    successMessage: "Todo updated successfully!",
+                    showSuccess: true,
+                    showEditModal: false,
+                    selectedTodo: null
+                }));
+
+                // Auto-hide success message after 3 seconds
+                setTimeout(() => {
+                    this.setState({
+                        showSuccess: false, 
+                        successMessage: ''
+                    });
+                }, 3000);
+            } else {
+                this.setState({
+                    errorMessage: "Failed to update Todo. Please try again.",
+                    showError: true,
+                });
+
+                setTimeout(() => {
+                    this.setState({
+                        showError: false,
+                        errorMessage: ''
+                    });
+                }, 3000);
+            }
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+            this.setState({
+                errorMessage: "An error occurred while updating the todo.",
+                showError: true,
+            });
+        });
+    };
+
+    // Handle delete modal close
+    handleDeleteModalClose = () => {
+        this.setState({
+            showDeleteModal: false,
+            todoToDelete: null,
+            ButtonLoading: false
+        });
+    };
+
+    handleDeleteTodo = () => {
+    const { todoToDelete, logged_in_employee_id } = this.state;
+    
+    if (!todoToDelete) return;
+
+    this.setState({ ButtonLoading: true });
+
+    const formData = new FormData();
+    formData.append('id', todoToDelete.id);
+    formData.append('logged_in_employee_id', logged_in_employee_id);
+
+    fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete`, {
+        method: "POST",
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            this.setState(prevState => ({
+                todos: prevState.todos.filter(todo => todo.id !== todoToDelete.id),
+                showDeleteModal: false,
+                todoToDelete: null,
+                ButtonLoading: false,
+                successMessage: "Todo deleted successfully!",
+                showSuccess: true
+            }));
+            
+            setTimeout(() => {
+                this.setState({
+                    showSuccess: false,
+                    successMessage: ''
+                });
+            }, 3000);
+        } else {
+            this.setState({ 
+                showError: true, 
+                errorMessage: data.message || 'Failed to delete todo',
+                showDeleteModal: false, 
+                todoToDelete: null,
+                ButtonLoading: false
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        this.setState({ 
+            showError: true, 
+            errorMessage: 'An error occurred while deleting the todo',
+            showDeleteModal: false, 
+            todoToDelete: null,
+            ButtonLoading: false
+        });
+    });
+};
+
+    // Handle delete confirmation
+    handleDeleteConfirm = () => {
+        const { todoToDelete, logged_in_employee_id } = this.state;
+        
+        if (!todoToDelete) return;
+
+        this.setState({ ButtonLoading: true });
+
+        const deleteFormData = new FormData();
+        deleteFormData.append('id', todoToDelete.id);
+        deleteFormData.append('logged_in_employee_id', logged_in_employee_id);
+
+        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete`, {
+            method: "POST",
+            body: deleteFormData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Hide the modal using Bootstrap
+                if (window.$) {
+                    window.$('#deleteTodoModal').modal('hide');
+                }
+                this.setState(prevState => ({
+                    todos: prevState.todos.filter(todo => todo.id !== todoToDelete.id),
+                    showDeleteModal: false,
+                    todoToDelete: null,
+                    ButtonLoading: false,
+                    successMessage: "Todo deleted successfully!",
+                    showSuccess: true
+                }));
+                
+                setTimeout(() => {
+                    this.setState({
+                        showSuccess: false,
+                        successMessage: ''
+                    });
+                }, 3000);
+            } else {
+                // Hide the modal using Bootstrap
+                if (window.$) {
+                    window.$('#deleteTodoModal').modal('hide');
+                }
+                this.setState({ 
+                    showError: true, 
+                    errorMessage: data.message || 'Failed to delete todo',
+                    showDeleteModal: false, 
+                    todoToDelete: null,
+                    ButtonLoading: false
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            // Hide the modal using Bootstrap
+            if (window.$) {
+                window.$('#deleteTodoModal').modal('hide');
+            }
+            this.setState({ 
+                showError: true, 
+                errorMessage: 'An error occurred while deleting the todo',
+                showDeleteModal: false, 
+                todoToDelete: null,
+                ButtonLoading: false
+            });
+        });
+    };
+
+    // Add handler for status filter
+    handleStatusFilterChange = (e) => {
+        this.setState({ statusFilter: e.target.value });
+    };
+
     render() {
         const { fixNavbar } = this.props;
-        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees } = this.state;
+        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees, statusFilter } = this.state;
 
         // Filter todos: employees see only their own, admins see all
-        const visibleTodos = (logged_in_employee_role === "employee")
+        let visibleTodos = (logged_in_employee_role === "employee")
             ? todos.filter(todo => String(todo.employee_id) === String(logged_in_employee_id))
             : todos;
+
+        // Apply status filter for admin
+        if (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") {
+            visibleTodos = visibleTodos.filter(todo => todo.todoStatus === statusFilter);
+        }
 
         return (
             <>
                 {this.renderAlertMessages()} {/* Show Toast Messages */}
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
                     <div className="container-fluid">
+                        {/* Status Filter for Admin/Super Admin */}
+                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                            <div className="row mb-3">
+                                <div className="col-md-3">
+                                    <label htmlFor="statusFilter"><b>Status Filter:</b></label>
+                                    <select
+                                        id="statusFilter"
+                                        className="form-control"
+                                        value={statusFilter}
+                                        onChange={this.handleStatusFilterChange}
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="completed">Completed</option>
+                                        {/* Add more statuses if needed */}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
                         <div className="row">
                             <div className="col-12">
                                 <div className="card">
@@ -396,7 +691,7 @@ class TodoList extends Component {
                                                     <tr>
                                                         <th>
                                                             {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                                                <button type="button" className="btn btn-info btn-sm" data-toggle="modal" data-target="#addTodoModal">Add New</button>
+                                                                <button type="button" className="btn btn-info btn-sm" onClick={() => this.setState({ showAddTodoModal: true })}>Add New</button>
                                                             )}
                                                             {(logged_in_employee_role === "employee") && (
                                                                 <p className="w150">Task</p>
@@ -404,7 +699,9 @@ class TodoList extends Component {
                                                         </th>
                                                         <th className="w150 text-right">Due</th>
                                                         <th className="w100">Priority</th>
-                                                        <th className="w150">Status</th>
+                                                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                                        <th className="w150">Action</th>
+                                                        )}
                                                         <th className="w80"><i className="icon-user" /></th>
                                                     </tr>
                                                 </thead>
@@ -458,22 +755,40 @@ class TodoList extends Component {
                                                                             {todo.priority.toUpperCase()}
                                                                         </span>
                                                                     </td>
+                                                                    {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                     <td>
-                                                                        <span className={`tag ml-0 mr-0 ${
-                                                                            todo.todoStatus === "pending"
-                                                                                ? "tag-warning"
-                                                                                : todo.todoStatus === "in_progress"
-                                                                                ? "tag-primary"
-                                                                                : todo.todoStatus === "completed"
-                                                                                ? "tag-success"
-                                                                                : todo.todoStatus === "cancelled"
-                                                                                ? "tag-danger"
-                                                                                : "tag-secondary"
-                                                                            }`}
-                                                                        >
-                                                                            {todo.todoStatus.replace(/_/g, " ").toUpperCase()}
-                                                                        </span>
+                                                                        <div className="d-flex align-items-center">
+                                                                                <>
+                                                                                    <button 
+                                                                                        className="btn btn-sm btn-icon mr-1"
+                                                                                        onClick={() => this.handleEditTodo(todo)}
+                                                                                        title="Edit"
+                                                                                    >
+                                                                                        <i className="fa fa-edit"></i>
+                                                                                    </button>
+                                                                                    <button 
+                                                                                        className="btn btn-sm btn-icon"
+                                                                                        onClick={() => {
+                                                                                            console.log('Delete button clicked');
+                                                                                            this.setState({ 
+                                                                                                showDeleteModal: true, 
+                                                                                                todoToDelete: todo 
+                                                                                            }, () => {
+                                                                                                console.log('State updated:', this.state.showDeleteModal, this.state.todoToDelete);
+                                                                                                // Show the modal using Bootstrap
+                                                                                                if (window.$) {
+                                                                                                    window.$('#deleteTodoModal').modal('show');
+                                                                                                }
+                                                                                            });
+                                                                                        }}
+                                                                                        title="Delete"
+                                                                                    >
+                                                                                        <i className="fa fa-trash"></i>
+                                                                                    </button>
+                                                                                </>
+                                                                        </div>
                                                                     </td>
+                                                                    )}
                                                                     <td>
                                                                         {todo.profile ? (
                                                                             <img 
@@ -539,121 +854,25 @@ class TodoList extends Component {
                     </div>
                 </div>
 
-                {/* Add Department Modal */}
-                <div className="modal fade" id="addTodoModal" tabIndex={-1} role="dialog" aria-labelledby="addTodoModalModalLabel" data-backdrop="static" 
-                data-keyboard="false">
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="addTodoModalLabel">Add Todo</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.resetFormErrors}><span aria-hidden="true">×</span></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="row clearfix">
-                                    <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="title">Title</label>
-                                            <input
-                                                type="text"
-                                                // className="form-control"
-                                                className={`form-control ${this.state.errors.title ? "is-invalid" : ""}`}
-                                                placeholder="Todo title"
-                                                name="title"
-                                                value={title}
+                {/* Add Todo Modal */}
+                <TodoModal
+                    show={this.state.showAddTodoModal}
+                    onClose={this.handleModalClose}
+                    onSubmit={this.handleModalSubmit}
                                                 onChange={this.handleInputChangeForAddTodo}
-                                            />
-                                            {this.state.errors.title && (
-                                                <small className="invalid-feedback">{this.state.errors.title}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="due_date">Due Date</label>
-                                            <input
-                                                type="date"
-                                                className={`form-control ${this.state.errors.due_date ? "is-invalid" : ""}`}
-                                                name="due_date"
-                                                value={due_date}
-                                                onChange={this.handleInputChangeForAddTodo}
-                                            />
-                                            {this.state.errors.due_date && (
-                                                <small className="invalid-feedback">{this.state.errors.due_date}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6 col-sm-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="priority">Priority</label>
-                                            <select
-                                                className={`form-control ${this.state.errors.priority ? "is-invalid" : ""}`}
-                                                value={priority}  // Bind value to state
-                                                onChange={this.handleInputChangeForAddTodo}
-                                                name="priority"
-                                            >
-                                                <option value="">Select Priority</option>
-                                                <option value="low">Low</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="high">High</option>
-                                            </select>
-                                            {this.state.errors.priority && (
-                                                <small className="invalid-feedback">{this.state.errors.priority}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6 col-sm-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="todoStatus">Status</label>
-                                            <select
-                                                className={`form-control ${this.state.errors.todoStatus ? "is-invalid" : ""}`}
-                                                value={todoStatus}
-                                                onChange={this.handleInputChangeForAddTodo}
-                                                name="todoStatus"
-                                            >
-                                                <option value="">Select Todo Status</option>
-                                                <option value="pending">Pending</option>
-                                                <option value="in_progress">In progress</option>
-                                                <option value="completed">Completed</option>
-                                                <option value="cancelled">Cancelled</option>
-                                            </select>
-                                            {this.state.errors.todoStatus && (
-                                                <small className="invalid-feedback">{this.state.errors.todoStatus}</small>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Show dropdown only if user is admin/super_admin */}
-                                    {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                        <div className="col-md-12 col-sm-12">
-                                            <label htmlFor="employeeSelect" className="form-label font-weight-bold">Select Employee</label>
-                                            <select
-                                                name="selectedEmployeeId"
-                                                id="selectedEmployeeId"
-                                                className={`form-control ${this.state.errors.selectedEmployeeId ? "is-invalid" : ""}`}
-                                                value={selectedEmployeeId}
-                                                onChange={this.handleInputChangeForAddTodo}
-                                            >
-                                                <option value="">Select an Employee</option>
-                                                {employees.map((employee) => (
-                                                    <option key={employee.id} value={employee.id}>
-                                                        {employee.first_name} {employee.last_name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {this.state.errors.selectedEmployeeId && (
-                                                <small className="invalid-feedback">{this.state.errors.selectedEmployeeId}</small>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                <button type="button" onClick={this.addTodoData} className="btn btn-primary">Save changes</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    formData={{
+                        title: this.state.title,
+                        due_date: this.state.due_date,
+                        priority: this.state.priority,
+                        todoStatus: this.state.todoStatus,
+                        selectedEmployeeId: this.state.selectedEmployeeId
+                    }}
+                    errors={this.state.errors}
+                    loading={false}
+                    modalId="addTodoModal"
+                    employees={this.state.employees}
+                    loggedInEmployeeRole={this.state.logged_in_employee_role}
+                />
 
                 {/* Overdue Modal */}
                 {this.state.showOverdueModal && (
@@ -686,6 +905,39 @@ class TodoList extends Component {
                         </div>
                     </div>
                 )}
+
+                {/* Edit Todo Modal */}
+                <TodoModal
+                    isEdit={true}
+                    show={this.state.showEditModal}
+                    onClose={this.handleEditModalClose}
+                    onSubmit={this.handleEditModalSubmit}
+                    onChange={this.handleInputChangeForAddTodo}
+                    formData={{
+                        title: this.state.title,
+                        due_date: this.state.due_date,
+                        priority: this.state.priority,
+                        todoStatus: this.state.todoStatus,
+                        selectedEmployeeId: this.state.selectedEmployeeId
+                    }}
+                    errors={this.state.errors}
+                    loading={false}
+                    modalId="editTodoModal"
+                    employees={this.state.employees}
+                    loggedInEmployeeRole={this.state.logged_in_employee_role}
+                />
+                {this.state.showEditModal && <div className="modal-backdrop fade show" />}
+
+                {/* Delete Todo Modal */}
+                <DeleteModal
+                    show={this.state.showDeleteModal}
+                    onConfirm={this.handleDeleteTodo}
+                    onClose={this.handleDeleteModalClose}  // Add this line
+                    isLoading={this.state.ButtonLoading}
+                    deleteBody="Are you sure you want to delete this todo?"
+                    modalId="deleteTodoModal"
+                />
+                {this.state.showDeleteModal && <div className="modal-backdrop fade show" />}
             </>
         )
     }
