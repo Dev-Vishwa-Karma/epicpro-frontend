@@ -91,10 +91,10 @@ class ReportModal extends Component {
 									</div>
 								)}
 								<div className="col-md-12 mb-2">
-									<div className="multiline-text">
-										<strong>Description</strong> <br />
-										{report.report}
-									</div>
+									<div
+										className="multiline-text"
+										dangerouslySetInnerHTML={{ __html: `<strong>Description</strong><br />${report.report || ''}` }}
+									/>
 								</div>
 								<div className="col-md-12 mb-2">
 									<strong>Start Time:</strong> {this.formatDateTimeAMPM(report.start_time)}

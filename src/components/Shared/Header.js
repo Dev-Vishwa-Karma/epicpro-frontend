@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { breakInAction, punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
 import AlertMessages from "../common/AlertMessages";
 import TextEditor from "../common/TextEditor";
+import DueTasksAlert from "../common/DueTasksAlert";
 
 class Header extends Component {
   constructor(props) {
@@ -37,7 +38,10 @@ class Header extends Component {
       errorMessage: "",
       showError: false,
       notifications: [],
-      loading: true
+      loading: true,
+      is_task_due_today:false,
+      showDueAlert:true,
+      dueTasks:[],
     };
   }
 
@@ -65,6 +69,7 @@ class Header extends Component {
         this.fetchNotifications();
         this.checkBirthdays(); 
         this.startNotificationInterval();
+        this.checktodayDueDate();
       });
      
     }
@@ -83,6 +88,26 @@ class Header extends Component {
   componentWillUnmount() {
     clearInterval(this.state.timer);
   }
+
+  checktodayDueDate = () => {
+    fetch(
+      `${process.env.REACT_APP_API_URL}/project_todo.php?action=due_today_check&user_id=${window.user.id}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          console.log('before data',data.data.has_due_today)
+            this.setState({
+              is_task_due_today: data.data.has_due_today,
+              dueTasks:data.data.tasks
+            });
+            console.log('after data',this.state.is_task_due_today)
+        } 
+      })
+      .catch((err) => {
+        console.error('Error checking birthdays:', err);
+      });
+  };
 
   startTimerInterval = (punchInTime, isAutoClose = true) => {
     if(punchInTime){
@@ -654,7 +679,10 @@ class Header extends Component {
       showSuccess,
       successMessage, 
       showError, 
-      errorMessage
+      errorMessage,
+      is_task_due_today,
+      showDueAlert,
+      dueTasks
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
@@ -722,7 +750,7 @@ class Header extends Component {
                                     {notification.title}{' '}
                                     <small className="float-right text-muted"> {formattedDate}</small>
                                   </h4>
-                                  <small> {notification.body}</small>
+                                  <small className="notification-body"> {notification.body}</small>
                                 </div>
                               </li>
                             );
@@ -1010,7 +1038,21 @@ class Header extends Component {
             </div>
           </div>
         )}
+        {is_task_due_today && showDueAlert && dueTasks?.length > 0 && (
+          <DueTasksAlert
+            dueTasks={dueTasks}
+            onClose={() => this.setState({ showDueAlert: false })}
+          />
+        )}
+        <style>
+          {`
+            .notification-body {
+                overflow: visible !important;
+            }
+          `}
+      </style>
       </div>
+      
     );
   }
 }
