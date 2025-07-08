@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DeleteModal = ({ onConfirm, isLoading, deleteBody, modalId }) => {
+const DeleteModal = ({ onConfirm, isLoading, onClose, deleteBody, modalId }) => {
     const labelId = `${modalId}Label`;
     
     return (
@@ -38,6 +38,7 @@ const DeleteModal = ({ onConfirm, isLoading, deleteBody, modalId }) => {
                             type="button"
                             className="btn btn-secondary"
                             data-dismiss="modal"
+                            onClick={onClose}
                         >
                             Cancel
                         </button>

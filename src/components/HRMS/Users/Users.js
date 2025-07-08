@@ -556,14 +556,61 @@ class Users extends Component {
 															currentUsers.map((user, index) => (
 																<tr key={index}>
 																	<td className="width45">
-																		<span
+																		{/* <span
 																			className="avatar avatar-blue"
 																			data-toggle="tooltip"
 																			data-placement="top"
 																			data-original-title="Avatar Name"
 																		>
 																			{user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
-																		</span>
+																		</span> */}
+																		{user.profile ? (
+                                                                            <img 
+                                                                                src={`${process.env.REACT_APP_API_URL}/${user.profile}`} 
+                                                                                className="avatar avatar-blue add-space" 
+                                                                                alt={`${user.first_name} ${user.last_name}`}
+                                                                                data-toggle="tooltip" 
+                                                                                data-placement="top" 
+                                                                                title={`${user.first_name} ${user.last_name}`}
+                                                                                style={{
+                                                                                    width: '40px', 
+                                                                                    height: '40px', 
+                                                                                    borderRadius: '50%', 
+                                                                                    objectFit: 'cover'
+                                                                                }}
+                                                                                onError={(e) => {
+                                                                                e.target.style.display = 'none';
+                                                                                const initialsSpan = document.createElement('span');
+                                                                                initialsSpan.className = 'avatar avatar-blue add-space';
+                                                                                initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                                                                initialsSpan.setAttribute('data-placement', 'top');
+                                                                                initialsSpan.setAttribute('title', `${user.first_name} ${user.last_name}`);
+                                                                                initialsSpan.style.display = 'inline-flex';
+                                                                                initialsSpan.style.alignItems = 'center';
+                                                                                initialsSpan.style.justifyContent = 'center';
+                                                                                initialsSpan.style.width = '40px';
+                                                                                initialsSpan.style.height = '40px';
+                                                                                initialsSpan.textContent = `${user.first_name.charAt(0).toUpperCase()}${user.last_name.charAt(0).toUpperCase()}`;
+                                                                                e.target.parentNode.appendChild(initialsSpan);
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <span
+                                                                                className="avatar avatar-blue add-space"
+                                                                                data-toggle="tooltip"
+                                                                                data-placement="top"
+                                                                                title={`${user.first_name} ${user.last_name}`}
+                                                                                style={{
+                                                                                    width: '40px',
+                                                                                    height: '40px',
+                                                                                    display: 'inline-flex',
+                                                                                    alignItems: 'center',
+                                                                                    justifyContent: 'center'
+                                                                                }}
+                                                                            >
+                                                                                {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
+                                                                            </span>
+                                                                        )}
 																	</td>
 																	<td>
 																		<h6 className="mb-0">{`${user.first_name} ${user.last_name}`}</h6>

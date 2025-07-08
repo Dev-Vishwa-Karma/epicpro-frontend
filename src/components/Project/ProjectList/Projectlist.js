@@ -4,6 +4,8 @@ import {
     boxAction, box2Action, box3Action, box4Action, box5Action, box6Action
 } from '../../../actions/settingsAction';
 import AlertMessages from '../../common/AlertMessages';
+import DeleteModal from '../../common/DeleteModal';
+import EditModal from './EditModal';
 
 class ProjectList extends Component {
     constructor(props) {
@@ -31,6 +33,14 @@ class ProjectList extends Component {
 			searchQuery: "",
             errors: {},
             collapsedCards: {},
+            editingProjectId: null,
+            isEditing: false,
+            showDeleteModal: false,
+            deleteProjectId: null,
+            deleteProjectName: '',
+            isDeleting: false,
+            showEditModal: false,
+            isSubmitting: false,
         }
     }
     handleBoxToggle = (index) => {
@@ -241,40 +251,57 @@ class ProjectList extends Component {
         return isValid;
 	};
 
-    // Add project data API call
+    // Add/Update project data API call
     addProjectData = () => {
-        const { logged_in_employee_id, projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, selectedClient, teamMembers } = this.state;
+        const { logged_in_employee_id, projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, selectedClient, teamMembers, isEditing, editingProjectId } = this.state;
 
         if (!this.validateAddProjectForm()) {
             return; // Stop execution if validation fails
         }
 
-        const addProjectFormData = new FormData();
-        addProjectFormData.append('logged_in_employee_id', logged_in_employee_id);
-        addProjectFormData.append('project_name', projectName);
-        addProjectFormData.append('project_description', projectDescription);
-        addProjectFormData.append('project_technology', projectTechnology);
-        addProjectFormData.append('client_id', selectedClient);
-        // addProjectFormData.append('team_members', teamMembers);
-        addProjectFormData.append('project_start_date', projectStartDate);
-        addProjectFormData.append('project_end_date', projectEndDate);
-
-        // Append multiple team members correctly
+        const projectFormData = new FormData();
+        projectFormData.append('logged_in_employee_id', logged_in_employee_id);
+        projectFormData.append('project_name', projectName);
+        projectFormData.append('project_description', projectDescription);
+        projectFormData.append('project_technology', projectTechnology);
+        projectFormData.append('client_id', selectedClient);
+        projectFormData.append('project_start_date', projectStartDate);
+        projectFormData.append('project_end_date', projectEndDate);
         teamMembers.forEach((member) => {
-            addProjectFormData.append('team_members[]', member);
+            projectFormData.append('team_members[]', member);
         });
+        if (isEditing && editingProjectId) {
+            projectFormData.append('project_id', editingProjectId);
+        }
+        const action = isEditing ? 'update' : 'add';
+        const successMessage = isEditing ? 'Project updated successfully!' : 'Project added successfully!';
 
-        // API call to add project
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=add`, {
-            method: "POST",
-            body: addProjectFormData,
+        // API call to add/update project (always POST for PHP)
+        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=${action}`, {
+            method: 'POST',
+            body: projectFormData,
         })
         .then((response) => response.json())
         .then((data) => {
-            if (data.success) {
-                // Update the project list
-                this.setState((prevState) => ({
-                    projects: [data.newProject, ...(prevState.projects || [])], // Add project at the start
+            if (data.status === 'success' || data.success) {
+                if (isEditing) {
+                    // Update existing project in the list
+                    this.setState((prevState) => ({
+                        projects: prevState.projects.map(project => 
+                            project.project_id === editingProjectId ? data.updatedProject : project
+                        ),
+                        allProjects: prevState.allProjects.map(project => 
+                            project.project_id === editingProjectId ? data.updatedProject : project
+                        ),
+                    }));
+                } else {
+                    // Add new project to the list
+                    this.setState((prevState) => ({
+                        projects: [data.newProject, ...(prevState.projects || [])],
+                        allProjects: [data.newProject, ...(prevState.allProjects || [])],
+                    }));
+                }
+                this.setState({
                     projectName: "",
                     projectDescription: "",
                     projectTechnology: "",
@@ -282,40 +309,40 @@ class ProjectList extends Component {
                     teamMembers: [],
                     projectStartDate: "",
                     projectEndDate: "",
-                    errors:{},
-                    successMessage: "Project added successfully!",
+                    errors: {},
+                    editingProjectId: null,
+                    isEditing: false,
+                    showEditModal: false,
+                    isSubmitting: false,
+                    successMessage: successMessage,
                     showSuccess: true,
-                }));
-                // Close the modal
-                document.querySelector("#addProjectModal .close").click();
-
-				// Auto-hide success message after 5 seconds
-				setTimeout(() => {
-					this.setState({
-						showSuccess: false, 
-						successMessage: ''
-					});
-				}, 5000);
+                });
+                setTimeout(() => {
+                    this.setState({
+                        showSuccess: false, 
+                        successMessage: ''
+                    });
+                }, 5000);
             } else {
                 this.setState({
-                    errorMessage: "Failed to add project. Please try again.",
+                    errorMessage: data.message || `Failed to ${isEditing ? 'update' : 'add'} project. Please try again.`,
                     showError: true,
+                    isSubmitting: false,
                 });
-
-				// Auto-hide success message after 5 seconds
-				setTimeout(() => {
-					this.setState({
-						showError: false,
-						errorMessage: ''
-					});
-				}, 5000);
+                setTimeout(() => {
+                    this.setState({
+                        showError: false,
+                        errorMessage: ''
+                    });
+                }, 5000);
             }
         })
         .catch((error) => {
             console.error("Error:", error);
             this.setState({
-                errorMessage: "An error occurred while adding the project.",
+                errorMessage: `An error occurred while ${isEditing ? 'updating' : 'adding'} the project.`,
                 showError: true,
+                isSubmitting: false,
             });
         });
     };
@@ -328,10 +355,26 @@ class ProjectList extends Component {
             projectDescription: "",
             projectTechnology: "",
             selectedClient: "",
-            teamMembers: "",
+            teamMembers: [],
             projectStartDate: "",
             projectEndDate: "",
+            editingProjectId: null,
+            isEditing: false,
         });
+
+        // Properly close the modal
+        const modal = document.querySelector("#addProjectModal");
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            
+            // Remove backdrop
+            const backdrop = document.getElementById('modalBackdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
     };
 
     // Function to dismiss messages
@@ -362,6 +405,145 @@ class ProjectList extends Component {
 			}
         });
     };
+
+    // Handle edit project
+    handleEditProject = (project) => {
+        // Populate form with project data for editing
+        this.setState({
+            projectName: project.project_name || "",
+            projectDescription: project.project_description || "",
+            projectTechnology: project.project_technology || "",
+            selectedClient: project.client_id || "",
+            teamMembers: project.team_members ? project.team_members.map(member => String(member.id)) : [],
+            projectStartDate: project.project_start_date || "",
+            projectEndDate: project.project_end_date || "",
+            editingProjectId: project.id,
+            isEditing: true,
+            showEditModal: true
+        });
+    };
+
+    // Handle delete project - show delete modal
+    handleDeleteProject = (projectId, projectName) => {
+        this.setState({
+            showDeleteModal: true,
+            deleteProjectId: projectId,
+            deleteProjectName: projectName
+        }, () => {
+            this.showDeleteModal();
+        });
+    };
+
+    // Confirm delete project
+    confirmDeleteProject = () => {
+        const { deleteProjectId } = this.state;
+        this.setState({ isDeleting: true });
+
+        // Make API call to delete project (use POST for PHP compatibility)
+        const formData = new FormData();
+        formData.append('project_id', deleteProjectId);
+        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=delete`, {
+            method: 'DELETE',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Remove project from state
+                const updatedProjects = this.state.projects.filter(project => project.project_id !== deleteProjectId);
+                const updatedAllProjects = this.state.allProjects.filter(project => project.project_id !== deleteProjectId);
+                this.setState({
+                    projects: updatedProjects,
+                    allProjects: updatedAllProjects,
+                    showSuccess: true,
+                    successMessage: 'Project deleted successfully!',
+                    showDeleteModal: false,
+                    deleteProjectId: null,
+                    deleteProjectName: '',
+                    isDeleting: false
+                });
+                setTimeout(() => this.setState({ showSuccess: false }), 3000);
+            } else {
+                this.setState({
+                    showError: true,
+                    errorMessage: data.message || 'Failed to delete project',
+                    showDeleteModal: false,
+                    deleteProjectId: null,
+                    deleteProjectName: '',
+                    isDeleting: false
+                });
+                setTimeout(() => this.setState({ showError: false }), 3000);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting project:', error);
+            this.setState({
+                showError: true,
+                errorMessage: 'An error occurred while deleting the project',
+                showDeleteModal: false,
+                deleteProjectId: null,
+                deleteProjectName: '',
+                isDeleting: false
+            });
+            setTimeout(() => this.setState({ showError: false }), 3000);
+        });
+    };
+
+    // Close delete modal
+    closeDeleteModal = () => {
+        this.setState({
+            showDeleteModal: false,
+            deleteProjectId: null,
+            deleteProjectName: '',
+            isDeleting: false
+        }, () => {
+            this.hideDeleteModal();
+        });
+    };
+
+    // Close edit modal
+    closeEditModal = () => {
+        this.setState({
+            showEditModal: false,
+            editingProjectId: null,
+            isEditing: false,
+            projectName: "",
+            projectDescription: "",
+            projectTechnology: "",
+            selectedClient: "",
+            teamMembers: [],
+            projectStartDate: "",
+            projectEndDate: "",
+            errors: {}
+        });
+    };
+
+    // Handle edit modal submit
+    handleEditModalSubmit = () => {
+        this.setState({ isSubmitting: true });
+        this.addProjectData();
+    };
+
+    // Show delete modal
+    showDeleteModal = () => {
+        const modal = document.querySelector('#deleteProjectModal');
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+    };
+
+    // Hide delete modal
+    hideDeleteModal = () => {
+        const modal = document.querySelector('#deleteProjectModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+    };
+
 
     render() {
         const { fixNavbar/* , boxOpen */ } = this.props;
@@ -396,7 +578,24 @@ class ProjectList extends Component {
                                     />
                                 </div>
                                 {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-                                    <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#addProjectModal"><i className="fe fe-plus mr-2" />Add</button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-primary" 
+                                        onClick={() => this.setState({ 
+                                            showEditModal: true, 
+                                            isEditing: false,
+                                            projectName: "",
+                                            projectDescription: "",
+                                            projectTechnology: "",
+                                            selectedClient: "",
+                                            teamMembers: [],
+                                            projectStartDate: "",
+                                            projectEndDate: "",
+                                            errors: {}
+                                        })}
+                                    >
+                                        <i className="fe fe-plus mr-2" />Add
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -420,6 +619,42 @@ class ProjectList extends Component {
                                                             </label>
                                                             <span className="card-options-collapse" data-toggle="card-collapse" onClick={() => this.handleBoxToggle(index)}
                                                             ><i className="fe fe-chevron-up" /></span>
+                                                            
+                                                            {/* 3-dot menu dropdown - Only show for admin users */}
+                                                            {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
+                                                                <div className="dropdown">
+                                                                    <button 
+                                                                        className="btn btn-icon btn-sm" 
+                                                                        type="button" 
+                                                                        data-toggle="dropdown" 
+                                                                        aria-haspopup="true" 
+                                                                        aria-expanded="false"
+                                                                        title="More options"
+                                                                    >
+                                                                        <i className="fa fa-ellipsis-v" />
+                                                                    </button>
+                                                                    <div className="dropdown-menu dropdown-menu-right">
+                                                                        <button 
+                                                                            className="dropdown-item" 
+                                                                            type="button"
+                                                                            onClick={() => this.handleEditProject(project)}
+                                                                            title="Edit Project"
+                                                                        >
+                                                                            <i className="fa fa-edit mr-2" />
+                                                                            Edit
+                                                                        </button>
+                                                                        <button 
+                                                                            className="dropdown-item text-danger" 
+                                                                            type="button"
+                                                                            onClick={() => this.handleDeleteProject(project.id, project.project_name)}
+                                                                            title="Delete Project"
+                                                                        >
+                                                                            <i className="fa fa-trash-o mr-2" />
+                                                                            Delete
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="card-body">
@@ -443,14 +678,48 @@ class ProjectList extends Component {
                                                             <div className="col-8 py-1">
                                                                 <div className="avatar-list avatar-list-stacked">
                                                                     {project.team_members.map((member) => (
-                                                                        <span
-																			className="avatar avatar-blue add-space"
-																			data-toggle="tooltip"
-																			data-placement="top"
-                                                                            title={`${member.first_name} ${member.last_name}`}
-																		>
-																			{member.first_name.charAt(0).toUpperCase()}{member.last_name.charAt(0).toUpperCase()}
-																		</span>
+                                                                        <span key={member.id}>
+                                                                            {member.profile ? (
+                                                                                <img
+                                                                                    src={`${process.env.REACT_APP_API_URL}/${member.profile}`}
+                                                                                    className="avatar avatar-blue add-space"
+                                                                                    alt={`${member.first_name} ${member.last_name}`}
+                                                                                    data-toggle="tooltip"
+                                                                                    data-placement="top"
+                                                                                    title={`${member.first_name} ${member.last_name}`}
+                                                                                    onError={(e) => {
+                                                                                        e.target.style.display = 'none';
+                                                                                        const initialsSpan = document.createElement('span');
+                                                                                        initialsSpan.className = 'avatar avatar-blue add-space';
+                                                                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
+                                                                                        initialsSpan.setAttribute('data-placement', 'top');
+                                                                                        initialsSpan.setAttribute('title', `${member.first_name} ${member.last_name}`);
+                                                                                        e.target.parentNode.insertBefore(initialsSpan, e.target.nextSibling);
+                                                                                        initialsSpan.style.display = 'inline-flex';
+                                                                                        initialsSpan.style.alignItems = 'center';
+                                                                                        initialsSpan.style.justifyContent = 'center';
+                                                                                        initialsSpan.style.width = '35px';
+                                                                                        initialsSpan.style.height = '35px';
+                                                                                    }}
+                                                                                />
+                                                                            ) : (
+                                                                                <span
+                                                                                    className="avatar avatar-blue add-space"
+                                                                                    data-toggle="tooltip"
+                                                                                    data-placement="top"
+                                                                                    title={`${member.first_name} ${member.last_name}`}
+                                                                                    style={{
+                                                                                        width: '35px',
+                                                                                        height: '35px',
+                                                                                        display: 'inline-flex',
+                                                                                        alignItems: 'center',
+                                                                                        justifyContent: 'center',
+                                                                                    }}
+                                                                                >
+                                                                                    {member.first_name.charAt(0).toUpperCase()}{member.last_name.charAt(0).toUpperCase()}
+                                                                                </span>
+                                                                            )}
+                                                                        </span>
                                                                     ))}
                                                                 </div>
                                                             </div>
@@ -557,11 +826,15 @@ class ProjectList extends Component {
 
                 {/* Add Project Modal */}
                 <div className="modal fade" id="addProjectModal" tabIndex={-1} role="dialog" aria-labelledby="addProjectModalLabel" data-backdrop="static" 
-                data-keyboard="false">
+                data-keyboard="false" style={{ zIndex: 1050 }} onClick={(e) => {
+                    if (e.target.id === 'addProjectModal') {
+                        this.resetFormErrors();
+                    }
+                }}>
                     <div className="modal-dialog" role="document">
-                        <div className="modal-content">
+                        <div className="modal-content" tabIndex={-1}>
                             <div className="modal-header">
-                                <h5 className="modal-title" id="addProjectModalLabel">Add Project</h5>
+                                <h5 className="modal-title" id="addProjectModalLabel">{this.state.isEditing ? 'Edit Project' : 'Add Project'}</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.resetFormErrors}><span aria-hidden="true">×</span></button>
                             </div>
                             <div className="modal-body">
@@ -722,11 +995,49 @@ class ProjectList extends Component {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                <button type="button" onClick={this.addProjectData} className="btn btn-primary">Add project</button>
+                                <button type="button" onClick={this.addProjectData} className="btn btn-primary">
+                                    {this.state.isEditing ? 'Update Project' : 'Add Project'}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Edit Project Modal */}
+                <EditModal
+                    modalId="editProjectModal"
+                    isOpen={this.state.showEditModal}
+                    onClose={this.closeEditModal}
+                    onSubmit={this.handleEditModalSubmit}
+                    formData={{
+                        projectName: this.state.projectName,
+                        projectDescription: this.state.projectDescription,
+                        projectTechnology: this.state.projectTechnology,
+                        selectedClient: this.state.selectedClient,
+                        teamMembers: this.state.teamMembers,
+                        projectStartDate: this.state.projectStartDate,
+                        projectEndDate: this.state.projectEndDate
+                    }}
+                    onInputChange={this.handleInputChangeForAddProject}
+                    onSelectionChange={this.handleSelectionChange}
+                    onCheckboxChange={this.handleCheckboxChange}
+                    errors={this.state.errors}
+                    employees={this.state.employees}
+                    clients={this.state.clients}
+                    dropdownOpen={this.state.dropdownOpen}
+                    toggleDropdown={this.toggleDropdown}
+                    isEditing={this.state.isEditing}
+                    isLoading={this.state.isSubmitting}
+                />
+
+                {/* Delete Project Modal */}
+                <DeleteModal
+                    modalId="deleteProjectModal"
+                    deleteBody={`Are you sure you want to delete the project "${this.state.deleteProjectName}"`}
+                    onConfirm={this.confirmDeleteProject}
+                    onClose={this.closeDeleteModal}
+                    isLoading={this.state.isDeleting}
+                />
             </>
         )
     }
