@@ -607,7 +607,6 @@ class AddEmployee extends Component {
                               className={`form-control${this.state.errors.joiningDate ? ' is-invalid' : ''}`}
                               value={joiningDate}
                               onChange={this.handleChange}
-                              max={new Date().toISOString().split("T")[0]}
                             />
                             {this.state.errors.joiningDate && (
                               <div className="invalid-feedback d-block">{this.state.errors.joiningDate}</div>

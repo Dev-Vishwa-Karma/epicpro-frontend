@@ -316,6 +316,21 @@ class EditEmployee extends Component {
         if (!dob || dob.trim() === "") {
         errors.dob = "DOB is required.";
         }
+        if (mobile1 && !/^\d{10}$/.test(mobile1)) {
+        errors.mobile1 = "Mobile number must be exactly 10 digits.";
+        }
+        if (mobile2 && !/^\d{10}$/.test(mobile2)) {
+        errors.mobile2 = "Mobile number must be exactly 10 digits.";
+        }
+        if (emergencyContact1 && !/^\d{10}$/.test(emergencyContact1)) {
+        errors.emergencyContact1 = "Mobile number must be exactly 10 digits.";
+        }
+        if (emergencyContact2 && !/^\d{10}$/.test(emergencyContact2)) {
+        errors.emergencyContact2 = "Mobile number must be exactly 10 digits.";
+        }
+        if (emergencyContact3 && !/^\d{10}$/.test(emergencyContact3)) {
+        errors.emergencyContact3 = "Mobile number must be exactly 10 digits.";
+        }
         if (!joiningDate || joiningDate.trim() === "") {
         errors.joiningDate = "Joining Date is required.";
         }
@@ -565,6 +580,7 @@ class EditEmployee extends Component {
                                                             className={`form-control${this.state.errors.dob ? ' is-invalid' : ''}`}
                                                             value={dob}
                                                             onChange={this.handleChange}
+                                                            max={new Date().toISOString().split("T")[0]}
                                                         />
                                                         {this.state.errors.dob && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
@@ -624,11 +640,18 @@ class EditEmployee extends Component {
                                                             type="tel"
                                                             name="mobile1"
                                                             id="mobile1"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.mobile1 ? ' is-invalid' : ''}`}
                                                             placeholder="Enter Mobile No"
+                                                            maxLength="10"
                                                             value={mobile1}
                                                             onChange={this.handleChange}
+                                                            onInput={(e) => {
+                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            }}
                                                         />
+                                                        {this.state.errors.mobile1 && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.mobile1}</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="col-sm-6 col-md-4">
@@ -638,11 +661,18 @@ class EditEmployee extends Component {
                                                             type="tel"
                                                             name="mobile2"
                                                             id="mobile2"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors.mobile2 ? ' is-invalid' : ''}`}
                                                             placeholder="Enter Mobile No"
+                                                            maxLength="10"
                                                             value={mobile2}
                                                             onChange={this.handleChange}
+                                                            onInput={(e) => {
+                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            }}
                                                         />
+                                                        {this.state.errors.mobile2 && (
+                                                            <div className="invalid-feedback d-block">{this.state.errors.mobile2}</div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                     <div className="col-sm-6 col-md-4">
@@ -693,11 +723,18 @@ class EditEmployee extends Component {
                                                         type="tel"
                                                         name="emergencyContact1"
                                                         id="emergencyContact1"
-                                                        className="form-control"
+                                                        className={`form-control${this.state.errors.emergencyContact1 ? ' is-invalid' : ''}`}
                                                         placeholder="Enter Emergency Contact"
+                                                        maxLength="10"
                                                         value={emergencyContact1}
                                                         onChange={this.handleChange}
+                                                        onInput={(e) => {
+                                                            e.target.value = e.target.value.replace(/\D/g, '');
+                                                        }}
                                                     />
+                                                    {this.state.errors.emergencyContact1 && (
+                                                        <div className="invalid-feedback d-block">{this.state.errors.emergencyContact1}</div>
+                                                    )}
                                                 </div>
                                                 <div className="col-sm-6 col-md-4 mb-4">
                                                     <label className="form-label">Emergency Contact 2</label>
@@ -705,11 +742,18 @@ class EditEmployee extends Component {
                                                         type="tel"
                                                         name="emergencyContact2"
                                                         id="emergencyContact2"
-                                                        className="form-control"
+                                                        className={`form-control${this.state.errors.emergencyContact2 ? ' is-invalid' : ''}`}
                                                         placeholder="Enter Emergency Contact"
+                                                        maxLength="10"
                                                         value={emergencyContact2}
                                                         onChange={this.handleChange}
+                                                        onInput={(e) => {
+                                                            e.target.value = e.target.value.replace(/\D/g, '');
+                                                        }}
                                                     />
+                                                    {this.state.errors.emergencyContact2 && (
+                                                        <div className="invalid-feedback d-block">{this.state.errors.emergencyContact2}</div>
+                                                    )}
                                                 </div>
                                                 <div className="col-sm-6 col-md-4 mb-4">
                                                     <label className="form-label">Emergency Contact 3</label>
@@ -717,11 +761,18 @@ class EditEmployee extends Component {
                                                         type="tel"
                                                         name="emergencyContact3"
                                                         id="emergencyContact3"
-                                                        className="form-control"
+                                                        className={`form-control${this.state.errors.emergencyContact3 ? ' is-invalid' : ''}`}
                                                         placeholder="Enter Emergency Contact"
+                                                        maxLength="10"
                                                         value={emergencyContact3}
                                                         onChange={this.handleChange}
+                                                        onInput={(e) => {
+                                                            e.target.value = e.target.value.replace(/\D/g, '');
+                                                        }}
                                                     />
+                                                    {this.state.errors.emergencyContact3 && (
+                                                        <div className="invalid-feedback d-block">{this.state.errors.emergencyContact3}</div>
+                                                    )}
                                                 </div>
 
                                                 {/* Frontend Skills */}

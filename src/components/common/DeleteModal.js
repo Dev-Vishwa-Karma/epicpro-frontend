@@ -1,15 +1,16 @@
 import React from 'react';
 
-const DeleteModal = ({ onConfirm, isLoading, onClose, deleteBody, modalId }) => {
+const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId }) => {
+    if (!show) return null;
     const labelId = `${modalId}Label`;
     
     return (
         <div
-            className="modal fade"
-            id={modalId}
+            className="modal fade show"
+            style={{ display: 'block' }}
             tabIndex={-1}
             role="dialog"
-            aria-labelledby={labelId}
+            aria-modal="true"
         >
             <div className="modal-dialog" role="document">
                 <div className="modal-content">
@@ -18,8 +19,8 @@ const DeleteModal = ({ onConfirm, isLoading, onClose, deleteBody, modalId }) => 
                         <button
                             type="button"
                             className="close"
-                            data-dismiss="modal"
                             aria-label="Close"
+                            onClick={onClose}
                         >
                             <span aria-hidden="true">×</span>
                         </button>
@@ -37,7 +38,6 @@ const DeleteModal = ({ onConfirm, isLoading, onClose, deleteBody, modalId }) => 
                         <button
                             type="button"
                             className="btn btn-secondary"
-                            data-dismiss="modal"
                             onClick={onClose}
                         >
                             Cancel

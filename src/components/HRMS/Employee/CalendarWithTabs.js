@@ -477,6 +477,7 @@ class CalendarWithTabs extends Component {
         if (!employee.dob || employee.dob.trim() === "") {
             errors.dob = "DOB is required.";
         }
+        
         if (!employee.joining_date || employee.joining_date.trim() === "") {
             errors.joining_date = "Joining Date is required.";
         }
@@ -947,8 +948,12 @@ class CalendarWithTabs extends Component {
                                                                 id="mobile_no1"
                                                                 className="form-control"
                                                                 placeholder="Enter Mobile No"
+                                                                maxLength="10"
                                                                 value={employee.mobile_no1 || ""}
                                                                 onChange={this.handleProfileChange}
+                                                                onInput={(e) => {
+                                                                    e.target.value = e.target.value.replace(/\D/g, '');
+                                                                }}
                                                             />
                                                         </div>
                                                     </div>
@@ -961,8 +966,12 @@ class CalendarWithTabs extends Component {
                                                                 id="mobile_no2"
                                                                 className="form-control"
                                                                 placeholder="Enter Mobile No"
+                                                                maxLength="10"
                                                                 value={employee.mobile_no2 || ""}
                                                                 onChange={this.handleProfileChange}
+                                                                onInput={(e) => {
+                                                                    e.target.value = e.target.value.replace(/\D/g, '');
+                                                                }}
                                                             />
                                                         </div>
                                                     </div>
@@ -1015,9 +1024,13 @@ class CalendarWithTabs extends Component {
                                                             name="emergency_contact1"
                                                             id="emergency_contact1"
                                                             className="form-control"
+                                                            maxLength="10"
                                                             placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact1}
                                                             onChange={this.handleProfileChange}
+                                                            onInput={(e) => {
+                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            }}
                                                         />
                                                     </div>
                                                     <div className="col-sm-6 col-md-4 mb-4">
@@ -1027,9 +1040,14 @@ class CalendarWithTabs extends Component {
                                                             name="emergency_contact2"
                                                             id="emergency_contact2"
                                                             className="form-control"
+                                                            maxLength="10"
                                                             placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact2}
                                                             onChange={this.handleProfileChange}
+                                                            onInput={(e) => {
+                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            }}
+                                                            
                                                         />
                                                     </div>
                                                     <div className="col-sm-6 col-md-4 mb-4">
@@ -1039,9 +1057,13 @@ class CalendarWithTabs extends Component {
                                                             name="emergency_contact3"
                                                             id="emergency_contact3"
                                                             className="form-control"
+                                                            maxLength="10"
                                                             placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact3}
                                                             onChange={this.handleProfileChange}
+                                                            onInput={(e) => {
+                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            }}
                                                         />
                                                     </div>
 
