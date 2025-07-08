@@ -595,8 +595,6 @@ class TodoList extends Component {
     // Add handler for status filter
     handleStatusFilterChange = (e) => {
         this.setState({ statusFilter: e.target.value });
-        console.log('e.target.value',e.target.value)
-        console.log('statusFilter',this.state.statusFilter)
         // Make the GET API call when the component is mounted
 		fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}&status=${e.target.value }`, {
 			method: "GET",
