@@ -22,7 +22,7 @@ class TodoList extends Component {
 			due_date: "",
             priority: "",
             todoStatus: "",
-            statusFilter: 'pending',
+            statusFilter: '',
 			errors: {
 				title: '',
         		due_date: '',
@@ -595,21 +595,32 @@ class TodoList extends Component {
     // Add handler for status filter
     handleStatusFilterChange = (e) => {
         this.setState({ statusFilter: e.target.value });
+        // Make the GET API call when the component is mounted
+		fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}&status=${e.target.value }`, {
+			method: "GET",
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.status === 'success') {
+				const todoData = data.data;
+				this.setState({
+					todos: todoData,
+					loading: false
+				});
+			} else {
+			  	this.setState({ message: data.message, loading: false });
+			}
+		})
+		.catch(err => {
+			this.setState({ message: 'Failed to fetch data', loading: false });
+			console.error(err);
+		});
     };
 
     render() {
         const { fixNavbar } = this.props;
         const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees, statusFilter, showSuccess, successMessage, showError, errorMessage,showDeleteModal } = this.state;
 
-        // Filter todos: employees see only their own, admins see all
-        let visibleTodos = (logged_in_employee_role === "employee")
-            ? todos.filter(todo => String(todo.employee_id) === String(logged_in_employee_id))
-            : todos;
-
-        // Apply status filter for admin
-        if (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") {
-            visibleTodos = visibleTodos.filter(todo => todo.todoStatus === statusFilter);
-        }
 
         return (
             <>
@@ -692,8 +703,8 @@ class TodoList extends Component {
                                                     </tbody>
                                                 ) : (
                                                     <tbody>
-                                                        {visibleTodos && visibleTodos.length > 0 ? (
-                                                            visibleTodos.map((todo, index) => (
+                                                        {todos && todos.length > 0 ? (
+                                                            todos.map((todo, index) => (
                                                                 <tr key={index+1} style={
                                                                     (logged_in_employee_role !== 'employee' && todo.hidden_for_employee)
                                                                         ? { textDecoration: 'line-through', opacity: 0.6 }
@@ -838,7 +849,7 @@ class TodoList extends Component {
                     show={this.state.showAddTodoModal}
                     onClose={this.handleModalClose}
                     onSubmit={this.handleModalSubmit}
-                                                onChange={this.handleInputChangeForAddTodo}
+                    onChange={this.handleInputChangeForAddTodo}
                     formData={{
                         title: this.state.title,
                         due_date: this.state.due_date,
@@ -909,7 +920,7 @@ class TodoList extends Component {
                 <DeleteModal
                     show={showDeleteModal}
                     onConfirm={this.handleDeleteTodo}
-                    onClose={this.handleDeleteModalClose}
+                    onClose={this.handleDeleteModalClose} 
                     isLoading={this.state.ButtonLoading}
                     deleteBody="Are you sure you want to delete this todo?"
                     modalId="deleteTodoModal"
