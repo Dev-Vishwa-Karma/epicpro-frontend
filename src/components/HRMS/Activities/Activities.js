@@ -85,7 +85,7 @@ class Activities extends Component {
 
     componentDidUpdate(prevProps)
     {
-        if (prevProps.selectedEmployeeId != this.props.selectedEmployeeId) {
+        if (prevProps.selectedEmployeeId !== this.props.selectedEmployeeId) {
             if (this.props.selectedEmployeeId) {
                 this.handleApplyFilter();
             }

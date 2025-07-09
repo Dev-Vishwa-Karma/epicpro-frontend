@@ -2,8 +2,7 @@ import React from 'react';
 
 const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId }) => {
     if (!show) return null;
-    const labelId = `${modalId}Label`;
-    
+  
     return (
         <div
             className="modal fade show"

@@ -666,7 +666,6 @@ class Header extends Component {
   render() {
     const { fixNavbar, darkHeader, isPunchedIn, breakDuration } = this.props;
     const {
-      report,
       punchErrorModel,
       userId,
       user,

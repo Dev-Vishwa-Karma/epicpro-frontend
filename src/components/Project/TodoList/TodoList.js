@@ -103,7 +103,7 @@ class TodoList extends Component {
 
     // Validate Add Department Form
 	validateAddTodoForm = (e) => {
-		const { title, due_date, priority, selectedEmployeeId, logged_in_employee_role } = this.state;
+		const { title, due_date, priority } = this.state;
         let errors = {};
         let isValid = true;
 
@@ -469,7 +469,7 @@ class TodoList extends Component {
     };
 
     handleDeleteTodo = () => {
-    const { todoToDelete, logged_in_employee_id } = this.state;
+    const { todoToDelete } = this.state;
     if (!todoToDelete) return;
 
     this.setState({ ButtonLoading: true });
@@ -619,7 +619,7 @@ class TodoList extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { title, due_date, priority, todoStatus, todos, loading, logged_in_employee_role, logged_in_employee_id, selectedEmployeeId, employees, statusFilter, showSuccess, successMessage, showError, errorMessage,showDeleteModal } = this.state;
+        const { todos, loading, logged_in_employee_role, statusFilter, showSuccess, successMessage, showError, errorMessage,showDeleteModal } = this.state;
 
 
         return (

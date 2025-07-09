@@ -59,11 +59,11 @@ class BirthdayBannerModal extends Component {
               background: 'linear-gradient(to right, #ffecd2, #fcb69f)',
             }}
           >
-            <div className="modal-header border-0">
-              <h5 className="modal-title w-100 text-dark display-6 fw-bold">
-                🎉 Happy Birthday! 🎂
-              </h5>
-            </div>
+           <div className="modal-header border-0">
+            <h5 className="modal-title w-100 text-dark display-6 fw-bold">
+              <span role="img" aria-label="party popper">🎉</span> Happy Birthday! <span role="img" aria-label="birthday cake">🎂</span>
+            </h5>
+          </div>
             <div className="modal-body">
               <img
                 src={user.profile || defaultProfileUrl}

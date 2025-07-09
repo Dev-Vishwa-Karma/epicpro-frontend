@@ -10,7 +10,7 @@ class ActivitiesTime extends Component {
 
     componentDidUpdate(prevProps)
     {
-        if (prevProps.activities != this.props.activities) {
+        if (prevProps.activities !== this.props.activities) {
             this.setState({
                 activities: this.props.activities,
             });

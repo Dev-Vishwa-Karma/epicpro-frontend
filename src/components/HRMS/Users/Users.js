@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
 
-let searchTimeout = null;
-
 class Users extends Component {
 	constructor(props) {
 		super(props);
