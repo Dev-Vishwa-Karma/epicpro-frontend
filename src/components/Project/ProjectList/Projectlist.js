@@ -80,7 +80,7 @@ class ProjectList extends Component {
         }
 
         // Fetch employees data
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
+        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
             method: "GET",
         })
         .then(response => response.json())
@@ -107,9 +107,13 @@ class ProjectList extends Component {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
+                const collapsedCards = {};
+                data.data.forEach(project => {
+                    collapsedCards[project.project_id] = project.project_is_active === 0;
+                });
                 this.setState({
-                    projects: data.status === 'success' ? data.data : [],
-                    allProjects: data.status === 'success' ? data.data: [],
+                    projects: data.data,
+                    allProjects: data.data,
                     loading: false
                 });
             } else {
@@ -251,9 +255,26 @@ class ProjectList extends Component {
         return isValid;
 	};
 
+    getEmployeeName = (employeeId, namePart) => {
+        const employee = this.state.employees.find(emp => String(emp.id) === String(employeeId));
+        if (!employee) return '';
+        return namePart === 'first' ? employee.first_name : employee.last_name;
+    };
+
     // Add/Update project data API call
     addProjectData = () => {
-        const { logged_in_employee_id, projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, selectedClient, teamMembers, isEditing, editingProjectId } = this.state;
+        const { 
+            logged_in_employee_id, 
+            projectName, 
+            projectDescription, 
+            projectTechnology, 
+            projectStartDate, 
+            projectEndDate, 
+            selectedClient, 
+            teamMembers, 
+            isEditing, 
+            editingProjectId 
+        } = this.state;
 
         if (!this.validateAddProjectForm()) {
             return; // Stop execution if validation fails
@@ -267,16 +288,17 @@ class ProjectList extends Component {
         projectFormData.append('client_id', selectedClient);
         projectFormData.append('project_start_date', projectStartDate);
         projectFormData.append('project_end_date', projectEndDate);
+        
         teamMembers.forEach((member) => {
             projectFormData.append('team_members[]', member);
         });
         if (isEditing && editingProjectId) {
             projectFormData.append('project_id', editingProjectId);
         }
-        const action = isEditing ? 'update' : 'add';
+
+        const action = isEditing ? 'edit' : 'add';
         const successMessage = isEditing ? 'Project updated successfully!' : 'Project added successfully!';
 
-        // API call to add/update project (always POST for PHP)
         fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=${action}`, {
             method: 'POST',
             body: projectFormData,
@@ -288,19 +310,66 @@ class ProjectList extends Component {
                     // Update existing project in the list
                     this.setState((prevState) => ({
                         projects: prevState.projects.map(project => 
-                            project.project_id === editingProjectId ? data.updatedProject : project
+                            project.project_id === editingProjectId ? {
+                                ...project,
+                                project_name: projectName,
+                                project_description: projectDescription,
+                                project_technology: projectTechnology,
+                                client_id: selectedClient,
+                                project_start_date: projectStartDate,
+                                project_end_date: projectEndDate,
+                                team_members: teamMembers.map(id => ({
+                                    employee_id: id,
+                                    first_name: this.getEmployeeName(id, 'first'),
+                                    last_name: this.getEmployeeName(id, 'last')
+                                }))
+                            } : project
                         ),
                         allProjects: prevState.allProjects.map(project => 
-                            project.project_id === editingProjectId ? data.updatedProject : project
+                            project.project_id === editingProjectId ? {
+                                ...project,
+                                project_name: projectName,
+                                project_description: projectDescription,
+                                project_technology: projectTechnology,
+                                client_id: selectedClient,
+                                project_start_date: projectStartDate,
+                                project_end_date: projectEndDate,
+                                team_members: teamMembers.map(id => ({
+                                    employee_id: id,
+                                    first_name: this.getEmployeeName(id, 'first'),
+                                    last_name: this.getEmployeeName(id, 'last')
+                                }))
+                            } : project
                         ),
                     }));
                 } else {
                     // Add new project to the list
-                    this.setState((prevState) => ({
-                        projects: [data.newProject, ...(prevState.projects || [])],
-                        allProjects: [data.newProject, ...(prevState.allProjects || [])],
+                    const newProject = {
+                        project_id: data.project_id || data.id, // Adjust based on API response
+                        project_name: projectName,
+                        project_description: projectDescription,
+                        project_technology: projectTechnology,
+                        client_id: selectedClient,
+                        project_start_date: projectStartDate,
+                        project_end_date: projectEndDate,
+                        created_at: new Date().toISOString(),
+                        team_members: teamMembers.map(id => {
+                            const emp = this.state.employees.find(e => String(e.id) === String(id));
+                            return {
+                                employee_id: id,
+                                first_name: emp ? emp.first_name : '',
+                                last_name: emp ? emp.last_name : '',
+                                profile: emp ? emp.profile : ''
+                            };
+                        })
+                    };
+                    
+                    this.setState(prevState => ({
+                        projects: [newProject, ...prevState.projects],
+                        allProjects: [newProject, ...prevState.allProjects],
                     }));
                 }
+
                 this.setState({
                     projectName: "",
                     projectDescription: "",
@@ -387,37 +456,99 @@ class ProjectList extends Component {
         });
     };
 
-    // Add searching functionalit for project search
-	handleSearch = (event) => {
-        const query = event.target.value.toLowerCase(); // Get search input
-        this.setState({ searchQuery: query }, () => {
-			if (query === "") {
-				// If search is empty, reset projects to the original list
-				this.setState({ projects: this.state.allProjects });
-			} else {
-				const filtered = this.state.allProjects.filter(project => {
-					return (
-						project.project_name.toLowerCase().includes(query) ||
-						project.project_technology.toLowerCase().includes(query)
-					);
-				});
-				this.setState({ projects: filtered });
-			}
-        });
+    // API for Toggle o and 1
+
+    handleToggleProjectStatus = async (projectId, currentStatus) => {
+        const newStatus = currentStatus === '1' || currentStatus === 1 ? 0 : 1; // Toggle between 1 and 0
+    
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: projectId,
+                    is_active: newStatus,
+                    logged_in_employee_id: this.state.logged_in_employee_id
+                })
+            });
+    
+            const data = await response.json();
+    
+            if (data.status === 'success') {
+                this.setState(prevState => ({
+                    projects: prevState.projects.map(p =>
+                        p.project_id === projectId
+                            ? { ...p, project_is_active: newStatus }
+                            : p
+                    ),
+                    allProjects: prevState.allProjects.map(p =>
+                        p.project_id === projectId
+                            ? { ...p, project_is_active: newStatus }
+                            : p
+                    ),
+                    showSuccess: true,
+                    successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
+                }));
+            }
+        } catch (error) {
+            // Error handling
+            this.setState({ showError: true, errorMessage: 'Failed to update project status.' });
+        }
+    };
+    // Add searching functionality for project search (API-based, name and technology, debounced)
+    handleSearch = (event) => {
+        const query = event.target.value;
+        this.setState({ searchQuery: query });
+
+        // Clear previous timeout
+        if (this.searchTimeout) clearTimeout(this.searchTimeout);
+
+        this.searchTimeout = setTimeout(() => {
+            const { searchQuery } = this.state;
+            const searchParam = searchQuery.trim();
+
+            // Build the API URL with the search query for both name and technology
+            let apiUrl = `${process.env.REACT_APP_API_URL}/projects.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`;
+            if (searchParam !== "") {
+                apiUrl += `&project_name=${encodeURIComponent(searchParam)}`;
+                apiUrl += `&project_technology=${encodeURIComponent(searchParam)}`;
+            }
+
+            fetch(apiUrl, {
+                method: "GET",
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    this.setState({
+                        projects: data.data,
+                        allProjects: data.data,
+                    });
+                } else {
+                    this.setState({ projects: [], allProjects: [] });
+                }
+            })
+            .catch(err => {
+                this.setState({ projects: [], allProjects: [] });
+                console.error(err);
+            });
+        }, 500);
     };
 
-    // Handle edit project
     handleEditProject = (project) => {
-        // Populate form with project data for editing
+        const teamMemberIds = project.team_members 
+            ? project.team_members.map(member => String(member.employee_id || member.id))
+            : [];
+
         this.setState({
             projectName: project.project_name || "",
             projectDescription: project.project_description || "",
             projectTechnology: project.project_technology || "",
             selectedClient: project.client_id || "",
-            teamMembers: project.team_members ? project.team_members.map(member => String(member.id)) : [],
+            teamMembers: teamMemberIds,
             projectStartDate: project.project_start_date || "",
             projectEndDate: project.project_end_date || "",
-            editingProjectId: project.id,
+            editingProjectId: project.project_id, // Use project_id instead of id
             isEditing: true,
             showEditModal: true
         });
@@ -425,69 +556,65 @@ class ProjectList extends Component {
 
     // Handle delete project - show delete modal
     handleDeleteProject = (projectId, projectName) => {
-        this.setState({
+            this.setState({
             showDeleteModal: true,
             deleteProjectId: projectId,
             deleteProjectName: projectName
-        }, () => {
-            this.showDeleteModal();
         });
     };
 
-    // Confirm delete project
-    confirmDeleteProject = () => {
-        const { deleteProjectId } = this.state;
-        this.setState({ isDeleting: true });
 
-        // Make API call to delete project (use POST for PHP compatibility)
-        const formData = new FormData();
-        formData.append('project_id', deleteProjectId);
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=delete`, {
-            method: 'DELETE',
-            body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // Remove project from state
-                const updatedProjects = this.state.projects.filter(project => project.project_id !== deleteProjectId);
-                const updatedAllProjects = this.state.allProjects.filter(project => project.project_id !== deleteProjectId);
-                this.setState({
-                    projects: updatedProjects,
-                    allProjects: updatedAllProjects,
-                    showSuccess: true,
-                    successMessage: 'Project deleted successfully!',
-                    showDeleteModal: false,
-                    deleteProjectId: null,
-                    deleteProjectName: '',
-                    isDeleting: false
-                });
-                setTimeout(() => this.setState({ showSuccess: false }), 3000);
-            } else {
-                this.setState({
-                    showError: true,
-                    errorMessage: data.message || 'Failed to delete project',
-                    showDeleteModal: false,
-                    deleteProjectId: null,
-                    deleteProjectName: '',
-                    isDeleting: false
-                });
-                setTimeout(() => this.setState({ showError: false }), 3000);
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting project:', error);
+
+    confirmDeleteProject = () => {    
+    const { deleteProjectId } = this.state;
+    if (!deleteProjectId) return;
+    
+    this.setState({ ButtonLoading: true, isDeleting: true });
+    
+    fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=delete&id=${deleteProjectId}`, {
+        method: "DELETE",
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' || data.success) {
+            this.setState(prevState => ({
+                projects: prevState.projects.filter(project => project.project_id !== deleteProjectId),
+                allProjects: prevState.allProjects.filter(project => project.project_id !== deleteProjectId),
+                showSuccess: true,
+                successMessage: 'Project deleted successfully!',
+                showDeleteModal: false,
+                deleteProjectId: null,
+                deleteProjectName: '',
+                isDeleting: false
+            }));
+            
+            setTimeout(() => this.setState({ showSuccess: false }), 3000);
+        } else {
+            // Error handling remains the same
             this.setState({
                 showError: true,
-                errorMessage: 'An error occurred while deleting the project',
+                errorMessage: data.message || 'Failed to delete project',
                 showDeleteModal: false,
                 deleteProjectId: null,
                 deleteProjectName: '',
                 isDeleting: false
             });
             setTimeout(() => this.setState({ showError: false }), 3000);
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting project:', error);
+        this.setState({
+            showError: true,
+            errorMessage: 'An error occurred while deleting the project',
+            showDeleteModal: false,
+            deleteProjectId: null,
+            deleteProjectName: '',
+            isDeleting: false
         });
-    };
+        setTimeout(() => this.setState({ showError: false }), 3000);
+    });
+};
 
     // Close delete modal
     closeDeleteModal = () => {
@@ -495,9 +622,7 @@ class ProjectList extends Component {
             showDeleteModal: false,
             deleteProjectId: null,
             deleteProjectName: '',
-            isDeleting: false
-        }, () => {
-            this.hideDeleteModal();
+            isDeleting: false   
         });
     };
 
@@ -546,8 +671,16 @@ class ProjectList extends Component {
 
 
     render() {
+        console.log('Role:', this.state.logged_in_employee_role);
+        console.log('Projects:', this.state.projects);
         const { fixNavbar/* , boxOpen */ } = this.props;
         const { projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, clients, selectedClient, teamMembers, employees, projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
+
+        // Filter projects for employees: only show active projects
+        const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
+            ? projects
+            : projects.filter(project => project.project_is_active == 1);
+        console.log('VisibleProjects:', visibleProjects);
 
         return (
             <>
@@ -606,15 +739,20 @@ class ProjectList extends Component {
                         <div className="tab-content">
                             <div className="tab-pane fade show active" id="Project-OnGoing" role="tabpanel">
                                 <div className="row">
-                                {projects && projects.length > 0 ? (
-                                    projects.map((project, index) => (
+                                {visibleProjects && visibleProjects.length > 0 ? (
+                                    visibleProjects.map((project, index) => (
                                             <div className="col-lg-4 col-md-12" key={index}>
-                                                <div className={`card ${this.state.collapsedCards[index] ? 'card-collapsed' : ""}`}>
+                                                <div className={`card ${this.state.collapsedCards[project.project_id] ? 'card-collapsed' : ''}`}>
                                                     <div className="card-header">
                                                         <h3 className="card-title">{project.project_name}</h3>
                                                         <div className="card-options">
                                                             <label className="custom-switch m-0">
-                                                                <input type="checkbox" defaultValue={1} className="custom-switch-input" defaultChecked />
+                                                            <input
+                                                                type="checkbox"
+                                                                className="custom-switch-input"
+                                                                checked={project.project_is_active == '1'}
+                                                                onChange={() => this.handleToggleProjectStatus(project.project_id, project.project_is_active)}
+                                                            />
                                                                 <span className="custom-switch-indicator" />
                                                             </label>
                                                             <span className="card-options-collapse" data-toggle="card-collapse" onClick={() => this.handleBoxToggle(index)}
@@ -622,42 +760,40 @@ class ProjectList extends Component {
                                                             
                                                             {/* 3-dot menu dropdown - Only show for admin users */}
                                                             {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-                                                                <div className="dropdown">
-                                                                    <button 
-                                                                        className="btn btn-icon btn-sm" 
-                                                                        type="button" 
-                                                                        data-toggle="dropdown" 
-                                                                        aria-haspopup="true" 
-                                                                        aria-expanded="false"
+                                                                <div className="dropdown d-flex">
+                                                                    <a
+                                                                        href="/#"
+                                                                        className="nav-link icon d-none d-md-flex  ml-1"
+                                                                        data-toggle="dropdown"
                                                                         title="More options"
                                                                     >
                                                                         <i className="fa fa-ellipsis-v" />
-                                                                    </button>
-                                                                    <div className="dropdown-menu dropdown-menu-right">
+                                                                    </a>
+                                                                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                                                         <button 
-                                                                            className="dropdown-item" 
-                                                                            type="button"
-                                                                            onClick={() => this.handleEditProject(project)}
-                                                                            title="Edit Project"
+                                                                        className="dropdown-item" style={{width:'200px', textAlign:'center' }} 
+                                                                        type="button"
+                                                                        onClick={() => this.handleEditProject(project)}
                                                                         >
-                                                                            <i className="fa fa-edit mr-2" />
-                                                                            Edit
+                                                                        <i className="dropdown-icon fe fe-edit mr-2" />
+                                                                        Edit
                                                                         </button>
                                                                         <button 
-                                                                            className="dropdown-item text-danger" 
-                                                                            type="button"
-                                                                            onClick={() => this.handleDeleteProject(project.id, project.project_name)}
-                                                                            title="Delete Project"
+                                                                        className="dropdown-item text-danger" style={{width:'200px', textAlign:'center' }}
+                                                                        type="button"
+                                                                        onClick={() => this.handleDeleteProject(project.project_id, project.project_name)}
                                                                         >
-                                                                            <i className="fa fa-trash-o mr-2" />
-                                                                            Delete
+                                                                        <i className="dropdown-icon fe fe-trash-2 mr-2" />
+                                                                        Delete
                                                                         </button>
                                                                     </div>
-                                                                </div>
+                                                                    </div> 
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="card-body">
+
+                                                   
+                                                     <div className="card-body">
                                                         <span className="tag tag-blue mb-3">{project.project_technology}</span>
                                                         <p>{project.project_description}</p>
                                                         <div className="row">
@@ -725,6 +861,8 @@ class ProjectList extends Component {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                
+                                                   
                                                     {/* <div className="card-footer">
                                                         <div className="clearfix">
                                                             <div className="float-left"><strong>15%</strong></div>
@@ -738,7 +876,7 @@ class ProjectList extends Component {
                                             </div>
                                         ))
                                 ): (
-                                    !message && <tr><td>projects not available.</td></tr>
+                                    !message && <p>projects not available.</p>
                                 )}
                                 </div>
                             </div>
@@ -821,189 +959,9 @@ class ProjectList extends Component {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>               
 
-
-                {/* Add Project Modal */}
-                <div className="modal fade" id="addProjectModal" tabIndex={-1} role="dialog" aria-labelledby="addProjectModalLabel" data-backdrop="static" 
-                data-keyboard="false" style={{ zIndex: 1050 }} onClick={(e) => {
-                    if (e.target.id === 'addProjectModal') {
-                        this.resetFormErrors();
-                    }
-                }}>
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content" tabIndex={-1}>
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="addProjectModalLabel">{this.state.isEditing ? 'Edit Project' : 'Add Project'}</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.resetFormErrors}><span aria-hidden="true">×</span></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="row clearfix">
-                                    <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="projectName">Project Name</label>
-                                            <input
-                                                type="text"
-                                                // className="form-control"
-                                                className={`form-control ${this.state.errors.projectName ? "is-invalid" : ""}`}
-                                                placeholder="Project Name"
-                                                name="projectName"
-                                                value={projectName}
-                                                onChange={this.handleInputChangeForAddProject}
-                                            />
-                                            {this.state.errors.projectName && (
-                                                <small className="invalid-feedback">{this.state.errors.projectName}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="projectDescription">Project Description</label>
-                                            <textarea
-                                                className={`form-control ${this.state.errors.projectDescription ? "is-invalid" : ""}`}
-                                                placeholder="Project Description"
-                                                name="projectDescription"
-                                                value={projectDescription}
-                                                onChange={this.handleInputChangeForAddProject}
-                                                rows={3}
-                                            >
-                                            </textarea>
-                                            {this.state.errors.projectDescription && (
-                                                <small className="invalid-feedback">{this.state.errors.projectDescription}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="projectTechnology">Project Technology</label>
-                                            <input
-                                                type="text"
-                                                className={`form-control ${this.state.errors.projectTechnology ? "is-invalid" : ""}`}
-                                                placeholder="Enter technologies (comma-separated)"
-                                                name="projectTechnology"
-                                                value={projectTechnology}
-                                                onChange={this.handleInputChangeForAddProject}
-                                            />
-                                            {this.state.errors.projectTechnology && (
-                                                <small className="invalid-feedback">{this.state.errors.projectTechnology}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {/* Client Details */}
-                                    <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="selectedClient">Select Client</label>
-                                            <select
-                                                name='selectedClient'
-                                                id="selectedClient"
-                                                className={`form-control ${this.state.errors.selectedClient ? "is-invalid" : ""}`}
-                                                value={selectedClient}
-                                                onChange={this.handleSelectionChange}
-                                            >
-                                                {clients.length > 0 ? (
-                                                    <>
-                                                        <option value="">Select a Client</option>
-                                                        {clients.map((client) => (
-                                                            <option key={client.id} value={client.id}>
-                                                                {client.name}
-                                                            </option>
-                                                        ))}
-                                                    </>
-                                                ) : (
-                                                    <option value="">No clients available</option>
-                                                )}
-                                            </select>
-                                            {this.state.errors.selectedClient && (
-                                                <small className="invalid-feedback">{this.state.errors.selectedClient}</small>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label className="form-label">Assign Team Members</label>
-                                            {/* Custom dropdown */}
-                                            <div className="dropdown w-100">
-                                                <button
-                                                    type="button"
-                                                    className="form-control dropdown-toggle"
-                                                    onClick={this.toggleDropdown}
-                                                    style={{ textAlign: "left" }}
-                                                >
-                                                    {teamMembers.length > 0
-                                                        ? `${teamMembers.length} selected`
-                                                        : "Select Team Members"}
-                                                </button>
-
-                                                {this.state.dropdownOpen && (
-                                                    <div className="dropdown-menu show w-100 p-2" style={{ maxHeight:"120px", overflowY: "auto" }}>
-                                                        {employees.map((employee) => (
-                                                            <div key={employee.id} className="form-check">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className="form-check-input"
-                                                                    id={`emp_${employee.id}`}
-                                                                    value={String(employee.id)}
-                                                                    checked={teamMembers.includes(String(employee.id))}
-                                                                    onChange={this.handleCheckboxChange}
-                                                                />
-                                                                <label className="form-check-label" htmlFor={`emp_${employee.id}`}>
-                                                                    {employee.first_name} {employee.last_name}
-                                                                </label>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {this.state.errors.teamMembers && (
-                                                <small className="invalid-feedback">{this.state.errors.teamMembers}</small>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="col-md-6">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="projectStartDate">Project start date</label>
-                                            <input
-                                                type="date"
-                                                className={`form-control ${this.state.errors.projectStartDate ? "is-invalid" : ""}`}
-                                                name="projectStartDate"
-                                                value={projectStartDate}
-                                                onChange={this.handleInputChangeForAddProject}
-                                            />
-                                            {this.state.errors.projectStartDate && (
-                                                <small className="invalid-feedback">{this.state.errors.projectStartDate}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="projectEndDate">Project end date</label>
-                                            <input
-                                                type="date"
-                                                className={`form-control ${this.state.errors.projectEndDate ? "is-invalid" : ""}`}
-                                                name="projectEndDate"
-                                                value={projectEndDate}
-                                                onChange={this.handleInputChangeForAddProject}
-                                            />
-                                            {this.state.errors.projectEndDate && (
-                                                <small className="invalid-feedback">{this.state.errors.projectEndDate}</small>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.resetFormErrors}>Close</button>
-                                <button type="button" onClick={this.addProjectData} className="btn btn-primary">
-                                    {this.state.isEditing ? 'Update Project' : 'Add Project'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Edit Project Modal */}
+                {/* Edit/Add Project Modal */}
                 <EditModal
                     modalId="editProjectModal"
                     isOpen={this.state.showEditModal}
@@ -1032,10 +990,11 @@ class ProjectList extends Component {
 
                 {/* Delete Project Modal */}
                 <DeleteModal
+                    show={this.state.showDeleteModal}
                     modalId="deleteProjectModal"
                     deleteBody={`Are you sure you want to delete the project "${this.state.deleteProjectName}"`}
                     onConfirm={this.confirmDeleteProject}
-                    onClose={this.closeDeleteModal}
+                    onClose={() => this.setState({ showDeleteModal: false, selectedId: null })}
                     isLoading={this.state.isDeleting}
                 />
             </>
@@ -1061,5 +1020,3 @@ const mapDispatchToProps = dispatch => ({
     box6Action: (e) => dispatch(box6Action(e))
 })
 export default connect(mapStateToProps, mapDispatchToProps)(ProjectList);
-
-

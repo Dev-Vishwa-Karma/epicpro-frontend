@@ -53,7 +53,7 @@ class TodoList extends Component {
 		.then(response => response.json())
 		.then(data => {
 			if (data.status === 'success') {
-				const todoData = data.data;
+				const todoData = data.data.map(t => ({ ...t, imageError: false }));
 				this.setState({
 					todos: todoData,
 					loading: false
@@ -471,12 +471,7 @@ class TodoList extends Component {
     handleDeleteTodo = () => {
     const { todoToDelete, logged_in_employee_id } = this.state;
     if (!todoToDelete) return;
-
     this.setState({ ButtonLoading: true });
-
-    // const formData = new FormData();
-    // formData.append('id', todoToDelete.id);
-    // formData.append('logged_in_employee_id', logged_in_employee_id);
 
     fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete&id=${todoToDelete.id}`, {
         method: "DELETE",
@@ -500,8 +495,6 @@ class TodoList extends Component {
                 });
             }, 3000);
 
-
-             console.log('Todo deleted successfully:', this.state.showDeleteModal);
         } else {
             this.setState({ 
                 showError: true, 
@@ -523,74 +516,6 @@ class TodoList extends Component {
         });
     });
 };
-
-    // Handle delete confirmation
-    handleDeleteConfirm = () => {
-        const { todoToDelete, logged_in_employee_id } = this.state;
-        
-        if (!todoToDelete) return;
-
-        this.setState({ ButtonLoading: true });
-
-        const deleteFormData = new FormData();
-        deleteFormData.append('id', todoToDelete.id);
-        deleteFormData.append('logged_in_employee_id', logged_in_employee_id);
-
-        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete`, {
-            method: "POST",
-            body: deleteFormData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // Hide the modal using Bootstrap
-                // if (window.$) {
-                //     window.$('#deleteTodoModal').modal('hide');
-                // }
-                this.setState(prevState => ({
-                    todos: prevState.todos.filter(todo => todo.id !== todoToDelete.id),
-                    showDeleteModal: false,
-                    todoToDelete: null,
-                    ButtonLoading: false,
-                    successMessage: "Todo deleted successfully!",
-                    showSuccess: true
-                }));
-                
-                setTimeout(() => {
-                    this.setState({
-                        showSuccess: false,
-                        successMessage: ''
-                    });
-                }, 3000);
-            } else {
-                // Hide the modal using Bootstrap
-                // if (window.$) {
-                //     window.$('#deleteTodoModal').modal('hide');
-                // }
-                this.setState({ 
-                    showError: true, 
-                    errorMessage: data.message || 'Failed to delete todo',
-                    showDeleteModal: false, 
-                    todoToDelete: null,
-                    ButtonLoading: false
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            // Hide the modal using Bootstrap
-            // if (window.$) {
-            //     window.$('#deleteTodoModal').modal('hide');
-            // }
-            this.setState({ 
-                showError: true, 
-                errorMessage: 'An error occurred while deleting the todo',
-                showDeleteModal: false, 
-                todoToDelete: null,
-                ButtonLoading: false
-            });
-        });
-    };
 
     // Add handler for status filter
     handleStatusFilterChange = (e) => {
@@ -710,86 +635,81 @@ class TodoList extends Component {
                                                                         ? { textDecoration: 'line-through', opacity: 0.6 }
                                                                         : {}
                                                                 }>
-        <td>
-            <label className="custom-control custom-checkbox">
-                <input
-                    type="checkbox"
-                    className="custom-control-input"
-                    name="example-checkbox1"
-                    checked={todo.todoStatus === 'completed'}
-                    onChange={() => this.handleCheckboxClick(todo)}
-                />
-                <span className="custom-control-label">{todo.title}</span>
-            </label>
-        </td>
-        <td className="text-right">
-            {new Date(todo.due_date).toLocaleString("en-US", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
-            }).replace(",", "")}
-        </td>
-        <td>
-            <span className={`tag ml-0 mr-0 ${
-                todo.priority === "high"
-                    ? "tag-danger"
-                    : todo.priority === "medium"
-                    ? "tag-warning"
-                    : "tag-success"
-                }`}
-            >
-                {todo.priority.toUpperCase()}
-            </span>
-        </td>
+                                                                <td>
+                                                                    <label className="custom-control custom-checkbox">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            className="custom-control-input"
+                                                                            name="example-checkbox1"
+                                                                            checked={todo.todoStatus === 'completed'}
+                                                                            onChange={() => this.handleCheckboxClick(todo)}
+                                                                        />
+                                                                        <span className="custom-control-label">{todo.title}</span>
+                                                                    </label>
+                                                                </td>
+                                                                <td className="text-right">
+                                                                    {new Date(todo.due_date).toLocaleString("en-US", {
+                                                                        day: "2-digit",
+                                                                        month: "short",
+                                                                        year: "numeric"
+                                                                    }).replace(",", "")}
+                                                                </td>
+                                                                <td>
+                                                                    <span className={`tag ml-0 mr-0 ${
+                                                                        todo.priority === "high"
+                                                                            ? "tag-danger"
+                                                                            : todo.priority === "medium"
+                                                                            ? "tag-warning"
+                                                                            : "tag-success"
+                                                                        }`}
+                                                                    >
+                                                                        {todo.priority.toUpperCase()}
+                                                                    </span>
+                                                                </td>
     
                                                                     <td>
-                                                                        {todo.profile ? (
-                                                                            <img 
-                                                                                src={`${process.env.REACT_APP_API_URL}/${todo.profile}`} 
-                                                                                className="avatar avatar-blue add-space" 
-                                                                                alt={`${todo.first_name} ${todo.last_name}`}
-                                                                                data-toggle="tooltip" 
-                                                                                data-placement="top" 
-                                                                                title={`${todo.first_name} ${todo.last_name}`}
-                                                                                style={{
-                                                                                    width: '40px', 
-                                                                                    height: '40px', 
-                                                                                    borderRadius: '50%', 
-                                                                                    objectFit: 'cover'
-                                                                                }}
-                                                                                // onError={(e) => {
-                                                                                // e.target.style.display = 'none';
-                                                                                // const initialsSpan = document.createElement('span');
-                                                                                // initialsSpan.className = 'avatar avatar-blue add-space';
-                                                                                // initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                                                                // initialsSpan.setAttribute('data-placement', 'top');
-                                                                                // initialsSpan.setAttribute('title', `${todo.first_name} ${todo.last_name}`);
-                                                                                // initialsSpan.style.display = 'inline-flex';
-                                                                                // initialsSpan.style.alignItems = 'center';
-                                                                                // initialsSpan.style.justifyContent = 'center';
-                                                                                // initialsSpan.style.width = '40px';
-                                                                                // initialsSpan.style.height = '40px';
-                                                                                // initialsSpan.textContent = `${todo.first_name.charAt(0).toUpperCase()}${todo.last_name.charAt(0).toUpperCase()}`;
-                                                                                // e.target.parentNode.appendChild(initialsSpan);
-                                                                                // }}
-                                                                            />
-                                                                        ) : (
-                                                                            <span
+                                                                        {todo.profile && !todo.imageError ? (
+                                                                            <img
+                                                                                src={`${process.env.REACT_APP_API_URL}/${todo.profile}`}
                                                                                 className="avatar avatar-blue add-space"
+                                                                                alt={`${todo.first_name} ${todo.last_name}`}
                                                                                 data-toggle="tooltip"
                                                                                 data-placement="top"
                                                                                 title={`${todo.first_name} ${todo.last_name}`}
                                                                                 style={{
+                                                                                width: '40px',
+                                                                                height: '40px',
+                                                                                borderRadius: '50%',
+                                                                                objectFit: 'cover',
+                                                                                }}
+                                                                                onError={() => {
+                                                                                this.setState(prevState => ({
+                                                                                    todos: prevState.todos.map(t =>
+                                                                                    t.id === todo.id ? { ...t, imageError: true } : t
+                                                                                    ),
+                                                                                }));
+                                                                                }}
+                                                                            />
+                                                                                ) : (
+                                                                                <span
+                                                                                    className="avatar avatar-blue add-space"
+                                                                                    data-toggle="tooltip"
+                                                                                    data-placement="top"
+                                                                                    title={`${todo.first_name} ${todo.last_name}`}
+                                                                                    style={{
                                                                                     width: '40px',
                                                                                     height: '40px',
                                                                                     display: 'inline-flex',
                                                                                     alignItems: 'center',
-                                                                                    justifyContent: 'center'
-                                                                                }}
-                                                                            >
-                                                                                {todo.first_name.charAt(0).toUpperCase()}{todo.last_name.charAt(0).toUpperCase()}
-                                                                            </span>
-                                                                        )}
+                                                                                    justifyContent: 'center',
+                                                                                    borderRadius: '50%',
+                                                                                    }}
+                                                                                >
+                                                                                    {todo.first_name.charAt(0).toUpperCase()}
+                                                                                    {todo.last_name.charAt(0).toUpperCase()}
+                                                                                </span>
+                                                                                )}
+
                                                                     </td>
                                                                         {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                     <td>

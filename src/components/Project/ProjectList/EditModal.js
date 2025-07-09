@@ -210,15 +210,15 @@ const EditModal = ({
                             type="button" 
                             onClick={onSubmit} 
                             className="btn btn-primary"
-                            disabled={isLoading}
+                            // disabled={isLoading}
                         >
-                            {isLoading && (
+                            {/* {isLoading && (
                                 <span
                                     className="spinner-border spinner-border-sm mr-2"
                                     role="status"
                                     aria-hidden="true"
                                 ></span>
-                            )}
+                            )} */}
                             {isEditing ? 'Update Project' : 'Add Project'}
                         </button>
                     </div>
