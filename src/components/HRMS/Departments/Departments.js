@@ -374,7 +374,7 @@ class departments extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { department_name, department_head, departmentData, selectedDepartment, message, loading,showSuccess,successMessage,showError,errorMessage} = this.state;
+        const { departmentData, selectedDepartment, message, loading,showSuccess,successMessage,showError,errorMessage} = this.state;
         return (
             <>
                 <AlertMessages

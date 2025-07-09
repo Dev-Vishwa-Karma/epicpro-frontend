@@ -68,7 +68,7 @@ class CalendarWithTabs extends Component {
     };
 
     componentDidUpdate(prevProps) {
-        if (prevProps.employeeId != this.props.employeeId) {
+        if (prevProps.employeeId !== this.props.employeeId) {
             this.setState({
                 employeeId: this.props.employeeId
             })
