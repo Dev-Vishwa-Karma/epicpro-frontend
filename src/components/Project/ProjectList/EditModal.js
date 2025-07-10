@@ -147,6 +147,8 @@ const EditModal = ({
                                         {dropdownOpen && (
                                             <div className="dropdown-menu show w-100 p-2" style={{ maxHeight:"120px", overflowY: "auto" }}>
                                                 {employees && employees.map((employee) => (
+                                                   <ul style={{ listStyleType: "none", padding: 0 }} key={employee.id}>
+                                                        <li>
                                                     <div key={employee.id} className="form-check">
                                                         <input
                                                             type="checkbox"
@@ -160,6 +162,8 @@ const EditModal = ({
                                                             {employee.first_name} {employee.last_name}
                                                         </label>
                                                     </div>
+                                                        </li>
+                                                   </ul>
                                                 ))}
                                             </div>
                                         )}
