@@ -391,43 +391,43 @@ class Menu extends Component {
 				}
 
 				// Find the index of "Job Portal"
-				const jobPortalSection = content.find(item => item.id === 21);
+				// const jobPortalSection = content.find(item => item.id === 21);
 				
-				if (!jobPortalSection) {
-					// Add the "Job Portal" section if it's missing for admin/super_admin roles
-					content.push({
-						"id": 21,
-						"icon": "icon-briefcase",
-						"label": "Job Portal",
-						"content": [
-							{
-								"id": 22,
-								"label": "Job Dashboard",
-								"to": "/jobportal-dashboard"
-							},
-							{
-								"id": 23,
-								"label": "Positions",
-								"to": "/jobportal-positions"
-							},
-							{
-								"id": 24,
-								"label": "Applicant",
-								"to": "/jobportal-applicants"
-							},
-							{
-								"id": 25,
-								"label": "Resumes",
-								"to": "/jobportal-resumes"
-							},
-							{
-								"id": 26,
-								"label": "Settings",
-								"to": "/jobportal-settings"
-							}
-						]
-					});
-				}
+				// if (!jobPortalSection) {
+				// 	// Add the "Job Portal" section if it's missing for admin/super_admin roles
+				// 	content.push({
+				// 		"id": 21,
+				// 		"icon": "icon-briefcase",
+				// 		"label": "Job Portal",
+				// 		"content": [
+				// 			{
+				// 				"id": 22,
+				// 				"label": "Job Dashboard",
+				// 				"to": "/jobportal-dashboard"
+				// 			},
+				// 			{
+				// 				"id": 23,
+				// 				"label": "Positions",
+				// 				"to": "/jobportal-positions"
+				// 			},
+				// 			{
+				// 				"id": 24,
+				// 				"label": "Applicant",
+				// 				"to": "/jobportal-applicants"
+				// 			},
+				// 			{
+				// 				"id": 25,
+				// 				"label": "Resumes",
+				// 				"to": "/jobportal-resumes"
+				// 			},
+				// 			{
+				// 				"id": 26,
+				// 				"label": "Settings",
+				// 				"to": "/jobportal-settings"
+				// 			}
+				// 		]
+				// 	});
+				// }
 
 				// // Find the index of "authentication section"
 				// const authenticationSection = content.find(item => item.id === 27);
@@ -503,7 +503,7 @@ class Menu extends Component {
 														title="Settings"
 													/>
 												</span>
-												<p className="nav-link user_btn" onClick={this.toggleUserMenu}>
+												{/* <p className="nav-link user_btn" onClick={this.toggleUserMenu}>
 													<img
 														className="avatar"
 														src="/assets/images/user.png"
@@ -512,7 +512,7 @@ class Menu extends Component {
 														data-placement="right"
 														title="User Menu"
 													/>
-												</p>
+												</p> */}
 											</div>
 										)}
 										<p className="nav-link icon menu_toggle" onClick={() => this.toggleLeftMenu(!istoggleLeftMenu)}>

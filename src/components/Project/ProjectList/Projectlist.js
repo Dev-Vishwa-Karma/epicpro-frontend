@@ -669,16 +669,13 @@ class ProjectList extends Component {
 
 
     render() {
-        console.log('Role:', this.state.logged_in_employee_role);
-        console.log('Projects:', this.state.projects);
         const { fixNavbar/* , boxOpen */ } = this.props;
-        const { projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, clients, selectedClient, teamMembers, employees, projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
 
         // Filter projects for employees: only show active projects
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
             ? projects
-            : projects.filter(project => project.project_is_active == 1);
-        console.log('VisibleProjects:', visibleProjects);
+            : projects.filter(project => project.project_is_active === '1');
 
         return (
             <>
@@ -780,7 +777,7 @@ class ProjectList extends Component {
                                                             <input
                                                                 type="checkbox"
                                                                 className="custom-switch-input"
-                                                                checked={project.project_is_active == '1'}
+                                                                checked={project.project_is_active === '1'}
                                                                 onChange={() => this.handleToggleProjectStatus(project.project_id, project.project_is_active)}
                                                             />
                                                                 <span className="custom-switch-indicator" />
