@@ -392,7 +392,7 @@ handleConfirmDelete = () => {
                             />
                       </div>
             
-            <div className="dropdown" style={{ position: 'absolute', top: '16px', right: '10px' }}>
+            {/* <div className="dropdown d-flex" style={{ position: 'absolute', top: '16px', right: '10px' }}>
                                 <a
                                     href="/#"
                     className="nav-link icon d-md-flex ml-1"
@@ -423,7 +423,63 @@ handleConfirmDelete = () => {
                                     Delete
                                     </button>
                                 </div>
-                            </div> 
+                            </div>  */}
+
+                            <div
+                                className="dropdown d-flex"
+                                style={{ position: 'absolute', top: '16px', right: '10px' }}
+                              >
+                                <a
+                                  href="/#"
+                                  className="nav-link icon d-none d-md-flex ml-1"
+                                  data-toggle="dropdown"
+                                  title="More options"
+                                >
+                                  <i className="fa fa-ellipsis-v" />
+                                </a>
+
+                                <div
+                                  className="dropdown-menu dropdown-menu-right"
+                                  style={{
+                                    minWidth: '100px',
+                                    padding: '0',
+                                    borderRadius: '8px',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  }}
+                                >
+                                  <button
+                                    className="dropdown-item text-center"
+                                    type="button"
+                                    title="Edit"
+                                    onClick={() => this.handleOpenEditClientField(client)}
+                                    style={{
+                                      padding: '8px 12px',
+                                      fontSize: '14px',
+                                      color: '#333',
+                                      backgroundColor: 'transparent',
+                                      borderBottom: '1px solid #eee',
+                                    }}
+                                  >
+                                    Edit
+                                  </button>
+
+                                  <button
+                                    className="dropdown-item text-center"
+                                    type="button"
+                                    title="Delete"
+                                    onClick={() => this.handleOpenDeleteModal(client)}
+                                    style={{
+                                      padding: '8px 12px',
+                                      fontSize: '14px',
+                                      color: '#d9534f',
+                                      backgroundColor: 'transparent',
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+
             
             {/* Client info with fixed spacing */}
             <div style={{ minHeight: '40px' }}>

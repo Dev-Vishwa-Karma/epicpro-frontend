@@ -109,7 +109,7 @@ class ProjectList extends Component {
             if (data.status === 'success') {
                 const collapsedCards = {};
                 data.data.forEach(project => {
-                    collapsedCards[project.project_id] = project.project_is_active === 0;
+                    collapsedCards[project.project_id] = Number(project.project_is_active) === 0;
                 });
                 this.setState({
                     projects: data.data,
@@ -318,6 +318,7 @@ class ProjectList extends Component {
                                 client_id: selectedClient,
                                 project_start_date: projectStartDate,
                                 project_end_date: projectEndDate,
+                                project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
                                 team_members: teamMembers.map(id => ({
                                     employee_id: id,
                                     first_name: this.getEmployeeName(id, 'first'),
@@ -334,6 +335,7 @@ class ProjectList extends Component {
                                 client_id: selectedClient,
                                 project_start_date: projectStartDate,
                                 project_end_date: projectEndDate,
+                                project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
                                 team_members: teamMembers.map(id => ({
                                     employee_id: id,
                                     first_name: this.getEmployeeName(id, 'first'),
@@ -353,7 +355,7 @@ class ProjectList extends Component {
                         project_start_date: projectStartDate,
                         project_end_date: projectEndDate,
                         created_at: new Date().toISOString(),
-                        project_is_active: 1,
+                        project_is_active: data.newProject?.project_is_active || 1,
                         team_members: teamMembers.map(id => {
                             const emp = this.state.employees.find(e => String(e.id) === String(id));
                             return {
@@ -386,24 +388,14 @@ class ProjectList extends Component {
                     successMessage: successMessage,
                     showSuccess: true,
                 });
-                setTimeout(() => {
-                    this.setState({
-                        showSuccess: false, 
-                        successMessage: ''
-                    });
-                }, 5000);
+                setTimeout(this.dismissMessages, 3000);
             } else {
                 this.setState({
                     errorMessage: data.message || `Failed to ${isEditing ? 'update' : 'add'} project. Please try again.`,
                     showError: true,
                     isSubmitting: false,
                 });
-                setTimeout(() => {
-                    this.setState({
-                        showError: false,
-                        errorMessage: ''
-                    });
-                }, 5000);
+                setTimeout(this.dismissMessages, 3000);
             }
         })
         .catch((error) => {
@@ -413,6 +405,7 @@ class ProjectList extends Component {
                 showError: true,
                 isSubmitting: false,
             });
+            setTimeout(this.dismissMessages, 3000);
         });
     };
 
@@ -459,7 +452,7 @@ class ProjectList extends Component {
     // API for Toggle o and 1
 
     handleToggleProjectStatus = async (projectId, currentStatus) => {
-        const newStatus = currentStatus === '1' || currentStatus === 1 ? 0 : 1; // Toggle between 1 and 0
+        const newStatus = Number(currentStatus) === 1 ? 0 : 1; // Toggle between 1 and 0
     
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
@@ -489,10 +482,27 @@ class ProjectList extends Component {
                     showSuccess: true,
                     successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
                 }));
+                
+                // Auto-dismiss success message after 3 seconds
+                setTimeout(this.dismissMessages, 3000);
+            } else {
+                // Error handling
+                this.setState({ 
+                    showError: true, 
+                    errorMessage: data.message || 'Failed to update project status.' 
+                });
+                
+                setTimeout(this.dismissMessages, 3000);
             }
         } catch (error) {
             // Error handling
-            this.setState({ showError: true, errorMessage: 'Failed to update project status.' });
+            this.setState({ 
+                showError: true, 
+                errorMessage: 'Failed to update project status.' 
+            });
+            
+            // Auto-dismiss error message after 3 seconds
+            setTimeout(this.dismissMessages, 3000);
         }
     };
     // Add searching functionality for project search (API-based, name and technology, debounced)
@@ -586,7 +596,7 @@ class ProjectList extends Component {
                 isDeleting: false
             }));
             
-            setTimeout(() => this.setState({ showSuccess: false }), 3000);
+            setTimeout(this.dismissMessages, 3000);
         } else {
             // Error handling remains the same
             this.setState({
@@ -597,7 +607,7 @@ class ProjectList extends Component {
                 deleteProjectName: '',
                 isDeleting: false
             });
-            setTimeout(() => this.setState({ showError: false }), 3000);
+            setTimeout(this.dismissMessages, 3000);
         }
     })
     .catch(error => {
@@ -610,7 +620,7 @@ class ProjectList extends Component {
             deleteProjectName: '',
             isDeleting: false
         });
-        setTimeout(() => this.setState({ showError: false }), 3000);
+        setTimeout(this.dismissMessages, 3000);
     });
 };
 
@@ -669,13 +679,16 @@ class ProjectList extends Component {
 
 
     render() {
+        console.log('Role:', this.state.logged_in_employee_role);
+        console.log('Projects:', this.state.projects);
         const { fixNavbar/* , boxOpen */ } = this.props;
-        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, clients, selectedClient, teamMembers, employees, projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
 
         // Filter projects for employees: only show active projects
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
             ? projects
-            : projects.filter(project => project.project_is_active === '1');
+            : projects.filter(project => Number(project.project_is_active) === 1);
+        console.log('VisibleProjects:', visibleProjects);
 
         return (
             <>
@@ -746,38 +759,54 @@ class ProjectList extends Component {
                                                                 <div className="dropdown d-flex">
                                                                     <a
                                                                         href="/#"
-                                                                        className="nav-link icon d-none d-md-flex  ml-1"
+                                                                        className="nav-link icon d-none d-md-flex ml-1"
                                                                         data-toggle="dropdown"
                                                                         title="More options"
                                                                     >
                                                                         <i className="fa fa-ellipsis-v" />
                                                                     </a>
-                                                                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                                        <button 
-                                                                        className="dropdown-item" style={{width:'200px', textAlign:'center' }} 
+
+                                                                    <div
+                                                                        className="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
+                                                                        style={{
+                                                                        width: '50px',
+                                                                        minWidth: 'unset',
+                                                                        padding: '4px 0',
+                                                                        borderRadius: '6px',
+                                                                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+                                                                        }}
+                                                                    >
+                                                                        {/* Edit Button */}
+                                                                        <button
+                                                                        className="dropdown-item p-2 d-flex justify-content-center"
                                                                         type="button"
+                                                                        title="Edit"
                                                                         onClick={() => this.handleEditProject(project)}
+                                                                        style={{ padding: '6px' }}
                                                                         >
-                                                                        <i className="dropdown-icon fe fe-edit mr-2" />
-                                                                        Edit
+                                                                        <i className="fe fe-edit" />
                                                                         </button>
-                                                                        <button 
-                                                                        className="dropdown-item text-danger" style={{width:'200px', textAlign:'center' }}
+
+                                                                        {/* Delete Button */}
+                                                                        <button
+                                                                        className="dropdown-item p-2 d-flex justify-content-center text-danger"
                                                                         type="button"
+                                                                        title="Delete"
                                                                         onClick={() => this.handleDeleteProject(project.project_id, project.project_name)}
+                                                                        style={{ padding: '6px' }}
                                                                         >
-                                                                        <i className="dropdown-icon fe fe-trash-2 mr-2" />
-                                                                        Delete
+                                                                        <i className="fe fe-trash-2" />
                                                                         </button>
                                                                     </div>
-                                                                    </div> 
+                                                                    </div>
+
                                                             )}
 
                                                             <label className="custom-switch m-0">
                                                             <input
                                                                 type="checkbox"
                                                                 className="custom-switch-input"
-                                                                checked={project.project_is_active === '1'}
+                                                                checked={Number(project.project_is_active) === 1}
                                                                 onChange={() => this.handleToggleProjectStatus(project.project_id, project.project_is_active)}
                                                             />
                                                                 <span className="custom-switch-indicator" />

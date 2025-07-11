@@ -149,7 +149,7 @@ class Events extends Component {
 	};
 
 	fetchEmployees = () => {
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
+		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
 			method: "GET",
 		})
 			.then(response => response.json())
@@ -1150,9 +1150,14 @@ formatDateTimeAMPM = (timeString) => {
 												}}
 												>
 										<option value="">All Events</option>
-										{employees.map(emp => (
-											<option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
-										))}
+											{employees
+												.filter(emp => emp.role !== 'admin' && emp.role !== 'super_admin') // Filter out admins
+												.map(emp => (
+												<option key={emp.id} value={emp.id}>
+													{emp.first_name} {emp.last_name}
+												</option>
+												))
+											}
 										</select>
 									</>
 								)}									
