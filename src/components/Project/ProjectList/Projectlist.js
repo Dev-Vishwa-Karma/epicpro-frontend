@@ -101,7 +101,7 @@ class ProjectList extends Component {
 
 
         // Get projects data
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {
+        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {   
             method: "GET",
         })
         .then(response => response.json())
@@ -344,7 +344,7 @@ class ProjectList extends Component {
                     }));
                 } else {
                     // Add new project to the list
-                    const newProject = {
+                    const newProject = data.newProject || {
                         project_id: data.project_id || data.id, // Adjust based on API response
                         project_name: projectName,
                         project_description: projectDescription,
@@ -353,6 +353,7 @@ class ProjectList extends Component {
                         project_start_date: projectStartDate,
                         project_end_date: projectEndDate,
                         created_at: new Date().toISOString(),
+                        project_is_active: 1,
                         team_members: teamMembers.map(id => {
                             const emp = this.state.employees.find(e => String(e.id) === String(id));
                             return {
@@ -363,7 +364,6 @@ class ProjectList extends Component {
                             };
                         })
                     };
-                    
                     this.setState(prevState => ({
                         projects: [newProject, ...prevState.projects],
                         allProjects: [newProject, ...prevState.allProjects],
@@ -409,7 +409,7 @@ class ProjectList extends Component {
         .catch((error) => {
             console.error("Error:", error);
             this.setState({
-                errorMessage: `An error occurred while ${isEditing ? 'updating' : 'adding'} the project.`,
+                errorMessage: `An error occurred while ${isEditing ? 'editting' : 'adding'} the project.`,
                 showError: true,
                 isSubmitting: false,
             });
@@ -548,7 +548,7 @@ class ProjectList extends Component {
             teamMembers: teamMemberIds,
             projectStartDate: project.project_start_date || "",
             projectEndDate: project.project_end_date || "",
-            editingProjectId: project.project_id, // Use project_id instead of id
+            editingProjectId: project.project_id,
             isEditing: true,
             showEditModal: true
         });
@@ -562,8 +562,6 @@ class ProjectList extends Component {
             deleteProjectName: projectName
         });
     };
-
-
 
     confirmDeleteProject = () => {    
     const { deleteProjectId } = this.state;
@@ -746,18 +744,6 @@ class ProjectList extends Component {
                                                     <div className="card-header">
                                                         <h3 className="card-title">{project.project_name}</h3>
                                                         <div className="card-options">
-                                                            <label className="custom-switch m-0">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="custom-switch-input"
-                                                                checked={project.project_is_active == '1'}
-                                                                onChange={() => this.handleToggleProjectStatus(project.project_id, project.project_is_active)}
-                                                            />
-                                                                <span className="custom-switch-indicator" />
-                                                            </label>
-                                                            <span className="card-options-collapse" data-toggle="card-collapse" onClick={() => this.handleBoxToggle(index)}
-                                                            ><i className="fe fe-chevron-up" /></span>
-                                                            
                                                             {/* 3-dot menu dropdown - Only show for admin users */}
                                                             {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
                                                                 <div className="dropdown d-flex">
@@ -789,15 +775,31 @@ class ProjectList extends Component {
                                                                     </div>
                                                                     </div> 
                                                             )}
+
+                                                            <label className="custom-switch m-0">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="custom-switch-input"
+                                                                checked={project.project_is_active == '1'}
+                                                                onChange={() => this.handleToggleProjectStatus(project.project_id, project.project_is_active)}
+                                                            />
+                                                                <span className="custom-switch-indicator" />
+                                                            </label>
                                                         </div>
                                                     </div>
 
                                                    
                                                      <div className="card-body">
                                                         <span className="tag tag-blue mb-3">{project.project_technology}</span>
-                                                        <p>{project.project_description}</p>
+                                                        <p style={{
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 4,
+                                                            WebkitBoxOrient: 'vertical',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis'
+                                                        }}>{project.project_description}</p>
                                                         <div className="row">
-                                                            <div className="col-4 py-1"><strong>Created:</strong></div>
+                                                            <div className="col-4 py-1"><strong>Started date:</strong></div>
                                                             <div className="col-8 py-1">
                                                                 {new Date(project.created_at).toLocaleString("en-US", {
                                                                     day: "2-digit",
@@ -876,7 +878,11 @@ class ProjectList extends Component {
                                             </div>
                                         ))
                                 ): (
-                                    !message && <p>projects not available.</p>
+                                    !message && (
+                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px', width: '100%' }}>
+                                            <p style={{ fontSize: '1.2rem', color: '#888', margin: 0 }}>projects not available.</p>
+                                        </div>
+                                    )
                                 )}
                                 </div>
                             </div>

@@ -672,10 +672,10 @@ class TodoList extends Component {
                                                                             <img
                                                                                 src={`${process.env.REACT_APP_API_URL}/${todo.profile}`}
                                                                                 className="avatar avatar-blue add-space"
-                                                                                alt={`${todo.first_name} ${todo.last_name}`}
+                                                                                alt={`${todo.first_name || ''} ${todo.last_name || ''}`}
                                                                                 data-toggle="tooltip"
                                                                                 data-placement="top"
-                                                                                title={`${todo.first_name} ${todo.last_name}`}
+                                                                                title={`${todo.first_name || ''} ${todo.last_name || ''}`}
                                                                                 style={{
                                                                                 width: '40px',
                                                                                 height: '40px',
@@ -690,12 +690,12 @@ class TodoList extends Component {
                                                                                 }));
                                                                                 }}
                                                                             />
-                                                                                ) : (
-                                                                                <span
+                                                                        ) : (
+                                                                            <span
                                                                                     className="avatar avatar-blue add-space"
                                                                                     data-toggle="tooltip"
                                                                                     data-placement="top"
-                                                                                    title={`${todo.first_name} ${todo.last_name}`}
+                                                                                    title={`${todo.first_name || ''} ${todo.last_name || ''}`}
                                                                                     style={{
                                                                                     width: '40px',
                                                                                     height: '40px',
@@ -703,13 +703,12 @@ class TodoList extends Component {
                                                                                     alignItems: 'center',
                                                                                     justifyContent: 'center',
                                                                                     borderRadius: '50%',
-                                                                                    }}
-                                                                                >
-                                                                                    {todo.first_name.charAt(0).toUpperCase()}
-                                                                                    {todo.last_name.charAt(0).toUpperCase()}
-                                                                                </span>
-                                                                                )}
-
+                                                                                }}
+                                                                            >
+                                                                                {(todo.first_name ? todo.first_name.charAt(0) : '').toUpperCase()}
+                                                                                {(todo.last_name ? todo.last_name.charAt(0) : '').toUpperCase()}
+                                                                            </span>
+                                                                            )}
                                                                     </td>
                                                                         {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                     <td>
