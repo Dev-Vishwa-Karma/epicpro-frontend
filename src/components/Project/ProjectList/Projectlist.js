@@ -560,7 +560,8 @@ class ProjectList extends Component {
             projectEndDate: project.project_end_date || "",
             editingProjectId: project.project_id,
             isEditing: true,
-            showEditModal: true
+            showEditModal: true,
+            dropdownOpen: false
         });
     };
 
@@ -647,7 +648,8 @@ class ProjectList extends Component {
             teamMembers: [],
             projectStartDate: "",
             projectEndDate: "",
-            errors: {}
+            errors: {},
+            dropdownOpen: false
         });
     };
 
@@ -732,7 +734,8 @@ class ProjectList extends Component {
                                             teamMembers: [],
                                             projectStartDate: "",
                                             projectEndDate: "",
-                                            errors: {}
+                                            errors: {},
+                                            dropdownOpen: false
                                         })}
                                     >
                                         <i className="fe fe-plus mr-2" />Add
@@ -746,171 +749,180 @@ class ProjectList extends Component {
                     <div className="container-fluid">
                         <div className="tab-content">
                             <div className="tab-pane fade show active" id="Project-OnGoing" role="tabpanel">
-                                <div className="row">
-                                {visibleProjects && visibleProjects.length > 0 ? (
-                                    visibleProjects.map((project, index) => (
-                                            <div className="col-lg-4 col-md-12" key={index}>
-                                                <div className={`card ${this.state.collapsedCards[project.project_id] ? 'card-collapsed' : ''}`}>
-                                                    <div className="card-header">
-                                                        <h3 className="card-title">{project.project_name}</h3>
-                                                        <div className="card-options">
-                                                            {/* 3-dot menu dropdown - Only show for admin users */}
-                                                            {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-                                                                <div className="dropdown d-flex">
-                                                                    <a
-                                                                        href="/#"
-                                                                        className="nav-link icon d-none d-md-flex ml-1"
-                                                                        data-toggle="dropdown"
-                                                                        title="More options"
-                                                                    >
-                                                                        <i className="fa fa-ellipsis-v" />
-                                                                    </a>
+                            <div className="row">
+  {visibleProjects && visibleProjects.length > 0 ? (
+    visibleProjects.map((project, index) => (
+      <div className="col-lg-4 col-md-6 mb-4" key={index}>
+        <div
+          className={`card h-100 d-flex flex-column ${
+            this.state.collapsedCards[project.project_id] ? 'card-collapsed' : ''
+          }`}
+        >
+          <div className="card-header">
+            <h3 className="card-title">{project.project_name}</h3>
+            <div className="card-options">
+              <label className="custom-switch m-0">
+                <input
+                  type="checkbox"
+                  className="custom-switch-input"
+                  checked={Number(project.project_is_active) === 1}
+                  onChange={() =>
+                    this.handleToggleProjectStatus(project.project_id, project.project_is_active)
+                  }
+                />
+                <span className="custom-switch-indicator" />
+              </label>
+              {(logged_in_employee_role === 'admin' ||
+                logged_in_employee_role === 'super_admin') && (
+                <div className="dropdown d-flex">
+                    <a
+                    href="/#"
+                    className="nav-link icon d-none d-md-flex ml-1"
+                    data-toggle="dropdown"
+                    title="More options"
+                    >
+                    <i className="fa fa-ellipsis-v" />
+                    </a>
 
-                                                                    <div
-                                                                        className="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
-                                                                        style={{
-                                                                        width: '50px',
-                                                                        minWidth: 'unset',
-                                                                        padding: '4px 0',
-                                                                        borderRadius: '6px',
-                                                                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-                                                                        }}
-                                                                    >
-                                                                        {/* Edit Button */}
-                                                                        <button
-                                                                        className="dropdown-item p-2 d-flex justify-content-center"
-                                                                        type="button"
-                                                                        title="Edit"
-                                                                        onClick={() => this.handleEditProject(project)}
-                                                                        style={{ padding: '6px' }}
-                                                                        >
-                                                                        <i className="fe fe-edit" />
-                                                                        </button>
+                    <div
+                    className="dropdown-menu dropdown-menu-right"
+                    style={{
+                        minWidth: '100px',
+                        padding: '0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    }}
+                    >
+                    <button
+                        className="dropdown-item text-center"
+                        type="button"
+                        title="Edit"
+                        onClick={() => this.handleEditProject(project)}
+                        style={{
+                        padding: '8px 12px',
+                        fontSize: '14px',
+                        color: '#333',
+                        backgroundColor: 'transparent',
+                        borderBottom: '1px solid #eee',
+                        }}
+                    >
+                        Edit
+                    </button>
 
-                                                                        {/* Delete Button */}
-                                                                        <button
-                                                                        className="dropdown-item p-2 d-flex justify-content-center text-danger"
-                                                                        type="button"
-                                                                        title="Delete"
-                                                                        onClick={() => this.handleDeleteProject(project.project_id, project.project_name)}
-                                                                        style={{ padding: '6px' }}
-                                                                        >
-                                                                        <i className="fe fe-trash-2" />
-                                                                        </button>
-                                                                    </div>
-                                                                    </div>
+                    <button
+                        className="dropdown-item text-center"
+                        type="button"
+                        title="Delete"
+                        onClick={() => this.handleDeleteProject(project.project_id, project.project_name)}
+                        style={{
+                        padding: '8px 12px',
+                        fontSize: '14px',
+                        color: '#d9534f',
+                        backgroundColor: 'transparent',
+                        }}
+                    >
+                        Delete
+                    </button>
+                    </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-                                                            )}
+          <div className="card-body flex-grow-1" style={{ minHeight: '300px' }}>
+            <span className="tag tag-blue mb-3">{project.project_technology}</span>
+            <p
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {project.project_description}
+            </p>
+            <div className="row">
+              <div className="col-4 py-1">
+                <strong>Started date:</strong>
+              </div>
+              <div className="col-8 py-1">
+                {new Date(project.created_at)
+                  .toLocaleString('en-US', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                  })
+                  .replace(',', '')}
+              </div>
+              <div className="col-4 py-1">
+                <strong>Team:</strong>
+              </div>
+              <div className="col-8 py-1">
+                <div className="avatar-list avatar-list-stacked">
+                  {project.team_members.map((member) => (
+                    <span key={member.id}>
+                      {member.profile ? (
+                        <img
+                          src={`${process.env.REACT_APP_API_URL}/${member.profile}`}
+                          className="avatar avatar-blue add-space"
+                          alt={`${member.first_name} ${member.last_name}`}
+                          data-toggle="tooltip"
+                          data-placement="top"
+                          title={`${member.first_name} ${member.last_name}`}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className="avatar avatar-blue add-space"
+                          data-toggle="tooltip"
+                          data-placement="top"
+                          title={`${member.first_name} ${member.last_name}`}
+                          style={{
+                            width: '35px',
+                            height: '35px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {member.first_name.charAt(0).toUpperCase()}
+                          {member.last_name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))
+  ) : (
+    !message && (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100px',
+          width: '100%',
+        }}
+      >
+        <p style={{ fontSize: '1.2rem', color: '#888', margin: 0 }}>
+          projects not available.
+        </p>
+      </div>
+    )
+  )}
+</div>
 
-                                                            <label className="custom-switch m-0">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="custom-switch-input"
-                                                                checked={Number(project.project_is_active) === 1}
-                                                                onChange={() => this.handleToggleProjectStatus(project.project_id, project.project_is_active)}
-                                                            />
-                                                                <span className="custom-switch-indicator" />
-                                                            </label>
-                                                        </div>
-                                                    </div>
-
-                                                   
-                                                     <div className="card-body">
-                                                        <span className="tag tag-blue mb-3">{project.project_technology}</span>
-                                                        <p style={{
-                                                            display: '-webkit-box',
-                                                            WebkitLineClamp: 4,
-                                                            WebkitBoxOrient: 'vertical',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis'
-                                                        }}>{project.project_description}</p>
-                                                        <div className="row">
-                                                            <div className="col-4 py-1"><strong>Started date:</strong></div>
-                                                            <div className="col-8 py-1">
-                                                                {new Date(project.created_at).toLocaleString("en-US", {
-                                                                    day: "2-digit",
-                                                                    month: "short",
-                                                                    year: "numeric",
-                                                                    hour: "2-digit",
-                                                                    minute: "2-digit",
-                                                                    hour12: true,
-                                                                }).replace(",", "")}
-                                                            </div>
-                                                            {/* <div className="col-4 py-1"><strong>Creator:</strong></div>
-                                                            <div className="col-8 py-1">Nathan Guerrero</div> */}
-                                                            <div className="col-4 py-1"><strong>Team:</strong></div>
-                                                            <div className="col-8 py-1">
-                                                                <div className="avatar-list avatar-list-stacked">
-                                                                    {project.team_members.map((member) => (
-                                                                        <span key={member.id}>
-                                                                            {member.profile ? (
-                                                                                <img
-                                                                                    src={`${process.env.REACT_APP_API_URL}/${member.profile}`}
-                                                                                    className="avatar avatar-blue add-space"
-                                                                                    alt={`${member.first_name} ${member.last_name}`}
-                                                                                    data-toggle="tooltip"
-                                                                                    data-placement="top"
-                                                                                    title={`${member.first_name} ${member.last_name}`}
-                                                                                    onError={(e) => {
-                                                                                        e.target.style.display = 'none';
-                                                                                        const initialsSpan = document.createElement('span');
-                                                                                        initialsSpan.className = 'avatar avatar-blue add-space';
-                                                                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                                                                        initialsSpan.setAttribute('data-placement', 'top');
-                                                                                        initialsSpan.setAttribute('title', `${member.first_name} ${member.last_name}`);
-                                                                                        e.target.parentNode.insertBefore(initialsSpan, e.target.nextSibling);
-                                                                                        initialsSpan.style.display = 'inline-flex';
-                                                                                        initialsSpan.style.alignItems = 'center';
-                                                                                        initialsSpan.style.justifyContent = 'center';
-                                                                                        initialsSpan.style.width = '35px';
-                                                                                        initialsSpan.style.height = '35px';
-                                                                                    }}
-                                                                                />
-                                                                            ) : (
-                                                                                <span
-                                                                                    className="avatar avatar-blue add-space"
-                                                                                    data-toggle="tooltip"
-                                                                                    data-placement="top"
-                                                                                    title={`${member.first_name} ${member.last_name}`}
-                                                                                    style={{
-                                                                                        width: '35px',
-                                                                                        height: '35px',
-                                                                                        display: 'inline-flex',
-                                                                                        alignItems: 'center',
-                                                                                        justifyContent: 'center',
-                                                                                    }}
-                                                                                >
-                                                                                    {member.first_name.charAt(0).toUpperCase()}{member.last_name.charAt(0).toUpperCase()}
-                                                                                </span>
-                                                                            )}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                
-                                                   
-                                                    {/* <div className="card-footer">
-                                                        <div className="clearfix">
-                                                            <div className="float-left"><strong>15%</strong></div>
-                                                            <div className="float-right"><small className="text-muted">Progress</small></div>
-                                                        </div>
-                                                        <div className="progress progress-xs">
-                                                            <div className="progress-bar bg-red" role="progressbar" style={{ width: '15%' }} aria-valuenow={36} aria-valuemin={0} aria-valuemax={100} />
-                                                        </div>
-                                                    </div> */}
-                                                </div>
-                                            </div>
-                                        ))
-                                ): (
-                                    !message && (
-                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px', width: '100%' }}>
-                                            <p style={{ fontSize: '1.2rem', color: '#888', margin: 0 }}>projects not available.</p>
-                                        </div>
-                                    )
-                                )}
-                                </div>
                             </div>
                             <div className="tab-pane fade" id="Project-UpComing" role="tabpanel">
                                 <div className="card">

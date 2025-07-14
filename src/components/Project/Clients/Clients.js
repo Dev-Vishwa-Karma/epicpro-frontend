@@ -383,48 +383,14 @@ handleConfirmDelete = () => {
                                   {client.client_country || ' '}
                             </div>
                                     
-                      <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
-                            <img
-                              className="rounded-circle img-thumbnail"
-                              src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                                alt="Client Profile"
-                              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                      </div>
-            
-            {/* <div className="dropdown d-flex" style={{ position: 'absolute', top: '16px', right: '10px' }}>
-                                <a
-                                    href="/#"
-                    className="nav-link icon d-md-flex ml-1"
-                                    data-toggle="dropdown"
-                                    title="More options"
-                                >
-                                    <i className="fa fa-ellipsis-v" />
-                                </a>
-                                <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                    <button 
-                        className="dropdown-item" 
-                        style={{ width: '200px', textAlign: 'center' }} 
-                                    type="button"
-                        title="Edit Client"
-                        onClick={() => this.handleOpenEditClientField(client)}
-                                    >
-                                    <i className="dropdown-icon fe fe-edit mr-2" />
-                                    Edit
-                                    </button>
-                                    <button 
-                        className="dropdown-item text-danger" 
-                        style={{ width: '200px', textAlign: 'center' }}
-                                    type="button"
-                        title="Delete Client"
-                        onClick={() => this.handleOpenDeleteModal(client)}
-                                    >
-                                    <i className="dropdown-icon fe fe-trash-2 mr-2" />
-                                    Delete
-                                    </button>
-                                </div>
-                            </div>  */}
-
+                            <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
+                                  <img
+                                    className="rounded-circle img-thumbnail"
+                                    src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                                      alt="Client Profile"
+                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                  />
+                            </div>
                             <div
                                 className="dropdown d-flex"
                                 style={{ position: 'absolute', top: '16px', right: '10px' }}
@@ -478,7 +444,7 @@ handleConfirmDelete = () => {
                                     Delete
                                   </button>
                                 </div>
-                              </div>
+                            </div>
 
             
             {/* Client info with fixed spacing */}
