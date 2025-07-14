@@ -377,7 +377,7 @@ handleConfirmDelete = () => {
                     ) : clients && clients.length > 0 ? (
                     clients.map((client, index) => (
                         <div key={index} className="col-xl-3 col-lg-4 col-md-6 mb-4">
-                          <div className="card h-80">
+                          <div className="card h-100">
                             <div className="card-body text-center ribbon" style={{ minHeight: '300px' }}> 
                                 <div className={`ribbon-box ${client.client_country ? 'green' : 'transparent'}`}>
                                   {client.client_country || ' '}
