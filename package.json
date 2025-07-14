@@ -16,6 +16,7 @@
 		"@types/react": "^19.0.10",
 		"apexcharts": "^3.19.0",
 		"dayjs": "^1.11.13",
+		"axios": "^1.10.0",
 		"fullcalendar-reactwrapper": "^1.0.7",
 		"jquery": "^3.5.0",
 		"react": "^16.12.0",
