@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
-
+import { getService } from '../../../services/getService';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -38,11 +38,7 @@ class Gallery extends Component {
         }
         // Check if user is admin or superadmin
         if (role === 'admin' || role === 'super_admin') {
-            // Fetch employees data if user is admin or super_admin
-            fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-                method: "GET",
-            })
-            .then(response => response.json())
+            getService.getCall('get_employees.php','view',null, null, 'employee', null, null, null, null, null )
             .then(data => {
                 if (data.status === 'success') {
                     this.setState({
@@ -60,33 +56,24 @@ class Gallery extends Component {
         }
 
         // Fetch gallery data
-        let galleryUrl = `${process.env.REACT_APP_API_URL}/gallery.php?action=view`;
-        if (role === "employee") {
-            // Add employee ID param if role is employee
-            galleryUrl += `&id=${id}`;
-        }
-
-        // Fetch gallery data (as in the previous code)
-        fetch(galleryUrl, {
-            method: "GET",
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                this.setState({
-                    images: sortedImages,
-                    filteredImages: sortedImages,
-                    loading: false
-                });
-            } else {
-                this.setState({ message: data.message, loading: false });
-            }
-        })
-        .catch(err => {
-            this.setState({ message: 'Failed to fetch data', loading: false });
-            console.error(err);
-        });
+        const params = role === "employee" ? { id } : null;
+        getService.getCall('gallery.php', 'view', null, null, null, null, null, null, null, params)
+            .then(data => {
+                if (data.status === 'success') {
+                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
+                    this.setState({
+                        images: sortedImages,
+                        filteredImages: sortedImages,
+                        loading: false
+                    });
+                } else {
+                    this.setState({ message: data.message, loading: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ message: 'Failed to fetch data', loading: false });
+                console.error(err);
+            });
     }
 
     openModal = () => {
@@ -202,11 +189,7 @@ class Gallery extends Component {
 
         this.setState({ ButtonLoading: true });
         // Send images using fetch or axios
-        fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=add`, {
-            method: 'POST',
-            body: uploadImageData,
-        })
-        .then(response => response.json())
+        getService.addCall('gallery.php','add',uploadImageData )
         .then(data => {
             if (data.status === "success") {
                 // Reset file input field using ref

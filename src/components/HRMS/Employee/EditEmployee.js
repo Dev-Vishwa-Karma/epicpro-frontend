@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
-
+import { getService } from '../../../services/getService';
 class EditEmployee extends Component {
     constructor(props) {
         super(props);
@@ -145,11 +145,8 @@ class EditEmployee extends Component {
             console.error("Error fetching employee details:", error);
         });
 
-        // Get department data from departments table
-		fetch(`${process.env.REACT_APP_API_URL}/departments.php`, {
-            method: "GET"
-        })
-        .then(response => response.json())
+
+        getService.getCall('departments.php','view' ,null, null, null, null, null, null, null)
         .then(data => {
 			this.setState({ departments: data.data });
         })
@@ -400,16 +397,7 @@ class EditEmployee extends Component {
         
         updateEmployeeData.append("logged_in_employee_id", id);
         updateEmployeeData.append('logged_in_employee_role', role); // Logged-in employee role
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=edit&user_id=${employeeId}`, {
-            method: "POST",
-            body: updateEmployeeData,
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json(); // Convert response to JSON
-        })
+        getService.editCall('get_employees.php','edit',updateEmployeeData, null, employeeId )
         .then((data) => {
             if (data && data.status === "success") {
                 this.setState((prevState) => {

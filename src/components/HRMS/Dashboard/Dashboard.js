@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import authService from "../../Authentication/authService";
 import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
+import { getService } from '../../../services/getService';
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -29,10 +30,7 @@ class Dashboard extends Component {
 		}
 
 		// Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/dashboard.php`, {
-			method: "GET",
-		})
-		.then(response => response.json())
+		getService.getCall('dashboard.php', null, null, null, null, null, null)
 		.then(data => {
 			if (data.status === 'success') {
 				let totalUsers = data.data[0].total_users;
@@ -41,16 +39,16 @@ class Dashboard extends Component {
 				const totalEvents = data.data[0].total_events;
 
 				// Check user role
-                if (loggedInUser && loggedInUser.role === "employee") {
-                    totalUsers = 0;
-					totalEmployees = 1; // Only show their own count
-                }
+				if (loggedInUser && loggedInUser.role === "employee") {
+					totalUsers = 0;
+					totalEmployees = 1;
+				}
 
 				this.setState(
 					{ totalUsers: totalUsers, totalEmployees: totalEmployees, totalHolidays: totalHolidays, totalEvents: totalEvents}
 				);
 			} else {
-			  	this.setState({ message: data.message });
+				this.setState({ message: data.message });
 			}
 		})
 		.catch(err => {
@@ -59,12 +57,9 @@ class Dashboard extends Component {
 		});
 
 		// Get projects data
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {
-            method: "GET",
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
+		getService.getCall('projects.php', 'view', null, window.user.id, window.user.role, null, null)
+		.then(data => {
+			if (data.status === 'success') {
                 this.setState({
                     projects: data.status === 'success' ? data.data : [],
                     loading: false
@@ -72,11 +67,11 @@ class Dashboard extends Component {
             } else {
                 this.setState({ error: data.message, loading: false });
             }
-        })
-        .catch(err => {
+		})
+		.catch(err => {
             this.setState({ error: 'Failed to fetch employees data' });
             console.error(err);
-        });
+		});
 	}
 
 	openBirthdayBannerModel = () => {
