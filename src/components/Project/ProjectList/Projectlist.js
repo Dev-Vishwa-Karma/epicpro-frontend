@@ -665,16 +665,13 @@ class ProjectList extends Component {
 
 
     render() {
-        console.log('Role:', this.state.logged_in_employee_role);
-        console.log('Projects:', this.state.projects);
         const { fixNavbar/* , boxOpen */ } = this.props;
-        const { projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, clients, selectedClient, teamMembers, employees, projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
 
         // Filter projects for employees: only show active projects
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
             ? projects
             : projects.filter(project => Number(project.project_is_active) === 1);
-        console.log('VisibleProjects:', visibleProjects);
 
         return (
             <>

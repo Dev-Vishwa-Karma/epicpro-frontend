@@ -1,6 +1,33 @@
 import api from "../api/axios";
 
 export const getService = {
+    //more Optimized code 
+    // getCall: (fileName, params = {}) => {
+    //     let apiUrl = `${process.env.REACT_APP_API_URL}/${fileName}`;
+    //     const queryParams = new URLSearchParams();
+
+    //     // Only add params that are not null/undefined
+    //     Object.entries(params).forEach(([key, value]) => {
+    //     if (value !== null && value !== undefined) {
+    //     queryParams.append(key, value);
+    //     }
+    //     });
+
+    //     if (queryParams.toString()) {
+    //     apiUrl += `?${queryParams.toString()}`;
+    //     }
+
+    //     return api.get(apiUrl)
+    //     .then(response => response.data)
+    //     .catch(error => {
+    //     throw error;
+    //     });
+    // },
+    
+    //call this function like this
+    // getService.getCall('get_employees.php', {
+    //     action: 'view'
+    // })
 
     getCall: (folderName, action, userId, logged_in_employee_id, role, from_date, to_date, is_timeline, year, employee_id , event_type, status, month, statistics_visibility_status , search, client_id, notification_id) => {
         let apiUrl = `${process.env.REACT_APP_API_URL}/${folderName}`;

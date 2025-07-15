@@ -3,13 +3,27 @@ import { Route, Redirect } from 'react-router-dom';
 
 class ProtectedRoute extends Component {
   // Method to check if the user is authorized
-  isAuthorized = () => {
-      const { roles } = this.props;
-      const currentUser = window.user
-    return roles?.length === 0 || roles?.includes(currentUser?.role);
+  isAuthorized = (routeProps) => {
+    const { roles, path } = this.props;
+    const currentUser = window.user;
+
+    // General role check
+    const hasRole = roles?.length === 0 || roles?.includes(currentUser?.role);
+
+    // Additional check: employee can't view others' profiles
+    if (path.startsWith("/view-employee")) {
+      const { match } = routeProps;
+      const idFromUrl = match.params.id;
+
+      const isAdmin = ['admin', 'super_admin'].includes(currentUser?.role);
+      const isSelf = currentUser?.id?.toString() === idFromUrl;
+
+      return isAdmin || isSelf;
+    }
+
+    return hasRole;
   };
 
-  // Render method
   render() {
     const { component: Component, ...rest } = this.props;
 
@@ -17,10 +31,10 @@ class ProtectedRoute extends Component {
       <Route
         {...rest}
         render={props =>
-          this.isAuthorized() ? (
+          this.isAuthorized(props) ? (
             <Component {...props} />
           ) : (
-            <Redirect to="/" /> // Or a custom "Unauthorized" page
+            <Redirect to="/" />
           )
         }
       />
