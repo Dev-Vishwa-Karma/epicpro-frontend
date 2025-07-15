@@ -1,5 +1,4 @@
 import React from "react";
-import { FaCheckCircle, FaTimesCircle, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 
 const ClientInfoModal = ({ client, onClose }) => {
   if (!client) return null;
@@ -81,9 +80,9 @@ const ClientInfoModal = ({ client, onClose }) => {
                 aria-label={isActive ? "Active" : "Inactive"}
               >
                 {isActive ? (
-                  <FaCheckCircle color="#fff" size={20} />
+                  <li className="fa fa-check-circle " style={{color:"#fff", fontSize:"20px"}}></li>
                 ) : (
-                  <FaTimesCircle color="#fff" size={20} />
+                  <li className="fa fa-times-circle " style={{color:"#fff", fontSize:"20px"}}></li>
                 )}
               </span>
             </div>
@@ -93,22 +92,20 @@ const ClientInfoModal = ({ client, onClose }) => {
           <div className="text-center px-4" style={{ marginTop: 70 }}>
             <h3 style={{ fontWeight: 700, marginBottom: 4 }}>{client.client_name}</h3>
             <div style={{ color: "#888", fontSize: 15, marginBottom: 2 }}>
-              <FaEnvelope style={{ marginRight: 6, verticalAlign: -2 }} />
+              <li className="fa fa-envelope" style={{ marginRight: 6, verticalAlign: -2 }}></li>
               {client.client_email}
             </div>
             <div style={{ color: "#888", fontSize: 15, marginBottom: 12 }}>
-              <FaMapMarkerAlt style={{ marginRight: 6, verticalAlign: -2 }} />
+              <li style={{ marginRight: 6, verticalAlign: -2 }} className="fa fa-map-marker"></li>
               {client.client_city}, {client.client_state}, {client.client_country}
             </div>
 
             {/* About */}
             <div
               style={{
-                background: "#f8f9fa",
                 borderRadius: 12,
                 margin: "0 auto 18px auto",
                 maxWidth: 420,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                 position: "relative",
                 fontStyle: "italic",
                 color: "#555",
