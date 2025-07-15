@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
+import { getService } from "../../../services/getService";
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -77,10 +78,7 @@ class AddEmployee extends Component {
 
   componentDidMount() {
     // Get department data from departments table
-    fetch(`${process.env.REACT_APP_API_URL}/departments.php`, {
-      method: "GET",
-    })
-      .then((response) => response.json())
+       getService.getCall('departments.php',null ,null, null, null, null, null, null)
       .then((data) => {
         this.setState({ departments: data.data });
       })
@@ -297,11 +295,7 @@ class AddEmployee extends Component {
     addEmployeeData.append("logged_in_employee_role", role);
 
 
-    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=add`, {
-      method: "POST",
-      body: addEmployeeData,
-    })
-      .then((response) => response.json())
+    getService.addCall('get_employees.php','add', addEmployeeData)
       .then((data) => {
         if (data.status === "success") {
           // Update the department list

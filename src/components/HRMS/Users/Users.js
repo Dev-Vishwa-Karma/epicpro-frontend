@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
+import { getService } from '../../../services/getService';
 
 class Users extends Component {
 	constructor(props) {
@@ -46,10 +47,7 @@ class Users extends Component {
 		this.getAdmins();
 
 		// Fetch all users to generate the correct employee code
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view`, {
-			method: "GET",
-		})
-		.then(response => response.json())
+		getService.getCall('get_employees.php', 'view', null, null, null, null, null, null, null, null , null, null, null, null)
 		.then(data => {
 			if (data.status === 'success') {
 				// Generate next employee Code from all users
@@ -65,10 +63,7 @@ class Users extends Component {
 		});
 
 		// Get department data from departments table
-		fetch(`${process.env.REACT_APP_API_URL}/departments.php`, {
-			method: "GET"
-		})
-        .then(response => response.json())
+		getService.getCall('departments.php', 'view', null, null, null, null, null, null, null, null , null, null, null, null)
         .then(data => {
 			this.setState({ departments: data.data });
         })
@@ -77,10 +72,7 @@ class Users extends Component {
 
 	getAdmins = () => {
 		// Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=admin`, {
-			method: "GET",
-		})
-		.then(response => response.json())
+		getService.getCall('get_employees.php', 'view', null, null, 'admin', null, null, null, null, null , null, null, null, null)
 		.then(data => {
 			if (data.status === 'success') {
 			  	this.setState({
@@ -186,11 +178,7 @@ class Users extends Component {
 		addUserData.append('logged_in_employee_role', logged_in_employee_role);
 
         // API call to add user
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=add`, {
-            method: "POST",
-            body: addUserData,
-        })
-        .then((response) => response.json())
+		getService.addCall('get_employees.php','add',addUserData )
         .then((data) => {
             if (data.status === "success") {
 				// Ensure 'users' is an array before updating it
@@ -294,11 +282,7 @@ class Users extends Component {
         updateProfileData.append('logged_in_employee_role', logged_in_employee_role);
 
         // Example API call
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=edit&user_id=${selectedUser.id}`, {
-            method: 'POST',
-            body: updateProfileData,
-		})
-        .then((response) => response.json())
+		getService.editCall('get_employees.php', 'edit', updateProfileData, null, selectedUser.id)
         .then((data) => {
             if (data.status === "success") {
 				this.getAdmins();
@@ -344,19 +328,21 @@ class Users extends Component {
         if (!deleteUser) return;
 
 		this.setState({ ButtonLoading: true });
-
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
-          	method: 'DELETE',
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				user_id: deleteUser,
-				logged_in_employee_id: logged_in_employee_id,
-				logged_in_employee_role: logged_in_employee_role,
-			}),
-        })
-        .then((response) => response.json())
+		
+		console.log('deleteUser',deleteUser)
+		// 		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
+        //   	method: 'DELETE',
+		// 	headers: {
+		// 		"Content-Type": "application/json",
+		// 	},
+		// 	body: JSON.stringify({
+		// 		user_id: deleteUser,
+		// 		logged_in_employee_id: logged_in_employee_id,
+		// 		logged_in_employee_role: logged_in_employee_role,
+		// 	}),
+        // })
+        // .then((response) => response.json())
+		getService.deleteCall('get_employees.php', 'delete', null, deleteUser, logged_in_employee_id, logged_in_employee_role)
         .then((data) => {
 			if (data.status === "success") {
 				// Update users state after deletion
@@ -424,17 +410,7 @@ class Users extends Component {
 			const searchParam = searchUser.trim();
 			
 			// If search is empty, fetch all admins (or whatever default you want)
-			const url = `${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=admin&search=${encodeURIComponent(searchParam)}`;
-
-			this.setState({ loading: true });
-
-			fetch(url, { method: "GET" })
-				.then(response => {
-					if (!response.ok) {
-						throw new Error('Network response was not ok');
-					}
-					return response.json();
-				})
+			getService.getCall('get_employees.php', 'view', null, null, 'admin', null, null, null, null, null , null, null, null, null,encodeURIComponent(searchParam))
 				.then(data => {
 					if (data.status === 'success') {
 						this.setState({

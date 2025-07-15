@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
 import TodoList from './TodoList';
+import { getService } from '../../../services/getService';
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -104,16 +105,7 @@ class Events extends Component {
 		endDate = formatDate(lastDay);
 	}
 
-	fetch(
-		`${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
-		{ method: 'GET' }
-	)
-		.then((response) => {
-		if (!response.ok) {
-			throw new Error('Network response was not ok');
-		}
-		return response.json();
-		})
+	getService.getCall('reports.php','view',null, null, null, startDate, endDate, null, null, employeeId )
 		.then((data) => {
 		// Defer state update
 		setTimeout(() => {
@@ -149,10 +141,7 @@ class Events extends Component {
 	};
 
 	fetchEmployees = () => {
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-			method: "GET",
-		})
-			.then(response => response.json())
+		getService.getCall('get_employees.php', 'view', null, null, 'employee', null, null, null, null, null)
 			.then(data => {
 				if (data.status === 'success') {
 		
@@ -184,10 +173,11 @@ class Events extends Component {
 	
 		this.setState({ loading: true });
 	
-		fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&employee_id=${employeeId}`, {
-			method: "GET",
-		})
-		.then((res) => res.json())
+		// fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&employee_id=${employeeId}`, {
+		// 	method: "GET",
+		// })
+		// .then((res) => res.json())
+		getService.getCall('project_todo.php', 'view', null, null, null, null, null, null, null, employeeId)
 		.then((data) => {
 			if (data.status === 'success' && Array.isArray(data.data)) {
 				this.setState({ todos: data.data, loading: false });
@@ -203,9 +193,7 @@ class Events extends Component {
 
 
 	fetchLeaveData = (employee_id, start_date, end_date) => {
-		  const url = `${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&start_date=${start_date}&end_date=${end_date}&employee_id=${employee_id}`;
-			fetch(url)
-				.then((res) => res.json())
+		getService.getCall('employee_leaves.php', 'view', null, null, null, start_date, end_date, null, null, employee_id)
 				.then((data) => {
 					if (data.status === "success" && Array.isArray(data.data)) {
 						if(employee_id === ''){
@@ -325,10 +313,7 @@ handleYearChange = (event) => {
 	getAlternateSaturday = async () => {
 		const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
 		try {
-			const response = await fetch(
-				`${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${now.getFullYear()}`
-			);
-			const data = await response.json();
+			const data = await getService.getCall('alternate_saturdays.php','view',null, null, null, null, null, null, now.getFullYear() )
 
 			this.setState({
 				alternateSatudays: data?.data
@@ -361,11 +346,7 @@ handleYearChange = (event) => {
 			addEventData.append('created_by', logged_in_employee_id);
 
 			// API call to add event
-			fetch(`${process.env.REACT_APP_API_URL}/events.php?action=add`, {
-				method: "POST",
-				body: addEventData,
-			})
-			.then((response) => response.json())
+			getService.addCall('events.php','add', addEventData)
 			.then((data) => {
 				if (data.status === "success") {
 					this.setState((prevState) => {
@@ -432,15 +413,8 @@ handleYearChange = (event) => {
 			});
 			return;
 		}
-		fetch(`${process.env.REACT_APP_API_URL}/events.php?action=delete&event_id=${eventId}`, {
-			method: 'GET'
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
-			}
-			return response.json();
-		})
+
+		getService.deleteCall('events.php','delete', eventId, null, null, null)
 		.then(data => {
 			if (data.status === 'success') {
 				this.setState(prevState => ({
@@ -448,7 +422,8 @@ handleYearChange = (event) => {
 					successMessage: 'Event deleted successfully!',
 					showSuccess: true,
 					loading: false,
-					ButtonLoading: false
+					ButtonLoading: false,
+					showDeleteModal:false
 				}));
 				setTimeout(() => this.setState({ showSuccess: false }), 2000);
 			} else {
@@ -586,10 +561,7 @@ fetchEvents = () => {
 		};
 	}).filter(event => event !== null); // Remove null entries
 
-	fetch(`${process.env.REACT_APP_API_URL}/events.php?start_date=${startDate}&end_date=${endDate}`, {
-		method: "GET",
-	})
-	.then(response => response.json())
+	getService.getCall('events.php','view',null, null, null, startDate, endDate, null, null, null )
 	.then(data => {
 		if (data.status === 'success') {
 			const eventsData = data.data;

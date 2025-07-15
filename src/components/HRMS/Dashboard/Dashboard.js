@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import authService from "../../Authentication/authService";
 import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
-import api from '../../../api/axios';
-import { DashboardService } from '../../../services/DashboardService';
-import { ProjectService } from '../../../services/ProjectService';
+import { getService } from '../../../services/getService';
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -32,7 +30,7 @@ class Dashboard extends Component {
 		}
 
 		// Make the GET API call when the component is mounted
-		DashboardService.getDashboardDetails()
+		getService.getCall('dashboard.php', null, null, null, null, null, null)
 		.then(data => {
 			if (data.status === 'success') {
 				let totalUsers = data.data[0].total_users;
@@ -59,7 +57,7 @@ class Dashboard extends Component {
 		});
 
 		// Get projects data
-		ProjectService.getProjects()
+		getService.getCall('projects.php', 'view', null, window.user.id, window.user.role, null, null)
 		.then(data => {
 			if (data.status === 'success') {
                 this.setState({

@@ -5,7 +5,8 @@ import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import ReactCropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 import CalendarWithTabs from './CalendarWithTabs';
-import AlertMessages from '../../common/AlertMessages';
+import AlertMessages from '../../common/AlertMessages'
+import { getService } from '../../../services/getService';
 class ViewEmployee extends Component {
     constructor(props) {
         super(props);
@@ -68,10 +69,11 @@ class ViewEmployee extends Component {
             uploadImageData.append('employee_id', this.state.employeeId);
             uploadImageData.append('created_by', window.user.id);
             uploadImageData.append('images[]', file);
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=add`, {
-                method: 'POST', body: uploadImageData
-            });
-            const data = await response.json();
+
+            // Wait for the API response
+            const data = await getService.addCall('gallery.php', 'add', uploadImageData);
+            
+
             if (data.status === "success") {
                 const updatedImages = [...this.state.images, ...data.data];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
@@ -105,10 +107,7 @@ class ViewEmployee extends Component {
             uploadImageData.append('employee_id', this.state.employeeId);
             uploadImageData.append('created_by', window.user.id);
             uploadImageData.append('image', croppedImage);
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=profile-update`, {
-                method: 'POST', body: uploadImageData
-            });
-            const data = await response.json();
+            const data = await getService.editCall('get_employees.php', 'profile-update', uploadImageData);
             if (data.status === "success") {
                 const profileImagePath = data.data.url.replace(/\\/g, '/');
                 const updatedImages = [...this.state.images];
@@ -177,12 +176,7 @@ class ViewEmployee extends Component {
     // }
 
     getEmployeeGallery = (id) => {
-        let galleryUrl = `${process.env.REACT_APP_API_URL}/gallery.php?action=view&id=${id}`;
-        // Fetch gallery data (as in the previous code)
-        fetch(galleryUrl, {
-            method: "GET",
-        })
-            .then(response => response.json())
+        getService.getCall('gallery.php','view' ,null, null, null, null, null, null, null, id)
             .then(data => {
                 if (data.status === 'success') {
                     const sortedImages = this.sortImages(data.data, this.state.sortOrder);
@@ -208,10 +202,7 @@ class ViewEmployee extends Component {
     };
 
     fetchEmployeeDetails = (employeeId) => {
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&user_id=${employeeId}`, {
-            method: "GET",
-        })
-            .then((response) => response.json())
+         getService.getCall('get_employees.php','view' ,employeeId, null, null, null, null, null, null, null)
             .then((data) => {
                 if (data.status === "success") {
                     this.setState(prevState => ({

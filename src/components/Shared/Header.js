@@ -8,6 +8,7 @@ import api from "../../api/axios";
 import AlertMessages from "../common/AlertMessages";
 import TextEditor from "../common/TextEditor";
 import DueTasksAlert from "../common/DueTasksAlert";
+import { getService } from "../../services/getService";
 
 class Header extends Component {
   constructor(props) {
@@ -65,10 +66,10 @@ class Header extends Component {
         userRole: user.role,
       }, () => { 
         this.startTimerInterval();
-        if (user.role === 'employee') {
+       // if (user.role === 'employee') {
           this.getPunchInStatus();
           this.getActivities();
-        }
+       // }
 
         this.fetchNotifications();
         this.checkBirthdays(); 
@@ -91,10 +92,7 @@ class Header extends Component {
   }
 
   checktodayDueDate = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/project_todo.php?action=due_today_check&user_id=${window.user.id}`
-    )
-      .then((response) => response.json())
+    getService.getCall('project_todo.php', 'due_today_check', window.user.id, null, null, null, null, null, null, null , null, null, null, null, null)
       .then((data) => {
         if (data.status === "success") {
             this.setState({
@@ -181,11 +179,11 @@ class Header extends Component {
     });
   }
 
-  getPunchInStatus = () => {
-    api.get(`${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${this.state.userId}`)
-    .then(response => {
-      let data = response.data;
+  getPunchInStatus = async() => {
+    getService.getCall('activities.php', 'get_punch_status', this.state.userId, null, null, null, null, null, null, null , null, null, null, null,null)
+    .then(data => {
       if (data.status === "success") {
+        console.log('data.data[0]',data.data[0])
         const inTime = new Date(data.data[0].in_time);
         this.props.punchInAction(true);
         this.setState({
@@ -222,9 +220,8 @@ class Header extends Component {
   };
 
   fetchNotifications = () => {
-		api.get(`${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}&limit=5`)
-		.then(response => {
-			let data = response.data;
+   getService.getCall('notifications.php', 'get_notifications', window.user.id, null, null, null, null, null, null, null , null, null, null, null, null)
+		.then(data => {
 	      if (data.status === "success") {
           this.setState({ notifications: data.data, loading: false });
         } else {
@@ -241,9 +238,8 @@ class Header extends Component {
   };
 
   checkBirthdays = () => {
-		api.get(`${process.env.REACT_APP_API_URL}/notifications.php?action=birthday_notify`)
-		.then(response => {
-			let data = response.data;
+     getService.getCall('notifications.php', 'birthday_notify', null, null, null, null, null, null, null, null , null, null, null, null, null)
+		.then(data => {
 			if (data.status === "success") {
           this.fetchNotifications();
         }
@@ -254,14 +250,12 @@ class Header extends Component {
   };
 
   markAsRead = (notification_id) => {
-    let apiUrl = `${process.env.REACT_APP_API_URL}/notifications.php?action=mark_read&user_id=${window.user.id}`;
-    if (notification_id) {
-        apiUrl += `&notification_id=${notification_id}`;
-    }
+      const apiCall = notification_id 
+        ? getService.getCall('notifications.php', 'mark_read', window.user.id, null, null, null, null, null, null, null , null, null, null, null , null, null, notification_id)
+        : getService.getCall('notifications.php', 'mark_read', window.user.id, null, null, null, null, null, null, null , null, null, null, null , null, null, null);
 
-    api.get(apiUrl)
-		.then(response => {
-			let data = response.data;
+    apiCall
+    .then(data => {
       if (data.status === "success") {
         this.fetchNotifications();
       } else {
@@ -274,9 +268,8 @@ class Header extends Component {
   };
 
   getActivities = () => {
-    api.get(`${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`)
-		.then(response => {
-			let data = response.data;
+    getService.getCall('activities.php', 'break_calculation', window.user.id, null, null, null, null, null, null, null , null, null, null, null, null)
+		.then(data => {
       if (data.status === "success") {
         this.props.breakDurationCalAction(data.data.break_duration);
         this.setState({
@@ -309,12 +302,8 @@ class Header extends Component {
     formData.append("status", "active");
 
     this.props.punchInAction(true);
-    // Proceed with punch-in API call
-    api.post(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      formData
-    )
-		.then(response => {
-			let data = response.data;
+    getService.addCall('activities.php', 'add-by-user', formData)
+		.then(data => {
       if (data.status === "success") {
         const currentTime = new Date();
 
@@ -540,12 +529,8 @@ class Header extends Component {
       this.formatToMySQLDateTime(todays_total_hours)
     );
 
-    // API call to save the report and punch-out
-    api.post(`${process.env.REACT_APP_API_URL}/reports.php?action=add-report-by-user`,
-      formData
-    )
-		.then(response => {
-			let data = response.data;
+    getService.addCall('reports.php', 'add-report-by-user', formData)
+		.then(data => {
       if (data.status === "success") {
         const newReport = data.data;
 
@@ -603,10 +588,7 @@ class Header extends Component {
     formData.append("description", null);
     formData.append("status", "completed");
 
-    // API call to add break
-    api.post(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      formData
-    )
+    getService.addCall('activities.php', 'add-by-user', formData)
     .then(response => {
       let data = response.data;
       if (data.status === "success") {
