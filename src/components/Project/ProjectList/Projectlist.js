@@ -6,7 +6,7 @@ import {
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import EditModal from './EditModal';
-
+import { getService } from '../../../services/getService';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -101,10 +101,7 @@ class ProjectList extends Component {
 
 
         // Get projects data
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {   
-            method: "GET",
-        })
-        .then(response => response.json())
+        getService.getCall('projects.php', 'view', null, window.user.id, window.user.id, null, null, null, null, null, null, null, null, null , null, null)
         .then(data => {
             if (data.status === 'success') {
                 const collapsedCards = {};
@@ -126,10 +123,7 @@ class ProjectList extends Component {
         });
 
         // Get clients data
-        fetch(`${process.env.REACT_APP_API_URL}/clients.php?action=view`, {
-            method: "GET",
-        })
-        .then(response => response.json())
+         getService.getCall('clients.php', 'view', null, null, null, null, null, null, null, null, null, null, null, null , null, null)
         .then(data => {
             if (data.status === 'success') {
                 this.setState({
@@ -299,12 +293,11 @@ class ProjectList extends Component {
         const action = isEditing ? 'edit' : 'add';
         const successMessage = isEditing ? 'Project updated successfully!' : 'Project added successfully!';
 
-        fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=${action}`, {
-            method: 'POST',
-            body: projectFormData,
-        })
-        .then((response) => response.json())
-        .then((data) => {
+         const apiCall = isEditing 
+            ? getService.editCall('projects.php', 'edit', projectFormData, null, editingProjectId)
+            : getService.addCall('projects.php', 'add', projectFormData);
+
+       apiCall.then((data) => {
             if (data.status === 'success' || data.success) {
                 if (isEditing) {
                     // Update existing project in the list
@@ -518,17 +511,11 @@ class ProjectList extends Component {
             const searchParam = searchQuery.trim();
 
             // Build the API URL with the search query for both name and technology
-            let apiUrl = `${process.env.REACT_APP_API_URL}/projects.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`;
-            if (searchParam !== "") {
-                apiUrl += `&project_name=${encodeURIComponent(searchParam)}`;
-                apiUrl += `&project_technology=${encodeURIComponent(searchParam)}`;
-            }
+             const apiCall = searchParam !== ""
+                ?  getService.getCall('projects.php', 'view', null, window.user.id, window.user.role, null, null, null, null, null , null, null, null, null,encodeURIComponent(searchParam))
+                :  getService.getCall('projects.php', 'view', null, window.user.id, window.user.role, null, null, null, null, null , null, null, null, null,null)
 
-            fetch(apiUrl, {
-                method: "GET",
-            })
-            .then(response => response.json())
-            .then(data => {
+         apiCall.then(data => {
                 if (data.status === 'success') {
                     this.setState({
                         projects: data.data,
@@ -580,10 +567,7 @@ class ProjectList extends Component {
     
     this.setState({ ButtonLoading: true, isDeleting: true });
     
-    fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=delete&id=${deleteProjectId}`, {
-        method: "DELETE",
-    })
-    .then(response => response.json())
+    getService.deleteCall('projects.php', 'delete', deleteProjectId, null, null, null)
     .then(data => {
         if (data.status === 'success' || data.success) {
             this.setState(prevState => ({

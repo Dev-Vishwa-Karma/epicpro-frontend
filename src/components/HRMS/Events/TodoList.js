@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import { getService } from '../../../services/getService';
 class TodoList extends Component {
   constructor(props) {
     super(props);
@@ -18,10 +18,7 @@ class TodoList extends Component {
 
     this.setState({ loading: true });
 
-    fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&employee_id=${employeeId}`, {
-      method: 'GET',
-    })
-      .then((res) => res.json())
+    getService.getCall('project_todo.php','view',null, null, null, null, null, null, null, employeeId )
       .then((data) => {
         if (data.status === 'success' && Array.isArray(data.data)) {
           this.setState({ todos: data.data, loading: false });

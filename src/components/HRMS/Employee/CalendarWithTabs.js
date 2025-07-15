@@ -4,6 +4,7 @@ import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
 import ActivitiesTime from '../Activities/ActivitiesTime';
 import AlertMessages from '../../common/AlertMessages';
+import { getService } from '../../../services/getService';
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
@@ -83,10 +84,7 @@ class CalendarWithTabs extends Component {
 
     getDepartments = () => {
         // Get department data from departments table
-        fetch(`${process.env.REACT_APP_API_URL}/departments.php`, {
-            method: "GET"
-        })
-            .then(response => response.json())
+         getService.getCall('departments.php','view' ,null, null, null, null, null, null, null)
             .then(data => {
                 this.setState({ departments: data.data });
             })
@@ -196,11 +194,7 @@ class CalendarWithTabs extends Component {
     getAlternateSaturday = async () => {
         const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
         try {
-            const response = await fetch(
-                `${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${now.getFullYear()}`
-            );
-            const data = await response.json();
-
+            const data = getService.getCall('alternate_saturdays.php','view',null, null, null, null, null, null, now.getFullYear() )
             this.setState({
                 alternateSatudays: data?.data
             })
@@ -231,11 +225,8 @@ class CalendarWithTabs extends Component {
         const currentEmployeeId = employeeId;
 
         if (currentEmployeeId) {
-            // Fetch reports
-            fetch(`${baseUrl}/reports.php?user_id=${currentEmployeeId}&from_date=${startDate}&to_date=${endDate}`, {
-                method: "GET",
-            })
-                .then(response => response.json())
+            //folderName, action, userId, logged_in_employee_id, role, from_date, to_date, is_timeline, year
+            getService.getCall('reports.php','view' ,currentEmployeeId, null, null, startDate, endDate, null, null, null)
                 .then(data => {
                     if (data.status === 'success') {
                         const reports = data.data;
@@ -260,12 +251,9 @@ class CalendarWithTabs extends Component {
                     const calendarEventsData = this.generateCalendarEvents(reports, leaves);
                     this.setState({ calendarEventsData });
                 });
-
-            // Fetch leaves
-            fetch(`${baseUrl}/employee_leaves.php?employee_id=${currentEmployeeId}`, {
-                method: "GET",
-            })
-                .then(response => response.json())
+                console.log('currentEmployeeId',currentEmployeeId)
+               
+            getService.getCall('employee_leaves.php','view' ,null, null, null, startDate, endDate, null, null, currentEmployeeId)
                 .then(data => {
                     if (data.status === 'success') {
                         const leaves = data.data;
@@ -294,10 +282,7 @@ class CalendarWithTabs extends Component {
     }
 
     fetchEmployeeDetails = (employeeId) => {
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&user_id=${employeeId}`, {
-            method: "GET",
-        })
-            .then((response) => response.json())
+        getService.getCall('get_employees.php','view' ,employeeId, null, null, null, null, null, null, null)
             .then((data) => {
                 if (data.status === "success") {
                      const { password, ...employeeData } = data.data;
@@ -393,19 +378,7 @@ class CalendarWithTabs extends Component {
             endDate = formatDate(lastDay);
         }
 
-        fetch(
-
-            `${process.env.REACT_APP_API_URL}/reports.php?user_id=${employeeId}&from_date=${startDate}&to_date=${endDate}`,
-            {
-                method: "GET",
-            }
-        )
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
+        getService.getCall('reports.php','view' ,employeeId, null, null, null, startDate, endDate, null, null)
             .then((data) => {
                 if (data.status === "success") {
                     if (employeeId === '') {
@@ -515,7 +488,6 @@ class CalendarWithTabs extends Component {
         appendField("joining_date", employee.joining_date);
         appendField("mobile_no1", employee.mobile_no1);
         appendField('mobile_no2', employee.mobile_no2);
-        console.log('employee.password',employee.password)
         if(employee.password !== "" && employee.password !== undefined){
             appendField("password", employee.password);
         }
@@ -533,11 +505,7 @@ class CalendarWithTabs extends Component {
         appendField("facebook_url", employee.facebook_url);
         appendField("twitter_url", employee.twitter_url);
 
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=edit&user_id=${employee.id}`, {
-            method: "POST",
-            body: updatedProfileData,
-        })
-            .then(response => response.json())
+        getService.editCall('get_employees.php','edit', updatedProfileData, null, employee.id )
             .then(data => {
                 if (data.status === "success") {
                     const updatedUser = data.data;
@@ -608,27 +576,14 @@ class CalendarWithTabs extends Component {
 
     handleApplyFilter = async () => {
         this.setState({ loading: true });
-        const { filterFromDate, filterToDate } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true&user_id=${this.props.employeeId}`;
-    
-        if (filterFromDate) {
-            apiUrl += `&from_date=${filterFromDate}`;
-        }
-        if (filterToDate) {
-            apiUrl += `&to_date=${filterToDate}`;
-        }
-
-        try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const { filterFromDate, filterToDate } = this.state;       
+        const data =  getService.getCall('activities.php','view',this.props.employeeId, null, null, filterFromDate, filterToDate, null, null )
         if (data.status === "success") {
             this.setState({ activities: data.data, loading: false });
         } else {
             this.setState({ activities: [], loading: false, error: data.message });
         }
-        } catch (err) {
-        this.setState({ activities: [], loading: false, error: "Failed to fetch data" });
-        }
+       
     };
 
     render() {

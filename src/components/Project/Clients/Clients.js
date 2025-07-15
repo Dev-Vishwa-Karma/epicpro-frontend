@@ -5,7 +5,7 @@ import AlertMessages from "../../common/AlertMessages";
 import ClientInfoModal from "./ClientInfoModal";
 import ClientFieldModal from "./ClientFieldModal";
 import DeleteModal from '../../common/DeleteModal';
-
+import { getService } from "../../../services/getService";
 class Clients extends Component {
   constructor(props) {
     super(props);
@@ -34,10 +34,7 @@ class Clients extends Component {
 
   getClients = (search = "") => {
     this.setState({ loading: true });
-    fetch(`${process.env.REACT_APP_API_URL}/clients.php?action=view_client&client_name=${search}`, {
-      method: "GET",
-    })
-      .then((response) => response.json())
+      getService.getCall('clients.php', 'view_client', null, null, null, null, null, null, null, null , null, null, null, null,search)
       .then((data) => {
         if (data.status === "success") {
           this.setState({
@@ -168,20 +165,15 @@ class Clients extends Component {
       formData.append('profile', clientFieldFormData.profilePic);
     }
 
-    const url = isEditClientField 
-      ? `${process.env.REACT_APP_API_URL}/clients.php?action=edit` 
-      : `${process.env.REACT_APP_API_URL}/clients.php?action=add`;
-
     if (isEditClientField) {
       formData.append('client_id', editingClientId);
     }
 
-    fetch(url, {
-      method: 'POST',
-      body: formData,
-    })
-      .then(response => response.json())
-      .then(data => {
+    const apiCall = isEditClientField 
+    ? getService.editCall('clients.php', 'edit', formData, null, editingClientId)
+    : getService.addCall('clients.php', 'add', formData);
+
+      apiCall.then(data => {
         if (data.status === 'success') {
           this.setState({
             clientFieldLoading: false,
@@ -215,10 +207,7 @@ handleConfirmDelete = () => {
   const { deletingClient } = this.state;
   this.setState({ deleteLoading: true });
 
-  fetch(`${process.env.REACT_APP_API_URL}/clients.php?action=delete&id=${deletingClient.client_id}`, {
-    method: 'DELETE',
-  })
-    .then(response => response.json())
+  getService.deleteCall('clients.php', 'delete', null, deletingClient.client_id, null, null)
     .then(data => {
       if (data.status === 'success') {
         this.setState({
@@ -261,11 +250,7 @@ handleConfirmDelete = () => {
   handleConfirmDelete = () => {
   const { deletingClient } = this.state;
   this.setState({ deleteLoading: true });
-
-  fetch(`${process.env.REACT_APP_API_URL}/clients.php?action=delete&id=${deletingClient.client_id}`, {
-    method: 'DELETE',
-  })
-    .then(response => response.json())
+    getService.deleteCall('clients.php', 'delete', deletingClient.client_id, null, null, null)
     .then(data => {
       if (data.status === 'success') {
         this.setState({

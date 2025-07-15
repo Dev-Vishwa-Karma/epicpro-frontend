@@ -5,6 +5,9 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
+import { getService } from '../../../services/getService';
+
+
 import {
 	statisticsAction,
 	statisticsCloseAction
@@ -148,31 +151,10 @@ class Employee extends Component {
 				logged_in_employee_role: role || null,
 			});
 			
-			const apiUrl = process.env.REACT_APP_API_URL;
-			let employeesUrl = "";
-			let leavesUrl = "";
-	
-			// Role-based API selection
-			if (role === "admin" || role === "super_admin") {
-				employeesUrl = `${apiUrl}/get_employees.php?action=view&role=employee`; // Fetch all employees
-				leavesUrl = `${apiUrl}/employee_leaves.php?action=view&employee_id=`; // Fetch all leaves
-
-			} else if (role === "employee") {
-				employeesUrl = `${apiUrl}/get_employees.php?action=view&user_id=${id}`; // Fetch only logged-in employee
-				leavesUrl = `${apiUrl}/employee_leaves.php?employee_id=${id}`; // Fetch only logged-in employee's leaves
-			} else {
-				console.warn("Invalid role or role not found.");
-				return;
-			}
-	
-			// Fetch employees & leaves based on role
+			// Fetch employees & leaves based on role using EmployeeService
 			Promise.all([
-				fetch(employeesUrl, {
-					method: "GET"
-				}).then(res => res.json()),
-				fetch(leavesUrl, {
-					method: "GET"
-				}).then(res => res.json()),
+				getService.getCall('get_employees.php','view' ,null, null, role, null, null, null, null, id),
+				getService.getCall('employee_leaves.php','view',null, null, role === "admin" || role === "super_admin" ? null : id , null, null, null, null, null)
 			])
 			.then(([employeesData, employeeLeavesData]) => {
 				// If only a single employee is returned, convert it to an array
@@ -205,11 +187,9 @@ class Employee extends Component {
 			console.warn("window.user is undefined");
 		}
 	}
-	
 
 	fetchEmployeeLeaves = () => {
-        const { fromDate, toDate, selectedLeaveEmployee } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&employee_id=${selectedLeaveEmployee}`;
+		const { fromDate, toDate, selectedLeaveEmployee } = this.state;
         
         const formatDate = (date) => {
             const year = date.getFullYear();
@@ -218,15 +198,10 @@ class Employee extends Component {
             return `${year}-${month}-${day}`; 
         };
 
-        if (fromDate) {
-            apiUrl += `&start_date=${formatDate(fromDate)}`;
-        }
-        if (toDate) {
-            apiUrl += `&end_date=${formatDate(toDate)}`;
-        }
+        const fromDateFormatted = fromDate ? formatDate(fromDate) : null;
+        const toDateFormatted = toDate ? formatDate(toDate) : null;
 
-        fetch(apiUrl)
-        .then(response => response.json())
+		getService.getCall('get_employees.php','view' ,null, null, null, fromDateFormatted, toDateFormatted, null, null, selectedLeaveEmployee)
         .then(data => {
             if (data.status === 'success') {
 				let employeesLeaveArray = Array.isArray(data.data) ? data.data : [data.data];
@@ -255,10 +230,7 @@ class Employee extends Component {
 		
 	goToEditEmployee(employee, employeeId) {
 		// Fetch salary details based on employee_id
-		fetch(`${process.env.REACT_APP_API_URL}/employee_salary_details.php?action=view&employee_id=${employeeId}`,{
-			method: "POST",
-		})
-        .then((res) => res.json())
+		getService.getCall('employee_salary_details.php','view' ,null, null, null, null, null, null, null, employeeId)
         .then((salaryDetails) => {
             if (salaryDetails.data) {
 				this.props.history.push({
@@ -378,20 +350,11 @@ class Employee extends Component {
 		const {id, role} = window.user;
 		const loggedInUserId = id; // Get logged-in user ID
 		const loggedInUserRole = role; // Get logged-in user role
-	
+		
 		if (!deleteUser) return;
 
 		this.setState({ ButtonLoading: true });
-	
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
-			method: "POST",  // Change method from DELETE to POST
-			body: JSON.stringify({
-				user_id: deleteUser,
-				logged_in_employee_id: loggedInUserId,
-				logged_in_employee_role: loggedInUserRole,
-			}),
-		})
-		.then((response) => response.json())
+		getService.deleteCall('get_employees.php','delete', deleteUser, null, loggedInUserId, loggedInUserRole)
 		.then((data) => {
 			if (data.status === "success") {
 				// Update users state after deletion
@@ -526,12 +489,7 @@ class Employee extends Component {
         addEmployeeLeaveData.append('status', finalStatus);
         addEmployeeLeaveData.append('is_half_day', halfDayCheckbox);
 
-        // API call to add employee leave
-        fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=add`, {
-            method: "POST",
-            body: addEmployeeLeaveData,
-        })
-        .then((response) => response.json())
+		getService.addCall('employee_leaves.php','add', addEmployeeLeaveData)
         .then((data) => {
             if (data.status === "success") {
 				data.data.is_half_day = data.data.is_half_day.toString();
@@ -603,12 +561,7 @@ class Employee extends Component {
         updateEmployeeLeaveData.append('status', selectedEmployeeLeave.status);
 		updateEmployeeLeaveData.append('is_half_day', selectedEmployeeLeave.is_half_day);
 
-		// Example API call
-		fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=edit&id=${selectedEmployeeLeave.id}`, {
-			method: 'POST',
-			body: updateEmployeeLeaveData,
-		})
-		.then((response) => response.json())
+		getService.editCall('employee_leaves.php','edit',updateEmployeeLeaveData, selectedEmployeeLeave.id )
 		.then((data) => {
 			if (data.status === "success") {
 				this.setState((prevState) => {
@@ -675,10 +628,7 @@ class Employee extends Component {
 
         this.setState({ ButtonLoading: true });
 
-        fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=delete&id=${deleteEmployeeLeave}`, {
-          	method: 'DELETE',
-        })
-        .then((response) => response.json())
+		getService.deleteCall('employee_leaves.php','delete', deleteEmployeeLeave, null, null, null)
         .then((data) => {
 			if (data.status === "success") {
 				this.setState((prevState) => {

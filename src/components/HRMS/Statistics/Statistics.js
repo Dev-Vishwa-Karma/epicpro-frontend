@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
 import dayjs from 'dayjs';
+import { getService } from "../../../services/getService";
 
 class Statistics extends Component {
   constructor(props) {
@@ -39,17 +40,7 @@ class Statistics extends Component {
 
   getEmployees = () => {
     const { selectedYear, selectedMonth } = this.state;
-    const queryParams = new URLSearchParams({
-      action: 'view',
-      role: 'employee',
-      status: 1,
-      year: selectedYear,
-      month: selectedMonth,
-      statistics_visibility_status: 'statistics_visibility_status'
-    });
-
-    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?${queryParams.toString()}`)
-      .then(response => response.json())
+    getService.getCall('get_employees.php', 'view', null, null, 'employee', null, null, null, selectedYear, null , null, 1, selectedMonth, 'statistics_visibility_status')
       .then(data => {
         if (data.status === 'success') {
           this.setState({ employeesData: data.data, isLoading: false });
@@ -69,9 +60,8 @@ class Statistics extends Component {
     const lastDay = new Date(selectedYear, selectedMonth, 0);
     const fromDate = firstDay.toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
     const toDate = lastDay.toISOString().split('T')[0]; 
-
-    fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=view&from_date=${fromDate}&to_date=${toDate}`)
-      .then(response => response.json())
+    
+    getService.getCall('reports.php','view',null, null, null, fromDate, toDate, null, null, null, null )
       .then(data => {
         if (data.status === 'success') {
           this.setState({ reportsData: data.data, isLoading: false });
@@ -86,8 +76,7 @@ class Statistics extends Component {
   }
 
   getleaves = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&status=approved`)
-      .then(response => response.json())
+    getService.getCall('employee_leaves.php','view',null, null, null, null, null, null, null, null, null, 'approved')
       .then(data => {
         if (data.status === 'success') {
           this.setState({ leavesData: data.data, isLoading: false });
@@ -105,10 +94,7 @@ class Statistics extends Component {
     const { selectedYear, selectedMonth } = this.state;
 
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${selectedYear}&month=${selectedMonth}`
-      );
-      const data = await response.json();
+      const data = await getService.getCall('alternate_saturdays.php','view',null, null, null, null, null, null, selectedYear, null, null, null, selectedMonth)
 
       if (data.status === "success" && Array.isArray(data.data) && data.data.length > 0) {
         // The date is a stringified JSON array, so parse it
@@ -136,8 +122,7 @@ class Statistics extends Component {
 
   getHolidays = () => {
     this.setState({ isLoading: true })
-    fetch(`${process.env.REACT_APP_API_URL}/events.php?action=view&event_type=holiday`)
-      .then(response => response.json())
+    getService.getCall('events.php','view',null, null, null, null, null, null, null, null,'holiday' )
       .then(data => {
         if (data.status === 'success') {
           const holidayDates = data.data.map(item => item.event_date); // Using 'event_date' field directly
