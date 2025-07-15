@@ -200,9 +200,13 @@ class departments extends Component {
 
     openModal = (departmentId) => {
         this.setState({
-            departmentToDelete: departmentId, // Save the department data
+            departmentToDelete: departmentId,
         });
     };
+
+    onCloseDeleteModal = () => {
+        this.setState({ departmentToDelete: null });
+    }
 
     onCloseAddEdit = () => {
         this.setState({ showModal: false,
@@ -235,7 +239,7 @@ class departments extends Component {
                 ButtonLoading: false,
 
             }));
-            document.querySelector("#deleteDepartmentModal .close").click();
+            this.onCloseDeleteModal();
             setTimeout(this.dismissMessages, 3000);
         } else {
             this.setState({
@@ -457,10 +461,12 @@ class departments extends Component {
                         loading={this.state.ButtonLoading}
                     />
                     <DeleteModal
+                        show={!!this.state.departmentToDelete}
                         onConfirm={this.confirmDelete}
                         isLoading={this.state.ButtonLoading}
                         deleteBody='Are you sure you want to delete the Department?'
                         modalId="deleteDepartmentModal"
+                        onClose={this.onCloseDeleteModal}
                     />
                 </div>
             </>

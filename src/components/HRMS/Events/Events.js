@@ -450,6 +450,7 @@ handleYearChange = (event) => {
 					loading: false,
 					ButtonLoading: false
 				}));
+				this.closeDeleteModal(); // Close the modal after successful delete
 				setTimeout(() => this.setState({ showSuccess: false }), 2000);
 			} else {
 				throw new Error(data.message || 'Failed to delete event');

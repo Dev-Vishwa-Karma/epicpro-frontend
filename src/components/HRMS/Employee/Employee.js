@@ -363,6 +363,16 @@ class Employee extends Component {
         });
     };
 
+    // Function to close the delete employee modal
+    onCloseDeleteEmployeeModal = () => {
+        this.setState({ deleteUser: null });
+    };
+
+    // Function to close the delete leave modal
+    onCloseDeleteLeaveModal = () => {
+        this.setState({ deleteEmployeeLeave: null });
+    };
+
 	confirmDelete = () => {
 		const { deleteUser, currentPageEmployees, employeeData, dataPerPage } = this.state;
 		const {id, role} = window.user;
@@ -406,7 +416,7 @@ class Employee extends Component {
 					deleteUser: null,  // Clear the deleteUser state
 					ButtonLoading: false,
 				});
-				document.querySelector("#deleteEmployeeModal .close").click();
+				this.onCloseDeleteEmployeeModal(); // Close the modal after successful delete
 				setTimeout(this.dismissMessages, 3000);
 			} else {
 				this.setState({
@@ -703,8 +713,7 @@ class Employee extends Component {
 						ButtonLoading: false,
 					};
 				});
-				// Close the modal after deletion
-				document.querySelector("#deleteLeaveRequestModal .close").click();
+				this.onCloseDeleteLeaveModal(); // Close the modal after successful delete
 				setTimeout(() => this.setState({ showSuccess: false }), 3000);
 			} else {
 				this.setState({
@@ -1594,18 +1603,22 @@ class Employee extends Component {
 
 				{/* Delete Leave Request Modal */}
 				<DeleteModal
+					show={!!this.state.deleteEmployeeLeave}
 					onConfirm={this.confirmDeleteForEmployeeLeave}
 					isLoading={this.state.ButtonLoading}
 					deleteBody='Are you sure you want to delete the leave?'
 					modalId="deleteLeaveRequestModal"
+					onClose={this.onCloseDeleteLeaveModal}
 				/>
 
 				{/* Delete Employee Model */}
 				<DeleteModal
+					show={!!this.state.deleteUser}
 					onConfirm={this.confirmDelete}
 					isLoading={this.state.ButtonLoading}
 					deleteBody='Are you sure you want to delete the employee?'
 					modalId="deleteEmployeeModal"
+					onClose={this.onCloseDeleteEmployeeModal}
 				/>
 			</>
 		);

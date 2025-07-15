@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCheckCircle, FaTimesCircle, FaFolderOpen, FaUsers, FaEnvelope, FaMapMarkerAlt, FaQuoteLeft } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 
 const ClientInfoModal = ({ client, onClose }) => {
   if (!client) return null;
@@ -25,7 +25,7 @@ const ClientInfoModal = ({ client, onClose }) => {
           {/* Header */}
           <div
             style={{
-              background: "rgb(240,240,240)",
+              background: "linear-gradient(to right, #fff, #FFA07A)",
               height: 120,
               position: "relative",
             }}
