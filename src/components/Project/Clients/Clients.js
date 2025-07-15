@@ -362,53 +362,75 @@ handleConfirmDelete = () => {
                     ) : clients && clients.length > 0 ? (
                     clients.map((client, index) => (
                         <div key={index} className="col-xl-3 col-lg-4 col-md-6 mb-4">
-                          <div className="card h-80">
+                          <div className="card h-100">
                             <div className="card-body text-center ribbon" style={{ minHeight: '300px' }}> 
                                 <div className={`ribbon-box ${client.client_country ? 'green' : 'transparent'}`}>
                                   {client.client_country || ' '}
                             </div>
                                     
-                      <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
-                            <img
-                              className="rounded-circle img-thumbnail"
-                              src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                                alt="Client Profile"
-                              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                      </div>
-            
-            <div className="dropdown" style={{ position: 'absolute', top: '16px', right: '10px' }}>
+                            <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
+                                  <img
+                                    className="rounded-circle img-thumbnail"
+                                    src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                                      alt="Client Profile"
+                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                  />
+                            </div>
+                            <div
+                                className="dropdown d-flex"
+                                style={{ position: 'absolute', top: '16px', right: '10px' }}
+                              >
                                 <a
-                                    href="/#"
-                    className="nav-link icon d-md-flex ml-1"
-                                    data-toggle="dropdown"
-                                    title="More options"
+                                  href="/#"
+                                  className="nav-link icon d-none d-md-flex ml-1"
+                                  data-toggle="dropdown"
+                                  title="More options"
                                 >
-                                    <i className="fa fa-ellipsis-v" />
+                                  <i className="fa fa-ellipsis-v" />
                                 </a>
-                                <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                    <button 
-                        className="dropdown-item" 
-                        style={{ width: '200px', textAlign: 'center' }} 
+
+                                <div
+                                  className="dropdown-menu dropdown-menu-right"
+                                  style={{
+                                    minWidth: '100px',
+                                    padding: '0',
+                                    borderRadius: '8px',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  }}
+                                >
+                                  <button
+                                    className="dropdown-item text-center"
                                     type="button"
-                        title="Edit Client"
-                        onClick={() => this.handleOpenEditClientField(client)}
-                                    >
-                                    <i className="dropdown-icon fe fe-edit mr-2" />
+                                    title="Edit"
+                                    onClick={() => this.handleOpenEditClientField(client)}
+                                    style={{
+                                      padding: '8px 12px',
+                                      fontSize: '14px',
+                                      color: '#333',
+                                      backgroundColor: 'transparent',
+                                      borderBottom: '1px solid #eee',
+                                    }}
+                                  >
                                     Edit
-                                    </button>
-                                    <button 
-                        className="dropdown-item text-danger" 
-                        style={{ width: '200px', textAlign: 'center' }}
+                                  </button>
+
+                                  <button
+                                    className="dropdown-item text-center"
                                     type="button"
-                        title="Delete Client"
-                        onClick={() => this.handleOpenDeleteModal(client)}
-                                    >
-                                    <i className="dropdown-icon fe fe-trash-2 mr-2" />
+                                    title="Delete"
+                                    onClick={() => this.handleOpenDeleteModal(client)}
+                                    style={{
+                                      padding: '8px 12px',
+                                      fontSize: '14px',
+                                      color: '#d9534f',
+                                      backgroundColor: 'transparent',
+                                    }}
+                                  >
                                     Delete
-                                    </button>
+                                  </button>
                                 </div>
-                            </div> 
+                            </div>
+
             
             {/* Client info with fixed spacing */}
             <div style={{ minHeight: '40px' }}>

@@ -13,12 +13,23 @@ class BirthdayBannerModal extends Component {
   state = {
     dontShowAgain: false,
     message: '',
-    defaultProfileUrl: ''
+    defaultProfileUrl: '',
+    user: null
   };
 
   componentDidMount() {
+    // Get user from props or localStorage
+    let user = this.props.user;
+    if (!user) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        user = JSON.parse(userStr);
+      }
+    }
+    if (!user) return;
+
     // Set default avatar based on gender
-    const isMale = this.props.user.gender === 'male';
+    const isMale = user.gender === 'male';
     const defaultUrl = isMale
       ? '../../assets/images/sm/avatar2.jpg'
       : '../../assets/images/sm/avatar1.jpg';
@@ -26,7 +37,7 @@ class BirthdayBannerModal extends Component {
     // Pick a random birthday message once
     const message = messages[Math.floor(Math.random() * messages.length)];
 
-    this.setState({ defaultProfileUrl: defaultUrl, message });
+    this.setState({ defaultProfileUrl: defaultUrl, message, user });
   }
 
   onCheckboxChange = e => this.setState({ dontShowAgain: e.target.checked });
@@ -38,10 +49,17 @@ class BirthdayBannerModal extends Component {
     this.props.onClose();
   };
 
+  // Helper to get full profile URL
+  getProfileUrl = (profile) => {
+    if (!profile) return null;
+    const backendUrl = process.env.REACT_APP_API_URL || '';
+    return `${backendUrl.replace(/\/$/, '')}/${profile.replace(/^\/+/, '')}`;
+  };
+
   render() {
-    const { visible, user } = this.props;
-    const { message, defaultProfileUrl } = this.state;
-    if (!visible) return null;
+    const { visible } = this.props;
+    const { message, defaultProfileUrl, user } = this.state;
+    if (!visible || !user) return null;
 
     return (
       <div
@@ -66,11 +84,12 @@ class BirthdayBannerModal extends Component {
           </div>
             <div className="modal-body">
               <img
-                src={user.profile || defaultProfileUrl}
+                src={this.getProfileUrl(user.profile) || defaultProfileUrl}
                 alt={user.first_name}
                 className="rounded-circle shadow mb-3"
                 width="130"
                 height="130"
+                onError={e => { e.target.onerror = null; e.target.src = defaultProfileUrl; }}
               />
               <h3 className="fw-bold text-dark mb-2">
                 {user.first_name} {user.last_name}

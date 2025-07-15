@@ -566,30 +566,39 @@ class TodoList extends Component {
                         {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                              
                             	<div className="col-12">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <div className="row">
-										<div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-											<label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
-											Status:
-											</label>
-										
-                                    <select
-                                        id="statusFilter"
-                                        className="form-control"
-                                        value={statusFilter}
-                                        onChange={this.handleStatusFilterChange}
-                                    >
-                                        <option value="pending">Pending</option>
-                                        <option value="completed">Completed</option>
-                                        {/* Add more statuses if needed */}
-                                    </select>
-                            
-										</div>
-										</div>
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <div className="row align-items-center">
+                                                <div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+                                                    <label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
+                                                        Status:
+                                                    </label>
+                                                    <select
+                                                        id="statusFilter"
+                                                        className="form-control"
+                                                        value={statusFilter}
+                                                        onChange={this.handleStatusFilterChange}
+                                                    >
+                                                        <option value="pending">Pending</option>
+                                                        <option value="completed">Completed</option>
+                                                        {/* Add more statuses if needed */}
+                                                    </select>
+                                                </div>
+                                                <div className="col-lg-8 col-md-12 col-sm-12 text-right">
+                                                    {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                                        <button 
+                                                            type="button" 
+                                                            className="btn btn-info btn-sm" 
+                                                            onClick={() => this.setState({ showAddTodoModal: true })}
+                                                        >
+                                                            Add New
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                         )}
                        
                             <div className="col-12">
@@ -600,12 +609,12 @@ class TodoList extends Component {
                                                 <thead>
                                                     <tr>
                                                         <th>
-                                                            {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                                            {/* {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                 <button type="button" className="btn btn-info btn-sm" onClick={() => this.setState({ showAddTodoModal: true })}>Add New</button>
-                                                            )}
-                                                            {(logged_in_employee_role === "employee") && (
+                                                            )} */}
+                                                            {/* {(logged_in_employee_role === "employee") && ( */}
                                                                 <p className="w150">Task</p>
-                                                            )}
+                                                            {/* )} */}
                                                         </th>
                                                         <th className="w150 text-right">Due</th>
                                                         <th className="w100">Priority</th>

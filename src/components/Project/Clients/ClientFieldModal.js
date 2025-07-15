@@ -34,7 +34,7 @@ const ClientFieldModal = ({
       previewUrl = profilePic;
     }
   }
-  const defaultAvatarUrl = 'https://ui-avatars.com/api/?name=User'; // fallback avatar
+  const defaultAvatarUrl = 'https://thumbs.dreamstime.com/b/male-avatar-profile-picture-silhouette-34443055.jpg';
 
   return (
     <>
@@ -44,7 +44,7 @@ const ClientFieldModal = ({
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" id={`${modalId}Label`}>
-                  {isEdit ? 'Edit Employee' : 'Add Employee'}
+                  {isEdit ? 'Edit Client' : 'Add Client'}
                 </h5>
                 <button type="button" className="close" onClick={onClose}>
                   <span aria-hidden="true">×</span>

@@ -425,6 +425,7 @@ handleYearChange = (event) => {
 					ButtonLoading: false,
 					showDeleteModal:false
 				}));
+				this.closeDeleteModal(); // Close the modal after successful delete
 				setTimeout(() => this.setState({ showSuccess: false }), 2000);
 			} else {
 				throw new Error(data.message || 'Failed to delete event');
@@ -1122,9 +1123,14 @@ formatDateTimeAMPM = (timeString) => {
 												}}
 												>
 										<option value="">All Events</option>
-										{employees.map(emp => (
-											<option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
-										))}
+											{employees
+												.filter(emp => emp.role !== 'admin' && emp.role !== 'super_admin') // Filter out admins
+												.map(emp => (
+												<option key={emp.id} value={emp.id}>
+													{emp.first_name} {emp.last_name}
+												</option>
+												))
+											}
 										</select>
 									</>
 								)}									

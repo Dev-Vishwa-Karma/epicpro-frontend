@@ -106,7 +106,7 @@ class ProjectList extends Component {
             if (data.status === 'success') {
                 const collapsedCards = {};
                 data.data.forEach(project => {
-                    collapsedCards[project.project_id] = project.project_is_active === 0;
+                    collapsedCards[project.project_id] = Number(project.project_is_active) === 0;
                 });
                 this.setState({
                     projects: data.data,
@@ -311,6 +311,7 @@ class ProjectList extends Component {
                                 client_id: selectedClient,
                                 project_start_date: projectStartDate,
                                 project_end_date: projectEndDate,
+                                project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
                                 team_members: teamMembers.map(id => ({
                                     employee_id: id,
                                     first_name: this.getEmployeeName(id, 'first'),
@@ -327,6 +328,7 @@ class ProjectList extends Component {
                                 client_id: selectedClient,
                                 project_start_date: projectStartDate,
                                 project_end_date: projectEndDate,
+                                project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
                                 team_members: teamMembers.map(id => ({
                                     employee_id: id,
                                     first_name: this.getEmployeeName(id, 'first'),
@@ -346,7 +348,7 @@ class ProjectList extends Component {
                         project_start_date: projectStartDate,
                         project_end_date: projectEndDate,
                         created_at: new Date().toISOString(),
-                        project_is_active: 1,
+                        project_is_active: data.newProject?.project_is_active || 1,
                         team_members: teamMembers.map(id => {
                             const emp = this.state.employees.find(e => String(e.id) === String(id));
                             return {
@@ -379,24 +381,14 @@ class ProjectList extends Component {
                     successMessage: successMessage,
                     showSuccess: true,
                 });
-                setTimeout(() => {
-                    this.setState({
-                        showSuccess: false, 
-                        successMessage: ''
-                    });
-                }, 5000);
+                setTimeout(this.dismissMessages, 3000);
             } else {
                 this.setState({
                     errorMessage: data.message || `Failed to ${isEditing ? 'update' : 'add'} project. Please try again.`,
                     showError: true,
                     isSubmitting: false,
                 });
-                setTimeout(() => {
-                    this.setState({
-                        showError: false,
-                        errorMessage: ''
-                    });
-                }, 5000);
+                setTimeout(this.dismissMessages, 3000);
             }
         })
         .catch((error) => {
@@ -406,6 +398,7 @@ class ProjectList extends Component {
                 showError: true,
                 isSubmitting: false,
             });
+            setTimeout(this.dismissMessages, 3000);
         });
     };
 
@@ -452,7 +445,7 @@ class ProjectList extends Component {
     // API for Toggle o and 1
 
     handleToggleProjectStatus = async (projectId, currentStatus) => {
-        const newStatus = currentStatus === '1' || currentStatus === 1 ? 0 : 1; // Toggle between 1 and 0
+        const newStatus = Number(currentStatus) === 1 ? 0 : 1; // Toggle between 1 and 0
     
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
@@ -482,10 +475,27 @@ class ProjectList extends Component {
                     showSuccess: true,
                     successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
                 }));
+                
+                // Auto-dismiss success message after 3 seconds
+                setTimeout(this.dismissMessages, 3000);
+            } else {
+                // Error handling
+                this.setState({ 
+                    showError: true, 
+                    errorMessage: data.message || 'Failed to update project status.' 
+                });
+                
+                setTimeout(this.dismissMessages, 3000);
             }
         } catch (error) {
             // Error handling
-            this.setState({ showError: true, errorMessage: 'Failed to update project status.' });
+            this.setState({ 
+                showError: true, 
+                errorMessage: 'Failed to update project status.' 
+            });
+            
+            // Auto-dismiss error message after 3 seconds
+            setTimeout(this.dismissMessages, 3000);
         }
     };
     // Add searching functionality for project search (API-based, name and technology, debounced)
@@ -537,7 +547,8 @@ class ProjectList extends Component {
             projectEndDate: project.project_end_date || "",
             editingProjectId: project.project_id,
             isEditing: true,
-            showEditModal: true
+            showEditModal: true,
+            dropdownOpen: false
         });
     };
 
@@ -570,7 +581,7 @@ class ProjectList extends Component {
                 isDeleting: false
             }));
             
-            setTimeout(() => this.setState({ showSuccess: false }), 3000);
+            setTimeout(this.dismissMessages, 3000);
         } else {
             // Error handling remains the same
             this.setState({
@@ -581,7 +592,7 @@ class ProjectList extends Component {
                 deleteProjectName: '',
                 isDeleting: false
             });
-            setTimeout(() => this.setState({ showError: false }), 3000);
+            setTimeout(this.dismissMessages, 3000);
         }
     })
     .catch(error => {
@@ -594,7 +605,7 @@ class ProjectList extends Component {
             deleteProjectName: '',
             isDeleting: false
         });
-        setTimeout(() => this.setState({ showError: false }), 3000);
+        setTimeout(this.dismissMessages, 3000);
     });
 };
 
@@ -621,7 +632,8 @@ class ProjectList extends Component {
             teamMembers: [],
             projectStartDate: "",
             projectEndDate: "",
-            errors: {}
+            errors: {},
+            dropdownOpen: false
         });
     };
 
@@ -653,13 +665,16 @@ class ProjectList extends Component {
 
 
     render() {
+        console.log('Role:', this.state.logged_in_employee_role);
+        console.log('Projects:', this.state.projects);
         const { fixNavbar/* , boxOpen */ } = this.props;
-        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { projectName, projectDescription, projectTechnology, projectStartDate, projectEndDate, clients, selectedClient, teamMembers, employees, projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
 
         // Filter projects for employees: only show active projects
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
             ? projects
-            : projects.filter(project => project.project_is_active === '1');
+            : projects.filter(project => Number(project.project_is_active) === 1);
+        console.log('VisibleProjects:', visibleProjects);
 
         return (
             <>
@@ -703,7 +718,8 @@ class ProjectList extends Component {
                                             teamMembers: [],
                                             projectStartDate: "",
                                             projectEndDate: "",
-                                            errors: {}
+                                            errors: {},
+                                            dropdownOpen: false
                                         })}
                                     >
                                         <i className="fe fe-plus mr-2" />Add
@@ -717,155 +733,180 @@ class ProjectList extends Component {
                     <div className="container-fluid">
                         <div className="tab-content">
                             <div className="tab-pane fade show active" id="Project-OnGoing" role="tabpanel">
-                                <div className="row">
-                                {visibleProjects && visibleProjects.length > 0 ? (
-                                    visibleProjects.map((project, index) => (
-                                            <div className="col-lg-4 col-md-12" key={index}>
-                                                <div className={`card ${this.state.collapsedCards[project.project_id] ? 'card-collapsed' : ''}`}>
-                                                    <div className="card-header">
-                                                        <h3 className="card-title">{project.project_name}</h3>
-                                                        <div className="card-options">
-                                                            {/* 3-dot menu dropdown - Only show for admin users */}
-                                                            {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-                                                                <div className="dropdown d-flex">
-                                                                    <a
-                                                                        href="/#"
-                                                                        className="nav-link icon d-none d-md-flex  ml-1"
-                                                                        data-toggle="dropdown"
-                                                                        title="More options"
-                                                                    >
-                                                                        <i className="fa fa-ellipsis-v" />
-                                                                    </a>
-                                                                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                                        <button 
-                                                                        className="dropdown-item" style={{width:'200px', textAlign:'center' }} 
-                                                                        type="button"
-                                                                        onClick={() => this.handleEditProject(project)}
-                                                                        >
-                                                                        <i className="dropdown-icon fe fe-edit mr-2" />
-                                                                        Edit
-                                                                        </button>
-                                                                        <button 
-                                                                        className="dropdown-item text-danger" style={{width:'200px', textAlign:'center' }}
-                                                                        type="button"
-                                                                        onClick={() => this.handleDeleteProject(project.project_id, project.project_name)}
-                                                                        >
-                                                                        <i className="dropdown-icon fe fe-trash-2 mr-2" />
-                                                                        Delete
-                                                                        </button>
-                                                                    </div>
-                                                                    </div> 
-                                                            )}
+                            <div className="row">
+  {visibleProjects && visibleProjects.length > 0 ? (
+    visibleProjects.map((project, index) => (
+      <div className="col-lg-4 col-md-6 mb-4" key={index}>
+        <div
+          className={`card h-100 d-flex flex-column ${
+            this.state.collapsedCards[project.project_id] ? 'card-collapsed' : ''
+          }`}
+        >
+          <div className="card-header">
+            <h3 className="card-title">{project.project_name}</h3>
+            <div className="card-options">
+              <label className="custom-switch m-0">
+                <input
+                  type="checkbox"
+                  className="custom-switch-input"
+                  checked={Number(project.project_is_active) === 1}
+                  onChange={() =>
+                    this.handleToggleProjectStatus(project.project_id, project.project_is_active)
+                  }
+                />
+                <span className="custom-switch-indicator" />
+              </label>
+              {(logged_in_employee_role === 'admin' ||
+                logged_in_employee_role === 'super_admin') && (
+                <div className="dropdown d-flex">
+                    <a
+                    href="/#"
+                    className="nav-link icon d-none d-md-flex ml-1"
+                    data-toggle="dropdown"
+                    title="More options"
+                    >
+                    <i className="fa fa-ellipsis-v" />
+                    </a>
 
-                                                            <label className="custom-switch m-0">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="custom-switch-input"
-                                                                checked={project.project_is_active === '1'}
-                                                                onChange={() => this.handleToggleProjectStatus(project.project_id, project.project_is_active)}
-                                                            />
-                                                                <span className="custom-switch-indicator" />
-                                                            </label>
-                                                        </div>
-                                                    </div>
+                    <div
+                    className="dropdown-menu dropdown-menu-right"
+                    style={{
+                        minWidth: '100px',
+                        padding: '0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    }}
+                    >
+                    <button
+                        className="dropdown-item text-center"
+                        type="button"
+                        title="Edit"
+                        onClick={() => this.handleEditProject(project)}
+                        style={{
+                        padding: '8px 12px',
+                        fontSize: '14px',
+                        color: '#333',
+                        backgroundColor: 'transparent',
+                        borderBottom: '1px solid #eee',
+                        }}
+                    >
+                        Edit
+                    </button>
 
-                                                   
-                                                     <div className="card-body">
-                                                        <span className="tag tag-blue mb-3">{project.project_technology}</span>
-                                                        <p style={{
-                                                            display: '-webkit-box',
-                                                            WebkitLineClamp: 4,
-                                                            WebkitBoxOrient: 'vertical',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis'
-                                                        }}>{project.project_description}</p>
-                                                        <div className="row">
-                                                            <div className="col-4 py-1"><strong>Started date:</strong></div>
-                                                            <div className="col-8 py-1">
-                                                                {new Date(project.created_at).toLocaleString("en-US", {
-                                                                    day: "2-digit",
-                                                                    month: "short",
-                                                                    year: "numeric",
-                                                                    hour: "2-digit",
-                                                                    minute: "2-digit",
-                                                                    hour12: true,
-                                                                }).replace(",", "")}
-                                                            </div>
-                                                            {/* <div className="col-4 py-1"><strong>Creator:</strong></div>
-                                                            <div className="col-8 py-1">Nathan Guerrero</div> */}
-                                                            <div className="col-4 py-1"><strong>Team:</strong></div>
-                                                            <div className="col-8 py-1">
-                                                                <div className="avatar-list avatar-list-stacked">
-                                                                    {project.team_members.map((member) => (
-                                                                        <span key={member.id}>
-                                                                            {member.profile ? (
-                                                                                <img
-                                                                                    src={`${process.env.REACT_APP_API_URL}/${member.profile}`}
-                                                                                    className="avatar avatar-blue add-space"
-                                                                                    alt={`${member.first_name} ${member.last_name}`}
-                                                                                    data-toggle="tooltip"
-                                                                                    data-placement="top"
-                                                                                    title={`${member.first_name} ${member.last_name}`}
-                                                                                    onError={(e) => {
-                                                                                        e.target.style.display = 'none';
-                                                                                        const initialsSpan = document.createElement('span');
-                                                                                        initialsSpan.className = 'avatar avatar-blue add-space';
-                                                                                        initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                                                                        initialsSpan.setAttribute('data-placement', 'top');
-                                                                                        initialsSpan.setAttribute('title', `${member.first_name} ${member.last_name}`);
-                                                                                        e.target.parentNode.insertBefore(initialsSpan, e.target.nextSibling);
-                                                                                        initialsSpan.style.display = 'inline-flex';
-                                                                                        initialsSpan.style.alignItems = 'center';
-                                                                                        initialsSpan.style.justifyContent = 'center';
-                                                                                        initialsSpan.style.width = '35px';
-                                                                                        initialsSpan.style.height = '35px';
-                                                                                    }}
-                                                                                />
-                                                                            ) : (
-                                                                                <span
-                                                                                    className="avatar avatar-blue add-space"
-                                                                                    data-toggle="tooltip"
-                                                                                    data-placement="top"
-                                                                                    title={`${member.first_name} ${member.last_name}`}
-                                                                                    style={{
-                                                                                        width: '35px',
-                                                                                        height: '35px',
-                                                                                        display: 'inline-flex',
-                                                                                        alignItems: 'center',
-                                                                                        justifyContent: 'center',
-                                                                                    }}
-                                                                                >
-                                                                                    {member.first_name.charAt(0).toUpperCase()}{member.last_name.charAt(0).toUpperCase()}
-                                                                                </span>
-                                                                            )}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                
-                                                   
-                                                    {/* <div className="card-footer">
-                                                        <div className="clearfix">
-                                                            <div className="float-left"><strong>15%</strong></div>
-                                                            <div className="float-right"><small className="text-muted">Progress</small></div>
-                                                        </div>
-                                                        <div className="progress progress-xs">
-                                                            <div className="progress-bar bg-red" role="progressbar" style={{ width: '15%' }} aria-valuenow={36} aria-valuemin={0} aria-valuemax={100} />
-                                                        </div>
-                                                    </div> */}
-                                                </div>
-                                            </div>
-                                        ))
-                                ): (
-                                    !message && (
-                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px', width: '100%' }}>
-                                            <p style={{ fontSize: '1.2rem', color: '#888', margin: 0 }}>projects not available.</p>
-                                        </div>
-                                    )
-                                )}
-                                </div>
+                    <button
+                        className="dropdown-item text-center"
+                        type="button"
+                        title="Delete"
+                        onClick={() => this.handleDeleteProject(project.project_id, project.project_name)}
+                        style={{
+                        padding: '8px 12px',
+                        fontSize: '14px',
+                        color: '#d9534f',
+                        backgroundColor: 'transparent',
+                        }}
+                    >
+                        Delete
+                    </button>
+                    </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="card-body flex-grow-1" style={{ minHeight: '300px' }}>
+            <span className="tag tag-blue mb-3">{project.project_technology}</span>
+            <p
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {project.project_description}
+            </p>
+            <div className="row">
+              <div className="col-4 py-1">
+                <strong>Started date:</strong>
+              </div>
+              <div className="col-8 py-1">
+                {new Date(project.created_at)
+                  .toLocaleString('en-US', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                  })
+                  .replace(',', '')}
+              </div>
+              <div className="col-4 py-1">
+                <strong>Team:</strong>
+              </div>
+              <div className="col-8 py-1">
+                <div className="avatar-list avatar-list-stacked">
+                  {project.team_members.map((member) => (
+                    <span key={member.id}>
+                      {member.profile ? (
+                        <img
+                          src={`${process.env.REACT_APP_API_URL}/${member.profile}`}
+                          className="avatar avatar-blue add-space"
+                          alt={`${member.first_name} ${member.last_name}`}
+                          data-toggle="tooltip"
+                          data-placement="top"
+                          title={`${member.first_name} ${member.last_name}`}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className="avatar avatar-blue add-space"
+                          data-toggle="tooltip"
+                          data-placement="top"
+                          title={`${member.first_name} ${member.last_name}`}
+                          style={{
+                            width: '35px',
+                            height: '35px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {member.first_name.charAt(0).toUpperCase()}
+                          {member.last_name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))
+  ) : (
+    !message && (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100px',
+          width: '100%',
+        }}
+      >
+        <p style={{ fontSize: '1.2rem', color: '#888', margin: 0 }}>
+          projects not available.
+        </p>
+      </div>
+    )
+  )}
+</div>
+
                             </div>
                             <div className="tab-pane fade" id="Project-UpComing" role="tabpanel">
                                 <div className="card">

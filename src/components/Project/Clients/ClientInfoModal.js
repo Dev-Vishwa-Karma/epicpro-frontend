@@ -2,6 +2,7 @@ import React from "react";
 
 const ClientInfoModal = ({ client, onClose }) => {
   if (!client) return null;
+  const isActive = client.client_status === "1";
 
   return (
     <div
@@ -10,64 +11,149 @@ const ClientInfoModal = ({ client, onClose }) => {
       role="dialog"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
-      <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">{client.client_name}'s Profile</h5>
-            <button type="button" className="close" onClick={onClose}>
-              <span>&times;</span>
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="row">
-              <div className="col-md-12 text-center mb-5">
-                <img
-                  src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                  alt="Client Profile Picture"
-                  title="Client Profile Picture"
-                  style={{
-                    width: "120px",
-                    height: "120px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: "2px solid #ccc"
-                  }}
-                />
-              </div>
-
-              <div className="col-md-6 mb-2">
-                <strong>Name:</strong> {client.client_name}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>Email:</strong> {client.client_email}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>Country:</strong> {client.client_country}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>State:</strong> {client.client_state}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>City:</strong> {client.client_city}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>about:</strong> {client.client_about}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>Project Count:</strong> {client.project_count}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>Employee Count:</strong> {client.employee_count}
-              </div>
-              <div className="col-md-6 mb-2">
-                <strong>Status:</strong> {client.client_status}
-              </div>
+      <div className="modal-dialog modal-dialog-centered" role="document">
+        <div
+          className="modal-content border-0 shadow"
+          style={{
+            borderRadius: 24,
+            overflow: "hidden",
+            fontFamily: "Inter, sans-serif",
+            boxShadow: "0 8px 32px rgba(60,60,120,0.18)",
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              background: "linear-gradient(to right, #fff, #FFA07A)",
+              height: 120,
+              position: "relative",
+            }}
+          >
+            {/* Profile Image with right and x sign */}
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                bottom: -50,
+                transform: "translateX(-50%)",
+                width: 110,
+                height: 110,
+                borderRadius: "50%",
+                border: "6px solid #fff",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                background: "#fff",
+                zIndex: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img
+                src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                alt="Profile"
+                style={{
+                  width: 98,
+                  height: 98,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: `3px solid ${isActive ? "#28a745" : "#dc3545"}`,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                }}
+              />
+              {/* Status Badge */}
+              <span
+                style={{
+                  position: "absolute",
+                  right: 6,
+                  bottom: 8,
+                  background: isActive ? "#28a745" : "#dc3545",
+                  borderRadius: "50%",
+                  width: 32,
+                  height: 32,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "3px solid #fff",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                }}
+                title={isActive ? "Active" : "Inactive"}
+                aria-label={isActive ? "Active" : "Inactive"}
+              >
+                {isActive ? (
+                  <li className="fa fa-check-circle " style={{color:"#fff", fontSize:"20px"}}></li>
+                ) : (
+                  <li className="fa fa-times-circle " style={{color:"#fff", fontSize:"20px"}}></li>
+                )}
+              </span>
             </div>
           </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+
+          {/* Body */}
+          <div className="text-center px-4" style={{ marginTop: 70 }}>
+            <h3 style={{ fontWeight: 700, marginBottom: 4 }}>{client.client_name}</h3>
+            <div style={{ color: "#888", fontSize: 15, marginBottom: 2 }}>
+              <li className="fa fa-envelope" style={{ marginRight: 6, verticalAlign: -2 }}></li>
+              {client.client_email}
+            </div>
+            <div style={{ color: "#888", fontSize: 15, marginBottom: 12 }}>
+              <li style={{ marginRight: 6, verticalAlign: -2 }} className="fa fa-map-marker"></li>
+              {client.client_city}, {client.client_state}, {client.client_country}
+            </div>
+
+            {/* About */}
+            <div
+              style={{
+                borderRadius: 12,
+                margin: "0 auto 18px auto",
+                maxWidth: 420,
+                position: "relative",
+                fontStyle: "italic",
+                color: "#555",
+              }}
+            >
+              <span style={{ marginLeft: 24 }}>
+                {client.client_about || "No description available."}
+              </span>
+            </div>
+
+            {/* Stats */}
+            <div className="d-flex justify-content-center gap-3 flex-wrap mb-4">
+              <div
+                className="shadow-sm p-3 rounded text-center d-flex flex-column align-items-center"
+                style={{
+                  minWidth: 100,
+                  margin: "0 8px",
+                  transition: "box-shadow 0.2s",
+                }}
+              >
+                <div style={{ fontWeight: 600, fontSize: 18 }}>{client.project_count}</div>
+                <small className="text-muted">Projects</small>
+              </div>
+              <div
+                className="shadow-sm p-3 rounded text-center d-flex flex-column align-items-center"
+                style={{
+                  minWidth: 100,
+                  margin: "0 8px",
+                  transition: "box-shadow 0.2s",
+                }}
+              >
+                <div style={{ fontWeight: 600, fontSize: 18 }}>{client.employee_count}</div>
+                <small className="text-muted">Employees</small>
+              </div>
+            </div>
+
+            {/* Close Button */}
+            <div className="card-footer text-right">
+              <button
+              className="btn btn-primary"
+              onClick={onClose}
+              onMouseOver={e => e.currentTarget.style.filter = "brightness(1.1)"}
+              onMouseOut={e => e.currentTarget.style.filter = "none"}
+              aria-label="Close Modal"
+            >
               Close
             </button>
+            </div>
           </div>
         </div>
       </div>

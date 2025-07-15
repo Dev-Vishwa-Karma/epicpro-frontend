@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
+import CropperModal from './CropperModal';
 import { getService } from '../../../services/getService';
+
 class EditEmployee extends Component {
     constructor(props) {
         super(props);
@@ -60,6 +62,23 @@ class EditEmployee extends Component {
             showError: false,
             errors: {},
             ButtonLoading: false,
+            showCropper: false,
+            cropperImage: null,
+            photoInputName: '',
+        };
+        this.fieldRefs = {
+            firstName: React.createRef(),
+            lastName: React.createRef(),
+            email: React.createRef(),
+            selectedDepartment: React.createRef(),
+            gender: React.createRef(),
+            dob: React.createRef(),
+            joiningDate: React.createRef(),
+            mobile1: React.createRef(),
+            mobile2: React.createRef(),
+            emergencyContact1: React.createRef(),
+            emergencyContact2: React.createRef(),
+            emergencyContact3: React.createRef(),
         };
     }
 
@@ -202,11 +221,21 @@ class EditEmployee extends Component {
         const { name, files } = e.target;
         const file = files[0];
     
-        if (file) {
-            this.setState((prevState) => ({
-                [name]: file, // Store the File object for form submission
-                [`${name}Url`]: URL.createObjectURL(file), // Create a temporary preview URL
-            }));
+        if (file && name === "photo") {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                this.setState({
+                    cropperImage: ev.target.result,
+                    showCropper: true,
+                    photoInputName: name,
+                });
+            };
+            reader.readAsDataURL(file);
+        } else if (file) {
+            this.setState({
+                [name]: file,
+                [`${name}Url`]: URL.createObjectURL(file),
+            });
         }
     };
 
@@ -334,9 +363,18 @@ class EditEmployee extends Component {
         if (!Number.isInteger(Number(visibilityPriority)) || Number(visibilityPriority) < 0) {
         errors.visibilityPriority = "Visibility Priority must valid integer.";
         }
-        // Show errors if any
+        // Show errors if any and scrolled on there
         if (Object.keys(errors).length > 0) {
-        this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false });
+            this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false }, () => {
+                const firstErrorField = Object.keys(errors)[0];
+                const ref = this.fieldRefs[firstErrorField];
+                if (ref && ref.current) {
+                    ref.current.focus();
+                    ref.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                } else {
+                    console.warn('No ref found for field:', firstErrorField);
+                }
+            });
         return;
         } else {
         this.setState({ errors: {} });
@@ -441,6 +479,18 @@ class EditEmployee extends Component {
         });
     }
 
+    handleCropperCrop = (blob) => {
+        const croppedFile = new File([blob], "updateimage.jpg", { type: "image/jpeg" });
+        this.setState({
+            photo: croppedFile,
+            photoUrl: URL.createObjectURL(croppedFile),
+            showCropper: false,
+            cropperImage: null,
+        });
+    };
+    handleCropperCancel = () => {
+        this.setState({ showCropper: false, cropperImage: null });
+    };
     render() {
         const { fixNavbar } = this.props;
         const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status, showSuccess,successMessage,showError, errorMessage } = this.state;
@@ -457,6 +507,14 @@ class EditEmployee extends Component {
                     errorMessage={errorMessage}
                     setShowSuccess={(val) => this.setState({ showSuccess: val })}
                     setShowError={(val) => this.setState({ showError: val })}
+                />
+                {/* Cropper Show */}
+                <CropperModal
+                    open={this.state.showCropper}
+                    image={this.state.cropperImage}
+                    onCrop={this.handleCropperCrop}
+                    onCancel={this.handleCropperCancel}
+                    aspectRatio={1}
                 />
                 <div>
                     <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
@@ -478,6 +536,7 @@ class EditEmployee extends Component {
                                                             placeholder="Enter First Name"
                                                             value={firstName}
                                                             onChange={this.handleChange}
+                                                            ref={this.fieldRefs.firstName}
                                                         />
                                                         {this.state.errors.firstName && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.firstName}</div>
@@ -495,6 +554,7 @@ class EditEmployee extends Component {
                                                             placeholder="Enter Last Name"
                                                             value={lastName}
                                                             onChange={this.handleChange}
+                                                            ref={this.fieldRefs.lastName}
                                                         />
                                                         {this.state.errors.lastName && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.lastName}</div>
@@ -512,6 +572,7 @@ class EditEmployee extends Component {
                                                             placeholder="Enter Email Address"
                                                             value={email}
                                                             onChange={this.handleChange}
+                                                            ref={this.fieldRefs.email}
                                                         />
                                                         {this.state.errors.email && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.email}</div>
@@ -527,6 +588,7 @@ class EditEmployee extends Component {
                                                             id='gender'
                                                             value={gender}
                                                             onChange={this.handleChange}
+                                                            ref={this.fieldRefs.gender}
                                                         >
                                                             <option value="">Select Gender</option>
                                                             <option value="male" >Male</option>
@@ -545,6 +607,7 @@ class EditEmployee extends Component {
 															value={this.state.selectedDepartment}
 															onChange={this.handleChange}
 															name="selectedDepartment"
+                                                            ref={this.fieldRefs.selectedDepartment}
 														>
 															<option value="">Select Department</option>
 															{this.state.departments.map((dept) => (
@@ -569,6 +632,7 @@ class EditEmployee extends Component {
                                                             value={dob}
                                                             onChange={this.handleChange}
                                                             max={new Date().toISOString().split("T")[0]}
+                                                            ref={this.fieldRefs.dob}
                                                         />
                                                         {this.state.errors.dob && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
@@ -585,6 +649,7 @@ class EditEmployee extends Component {
                                                             className={`form-control${this.state.errors.joiningDate ? ' is-invalid' : ''}`}
                                                             value={joiningDate}
                                                             onChange={this.handleChange}
+                                                            ref={this.fieldRefs.joiningDate}
                                                         />
                                                         {this.state.errors.joiningDate && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.joiningDate}</div>
@@ -636,6 +701,7 @@ class EditEmployee extends Component {
                                                             onInput={(e) => {
                                                                 e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
+                                                            ref={this.fieldRefs.mobile1}
                                                         />
                                                         {this.state.errors.mobile1 && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.mobile1}</div>
@@ -657,6 +723,7 @@ class EditEmployee extends Component {
                                                             onInput={(e) => {
                                                                 e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
+                                                            ref={this.fieldRefs.mobile2}
                                                         />
                                                         {this.state.errors.mobile2 && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.mobile2}</div>
@@ -674,6 +741,7 @@ class EditEmployee extends Component {
                                                                 placeholder="Enter New Password"
                                                                 value={password}
                                                                 onChange={this.handleChange}
+                                                                ref={this.fieldRefs.password}
                                                             />
                                                         </div>
                                                     </div>
@@ -719,6 +787,7 @@ class EditEmployee extends Component {
                                                         onInput={(e) => {
                                                             e.target.value = e.target.value.replace(/\D/g, '');
                                                         }}
+                                                        ref={this.fieldRefs.emergencyContact1}
                                                     />
                                                     {this.state.errors.emergencyContact1 && (
                                                         <div className="invalid-feedback d-block">{this.state.errors.emergencyContact1}</div>
@@ -738,6 +807,7 @@ class EditEmployee extends Component {
                                                         onInput={(e) => {
                                                             e.target.value = e.target.value.replace(/\D/g, '');
                                                         }}
+                                                        ref={this.fieldRefs.emergencyContact2}
                                                     />
                                                     {this.state.errors.emergencyContact2 && (
                                                         <div className="invalid-feedback d-block">{this.state.errors.emergencyContact2}</div>
@@ -757,6 +827,7 @@ class EditEmployee extends Component {
                                                         onInput={(e) => {
                                                             e.target.value = e.target.value.replace(/\D/g, '');
                                                         }}
+                                                        ref={this.fieldRefs.emergencyContact3}
                                                     />
                                                     {this.state.errors.emergencyContact3 && (
                                                         <div className="invalid-feedback d-block">{this.state.errors.emergencyContact3}</div>
@@ -1164,6 +1235,7 @@ class EditEmployee extends Component {
                                                             placeholder="Enter First Name"
                                                             value={visibilityPriority}
                                                             onChange={this.handleChange}
+                                                            ref={this.fieldRefs.visibilityPriority}
                                                         />
                                                         {this.state.errors.visibilityPriority && (
                                                             <div className="invalid-feedback d-block">{this.state.errors.visibilityPriority}</div>
