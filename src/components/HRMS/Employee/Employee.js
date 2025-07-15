@@ -201,7 +201,7 @@ class Employee extends Component {
         const fromDateFormatted = fromDate ? formatDate(fromDate) : null;
         const toDateFormatted = toDate ? formatDate(toDate) : null;
 
-		getService.getCall('get_employees.php','view' ,null, null, null, fromDateFormatted, toDateFormatted, null, null, selectedLeaveEmployee)
+		getService.getCall('employee_leaves.php','view' ,null, null, null, fromDateFormatted, toDateFormatted, null, null, selectedLeaveEmployee)
         .then(data => {
             if (data.status === 'success') {
 				let employeesLeaveArray = Array.isArray(data.data) ? data.data : [data.data];
@@ -354,7 +354,7 @@ class Employee extends Component {
 		if (!deleteUser) return;
 
 		this.setState({ ButtonLoading: true });
-		getService.deleteCall('get_employees.php','delete', deleteUser, null, loggedInUserId, loggedInUserRole)
+		getService.deleteCall('get_employees.php','delete', null, deleteUser, loggedInUserId, loggedInUserRole)
 		.then((data) => {
 			if (data.status === "success") {
 				// Update users state after deletion
