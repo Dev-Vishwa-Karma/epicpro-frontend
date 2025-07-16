@@ -41,12 +41,18 @@ class Holidays extends Component {
 		.then(data => {
 			if (data.status === 'success') {
 				const holidaysData = data.data;
-				const today = new Date(); // Get today's date
-
-				// Filter only holidays and exclude past holidays
-            	const upcomingHolidays = holidaysData.filter(holiday => holiday.event_type === 'holiday' && new Date(holiday.event_date) >= today) 
-                .sort((a, b) => new Date(a.event_date) - new Date(b.event_date)); // Sort by ASC order
-
+				const today = new Date();
+				today.setHours(0, 0, 0, 0);
+				
+				const upcomingHolidays = holidaysData
+				.filter(holiday => {
+					if (holiday.event_type !== 'holiday') return false;
+					const eventDate = new Date(holiday.event_date);
+					eventDate.setHours(0, 0, 0, 0);
+					return eventDate >= today;
+				})
+				.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));// Sort by ASC order
+				
 				this.setState(
 					{ holidays: upcomingHolidays, loading: false}
 				);

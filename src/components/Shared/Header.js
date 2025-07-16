@@ -66,10 +66,10 @@ class Header extends Component {
         userRole: user.role,
       }, () => { 
         this.startTimerInterval();
-       // if (user.role === 'employee') {
+        if (user.role === 'employee') {
           this.getPunchInStatus();
           this.getActivities();
-       // }
+        }
 
         this.fetchNotifications();
         this.checkBirthdays(); 

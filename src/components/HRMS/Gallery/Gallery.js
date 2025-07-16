@@ -56,7 +56,7 @@ class Gallery extends Component {
         }
 
         // Fetch gallery data
-        const params = role === "employee" ? { id } : null;
+        const params = role === "employee" ?  id  : null;
         getService.getCall('gallery.php', 'view', null, null, null, null, null, null, null, params)
             .then(data => {
                 if (data.status === 'success') {
@@ -440,44 +440,31 @@ class Gallery extends Component {
                             </div>
                         </div>
                         {/* Images listing */}
-                        <div className="row row-cards">
-                            {loading && ( // Show Loader while fetching images
-                                <div className="col-12">
-                                    <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <div className="dimmer active">
-                                            <div className="loader" />
-                                        </div>
-                                    </div>
+                        <div className="masonry">
+                            {loading && (
+                                <div className="loader-container">
+                                <div className="loader" />
                                 </div>
                             )}
-            
-                            {/* {!loading && window.user?.role === "employee" && (
-                                <div className="col-12">
-                                    <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <span className="text-danger fw-bold">Access Denied</span>
+
+                            {!loading && filteredImages.length > 0 && (
+                                currentImages.map((image, index) => (
+                                <div className="masonry-item" key={index}>
+                                    <div className="card p-2">
+                                    <img
+                                        src={`${process.env.REACT_APP_API_URL}/${image.url}`}
+                                        alt="Gallery"
+                                        className="img-fluid rounded"
+                                    />
                                     </div>
                                 </div>
-                            )} */}
-                            
-                            {!loading && filteredImages.length > 0 && ( // If not employee, show images if available
-                                currentImages.map((image, index) => (
-                                    <div className="col-sm-6 col-lg-3" key={index + 1}>
-                                        <div className="card p-3">
-                                            <img src={`${process.env.REACT_APP_API_URL}/${image.url}`} alt="Gallery" className="rounded" />
-                                        </div>
-                                    </div>
                                 ))
                             )}
-                            
+
                             {!loading && filteredImages.length === 0 && (
-                                <div className="col-12">
-                                    <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <span>Image not available</span>
-                                    </div>
-                                </div>
+                                <div className="no-images">Image not available</div>
                             )}
                         </div>
-
                         {/* Only show pagination if there are images */}
                         {filteredImages.length > 0 && totalPages > 1 && (
                             <nav aria-label="Page navigation">
