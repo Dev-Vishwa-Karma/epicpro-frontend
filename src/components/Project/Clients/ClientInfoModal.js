@@ -24,12 +24,12 @@ const ClientInfoModal = ({ client, onClose }) => {
           {/* Header */}
           <div
             style={{
-              background: "linear-gradient(to right, #fff, #FFA07A)",
-              height: 120,
+              background: "linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%)",
+              height: 100,
               position: "relative",
             }}
           >
-            {/* Profile Image with right and x sign */}
+            {/* Profile Image with Status Badge */}
             <div
               style={{
                 position: "absolute",
@@ -60,51 +60,21 @@ const ClientInfoModal = ({ client, onClose }) => {
                   boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
                 }}
               />
-              {/* Status Badge */}
-              <span
-                style={{
-                  position: "absolute",
-                  right: 6,
-                  bottom: 8,
-                  background: isActive ? "#28a745" : "#dc3545",
-                  borderRadius: "50%",
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "3px solid #fff",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
-                }}
-                title={isActive ? "Active" : "Inactive"}
-                aria-label={isActive ? "Active" : "Inactive"}
-              >
-                {isActive ? (
-                  <li className="fa fa-check-circle " style={{color:"#fff", fontSize:"20px"}}></li>
-                ) : (
-                  <li className="fa fa-times-circle " style={{color:"#fff", fontSize:"20px"}}></li>
-                )}
-              </span>
+              
             </div>
           </div>
 
           {/* Body */}
-          <div className="text-center px-4" style={{ marginTop: 70 }}>
-            <h3 style={{ fontWeight: 700, marginBottom: 4 }}>{client.client_name}</h3>
-            <div style={{ color: "#888", fontSize: 15, marginBottom: 2 }}>
-              <li className="fa fa-envelope" style={{ marginRight: 6, verticalAlign: -2 }}></li>
+          <div className="text-center" style={{ marginTop: 70 }}>
+            <h3 style={{ fontWeight: 700,}}>{client.client_name}</h3>
+            <div style={{ color: "#888", fontSize: 15, marginTop: -10 }}>
               {client.client_email}
-            </div>
-            <div style={{ color: "#888", fontSize: 15, marginBottom: 12 }}>
-              <li style={{ marginRight: 6, verticalAlign: -2 }} className="fa fa-map-marker"></li>
-              {client.client_city}, {client.client_state}, {client.client_country}
             </div>
 
             {/* About */}
             <div
               style={{
-                borderRadius: 12,
-                margin: "0 auto 18px auto",
+                margin: "18px auto 18px auto",
                 maxWidth: 420,
                 position: "relative",
                 fontStyle: "italic",
@@ -121,31 +91,68 @@ const ClientInfoModal = ({ client, onClose }) => {
               <div
                 className="shadow-sm p-3 rounded text-center d-flex flex-column align-items-center"
                 style={{
+                  background: "linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)",
                   minWidth: 100,
                   margin: "0 8px",
                   transition: "box-shadow 0.2s",
                 }}
               >
+                <li className="fa fa-folder-open" style={{ color: "#6a82fb", fontSize: 22, marginBottom: 2 }}></li>
                 <div style={{ fontWeight: 600, fontSize: 18 }}>{client.project_count}</div>
                 <small className="text-muted">Projects</small>
               </div>
               <div
                 className="shadow-sm p-3 rounded text-center d-flex flex-column align-items-center"
                 style={{
+                  background: "linear-gradient(135deg, #e0f9e0 0%, #d4fc79 100%)",
                   minWidth: 100,
                   margin: "0 8px",
                   transition: "box-shadow 0.2s",
                 }}
               >
+                <li className="fa fa-user" style={{ color: "#28a745", fontSize: 22, marginBottom: 2 }}></li>
                 <div style={{ fontWeight: 600, fontSize: 18 }}>{client.employee_count}</div>
                 <small className="text-muted">Employees</small>
+              </div>
+              <div
+                className="shadow-sm p-3 rounded text-center d-flex flex-column align-items-center"
+                style={{
+                  background: isActive
+                    ? "linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)"
+                    : "linear-gradient(135deg, #f9d6d5 0%, #fbc2eb 100%)",
+                  minWidth: 100,
+                  margin: "0 8px",
+                  transition: "box-shadow 0.2s",
+                }}
+              >
+                {isActive ? (
+                  <li className="fa fa-check-circle " style={{ color: "#28a745", fontSize: 22, marginBottom: 2 }} />
+                ) : (
+                  <li className="fa fa-times-circle" style={{ color: "#dc3545", fontSize: 22, marginBottom: 2 }}></li>
+                )}
+                <div style={{ fontWeight: 600, fontSize: 18 }}>
+                  {isActive ? "Active" : "Inactive"}
+                </div>
+                <small className="text-muted">Status</small>
               </div>
             </div>
 
             {/* Close Button */}
-            <div className="card-footer text-right">
-              <button
-              className="btn btn-primary"
+            <button
+              className="btn"
+              style={{
+                background: "linear-gradient(135deg, #fc5c7d 0%, #6a82fb 100%)",
+                color: "#fff",
+                borderRadius: 24,
+                padding: "8px 20px",
+                fontWeight: 500,
+                fontSize: 18,
+                letterSpacing: 1,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                transition: "filter 0.2s, box-shadow 0.2s",
+                marginTop: 8,
+                marginBottom:10,
+              }}
               onClick={onClose}
               onMouseOver={e => e.currentTarget.style.filter = "brightness(1.1)"}
               onMouseOut={e => e.currentTarget.style.filter = "none"}
@@ -153,7 +160,6 @@ const ClientInfoModal = ({ client, onClose }) => {
             >
               Close
             </button>
-            </div>
           </div>
         </div>
       </div>
