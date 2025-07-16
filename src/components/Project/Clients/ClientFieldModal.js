@@ -194,7 +194,7 @@ const ClientFieldModal = ({
                       >
                         <option value="">Select Status</option>
                         <option value="1">Active</option>
-                        <option value="0">In-Active</option>
+                        <option value="0">Inactive</option>
                       </select>
                       {errors.status && <small className="invalid-feedback">{errors.status}</small>}
                     </div>
