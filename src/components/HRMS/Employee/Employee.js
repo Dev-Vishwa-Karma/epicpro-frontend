@@ -155,12 +155,12 @@ class Employee extends Component {
 			Promise.all([
 				getService.getCall('get_employees.php', {
 					action: 'view',
-					role:role,
+					role: 'employee',
 					employee_id:id
 				}),
 				getService.getCall('employee_leaves.php', {
 					action: 'view',
-					role:role === "admin" || role === "super_admin" ? null : id,					
+					role:role === "admin" || role === "super_admin" ? null : id,
 				})
 			])
 			.then(([employeesData, employeeLeavesData]) => {

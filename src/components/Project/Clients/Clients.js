@@ -145,7 +145,6 @@ class Clients extends Component {
     if (!clientFieldFormData.name) errors.name = 'Name is required';
     if (!clientFieldFormData.email) errors.email = 'Email is required';
     if (!clientFieldFormData.status) errors.status = 'Status is required';
-    if (!isEditClientField && !clientFieldFormData.profilePic) errors.profilePic = 'Profile pic is required';
     
     if (Object.keys(errors).length > 0) {
       this.setState({ clientFieldErrors: errors });

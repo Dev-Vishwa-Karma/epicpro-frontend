@@ -7,6 +7,8 @@ import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import EditModal from './EditModal';
 import { getService } from '../../../services/getService';
+import authService from '../../Authentication/authService';
+
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -193,7 +195,6 @@ class ProjectList extends Component {
             return { teamMembers: updatedTeamMembers };
         });
     };    
-    
 
     // Validate Add Project Form
 	validateAddProjectForm = (e) => {
@@ -230,11 +231,6 @@ class ProjectList extends Component {
             isValid = false;
         }
 
-        // Client Validation (Required)
-        /* if (!selectedClient || selectedClient.trim() === "") {
-            errors.selectedClient = "Please select a client.";
-            isValid = false;
-        } */
 
         // Team Members Validation (At least one team member should be selected)
         if (!teamMembers || (Array.isArray(teamMembers) && teamMembers.length === 0)) {
@@ -457,9 +453,10 @@ class ProjectList extends Component {
         const newStatus = Number(currentStatus) === 1 ? 0 : 1; // Toggle between 1 and 0
     
         try {
+            const user = authService.getUser();
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.access_token}` },
                 body: JSON.stringify({
                     id: projectId,
                     is_active: newStatus,
