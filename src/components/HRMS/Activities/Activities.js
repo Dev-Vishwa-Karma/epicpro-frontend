@@ -294,6 +294,9 @@ class Activities extends Component {
                 successMessage: data.message,
                 showError: false,
                 showSuccess: true,
+                selectedEmployee: "",
+                selectedStatus: "",
+                breakReason: ""
             });
             setTimeout(this.dismissMessages, 3000);
             document.querySelector("#addBreakModal .close").click();
@@ -316,6 +319,14 @@ class Activities extends Component {
             });
             setTimeout(this.dismissMessages, 3000);
             console.error("Error:", error);
+        });
+    };
+
+    openAddBreakModal = () => {
+        this.setState({
+            selectedEmployee: "",
+            selectedStatus: "",
+            breakReason: ""
         });
     };
 
@@ -417,7 +428,7 @@ class Activities extends Component {
                               Apply
                           </button>
                           {window.user.role !== 'employee' && (
-                            <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal">
+                            <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={this.openAddBreakModal}>
                                 <i className="fe fe-plus mr-2" />Add
                             </button>
                             )}

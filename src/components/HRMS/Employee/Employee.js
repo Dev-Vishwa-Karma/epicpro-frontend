@@ -744,7 +744,9 @@ class Employee extends Component {
 		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee, showSuccess, successMessage, showError, errorMessage  } = this.state;
 
 		// Handle empty employee data safely
-		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
+		const employeeList = (employeeData || []).length > 0
+			? employeeData.filter(emp => emp.role === "employee")
+			: [];
 		const leaveList = (employeeLeavesData || []).length > 0 ? employeeLeavesData : [];
 
 		// Filter leaves
