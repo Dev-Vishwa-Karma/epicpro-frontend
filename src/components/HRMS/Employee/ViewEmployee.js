@@ -176,7 +176,10 @@ class ViewEmployee extends Component {
     // }
 
     getEmployeeGallery = (id) => {
-        getService.getCall('gallery.php','view' ,null, null, null, null, null, null, null, id)
+        getService.getCall('gallery.php', {
+            action: 'view',
+            employee_id:id
+        })
             .then(data => {
                 if (data.status === 'success') {
                     const sortedImages = this.sortImages(data.data, this.state.sortOrder);
@@ -202,7 +205,10 @@ class ViewEmployee extends Component {
     };
 
     fetchEmployeeDetails = (employeeId) => {
-         getService.getCall('get_employees.php','view' ,employeeId, null, null, null, null, null, null, null)
+         getService.getCall('get_employees.php', {
+            action: 'view',
+            user_id:employeeId
+        })
             .then((data) => {
                 if (data.status === "success") {
                     this.setState(prevState => ({

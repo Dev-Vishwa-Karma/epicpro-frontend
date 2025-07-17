@@ -18,7 +18,10 @@ class TodoList extends Component {
 
     this.setState({ loading: true });
 
-    getService.getCall('project_todo.php','view',null, null, null, null, null, null, null, employeeId )
+    getService.getCall('project_todo.php', {
+			action: 'view',
+      employee_id:employeeId
+		})
       .then((data) => {
         if (data.status === 'success' && Array.isArray(data.data)) {
           this.setState({ todos: data.data, loading: false });

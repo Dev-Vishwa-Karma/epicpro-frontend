@@ -92,7 +92,10 @@ class Header extends Component {
   }
 
   checktodayDueDate = () => {
-    getService.getCall('project_todo.php', 'due_today_check', window.user.id, null, null, null, null, null, null, null , null, null, null, null, null)
+    getService.getCall('project_todo.php', {
+      action: 'due_today_check',
+      user_id: window.user.id,
+    })
       .then((data) => {
         if (data.status === "success") {
             this.setState({
@@ -180,7 +183,10 @@ class Header extends Component {
   }
 
   getPunchInStatus = async() => {
-    getService.getCall('activities.php', 'get_punch_status', this.state.userId, null, null, null, null, null, null, null , null, null, null, null,null)
+    getService.getCall('activities.php', {
+      action: 'get_punch_status',
+      user_id:this.state.userId
+    })
     .then(data => {
       if (data.status === "success") {
         console.log('data.data[0]',data.data[0])
@@ -220,7 +226,10 @@ class Header extends Component {
   };
 
   fetchNotifications = () => {
-   getService.getCall('notifications.php', 'get_notifications', window.user.id, null, null, null, null, null, null, null , null, null, null, null, null)
+   getService.getCall('notifications.php', {
+      action: 'get_notifications',
+      user_id:window.user.id
+    })
 		.then(data => {
 	      if (data.status === "success") {
           this.setState({ notifications: data.data, loading: false });
@@ -238,7 +247,9 @@ class Header extends Component {
   };
 
   checkBirthdays = () => {
-     getService.getCall('notifications.php', 'birthday_notify', null, null, null, null, null, null, null, null , null, null, null, null, null)
+     getService.getCall('notifications.php', {
+        action: 'birthday_notify'
+      })
 		.then(data => {
 			if (data.status === "success") {
           this.fetchNotifications();
@@ -251,8 +262,15 @@ class Header extends Component {
 
   markAsRead = (notification_id) => {
       const apiCall = notification_id 
-        ? getService.getCall('notifications.php', 'mark_read', window.user.id, null, null, null, null, null, null, null , null, null, null, null , null, null, notification_id)
-        : getService.getCall('notifications.php', 'mark_read', window.user.id, null, null, null, null, null, null, null , null, null, null, null , null, null, null);
+        ? getService.getCall('notifications.php', {
+          action: 'mark_read',
+          user_id:window.user.id,
+          notification_id:notification_id
+        })
+        : getService.getCall('notifications.php', {
+          action: 'mark_read',
+          user_id:window.user.id,
+        })
 
     apiCall
     .then(data => {
@@ -268,7 +286,10 @@ class Header extends Component {
   };
 
   getActivities = () => {
-    getService.getCall('activities.php', 'break_calculation', window.user.id, null, null, null, null, null, null, null , null, null, null, null, null)
+    getService.getCall('activities.php', {
+      action: 'break_calculation',
+      user_id:window.user.id
+    })
 		.then(data => {
       if (data.status === "success") {
         this.props.breakDurationCalAction(data.data.break_duration);

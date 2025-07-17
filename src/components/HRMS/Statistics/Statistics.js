@@ -40,7 +40,14 @@ class Statistics extends Component {
 
   getEmployees = () => {
     const { selectedYear, selectedMonth } = this.state;
-    getService.getCall('get_employees.php', 'view', null, null, 'employee', null, null, null, selectedYear, null , null, 1, selectedMonth, 'statistics_visibility_status')
+    getService.getCall('get_employees.php', {
+      action: 'view',
+      role:'employee',
+      year:selectedYear,
+      status:1,
+      month:selectedMonth,
+      statistics_visibility_status:'statistics_visibility_status'
+    })
       .then(data => {
         if (data.status === 'success') {
           this.setState({ employeesData: data.data, isLoading: false });
@@ -61,7 +68,11 @@ class Statistics extends Component {
     const fromDate = firstDay.toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
     const toDate = lastDay.toISOString().split('T')[0]; 
     
-    getService.getCall('reports.php','view',null, null, null, fromDate, toDate, null, null, null, null )
+    getService.getCall('reports.php', {
+      action: 'view',
+      from_date:fromDate,
+      to_date:toDate
+    })
       .then(data => {
         if (data.status === 'success') {
           this.setState({ reportsData: data.data, isLoading: false });
@@ -76,7 +87,10 @@ class Statistics extends Component {
   }
 
   getleaves = () => {
-    getService.getCall('employee_leaves.php','view',null, null, null, null, null, null, null, null, null, 'approved')
+    getService.getCall('employee_leaves.php', {
+      action: 'view',
+      status:'approved'
+    })
       .then(data => {
         if (data.status === 'success') {
           this.setState({ leavesData: data.data, isLoading: false });
@@ -94,7 +108,11 @@ class Statistics extends Component {
     const { selectedYear, selectedMonth } = this.state;
 
     try {
-      const data = await getService.getCall('alternate_saturdays.php','view',null, null, null, null, null, null, selectedYear, null, null, null, selectedMonth)
+      const data = await getService.getCall('alternate_saturdays.php', {
+            action: 'view',
+            year:selectedYear,
+            month:selectedMonth
+          })
 
       if (data.status === "success" && Array.isArray(data.data) && data.data.length > 0) {
         // The date is a stringified JSON array, so parse it
@@ -122,7 +140,10 @@ class Statistics extends Component {
 
   getHolidays = () => {
     this.setState({ isLoading: true })
-    getService.getCall('events.php','view',null, null, null, null, null, null, null, null,'holiday' )
+    getService.getCall('events.php', {
+      action: 'view',
+      event_type:'holiday'
+    })
       .then(data => {
         if (data.status === 'success') {
           const holidayDates = data.data.map(item => item.event_date); // Using 'event_date' field directly

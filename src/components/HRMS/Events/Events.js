@@ -105,7 +105,12 @@ class Events extends Component {
 		endDate = formatDate(lastDay);
 	}
 
-	getService.getCall('reports.php','view',employeeId, null, null, startDate, endDate, null, null, null )
+	getService.getCall('reports.php', {
+		action: 'view',
+		from_date:startDate,
+		to_date:endDate,
+		user_id:employeeId
+	})
 		.then((data) => {
 		// Defer state update
 		setTimeout(() => {
@@ -141,7 +146,10 @@ class Events extends Component {
 	};
 
 	fetchEmployees = () => {
-		getService.getCall('get_employees.php', 'view', null, null, 'employee', null, null, null, null, null)
+		getService.getCall('get_employees.php', {
+			action: 'view',
+			role:'employee'
+		})
 			.then(data => {
 				if (data.status === 'success') {
 		
@@ -177,7 +185,10 @@ class Events extends Component {
 		// 	method: "GET",
 		// })
 		// .then((res) => res.json())
-		getService.getCall('project_todo.php', 'view', null, null, null, null, null, null, null, employeeId)
+		getService.getCall('project_todo.php', {
+					action: 'view',
+					employee_id:employeeId
+				})
 		.then((data) => {
 			if (data.status === 'success' && Array.isArray(data.data)) {
 				this.setState({ todos: data.data, loading: false });
@@ -193,7 +204,12 @@ class Events extends Component {
 
 
 	fetchLeaveData = (employee_id, start_date, end_date) => {
-		getService.getCall('employee_leaves.php', 'view', null, null, null, start_date, end_date, null, null, employee_id)
+		getService.getCall('employee_leaves.php', {
+			action: 'view',
+			from_date:start_date,
+			to_date:end_date,
+			employee_id:employee_id
+		})
 				.then((data) => {
 					if (data.status === "success" && Array.isArray(data.data)) {
 						if(employee_id === ''){
@@ -313,7 +329,10 @@ handleYearChange = (event) => {
 	getAlternateSaturday = async () => {
 		const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
 		try {
-			const data = await getService.getCall('alternate_saturdays.php','view',null, null, null, null, null, null, now.getFullYear() )
+			const data = await getService.getCall('alternate_saturdays.php', {
+				action: 'view',
+				year:now.getFullYear()
+			})
 
 			this.setState({
 				alternateSatudays: data?.data
@@ -562,7 +581,11 @@ fetchEvents = () => {
 		};
 	}).filter(event => event !== null); // Remove null entries
 
-	getService.getCall('events.php','view',null, null, null, startDate, endDate, null, null, null )
+	getService.getCall('events.php', {
+		action: 'view',
+		from_date:startDate,
+		to_date:endDate
+	})
 	.then(data => {
 		if (data.status === 'success') {
 			const eventsData = data.data;

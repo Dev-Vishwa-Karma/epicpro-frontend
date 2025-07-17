@@ -30,8 +30,9 @@ class departments extends Component {
 	}
 
     componentDidMount() {
-        //folderName, action, userId, logged_in_employee_id, role, from_date, to_date, is_timeline
-        getService.getCall('departments.php','view',null, null, null, null, null, null)
+        getService.getCall('departments.php', {
+            action: 'view'
+        })
 		.then(data => {
             if (data.status === 'success') {
                 this.setState({ departmentData: data.data, loading: false }); // Update users in state

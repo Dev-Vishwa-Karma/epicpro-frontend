@@ -30,7 +30,10 @@ class Dashboard extends Component {
 		}
 
 		// Make the GET API call when the component is mounted
-		getService.getCall('dashboard.php', null, null, null, null, null, null)
+		//getService.getCall('dashboard.php', null, null, null, null, null, null)
+		getService.getCall('dashboard.php', {
+			action: 'view'
+		})
 		.then(data => {
 			if (data.status === 'success') {
 				let totalUsers = data.data[0].total_users;
@@ -57,7 +60,11 @@ class Dashboard extends Component {
 		});
 
 		// Get projects data
-		getService.getCall('projects.php', 'view', null, window.user.id, window.user.role, null, null)
+		getService.getCall('projects.php', {
+			action: 'view',
+			logged_in_employee_id:window.user.id,
+			role:window.user.role
+		})
 		.then(data => {
 			if (data.status === 'success') {
                 this.setState({
