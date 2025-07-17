@@ -105,7 +105,7 @@ class Events extends Component {
 		endDate = formatDate(lastDay);
 	}
 
-	getService.getCall('reports.php','view',null, null, null, startDate, endDate, null, null, employeeId )
+	getService.getCall('reports.php','view',employeeId, null, null, startDate, endDate, null, null, null )
 		.then((data) => {
 		// Defer state update
 		setTimeout(() => {
