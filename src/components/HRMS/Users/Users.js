@@ -47,7 +47,9 @@ class Users extends Component {
 		this.getAdmins();
 
 		// Fetch all users to generate the correct employee code
-		getService.getCall('get_employees.php', 'view', null, null, null, null, null, null, null, null , null, null, null, null)
+		getService.getCall('get_employees.php', {
+			action: 'view'
+		})
 		.then(data => {
 			if (data.status === 'success') {
 				// Generate next employee Code from all users
@@ -63,7 +65,9 @@ class Users extends Component {
 		});
 
 		// Get department data from departments table
-		getService.getCall('departments.php', 'view', null, null, null, null, null, null, null, null , null, null, null, null)
+		getService.getCall('departments.php', {
+			action: 'view'
+		})
         .then(data => {
 			this.setState({ departments: data.data });
         })
@@ -72,7 +76,10 @@ class Users extends Component {
 
 	getAdmins = () => {
 		// Make the GET API call when the component is mounted
-		getService.getCall('get_employees.php', 'view', null, null, 'admin', null, null, null, null, null , null, null, null, null)
+		getService.getCall('get_employees.php', {
+			action: 'view',
+			role:'admin'
+		})
 		.then(data => {
 			if (data.status === 'success') {
 			  	this.setState({
@@ -410,7 +417,11 @@ class Users extends Component {
 			const searchParam = searchUser.trim();
 			
 			// If search is empty, fetch all admins (or whatever default you want)
-			getService.getCall('get_employees.php', 'view', null, null, 'admin', null, null, null, null, null , null, null, null, null,encodeURIComponent(searchParam))
+			getService.getCall('get_employees.php', {
+				action: 'view',
+				role:'admin',
+				search:encodeURIComponent(searchParam)
+			})
 				.then(data => {
 					if (data.status === 'success') {
 						this.setState({

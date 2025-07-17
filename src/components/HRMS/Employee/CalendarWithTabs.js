@@ -84,7 +84,9 @@ class CalendarWithTabs extends Component {
 
     getDepartments = () => {
         // Get department data from departments table
-         getService.getCall('departments.php','view' ,null, null, null, null, null, null, null)
+         getService.getCall('departments.php', {
+            action: 'view'
+        })
             .then(data => {
                 this.setState({ departments: data.data });
             })
@@ -194,7 +196,10 @@ class CalendarWithTabs extends Component {
     getAlternateSaturday = async () => {
         const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
         try {
-            const data = getService.getCall('alternate_saturdays.php','view',null, null, null, null, null, null, now.getFullYear() )
+            const data = getService.getCall('alternate_saturdays.php', {
+                action: 'view',
+                year: now.getFullYear()
+            })
             this.setState({
                 alternateSatudays: data?.data
             })
@@ -225,8 +230,12 @@ class CalendarWithTabs extends Component {
         const currentEmployeeId = employeeId;
 
         if (currentEmployeeId) {
-            //folderName, action, userId, logged_in_employee_id, role, from_date, to_date, is_timeline, year
-            getService.getCall('reports.php','view' ,currentEmployeeId, null, null, startDate, endDate, null, null, null)
+            getService.getCall('reports.php', {
+                        action: 'view',
+                        user_id: currentEmployeeId,
+                        from_date:startDate,
+                        to_date:endDate,
+                    })
                 .then(data => {
                     if (data.status === 'success') {
                         const reports = data.data;
@@ -253,7 +262,12 @@ class CalendarWithTabs extends Component {
                 });
                 console.log('currentEmployeeId',currentEmployeeId)
                
-            getService.getCall('employee_leaves.php','view' ,null, null, null, startDate, endDate, null, null, currentEmployeeId)
+            getService.getCall('employee_leaves.php', {
+                action: 'view',
+                from_date:startDate,
+                to_date:endDate,
+                employee_id: currentEmployeeId
+            })
                 .then(data => {
                     if (data.status === 'success') {
                         const leaves = data.data;
@@ -282,7 +296,11 @@ class CalendarWithTabs extends Component {
     }
 
     fetchEmployeeDetails = (employeeId) => {
-        getService.getCall('get_employees.php','view' ,employeeId, null, null, null, null, null, null, null)
+        getService.getCall('get_employees.php', {
+                    action: 'view',
+                    user_id:employeeId,
+                })
+        
             .then((data) => {
                 if (data.status === "success") {
                      const { password, ...employeeData } = data.data;
@@ -378,7 +396,12 @@ class CalendarWithTabs extends Component {
             endDate = formatDate(lastDay);
         }
 
-        getService.getCall('reports.php','view' ,employeeId, null, null, null, startDate, endDate, null, null)
+        getService.getCall('reports.php', {
+            action: 'view',
+            user_id:employeeId,
+            from_date:startDate,
+            to_date:endDate
+        })
             .then((data) => {
                 if (data.status === "success") {
                     if (employeeId === '') {
@@ -577,7 +600,12 @@ class CalendarWithTabs extends Component {
     handleApplyFilter = async () => {
         this.setState({ loading: true });
         const { filterFromDate, filterToDate } = this.state;       
-        const data =  getService.getCall('activities.php','view',this.props.employeeId, null, null, filterFromDate, filterToDate, null, null )
+        const data = getService.getCall('activities.php', {
+            action: 'view',
+            user_id:this.props.employeeId,
+            from_date: filterFromDate,
+            to_date:filterToDate
+        })
         if (data.status === "success") {
             this.setState({ activities: data.data, loading: false });
         } else {

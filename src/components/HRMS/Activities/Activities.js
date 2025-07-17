@@ -46,7 +46,11 @@ class Activities extends Component {
     };
 
     componentDidMount() {
-        getService.getCall('get_employees.php','view',null, null, 'employee', null, null, null)
+        getService.getCall('get_employees.php', {
+            action: 'view',
+            role:'employee',
+
+        })
         .then(data => {
             if (data.status === 'success') {
             this.setState({ employeeData: data.data });
@@ -60,7 +64,10 @@ class Activities extends Component {
         });
 
         // Fetch break status if not in view mode
-        getService.getCall('activities.php','get_break_status',  window.user.id,null, null, null, null, null)
+        getService.getCall('activities.php', {
+            action: 'get_break_status',
+            user_id:window.user.id,
+        })
             .then(data => {
             if (data.status === 'success') {
                 this.setState({ isBreakedIn: true });
@@ -145,7 +152,10 @@ class Activities extends Component {
     };
 
     breakCalculation = () => {
-        getService.getCall('activities.php','break_calculation',  window.user.id,null, null, null, null, null)
+        getService.getCall('activities.php', {
+            action: 'break_calculation',
+            user_id:window.user.id,
+        })
         .then((data) => {
             if (data.status === "success") {
             this.props.breakDurationCalAction(data.data.break_duration);
@@ -323,7 +333,13 @@ class Activities extends Component {
             }
         }
         //folderName, action, userId, logged_in_employee_id, role, from_date, to_date, is_timeline
-        getService.getCall('activities.php','view', user_id, null, null, filterFromDate, filterToDate, true)
+        getService.getCall('activities.php', {
+            action: 'view',
+            user_id:user_id,
+            from_date:filterFromDate,
+            to_date:filterToDate,
+            is_timeline:true
+        })
         .then((data) => {
             if (data.status === "success") {
                 this.setState({ activities: data.data, loading: false });

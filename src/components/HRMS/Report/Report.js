@@ -75,7 +75,9 @@ class Report extends Component {
         });
 
         /** Get employees list */
-        getService.getCall('get_employees.php','view',null, null, null, null, null, null, null, null, null )
+        getService.getCall('get_employees.php', {
+            action: 'view'
+        })
             .then(data => {
                 if (data.status === 'success') {
                     this.setState({ employeeData: data.data });
@@ -717,7 +719,12 @@ class Report extends Component {
             return `${year}-${month}-${day}`; 
         };
 
-        getService.getCall('reports.php','view',selectedReportEmployee, null, null, formatDate(fromDate), formatDate(toDate), null, null, null , null)
+        getService.getCall('reports.php', {
+            action: 'view',
+            user_id:selectedReportEmployee,
+            from_date:formatDate(fromDate),
+            to_date:formatDate(toDate)
+        })
         .then(data => {
             if (data.status === 'success') {
 

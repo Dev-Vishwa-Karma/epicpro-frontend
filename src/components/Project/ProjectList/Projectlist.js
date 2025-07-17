@@ -80,10 +80,13 @@ class ProjectList extends Component {
         }
 
         // Fetch employees data
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-            method: "GET",
+        // fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
+        //     method: "GET",
+        // })
+        getService.getCall('get_employees.php', {
+            action: 'view',
+            role:'employee'
         })
-        .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
                 this.setState({
@@ -101,7 +104,11 @@ class ProjectList extends Component {
 
 
         // Get projects data
-        getService.getCall('projects.php', 'view', null, window.user.id, window.user.id, null, null, null, null, null, null, null, null, null , null, null)
+        getService.getCall('projects.php', {
+            action: 'view',
+            logged_in_employee_id:window.user.id,
+            role:window.user.id
+        })
         .then(data => {
             if (data.status === 'success') {
                 const collapsedCards = {};
@@ -123,7 +130,9 @@ class ProjectList extends Component {
         });
 
         // Get clients data
-         getService.getCall('clients.php', 'view', null, null, null, null, null, null, null, null, null, null, null, null , null, null)
+         getService.getCall('clients.php', {
+            action: 'view'
+        })
         .then(data => {
             if (data.status === 'success') {
                 this.setState({
@@ -512,8 +521,17 @@ class ProjectList extends Component {
 
             // Build the API URL with the search query for both name and technology
              const apiCall = searchParam !== ""
-                ?  getService.getCall('projects.php', 'view', null, window.user.id, window.user.role, null, null, null, null, null , null, null, null, null,encodeURIComponent(searchParam))
-                :  getService.getCall('projects.php', 'view', null, window.user.id, window.user.role, null, null, null, null, null , null, null, null, null,null)
+                ? getService.getCall('projects.php', {
+                    action: 'view',
+                    logged_in_employee_id:window.user.id,
+                    role:window.user.role,
+                    search:encodeURIComponent(searchParam)
+                })
+                : getService.getCall('projects.php', {
+                    action: 'view',
+                    logged_in_employee_id:window.user.id,
+                    role:window.user.role
+                })
 
          apiCall.then(data => {
                 if (data.status === 'success') {
@@ -810,12 +828,12 @@ class ProjectList extends Component {
             </div>
           </div>
 
-          <div className="card-body flex-grow-1" style={{ minHeight: '300px' }}>
+          <div className="card-body flex-grow-1">
             <span className="tag tag-blue mb-3">{project.project_technology}</span>
             <p
               style={{
                 display: '-webkit-box',
-                WebkitLineClamp: 4,
+                WebkitLineClamp: 1,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -845,7 +863,7 @@ class ProjectList extends Component {
               <div className="col-8 py-1">
                 <div className="avatar-list avatar-list-stacked">
                   {project.team_members.map((member) => (
-                    <span key={member.id}>
+                    <span key={member.id || member.employee_id}>
                       {member.profile ? (
                         <img
                           src={`${process.env.REACT_APP_API_URL}/${member.profile}`}

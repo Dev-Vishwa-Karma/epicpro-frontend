@@ -82,7 +82,9 @@ class AddEmployee extends Component {
 
   componentDidMount() {
     // Get department data from departments table
-       getService.getCall('departments.php',null ,null, null, null, null, null, null)
+       getService.getCall('departments.php', {
+            action: 'view'
+          })
       .then((data) => {
         this.setState({ departments: data.data });
       })

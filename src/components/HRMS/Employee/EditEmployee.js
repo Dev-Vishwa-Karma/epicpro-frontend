@@ -101,10 +101,14 @@ class EditEmployee extends Component {
         }
 
         // Fetch latest employee data from API
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&user_id=${employeeId}`, {
-            method: "GET",
-        })
-        .then(response => response.json())
+        // fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&user_id=${employeeId}`, {
+        //     method: "GET",
+        // })
+        // .then(response => response.json())
+        getService.getCall('get_employees.php', {
+                    action: 'view',
+                    user_id:employeeId
+                })
         .then(data => {
             if (data.status === "success" && data.data) {
                 const employee = data.data;
@@ -165,7 +169,9 @@ class EditEmployee extends Component {
         });
 
 
-        getService.getCall('departments.php','view' ,null, null, null, null, null, null, null)
+        getService.getCall('departments.php', {
+            action: 'view'
+        })
         .then(data => {
 			this.setState({ departments: data.data });
         })

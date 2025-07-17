@@ -146,7 +146,11 @@ class SaturdaySettings extends Component {
     const { selectedYear } = this.state;
 
     try {
-      const data = await getService.getCall('alternate_saturdays.php','view',null, null, null, null,null, null, selectedYear, null , null)
+      const data = await getService.getCall('alternate_saturdays.php', {
+        action: 'view',
+        year:selectedYear
+      })
+
 
       if (data.status === "success" && Array.isArray(data.data)) {
         const savedSaturdays = data.data;

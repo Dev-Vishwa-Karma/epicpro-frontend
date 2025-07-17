@@ -37,7 +37,10 @@ class Holidays extends Component {
 			logged_in_user_role: role
 		});
 
-		getService.getCall('events.php','view',null, null, null, null, null, null, null, null,'holiday' )
+		getService.getCall('events.php', {
+			action: 'view',
+			event_type:'holiday'
+		})
 		.then(data => {
 			if (data.status === 'success') {
 				const holidaysData = data.data;

@@ -34,7 +34,10 @@ class Clients extends Component {
 
   getClients = (search = "") => {
     this.setState({ loading: true });
-      getService.getCall('clients.php', 'view_client', null, null, null, null, null, null, null, null , null, null, null, null,search)
+      getService.getCall('clients.php', {
+        action: 'view_client',
+        search:search
+      })
       .then((data) => {
         if (data.status === "success") {
           this.setState({

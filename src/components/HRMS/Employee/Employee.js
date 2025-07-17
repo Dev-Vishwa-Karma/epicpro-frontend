@@ -153,8 +153,15 @@ class Employee extends Component {
 			
 			// Fetch employees & leaves based on role using EmployeeService
 			Promise.all([
-				getService.getCall('get_employees.php','view' ,null, null, role, null, null, null, null, id),
-				getService.getCall('employee_leaves.php','view',null, null, role === "admin" || role === "super_admin" ? null : id , null, null, null, null, null)
+				getService.getCall('get_employees.php', {
+					action: 'view',
+					role:role,
+					employee_id:id
+				}),
+				getService.getCall('employee_leaves.php', {
+					action: 'view',
+					role:role === "admin" || role === "super_admin" ? null : id,					
+				})
 			])
 			.then(([employeesData, employeeLeavesData]) => {
 				// If only a single employee is returned, convert it to an array
@@ -201,7 +208,12 @@ class Employee extends Component {
         const fromDateFormatted = fromDate ? formatDate(fromDate) : null;
         const toDateFormatted = toDate ? formatDate(toDate) : null;
 
-		getService.getCall('employee_leaves.php','view' ,null, null, null, fromDateFormatted, toDateFormatted, null, null, selectedLeaveEmployee)
+		getService.getCall('employee_leaves.php', {
+			action: 'view',
+			from_date:fromDateFormatted,
+			to_date: toDateFormatted,
+			employee_id: selectedLeaveEmployee
+		})
         .then(data => {
             if (data.status === 'success') {
 				let employeesLeaveArray = Array.isArray(data.data) ? data.data : [data.data];
@@ -230,7 +242,10 @@ class Employee extends Component {
 		
 	goToEditEmployee(employee, employeeId) {
 		// Fetch salary details based on employee_id
-		getService.getCall('employee_salary_details.php','view' ,null, null, null, null, null, null, null, employeeId)
+		getService.getCall('employee_salary_details.php', {
+					action: 'view',
+					employee_id:employeeId
+				})
         .then((salaryDetails) => {
             if (salaryDetails.data) {
 				this.props.history.push({

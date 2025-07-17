@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import TodoModal from './TodoModal';
 import DeleteModal from '../../common/DeleteModal';
 import AlertMessages from '../../common/AlertMessages';
+import { getService } from '../../../services/getService';
 
 class TodoList extends Component {
     constructor(props) {
@@ -46,11 +47,12 @@ class TodoList extends Component {
             logged_in_employee_role: window.user.role
 		});
 
-		// Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {
-			method: "GET",
+		// Fetch todos using getService
+		getService.getCall('project_todo.php', {
+			action: 'view',
+			logged_in_employee_id: window.user.id,
+			role: window.user.role
 		})
-		.then(response => response.json())
 		.then(data => {
 			if (data.status === 'success') {
 				const todoData = data.data.map(t => ({ ...t, imageError: false }));
@@ -71,10 +73,10 @@ class TodoList extends Component {
         // Check if user is admin or superadmin
         if (role === 'admin' || role === 'super_admin') {
             // Fetch employees data if user is admin or super_admin
-            fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-                method: "GET",
+            getService.getCall('get_employees.php', {
+                action: 'view',
+                role: 'employee'
             })
-            .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     this.setState({
@@ -166,19 +168,16 @@ class TodoList extends Component {
         addTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
         addTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
-        // API call to add department
-        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=add`, {
-            method: "POST",
-            body: addTodoFormData,
-        })
-        .then((response) => response.json())
+        // API call to add todo using getService
+        getService.addCall('project_todo.php', 'add', addTodoFormData)
         .then((data) => {
             if (data.status === 'success') {
                 // Fetch the updated todo list
-                fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}`, {
-                    method: "GET",
+                getService.getCall('project_todo.php', {
+                    action: 'view',
+                    logged_in_employee_id: window.user.id,
+                    role: window.user.role
                 })
-                .then(response => response.json())
                 .then(updatedData => {
                     if (updatedData.status === 'success') {
                         this.setState({
@@ -314,12 +313,8 @@ class TodoList extends Component {
         formData.append('id', selectedTodo.id);
         formData.append('status', newStatus);
         formData.append('logged_in_employee_id', logged_in_employee_id);
-
-        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=update_status`, {
-            method: "POST",
-            body: formData,
-        })
-        .then(response => response.json())
+        
+        getService.addCall('project_todo.php', 'update_status', formData)
         .then(data => {
             if (data.status === 'success') {
                 this.setState(prevState => ({
@@ -403,12 +398,8 @@ class TodoList extends Component {
         updateTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
         updateTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
-        // API call to update todo
-        fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=edit`, {
-            method: "POST",
-            body: updateTodoFormData,
-        })
-        .then((response) => response.json())
+        // API call to update todo using getService
+        getService.addCall('project_todo.php', 'edit', updateTodoFormData)
         .then((data) => {
             if (data.status === 'success') {
                 // Update the todo list
@@ -473,10 +464,8 @@ class TodoList extends Component {
     if (!todoToDelete) return;
     this.setState({ ButtonLoading: true });
 
-    fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=delete&id=${todoToDelete.id}`, {
-        method: "DELETE",
-    })
-    .then(response => response.json())
+    // API call to delete todo using getService
+    getService.deleteCall('project_todo.php', 'delete', todoToDelete.id)
     .then(data => {
         if (data.status === 'success') {
             this.setState(prevState => ({
@@ -487,7 +476,6 @@ class TodoList extends Component {
                 successMessage: "Todo deleted successfully!",
                 showSuccess: true
             }));
-            
             setTimeout(() => {
                 this.setState({
                     showSuccess: false,
@@ -521,10 +509,12 @@ class TodoList extends Component {
     handleStatusFilterChange = (e) => {
         this.setState({ statusFilter: e.target.value });
         // Make the GET API call when the component is mounted
-		fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&logged_in_employee_id=${window.user.id}&role=${window.user.role}&status=${e.target.value }`, {
-			method: "GET",
-		})
-		.then(response => response.json())
+		getService.getCall('project_todo.php', {
+            action: 'view',
+            logged_in_employee_id: window.user.id,
+            role: window.user.role,
+            status: e.target.value
+        })
 		.then(data => {
 			if (data.status === 'success') {
 				const todoData = data.data;
