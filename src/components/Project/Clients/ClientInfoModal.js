@@ -48,18 +48,23 @@ const ClientInfoModal = ({ client, onClose }) => {
                 justifyContent: "center",
               }}
             >
-              <img
-                src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                alt="Profile"
-                style={{
-                  width: 98,
-                  height: 98,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: `3px solid ${isActive ? "#28a745" : "#dc3545"}`,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                }}
-              />
+              <>
+                    {client.client_profile ? (
+                      <img
+                        className="rounded-circle img-thumbnail"
+                        src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                        alt="Client Profile"
+                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <img
+                        className="rounded-circle img-thumbnail"
+                        src="../../../assets/images/sm/avatar2.jpg" 
+                        alt="Default Avatar"
+                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                      />
+                    )}
+              </>
               
             </div>
           </div>
@@ -87,7 +92,7 @@ const ClientInfoModal = ({ client, onClose }) => {
             </div>
 
             {/* Stats */}
-            <div className="d-flex justify-content-center gap-3 flex-wrap mb-4">
+            {/* <div className="d-flex justify-content-center gap-3 flex-wrap mb-4">
               <div
                 className="shadow-sm p-3 rounded text-center d-flex flex-column align-items-center"
                 style={{
@@ -134,6 +139,55 @@ const ClientInfoModal = ({ client, onClose }) => {
                   {isActive ? "Active" : "Inactive"}
                 </div>
                 <small className="text-muted">Status</small>
+              </div>
+            </div> */}
+
+            {/* Project/Team Table */}
+            <div className="container mt-4 mb-3">
+              <div className="table-responsive">
+                <table className="table table-striped">
+                  <thead className="thead-dark">
+                    <tr>
+                      <th>Project Title</th>
+                      <th>Team Member Name</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {client.projects && client.projects.length > 0 ? (
+                      client.projects.map((project) => (
+                        <tr key={project.project_id}>
+                          <td>{project.project_title}</td>
+                          <td>
+                            {project.team_members && project.team_members.length > 0
+                              ? project.team_members.map((member, idx) =>
+                                  `${member.first_name} ${member.last_name}${idx < project.team_members.length - 1 ? ', ' : ''}`
+                                )
+                              : <span className="text-muted">No team members</span>
+                            }
+                          </td>
+                        </tr>
+                      ))
+                    ) : client.team_members && client.team_members.length > 0 ? (
+                      <tr>
+                        <td>No Project</td>
+                        <td>
+                          {client.team_members.map((member, idx) =>
+                            `${member.first_name} ${member.last_name}${idx < client.team_members.length - 1 ? ', ' : ''}`
+                          )}
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr className="table-secondary">
+                        <td>
+                          <b>No. of Projects:</b> {client.project_count || 0}
+                        </td>
+                        <td>
+                          <b>No. of Team Members:</b> {client.employee_count || 0}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 
