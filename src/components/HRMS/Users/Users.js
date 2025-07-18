@@ -420,7 +420,7 @@ class Users extends Component {
 			getService.getCall('get_employees.php', {
 				action: 'view',
 				role:'admin',
-				search:encodeURIComponent(searchParam)
+				search:searchParam
 			})
 				.then(data => {
 					if (data.status === 'success') {

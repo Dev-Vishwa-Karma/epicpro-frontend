@@ -16,6 +16,7 @@ class ProjectList extends Component {
         this.state = {
             projectName: "",
             projectDescription: "",
+            project_is_active:"",
             projectTechnology: "",
             teamMembers: [],
             projectStartDate: "",
@@ -272,7 +273,8 @@ class ProjectList extends Component {
             selectedClient, 
             teamMembers, 
             isEditing, 
-            editingProjectId 
+            editingProjectId,
+            project_is_active
         } = this.state;
 
         if (!this.validateAddProjectForm()) {
@@ -353,7 +355,7 @@ class ProjectList extends Component {
                         project_start_date: projectStartDate,
                         project_end_date: projectEndDate,
                         created_at: new Date().toISOString(),
-                        project_is_active: data.newProject?.project_is_active || 1,
+                        project_is_active: project_is_active,
                         team_members: teamMembers.map(id => {
                             const emp = this.state.employees.find(e => String(e.id) === String(id));
                             return {
@@ -522,7 +524,7 @@ class ProjectList extends Component {
                     action: 'view',
                     logged_in_employee_id:window.user.id,
                     role:window.user.role,
-                    search:encodeURIComponent(searchParam)
+                    search:searchParam
                 })
                 : getService.getCall('projects.php', {
                     action: 'view',
