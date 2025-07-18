@@ -44,6 +44,7 @@ class Header extends Component {
       is_task_due_today:false,
       showDueAlert:true,
       dueTasks:[],
+      disableButton:false,
     };
   }
 
@@ -149,6 +150,9 @@ class Header extends Component {
   };
 
   autoCloseActivities = (punchInTime) => {
+    this.setState({
+          disableButton: true,
+    });
     const punchInTimeDate = punchInTime.toISOString().split('T')[0];
 		api.get(`${process.env.REACT_APP_API_URL}/auto_close_breaks.php?user_id=${window.user.id}&date=${punchInTimeDate}`)
 		.then(response => {
@@ -156,6 +160,7 @@ class Header extends Component {
       if (data.status === "success") {
         this.setState({
           punchInTime: null,
+          disableButton: false
         });
         clearInterval(this.state.timer);
         this.props.punchInAction(false);
@@ -167,6 +172,7 @@ class Header extends Component {
           showError: true,
           showSuccess: false,
           loading: false,
+          disableButton: false
         });
         setTimeout(this.dismissMessages, 3000);
       }
@@ -176,6 +182,7 @@ class Header extends Component {
           errorMessage: "Failed to fetch data",
           showError: true,
           showSuccess: false,
+          disableButton: false
         });
         setTimeout(this.dismissMessages, 3000);
         console.error(err);
@@ -661,7 +668,8 @@ class Header extends Component {
       errorMessage,
       is_task_due_today,
       showDueAlert,
-      dueTasks
+      dueTasks,
+      disableButton
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
@@ -689,6 +697,7 @@ class Header extends Component {
               <div className="right">
                 {window.user && (window.user.role === 'employee') && (
                   <button
+                    disabled={disableButton}
                     className="btn btn-primary"
                     onClick={
                       isPunchedIn ? this.handlePunchOut : this.handlePunchIn
