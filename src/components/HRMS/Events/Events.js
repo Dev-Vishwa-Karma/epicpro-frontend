@@ -206,8 +206,8 @@ class Events extends Component {
 	fetchLeaveData = (employee_id, start_date, end_date) => {
 		getService.getCall('employee_leaves.php', {
 			action: 'view',
-			from_date:start_date,
-			to_date:end_date,
+			start_date:start_date,
+			end_date:end_date,
 			employee_id:employee_id
 		})
 				.then((data) => {
@@ -1177,7 +1177,7 @@ formatDateTimeAMPM = (timeString) => {
 														r.id === eventData.id || 
 														r.created_at?.split(" ")[0] === eventData.start?.format('YYYY-MM-DD')
 													);
-													if (report) {
+													if (report && calendarView === 'report') {
 														this.handleReportClick(report);
 													} 
 												}}
