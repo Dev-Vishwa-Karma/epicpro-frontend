@@ -744,7 +744,7 @@ class TodoList extends Component {
                                                                 </tr>
                                                             ))
                                                         ): (
-                                                            <tr><td>Todo not available.</td></tr>
+                                                            <tr><td colspan="5" className="text-center">Todo not available.</td></tr>
                                                         )}
                                                     </tbody>
                                                 )}

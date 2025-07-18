@@ -100,7 +100,7 @@ const ClientFieldModal = ({
                       <input
                         type="text"
                         className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                        placeholder="Employee Name"
+                        placeholder="Client Name"
                         name="name"
                         value={name}
                         onChange={onChange}
@@ -114,7 +114,7 @@ const ClientFieldModal = ({
                       <input
                         type="email"
                         className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                        placeholder="Email"
+                        placeholder="Client Email"
                         name="email"
                         value={email}
                         onChange={onChange}
@@ -128,7 +128,7 @@ const ClientFieldModal = ({
                       <label className="form-label" htmlFor="about">About</label>
                       <textarea
                         className={`form-control ${errors.about ? 'is-invalid' : ''}`}
-                        placeholder="About Employee"
+                        placeholder="About Client"
                         name="about"
                         value={about}
                         onChange={onChange}

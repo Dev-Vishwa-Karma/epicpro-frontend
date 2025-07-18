@@ -7,7 +7,6 @@ import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import EditModal from './EditModal';
 import { getService } from '../../../services/getService';
-import authService from '../../Authentication/authService';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -15,6 +14,7 @@ class ProjectList extends Component {
         this.state = {
             projectName: "",
             projectDescription: "",
+            project_is_active:"",
             projectTechnology: "",
             teamMembers: [],
             projectStartDate: "",
@@ -194,7 +194,6 @@ class ProjectList extends Component {
             return { teamMembers: updatedTeamMembers };
         });
     };    
-    
 
     // Validate Add Project Form
 	validateAddProjectForm = (e) => {
@@ -231,11 +230,6 @@ class ProjectList extends Component {
             isValid = false;
         }
 
-        // Client Validation (Required)
-        /* if (!selectedClient || selectedClient.trim() === "") {
-            errors.selectedClient = "Please select a client.";
-            isValid = false;
-        } */
 
         // Team Members Validation (At least one team member should be selected)
         if (!teamMembers || (Array.isArray(teamMembers) && teamMembers.length === 0)) {
@@ -277,7 +271,8 @@ class ProjectList extends Component {
             selectedClient, 
             teamMembers, 
             isEditing, 
-            editingProjectId 
+            editingProjectId,
+            project_is_active
         } = this.state;
 
         if (!this.validateAddProjectForm()) {
@@ -366,7 +361,7 @@ class ProjectList extends Component {
                         project_start_date: projectStartDate,
                         project_end_date: projectEndDate,
                         created_at: new Date().toISOString(),
-                        project_is_active: data.newProject?.project_is_active || 1,
+                        project_is_active: project_is_active,
                         team_members: teamMembers.map(id => {
                             const emp = this.state.employees.find(e => String(e.id) === String(id));
                             return {
@@ -468,12 +463,10 @@ class ProjectList extends Component {
         const token = user ? user.access_token : null;
     
         try {
+            const user = authService.getUser();
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id: projectId,
                     is_active: newStatus,
@@ -539,7 +532,7 @@ class ProjectList extends Component {
                     action: 'view',
                     logged_in_employee_id:window.user.id,
                     role:window.user.role,
-                    search:encodeURIComponent(searchParam)
+                    search:searchParam
                 })
                 : getService.getCall('projects.php', {
                     action: 'view',
