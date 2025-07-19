@@ -7,6 +7,7 @@ import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import EditModal from './EditModal';
 import { getService } from '../../../services/getService';
+import authService from '../../Authentication/authService';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -463,10 +464,12 @@ class ProjectList extends Component {
         const token = user ? user.access_token : null;
     
         try {
-            const user = authService.getUser();
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify({
                     id: projectId,
                     is_active: newStatus,

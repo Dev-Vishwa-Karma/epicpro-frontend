@@ -13,12 +13,14 @@ const ClientInfoModal = ({ client, onClose }) => {
     >
       <div className="modal-dialog modal-dialog-centered" role="document">
         <div
-          className="modal-content border-0 shadow"
+          className="modal-content border-0 shadow d-flex flex-column"
           style={{
             borderRadius: 24,
             overflow: "hidden",
             fontFamily: "Inter, sans-serif",
             boxShadow: "0 8px 32px rgba(60,60,120,0.18)",
+            maxHeight: '90vh',
+            minHeight: 400,
           }}
         >
           {/* Header */}
@@ -27,6 +29,7 @@ const ClientInfoModal = ({ client, onClose }) => {
               background: "linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%)",
               height: 100,
               position: "relative",
+              flexShrink: 0,
             }}
           >
             {/* Profile Image with Status Badge */}
@@ -61,7 +64,7 @@ const ClientInfoModal = ({ client, onClose }) => {
                         className="rounded-circle img-thumbnail"
                         src="../../../assets/images/sm/avatar2.jpg" 
                         alt="Default Avatar"
-                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                       />
                     )}
               </>
@@ -69,8 +72,8 @@ const ClientInfoModal = ({ client, onClose }) => {
             </div>
           </div>
 
-          {/* Body */}
-          <div className="text-center" style={{ marginTop: 70 }}>
+          {/* Body (scrollable) */}
+          <div className="text-center flex-grow-1" style={{ marginTop: 70, overflowY: 'auto', paddingBottom: 24 }}>
             <h3 style={{ fontWeight: 700,}}>{client.client_name}</h3>
             <div style={{ color: "#888", fontSize: 15, marginTop: -10 }}>
               {client.client_email}
@@ -142,56 +145,127 @@ const ClientInfoModal = ({ client, onClose }) => {
               </div>
             </div> */}
 
-            {/* Project/Team Table */}
-            <div className="container mt-4 mb-3">
-              <div className="table-responsive">
-                <table className="table table-striped">
-                  <thead className="thead-dark">
-                    <tr>
-                      <th>Project Title</th>
-                      <th>Team Member Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {client.projects && client.projects.length > 0 ? (
-                      client.projects.map((project) => (
-                        <tr key={project.project_id}>
-                          <td>{project.project_title}</td>
-                          <td>
-                            {project.team_members && project.team_members.length > 0
-                              ? project.team_members.map((member, idx) =>
-                                  `${member.first_name} ${member.last_name}${idx < project.team_members.length - 1 ? ', ' : ''}`
-                                )
-                              : <span className="text-muted">No team members</span>
-                            }
-                          </td>
-                        </tr>
-                      ))
-                    ) : client.team_members && client.team_members.length > 0 ? (
-                      <tr>
-                        <td>No Project</td>
-                        <td>
-                          {client.team_members.map((member, idx) =>
-                            `${member.first_name} ${member.last_name}${idx < client.team_members.length - 1 ? ', ' : ''}`
-                          )}
-                        </td>
-                      </tr>
-                    ) : (
-                      <tr className="table-secondary">
-                        <td>
-                          <b>No. of Projects:</b> {client.project_count || 0}
-                        </td>
-                        <td>
-                          <b>No. of Team Members:</b> {client.employee_count || 0}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            {/* Project Cards */}
+            <div
+              className="container mt-4 mb-3"
+              style={{
+                maxHeight: "350px",
+                overflowY: "auto",
+                paddingRight: 10,
+              }}
+            >
+              {client.projects && client.projects.length > 0 ? (
+                client.projects.map((project) => (
+                  <div
+                    key={ project.project_name }
+                    className="card mb-3"
+                    style={{
+                      borderRadius: 16,
+                      border: "1px solid #e0eafc",
+                      boxShadow: "0 5px 12px rgba(60,60,120,0.08)",
+                      padding: 16,
+                      textAlign: "left",
+                    }}
+                  >
+                    {/* Project Name */}
+                    <div style={{ fontWeight: 700, fontSize: 18 }}>{project.project_name}</div>
+                    {/* Divider for spacing and separation */}
+                    <div style={{ height: 5 }} />
+                    <div style={{  margin: '0 0 10px 0' }} />
+                    {/* Technology */}
+                    <div style={{ color: "#888", fontSize: 15, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} >
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {project.technology
+                          ? project.technology.split(',').map((tech, i) => (
+                              <span
+                                key={i}
+                                style={{
+                                  display: 'inline-block',
+                                  background: '#e0eafc',
+                                  color: '#3a3a6a',
+                                  borderRadius: 12,
+                                  padding: '2px 12px',
+                                  fontSize: 13,
+                                  fontWeight: 500,
+                                  marginRight: 6,
+                                  marginBottom: 2,
+                                  border: '1px solid #b3c6e0',
+                                }}
+                              >
+                                {tech.trim()}
+                              </span>
+                            ))
+                          : 'N/A'}
+                      </div>
+                      {/* Start date */}
+                      {/* <div style={{ minWidth: 90, textAlign: 'right', fontWeight: 500 }}>
+                        {project.start_date || "N/A"}
+                      </div> */}
+                    </div>
+                    <div>
+                      {/* Team with profile pic */}
+                      <div className="d-flex">
+                      <span style={{ fontWeight: 600, marginTop:10 }}>Team:</span>
+                      <div style={{ display: "flex", alignItems: "center", marginLeft: 20 }}>
+                        {project.team_members && project.team_members.length > 0 ? (
+                          project.team_members.map((member) => (
+                            <div
+                              key={member.employee_id}
+                              style={{
+                                marginLeft: member === 0 ? 0 : -12,
+                                zIndex: project.team_members.length - member,
+                                position: "relative",
+                              }}
+                              title={`${member.first_name} ${member.last_name}`}
+                            >
+                              <img
+                                src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
+                                alt={`${member.first_name} ${member.last_name}`}
+                                style={{
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: "50%",
+                                  border: "2px solid #fff",
+                                  objectFit: "cover",
+                                  boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-muted" style={{ marginLeft: 8 }}>No team members</span>
+                        )}
+                      </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="card p-3 text-center">
+                  <div>
+                    <b>No. of Projects:</b> {client.project_count || 0}
+                  </div>
+                  <div>
+                    <b>No. of Team Members:</b> {client.employee_count || 0}
+                  </div>
+                </div>
+              )}
             </div>
+          </div>
 
-            {/* Close Button */}
+          {/* Close Button (sticky at bottom) */}
+          <div style={{
+            width: '100%',
+            background: '#fff',
+            boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
+            padding: '12px 0 10px 0',
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 10,
+            display: 'flex',
+            justifyContent: 'center',
+          }}>
             <button
               className="btn"
               style={{
@@ -204,8 +278,6 @@ const ClientInfoModal = ({ client, onClose }) => {
                 letterSpacing: 1,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
                 transition: "filter 0.2s, box-shadow 0.2s",
-                marginTop: 8,
-                marginBottom:10,
               }}
               onClick={onClose}
               onMouseOver={e => e.currentTarget.style.filter = "brightness(1.1)"}
