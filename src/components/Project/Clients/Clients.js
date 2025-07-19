@@ -371,12 +371,21 @@ handleConfirmDelete = () => {
                             </div>
                                     
                             <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
-                                  <img
-                                    className="rounded-circle img-thumbnail"
-                                    src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                                      alt="Client Profile"
-                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                                  />
+                              {client.client_profile ? (
+                                <img
+                                  className="rounded-circle img-thumbnail"
+                                  src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                                  alt="Client Profile"
+                                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                />
+                              ) : (
+                                <img
+                                  className="rounded-circle img-thumbnail"
+                                  src="../../../assets/images/sm/avatar2.jpg" 
+                                  alt="Default Avatar"
+                                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                />
+                              )}
                             </div>
                             <div
                                 className="dropdown d-flex"
@@ -410,7 +419,7 @@ handleConfirmDelete = () => {
                                       fontSize: '14px',
                                       color: '#333',
                                       backgroundColor: 'transparent',
-                                      borderBottom: '1px solid #eee',
+                                    
                                     }}
                                   >
                                     Edit

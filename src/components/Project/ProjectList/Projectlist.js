@@ -8,7 +8,6 @@ import DeleteModal from '../../common/DeleteModal';
 import EditModal from './EditModal';
 import { getService } from '../../../services/getService';
 import authService from '../../Authentication/authService';
-
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -319,11 +318,15 @@ class ProjectList extends Component {
                                 project_start_date: projectStartDate,
                                 project_end_date: projectEndDate,
                                 project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
-                                team_members: teamMembers.map(id => ({
-                                    employee_id: id,
-                                    first_name: this.getEmployeeName(id, 'first'),
-                                    last_name: this.getEmployeeName(id, 'last')
-                                }))
+                                team_members: teamMembers.map(id => {
+                                    const emp = this.state.employees.find(e => String(e.id) === String(id));
+                                    return {
+                                        employee_id: id,
+                                        first_name: emp ? emp.first_name : '',
+                                        last_name: emp ? emp.last_name : '',
+                                        profile: emp ? emp.profile : ''
+                                    };
+                                })
                             } : project
                         ),
                         allProjects: prevState.allProjects.map(project => 
@@ -336,11 +339,15 @@ class ProjectList extends Component {
                                 project_start_date: projectStartDate,
                                 project_end_date: projectEndDate,
                                 project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
-                                team_members: teamMembers.map(id => ({
-                                    employee_id: id,
-                                    first_name: this.getEmployeeName(id, 'first'),
-                                    last_name: this.getEmployeeName(id, 'last')
-                                }))
+                                team_members: teamMembers.map(id => {
+                                    const emp = this.state.employees.find(e => String(e.id) === String(id));
+                                    return {
+                                        employee_id: id,
+                                        first_name: emp ? emp.first_name : '',
+                                        last_name: emp ? emp.last_name : '',
+                                        profile: emp ? emp.profile : ''
+                                    };
+                                })
                             } : project
                         ),
                     }));
@@ -453,12 +460,16 @@ class ProjectList extends Component {
 
     handleToggleProjectStatus = async (projectId, currentStatus) => {
         const newStatus = Number(currentStatus) === 1 ? 0 : 1; // Toggle between 1 and 0
+        const user = authService.getUser();
+        const token = user ? user.access_token : null;
     
         try {
-            const user = authService.getUser();
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.access_token}` },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify({
                     id: projectId,
                     is_active: newStatus,

@@ -13,12 +13,14 @@ const ClientInfoModal = ({ client, onClose }) => {
     >
       <div className="modal-dialog modal-dialog-centered" role="document">
         <div
-          className="modal-content border-0 shadow"
+          className="modal-content border-0 shadow d-flex flex-column"
           style={{
             borderRadius: 24,
             overflow: "hidden",
             fontFamily: "Inter, sans-serif",
             boxShadow: "0 8px 32px rgba(60,60,120,0.18)",
+            maxHeight: '90vh',
+            minHeight: 400,
           }}
         >
           {/* Header */}
@@ -27,6 +29,7 @@ const ClientInfoModal = ({ client, onClose }) => {
               background: "linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%)",
               height: 100,
               position: "relative",
+              flexShrink: 0,
             }}
           >
             {/* Profile Image with Status Badge */}
@@ -48,24 +51,29 @@ const ClientInfoModal = ({ client, onClose }) => {
                 justifyContent: "center",
               }}
             >
-              <img
-                src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                alt="Profile"
-                style={{
-                  width: 98,
-                  height: 98,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: `3px solid ${isActive ? "#28a745" : "#dc3545"}`,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                }}
-              />
+              <>
+                    {client.client_profile ? (
+                      <img
+                        className="rounded-circle img-thumbnail"
+                        src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                        alt="Client Profile"
+                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <img
+                        className="rounded-circle img-thumbnail"
+                        src="../../../assets/images/sm/avatar2.jpg" 
+                        alt="Default Avatar"
+                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                      />
+                    )}
+              </>
               
             </div>
           </div>
 
-          {/* Body */}
-          <div className="text-center" style={{ marginTop: 70 }}>
+          {/* Body (scrollable) */}
+          <div className="text-center flex-grow-1" style={{ marginTop: 70, overflowY: 'auto', paddingBottom: 24 }}>
             <h3 style={{ fontWeight: 700,}}>{client.client_name}</h3>
             <div style={{ color: "#888", fontSize: 15, marginTop: -10 }}>
               {client.client_email}
@@ -87,7 +95,7 @@ const ClientInfoModal = ({ client, onClose }) => {
             </div>
 
             {/* Stats */}
-            <div className="d-flex justify-content-center gap-3 flex-wrap mb-4">
+            {/* <div className="d-flex justify-content-center gap-3 flex-wrap mb-4">
               <div
                 className="shadow-sm p-3 rounded text-center d-flex flex-column align-items-center"
                 style={{
@@ -135,9 +143,119 @@ const ClientInfoModal = ({ client, onClose }) => {
                 </div>
                 <small className="text-muted">Status</small>
               </div>
-            </div>
+            </div> */}
 
-            {/* Close Button */}
+            {/* Project Cards */}
+            <div
+              className="container mt-4 mb-3"
+              style={{
+                maxHeight: "350px",
+                overflowY: "auto",
+                paddingRight: 10,
+              }}
+            >
+              {client.projects && client.projects.length > 0 ? (
+                client.projects.map((project) => (
+                  <div
+                    key={ project.project_name }
+                    className="card mb-3"
+                    style={{
+                      borderRadius: 16,
+                      border: "1px solid #e0eafc",
+                      boxShadow: "0 5px 12px rgba(60,60,120,0.08)",
+                      padding: 16,
+                      textAlign: "left",
+                    }}
+                  >
+                    {/* Project Name */}
+                    <div style={{ fontWeight: 700, fontSize: 18 }}>{project.project_name}</div>
+                    {/* Divider for spacing and separation */}
+                    <div style={{ height: 5 }} />
+                    <div style={{  margin: '0 0 10px 0' }} />
+                    {/* Technology */}
+                    <div style={{ color: "#888", fontSize: 15, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} >
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {project.technology
+                          ? project.technology.split(',').map((tech, i) => (
+                              <span
+                                key={i}
+                                style={{
+                                  display: 'inline-block',
+                                  background: '#e0eafc',
+                                  color: '#3a3a6a',
+                                  borderRadius: 12,
+                                  padding: '2px 12px',
+                                  fontSize: 13,
+                                  fontWeight: 500,
+                                  marginRight: 6,
+                                  marginBottom: 2,
+                                  border: '1px solid #b3c6e0',
+                                }}
+                              >
+                                {tech.trim()}
+                              </span>
+                            ))
+                          : 'N/A'}
+                      </div>
+                    </div>
+                    {/* Team member profiles */}
+                    <div style={{ color: '#555', fontSize: 15, marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontWeight: 600, minWidth: 48 }}>Team:</span>
+                        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {project.team_member_details && project.team_member_details.length > 0 ? (
+                          project.team_member_details.map((member) => (
+                            <img
+                              key={member}
+                              src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
+                              alt={member.full_name}
+                              style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: '50%',
+                                border: '2px solid #fff',
+                                objectFit: 'cover',
+                                boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+                                marginLeft: member === 0 ? 0 : -14,
+                                background: '#fff',
+                                zIndex: 10 + member,
+                                transition: 'z-index 0.2s',
+                                cursor: 'pointer',
+                              }}
+                              title={member.full_name}
+                            />
+                          ))
+                        ) : (
+                          <span className="text-muted" style={{ marginLeft: 8 }}>No team members</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="card p-3 text-center">
+                  <div>
+                    <b>No. of Projects:</b> {client.project_count || 0}
+                  </div>
+                  <div>
+                    <b>No. of Team Members:</b> {client.employee_count || 0}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Close Button (sticky at bottom) */}
+          <div style={{
+            width: '100%',
+            background: '#fff',
+            boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
+            padding: '12px 0 10px 0',
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 10,
+            display: 'flex',
+            justifyContent: 'center',
+          }}>
             <button
               className="btn"
               style={{
@@ -150,8 +268,6 @@ const ClientInfoModal = ({ client, onClose }) => {
                 letterSpacing: 1,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
                 transition: "filter 0.2s, box-shadow 0.2s",
-                marginTop: 8,
-                marginBottom:10,
               }}
               onClick={onClose}
               onMouseOver={e => e.currentTarget.style.filter = "brightness(1.1)"}

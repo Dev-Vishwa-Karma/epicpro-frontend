@@ -428,13 +428,14 @@ class Users extends Component {
 							users: data.data,
 							allUsers: data.data,
 							currentPage: 1,
-							loading: false
+							loading: false,
+							error: null 
 						});
 					} else {
 						this.setState({ 
 							users: [], 
 							loading: false,
-							error: data.message || 'No results found'
+							error: null
 						});
 					}
 				})
@@ -653,9 +654,15 @@ class Users extends Component {
 																</tr>
 															))
 														): (
-															!error && <tr><td>No users found</td></tr>
-														)}
-													</tbody>
+															!error && (
+																<tr>
+																	<td colSpan="6" style={{ textAlign: 'center', color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+                                                                        User not found
+                                                                    </td>
+                                                                </tr>
+                                                            )
+                                                        )}
+                                                    </tbody>
 												</table>
 												)}
 											</div>

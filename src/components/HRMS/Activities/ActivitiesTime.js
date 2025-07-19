@@ -35,43 +35,35 @@ class ActivitiesTime extends Component {
                         : null;
                     // Date Seperation
                     let showSeparator = false;
-                    function getDateStr(activity) {
-                        const dateTime = activity.complete_in_time || activity.complete_out_time;
-                        if (!dateTime) return 'Unknown Date';
-                        return dateTime.split(' ')[0];
-                    }
-                    function getDisplayDateLabel(dateStr, isFirst) {
-                        if (!dateStr || dateStr === 'Unknown Date') {
-                        return isFirst ? '' : '';
-                        }
-                        const date = new Date(dateStr);
-                        if (isNaN(date.getTime())) {
-                        return isFirst ? '' : '';
-                        }
-                        const today = new Date();
-                        const yesterday = new Date();
-                        yesterday.setDate(today.getDate() - 1);
-                        function stripTime(d) {
-                        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                        }
-                        const dateNoTime = stripTime(date);
-                        const todayNoTime = stripTime(today);
-                        const yesterdayNoTime = stripTime(yesterday);
-                        if (dateNoTime.getTime() === todayNoTime.getTime()) return '';
-                        if (dateNoTime.getTime() === yesterdayNoTime.getTime()) return 'Yesterday';
-                        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
-                    }
-                    const currentDateStr = getDateStr(activity);
                     let displayDate = '';
-                    if (index > 0) {
-                        const prevDateStr = getDateStr(activities[index - 1]);
-                        if (currentDateStr !== prevDateStr) {
-                        showSeparator = true;
-                        displayDate = getDisplayDateLabel(currentDateStr, false);
-                        }
+                    // activity.date from backend for date separation
+                    const currentDateStr = activity.date ? activity.date.split(' ')[0] : null;
+                    if (index === 0) {
+                      showSeparator = true;
                     } else {
+                      const prevDateStr = activities[index - 1].date ? activities[index - 1].date.split(' ')[0] : null;
+                      if (currentDateStr !== prevDateStr) {
                         showSeparator = true;
-                        displayDate = getDisplayDateLabel(currentDateStr, true);
+                      }
+                    }
+                    if (showSeparator && currentDateStr) {
+                      const dateObj = new Date(currentDateStr);
+                      const today = new Date();
+                      const yesterday = new Date();
+                      yesterday.setDate(today.getDate() - 1);
+                      function stripTime(d) {
+                        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                      }
+                      const dateNoTime = stripTime(dateObj);
+                      const todayNoTime = stripTime(today);
+                      const yesterdayNoTime = stripTime(yesterday);
+                      if (dateNoTime.getTime() === todayNoTime.getTime()) {
+                        displayDate = '';
+                      } else if (dateNoTime.getTime() === yesterdayNoTime.getTime()) {
+                        displayDate = 'Yesterday';
+                      } else {
+                        displayDate = dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+                      }
                     }
                     return (
                         <>

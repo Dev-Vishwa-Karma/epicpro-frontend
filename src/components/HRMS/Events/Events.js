@@ -148,7 +148,6 @@ class Events extends Component {
 	fetchEmployees = () => {
 		getService.getCall('get_employees.php', {
 			action: 'view',
-			role:'employee'
 		})
 			.then(data => {
 				if (data.status === 'success') {
