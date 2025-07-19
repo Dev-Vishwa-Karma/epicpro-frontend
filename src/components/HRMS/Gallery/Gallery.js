@@ -554,7 +554,7 @@ class Gallery extends Component {
                                                 title="Delete Image"
                                                 onClick={() => this.openDeleteModal(image)}
                                             >
-                                                <i className="fa fa-trash-o " style={{ fontSize: '1.2rem', color:'#fd5c63' }}></i>
+                                                <i className="fa fa-trash " style={{ fontSize: '1rem', color:'red' }}></i>
                                             </button>
                                             <img src={`${process.env.REACT_APP_API_URL}/${image.url}`} alt="Gallery" className="rounded" />
                                         </div>

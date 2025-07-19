@@ -930,11 +930,16 @@ class Report extends Component {
                                                                 onChange={this.handleEmployeeChange}
                                                             >
                                                                 <option value="">All Employees</option>
-                                                                {employeeData.map((employee) => (
-                                                                    <option key={employee.id} value={employee.id}>
-                                                                        {employee.first_name} {employee.last_name}
-                                                                    </option>
-                                                                ))}
+                                                                {employeeData
+                                                                    .filter(employee => {
+                                                                        const role = (employee.role || '').toLowerCase();
+                                                                        return role !== 'admin' && role !== 'super_admin';
+                                                                    })
+                                                                    .map((employee) => (
+                                                                        <option key={employee.id} value={employee.id}>
+                                                                            {employee.first_name} {employee.last_name}
+                                                                        </option>
+                                                                    ))}
                                                             </select>
                                                         </div>
                                                     </div> 
