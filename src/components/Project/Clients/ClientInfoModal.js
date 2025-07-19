@@ -90,7 +90,7 @@ const ClientInfoModal = ({ client, onClose }) => {
               }}
             >
               <span style={{ marginLeft: 24 }}>
-                {client.client_about || "No description available."}
+                {client.client_about || " "}
               </span>
             </div>
 
@@ -203,9 +203,9 @@ const ClientInfoModal = ({ client, onClose }) => {
                         <span style={{ fontWeight: 600, minWidth: 48 }}>Team:</span>
                         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                         {project.team_member_details && project.team_member_details.length > 0 ? (
-                          project.team_member_details.map((member) => (
+                          project.team_member_details.map((member, idx) => (
                             <img
-                              key={member}
+                              key={idx}
                               src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
                               alt={member.full_name}
                               style={{
@@ -215,13 +215,18 @@ const ClientInfoModal = ({ client, onClose }) => {
                                 border: '2px solid #fff',
                                 objectFit: 'cover',
                                 boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
-                                marginLeft: member === 0 ? 0 : -14,
+                                marginLeft: idx === 0 ? 0 : -14,
                                 background: '#fff',
-                                zIndex: 10 + member,
+                                zIndex: 10 + idx,
                                 transition: 'z-index 0.2s',
                                 cursor: 'pointer',
                               }}
                               title={member.full_name}
+                              onError={e => {
+                                if (!e.target.src.includes('/assets/images/sm/avatar2.jpg')) {
+                                  e.target.src = '/assets/images/sm/avatar2.jpg';
+                                }
+                              }}
                             />
                           ))
                         ) : (
@@ -233,12 +238,12 @@ const ClientInfoModal = ({ client, onClose }) => {
                 ))
               ) : (
                 <div className="card p-3 text-center">
-                  <div>
+                  {/* <div>
                     <b>No. of Projects:</b> {client.project_count || 0}
                   </div>
                   <div>
                     <b>No. of Team Members:</b> {client.employee_count || 0}
-                  </div>
+                  </div> */}
                 </div>
               )}
             </div>
