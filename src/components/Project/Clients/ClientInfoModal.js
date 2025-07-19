@@ -197,46 +197,36 @@ const ClientInfoModal = ({ client, onClose }) => {
                             ))
                           : 'N/A'}
                       </div>
-                      {/* Start date */}
-                      {/* <div style={{ minWidth: 90, textAlign: 'right', fontWeight: 500 }}>
-                        {project.start_date || "N/A"}
-                      </div> */}
                     </div>
-                    <div>
-                      {/* Team with profile pic */}
-                      <div className="d-flex">
-                      <span style={{ fontWeight: 600, marginTop:10 }}>Team:</span>
-                      <div style={{ display: "flex", alignItems: "center", marginLeft: 20 }}>
-                        {project.team_members && project.team_members.length > 0 ? (
-                          project.team_members.map((member) => (
-                            <div
-                              key={member.employee_id}
+                    {/* Team member profiles */}
+                    <div style={{ color: '#555', fontSize: 15, marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontWeight: 600, minWidth: 48 }}>Team:</span>
+                        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {project.team_member_details && project.team_member_details.length > 0 ? (
+                          project.team_member_details.map((member) => (
+                            <img
+                              key={member}
+                              src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
+                              alt={member.full_name}
                               style={{
-                                marginLeft: member === 0 ? 0 : -12,
-                                zIndex: project.team_members.length - member,
-                                position: "relative",
+                                width: 36,
+                                height: 36,
+                                borderRadius: '50%',
+                                border: '2px solid #fff',
+                                objectFit: 'cover',
+                                boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+                                marginLeft: member === 0 ? 0 : -14,
+                                background: '#fff',
+                                zIndex: 10 + member,
+                                transition: 'z-index 0.2s',
+                                cursor: 'pointer',
                               }}
-                              title={`${member.first_name} ${member.last_name}`}
-                            >
-                              <img
-                                src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
-                                alt={`${member.first_name} ${member.last_name}`}
-                                style={{
-                                  width: 36,
-                                  height: 36,
-                                  borderRadius: "50%",
-                                  border: "2px solid #fff",
-                                  objectFit: "cover",
-                                  boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
-                                  cursor: "pointer",
-                                }}
-                              />
-                            </div>
+                              title={member.full_name}
+                            />
                           ))
                         ) : (
                           <span className="text-muted" style={{ marginLeft: 8 }}>No team members</span>
                         )}
-                      </div>
                       </div>
                     </div>
                   </div>
