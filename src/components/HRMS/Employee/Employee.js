@@ -1014,7 +1014,13 @@ class Employee extends Component {
 																		</tr>
 																	))
 																): (
-																	!message && <tr><td>No employees found</td></tr>
+																	!message && (
+																		<tr>
+																			<td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+																				No employees found
+																			</td>
+																		</tr>
+																	)
 																)}
 															</tbody>
 														</table>
@@ -1253,7 +1259,7 @@ class Employee extends Component {
 																	))
 																) : (
 																	<tr>
-                                                                        <td colSpan={6} className="text-center">No leaves found</td>
+                                                                        <td colSpan={7} className="text-center">No leaves found</td>
                                                                     </tr>
 																)}
 															</tbody>
@@ -1265,28 +1271,28 @@ class Employee extends Component {
 
 										{/* Only show pagination if there are employee leaves */}
 										{totalPagesLeaves > 1 && (
-											<nav aria-label="Page navigation">
-												<ul className="pagination mb-0 justify-content-end">
+    <nav aria-label="Page navigation">
+        <ul className="pagination mb-0 justify-content-end">
 													<li className={`page-item ${currentPageLeaves === 1 ? 'disabled' : ''}`}>
 														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves - 1, 'leaves')}>
-															Previous
-														</button>
-													</li>
+                    Previous
+                </button>
+            </li>
 													{[...Array(totalPagesLeaves)].map((_, i) => (
 														<li key={i} className={`page-item ${currentPageLeaves === i + 1 ? 'active' : ''}`}>
 															<button className="page-link" onClick={() => this.handlePageChange(i + 1, 'leaves')}>
 																{i + 1}
-															</button>
-														</li>
+                    </button>
+                </li>
 													))}
 													<li className={`page-item ${currentPageLeaves === totalPagesLeaves ? 'disabled' : ''}`}>
 														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves + 1, 'leaves')}>
-															Next
-														</button>
-													</li>
-												</ul>
-											</nav>
-										)}
+                    Next
+                </button>
+            </li>
+        </ul>
+    </nav>
+)}
 									</div>
 								</div>
 							</div>
