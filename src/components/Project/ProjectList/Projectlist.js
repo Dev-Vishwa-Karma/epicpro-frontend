@@ -871,40 +871,32 @@ class ProjectList extends Component {
                 <strong>Team:</strong>
               </div>
               <div className="col-8 py-1">
-                <div className="avatar-list avatar-list-stacked">
-                  {project.team_members.map((member) => (
-                    <span key={member.id || member.employee_id}>
-                      {member.profile ? (
-                        <img
-                          src={`${process.env.REACT_APP_API_URL}/${member.profile}`}
-                          className="avatar avatar-blue add-space"
-                          alt={`${member.first_name} ${member.last_name}`}
-                          data-toggle="tooltip"
-                          data-placement="top"
-                          title={`${member.first_name} ${member.last_name}`}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <span
-                          className="avatar avatar-blue add-space"
-                          data-toggle="tooltip"
-                          data-placement="top"
-                          title={`${member.first_name} ${member.last_name}`}
-                          style={{
-                            width: '35px',
-                            height: '35px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {member.first_name.charAt(0).toUpperCase()}
-                          {member.last_name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {project.team_members.map((member, idx) => (
+                    <img
+                      key={member.id || member.employee_id}
+                      src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
+                      alt={`${member.first_name} ${member.last_name}`}
+                      title={`${member.first_name} ${member.last_name}`}
+                      style={{
+                        width: 35,
+                        height: 35,
+                        borderRadius: '50%',
+                        border: '2px solid #fff',
+                        objectFit: 'cover',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+                        marginLeft: idx === 0 ? 0 : -14,
+                        background: '#fff',
+                        zIndex: 10 + idx,
+                        transition: 'z-index 0.2s',
+                        cursor: 'pointer',
+                      }}
+                      onError={e => {
+                        if (!e.target.src.includes('/assets/images/sm/avatar2.jpg')) {
+                          e.target.src = '/assets/images/sm/avatar2.jpg';
+                        }
+                      }}
+                    />
                   ))}
                 </div>
               </div>
