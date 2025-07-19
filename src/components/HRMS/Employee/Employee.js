@@ -150,7 +150,22 @@ class Employee extends Component {
 				employee_id: id || null,
 				logged_in_employee_role: role || null,
 			});
-			
+
+			const now = new Date();
+			const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+			const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+			// Set the state for fromDate and toDate
+			// this.setState({
+			// 	fromDate: firstDay,
+			// 	toDate: lastDay
+			// });
+			const formatDate = (date) => {
+				const year = date.getFullYear();
+				const month = String(date.getMonth() + 1).padStart(2, '0'); 
+				const day = String(date.getDate()).padStart(2, '0'); 
+				return `${year}-${month}-${day}`; 
+			};
+
 			// Fetch employees & leaves based on role using EmployeeService
 			Promise.all([
 				getService.getCall('get_employees.php', {
@@ -160,7 +175,9 @@ class Employee extends Component {
 				}),
 				getService.getCall('employee_leaves.php', {
 					action: 'view',
-					role:role === "admin" || role === "super_admin" ? null : id,
+					start_date:formatDate(firstDay),
+					end_date: formatDate(lastDay),
+					role:role === "admin" || role === "super_admin" ? null : id
 				})
 			])
 			.then(([employeesData, employeeLeavesData]) => {
@@ -210,8 +227,8 @@ class Employee extends Component {
 
 		getService.getCall('employee_leaves.php', {
 			action: 'view',
-			from_date:fromDateFormatted,
-			to_date: toDateFormatted,
+			start_date:fromDateFormatted,
+			end_date: toDateFormatted,
 			employee_id: selectedLeaveEmployee
 		})
         .then(data => {
