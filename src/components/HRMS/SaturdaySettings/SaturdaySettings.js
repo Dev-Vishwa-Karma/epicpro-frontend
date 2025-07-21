@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
-
+import { getService } from "../../../services/getService";
 class SaturdaySettings extends Component {
   constructor(props) {
     super(props);
@@ -146,10 +146,11 @@ class SaturdaySettings extends Component {
     const { selectedYear } = this.state;
 
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=view&year=${selectedYear}`
-      );
-      const data = await response.json();
+      const data = await getService.getCall('alternate_saturdays.php', {
+        action: 'view',
+        year:selectedYear
+      })
+
 
       if (data.status === "success" && Array.isArray(data.data)) {
         const savedSaturdays = data.data;
@@ -254,20 +255,9 @@ class SaturdaySettings extends Component {
     }
 
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/alternate_saturdays.php?action=add`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+      const result = await getService.addCall('alternate_saturdays.php','add',JSON.stringify({
             saturdays: mergedData,
-          }),
-        }
-      );
-
-      const result = await response.json();
+          }) )
 
       if (result && result.status === "success") {
         this.setState({

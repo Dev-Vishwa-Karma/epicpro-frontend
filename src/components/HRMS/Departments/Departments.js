@@ -5,6 +5,7 @@ import DepartmentModal from './DepartmentModal';
 import DeleteModal from '../../common/DeleteModal';
 import DepartmentTable from './DepartmentTable';
 import DepartmentGrid from './DepartmentGrid';
+import { getService } from '../../../services/getService';
 class departments extends Component {
     constructor(props) {
 		super(props);
@@ -29,10 +30,9 @@ class departments extends Component {
 	}
 
     componentDidMount() {
-        fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=view`, {
-            method: "GET",
+        getService.getCall('departments.php', {
+            action: 'view'
         })
-		.then(response => response.json())
 		.then(data => {
             if (data.status === 'success') {
                 this.setState({ departmentData: data.data, loading: false }); // Update users in state
@@ -137,24 +137,13 @@ class departments extends Component {
 
         const { selectedDepartment } = this.state;
         if (!selectedDepartment) return;
+        
+        const data = {
+            department_name: selectedDepartment.department_name,
+            department_head: selectedDepartment.department_head,
+        };
 
-        // Example API call
-        fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=edit&id=${selectedDepartment.id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                department_name: selectedDepartment.department_name,
-                department_head: selectedDepartment.department_head,
-            }),
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Failed to update department');
-            }
-            return response.json();
-        })
+        getService.editCall('departments.php','edit', JSON.stringify(data), selectedDepartment.id )
         .then((data) => {
             if (data.success) {
                 this.setState((prevState) => {
@@ -200,9 +189,13 @@ class departments extends Component {
 
     openModal = (departmentId) => {
         this.setState({
-            departmentToDelete: departmentId, // Save the department data
+            departmentToDelete: departmentId,
         });
     };
+
+    onCloseDeleteModal = () => {
+        this.setState({ departmentToDelete: null });
+    }
 
     onCloseAddEdit = () => {
         this.setState({ showModal: false,
@@ -220,10 +213,7 @@ class departments extends Component {
 
         this.setState({ ButtonLoading: true });
       
-        fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=delete&id=${departmentToDelete}`, {
-          method: 'DELETE',
-        })
-        .then((response) => response.json())
+       getService.deleteCall('departments.php','delete', departmentToDelete )
         .then((data) => {
         if (data.success) {
             this.setState((prevState) => ({
@@ -235,7 +225,7 @@ class departments extends Component {
                 ButtonLoading: false,
 
             }));
-            document.querySelector("#deleteDepartmentModal .close").click();
+            this.onCloseDeleteModal();
             setTimeout(this.dismissMessages, 3000);
         } else {
             this.setState({
@@ -311,11 +301,7 @@ class departments extends Component {
         addDepartmentFormData.append('department_head', department_head);
 
         // API call to add department
-        fetch(`${process.env.REACT_APP_API_URL}/departments.php?action=add`, {
-            method: "POST",
-            body: addDepartmentFormData,
-        })
-        .then((response) => response.json())
+        getService.addCall('departments.php','add', addDepartmentFormData)
         .then((data) => {
             if (data.success) {
                 // Update the department list
@@ -457,10 +443,12 @@ class departments extends Component {
                         loading={this.state.ButtonLoading}
                     />
                     <DeleteModal
+                        show={!!this.state.departmentToDelete}
                         onConfirm={this.confirmDelete}
                         isLoading={this.state.ButtonLoading}
                         deleteBody='Are you sure you want to delete the Department?'
                         modalId="deleteDepartmentModal"
+                        onClose={this.onCloseDeleteModal}
                     />
                 </div>
             </>

@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
-
+import { getService } from '../../../services/getService';
+import DeleteModal from '../../common/DeleteModal';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -24,6 +25,9 @@ class Gallery extends Component {
             sortOrder: "asc", // Default to newest first
             loading: true,
             ButtonLoading: false,
+            showDeleteModal: false,
+            imageToDelete: null,
+            deleteLoading: false,
         };
         this.fileInputRef = React.createRef();
     }
@@ -38,11 +42,11 @@ class Gallery extends Component {
         }
         // Check if user is admin or superadmin
         if (role === 'admin' || role === 'super_admin') {
-            // Fetch employees data if user is admin or super_admin
-            fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-                method: "GET",
+            getService.getCall('get_employees.php', {
+                action: 'view',
+                role: 'employee', 
             })
-            .then(response => response.json())
+
             .then(data => {
                 if (data.status === 'success') {
                     this.setState({
@@ -60,33 +64,27 @@ class Gallery extends Component {
         }
 
         // Fetch gallery data
-        let galleryUrl = `${process.env.REACT_APP_API_URL}/gallery.php?action=view`;
-        if (role === "employee") {
-            // Add employee ID param if role is employee
-            galleryUrl += `&id=${id}`;
-        }
-
-        // Fetch gallery data (as in the previous code)
-        fetch(galleryUrl, {
-            method: "GET",
+        const params = role === "employee" ? id : null;
+        getService.getCall('gallery.php', {
+            action: 'view',
+            employee_id:params 
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                this.setState({
-                    images: sortedImages,
-                    filteredImages: sortedImages,
-                    loading: false
-                });
-            } else {
-                this.setState({ message: data.message, loading: false });
-            }
-        })
-        .catch(err => {
-            this.setState({ message: 'Failed to fetch data', loading: false });
-            console.error(err);
-        });
+            .then(data => {
+                if (data.status === 'success') {
+                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
+                    this.setState({
+                        images: sortedImages,
+                        filteredImages: sortedImages,
+                        loading: false
+                    });
+                } else {
+                    this.setState({ message: data.message, loading: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ message: 'Failed to fetch data', loading: false });
+                console.error(err);
+            });
     }
 
     openModal = () => {
@@ -202,11 +200,7 @@ class Gallery extends Component {
 
         this.setState({ ButtonLoading: true });
         // Send images using fetch or axios
-        fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=add`, {
-            method: 'POST',
-            body: uploadImageData,
-        })
-        .then(response => response.json())
+        getService.addCall('gallery.php','add',uploadImageData )
         .then(data => {
             if (data.status === "success") {
                 // Reset file input field using ref
@@ -229,6 +223,9 @@ class Gallery extends Component {
                     };
                 });
                 
+                // Close the modal after successful upload
+            // this.closeModal();
+
                 // Auto-hide success message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);
             } else {
@@ -301,10 +298,66 @@ class Gallery extends Component {
             errorMessage: "",
         });
     };
+
+    // Open delete modal for image
+    openDeleteModal = (image) => {
+        this.setState({ showDeleteModal: true, imageToDelete: image });
+    };
+
+    // Close delete modal
+    closeDeleteModal = () => {
+        this.setState({ showDeleteModal: false, imageToDelete: null, deleteLoading: false });
+    };
+
+    // Confirm delete image
+    confirmDeleteImage = () => {
+    const { imageToDelete } = this.state;
+    if (!imageToDelete) return;
+    this.setState({ deleteLoading: true });
+    
+    // Get user info from window.user
+    const { role: loggedInUserRole, id: loggedInUserId } = window.user || {};
+    
+    // Call delete with all required parameters
+    getService.deleteCall('gallery.php', 'delete', imageToDelete.id, null, loggedInUserRole, loggedInUserId)
+        .then(data => {
+            if (data.status === 'success') {
+                this.setState(prevState => {
+                    const updatedImages = prevState.images.filter(img => img.id !== imageToDelete.id);
+                    const updatedFiltered = prevState.filteredImages.filter(img => img.id !== imageToDelete.id);
+                    return {
+                        images: updatedImages,
+                        filteredImages: updatedFiltered,
+                        showDeleteModal: false,
+                        imageToDelete: null,
+                        deleteLoading: false,
+                        successMessage: data.message,
+                        showSuccess: true
+                    };
+                });
+                setTimeout(this.dismissMessages, 3000);
+            } else {
+                this.setState({
+                    errorMessage: data.message || 'Failed to delete image.',
+                    showError: true,
+                    deleteLoading: false
+                });
+                setTimeout(this.dismissMessages, 3000);
+            }
+        })
+        .catch(err => {
+            this.setState({
+                errorMessage: 'An error occurred while deleting the image.',
+                showError: true,
+                deleteLoading: false
+            });
+            setTimeout(this.dismissMessages, 3000);
+        });
+};
     
     render() {
         const { fixNavbar } = this.props;
-        const { sortOrder, filteredImages, currentPage, imagesPerPage, employees, loading, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { sortOrder, filteredImages, currentPage, imagesPerPage, employees, loading, showSuccess, successMessage, showError, errorMessage, showDeleteModal, deleteLoading, imageToDelete } = this.state;
 
         // Pagination Logic
         const indexOfLastImage = currentPage * imagesPerPage;
@@ -321,6 +374,19 @@ class Gallery extends Component {
                     errorMessage={errorMessage}
                     setShowSuccess={(val) => this.setState({ showSuccess: val })}
                     setShowError={(val) => this.setState({ showError: val })}
+                />
+                {/* Delete Modal */}
+                <DeleteModal
+                    show={showDeleteModal}
+                    onConfirm={this.confirmDeleteImage}
+                    isLoading={deleteLoading}
+                    onClose={this.closeDeleteModal}
+                    deleteBody={
+                        imageToDelete ? (
+                            <span>Are you sure you want to delete this image?</span>
+                        ) : ''
+                    }
+                    modalId="deleteGalleryImageModal"
                 />
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
                     <div className="container-fluid">
@@ -478,8 +544,18 @@ class Gallery extends Component {
                             
                             {!loading && filteredImages.length > 0 && ( // If not employee, show images if available
                                 currentImages.map((image, index) => (
-                                    <div className="col-sm-6 col-lg-3" key={index + 1}>
-                                        <div className="card p-3">
+                                    <div className="col-sm-6 col-lg-3" key={image.id || index}>
+                                        <div className="card p-3 position-relative">
+                                            {/* Delete Icon */}
+                                            <button
+                                                type="button"
+                                                className="btn btn-link p-0 position-absolute"
+                                                style={{ top: '1px', right: '4px', zIndex: 2 }}
+                                                title="Delete Image"
+                                                onClick={() => this.openDeleteModal(image)}
+                                            >
+                                                <i className="fa fa-trash " style={{ fontSize: '1rem', color:'red' }}></i>
+                                            </button>
                                             <img src={`${process.env.REACT_APP_API_URL}/${image.url}`} alt="Gallery" className="rounded" />
                                         </div>
                                     </div>

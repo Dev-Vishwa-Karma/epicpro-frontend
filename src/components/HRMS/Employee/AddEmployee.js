@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
+import CropperModal from './CropperModal';
+import { getService } from "../../../services/getService";
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -53,6 +55,9 @@ class AddEmployee extends Component {
       statisticsVisibilityStatus: 1,
       errors: {},
       ButtonLoading: false,
+      showCropper: false,
+      cropperImage: null,
+      photoInputName: '',
     };
 
     // Create refs for each file input
@@ -77,10 +82,9 @@ class AddEmployee extends Component {
 
   componentDidMount() {
     // Get department data from departments table
-    fetch(`${process.env.REACT_APP_API_URL}/departments.php`, {
-      method: "GET",
-    })
-      .then((response) => response.json())
+       getService.getCall('departments.php', {
+            action: 'view'
+          })
       .then((data) => {
         this.setState({ departments: data.data });
       })
@@ -122,9 +126,22 @@ class AddEmployee extends Component {
 
   handleFileChange = (e) => {
     const { name, files } = e.target;
+    const file = files[0];
+    if (file && name === "photo") {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
     this.setState({
-      [name]: files[0],
+          cropperImage: ev.target.result,
+          showCropper: true,
+          photoInputName: name,
+        });
+      };
+      reader.readAsDataURL(file);
+    } else if (file) {
+      this.setState({
+        [name]: file,
     });
+    }
   };
 
   handleSkillChange = (e, category) => {
@@ -297,11 +314,7 @@ class AddEmployee extends Component {
     addEmployeeData.append("logged_in_employee_role", role);
 
 
-    fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=add`, {
-      method: "POST",
-      body: addEmployeeData,
-    })
-      .then((response) => response.json())
+    getService.addCall('get_employees.php','add', addEmployeeData)
       .then((data) => {
         if (data.status === "success") {
           // Update the department list
@@ -384,6 +397,18 @@ class AddEmployee extends Component {
 
   handleBack = () => {
     this.props.history.goBack(); // Navigate to the previous page
+  };
+
+  handleCropperCrop = (blob) => {
+    const croppedFile = new File([blob], "profile.jpg", { type: "image/jpeg" });
+    this.setState({
+      photo: croppedFile,
+      showCropper: false,
+      cropperImage: null,
+    });
+  };
+  handleCropperCancel = () => {
+    this.setState({ showCropper: false, cropperImage: null });
   };
 
   render() {
@@ -1266,6 +1291,13 @@ class AddEmployee extends Component {
             </div>
           </div>
         </div>
+        <CropperModal
+          open={this.state.showCropper}
+          image={this.state.cropperImage}
+          onCrop={this.handleCropperCrop}
+          onCancel={this.handleCropperCancel}
+          aspectRatio={1}
+        />
       </>
     );
   }

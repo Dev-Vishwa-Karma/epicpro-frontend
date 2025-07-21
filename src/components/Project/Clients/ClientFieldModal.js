@@ -34,7 +34,7 @@ const ClientFieldModal = ({
       previewUrl = profilePic;
     }
   }
-  const defaultAvatarUrl = 'https://ui-avatars.com/api/?name=User'; // fallback avatar
+  const defaultAvatarUrl = 'https://thumbs.dreamstime.com/b/male-avatar-profile-picture-silhouette-34443055.jpg';
 
   return (
     <>
@@ -44,7 +44,7 @@ const ClientFieldModal = ({
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" id={`${modalId}Label`}>
-                  {isEdit ? 'Edit Employee' : 'Add Employee'}
+                  {isEdit ? 'Edit Client' : 'Add Client'}
                 </h5>
                 <button type="button" className="close" onClick={onClose}>
                   <span aria-hidden="true">×</span>
@@ -100,7 +100,7 @@ const ClientFieldModal = ({
                       <input
                         type="text"
                         className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                        placeholder="Employee Name"
+                        placeholder="Client Name"
                         name="name"
                         value={name}
                         onChange={onChange}
@@ -114,7 +114,7 @@ const ClientFieldModal = ({
                       <input
                         type="email"
                         className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                        placeholder="Email"
+                        placeholder="Client Email"
                         name="email"
                         value={email}
                         onChange={onChange}
@@ -128,7 +128,7 @@ const ClientFieldModal = ({
                       <label className="form-label" htmlFor="about">About</label>
                       <textarea
                         className={`form-control ${errors.about ? 'is-invalid' : ''}`}
-                        placeholder="About Employee"
+                        placeholder="About Client"
                         name="about"
                         value={about}
                         onChange={onChange}
@@ -194,7 +194,7 @@ const ClientFieldModal = ({
                       >
                         <option value="">Select Status</option>
                         <option value="1">Active</option>
-                        <option value="0">In-Active</option>
+                        <option value="0">Inactive</option>
                       </select>
                       {errors.status && <small className="invalid-feedback">{errors.status}</small>}
                     </div>

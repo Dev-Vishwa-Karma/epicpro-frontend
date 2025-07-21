@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import { getService } from '../../../services/getService';
 class TodoList extends Component {
   constructor(props) {
     super(props);
@@ -18,10 +18,10 @@ class TodoList extends Component {
 
     this.setState({ loading: true });
 
-    fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&employee_id=${employeeId}`, {
-      method: 'GET',
-    })
-      .then((res) => res.json())
+    getService.getCall('project_todo.php', {
+			action: 'view',
+      employee_id:employeeId
+		})
       .then((data) => {
         if (data.status === 'success' && Array.isArray(data.data)) {
           this.setState({ todos: data.data, loading: false });
@@ -75,11 +75,13 @@ class TodoList extends Component {
               onChange={this.handleEmployeeSelection}
             >
               <option value="">Select an Employee</option>
-              {employees.map((employee) => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.first_name} {employee.last_name}
-                </option>
-              ))}
+                {employees
+                  .filter(emp => emp.role !== 'admin' && emp.role !== 'super_admin') // Filter out admins
+                  .map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.first_name} {employee.last_name}
+                    </option>
+                  ))}
             </select>
           </div>
         )}

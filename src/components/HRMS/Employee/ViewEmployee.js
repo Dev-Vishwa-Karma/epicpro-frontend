@@ -7,7 +7,7 @@ import 'cropperjs/dist/cropper.css';
 import CalendarWithTabs from './CalendarWithTabs';
 import AlertMessages from '../../common/AlertMessages';
 import InfiniteScroll from 'react-infinite-scroll-component';
-
+import { getService } from '../../../services/getService';
 class ViewEmployee extends Component {
     constructor(props) {
         super(props);
@@ -75,10 +75,11 @@ class ViewEmployee extends Component {
             uploadImageData.append('employee_id', this.state.employeeId);
             uploadImageData.append('created_by', window.user.id);
             uploadImageData.append('images[]', file);
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/gallery.php?action=add`, {
-                method: 'POST', body: uploadImageData
-            });
-            const data = await response.json();
+
+            // Wait for the API response
+            const data = await getService.addCall('gallery.php', 'add', uploadImageData);
+            
+
             if (data.status === "success") {
                 console.log('profileImagePath',data.data)
                 const profileImagePath = data.data[0].url.replace(/\\/g, '/');
@@ -119,10 +120,7 @@ class ViewEmployee extends Component {
             uploadImageData.append('employee_id', this.state.employeeId);
             uploadImageData.append('created_by', window.user.id);
             uploadImageData.append('image', croppedImage);
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=profile-update`, {
-                method: 'POST', body: uploadImageData
-            });
-            const data = await response.json();
+            const data = await getService.editCall('get_employees.php', 'profile-update', uploadImageData);
             if (data.status === "success") {
                 const profileImagePath = data.data.url.replace(/\\/g, '/');
                 const updatedImages = [...this.state.images];
@@ -238,10 +236,10 @@ class ViewEmployee extends Component {
     };
 
     fetchEmployeeDetails = (employeeId) => {
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&user_id=${employeeId}`, {
-            method: "GET",
+         getService.getCall('get_employees.php', {
+            action: 'view',
+            user_id:employeeId
         })
-            .then((response) => response.json())
             .then((data) => {
                 if (data.status === "success") {
                     this.setState(prevState => ({

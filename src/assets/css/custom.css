@@ -206,3 +206,45 @@ border-left: 6px solid #e6140d !important;
 .alternate-saturday-closure{
     background-color: chocolate !important;
 }
+
+  .masonry {
+    column-count: 4;
+    column-gap: 1rem;
+    padding: 1rem;
+  }
+
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+
+  .masonry-item card img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  @media (max-width: 1200px) {
+    .masonry {
+      column-count: 3;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .masonry {
+      column-count: 2;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .masonry {
+      column-count: 1;
+    }
+  }
+
+  .loader-container, .no-images {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }

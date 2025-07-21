@@ -5,6 +5,9 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
+import { getService } from '../../../services/getService';
+
+
 import {
 	statisticsAction,
 	statisticsCloseAction
@@ -147,32 +150,35 @@ class Employee extends Component {
 				employee_id: id || null,
 				logged_in_employee_role: role || null,
 			});
-			
-			const apiUrl = process.env.REACT_APP_API_URL;
-			let employeesUrl = "";
-			let leavesUrl = "";
-	
-			// Role-based API selection
-			if (role === "admin" || role === "super_admin") {
-				employeesUrl = `${apiUrl}/get_employees.php?action=view&role=employee`; // Fetch all employees
-				leavesUrl = `${apiUrl}/employee_leaves.php?action=view&employee_id=`; // Fetch all leaves
 
-			} else if (role === "employee") {
-				employeesUrl = `${apiUrl}/get_employees.php?action=view&user_id=${id}`; // Fetch only logged-in employee
-				leavesUrl = `${apiUrl}/employee_leaves.php?employee_id=${id}`; // Fetch only logged-in employee's leaves
-			} else {
-				console.warn("Invalid role or role not found.");
-				return;
-			}
-	
-			// Fetch employees & leaves based on role
+			const now = new Date();
+			const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+			const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+			// Set the state for fromDate and toDate
+			// this.setState({
+			// 	fromDate: firstDay,
+			// 	toDate: lastDay
+			// });
+			const formatDate = (date) => {
+				const year = date.getFullYear();
+				const month = String(date.getMonth() + 1).padStart(2, '0'); 
+				const day = String(date.getDate()).padStart(2, '0'); 
+				return `${year}-${month}-${day}`; 
+			};
+
+			// Fetch employees & leaves based on role using EmployeeService
 			Promise.all([
-				fetch(employeesUrl, {
-					method: "GET"
-				}).then(res => res.json()),
-				fetch(leavesUrl, {
-					method: "GET"
-				}).then(res => res.json()),
+				getService.getCall('get_employees.php', {
+					action: 'view',
+					role: 'employee',
+					employee_id:id
+				}),
+				getService.getCall('employee_leaves.php', {
+					action: 'view',
+					start_date:formatDate(firstDay),
+					end_date: formatDate(lastDay),
+					role:role === "admin" || role === "super_admin" ? null : id
+				})
 			])
 			.then(([employeesData, employeeLeavesData]) => {
 				// If only a single employee is returned, convert it to an array
@@ -205,11 +211,9 @@ class Employee extends Component {
 			console.warn("window.user is undefined");
 		}
 	}
-	
 
 	fetchEmployeeLeaves = () => {
-        const { fromDate, toDate, selectedLeaveEmployee } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/employee_leaves.php?action=view&employee_id=${selectedLeaveEmployee}`;
+		const { fromDate, toDate, selectedLeaveEmployee } = this.state;
         
         const formatDate = (date) => {
             const year = date.getFullYear();
@@ -218,15 +222,15 @@ class Employee extends Component {
             return `${year}-${month}-${day}`; 
         };
 
-        if (fromDate) {
-            apiUrl += `&start_date=${formatDate(fromDate)}`;
-        }
-        if (toDate) {
-            apiUrl += `&end_date=${formatDate(toDate)}`;
-        }
+        const fromDateFormatted = fromDate ? formatDate(fromDate) : null;
+        const toDateFormatted = toDate ? formatDate(toDate) : null;
 
-        fetch(apiUrl)
-        .then(response => response.json())
+		getService.getCall('employee_leaves.php', {
+			action: 'view',
+			start_date:fromDateFormatted,
+			end_date: toDateFormatted,
+			employee_id: selectedLeaveEmployee
+		})
         .then(data => {
             if (data.status === 'success') {
 				let employeesLeaveArray = Array.isArray(data.data) ? data.data : [data.data];
@@ -250,15 +254,16 @@ class Employee extends Component {
 	handleApplyFilters = () => {
 		this.setState({ ButtonLoading: true });
         this.fetchEmployeeLeaves();
-		setTimeout(() => this.setState({ ButtonLoading: false }), 3000);// Filtering takes about 1 second
+		//setTimeout(() => this.setState({ ButtonLoading: false }), 3000);
+		 this.setState({ ButtonLoading: false });
     };
 		
 	goToEditEmployee(employee, employeeId) {
 		// Fetch salary details based on employee_id
-		fetch(`${process.env.REACT_APP_API_URL}/employee_salary_details.php?action=view&employee_id=${employeeId}`,{
-			method: "POST",
-		})
-        .then((res) => res.json())
+		getService.getCall('employee_salary_details.php', {
+					action: 'view',
+					employee_id:employeeId
+				})
         .then((salaryDetails) => {
             if (salaryDetails.data) {
 				this.props.history.push({
@@ -363,25 +368,26 @@ class Employee extends Component {
         });
     };
 
+    // Function to close the delete employee modal
+    onCloseDeleteEmployeeModal = () => {
+        this.setState({ deleteUser: null });
+    };
+
+    // Function to close the delete leave modal
+    onCloseDeleteLeaveModal = () => {
+        this.setState({ deleteEmployeeLeave: null });
+    };
+
 	confirmDelete = () => {
 		const { deleteUser, currentPageEmployees, employeeData, dataPerPage } = this.state;
 		const {id, role} = window.user;
 		const loggedInUserId = id; // Get logged-in user ID
 		const loggedInUserRole = role; // Get logged-in user role
-	
+		
 		if (!deleteUser) return;
 
 		this.setState({ ButtonLoading: true });
-	
-		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
-			method: "POST",  // Change method from DELETE to POST
-			body: JSON.stringify({
-				user_id: deleteUser,
-				logged_in_employee_id: loggedInUserId,
-				logged_in_employee_role: loggedInUserRole,
-			}),
-		})
-		.then((response) => response.json())
+		getService.deleteCall('get_employees.php','delete', null, deleteUser, loggedInUserId, loggedInUserRole)
 		.then((data) => {
 			if (data.status === "success") {
 				// Update users state after deletion
@@ -406,7 +412,7 @@ class Employee extends Component {
 					deleteUser: null,  // Clear the deleteUser state
 					ButtonLoading: false,
 				});
-				document.querySelector("#deleteEmployeeModal .close").click();
+				this.onCloseDeleteEmployeeModal(); // Close the modal after successful delete
 				setTimeout(this.dismissMessages, 3000);
 			} else {
 				this.setState({
@@ -516,12 +522,7 @@ class Employee extends Component {
         addEmployeeLeaveData.append('status', finalStatus);
         addEmployeeLeaveData.append('is_half_day', halfDayCheckbox);
 
-        // API call to add employee leave
-        fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=add`, {
-            method: "POST",
-            body: addEmployeeLeaveData,
-        })
-        .then((response) => response.json())
+		getService.addCall('employee_leaves.php','add', addEmployeeLeaveData)
         .then((data) => {
             if (data.status === "success") {
 				data.data.is_half_day = data.data.is_half_day.toString();
@@ -593,12 +594,7 @@ class Employee extends Component {
         updateEmployeeLeaveData.append('status', selectedEmployeeLeave.status);
 		updateEmployeeLeaveData.append('is_half_day', selectedEmployeeLeave.is_half_day);
 
-		// Example API call
-		fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=edit&id=${selectedEmployeeLeave.id}`, {
-			method: 'POST',
-			body: updateEmployeeLeaveData,
-		})
-		.then((response) => response.json())
+		getService.editCall('employee_leaves.php','edit',updateEmployeeLeaveData, selectedEmployeeLeave.id )
 		.then((data) => {
 			if (data.status === "success") {
 				this.setState((prevState) => {
@@ -665,10 +661,7 @@ class Employee extends Component {
 
         this.setState({ ButtonLoading: true });
 
-        fetch(`${process.env.REACT_APP_API_URL}/employee_leaves.php?action=delete&id=${deleteEmployeeLeave}`, {
-          	method: 'DELETE',
-        })
-        .then((response) => response.json())
+		getService.deleteCall('employee_leaves.php','delete', deleteEmployeeLeave, null, null, null)
         .then((data) => {
 			if (data.status === "success") {
 				this.setState((prevState) => {
@@ -703,8 +696,7 @@ class Employee extends Component {
 						ButtonLoading: false,
 					};
 				});
-				// Close the modal after deletion
-				document.querySelector("#deleteLeaveRequestModal .close").click();
+				this.onCloseDeleteLeaveModal(); // Close the modal after successful delete
 				setTimeout(() => this.setState({ showSuccess: false }), 3000);
 			} else {
 				this.setState({
@@ -770,7 +762,9 @@ class Employee extends Component {
 		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee, showSuccess, successMessage, showError, errorMessage  } = this.state;
 
 		// Handle empty employee data safely
-		const employeeList = (employeeData || []).length > 0 ? employeeData : [];
+		const employeeList = (employeeData || []).length > 0
+			? employeeData.filter(emp => emp.role === "employee")
+			: [];
 		const leaveList = (employeeLeavesData || []).length > 0 ? employeeLeavesData : [];
 
 		// Filter leaves
@@ -1594,18 +1588,22 @@ class Employee extends Component {
 
 				{/* Delete Leave Request Modal */}
 				<DeleteModal
+					show={!!this.state.deleteEmployeeLeave}
 					onConfirm={this.confirmDeleteForEmployeeLeave}
 					isLoading={this.state.ButtonLoading}
 					deleteBody='Are you sure you want to delete the leave?'
 					modalId="deleteLeaveRequestModal"
+					onClose={this.onCloseDeleteLeaveModal}
 				/>
 
 				{/* Delete Employee Model */}
 				<DeleteModal
+					show={!!this.state.deleteUser}
 					onConfirm={this.confirmDelete}
 					isLoading={this.state.ButtonLoading}
 					deleteBody='Are you sure you want to delete the employee?'
 					modalId="deleteEmployeeModal"
+					onClose={this.onCloseDeleteEmployeeModal}
 				/>
 			</>
 		);

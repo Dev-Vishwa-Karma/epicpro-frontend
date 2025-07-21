@@ -4,7 +4,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import TextEditor from '../../common/TextEditor';
-
+import { getService } from '../../../services/getService';
 class Report extends Component {
 
     constructor(props) {
@@ -75,10 +75,9 @@ class Report extends Component {
         });
 
         /** Get employees list */
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php`, {
-            method: "GET",
+        getService.getCall('get_employees.php', {
+            action: 'view'
         })
-            .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     this.setState({ employeeData: data.data });
@@ -257,11 +256,7 @@ class Report extends Component {
         formData.append('note', this.state.editNotes);
 
         // API call to add break
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=edit-report-by-admin`, {
-            method: "POST",
-            body: formData,
-        })
-            .then((response) => response.json())
+        getService.editCall('activities.php', 'report-by-admin', formData, null, null)
             .then((data) => {
                 if (data.status === "success") {
                     this.setState({ reportSuccess: data.message });
@@ -299,10 +294,7 @@ class Report extends Component {
         }
 
         // API call to add break
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=delete&id=${activityId}&user_id=${window.user.id}`, {
-            method: 'DELETE'
-        })
-            .then((response) => response.json())
+        getService.deleteCall('activities.php','delete', activityId, window.user.id, null, null)
             .then((data) => {
                 if (data.status === "success") {
                     this.setState({ reportSuccess: data.message });
@@ -388,11 +380,7 @@ class Report extends Component {
         formData.append('note', this.state.editNotes);
 
         // API call to add break
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-admin`, {
-            method: "POST",
-            body: formData,
-        })
-            .then((response) => response.json())
+        getService.addCall('activities.php','add-by-admin',formData )
             .then((data) => {
                 if (data.status === "success") {
                     this.setState({ reportSuccess: data.message });
@@ -687,11 +675,7 @@ class Report extends Component {
         formData.append("note", editNotes);
 
 		// API call to save the report and punch-out
-		fetch(`${process.env.REACT_APP_API_URL}/reports.php?action=update-report-by-user&report_id=${report_id}`, {
-			method: "POST",
-			body: formData,
-		})
-        .then((response) => response.json())
+        getService.editCall('reports.php', 'update-report-by-user', formData, report_id, null)
         .then((data) => {
             if (data.status === "success") {
                 this.setState({
@@ -726,8 +710,7 @@ class Report extends Component {
 
     fetchReports = () => {
         const { fromDate, toDate, selectedReportEmployee } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/reports.php?action=view&user_id=${selectedReportEmployee}`;
-        
+    
         const formatDate = (date) => {
             if (!date) return '';
             const year = date.getFullYear();
@@ -736,15 +719,12 @@ class Report extends Component {
             return `${year}-${month}-${day}`; 
         };
 
-        if (fromDate) {
-            apiUrl += `&from_date=${formatDate(fromDate)}`;
-        }
-        if (toDate) {
-            apiUrl += `&to_date=${formatDate(toDate)}`;
-        }
-
-        fetch(apiUrl)
-        .then(response => response.json())
+        getService.getCall('reports.php', {
+            action: 'view',
+            user_id:selectedReportEmployee,
+            from_date:formatDate(fromDate),
+            to_date:formatDate(toDate)
+        })
         .then(data => {
             if (data.status === 'success') {
 
@@ -950,11 +930,16 @@ class Report extends Component {
                                                                 onChange={this.handleEmployeeChange}
                                                             >
                                                                 <option value="">All Employees</option>
-                                                                {employeeData.map((employee) => (
-                                                                    <option key={employee.id} value={employee.id}>
-                                                                        {employee.first_name} {employee.last_name}
-                                                                    </option>
-                                                                ))}
+                                                                {employeeData
+                                                                    .filter(employee => {
+                                                                        const role = (employee.role || '').toLowerCase();
+                                                                        return role !== 'admin' && role !== 'super_admin';
+                                                                    })
+                                                                    .map((employee) => (
+                                                                        <option key={employee.id} value={employee.id}>
+                                                                            {employee.first_name} {employee.last_name}
+                                                                        </option>
+                                                                    ))}
                                                             </select>
                                                         </div>
                                                     </div> 

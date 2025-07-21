@@ -4,9 +4,11 @@ import { withRouter, NavLink } from "react-router-dom";
 import authService from "../Authentication/authService";
 import "react-datepicker/dist/react-datepicker.css";
 import { breakInAction, punchInAction, breakDurationCalAction } from '../../actions/settingsAction';
+import api from "../../api/axios";
 import AlertMessages from "../common/AlertMessages";
 import TextEditor from "../common/TextEditor";
 import DueTasksAlert from "../common/DueTasksAlert";
+import { getService } from "../../services/getService";
 
 class Header extends Component {
   constructor(props) {
@@ -42,6 +44,7 @@ class Header extends Component {
       is_task_due_today:false,
       showDueAlert:true,
       dueTasks:[],
+      disableButton:false,
     };
   }
 
@@ -64,8 +67,11 @@ class Header extends Component {
         userRole: user.role,
       }, () => { 
         this.startTimerInterval();
-        this.getPunchInStatus();
-        this.getActivities();
+        if (user.role === 'employee') {
+          this.getPunchInStatus();
+          this.getActivities();
+        }
+
         this.fetchNotifications();
         this.checkBirthdays(); 
         this.startNotificationInterval();
@@ -73,16 +79,13 @@ class Header extends Component {
       });
      
     }
-
-    // Proceed with the punch-in status check
   }
 
 
   startNotificationInterval() {
     this.notificationInterval = setInterval(() => {
       this.fetchNotifications();
-      this.checkBirthdays();
-    }, 20000);
+    }, 40000);
   }
 
   componentWillUnmount() {
@@ -90,10 +93,10 @@ class Header extends Component {
   }
 
   checktodayDueDate = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/project_todo.php?action=due_today_check&user_id=${window.user.id}`
-    )
-      .then((response) => response.json())
+    getService.getCall('project_todo.php', {
+      action: 'due_today_check',
+      user_id: window.user.id,
+    })
       .then((data) => {
         if (data.status === "success") {
             this.setState({
@@ -147,61 +150,68 @@ class Header extends Component {
   };
 
   autoCloseActivities = (punchInTime) => {
+    this.setState({
+          disableButton: true,
+    });
     const punchInTimeDate = punchInTime.toISOString().split('T')[0];
-    fetch(`${process.env.REACT_APP_API_URL}/auto_close_breaks.php?user_id=${window.user.id}&date=${punchInTimeDate}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.setState({
-            punchInTime: null,
-          });
-          clearInterval(this.state.timer);
-          this.props.punchInAction(false);
-          this.props.breakInAction(false);
-          window.location.reload();
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-            loading: false,
-          });
-          setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((err) => {
+		api.get(`${process.env.REACT_APP_API_URL}/auto_close_breaks.php?user_id=${window.user.id}&date=${punchInTimeDate}`)
+		.then(response => {
+			let data = response.data;
+      if (data.status === "success") {
+        this.setState({
+          punchInTime: null,
+          disableButton: false
+        });
+        clearInterval(this.state.timer);
+        this.props.punchInAction(false);
+        this.props.breakInAction(false);
+        window.location.reload();
+      } else {
+        this.setState({
+          errorMessage: data.message,
+          showError: true,
+          showSuccess: false,
+          loading: false,
+          disableButton: false
+        });
+        setTimeout(this.dismissMessages, 3000);
+      }
+		})
+    .catch((err) => {
         this.setState({
           errorMessage: "Failed to fetch data",
           showError: true,
           showSuccess: false,
+          disableButton: false
         });
         setTimeout(this.dismissMessages, 3000);
         console.error(err);
-      });
+    });
   }
 
-  getPunchInStatus = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=get_punch_status&user_id=${this.state.userId}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          const inTime = new Date(data.data[0].in_time);
-          this.props.punchInAction(true);
-          this.setState({
-            punchInTime: inTime,
-            start_time: inTime.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            }),
-          });
-          this.startTimerInterval(inTime);
-        } else {
-          this.props.punchInAction(false);
-        }
-      })
+  getPunchInStatus = async() => {
+    getService.getCall('activities.php', {
+      action: 'get_punch_status',
+      user_id:this.state.userId
+    })
+    .then(data => {
+      if (data.status === "success") {
+        console.log('data.data[0]',data.data[0])
+        const inTime = new Date(data.data[0].in_time);
+        this.props.punchInAction(true);
+        this.setState({
+          punchInTime: inTime,
+          start_time: inTime.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+        });
+        this.startTimerInterval(inTime);
+      } else {
+        this.props.punchInAction(false);
+      }
+    })
       .catch((error) => {
         this.setState({
           errorMessage: "Something went wrong. Please try again.",
@@ -223,12 +233,12 @@ class Header extends Component {
   };
 
   fetchNotifications = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/notifications.php?action=get_notifications&user_id=${window.user.id}&limit=5`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
+   getService.getCall('notifications.php', {
+      action: 'get_notifications',
+      user_id:window.user.id
+    })
+		.then(data => {
+	      if (data.status === "success") {
           this.setState({ notifications: data.data, loading: false });
         } else {
           this.setState({
@@ -237,77 +247,79 @@ class Header extends Component {
           });
           setTimeout(this.dismissMessages, 3000);
         }
-      })
-      .catch((err) => {
+		})
+    .catch((err) => {
         console.error(err);
-      });
+    });
   };
 
   checkBirthdays = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/notifications.php?action=birthday_notify`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
+     getService.getCall('notifications.php', {
+        action: 'birthday_notify'
+      })
+		.then(data => {
+			if (data.status === "success") {
           this.fetchNotifications();
         }
       })
       .catch((err) => {
         console.error('Error checking birthdays:', err);
-      });
+    });
   };
 
   markAsRead = (notification_id) => {
-    let apiUrl = `${process.env.REACT_APP_API_URL}/notifications.php?action=mark_read&user_id=${window.user.id}`;
-    if (notification_id) {
-        apiUrl += `&notification_id=${notification_id}`;
-    }
+      const apiCall = notification_id 
+        ? getService.getCall('notifications.php', {
+          action: 'mark_read',
+          user_id:window.user.id,
+          notification_id:notification_id
+        })
+        : getService.getCall('notifications.php', {
+          action: 'mark_read',
+          user_id:window.user.id,
+        })
 
-    fetch(
-      apiUrl
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.fetchNotifications();
-        } else {
-          console.error('Error marking notification as read');
-        }
-      })
-      .catch((err) => {
+    apiCall
+    .then(data => {
+      if (data.status === "success") {
+        this.fetchNotifications();
+      } else {
+        console.error('Error marking notification as read');
+      }
+		})
+    .catch((err) => {
         console.error('Error marking notification as read', err);
-      });
+    });
   };
 
   getActivities = () => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.props.breakDurationCalAction(data.data.break_duration);
-          this.setState({
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-          this.props.breakDurationCalAction(0);
-          setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((err) => {
+    getService.getCall('activities.php', {
+      action: 'break_calculation',
+      user_id:window.user.id
+    })
+		.then(data => {
+      if (data.status === "success") {
+        this.props.breakDurationCalAction(data.data.break_duration);
         this.setState({
-          errorMessage: "Failed to fetch data",
-          showError: true,
-          showSuccess: false,
+          loading: false,
         });
+      } else {
+        this.setState({
+          loading: false,
+        });
+        this.props.breakDurationCalAction(0);
         setTimeout(this.dismissMessages, 3000);
-        console.error(err);
+      }
+		})
+    .catch((err) => {
+      this.setState({
+        errorMessage: "Failed to fetch data",
+        showError: true,
+        showSuccess: false,
       });
+      setTimeout(this.dismissMessages, 3000);
+      console.error(err);
+    });
   };
 
   handlePunchIn = () => {
@@ -318,52 +330,44 @@ class Header extends Component {
     formData.append("status", "active");
 
     this.props.punchInAction(true);
-    // Proceed with punch-in API call
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          const currentTime = new Date();
+    getService.addCall('activities.php', 'add-by-user', formData)
+		.then(data => {
+      if (data.status === "success") {
+        const currentTime = new Date();
 
-          this.setState(
-            {
-              punchInTime: currentTime,
-              start_time: currentTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              }),
-              successMessage: data.message,
-              showError: false,
-              showSuccess: true,
-            }          );
+        this.setState(
+          {
+            punchInTime: currentTime,
+            start_time: currentTime.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            }),
+            successMessage: data.message,
+            showError: false,
+            showSuccess: true,
+          }          );
 
-            this.startTimerInterval(currentTime, false);
-            setTimeout(this.dismissMessages, 3000);
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-          });
-          this.props.punchInAction(false);
+          this.startTimerInterval(currentTime, false);
           setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((error) => {
+      } else {
         this.setState({
-          errorMessage: "Something went wrong. Please try again.",
+          errorMessage: data.message,
           showError: true,
           showSuccess: false,
         });
+        this.props.punchInAction(false);
         setTimeout(this.dismissMessages, 3000);
+      }
+		})
+    .catch((error) => {
+      this.setState({
+        errorMessage: "Something went wrong. Please try again.",
+        showError: true,
+        showSuccess: false,
       });
+      setTimeout(this.dismissMessages, 3000);
+    });
   };
 
   handlePunchOut = () => {
@@ -553,64 +557,56 @@ class Header extends Component {
       this.formatToMySQLDateTime(todays_total_hours)
     );
 
-    // API call to save the report and punch-out
-    fetch(
-      `${process.env.REACT_APP_API_URL}/reports.php?action=add-report-by-user`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          const newReport = data.data;
+    getService.addCall('reports.php', 'add-report-by-user', formData)
+		.then(data => {
+      if (data.status === "success") {
+        const newReport = data.data;
 
-          // Dispatch the custom event with new report
-          window.dispatchEvent(
-            new CustomEvent("reportMessage", {
-              detail: { report: newReport },
-            })
-          );
-          this.closeModal();
-        
-          this.setState({
-            successMessage: data.message,
-            showError: false,
-            showSuccess: true,
-            showModal: false,
-            report: "",
-            isReportSubmitting: false,
-            isReportSubmitted: true, //disable after submit
-          });
-
-          this.props.punchInAction(false);
-          this.props.breakDurationCalAction(0);
-          clearInterval(this.state.timer);
-          setTimeout(this.dismissMessages, 3000);
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-            isReportSubmitting: false,
-          });
-
-          this.props.punchInAction(true);
-          setTimeout(this.dismissMessages, 3000);
-
-        }
-      })
-      .catch((error) => {
+        // Dispatch the custom event with new report
+        window.dispatchEvent(
+          new CustomEvent("reportMessage", {
+            detail: { report: newReport },
+          })
+        );
+        this.closeModal();
+      
         this.setState({
-          errorMessage: "Something went wrong. Please try again.",
+          successMessage: data.message,
+          showError: false,
+          showSuccess: true,
+          showModal: false,
+          report: "",
+          isReportSubmitting: false,
+          isReportSubmitted: true, //disable after submit
+        });
+
+        this.props.punchInAction(false);
+        this.props.breakDurationCalAction(0);
+        clearInterval(this.state.timer);
+        setTimeout(this.dismissMessages, 3000);
+      } else {
+        this.setState({
+          errorMessage: data.message,
           showError: true,
           showSuccess: false,
           isReportSubmitting: false,
         });
-        this.props.punchInAction(false);
+
+        this.props.punchInAction(true);
         setTimeout(this.dismissMessages, 3000);
+
+      }
+		})
+    .catch((error) => {
+      this.setState({
+        errorMessage: "Something went wrong. Please try again.",
+        showError: true,
+        showSuccess: false,
+        isReportSubmitting: false,
       });
+      this.props.punchInAction(false);
+      setTimeout(this.dismissMessages, 3000);
+    });
   };
 
   afterPunchOut = () => {
@@ -620,40 +616,33 @@ class Header extends Component {
     formData.append("description", null);
     formData.append("status", "completed");
 
-    // API call to add break
-    fetch(
-      `${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          this.setState({
-            successMessage: data.message,
-            showError: false,
-            showSuccess: true,
-          });
-          setTimeout(this.dismissMessages, 3000);
-        } else {
-          this.setState({
-            errorMessage: data.message,
-            showError: true,
-            showSuccess: false,
-          });
-          setTimeout(this.dismissMessages, 3000);
-        }
-      })
-      .catch((error) => {
+    getService.addCall('activities.php', 'add-by-user', formData)
+    .then(response => {
+      let data = response.data;
+      if (data.status === "success") {
         this.setState({
-          errorMessage: error.message,
+          successMessage: data.message,
+          showError: false,
+          showSuccess: true,
+        });
+        setTimeout(this.dismissMessages, 3000);
+      } else {
+        this.setState({
+          errorMessage: data.message,
           showError: true,
           showSuccess: false,
         });
         setTimeout(this.dismissMessages, 3000);
+      }
+    })
+    .catch((error) => {
+      this.setState({
+        errorMessage: error.message,
+        showError: true,
+        showSuccess: false,
       });
+      setTimeout(this.dismissMessages, 3000);
+    });
   };
 
   // Handle logout functionality
@@ -679,7 +668,8 @@ class Header extends Component {
       errorMessage,
       is_task_due_today,
       showDueAlert,
-      dueTasks
+      dueTasks,
+      disableButton
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
@@ -707,6 +697,7 @@ class Header extends Component {
               <div className="right">
                 {window.user && (window.user.role === 'employee') && (
                   <button
+                    disabled={disableButton}
                     className="btn btn-primary"
                     onClick={
                       isPunchedIn ? this.handlePunchOut : this.handlePunchIn
@@ -739,7 +730,7 @@ class Header extends Component {
                               <li 
                                 key={index}  
                                 className={`${notification.read === 0 ? '' : ''}`}   
-                                style={{ backgroundColor: notification.read === 0 ? '#E8E9E9' : 'transparent' }} 
+                                style={{ backgroundColor: notification.read === 0 ? '#E8E9E9 ' : 'transparent', cursor: 'pointer' }} 
                                 onClick={() => this.markAsRead(notification.id)}
                               >                          
                                 <div className="feeds-body">

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { breakInAction, breakDurationCalAction } from '../../../actions/settingsAction';
 import AlertMessages from '../../common/AlertMessages';
 import ActivitiesTime from './ActivitiesTime';
+import { getService } from '../../../services/getService';
 
 class Activities extends Component {
     constructor(props) {
@@ -45,11 +46,11 @@ class Activities extends Component {
     };
 
     componentDidMount() {
-        // Fetch employees list
-        fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=view&role=employee`, {
-        method: "GET",
+        getService.getCall('get_employees.php', {
+            action: 'view',
+            role:'employee',
+
         })
-        .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
             this.setState({ employeeData: data.data });
@@ -63,8 +64,10 @@ class Activities extends Component {
         });
 
         // Fetch break status if not in view mode
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=get_break_status&user_id=${window.user.id}`)
-            .then(response => response.json())
+        getService.getCall('activities.php', {
+            action: 'get_break_status',
+            user_id:window.user.id,
+        })
             .then(data => {
             if (data.status === 'success') {
                 this.setState({ isBreakedIn: true });
@@ -117,11 +120,7 @@ class Activities extends Component {
         formData.append('description', null);
         formData.append('status', 'completed');
 
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`, {
-        method: "POST",
-        body: formData,
-        })
-        .then((response) => response.json())
+        getService.addCall('activities.php','add-by-user', formData)
         .then((data) => {
             if (data.status === "success") {
             this.setState({
@@ -153,10 +152,10 @@ class Activities extends Component {
     };
 
     breakCalculation = () => {
-        fetch(
-        `${process.env.REACT_APP_API_URL}/activities.php?action=break_calculation&user_id=${window.user.id}`
-        )
-        .then((response) => response.json())
+        getService.getCall('activities.php', {
+            action: 'break_calculation',
+            user_id:window.user.id,
+        })
         .then((data) => {
             if (data.status === "success") {
             this.props.breakDurationCalAction(data.data.break_duration);
@@ -183,11 +182,7 @@ class Activities extends Component {
         formData.append('description', this.state.breakReason);
         formData.append('status', 'active');
 
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-user`, {
-        method: "POST",
-        body: formData,
-        })
-        .then((response) => response.json())
+        getService.addCall('activities.php','add-by-user', formData)
         .then((data) => {
             if (data.status === "success") {
             this.setState({
@@ -290,11 +285,7 @@ class Activities extends Component {
         formData.append('created_by', window.user.id);
         formData.append('updated_by', window.user.id);
 
-        fetch(`${process.env.REACT_APP_API_URL}/activities.php?action=add-by-admin`, {
-        method: "POST",
-        body: formData,
-        })
-        .then((response) => response.json())
+        getService.addCall('activities.php','add-by-admin', formData)
         .then((data) => {
             this.setState({ loading: false, ButtonLoading: false });
 
@@ -303,6 +294,9 @@ class Activities extends Component {
                 successMessage: data.message,
                 showError: false,
                 showSuccess: true,
+                selectedEmployee: "",
+                selectedStatus: "",
+                breakReason: ""
             });
             setTimeout(this.dismissMessages, 3000);
             document.querySelector("#addBreakModal .close").click();
@@ -328,39 +322,46 @@ class Activities extends Component {
         });
     };
 
+    openAddBreakModal = () => {
+        this.setState({
+            selectedEmployee: "",
+            selectedStatus: "",
+            breakReason: ""
+        });
+    };
+
     handleApplyFilter = async () => {
         this.setState({ loading: true });
         const { filterFromDate, filterToDate, filterEmployeeId } = this.state;
-        let apiUrl = `${process.env.REACT_APP_API_URL}/activities.php?action=view&is_timeline=true`;
-
+        let user_id = '';
         if (this.props.selectedEmployeeId) {
-            apiUrl += `&user_id=${this.props.selectedEmployeeId}`;
+            user_id = this.props.selectedEmployeeId;
         } else if (window.user.role === 'employee') {
-            apiUrl += `&user_id=${window.user.id}`;
+            user_id = window.user.id;
         } else {
-        if (filterEmployeeId) {
-            apiUrl += `&user_id=${filterEmployeeId}`;
+            if (filterEmployeeId) {
+                user_id = filterEmployeeId;
+            }
         }
-        }
-        
-        if (filterFromDate) {
-          apiUrl += `&from_date=${filterFromDate}`;
-        }
-        if (filterToDate) {
-          apiUrl += `&to_date=${filterToDate}`;
-        }
-
-        try {
-          const response = await fetch(apiUrl);
-          const data = await response.json();
-          if (data.status === "success") {
-              this.setState({ activities: data.data, loading: false });
-          } else {
-              this.setState({ activities: [], loading: false, error: data.message });
-          }
-        } catch (err) {
-          this.setState({ activities: [], loading: false, error: "Failed to fetch data" });
-        }
+        //folderName, action, userId, logged_in_employee_id, role, from_date, to_date, is_timeline
+        getService.getCall('activities.php', {
+            action: 'view',
+            user_id:user_id,
+            from_date:filterFromDate,
+            to_date:filterToDate,
+            is_timeline:true
+        })
+        .then((data) => {
+            if (data.status === "success") {
+                this.setState({ activities: data.data, loading: false });
+            } else {
+                this.setState({ activities: [], loading: false, error: data.message });
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+ 
     };
 
     render() {
@@ -427,7 +428,7 @@ class Activities extends Component {
                               Apply
                           </button>
                           {window.user.role !== 'employee' && (
-                            <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal">
+                            <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={this.openAddBreakModal}>
                                 <i className="fe fe-plus mr-2" />Add
                             </button>
                             )}
