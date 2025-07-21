@@ -1176,7 +1176,7 @@ formatDateTimeAMPM = (timeString) => {
 														r.id === eventData.id || 
 														r.created_at?.split(" ")[0] === eventData.start?.format('YYYY-MM-DD')
 													);
-													if (report && calendarView === 'report') {
+													if (report && calendarView !== 'event') {
 														this.handleReportClick(report);
 													} 
 												}}

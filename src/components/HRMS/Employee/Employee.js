@@ -254,7 +254,8 @@ class Employee extends Component {
 	handleApplyFilters = () => {
 		this.setState({ ButtonLoading: true });
         this.fetchEmployeeLeaves();
-		setTimeout(() => this.setState({ ButtonLoading: false }), 3000);// Filtering takes about 1 second
+		//setTimeout(() => this.setState({ ButtonLoading: false }), 3000);
+		 this.setState({ ButtonLoading: false });
     };
 		
 	goToEditEmployee(employee, employeeId) {
