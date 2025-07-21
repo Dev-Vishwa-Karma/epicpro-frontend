@@ -414,7 +414,7 @@ class ActivitiesTime extends Component {
                     );
                     })
                 ) : (
-                    <div className="text-center text-muted py-4">activities not found</div>
+                    <div className="text-center text-muted py-4" style={{ fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>activities not found</div>
                 )}
                 </div>
             </div>

@@ -254,7 +254,7 @@ class Employee extends Component {
 	handleApplyFilters = () => {
 		this.setState({ ButtonLoading: true });
         this.fetchEmployeeLeaves();
-		setTimeout(() => this.setState({ ButtonLoading: false }), 3000);// Filtering takes about 1 second
+		setTimeout(() => this.setState({ ButtonLoading: false }), 1000);// Filtering takes about 1 second
     };
 		
 	goToEditEmployee(employee, employeeId) {
@@ -341,7 +341,7 @@ class Employee extends Component {
     };
 
 	handleEmployeeChange = (event) => {
-        this.setState({ selectedLeaveEmployee: event.target.value });
+        this.setState({ selectedLeaveEmployee: event.target.value, currentPageLeaves: 1 });
     };
 
 	// Function for "Add" button based on active tab
@@ -1259,7 +1259,9 @@ class Employee extends Component {
 																	))
 																) : (
 																	<tr>
-                                                                        <td colSpan={7} className="text-center">No leaves found</td>
+																		<td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+																			No leaves found
+																		</td>
                                                                     </tr>
 																)}
 															</tbody>
@@ -1271,28 +1273,74 @@ class Employee extends Component {
 
 										{/* Only show pagination if there are employee leaves */}
 										{totalPagesLeaves > 1 && (
-    <nav aria-label="Page navigation">
-        <ul className="pagination mb-0 justify-content-end">
+											<nav aria-label="Page navigation">
+												<ul className="pagination mb-0 justify-content-end">
+													{/* Previous button */}
 													<li className={`page-item ${currentPageLeaves === 1 ? 'disabled' : ''}`}>
 														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves - 1, 'leaves')}>
-                    Previous
-                </button>
-            </li>
-													{[...Array(totalPagesLeaves)].map((_, i) => (
-														<li key={i} className={`page-item ${currentPageLeaves === i + 1 ? 'active' : ''}`}>
-															<button className="page-link" onClick={() => this.handlePageChange(i + 1, 'leaves')}>
-																{i + 1}
-                    </button>
-                </li>
-													))}
+															Previous
+														</button>
+													</li>
+
+													{/* First page */}
+													{currentPageLeaves > 3 && (
+														<>
+															<li className="page-item">
+																<button className="page-link" onClick={() => this.handlePageChange(1, 'leaves')}>
+																	1
+																</button>
+															</li>
+															{currentPageLeaves > 4 && (
+																<li className="page-item disabled">
+																	<span className="page-link">...</span>
+																</li>
+															)}
+														</>
+													)}
+
+													{/* Page numbers */}
+													{Array.from({ length: totalPagesLeaves }, (_, i) => i + 1)
+														.filter(pageNum => 
+															pageNum >= currentPageLeaves - 1 && pageNum <= currentPageLeaves + 1
+														)
+														.map(pageNum => {
+															if (pageNum > 0 && pageNum <= totalPagesLeaves) {
+																return (
+																	<li key={pageNum} className={`page-item ${currentPageLeaves === pageNum ? 'active' : ''}`}>
+																		<button className="page-link" onClick={() => this.handlePageChange(pageNum, 'leaves')}>
+																			{pageNum}
+																		</button>
+																	</li>
+																);
+															}
+															return null;
+														})}
+
+													{/* Ellipsis if needed */}
+													{currentPageLeaves < totalPagesLeaves - 2 && (
+														<>
+															{currentPageLeaves < totalPagesLeaves - 3 && (
+																<li className="page-item disabled">
+																	<span className="page-link">...</span>
+																</li>
+															)}
+															<li className="page-item">
+																<button className="page-link" onClick={() => this.handlePageChange(totalPagesLeaves, 'leaves')}>
+																	{totalPagesLeaves}
+																</button>
+															</li>
+														</>
+													)}
+
+													{/* Next button */}
 													<li className={`page-item ${currentPageLeaves === totalPagesLeaves ? 'disabled' : ''}`}>
 														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves + 1, 'leaves')}>
-                    Next
-                </button>
-            </li>
-        </ul>
-    </nav>
-)}
+															Next
+														</button>
+													</li>
+												</ul>
+											</nav>
+										)}
 									</div>
 								</div>
 							</div>

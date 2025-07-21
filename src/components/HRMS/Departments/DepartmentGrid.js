@@ -45,8 +45,8 @@ const DepartmentGrid = ({ departmentData, onEditClick, onDeleteClick }) => {
                     </div>
                 ))
             ) : (
-                <div>
-                    <span>Department not found</span>
+                <div className="col-12 text-center">
+                    <span style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>Department not found</span>
                 </div>
             )}
         </div>

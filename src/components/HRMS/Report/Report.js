@@ -1057,11 +1057,11 @@ class Report extends Component {
                                                                     </tr>
                                                                 ))
                                                             ) : (
-                                                                <tr>
-                                                                    <td colSpan="8" style={{ textAlign: 'center' }}>
-                                                                        No reports available
-                                                                    </td>
-                                                                </tr>
+                                                            <tr>
+                                                                <td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+                                                                    No reports available
+                                                                </td>
+                                                            </tr>
                                                             )}
                                                         </tbody>
                                                     </table>
@@ -1072,78 +1072,78 @@ class Report extends Component {
 
                                     {/* Only show pagination if there are reports */}
                                     {totalPagesReports > 1 && (
-    <nav aria-label="Page navigation">
-                                            <ul className="pagination mb-0 justify-content-end">
-                                                
-            {/* Previous button */}
-            <li className={`page-item ${currentPageReports === 1 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => this.handlePageChange(currentPageReports - 1, 'reports')}>
-                    Previous
-                </button>
-            </li>
+                                        <nav aria-label="Page navigation">
+                                                                                <ul className="pagination mb-0 justify-content-end">
+                                                                                    
+                                                {/* Previous button */}
+                                                <li className={`page-item ${currentPageReports === 1 ? 'disabled' : ''}`}>
+                                                    <button className="page-link" onClick={() => this.handlePageChange(currentPageReports - 1, 'reports')}>
+                                                        Previous
+                                                    </button>
+                                                </li>
 
-            {/* First page */}
-            {currentPageReports > 5 && (
-                <li className="page-item">
-                    <button className="page-link" onClick={() => this.handlePageChange(1, 'reports')}>
-                        1
-                    </button>
-                </li>
-            )}
+                                                {/* First page */}
+                                                {currentPageReports > 5 && (
+                                                    <li className="page-item">
+                                                        <button className="page-link" onClick={() => this.handlePageChange(1, 'reports')}>
+                                                            1
+                                                        </button>
+                                                    </li>
+                                                )}
 
-            {/* Ellipsis ......*/}
-            {currentPageReports > 6 && (
-                <li className="page-item disabled">
-                    <span className="page-link">...</span>
-                </li>
-            )}
+                                                {/* Ellipsis ......*/}
+                                                {currentPageReports > 6 && (
+                                                    <li className="page-item disabled">
+                                                        <span className="page-link">...</span>
+                                                    </li>
+                                                )}
 
-            {/* Page numbers */}
-            {Array.from({ length: Math.min(5, totalPagesReports) }, (_, i) => {
-                let pageNum;
-                if (currentPageReports <= 3) {
-                    pageNum = i + 1;
-                } else if (currentPageReports >= totalPagesReports - 2) {
-                    pageNum = totalPagesReports - 4 + i;
-                } else {
-                    pageNum = currentPageReports - 2 + i;
-                }
+                                                {/* Page numbers */}
+                                                {Array.from({ length: Math.min(5, totalPagesReports) }, (_, i) => {
+                                                    let pageNum;
+                                                    if (currentPageReports <= 3) {
+                                                        pageNum = i + 1;
+                                                    } else if (currentPageReports >= totalPagesReports - 2) {
+                                                        pageNum = totalPagesReports - 4 + i;
+                                                    } else {
+                                                        pageNum = currentPageReports - 2 + i;
+                                                    }
 
-                if (pageNum > 0 && pageNum <= totalPagesReports) {
-                    return (
-                        <li key={pageNum} className={`page-item ${currentPageReports === pageNum ? 'active' : ''}`}>
-                            <button className="page-link" onClick={() => this.handlePageChange(pageNum, 'reports')}>
-                                {pageNum}
-                            </button>
-                        </li>
-                    );
-                }
-                return null;
-            })}
+                                                    if (pageNum > 0 && pageNum <= totalPagesReports) {
+                                                        return (
+                                                            <li key={pageNum} className={`page-item ${currentPageReports === pageNum ? 'active' : ''}`}>
+                                                                <button className="page-link" onClick={() => this.handlePageChange(pageNum, 'reports')}>
+                                                                    {pageNum}
+                                                                </button>
+                                                            </li>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
 
-            {/* Ellipsis if needed */}
-            {currentPageReports < totalPagesReports - 3 && (
-                <li className="page-item disabled">
-                    <span className="page-link">...</span>
-                </li>
-            )}
+                                                {/* Ellipsis if needed */}
+                                                {currentPageReports < totalPagesReports - 3 && (
+                                                    <li className="page-item disabled">
+                                                        <span className="page-link">...</span>
+                                                    </li>
+                                                )}
 
-            {/* Last page */}
-            {currentPageReports < totalPagesReports - 2 && (
-                <li className="page-item">
-                    <button className="page-link" onClick={() => this.handlePageChange(totalPagesReports, 'reports')}>
-                        {totalPagesReports}
-                    </button>
-                </li>
-            )}
-            <li className={`page-item ${currentPageReports === totalPagesReports ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => this.handlePageChange(currentPageReports + 1, 'reports')}>
-                    Next
-                </button>
-            </li>
-        </ul>
-    </nav>
-)}
+                                                {/* Last page */}
+                                                {currentPageReports < totalPagesReports - 2 && (
+                                                    <li className="page-item">
+                                                        <button className="page-link" onClick={() => this.handlePageChange(totalPagesReports, 'reports')}>
+                                                            {totalPagesReports}
+                                                        </button>
+                                                    </li>
+                                                )}
+                                                <li className={`page-item ${currentPageReports === totalPagesReports ? 'disabled' : ''}`}>
+                                                    <button className="page-link" onClick={() => this.handlePageChange(currentPageReports + 1, 'reports')}>
+                                                        Next
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    )}
                                 </div>
                             </div>
                         </div>

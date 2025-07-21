@@ -50,9 +50,11 @@ const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }
                         ))
                     ) : (
                         !message && (
-                            <tr>
-                                <td colSpan="5" className="text-center">Department not found</td>
-                            </tr>
+                                <tr>
+                                    <td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+                                        Department not found
+                                    </td>
+                                </tr>
                         )
                     )}
                 </tbody>
