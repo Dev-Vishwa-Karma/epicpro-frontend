@@ -260,7 +260,6 @@ class CalendarWithTabs extends Component {
                     const calendarEventsData = this.generateCalendarEvents(reports, leaves);
                     this.setState({ calendarEventsData });
                 });
-                console.log('currentEmployeeId',currentEmployeeId)
                
             getService.getCall('employee_leaves.php', {
                 action: 'view',
@@ -609,7 +608,6 @@ class CalendarWithTabs extends Component {
             }).then(data => {
                 if (data.status === "success") {
                     this.setState({ activities: data.data, loading: false });
-                    console.log('activities',this.state.activities)
                 } else {
                     this.setState({ activities: [], loading: false, error: data.message });
                 }

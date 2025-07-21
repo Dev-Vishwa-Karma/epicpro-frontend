@@ -6,6 +6,14 @@ class Fullcalender extends Component {
 	constructor(props) {
 		super(props);
     }
+    
+    shouldComponentUpdate(nextProps) {
+        return (
+            nextProps.events !== this.props.events ||
+            nextProps.defaultDate !== this.props.defaultDate ||
+            nextProps.defaultView !== this.props.defaultView
+        );
+    }
 
     formatDate = (date) => {
         const d = new Date(date);
