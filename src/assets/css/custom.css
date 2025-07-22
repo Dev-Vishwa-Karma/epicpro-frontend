@@ -248,3 +248,8 @@ border-left: 6px solid #e6140d !important;
     align-items: center;
     justify-content: center;
   }
+
+
+.custom-control-input{
+  cursor: pointer !important;
+}

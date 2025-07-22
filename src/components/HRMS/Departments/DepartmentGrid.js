@@ -1,5 +1,6 @@
 // DepartmentGrid.js
 import React from 'react';
+import BlankState from '../../common/BlankState';
 
 const DepartmentGrid = ({ departmentData, onEditClick, onDeleteClick }) => {
     return (
@@ -45,8 +46,8 @@ const DepartmentGrid = ({ departmentData, onEditClick, onDeleteClick }) => {
                     </div>
                 ))
             ) : (
-                <div>
-                    <span>Department not found</span>
+                <div className="col-12 text-center">
+                    <BlankState message="Department not found" />
                 </div>
             )}
         </div>

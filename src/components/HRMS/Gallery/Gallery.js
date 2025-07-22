@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import DeleteModal from '../../common/DeleteModal';
+import BlankState from '../../common/BlankState';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -221,10 +222,10 @@ class Gallery extends Component {
                         images: sortedImages,
                         filteredImages: sortedImages // Apply sorting dynamically
                     };
-                });
+                                });
                 
                 // Close the modal after successful upload
-            // this.closeModal();
+                this.closeModal();
 
                 // Auto-hide success message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);
@@ -565,7 +566,7 @@ class Gallery extends Component {
                             {!loading && filteredImages.length === 0 && (
                                 <div className="col-12">
                                     <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <span>Image not available</span>
+                                        <BlankState message="Image not available" />
                                     </div>
                                 </div>
                             )}
@@ -575,18 +576,62 @@ class Gallery extends Component {
                         {filteredImages.length > 0 && totalPages > 1 && (
                             <nav aria-label="Page navigation">
                                 <ul className="pagination mb-0 justify-content-end">
+                                    {/* Previous button */}
                                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                         <button className="page-link" onClick={() => this.handlePageChange(currentPage - 1)}>
                                             Previous
                                         </button>
                                     </li>
-                                    {[...Array(totalPages)].map((_, i) => (
-                                        <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                                            <button className="page-link" onClick={() => this.handlePageChange(i + 1)}>
-                                                {i + 1}
+
+                                    {/* First page */}
+                                    {currentPage > 3 && (
+                                        <>
+                                            <li className="page-item">
+                                                <button className="page-link" onClick={() => this.handlePageChange(1)}>
+                                                    1
+                                                </button>
+                                            </li>
+                                            {currentPage > 4 && (
+                                                <li className="page-item disabled">
+                                                    <span className="page-link">...</span>
+                                                </li>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {/* Page numbers */}
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                        .filter(pageNum => pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                                        .map(pageNum => {
+                                            if (pageNum > 0 && pageNum <= totalPages) {
+                                                return (
+                                                    <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
+                                                        <button className="page-link" onClick={() => this.handlePageChange(pageNum)}>
+                                                            {pageNum}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+
+                                    {/* Ellipsis if needed */}
+                                    {currentPage < totalPages - 2 && (
+                                        <>
+                                            {currentPage < totalPages - 3 && (
+                                                <li className="page-item disabled">
+                                                    <span className="page-link">...</span>
+                                                </li>
+                                            )}
+                                            <li className="page-item">
+                                                <button className="page-link" onClick={() => this.handlePageChange(totalPages)}>
+                                                    {totalPages}
                                             </button>
                                         </li>
-                                    ))}
+                                        </>
+                                    )}
+
+                                    {/* Next button */}
                                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                                         <button className="page-link" onClick={() => this.handlePageChange(currentPage + 1)}>
                                             Next

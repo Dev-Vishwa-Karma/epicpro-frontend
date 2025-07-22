@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 import DeleteModal from '../../common/DeleteModal';
 
 class Users extends Component {
@@ -635,13 +636,14 @@ class Users extends Component {
 																</tr>
 															))
 														): (
-															!error && (
-																<tr>
-																	<td colSpan="6" style={{ textAlign: 'center', color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-                                                                        User not found
-                                                                    </td>
-                                                                </tr>
-                                                            )
+															// !error && (
+															// 	<tr>
+															// 		<td colSpan="6" style={{ textAlign: 'center', color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+                                                            //             User not found
+                                                            //         </td>
+                                                            //     </tr>
+                                                            // )
+															<NoDataRow colSpan={7} message="User not found" />
                                                         )}
                                                     </tbody>
 												</table>

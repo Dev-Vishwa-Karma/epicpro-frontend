@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 class Holidays extends Component {
 	constructor(props) {
 		super(props);
@@ -550,7 +551,7 @@ class Holidays extends Component {
 																	</tr>
 																))
 															): (
-																!message && <tr><td>Holidays data not found</td></tr>
+																<NoDataRow colSpan={5} message="Holidays data not found" />
 															)}
 														</tbody>
 													</table>

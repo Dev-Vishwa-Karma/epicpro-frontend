@@ -1,0 +1,160 @@
+/* For Client Modal */
+.custom-modal {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+.custom-modal-content {
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  font-family: Inter, sans-serif !important;
+  box-shadow: 0 8px 32px rgba(60,60,120,0.18) !important;
+  max-height: 90vh !important;
+  min-height: 400px !important;
+}
+.content-for-modals {
+  background: linear-gradient(135deg, #DEE2E6 0%, #fff 100%) !important;
+  height: 100px !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+.modal-profile-image {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -50px !important;
+  transform: translateX(-50%) !important;
+  width: 110px !important;
+  height: 110px !important;
+  border-radius: 50% !important;
+  border: 6px solid #fff !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+  display: flex !important;
+  background: #fff !important;
+  z-index: 2 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+.client-profile{
+  width: 100px !important;
+  height: 100px !important;
+  object-fit: cover !important;
+}
+
+
+/* New styles for client name and email */
+.clientName {
+  font-weight: 700;
+}
+.clientEmail {
+  color: #888;
+  font-size: 15px;
+  margin-top: -10px;
+}
+.about{
+  margin: 18px auto 18px auto !important;
+  max-width: 420px !important;
+  position: relative !important;
+  font-style: italic !important;
+  color: #555 !important;
+}
+.project-card{
+  max-height: 350 px;
+  overflow-y: auto !important;
+  padding-right: 10px !important;
+}
+
+.project-content{
+  border-radius: 16px !important;
+  border: 1px solid #e0eafc !important;
+  box-shadow: 0 5px 12px rgba(60,60,120,0.08) !important;
+  padding: 16px !important;
+  text-align: left !important;}
+.project-name{
+  font-weight: 700 !important;
+  font-size: 18px !important;
+}
+.technology{
+  color: #888 !important;
+  font-size: 15px !important;
+  margin-bottom: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+.tech-trim{
+  display: inline-block !important;
+  background: #e0eafc !important;
+  color: #3a3a6a !important;
+  border-radius: 12px !important;
+  padding: 2px 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  margin-right: 6px !important;
+  margin-bottom: 2px !important;
+  border: 1px solid #b3c6e0 !important;
+}
+.avatar-img{
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  transition: z-index 0.2s, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.sticky-footer{
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  padding: 12px 0 10px 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+.gradient-button {
+  /* background: linear-gradient(135deg, #fc5c7d 0%, #6a82fb 100%); */
+  color: #fff;
+  border-radius: 24px;
+  padding: 8px 20px;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: filter 0.2s, box-shadow 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.client-info-fixed {
+  padding: 70px 20px 20px 20px;
+  background: white;
+  z-index: 1;
+  position: relative;
+}
+
+/* Scrollable projects section */
+.scrollable-projects {
+  overflow-y: auto;
+  padding-bottom: 24px;
+  /* Adjust height as needed */
+  max-height: calc(100vh - 400px);
+}
+
+.Team-member{
+  color: #555 !important;
+  font-size: 15px !important;
+  margin-top: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.Team-member-profile{
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}

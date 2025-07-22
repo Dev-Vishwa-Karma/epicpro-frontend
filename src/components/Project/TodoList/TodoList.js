@@ -4,6 +4,7 @@ import TodoModal from './TodoModal';
 import DeleteModal from '../../common/DeleteModal';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 
 class TodoList extends Component {
     constructor(props) {
@@ -35,7 +36,8 @@ class TodoList extends Component {
 			showSuccess: false,
       		showError: false,
 			loading: true,
-            ButtonLoading: false
+            ButtonLoading: false,
+            currentPageTodos: 1 //pagination
 		}
 	}
 
@@ -536,6 +538,13 @@ class TodoList extends Component {
         const { fixNavbar } = this.props;
         const { todos, loading, logged_in_employee_role, statusFilter, showSuccess, successMessage, showError, errorMessage,showDeleteModal } = this.state;
 
+        // Pagination logic
+        const dataPerPage = 10;
+        const currentPageTodos = this.state.currentPageTodos || 1;
+        const totalPagesTodos = Math.ceil((todos && todos.length ? todos.length : 0) / dataPerPage);
+        const indexOfLastTodo = currentPageTodos * dataPerPage;
+        const indexOfFirstTodo = indexOfLastTodo - dataPerPage;
+        const currentTodos = todos && todos.length > 0 ? todos.slice(indexOfFirstTodo, indexOfLastTodo) : [];
 
         return (
             <>
@@ -622,8 +631,8 @@ class TodoList extends Component {
                                                     </tbody>
                                                 ) : (
                                                     <tbody>
-                                                        {todos && todos.length > 0 ? (
-                                                            todos.map((todo, index) => (
+                                                        {currentTodos && currentTodos.length > 0 ? (
+                                                            currentTodos.map((todo, index) => (
                                                                 <tr key={index+1} style={
                                                                     (logged_in_employee_role !== 'employee' && todo.hidden_for_employee)
                                                                         ? { textDecoration: 'line-through', opacity: 0.6 }
@@ -744,12 +753,76 @@ class TodoList extends Component {
                                                                 </tr>
                                                             ))
                                                         ): (
-                                                            <tr><td colspan="5" className="text-center">Todo not available.</td></tr>
+                                                            <NoDataRow colSpan={7} message="Todo not available." />
                                                         )}
                                                     </tbody>
                                                 )}
                                             </table>
                                         </div>
+                                       {/* Pagination for todos */}
+                                       {totalPagesTodos > 1 && (
+                                         <nav aria-label="Page navigation">
+                                           <ul className="pagination mb-0 justify-content-end">
+                                             {/* Previous button */}
+                                             <li className={`page-item ${currentPageTodos === 1 ? 'disabled' : ''}`}>
+                                               <button className="page-link" onClick={() => this.setState({ currentPageTodos: currentPageTodos - 1 })}>
+                                                 Previous
+                                               </button>
+                                             </li>
+                                             {/* First page */}
+                                             {currentPageTodos > 3 && (
+                                               <>
+                                                 <li className="page-item">
+                                                   <button className="page-link" onClick={() => this.setState({ currentPageTodos: 1 })}>
+                                                     1
+                                                   </button>
+                                                 </li>
+                                                 {currentPageTodos > 4 && (
+                                                   <li className="page-item disabled">
+                                                     <span className="page-link">...</span>
+                                                   </li>
+                                                 )}
+                                               </>
+                                             )}
+                                             {/* Page numbers */}
+                                             {Array.from({ length: totalPagesTodos }, (_, i) => i + 1)
+                                               .filter(pageNum => pageNum >= currentPageTodos - 1 && pageNum <= currentPageTodos + 1)
+                                               .map(pageNum => {
+                                                 if (pageNum > 0 && pageNum <= totalPagesTodos) {
+                                                   return (
+                                                     <li key={pageNum} className={`page-item ${currentPageTodos === pageNum ? 'active' : ''}`}>
+                                                       <button className="page-link" onClick={() => this.setState({ currentPageTodos: pageNum })}>
+                                                         {pageNum}
+                                                       </button>
+                                                     </li>
+                                                   );
+                                                 }
+                                                 return null;
+                                               })}
+                                             {/* Ellipsis if needed */}
+                                             {currentPageTodos < totalPagesTodos - 2 && (
+                                               <>
+                                                 {currentPageTodos < totalPagesTodos - 3 && (
+                                                   <li className="page-item disabled">
+                                                     <span className="page-link">...</span>
+                                                   </li>
+                                                 )}
+                                                 <li className="page-item">
+                                                   <button className="page-link" onClick={() => this.setState({ currentPageTodos: totalPagesTodos })}>
+                                                     {totalPagesTodos}
+                                                   </button>
+                                                 </li>
+                                               </>
+                                             )}
+                                             {/* Next button */}
+                                             <li className={`page-item ${currentPageTodos === totalPagesTodos ? 'disabled' : ''}`}>
+                                               <button className="page-link" onClick={() => this.setState({ currentPageTodos: currentPageTodos + 1 })}>
+                                                 Next
+                                               </button>
+                                             </li>
+                                           </ul>
+                                         </nav>
+                                       )}
                                     </div>
                                 </div>
                             </div>

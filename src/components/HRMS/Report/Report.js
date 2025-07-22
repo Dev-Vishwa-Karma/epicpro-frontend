@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import TextEditor from '../../common/TextEditor';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 class Report extends Component {
 
     constructor(props) {
@@ -1057,11 +1058,7 @@ class Report extends Component {
                                                                     </tr>
                                                                 ))
                                                             ) : (
-                                                                <tr>
-                                                                    <td colSpan="8" style={{ textAlign: 'center' }}>
-                                                                        No reports available
-                                                                    </td>
-                                                                </tr>
+                                                                <NoDataRow colSpan={7} message="No reports available" />
                                                             )}
                                                         </tbody>
                                                     </table>
@@ -1073,19 +1070,69 @@ class Report extends Component {
                                     {/* Only show pagination if there are reports */}
                                     {totalPagesReports > 1 && (
                                         <nav aria-label="Page navigation">
-                                            <ul className="pagination mb-0 justify-content-end">
+                                                                                <ul className="pagination mb-0 justify-content-end">
+                                                                                    
+                                                {/* Previous button */}
                                                 <li className={`page-item ${currentPageReports === 1 ? 'disabled' : ''}`}>
                                                     <button className="page-link" onClick={() => this.handlePageChange(currentPageReports - 1, 'reports')}>
                                                         Previous
                                                     </button>
                                                 </li>
-                                                {[...Array(totalPagesReports)].map((_, i) => (
-                                                    <li key={i} className={`page-item ${currentPageReports === i + 1 ? 'active' : ''}`}>
-                                                        <button className="page-link" onClick={() => this.handlePageChange(i + 1, 'reports')}>
-                                                            {i + 1}
+
+                                                {/* First page */}
+                                                {currentPageReports > 5 && (
+                                                    <li className="page-item">
+                                                        <button className="page-link" onClick={() => this.handlePageChange(1, 'reports')}>
+                                                            1
                                                         </button>
                                                     </li>
-                                                ))}
+                                                )}
+
+                                                {/* Ellipsis ......*/}
+                                                {currentPageReports > 6 && (
+                                                    <li className="page-item disabled">
+                                                        <span className="page-link">...</span>
+                                                    </li>
+                                                )}
+
+                                                {/* Page numbers */}
+                                                {Array.from({ length: Math.min(5, totalPagesReports) }, (_, i) => {
+                                                    let pageNum;
+                                                    if (currentPageReports <= 3) {
+                                                        pageNum = i + 1;
+                                                    } else if (currentPageReports >= totalPagesReports - 2) {
+                                                        pageNum = totalPagesReports - 4 + i;
+                                                    } else {
+                                                        pageNum = currentPageReports - 2 + i;
+                                                    }
+
+                                                    if (pageNum > 0 && pageNum <= totalPagesReports) {
+                                                        return (
+                                                            <li key={pageNum} className={`page-item ${currentPageReports === pageNum ? 'active' : ''}`}>
+                                                                <button className="page-link" onClick={() => this.handlePageChange(pageNum, 'reports')}>
+                                                                    {pageNum}
+                                                                </button>
+                                                            </li>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
+
+                                                {/* Ellipsis if needed */}
+                                                {currentPageReports < totalPagesReports - 3 && (
+                                                    <li className="page-item disabled">
+                                                        <span className="page-link">...</span>
+                                                    </li>
+                                                )}
+
+                                                {/* Last page */}
+                                                {currentPageReports < totalPagesReports - 2 && (
+                                                    <li className="page-item">
+                                                        <button className="page-link" onClick={() => this.handlePageChange(totalPagesReports, 'reports')}>
+                                                            {totalPagesReports}
+                                                        </button>
+                                                    </li>
+                                                )}
                                                 <li className={`page-item ${currentPageReports === totalPagesReports ? 'disabled' : ''}`}>
                                                     <button className="page-link" onClick={() => this.handlePageChange(currentPageReports + 1, 'reports')}>
                                                         Next

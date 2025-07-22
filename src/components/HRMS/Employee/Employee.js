@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 
 
 import {
@@ -342,19 +343,33 @@ class Employee extends Component {
     };
 
 	handleEmployeeChange = (event) => {
-        this.setState({ selectedLeaveEmployee: event.target.value });
+        this.setState({ selectedLeaveEmployee: event.target.value, currentPageLeaves: 1 });
     };
 
 	// Function for "Add" button based on active tab
     goToAddEmployee = () => {
-        const { activeTab } = this.state;
+        const { activeTab, logged_in_employee_role } = this.state;
         switch (activeTab) {
             case 'Employee-list':
                 // Handle Add for Employee List
                 this.props.history.push("/add-employee");
                 break;
             case 'Employee-Request':
-                this.setState({ showAddLeaveRequestModal: true }); // Show the modal
+                const newState = {
+                    showAddLeaveRequestModal: true,
+                    from_date: "",
+                    to_date: "",
+                    reason: "",
+                    status: 'approved',
+                    halfDayCheckbox: 0,
+                    addLeaveErrors: {}
+                };
+
+                if (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') {
+                    newState.employee_id = '';
+                }
+                
+                this.setState(newState);
                 break;
             default:
                 break;
@@ -1015,7 +1030,13 @@ class Employee extends Component {
 																		</tr>
 																	))
 																): (
-																	!message && <tr><td>No employees found</td></tr>
+																	!message && (
+																		<tr>
+																			<td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+																				No employees found
+																			</td>
+																		</tr>
+																	)
 																)}
 															</tbody>
 														</table>
@@ -1253,9 +1274,12 @@ class Employee extends Component {
 																		</tr>
 																	))
 																) : (
-																	<tr>
-                                                                        <td colSpan={6} className="text-center">No leaves found</td>
-                                                                    </tr>
+																	// <tr>
+																	// 	<td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+																	// 		No leaves found
+																	// 	</td>
+                                                                    // </tr>
+																	<NoDataRow colSpan={7} message="No leaves found" />
 																)}
 															</tbody>
 														</table>
@@ -1268,18 +1292,64 @@ class Employee extends Component {
 										{totalPagesLeaves > 1 && (
 											<nav aria-label="Page navigation">
 												<ul className="pagination mb-0 justify-content-end">
+													{/* Previous button */}
 													<li className={`page-item ${currentPageLeaves === 1 ? 'disabled' : ''}`}>
 														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves - 1, 'leaves')}>
 															Previous
 														</button>
 													</li>
-													{[...Array(totalPagesLeaves)].map((_, i) => (
-														<li key={i} className={`page-item ${currentPageLeaves === i + 1 ? 'active' : ''}`}>
-															<button className="page-link" onClick={() => this.handlePageChange(i + 1, 'leaves')}>
-																{i + 1}
-															</button>
-														</li>
-													))}
+
+													{/* First page */}
+													{currentPageLeaves > 3 && (
+														<>
+															<li className="page-item">
+																<button className="page-link" onClick={() => this.handlePageChange(1, 'leaves')}>
+																	1
+																</button>
+															</li>
+															{currentPageLeaves > 4 && (
+																<li className="page-item disabled">
+																	<span className="page-link">...</span>
+																</li>
+															)}
+														</>
+													)}
+
+													{/* Page numbers */}
+													{Array.from({ length: totalPagesLeaves }, (_, i) => i + 1)
+														.filter(pageNum => 
+															pageNum >= currentPageLeaves - 1 && pageNum <= currentPageLeaves + 1
+														)
+														.map(pageNum => {
+															if (pageNum > 0 && pageNum <= totalPagesLeaves) {
+																return (
+																	<li key={pageNum} className={`page-item ${currentPageLeaves === pageNum ? 'active' : ''}`}>
+																		<button className="page-link" onClick={() => this.handlePageChange(pageNum, 'leaves')}>
+																			{pageNum}
+																		</button>
+																	</li>
+																);
+															}
+															return null;
+														})}
+
+													{/* Ellipsis if needed */}
+													{currentPageLeaves < totalPagesLeaves - 2 && (
+														<>
+															{currentPageLeaves < totalPagesLeaves - 3 && (
+																<li className="page-item disabled">
+																	<span className="page-link">...</span>
+																</li>
+															)}
+															<li className="page-item">
+																<button className="page-link" onClick={() => this.handlePageChange(totalPagesLeaves, 'leaves')}>
+																	{totalPagesLeaves}
+																</button>
+															</li>
+														</>
+													)}
+
+													{/* Next button */}
 													<li className={`page-item ${currentPageLeaves === totalPagesLeaves ? 'disabled' : ''}`}>
 														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves + 1, 'leaves')}>
 															Next
@@ -1325,7 +1395,7 @@ class Employee extends Component {
 												<label className="form-label">Select Employee</label>
 												<select 
 													name="employee_id"
-													className="form-control"
+													className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id ? ' is-invalid' : ''}`}
 													onChange={this.handleInputChangeForAddLeaves}
 													value={this.state.employee_id}
 												>
@@ -1336,6 +1406,9 @@ class Employee extends Component {
 														</option>
 													))}
 												</select>
+												{this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id && (
+													<div className="invalid-feedback d-block">{this.state.addLeaveErrors.employee_id}</div>
+												)}
 											</div>
 										</div>
 									)}
@@ -1345,13 +1418,13 @@ class Employee extends Component {
 											<label className="form-label">From Date</label>
 											<input
 												type="date"
-												className="form-control"
+												className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.from_date ? ' is-invalid' : ''}`}
 												name='from_date'
 												value={this.state.from_date}
 												onChange={this.handleInputChangeForAddLeaves}
 											/>
 											{this.state.addLeaveErrors.from_date && (
-  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>
+  											<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>
 											)}
 										</div>
 									</div>
@@ -1360,14 +1433,14 @@ class Employee extends Component {
 											<label className="form-label">To Date</label>
 											<input
 												type="date"
-												className="form-control"
+												className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.to_date ? ' is-invalid' : ''}`}
 												name='to_date'
 												value={this.state.to_date}
 												onChange={this.handleInputChangeForAddLeaves}
 												min={this.state.from_date ? this.state.from_date : new Date().toISOString().split("T")[0]}
 											/>
 											{this.state.addLeaveErrors.to_date && (
-  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.to_date}</div>
+  											<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.to_date}</div>
 											)} 
 										</div>
 									</div>
@@ -1376,14 +1449,14 @@ class Employee extends Component {
 											<label className="form-label">Reason</label>
 											<input
 												type="text"
-												className="form-control"
+												className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.reason ? ' is-invalid' : ''}`}
 												name='reason'
 												placeholder="Reason"
 												value={this.state.reason}
 												onChange={this.handleInputChangeForAddLeaves}
 											/>
 													{this.state.addLeaveErrors.reason && (
-													<div className=" small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.reason}</div>
+													<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.reason}</div>
 														)}
 										</div>
 									</div>
@@ -1393,7 +1466,7 @@ class Employee extends Component {
 												<label className="form-label">Status</label>
 												<select 
 													name="status"
-													className="form-control"
+													className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.status ? ' is-invalid' : ''}`}
 													id="status"
 													onChange={this.handleLeaveStatus}
 													value={this.state.status}
@@ -1404,7 +1477,7 @@ class Employee extends Component {
 													<option value="rejected">Rejected</option>
 												</select>
 												{this.state.addLeaveErrors.status && (
-  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.status}</div>
+  											<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.status}</div>
 											)}
 											</div>
 										</div>

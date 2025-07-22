@@ -1,26 +1,48 @@
-import React from 'react';
+import React, { Component } from 'react';
 
-const ClientFieldModal = ({
-  isEdit = false,
-  show,
-  onClose,
-  onSubmit,
-  onChange,
-  formData = {},
-  errors = {},
-  loading = false,
-  modalId,
-}) => {
-  const {
-    name = '',
-    profilePic = null,
-    email = '',
-    about = '',
-    country = '',
-    state = '',
-    city = '',
-    status = '',
-  } = formData;
+class ClientFieldModal extends Component {
+  componentDidMount() {
+    if (this.props.show) {
+      this.setDefaultStatus();
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!prevProps.show && this.props.show) {
+      this.setDefaultStatus();
+    }
+  }
+
+  setDefaultStatus = () => {
+    const { isEdit, formData, onChange } = this.props;
+    if (!isEdit && (formData.status === '' || formData.status === undefined)) {
+      onChange({ target: { name: 'status', value: '1' } });
+    }
+  };
+
+  render() {
+    const {
+      isEdit = false,
+      show,
+      onClose,
+      onSubmit,
+      onChange,
+      formData = {},
+      errors = {},
+      loading = false,
+      modalId,
+    } = this.props;
+
+    const {
+      name = '',
+      profilePic = null,
+      email = '',
+      about = '',
+      country = '',
+      state = '',
+      city = '',
+      status = '',
+    } = formData;
 
   let previewUrl = null;
   if (profilePic) {
@@ -217,6 +239,7 @@ const ClientFieldModal = ({
       {show && <div className="modal-backdrop fade show" />}
     </>
   );
-};
+  }
+}
 
 export default ClientFieldModal;

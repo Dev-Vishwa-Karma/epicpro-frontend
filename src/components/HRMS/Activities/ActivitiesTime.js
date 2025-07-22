@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import BlankState from '../../common/BlankState';
 
 class ActivitiesTime extends Component {
     constructor(props) {
@@ -414,7 +415,7 @@ class ActivitiesTime extends Component {
                     );
                     })
                 ) : (
-                    <div className="text-center text-muted py-4">activities not found</div>
+                    <BlankState message="Activities not found" />
                 )}
                 </div>
             </div>

@@ -472,9 +472,24 @@ class CalendarWithTabs extends Component {
         if (!employee.dob || employee.dob.trim() === "") {
             errors.dob = "DOB is required.";
         }
-        
+
         if (!employee.joining_date || employee.joining_date.trim() === "") {
             errors.joining_date = "Joining Date is required.";
+        }
+        if (employee.mobile_no1 && !/^\d{10}$/.test(employee.mobile_no1)) {
+            errors.mobile_no1 = "Mobile number must be exactly 10 digits.";
+        }
+        if (employee.mobile_no2 && !/^\d{10}$/.test(employee.mobile_no2)) {
+            errors.mobile_no2 = "Mobile number must be exactly 10 digits.";
+        }
+        if (employee.emergency_contact1 && !/^\d{10}$/.test(employee.emergency_contact1)) {
+            errors.emergency_contact1 = "Mobile number must be exactly 10 digits.";
+        }
+        if (employee.emergency_contact2 && !/^\d{10}$/.test(employee.emergency_contact2)) {
+            errors.emergency_contact2 = "Mobile number must be exactly 10 digits.";
+        }
+        if (employee.emergency_contact3 && !/^\d{10}$/.test(employee.emergency_contact3)) {
+            errors.emergency_contact3 = "Mobile number must be exactly 10 digits.";
         }
         if (Object.keys(errors).length > 0) {
             this.setState({ errors });
@@ -929,7 +944,7 @@ class CalendarWithTabs extends Component {
                                                                 type="tel"
                                                                 name="mobile_no1"
                                                                 id="mobile_no1"
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors && this.state.errors.mobile_no1 ? ' is-invalid' : ''}`}
                                                                 placeholder="Enter Mobile No"
                                                                 maxLength="10"
                                                                 value={employee.mobile_no1 || ""}
@@ -938,6 +953,9 @@ class CalendarWithTabs extends Component {
                                                                     e.target.value = e.target.value.replace(/\D/g, '');
                                                                 }}
                                                             />
+                                                             {this.state.errors && this.state.errors.mobile_no1 && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.mobile_no1}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
@@ -947,7 +965,7 @@ class CalendarWithTabs extends Component {
                                                                 type="tel"
                                                                 name="mobile_no2"
                                                                 id="mobile_no2"
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors && this.state.errors.mobile_no2 ? ' is-invalid' : ''}`}
                                                                 placeholder="Enter Mobile No"
                                                                 maxLength="10"
                                                                 value={employee.mobile_no2 || ""}
@@ -956,6 +974,9 @@ class CalendarWithTabs extends Component {
                                                                     e.target.value = e.target.value.replace(/\D/g, '');
                                                                 }}
                                                             />
+                                                            {this.state.errors && this.state.errors.mobile_no2 && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.mobile_no2}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
@@ -1006,7 +1027,7 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             name="emergency_contact1"
                                                             id="emergency_contact1"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors && this.state.errors.emergency_contact1 ? ' is-invalid' : ''}`}
                                                             maxLength="10"
                                                             placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact1}
@@ -1015,6 +1036,9 @@ class CalendarWithTabs extends Component {
                                                                 e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
                                                         />
+                                                        {this.state.errors && this.state.errors.emergency_contact1 && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.emergency_contact1}</div>
+                                                            )}
                                                     </div>
                                                     <div className="col-sm-6 col-md-4 mb-4">
                                                         <label className="form-label">Emergency Contact 2</label>
@@ -1022,7 +1046,7 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             name="emergency_contact2"
                                                             id="emergency_contact2"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors && this.state.errors.emergency_contact2 ? ' is-invalid' : ''}`}
                                                             maxLength="10"
                                                             placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact2}
@@ -1032,6 +1056,9 @@ class CalendarWithTabs extends Component {
                                                             }}
                                                             
                                                         />
+                                                         {this.state.errors && this.state.errors.emergency_contact2 && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.emergency_contact2}</div>
+                                                            )}
                                                     </div>
                                                     <div className="col-sm-6 col-md-4 mb-4">
                                                         <label className="form-label">Emergency Contact 3</label>
@@ -1039,7 +1066,7 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             name="emergency_contact3"
                                                             id="emergency_contact3"
-                                                            className="form-control"
+                                                            className={`form-control${this.state.errors && this.state.errors.emergency_contact3 ? ' is-invalid' : ''}`}
                                                             maxLength="10"
                                                             placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact3}
@@ -1048,6 +1075,9 @@ class CalendarWithTabs extends Component {
                                                                 e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
                                                         />
+                                                        {this.state.errors && this.state.errors.emergency_contact3 && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.emergency_contact3}</div>
+                                                            )}
                                                     </div>
 
                                                     {/* Frontend Skills */}

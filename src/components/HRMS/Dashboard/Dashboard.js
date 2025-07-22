@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import authService from "../../Authentication/authService";
 import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -177,49 +178,45 @@ class Dashboard extends Component {
 																		<td>{(index + 1).toString().padStart(2, '0')}</td>
 																		<td>{project.client_name}</td>
 																		<td>
-																			<ul className="list-unstyled team-info sm margin-0 w150">
-																				{project.team_members.map((member, index) => (
-																					<li key={index} data-toggle="tooltip" data-placement="top" 
+																			{project.team_members && project.team_members.length > 0 && (
+																				<div style={{ display: 'flex', alignItems: 'center', marginTop: 8 }}>
+																					{project.team_members.map((member, idx) => (
+																					<img
+																						key={member.id || idx}
+																						src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
+																						alt={`${member.first_name} ${member.last_name}`}
 																						title={`${member.first_name} ${member.last_name}`}
-																						style={{ marginLeft: "3px" }}
-																					>
-																						{member.profile ? (
-																							<img 
-																								src={`${process.env.REACT_APP_API_URL}/${member.profile}`} 
-																								alt={`${member.first_name} ${member.last_name}`}
-																								className="avatar avatar-blue add-space"
-																								style={{
-																									width: '35px',
-																									height: '35px',
-																									objectFit: 'cover',
-																									borderRadius: '50%'
-																								}}
-																								onError={(e) => {
-																									e.target.style.display = 'none';
-																									const initialsSpan = document.createElement('span');
-																									initialsSpan.className = 'avatar avatar-blue add-space';
-																									initialsSpan.setAttribute('data-toggle', 'tooltip');
-																									initialsSpan.setAttribute('data-placement', 'top');
-																									initialsSpan.setAttribute('title', `${member.first_name} ${member.last_name}`);
-																									initialsSpan.textContent = `${member.first_name.charAt(0).toUpperCase()}${member.last_name.charAt(0).toUpperCase()}`;
-																									e.target.parentNode.appendChild(initialsSpan);
-																								}}
-																							/>
-																						) : (
-																							<span className="avatar avatar-blue add-space">
-																								{member.first_name.charAt(0).toUpperCase()}{member.last_name.charAt(0).toUpperCase()}
-																							</span>
-																						)}
-																					</li>
-																				))}
-																			</ul>
+																						style={{
+																						width: 35,
+																						height: 35,
+																						borderRadius: '50%',
+																						border: '2px solid #fff',
+																						objectFit: 'cover',
+																						boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+																						marginLeft: idx === 0 ? 0 : -14,
+																						background: '#fff',
+																						zIndex: 10 + idx,
+																						transition: 'z-index 0.2s, transform 0.25s cubic-bezier(0.4,0,0.2,1)',
+																						cursor: 'pointer',
+																						}}
+																						onError={e => {
+																						if (!e.target.src.includes('/assets/images/sm/avatar2.jpg')) {
+																							e.target.src = '/assets/images/sm/avatar2.jpg';
+																						}
+																						}}
+																						onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
+																						onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
+																					/>
+																					))}
+																				</div>
+																				)}
 																		</td>
 																		<td>{project.project_name}</td>
 																		<td>{project.project_technology}</td>
 																	</tr>
 																))
 															): (
-																!message && <tr><td colSpan={5} className="text-center">Projects not available</td></tr>
+																<NoDataRow colSpan={7} message="Projects not available" />
 															)}
 														</tbody>
 													</table>
