@@ -4,6 +4,7 @@ import TodoModal from './TodoModal';
 import DeleteModal from '../../common/DeleteModal';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 
 class TodoList extends Component {
     constructor(props) {
@@ -752,11 +753,7 @@ class TodoList extends Component {
                                                                 </tr>
                                                             ))
                                                         ): (
-                                                            <tr>
-                                                                <td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-                                                                    Todo not available.
-                                                                </td>
-                                                            </tr>
+                                                            <NoDataRow colSpan={7} message="Todo not available." />
                                                         )}
                                                     </tbody>
                                                 )}

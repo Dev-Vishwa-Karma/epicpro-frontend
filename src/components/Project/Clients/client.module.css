@@ -143,3 +143,18 @@
   /* Adjust height as needed */
   max-height: calc(100vh - 400px);
 }
+
+.Team-member{
+  color: #555 !important;
+  font-size: 15px !important;
+  margin-top: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.Team-member-profile{
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}

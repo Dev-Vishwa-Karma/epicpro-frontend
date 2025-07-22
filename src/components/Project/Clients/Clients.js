@@ -6,6 +6,7 @@ import ClientInfoModal from "./ClientInfoModal";
 import ClientFieldModal from "./ClientFieldModal";
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from "../../../services/getService";
+import BlankState from "../../common/BlankState";
 class Clients extends Component {
   constructor(props) {
     super(props);
@@ -481,8 +482,8 @@ handleConfirmDelete = () => {
                         </div>
                     ))
                     ) : (
-                    <div className="col-12 text-center mt-4 text-muted" style={{ fontSize: '1rem', padding: '2rem 0' }}>
-                        <h5>No clients available</h5>
+                    <div className="col-12">
+                        <BlankState message="No clients available" />
                     </div>
                     )}
 

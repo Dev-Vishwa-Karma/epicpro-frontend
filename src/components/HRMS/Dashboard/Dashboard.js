@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import authService from "../../Authentication/authService";
 import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -217,12 +218,7 @@ class Dashboard extends Component {
 																	</tr>
 																))
 															): (
-																!message && 
-																<tr>
-																	<td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-																		Projects not available
-																	</td>
-																</tr>
+																<NoDataRow colSpan={7} message="Projects not available" />
 															)}
 														</tbody>
 													</table>

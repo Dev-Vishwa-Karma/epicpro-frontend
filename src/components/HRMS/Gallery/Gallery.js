@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import DeleteModal from '../../common/DeleteModal';
+import BlankState from '../../common/BlankState';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -565,7 +566,7 @@ class Gallery extends Component {
                             {!loading && filteredImages.length === 0 && (
                                 <div className="col-12">
                                     <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <span>Image not available</span>
+                                        <BlankState message="Image not available" />
                                     </div>
                                 </div>
                             )}

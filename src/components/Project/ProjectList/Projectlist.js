@@ -8,6 +8,7 @@ import DeleteModal from '../../common/DeleteModal';
 import EditModal from './EditModal';
 import { getService } from '../../../services/getService';
 import authService from '../../Authentication/authService';
+import BlankState from '../../common/BlankState';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -907,19 +908,9 @@ class ProjectList extends Component {
     ))
   ) : (
     !message && (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100px',
-          width: '100%',
-        }}
-      >
-        <p style={{ fontSize: '1.2rem', color: '#888', margin: 0 }}>
-          projects not available.
-        </p>
-      </div>
+        <div className="col-12">
+            <BlankState message="Projects not available" />
+        </div>
     )
   )}
 </div>

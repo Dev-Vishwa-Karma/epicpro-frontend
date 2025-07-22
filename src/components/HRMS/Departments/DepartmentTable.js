@@ -1,4 +1,5 @@
 import React from 'react';
+import NoDataRow from '../../common/NoDataRow';
 
 const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }) => {
     return (
@@ -49,13 +50,14 @@ const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }
                             </tr>
                         ))
                     ) : (
-                        !message && (
-                                <tr>
-                                    <td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-                                        Department not found
-                                    </td>
-                                </tr>
-                        )
+                        // !message && (
+                        //         <tr>
+                        //             <td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
+                        //                 Department not found
+                        //             </td>
+                        //         </tr>
+                        // )
+                        <NoDataRow colSpan={7} message="Department not found" />
                     )}
                 </tbody>
             </table>

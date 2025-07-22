@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import TextEditor from '../../common/TextEditor';
 import { getService } from '../../../services/getService';
+import NoDataRow from '../../common/NoDataRow';
 class Report extends Component {
 
     constructor(props) {
@@ -1057,11 +1058,7 @@ class Report extends Component {
                                                                     </tr>
                                                                 ))
                                                             ) : (
-                                                            <tr>
-                                                                <td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-                                                                    No reports available
-                                                                </td>
-                                                            </tr>
+                                                                <NoDataRow colSpan={7} message="No reports available" />
                                                             )}
                                                         </tbody>
                                                     </table>
