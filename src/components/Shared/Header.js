@@ -196,7 +196,6 @@ class Header extends Component {
     })
     .then(data => {
       if (data.status === "success") {
-        console.log('data.data[0]',data.data[0])
         const inTime = new Date(data.data[0].in_time);
         this.props.punchInAction(true);
         this.setState({

@@ -250,7 +250,6 @@ class departments extends Component {
     // Handle input changes
     handleInputChangeForAddDepartment = (event) => {
         const { name, value } = event.target;
-        console.log('name',name,value)
         this.setState({ 
             [name]: value,
             errors: { ...this.state.errors, [name]: "" }

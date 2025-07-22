@@ -166,15 +166,6 @@ class ViewEmployee extends Component {
         this.getEmployeeGallery(id);
     }
 
-    // componentDidUpdate(prevProps, prevState) {
-    //     const { id, activeTab } = this.props.match.params;
-    //     // // Watch for tab change even if pathname is same
-    //     if (activeTab && activeTab !== prevState.activeTab) {
-    //          console.log('prevState.activeTab',prevState.activeTab)
-    //         this.setState({ activeTab });
-    //     }
-    // }
-
     getEmployeeGallery = (id) => {
         getService.getCall('gallery.php', {
             action: 'view',

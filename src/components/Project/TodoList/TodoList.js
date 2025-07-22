@@ -731,12 +731,10 @@ class TodoList extends Component {
                                                                                                     className="btn btn-icon btn-sm js-sweetalert"
                                                                                                     title="Delete"
                                                                                                     onClick={() => {
-                                                                                            console.log('Delete button clicked');
                                                                                             this.setState({ 
                                                                                                 showDeleteModal: true, 
                                                                                                 todoToDelete: todo 
                                                                                             }, () => {
-                                                                                                console.log('State updated:', this.state.showDeleteModal, this.state.todoToDelete);
                                                                                                 // Show the modal using Bootstrap
                                                                                                 if (window.$) {
                                                                                                     window.$('#deleteTodoModal').modal('show');

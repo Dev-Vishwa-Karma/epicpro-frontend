@@ -1,5 +1,3 @@
-// Import all components here
-// import React, { Component } from 'react'
 import Dashboard from './HRMS/Dashboard/Dashboard';
 import Users from './HRMS/Users/Users';
 import Departments from './HRMS/Departments/Departments';
@@ -13,8 +11,6 @@ import Report from './HRMS/Report/Report';
 import Gallery from './HRMS/Gallery/Gallery';
 import SaturdaySettings from './HRMS/SaturdaySettings/SaturdaySettings';
 import Statistics from './HRMS/Statistics/Statistics';
-
-// import ProjectDashboard from './Project/Dashboard/Dashboard';
 import ProjectList from './Project/ProjectList/Projectlist';
 import Clients from './Project/Clients/Clients';
 import TodoList from './Project/TodoList/TodoList';
@@ -22,10 +18,6 @@ import JobPortalDashboard from './JobPortal/Dashboard/Dashboard';
 import Applicants from './JobPortal/Applicants/Applicants';
 import Positions from './JobPortal/Positions/Positions';
 import Resumes from './JobPortal/Resumes/Resumes';
-import Settings from './JobPortal/Settings/Settings';
-import AppCalendar from './AppPages/AppCalendar';
-import AppContact from './AppPages/AppContact';
-import AppSetting from './AppPages/AppSetting';
 import Login from './Authentication/login';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
 
@@ -224,41 +216,11 @@ const Routes = [
         component: Resumes
     },
     {
-        path: "/jobportal-settings",
-        name: 'jobportalSettings',
-        exact: true,
-        adminAccess: true,
-        pageTitle: "Job Settings",
-        roles: ['admin', 'super_admin'],
-        component: Settings
-    },
-    {
         path: "/login",
         name: 'login',
         exact: true,
         pageTitle: "Tables",
         component: Login
-    },
-    {
-        path: "/app-calendar",
-        name: 'app-calendar',
-        exact: true,
-        pageTitle: "Calendar",
-        component: AppCalendar
-    },
-    {
-        path: "/app-contact",
-        name: 'app-contact',
-        exact: true,
-        pageTitle: "Contact",
-        component: AppContact
-    },
-    {
-        path: "/app-setting",
-        name: 'app-setting',
-        exact: true,
-        pageTitle: "App Setting",
-        component: AppSetting
     },
 ];
 
