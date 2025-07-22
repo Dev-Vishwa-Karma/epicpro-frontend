@@ -81,11 +81,9 @@ class ViewEmployee extends Component {
             
 
             if (data.status === "success") {
-                console.log('profileImagePath',data.data)
                 const profileImagePath = data.data[0].url.replace(/\\/g, '/');
                 const imageUrl = process.env.REACT_APP_API_URL + '/' + profileImagePath;
                 const dataUrl = await this.toDataURL(imageUrl);
-                console.log('profileImagePath',profileImagePath)
                 const updatedImages = [...this.state.images, ...data.data];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
                 this.setState({
@@ -189,31 +187,29 @@ class ViewEmployee extends Component {
     // }
 
     getEmployeeGallery = (id, page = 1, limit = 12) => {
-                getService.getCall('gallery.php', {
-                    action: 'view',
-                    employee_id:id,
-                    page:page,
-                    limit:limit
-                })
-                .then(data => {
-                    if (data.status === 'success') {
-                        const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                        console.log('sortedImages',sortedImages)
-                        this.setState(prevState => ({
-                            images: page === 1 ? sortedImages : [...prevState.images, ...sortedImages],
-                            hasMore: sortedImages.length >= limit, // if less than limit, we assume no more images
-                            page,
-                            loading: false
-                        }));
-                        console.log('images',this.state.images)
-                    } else {
-                        this.setState({ message: data.message, loading: false, hasMore: false });
-                    }
-                })
-                .catch(err => {
-                    this.setState({ message: 'Failed to fetch data', loading: false, hasMore: false });
-                    console.error(err);
-                });
+        getService.getCall('gallery.php', {
+            action: 'view',
+            employee_id:id,
+            page:page,
+            limit:limit
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                const sortedImages = this.sortImages(data.data, this.state.sortOrder);
+                this.setState(prevState => ({
+                    images: page === 1 ? sortedImages : [...prevState.images, ...sortedImages],
+                    hasMore: sortedImages.length >= limit, // if less than limit, we assume no more images
+                    page,
+                    loading: false
+                }));
+            } else {
+                this.setState({ message: data.message, loading: false, hasMore: false });
+            }
+        })
+        .catch(err => {
+            this.setState({ message: 'Failed to fetch data', loading: false, hasMore: false });
+            console.error(err);
+        });
     };
 
     fetchMoreImages = () => {
