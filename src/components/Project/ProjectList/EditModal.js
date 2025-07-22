@@ -33,7 +33,7 @@ const EditModal = ({
                 }
             }}
         >
-            <div className="modal-dialog" role="document">
+            <div className="modal-dialog modal-dialog-scrollable" role="document">
                 <div className="modal-content" tabIndex={-1}>
                     <div className="modal-header">
                         <h5 className="modal-title" id={labelId}>

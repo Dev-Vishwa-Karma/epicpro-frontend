@@ -30,8 +30,6 @@ class Dashboard extends Component {
 			this.openBirthdayBannerModel();
 		}
 
-		// Make the GET API call when the component is mounted
-		//getService.getCall('dashboard.php', null, null, null, null, null, null)
 		getService.getCall('dashboard.php', {
 			action: 'view'
 		})

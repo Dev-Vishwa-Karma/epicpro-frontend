@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
+import DeleteModal from '../../common/DeleteModal';
 
 class Users extends Component {
 	constructor(props) {
@@ -336,20 +337,6 @@ class Users extends Component {
         if (!deleteUser) return;
 
 		this.setState({ ButtonLoading: true });
-		
-		console.log('deleteUser',deleteUser)
-		// 		fetch(`${process.env.REACT_APP_API_URL}/get_employees.php?action=delete`, {
-        //   	method: 'DELETE',
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// 	body: JSON.stringify({
-		// 		user_id: deleteUser,
-		// 		logged_in_employee_id: logged_in_employee_id,
-		// 		logged_in_employee_role: logged_in_employee_role,
-		// 	}),
-        // })
-        // .then((response) => response.json())
 		getService.deleteCall('get_employees.php', 'delete', null, deleteUser, logged_in_employee_id, logged_in_employee_role)
         .then((data) => {
 			if (data.status === "success") {
@@ -375,7 +362,6 @@ class Users extends Component {
 					deleteUser: null,  // Clear the deleteUser state
                     ButtonLoading: false,
 				});
-				document.querySelector("#deleteUserModal .close").click();
 
 				setTimeout(() => this.setState({ showSuccess: false }), 3000);
 			} else {
@@ -384,7 +370,6 @@ class Users extends Component {
 					errorMessage: "Failed to delete user. Please try again.",
                     ButtonLoading: false,
 				});
-				// setTimeout(() => this.setState({ showError: false }), 3000);
 			}
         })
 		.catch((error) => {
@@ -396,6 +381,10 @@ class Users extends Component {
 			});
 		});
     };
+
+	onCloseDeleteModal = () => {
+        this.setState({ deleteUser: null });
+    }
 
 	// Handle Pagination
     handlePageChange = (newPage) => {
@@ -543,14 +532,6 @@ class Users extends Component {
 															currentUsers.map((user, index) => (
 																<tr key={index}>
 																	<td className="width45">
-																		{/* <span
-																			className="avatar avatar-blue"
-																			data-toggle="tooltip"
-																			data-placement="top"
-																			data-original-title="Avatar Name"
-																		>
-																			{user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
-																		</span> */}
 																		{user.profile ? (
                                                                             <img 
                                                                                 src={`${process.env.REACT_APP_API_URL}/${user.profile}`} 
@@ -970,94 +951,6 @@ class Users extends Component {
 																		</label>
 																	</td>
 																</tr>
-																{/* <tr>
-																	<td>Employee</td>
-																	<td>
-																		<label className="custom-control custom-checkbox">
-																			<input
-																				type="checkbox"
-																				className="custom-control-input"
-																				name="example-checkbox1"
-																				defaultValue="option1"
-																				defaultChecked
-																			/>
-																			<span className="custom-control-label">
-																				&nbsp;
-																			</span>
-																		</label>
-																	</td>
-																	<td>
-																		<label className="custom-control custom-checkbox">
-																			<input
-																				type="checkbox"
-																				className="custom-control-input"
-																				name="example-checkbox1"
-																				defaultValue="option1"
-																			/>
-																			<span className="custom-control-label">
-																				&nbsp;
-																			</span>
-																		</label>
-																	</td>
-																	<td>
-																		<label className="custom-control custom-checkbox">
-																			<input
-																				type="checkbox"
-																				className="custom-control-input"
-																				name="example-checkbox1"
-																				defaultValue="option1"
-																			/>
-																			<span className="custom-control-label">
-																				&nbsp;
-																			</span>
-																		</label>
-																	</td>
-																</tr> */}
-																{/* <tr>
-																	<td>HR Admin</td>
-																	<td>
-																		<label className="custom-control custom-checkbox">
-																			<input
-																				type="checkbox"
-																				className="custom-control-input"
-																				name="example-checkbox1"
-																				defaultValue="option1"
-																				defaultChecked
-																			/>
-																			<span className="custom-control-label">
-																				&nbsp;
-																			</span>
-																		</label>
-																	</td>
-																	<td>
-																		<label className="custom-control custom-checkbox">
-																			<input
-																				type="checkbox"
-																				className="custom-control-input"
-																				name="example-checkbox1"
-																				defaultValue="option1"
-																				defaultChecked
-																			/>
-																			<span className="custom-control-label">
-																				&nbsp;
-																			</span>
-																		</label>
-																	</td>
-																	<td>
-																		<label className="custom-control custom-checkbox">
-																			<input
-																				type="checkbox"
-																				className="custom-control-input"
-																				name="example-checkbox1"
-																				defaultValue="option1"
-																				defaultChecked
-																			/>
-																			<span className="custom-control-label">
-																				&nbsp;
-																			</span>
-																		</label>
-																	</td>
-																</tr> */}
 															</tbody>
 														</table>
 													</div>
@@ -1208,7 +1101,15 @@ class Users extends Component {
 					</div>
 
 					{/* Delete User Model */}
-					<div className="modal fade" id="deleteUserModal" tabIndex={-1} role="dialog" aria-labelledby="deleteUserModalLabel">
+					<DeleteModal
+                        show={!!this.state.deleteUser}
+                        onConfirm={this.confirmDelete}
+                        isLoading={this.state.ButtonLoading}
+                        deleteBody='Are you sure you want to delete the user?'
+                        modalId="deleteUserModal"
+                        onClose={this.onCloseDeleteModal}
+                    />
+					{/* <div className="modal fade" id="deleteUserModal" tabIndex={-1} role="dialog" aria-labelledby="deleteUserModalLabel">
 						<div className="modal-dialog" role="document">
 							<div className="modal-content">
 								<div className="modal-header" style={{ display: 'none' }}>
@@ -1229,8 +1130,8 @@ class Users extends Component {
 									</button>
 								</div>
 							</div>
-						</div>
-					</div>
+						</div> */}
+					{/* </div> */}
 				</div>
 
 			</>

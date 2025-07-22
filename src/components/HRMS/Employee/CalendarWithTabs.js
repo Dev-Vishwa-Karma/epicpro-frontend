@@ -260,7 +260,6 @@ class CalendarWithTabs extends Component {
                     const calendarEventsData = this.generateCalendarEvents(reports, leaves);
                     this.setState({ calendarEventsData });
                 });
-                console.log('currentEmployeeId',currentEmployeeId)
                
             getService.getCall('employee_leaves.php', {
                 action: 'view',
@@ -614,19 +613,20 @@ class CalendarWithTabs extends Component {
 
     handleApplyFilter = async () => {
         this.setState({ loading: true });
-        const { filterFromDate, filterToDate } = this.state;       
-        const data = getService.getCall('activities.php', {
-            action: 'view',
-            user_id:this.props.employeeId,
-            from_date: filterFromDate,
-            to_date:filterToDate
-        })
-        if (data.status === "success") {
-            this.setState({ activities: data.data, loading: false });
-        } else {
-            this.setState({ activities: [], loading: false, error: data.message });
-        }
-       
+        const { filterFromDate, filterToDate } = this.state;  
+            getService.getCall('activities.php', {
+                action: 'view',
+                user_id:this.props.employeeId,
+                from_date: filterFromDate,
+                to_date:filterToDate,
+                is_timeline:true
+            }).then(data => {
+                if (data.status === "success") {
+                    this.setState({ activities: data.data, loading: false });
+                } else {
+                    this.setState({ activities: [], loading: false, error: data.message });
+                }
+            })       
     };
 
     render() {

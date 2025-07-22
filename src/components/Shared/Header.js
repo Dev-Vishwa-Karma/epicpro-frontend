@@ -730,7 +730,7 @@ class Header extends Component {
                               <li 
                                 key={index}  
                                 className={`${notification.read === 0 ? '' : ''}`}   
-                                style={{ backgroundColor: notification.read === 0 ? '#E8E9E9' : 'transparent' }} 
+                                style={{ backgroundColor: notification.read === 0 ? '#E8E9E9 ' : 'transparent', cursor: 'pointer' }} 
                                 onClick={() => this.markAsRead(notification.id)}
                               >                          
                                 <div className="feeds-body">
