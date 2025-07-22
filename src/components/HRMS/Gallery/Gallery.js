@@ -32,6 +32,7 @@ class Gallery extends Component {
             // Modal for image preview
             showImageModal: false,
             selectedImageForModal: null,
+            downloadLoading: false,
         };
         this.fileInputRef = React.createRef();
     }
@@ -376,6 +377,63 @@ class Gallery extends Component {
         this.openDeleteModal(this.state.selectedImageForModal);
         this.closeImageModal();
     };
+
+    handleDownload = () => {
+        const { selectedImageForModal } = this.state;
+        if (!selectedImageForModal) return;
+
+        this.setState({ downloadLoading: true });
+
+        // Validate file extension
+        var validExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
+        var fileName = selectedImageForModal.url.split('/').pop();
+        var fileExtension = fileName.split('.').pop().toLowerCase();
+
+        if (validExtensions.indexOf('.' + fileExtension) === -1) {
+            this.setState({
+                downloadLoading: false,
+                errorMessage: 'Only PNG, JPG, JPEG, and WEBP images are supported',
+                showError: true
+            });
+            setTimeout(this.dismissMessages, 3000);
+            return;
+        }
+
+        // backend endpoint for download
+        var imageUrl = process.env.REACT_APP_API_URL + '/gallery.php?action=view_image&img=' + encodeURIComponent(fileName);
+
+        fetch(imageUrl)
+            .then(function (response) {
+                return response.blob();
+            })
+            .then(function (blob) {
+                const imageDataUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = imageDataUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(imageDataUrl);
+            })
+            .catch((error) => {
+                this.setState({
+                    downloadLoading: false,
+                    errorMessage: 'Failed to download image',
+                    showError: true
+                });
+                setTimeout(this.dismissMessages, 3000);
+                console.error('Error downloading image:', error);
+            })
+            .finally(() => {
+                this.setState({
+                    downloadLoading: false,
+                    successMessage: 'Download started successfully',
+                    showSuccess: true
+                });
+                setTimeout(this.dismissMessages, 3000);
+            });
+    };
     
     render() {
         const { fixNavbar } = this.props;
@@ -676,14 +734,13 @@ class Gallery extends Component {
                             onClick={this.handleDeleteFromModal}
                             >
                             DELETE
-                                </button>
-                                {/* <a href={`${process.env.REACT_APP_API_URL}/${this.state.selectedImageForModal.url}`} download>
-                            <button
+                             </button>
+                               <button
                             className="btn btn-primary"
+                            onClick={this.handleDownload}
                             >
                             DOWNLOAD
-                            </button>                                    
-                            </a> */}
+                            </button>
 
                         </div>
                         </div>
