@@ -9,9 +9,7 @@ import EditEmployee from './HRMS/Employee/EditEmployee';
 import Holidays from './HRMS/Holidays/Holidays';
 import Events from './HRMS/Events/Events';
 import Activities from './HRMS/Activities/Activities';
-import Payroll from './HRMS/Payroll/Payroll';
 import Report from './HRMS/Report/Report';
-import Accounts from './HRMS/Accounts/Accounts';
 import Gallery from './HRMS/Gallery/Gallery';
 import SaturdaySettings from './HRMS/SaturdaySettings/SaturdaySettings';
 import Statistics from './HRMS/Statistics/Statistics';
@@ -25,7 +23,6 @@ import Applicants from './JobPortal/Applicants/Applicants';
 import Positions from './JobPortal/Positions/Positions';
 import Resumes from './JobPortal/Resumes/Resumes';
 import Settings from './JobPortal/Settings/Settings';
-import Profile from './Profile/Profile';
 import AppCalendar from './AppPages/AppCalendar';
 import AppContact from './AppPages/AppContact';
 import AppSetting from './AppPages/AppSetting';
@@ -49,7 +46,6 @@ const Routes = [
         adminAccess: true,
         component: Users,
         roles: ['admin', 'super_admin']
-
     },
     {
         path: "/hr-department",
@@ -59,7 +55,6 @@ const Routes = [
         adminAccess: true,
         component: Departments,
         roles: ['admin', 'super_admin']
-
     },
     {
         path: "/hr-employee",
@@ -131,25 +126,6 @@ const Routes = [
         roles: ['admin', 'super_admin', 'employee']
     },
     {
-        path: "/hr-payroll",
-        name: 'payroll',
-        exact: true,
-        pageTitle: "Payroll",
-        adminAccess: true,
-        roles: ['admin', 'super_admin'],
-        component: Payroll
-
-    },
-    {
-        path: "/hr-accounts",
-        name: 'accounts',
-        exact: true,
-        pageTitle: "Accounts",
-        adminAccess: true,
-        roles: ['admin', 'super_admin'],
-        component: Accounts
-    },
-    {
         path: "/hr-report",
         name: 'report',
         exact: true,
@@ -183,10 +159,7 @@ const Routes = [
         roles: ['admin', 'super_admin'],
         component: Statistics
     },
-    // add new routes here
-
     //project
-
     {
         path: "/project-list",
         name: 'project-list',
@@ -204,7 +177,6 @@ const Routes = [
         roles: ['admin', 'super_admin'],
         component: Clients
     },
-
     {
         path: "/project-todo",
         name: 'project-todo',
@@ -215,7 +187,6 @@ const Routes = [
     },
 
     //job portal
-
     {
         path: "/jobportal-dashboard",
         name: 'jobportalDashboard',
@@ -288,14 +259,6 @@ const Routes = [
         exact: true,
         pageTitle: "App Setting",
         component: AppSetting
-    },
-    {
-        path: "/profile",
-        name: 'profile',
-        exact: true,
-        pageTitle: "My Profile",
-        roles: ['admin', 'super_admin'],
-        component: Profile
     },
 ];
 

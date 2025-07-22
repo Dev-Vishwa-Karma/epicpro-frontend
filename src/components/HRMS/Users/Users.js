@@ -443,7 +443,7 @@ class Users extends Component {
 	render() {
 
 		const { fixNavbar } = this.props;
-		const { users, error, selectedUser, currentPage, dataPerPage, loading, showSuccess, successMessage, showError, errorMessage } = this.state;
+		const { users, selectedUser, currentPage, dataPerPage, loading, showSuccess, successMessage, showError, errorMessage } = this.state;
 
 		// Pagination Logic
         const indexOfLastUser = currentPage * dataPerPage;
@@ -1109,31 +1109,7 @@ class Users extends Component {
                         modalId="deleteUserModal"
                         onClose={this.onCloseDeleteModal}
                     />
-					{/* <div className="modal fade" id="deleteUserModal" tabIndex={-1} role="dialog" aria-labelledby="deleteUserModalLabel">
-						<div className="modal-dialog" role="document">
-							<div className="modal-content">
-								<div className="modal-header" style={{ display: 'none' }}>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                                </div>
-								<div className="modal-body">
-									<div className="row clearfix">
-										<p>Are you sure you want to delete the user?</p>
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-									<button type="button" onClick={this.confirmDelete}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
-										{this.state.ButtonLoading && (
-											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-										)}
-										Delete
-									</button>
-								</div>
-							</div>
-						</div> */}
-					{/* </div> */}
 				</div>
-
 			</>
 		);
 	}

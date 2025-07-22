@@ -210,7 +210,6 @@ class CalendarWithTabs extends Component {
     }
 
     loadEmployeeData = () => {
-        const baseUrl = process.env.REACT_APP_API_URL;
         let employeeId = this.props.employeeId;
 
         if (!employeeId) {

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import styles from './client.module.css';
 const ClientInfoModal = ({ client, onClose }) => {
   if (!client) return null;
-  const isActive = client.client_status === "1";
 
   return (
     <div

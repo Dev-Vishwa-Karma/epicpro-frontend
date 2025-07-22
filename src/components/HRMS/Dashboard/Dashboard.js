@@ -128,7 +128,7 @@ class Dashboard extends Component {
 	}
 	render() {
 		const { fixNavbar } = this.props;
-		const { user, projects, message, loading, showBirthdayBannerModal} = this.state;
+		const { user, projects, loading, showBirthdayBannerModal} = this.state;
 		return (
 			<>
 				<div>
