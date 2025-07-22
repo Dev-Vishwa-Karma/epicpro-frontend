@@ -29,9 +29,45 @@ class Gallery extends Component {
             showDeleteModal: false,
             imageToDelete: null,
             deleteLoading: false,
+            // Modal for image preview
+            showImageModal: false,
+            selectedImageForModal: null,
         };
         this.fileInputRef = React.createRef();
     }
+
+    fetchImages = () => {
+        const { sortOrder } = this.state;
+        const { role, id } = window.user;
+        const params = role === "employee" ? id : null;
+        this.setState({ loading: true });
+        getService.getCall('gallery.php', {
+            action: 'view',
+            employee_id: params,
+            sortOrder: sortOrder
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                this.setState({
+                    images: data.data,
+                    filteredImages: data.data,
+                    loading: false
+                });
+            } else {
+                this.setState({ loading: false });
+            }
+        })
+        .catch(() => {
+            this.setState({ loading: false });
+        });
+    };
+
+    handleSortChange = (event) => {
+        const newSortOrder = event.target.value;
+        this.setState({ sortOrder: newSortOrder }, () => {
+            this.fetchImages();
+        });
+    };
 
     componentDidMount() {
         const {role, id} = window.user;
@@ -63,29 +99,8 @@ class Gallery extends Component {
                 console.error(err);
             });
         }
-
-        // Fetch gallery data
-        const params = role === "employee" ? id : null;
-        getService.getCall('gallery.php', {
-            action: 'view',
-            employee_id:params 
-        })
-            .then(data => {
-                if (data.status === 'success') {
-                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                    this.setState({
-                        images: sortedImages,
-                        filteredImages: sortedImages,
-                        loading: false
-                    });
-                } else {
-                    this.setState({ message: data.message, loading: false });
-                }
-            })
-            .catch(err => {
-                this.setState({ message: 'Failed to fetch data', loading: false });
-                console.error(err);
-            });
+        // Fetch gallery data with sortOrder
+        this.fetchImages();
     }
 
     openModal = () => {
@@ -254,14 +269,6 @@ class Gallery extends Component {
     };
 
     // Handle Sort Order Change
-    handleSortChange = (event) => {
-        const newSortOrder = event.target.value;
-        this.setState(prevState => ({
-            sortOrder: newSortOrder,
-            filteredImages: this.sortImages(prevState.images, newSortOrder)
-        }));
-    };
-
     sortImages = (images, sortOrder) => {
         return [...images].sort((a, b) => {
             return sortOrder === "asc"
@@ -355,6 +362,20 @@ class Gallery extends Component {
             setTimeout(this.dismissMessages, 3000);
         });
 };
+    
+    // Modal handlers for image preview
+    openImageModal = (image) => {
+        this.setState({ showImageModal: true, selectedImageForModal: image });
+    };
+
+    closeImageModal = () => {
+        this.setState({ showImageModal: false, selectedImageForModal: null });
+    };
+
+    handleDeleteFromModal = () => {
+        this.openDeleteModal(this.state.selectedImageForModal);
+        this.closeImageModal();
+    };
     
     render() {
         const { fixNavbar } = this.props;
@@ -490,7 +511,7 @@ class Gallery extends Component {
                                                                                     alt="Preview"
                                                                                     className="img-thumbnail"
                                                                                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                                                                                />
+                                                                                />  
                                                                                 <button
                                                                                     className="btn btn-danger btn-sm position-absolute"
                                                                                     style={{ top: '-5px', right: '-5px', borderRadius: '50%' }}
@@ -534,30 +555,21 @@ class Gallery extends Component {
                                     </div>
                                 </div>
                             )}
-            
-                            {/* {!loading && window.user?.role === "employee" && (
-                                <div className="col-12">
-                                    <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <span className="text-danger fw-bold">Access Denied</span>
-                                    </div>
-                                </div>
-                            )} */}
                             
                             {!loading && filteredImages.length > 0 && ( // If not employee, show images if available
                                 currentImages.map((image, index) => (
                                     <div className="col-sm-6 col-lg-3" key={image.id || index}>
-                                        <div className="card p-3 position-relative">
-                                            {/* Delete Icon */}
-                                            <button
-                                                type="button"
-                                                className="btn btn-link p-0 position-absolute"
-                                                style={{ top: '1px', right: '4px', zIndex: 2 }}
-                                                title="Delete Image"
-                                                onClick={() => this.openDeleteModal(image)}
-                                            >
-                                                <i className="fa fa-trash " style={{ fontSize: '1rem', color:'red' }}></i>
-                                            </button>
-                                            <img src={`${process.env.REACT_APP_API_URL}/${image.url}`} alt="Gallery" className="rounded" />
+                                        <div className="card p-3 position-relative gallery-card">
+                                            <div className="gallery-image-wrapper">
+                                            <img 
+                                                src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
+                                                alt="Gallery" 
+                                                className="rounded w-100 h-auto" 
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => this.openImageModal(image)}
+                                            />
+                                            {/* Delete button removed from here, now in modal */}
+                                            </div>
                                         </div>
                                     </div>
                                 ))
@@ -642,6 +654,42 @@ class Gallery extends Component {
                         )}
                     </div>
                 </div>
+                {/* Modal for image preview, delete, and download */}
+                {this.state.showImageModal && this.state.selectedImageForModal && (
+                    <div className="modal-backdrop modal-backdrop-type">
+                        <div className="modal-backdrop-content">
+                        <button
+                            onClick={this.closeImageModal}
+                            className="gallery-closeImageModal"
+                            aria-label="Close"
+                        >
+                            &times;
+                        </button>
+                        <img
+                            src={`${process.env.REACT_APP_API_URL}/${this.state.selectedImageForModal.url}`}
+                                alt="Gallery Large"
+                                className="gallery-large"
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+                            <button
+                            className="btn btn-danger"
+                            onClick={this.handleDeleteFromModal}
+                            >
+                            DELETE
+                                </button>
+                                {/* <a href={`${process.env.REACT_APP_API_URL}/${this.state.selectedImageForModal.url}`} download>
+                            <button
+                            className="btn btn-primary"
+                            >
+                            DOWNLOAD
+                            </button>                                    
+                            </a> */}
+
+                        </div>
+                        </div>
+                    </div>
+                    )}
+
             </>
         )
     }

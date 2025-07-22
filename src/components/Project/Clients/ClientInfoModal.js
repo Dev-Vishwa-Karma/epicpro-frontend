@@ -95,9 +95,7 @@ const ClientInfoModal = ({ client, onClose }) => {
                                   style={{marginLeft: idx === 0 ? 0 : -14,}}
                                   title={member.full_name}
                                   onError={e => {
-                                    if (!e.target.src.includes('/assets/images/sm/avatar2.jpg')) {
                                       e.target.src = '/assets/images/sm/avatar2.jpg';
-                                    }
                                   }}
                                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
                                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
