@@ -755,54 +755,61 @@ class Header extends Component {
                             <div
                           id="notificationScrollArea"
                           style={{
-                    height: notifications.length > 2 ? '300px' : 'auto',
+                    height: notifications.length > 2 ? '310px' : 'auto',
                     overflow: 'auto',
-                    padding: '10px'
+                    
                   }}
                     >
-                      <InfiniteScroll
-                        dataLength={notifications.length}
-                        next={this.fetchNotifications}
-                        hasMore={hasMore && notifications.length > 2}
-                        loader={<p className="text-center">Loading...</p>}
-                        scrollableTarget="notificationScrollArea"
-                      >
-                        <ul className="list-unstyled feeds_widget">
-                          {notifications.length > 0 ? (
-                            notifications.map((notification, index) => {
-                              const createdAt = new Date(notification.created_at);
-                              const formattedDate = createdAt.toLocaleDateString();
+                  <InfiniteScroll
+                      dataLength={this.state.notifications.length}
+                      next={() => {
+                          this.setState({ loadingMore: true });
+                          setTimeout(() => {
+                              this.fetchNotifications(); 
+                          }, 1000);
+                      }}
+                      hasMore={this.state.hasMore && this.state.notifications.length > 2}
+                      loader={this.state.loadingMore ? <p className="text-center mt-2">Loading...</p> : null} // Show loading spinner when loadingMore is true
+                      scrollableTarget="notificationScrollArea"
+                  >
+                      <ul className="list-unstyled feeds_widget">
+                          {this.state.notifications.length > 0 ? (
+                              this.state.notifications.map((notification, index) => {
+                                  const createdAt = new Date(notification.created_at);
+                                  const formattedDate = createdAt.toLocaleDateString();
 
-                              return (
-                                <li
-                                  key={index}
-                                  style={{
-                                    backgroundColor: notification.read === 0 ? '#E8E9E9' : 'transparent',
-                                    cursor: 'pointer',
-                                    padding: '10px',
-                                    borderBottom: '1px solid #ddd'
-                                  }}
-                                  onClick={() => this.markAsRead(notification.id)}
-                                >
-                                  <div className="feeds-body">
-                                    <h4 className={`title text-danger ${notification.read === 0 ? 'font-weight-bold' : ''}`}>
-                                      {notification.title}
-                                      <small className="float-right text-muted">{formattedDate}</small>
-                                    </h4>
-                                    <small className="notification-body">{notification.body}</small>
-                                  </div>
-                                </li>
-                              );
-                            })
+                                  return (
+                                      <li
+                                          key={index}
+                                          style={{
+                                              backgroundColor: notification.read === 0 ? '#E8E9E9' : 'transparent',
+                                              cursor: 'pointer',
+                                              borderBottom: '1px solid #ddd'
+                                          }}
+                                          onClick={() => this.markAsRead(notification.id)}
+                                      >
+                                          <div className="feeds-body">
+                                              <h4 className={`title text-danger ${notification.read === 0 ? 'font-weight-bold' : ''}`}>
+                                                  {notification.title}
+                                                  <small className="float-right text-muted">{formattedDate}</small>
+                                              </h4>
+                                              <small className="notification-body">{notification.body}</small>
+                                          </div>
+                                      </li>
+                                  );
+                              })
                           ) : (
-                            <li>
-                              <div className="feeds-body">
-                                <h4 className="title text-danger">Notification not found</h4>
-                              </div>
-                            </li>
+                              <li>
+                                  <div className="feeds-body">
+                                      <h4 className="title text-danger">Notification not found</h4>
+                                  </div>
+                              </li>
                           )}
-                        </ul>
-                      </InfiniteScroll>
+                      </ul>
+                  </InfiniteScroll>
+
+
+
                     </div>
                       {notifications.length > 0 && (
                         <>
