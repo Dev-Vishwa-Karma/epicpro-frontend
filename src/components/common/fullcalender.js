@@ -36,7 +36,7 @@ class Fullcalender extends Component {
                     }}
                     defaultDate={defaultDate}
                     navLinks={true}
-                    editable={true}
+                    editable={false}
                     eventLimit={true}
                     events={events}
                     defaultView={defaultView}
