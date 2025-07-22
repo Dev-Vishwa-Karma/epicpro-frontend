@@ -5,7 +5,8 @@ import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import ReactCropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 import CalendarWithTabs from './CalendarWithTabs';
-import AlertMessages from '../../common/AlertMessages'
+import AlertMessages from '../../common/AlertMessages';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { getService } from '../../../services/getService';
 class ViewEmployee extends Component {
     constructor(props) {
@@ -28,7 +29,12 @@ class ViewEmployee extends Component {
             images: [],   
             showGallery: true,
             croppperPreviewImage: null,
-            profileImage: null
+            profileImage: null,
+            page: 1,
+            hasMore: true,
+            sortOrder: 'asc', // or 'desc'
+            loading: true,
+            message: ''
         };
         this.cropperRef = React.createRef();
     }
@@ -75,9 +81,16 @@ class ViewEmployee extends Component {
             
 
             if (data.status === "success") {
+                console.log('profileImagePath',data.data)
+                const profileImagePath = data.data[0].url.replace(/\\/g, '/');
+                const imageUrl = process.env.REACT_APP_API_URL + '/' + profileImagePath;
+                const dataUrl = await this.toDataURL(imageUrl);
+                console.log('profileImagePath',profileImagePath)
                 const updatedImages = [...this.state.images, ...data.data];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
                 this.setState({
+                    selectedImage: `${profileImagePath}`,
+                    croppperPreviewImage: `${dataUrl}`,
                     images: sortedImages,
                     successMessage: "Image uploaded successfully!",
                     showSuccess: true,
@@ -166,26 +179,53 @@ class ViewEmployee extends Component {
         this.getEmployeeGallery(id);
     }
 
-    getEmployeeGallery = (id) => {
-        getService.getCall('gallery.php', {
-            action: 'view',
-            employee_id:id
-        })
-            .then(data => {
-                if (data.status === 'success') {
-                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                    this.setState({
-                        images: sortedImages,
-                    });
-                } else {
-                    this.setState({ message: data.message, loading: false });
-                }
+    // componentDidUpdate(prevProps, prevState) {
+    //     const { id, activeTab } = this.props.match.params;
+    //     // // Watch for tab change even if pathname is same
+    //     if (activeTab && activeTab !== prevState.activeTab) {
+    //          console.log('prevState.activeTab',prevState.activeTab)
+    //         this.setState({ activeTab });
+    //     }
+    // }
+
+    getEmployeeGallery = (id, page = 1, limit = 12) => {
+                getService.getCall('gallery.php', {
+                    action: 'view',
+                    employee_id:id,
+                    page:page,
+                    limit:limit
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        const sortedImages = this.sortImages(data.data, this.state.sortOrder);
+                        console.log('sortedImages',sortedImages)
+                        this.setState(prevState => ({
+                            images: page === 1 ? sortedImages : [...prevState.images, ...sortedImages],
+                            hasMore: sortedImages.length >= limit, // if less than limit, we assume no more images
+                            page,
+                            loading: false
+                        }));
+                        console.log('images',this.state.images)
+                    } else {
+                        this.setState({ message: data.message, loading: false, hasMore: false });
+                    }
+                })
+                .catch(err => {
+                    this.setState({ message: 'Failed to fetch data', loading: false, hasMore: false });
+                    console.error(err);
+                });
+    };
+
+    fetchMoreImages = () => {
+        let { id } = this.props.match.params;
+            this.setState({
+                employeeId: id
             })
-            .catch(err => {
-                this.setState({ message: 'Failed to fetch data', loading: false });
-                console.error(err);
-            });
-    }
+
+        const { page } = this.state;
+        const nextPage = page + 1;
+        this.getEmployeeGallery(id, nextPage);
+    };
 
     sortImages = (images, sortOrder) => {
         return [...images].sort((a, b) => {
@@ -364,62 +404,74 @@ class ViewEmployee extends Component {
                                         )}
 
                                         {showGallery && (
-                                            <div className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start">
-                                                {this.state.images.map((image, index) => (
-                                                    <div key={index} className="position-relative  mr-2">
-                                                        <label className="d-block mb-0 pointer">
-                                                            <input 
-                                                                name="imagecheck" 
-                                                                type="radio" 
-                                                                value={image.url} 
-                                                                className="d-none" 
-                                                                onChange={async () => {
-                                                                    const imageUrl = process.env.REACT_APP_API_URL + '/' + image.url;
-                                                                    const dataUrl = await this.toDataURL(imageUrl);
-                                                                    this.setState({
-                                                                        selectedImage: image.url,
-                                                                        croppperPreviewImage: dataUrl
-                                                                    });
+                                            <InfiniteScroll
+                                                dataLength={this.state.images.length}
+                                                next={this.fetchMoreImages}
+                                                hasMore={this.state.hasMore}
+                                                loader={<p className="text-center">Loading more images...</p>}
+                                                scrollableTarget="scrollableGallery"
+                                            >
+                                                <div
+                                                    id="scrollableGallery"
+                                                    className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start"
+                                                    style={{ maxHeight: '200px', overflowY: 'auto' }}
+                                                >
+                                                            {/* Upload box */}
+                                                    <label className="cursor-pointer">
+                                                        <div className="border rounded-2 mt-1 mr-3 border-dashed hover-bg-light">
+                                                            <div 
+                                                                style={{
+                                                                    width: '80px',
+                                                                    height: '80px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    color: '#6c757d',
+                                                                    cursor: 'pointer'
                                                                 }}
-                                                            />
-                                                            <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
-                                                                <img 
-                                                                    src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
-                                                                    alt="Profile option" 
-                                                                    className="img-fluid rounded-1" 
-                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover',cursor: 'pointer'}}
-                                                                />
+                                                            >
+                                                                <i className="fe fe-plus fs-4" />
                                                             </div>
-                                                        </label>
-                                                    </div>
-                                                ))}
-                                                
-                                                <label className="cursor-pointer">
-                                                    <div className="border rounded-2 mt-1 ml-1 border-dashed hover-bg-light">
-                                                        <div 
-                                                            style={{
-                                                                width: '80px',
-                                                                height: '80px',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                color: '#6c757d',
-                                                                cursor: 'pointer'
-
-                                                            }}
-                                                        >
-                                                            <i className="fe fe-plus fs-4" />
+                                                            <input 
+                                                                type="file" 
+                                                                className="d-none" 
+                                                                accept="image/*"
+                                                                onChange={this.handleFileChange}
+                                                            />
                                                         </div>
-                                                        <input 
-                                                            type="file" 
-                                                            className="d-none" 
-                                                            accept="image/*"
-                                                            onChange={this.handleFileChange}
-                                                        />
-                                                    </div>
-                                                </label>
-                                            </div>
-                                        )}
+                                                    </label>
+                                                    {this.state.images.map((image, index) => (
+                                                        <div key={index} className="position-relative mr-2">
+                                                            <label className="d-block mb-0 pointer">
+                                                                <input 
+                                                                    name="imagecheck" 
+                                                                    type="radio" 
+                                                                    value={image.url} 
+                                                                    className="d-none" 
+                                                                    onChange={async () => {
+                                                                        const imageUrl = process.env.REACT_APP_API_URL + '/' + image.url;
+                                                                        const dataUrl = await this.toDataURL(imageUrl);
+                                                                        this.setState({
+                                                                            selectedImage: image.url,
+                                                                            croppperPreviewImage: dataUrl
+                                                                        });
+                                                                    }}
+                                                                />
+                                                                <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
+                                                                    <img 
+                                                                        src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
+                                                                        alt="Profile option" 
+                                                                        className="img-fluid rounded-1" 
+                                                                        style={{ width: '80px', height: '80px', objectFit: 'cover', cursor: 'pointer' }}
+                                                                    />
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </InfiniteScroll>
+                                       
+                                         )}
                                     </div>
                                 </div>
 
