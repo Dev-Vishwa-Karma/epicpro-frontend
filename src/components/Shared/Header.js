@@ -9,6 +9,7 @@ import AlertMessages from "../common/AlertMessages";
 import TextEditor from "../common/TextEditor";
 import DueTasksAlert from "../common/DueTasksAlert";
 import { getService } from "../../services/getService";
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 class Header extends Component {
   constructor(props) {
@@ -45,6 +46,10 @@ class Header extends Component {
       showDueAlert:true,
       dueTasks:[],
       disableButton:false,
+      page: 1,
+      hasMore: true,
+      loading: false,
+      limit: 5,
     };
   }
 
@@ -84,7 +89,12 @@ class Header extends Component {
 
   startNotificationInterval() {
     this.notificationInterval = setInterval(() => {
-      this.fetchNotifications();
+        this.setState({
+            page: 1,
+            notifications: [], 
+          }, () => {
+            this.fetchNotifications(); 
+        });
     }, 40000);
   }
 
@@ -233,25 +243,36 @@ class Header extends Component {
   };
 
   fetchNotifications = () => {
-   getService.getCall('notifications.php', {
+    const { page, notifications, limit } = this.state;
+
+    this.setState({ loading: true });
+
+    getService.getCall('notifications.php', {
       action: 'get_notifications',
-      user_id:window.user.id
+      user_id: window.user.id,
+      page: page,
+      limit: limit
     })
-		.then(data => {
-	      if (data.status === "success") {
-          this.setState({ notifications: data.data, loading: false });
-        } else {
-          this.setState({
-            notifications:[],
-            loading: false,
-          });
-          setTimeout(this.dismissMessages, 3000);
-        }
-		})
-    .catch((err) => {
-        console.error(err);
+    .then(data => {
+      if (data.status === "success") {
+        const newNotifications = data.data;
+
+        this.setState({
+          notifications: [...notifications, ...newNotifications],
+          hasMore: newNotifications.length === limit, // If less than limit, there's no more to load
+          page: page + 1,
+          loading: false
+        });
+      } else {
+        this.setState({ hasMore: false, loading: false });
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      this.setState({ loading: false });
     });
   };
+
 
   checkBirthdays = () => {
      getService.getCall('notifications.php', {
@@ -259,7 +280,13 @@ class Header extends Component {
       })
 		.then(data => {
 			if (data.status === "success") {
-          this.fetchNotifications();
+          //this.fetchNotifications();
+          this.setState({
+          page: 1,
+          notifications: [], 
+        }, () => {
+          this.fetchNotifications(); 
+        });
         }
       })
       .catch((err) => {
@@ -282,7 +309,12 @@ class Header extends Component {
     apiCall
     .then(data => {
       if (data.status === "success") {
-        this.fetchNotifications();
+          this.setState({
+          page: 1,
+          notifications: [], 
+        }, () => {
+          this.fetchNotifications(); 
+        });
       } else {
         console.error('Error marking notification as read');
       }
@@ -669,7 +701,8 @@ class Header extends Component {
       is_task_due_today,
       showDueAlert,
       dueTasks,
-      disableButton
+      disableButton,
+      hasMore
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 
@@ -719,40 +752,59 @@ class Header extends Component {
                         <span className="badge badge-primary nav-unread" />
                       )}
 										</a>
-										<div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-											<ul className="list-unstyled feeds_widget">
-                        {notifications.length > 0 ? (
-                          notifications.map((notification, index) => { 
-                            const createdAt = new Date(notification.created_at); 
-                            const formattedDate = createdAt.toLocaleDateString();
+                    <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                            <div
+                          id="notificationScrollArea"
+                          style={{
+                    height: notifications.length > 2 ? '300px' : 'auto',
+                    overflow: 'auto',
+                    padding: '10px'
+                  }}
+                    >
+                      <InfiniteScroll
+                        dataLength={notifications.length}
+                        next={this.fetchNotifications}
+                        hasMore={hasMore && notifications.length > 2}
+                        loader={<p className="text-center">Loading...</p>}
+                        scrollableTarget="notificationScrollArea"
+                      >
+                        <ul className="list-unstyled feeds_widget">
+                          {notifications.length > 0 ? (
+                            notifications.map((notification, index) => {
+                              const createdAt = new Date(notification.created_at);
+                              const formattedDate = createdAt.toLocaleDateString();
 
-                            return (
-                              <li 
-                                key={index}  
-                                className={`${notification.read === 0 ? '' : ''}`}   
-                                style={{ backgroundColor: notification.read === 0 ? '#E8E9E9 ' : 'transparent', cursor: 'pointer' }} 
-                                onClick={() => this.markAsRead(notification.id)}
-                              >                          
-                                <div className="feeds-body">
-                                  <h4 className={`title text-danger ${notification.read === 0 ? 'font-weight-bold' : ''}`}>
-                                    {notification.title}{' '}
-                                    <small className="float-right text-muted"> {formattedDate}</small>
-                                  </h4>
-                                  <small className="notification-body"> {notification.body}</small>
-                                </div>
-                              </li>
-                            );
-                          })
-                        ) : (
-                          <li>
-                            <div className="feeds-body">
-                              <h4 className="title text-danger">
-                                Notification not found
-                              </h4>
-                            </div>
-                          </li>
-                        )}
-											</ul>
+                              return (
+                                <li
+                                  key={index}
+                                  style={{
+                                    backgroundColor: notification.read === 0 ? '#E8E9E9' : 'transparent',
+                                    cursor: 'pointer',
+                                    padding: '10px',
+                                    borderBottom: '1px solid #ddd'
+                                  }}
+                                  onClick={() => this.markAsRead(notification.id)}
+                                >
+                                  <div className="feeds-body">
+                                    <h4 className={`title text-danger ${notification.read === 0 ? 'font-weight-bold' : ''}`}>
+                                      {notification.title}
+                                      <small className="float-right text-muted">{formattedDate}</small>
+                                    </h4>
+                                    <small className="notification-body">{notification.body}</small>
+                                  </div>
+                                </li>
+                              );
+                            })
+                          ) : (
+                            <li>
+                              <div className="feeds-body">
+                                <h4 className="title text-danger">Notification not found</h4>
+                              </div>
+                            </li>
+                          )}
+                        </ul>
+                      </InfiniteScroll>
+                    </div>
                       {notifications.length > 0 && (
                         <>
                           <div className="dropdown-divider" />
