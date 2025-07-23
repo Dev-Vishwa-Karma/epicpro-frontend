@@ -358,7 +358,7 @@ class Statistics extends Component {
                 <span className="halfDay">Half day</span>
                 <span className="extraWorking">Extra working</span>
                 <span className="holiday">Holiday</span>
-                <span className="alternateHoliday">Alternate Saturday/Sunday</span>
+                <span className="alternateHoliday">Weekend</span>
               </div>
             </div>
 
