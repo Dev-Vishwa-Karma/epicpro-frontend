@@ -223,6 +223,11 @@ class Menu extends Component {
 						"id": 20,
 						"label": "Todo List",
 						"to": "/project-todo"
+					},
+					{
+						"id": 40,
+						"label": "Link",
+						"to": "/link"
 					}
 				]
 			},

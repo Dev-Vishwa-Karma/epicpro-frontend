@@ -20,6 +20,7 @@ import Positions from './JobPortal/Positions/Positions';
 import Resumes from './JobPortal/Resumes/Resumes';
 import Login from './Authentication/login';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
+import Link from './HRMS/Link/link';
 
 const Routes = [
     {
@@ -176,6 +177,16 @@ const Routes = [
         pageTitle: "Todo List",
         roles: ['admin', 'super_admin', 'employee'],
         component: TodoList
+    },
+
+    //Git-Excel-Codebase
+    {
+        path: "/link",
+        name: 'link-work',
+        exact: true,
+        pageTitle: "Link",
+        roles: ['admin', 'super_admin'],
+        component: Link
     },
 
     //job portal
