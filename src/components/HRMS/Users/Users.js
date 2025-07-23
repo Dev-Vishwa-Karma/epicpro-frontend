@@ -636,13 +636,6 @@ class Users extends Component {
 																</tr>
 															))
 														): (
-															// !error && (
-															// 	<tr>
-															// 		<td colSpan="6" style={{ textAlign: 'center', color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-                                                            //             User not found
-                                                            //         </td>
-                                                            //     </tr>
-                                                            // )
 															<NoDataRow colSpan={7} message="User not found" />
                                                         )}
                                                     </tbody>
