@@ -2,6 +2,7 @@
 .custom-modal {
   background-color: rgba(0, 0, 0, 0.5) !important;
 }
+
 .custom-modal-content {
   border-radius: 24px !important;
   overflow: hidden !important;
@@ -10,12 +11,14 @@
   max-height: 90vh !important;
   min-height: 400px !important;
 }
+
 .content-for-modals {
   background: linear-gradient(135deg, #DEE2E6 0%, #fff 100%) !important;
   height: 100px !important;
   position: relative !important;
   flex-shrink: 0 !important;
 }
+
 .modal-profile-image {
   position: absolute !important;
   left: 50% !important;
@@ -33,23 +36,23 @@
   justify-content: center !important;
 }
 
-
 .client-profile{
   width: 100px !important;
   height: 100px !important;
   object-fit: cover !important;
 }
 
-
 /* New styles for client name and email */
 .clientName {
   font-weight: 700;
 }
+
 .clientEmail {
   color: #888;
   font-size: 15px;
   margin-top: -10px;
 }
+
 .about{
   margin: 18px auto 18px auto !important;
   max-width: 420px !important;
@@ -57,6 +60,7 @@
   font-style: italic !important;
   color: #555 !important;
 }
+
 .project-card{
   max-height: 350 px;
   overflow-y: auto !important;
@@ -68,11 +72,14 @@
   border: 1px solid #e0eafc !important;
   box-shadow: 0 5px 12px rgba(60,60,120,0.08) !important;
   padding: 16px !important;
-  text-align: left !important;}
-.project-name{
+  text-align: left !important;
+}
+
+  .project-name{
   font-weight: 700 !important;
   font-size: 18px !important;
 }
+
 .technology{
   color: #888 !important;
   font-size: 15px !important;
@@ -81,6 +88,7 @@
   align-items: center !important;
   justify-content: space-between !important;
 }
+
 .tech-trim{
   display: inline-block !important;
   background: #e0eafc !important;
@@ -93,6 +101,7 @@
   margin-bottom: 2px !important;
   border: 1px solid #b3c6e0 !important;
 }
+
 .avatar-img{
   width: 36px;
   height: 36px;
@@ -104,6 +113,7 @@
   transition: z-index 0.2s, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
+
 .sticky-footer{
   width: 100%;
   background: #fff;
@@ -115,8 +125,8 @@
   display: flex;
   justify-content: center;
 }
+
 .gradient-button {
-  /* background: linear-gradient(135deg, #fc5c7d 0%, #6a82fb 100%); */
   color: #fff;
   border-radius: 24px;
   padding: 8px 20px;
@@ -139,7 +149,6 @@
 /* Scrollable projects section */
 .scrollable-projects {
   overflow-y: auto;
-  padding-bottom: 24px;
   /* Adjust height as needed */
   max-height: calc(100vh - 400px);
 }

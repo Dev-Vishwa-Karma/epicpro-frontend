@@ -35,10 +35,10 @@ class Clients extends Component {
 
   getClients = (search = "") => {
     this.setState({ loading: true });
-      getService.getCall('clients.php', {
-        action: 'view_client',
-        search:search
-      })
+    getService.getCall('clients.php', {
+      action: 'view_client',
+      search: search
+    })
       .then((data) => {
         if (data.status === "success") {
           this.setState({
@@ -66,17 +66,17 @@ class Clients extends Component {
 
   handleViewProfile = (client) => {
     this.setState({
-        selectedClient: client,
-        showClientModal: true,
+      selectedClient: client,
+      showClientModal: true,
     });
   };
 
-    handleCloseClientModal = () => {
-        this.setState({
-            selectedClient: null,
-            showClientModal: false,
-        });
-    };
+  handleCloseClientModal = () => {
+    this.setState({
+      selectedClient: null,
+      showClientModal: false,
+    });
+  };
 
   // Add handlers for ClientFieldModal
   handleOpenAddClientField = () => {
@@ -98,33 +98,33 @@ class Clients extends Component {
   };
 
   handleOpenEditClientField = (client) => {
-  this.setState({
-    showClientFieldModal: true,
-    isEditClientField: true,
-    clientFieldFormData: {
-      name: client.client_name || '',
-      profilePic: client.client_profile
-        ? `${process.env.REACT_APP_API_URL}/${client.client_profile}`
-        : '',
-      email: client.client_email || '',
-      about: client.client_about || '',
-      country: client.client_country || '',
-      state: client.client_state || '',
-      city: client.client_city || '',
-      status: client.client_status !== undefined ? String(client.client_status) : '',
-    },
-    clientFieldErrors: {},
-    editingClientId: client.client_id, // Use client_id instead of id
-  });
-};
+    this.setState({
+      showClientFieldModal: true,
+      isEditClientField: true,
+      clientFieldFormData: {
+        name: client.client_name || '',
+        profilePic: client.client_profile
+          ? `${process.env.REACT_APP_API_URL}/${client.client_profile}`
+          : '',
+        email: client.client_email || '',
+        about: client.client_about || '',
+        country: client.client_country || '',
+        state: client.client_state || '',
+        city: client.client_city || '',
+        status: client.client_status !== undefined ? String(client.client_status) : '',
+      },
+      clientFieldErrors: {},
+      editingClientId: client.client_id, // Use client_id instead of id
+    });
+  };
 
   handleCloseClientFieldModal = () => {
     this.setState
-    ({ 
-      showClientFieldModal: 
-      false, clientFieldErrors: {}, 
-      clientFieldLoading: false 
-    });
+      ({
+        showClientFieldModal:
+          false, clientFieldErrors: {},
+        clientFieldLoading: false
+      });
   };
 
   handleClientFieldChange = (e) => {
@@ -141,12 +141,12 @@ class Clients extends Component {
 
     const { clientFieldFormData, isEditClientField, editingClientId } = this.state;
     let errors = {};
-    
+
     // Validation
     if (!clientFieldFormData.name) errors.name = 'Name is required';
     if (!clientFieldFormData.email) errors.email = 'Email is required';
     if (!clientFieldFormData.status) errors.status = 'Status is required';
-    
+
     if (Object.keys(errors).length > 0) {
       this.setState({ clientFieldErrors: errors });
       return;
@@ -162,7 +162,7 @@ class Clients extends Component {
     formData.append('state', clientFieldFormData.state);
     formData.append('city', clientFieldFormData.city);
     formData.append('status', clientFieldFormData.status);
-    
+
     // Only append profile if it's a file (new upload)
     if (clientFieldFormData.profilePic instanceof File) {
       formData.append('profile', clientFieldFormData.profilePic);
@@ -172,29 +172,29 @@ class Clients extends Component {
       formData.append('client_id', editingClientId);
     }
 
-    const apiCall = isEditClientField 
-    ? getService.editCall('clients.php', 'edit', formData, null, editingClientId)
-    : getService.addCall('clients.php', 'add', formData);
+    const apiCall = isEditClientField
+      ? getService.editCall('clients.php', 'edit', formData, null, editingClientId)
+      : getService.addCall('clients.php', 'add', formData);
 
-      apiCall.then(data => {
-        if (data.status === 'success') {
-          this.setState({
-            clientFieldLoading: false,
-            showClientFieldModal: false,
-            showSuccess: true,
-            successMessage: isEditClientField ? 'Client updated successfully' : 'Client added successfully'
-          });
-          this.getClients();
-          setTimeout(this.dismissMessages, 3000);
-        } else {
-          this.setState({
-            clientFieldLoading: false,
-            showError: true,
-            errorMessage: data.message || 'Operation failed'
-          });
-          setTimeout(this.dismissMessages, 3000);
-        }
-      })
+    apiCall.then(data => {
+      if (data.status === 'success') {
+        this.setState({
+          clientFieldLoading: false,
+          showClientFieldModal: false,
+          showSuccess: true,
+          successMessage: isEditClientField ? 'Client updated successfully' : 'Client added successfully'
+        });
+        this.getClients();
+        setTimeout(this.dismissMessages, 3000);
+      } else {
+        this.setState({
+          clientFieldLoading: false,
+          showError: true,
+          errorMessage: data.message || 'Operation failed'
+        });
+        setTimeout(this.dismissMessages, 3000);
+      }
+    })
       .catch(error => {
         this.setState({
           clientFieldLoading: false,
@@ -206,40 +206,40 @@ class Clients extends Component {
       });
   };
 
-handleConfirmDelete = () => {
-  const { deletingClient } = this.state;
-  this.setState({ deleteLoading: true });
+  handleConfirmDelete = () => {
+    const { deletingClient } = this.state;
+    this.setState({ deleteLoading: true });
 
-  getService.deleteCall('clients.php', 'delete', null, deletingClient.client_id, null, null)
-    .then(data => {
-      if (data.status === 'success') {
-        this.setState({
-          deleteLoading: false,
-          showDeleteModal: false,
-          showSuccess: true,
-          successMessage: 'Client deleted successfully'
-        });
-        this.getClients();
-        setTimeout(this.dismissMessages, 3000);
-      } else {
+    getService.deleteCall('clients.php', 'delete', null, deletingClient.client_id, null, null)
+      .then(data => {
+        if (data.status === 'success') {
+          this.setState({
+            deleteLoading: false,
+            showDeleteModal: false,
+            showSuccess: true,
+            successMessage: 'Client deleted successfully'
+          });
+          this.getClients();
+          setTimeout(this.dismissMessages, 3000);
+        } else {
+          this.setState({
+            deleteLoading: false,
+            showError: true,
+            errorMessage: data.message || 'Failed to delete client'
+          });
+          setTimeout(this.dismissMessages, 3000);
+        }
+      })
+      .catch(error => {
         this.setState({
           deleteLoading: false,
           showError: true,
-          errorMessage: data.message || 'Failed to delete client'
+          errorMessage: 'Network error occurred'
         });
         setTimeout(this.dismissMessages, 3000);
-      }
-    })
-    .catch(error => {
-      this.setState({
-        deleteLoading: false,
-        showError: true,
-        errorMessage: 'Network error occurred'
+        console.error('Error:', error);
       });
-      setTimeout(this.dismissMessages, 3000);
-      console.error('Error:', error);
-    });
-};
+  };
 
 
   handleOpenDeleteModal = (client) => {
@@ -251,37 +251,37 @@ handleConfirmDelete = () => {
   };
 
   handleConfirmDelete = () => {
-  const { deletingClient } = this.state;
-  this.setState({ deleteLoading: true });
+    const { deletingClient } = this.state;
+    this.setState({ deleteLoading: true });
     getService.deleteCall('clients.php', 'delete', deletingClient.client_id, null, null, null)
-    .then(data => {
-      if (data.status === 'success') {
-        this.setState({
-          deleteLoading: false,
-          showDeleteModal: false,
-          showSuccess: true,
-          successMessage: 'Client deleted successfully'
-        });
-        this.getClients();
-        setTimeout(this.dismissMessages, 3000);
-      } else {
+      .then(data => {
+        if (data.status === 'success') {
+          this.setState({
+            deleteLoading: false,
+            showDeleteModal: false,
+            showSuccess: true,
+            successMessage: 'Client deleted successfully'
+          });
+          this.getClients();
+          setTimeout(this.dismissMessages, 3000);
+        } else {
+          this.setState({
+            deleteLoading: false,
+            showError: true,
+            errorMessage: data.message || 'Failed to delete client'
+          });
+          setTimeout(this.dismissMessages, 3000);
+        }
+      })
+      .catch(error => {
         this.setState({
           deleteLoading: false,
           showError: true,
-          errorMessage: data.message || 'Failed to delete client'
+          errorMessage: 'Network error occurred'
         });
         setTimeout(this.dismissMessages, 3000);
-      }
-    })
-    .catch(error => {
-      this.setState({
-        deleteLoading: false,
-        showError: true,
-        errorMessage: 'Network error occurred'
       });
-      setTimeout(this.dismissMessages, 3000);
-        });
-    };
+  };
 
   render() {
     const { fixNavbar } = this.props;
@@ -324,13 +324,13 @@ handleConfirmDelete = () => {
                     <div className="row">
                       <div className="col-lg-4 col-md-4 col-sm-6">
                         <div className="input-group">
-                            <input
+                          <input
                             type="text"
                             className="form-control"
                             placeholder="Client Name"
                             value={this.state.searchTerm}
                             onChange={(e) => this.setState({ searchTerm: e.target.value })}
-                            />
+                          />
                         </div>
                       </div>
                       <div className="col-lg-5 col-md-4 col-sm-6">
@@ -353,148 +353,148 @@ handleConfirmDelete = () => {
                   </div>
                 </div>
               </div>
-                {loading ? (
-                    <div className="col-12">
-                        <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                            <div className="dimmer active">
-                                <div className="loader" />
-                            </div>
-                        </div>
+              {loading ? (
+                <div className="col-12">
+                  <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
+                    <div className="dimmer active">
+                      <div className="loader" />
                     </div>
-                    
-                    ) : clients && clients.length > 0 ? (
-                    clients.map((client, index) => (
-                        <div key={index} className="col-xl-3 col-lg-4 col-md-6 mb-4">
-                          <div className="card h-100">
-                            <div className="card-body text-center ribbon" style={{ minHeight: '300px' }}> 
-                                <div className={`ribbon-box ${client.client_country ? 'green' : 'transparent'}`}>
-                                  {client.client_country || ' '}
-                            </div>
-                                    
-                            <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
-                              {client.client_profile ? (
-                                <img
-                                  className="rounded-circle img-thumbnail"
-                                  src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                                  alt="Client Profile"
-                                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                                />
-                              ) : (
-                                <img
-                                  className="rounded-circle img-thumbnail"
-                                  src="../../../assets/images/sm/avatar2.jpg" 
-                                  alt="Default Avatar"
-                                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                                />
-                              )}
-                            </div>
-                            <div
-                                className="dropdown d-flex"
-                                style={{ position: 'absolute', top: '16px', right: '10px' }}
-                              >
-                                <a
-                                  href="/#"
-                                  className="nav-link icon d-none d-md-flex ml-1"
-                                  data-toggle="dropdown"
-                                  title="More options"
-                                >
-                                  <i className="fa fa-ellipsis-v" />
-                                </a>
+                  </div>
+                </div>
 
-                                <div
-                                  className="dropdown-menu dropdown-menu-right"
-                                  style={{
-                                    minWidth: '100px',
-                                    padding: '0',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                  }}
-                                >
-                                  <button
-                                    className="dropdown-item text-center"
-                                    type="button"
-                                    title="Edit"
-                                    onClick={() => this.handleOpenEditClientField(client)}
-                                    style={{
-                                      padding: '8px 12px',
-                                      fontSize: '14px',
-                                      color: '#333',
-                                      backgroundColor: 'transparent',
-                                    
-                                    }}
-                                  >
-                                    Edit
-                                  </button>
-
-                                  <button
-                                    className="dropdown-item text-center"
-                                    type="button"
-                                    title="Delete"
-                                    onClick={() => this.handleOpenDeleteModal(client)}
-                                    style={{
-                                      padding: '8px 12px',
-                                      fontSize: '14px',
-                                      color: '#d9534f',
-                                      backgroundColor: 'transparent',
-                                    }}
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                            </div>
-
-            
-            {/* Client info with fixed spacing */}
-            <div style={{ minHeight: '40px' }}>
-                <h6 className="mt-3 mb-0">{client.client_name || ' '}</h6>
-                <span style={{ fontSize: '15px' }}>{client.client_email || ' '}</span>
-            </div>
-            
-            {/* View Profile button */}
-            <ul className="mt-3 list-unstyled d-flex justify-content-center" >
-                                <button className="btn btn-default btn-sm"
-                                onClick={() => this.handleViewProfile(client)} >
-                                View Profile
-                                </button>
-                            </ul>
-            
-            {/* Stats section with fixed height */}
-            <div className="row text-center mt-4" style={{ minHeight: '80px' }}>
-                                <div className="col-lg-6 border-right">
-                                <label className="mb-0">Project</label>
-                                <h4 className="font-18">
-                                    <Link to={`/project-list`}>
-                                    {client.project_count}
-                                    </Link>
-                                </h4>
-                                </div>
-                                <div className="col-lg-6">
-                                <label className="mb-0">Employee</label>
-                                <h4 className="font-18">
-                                    <Link to={`/hr-employee`}>
-                                    {client.employee_count}
-                                    </Link>
-                                </h4>
-                                </div>
-                            </div>
-                            </div>
+              ) : clients && clients.length > 0 ? (
+                clients.map((client, index) => (
+                  <div key={index} className="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div className="card h-100">
+                      <div className="card-body text-center ribbon" style={{ minHeight: '300px' }}>
+                        <div className={`ribbon-box ${client.client_country ? 'green' : 'transparent'}`}>
+                          {client.client_country || ' '}
                         </div>
+
+                        <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
+                          {client.client_profile ? (
+                            <img
+                              className="rounded-circle img-thumbnail"
+                              src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                              alt="Client Profile"
+                              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <img
+                              className="rounded-circle img-thumbnail"
+                              src="../../../assets/images/sm/avatar2.jpg"
+                              alt="Default Avatar"
+                              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                            />
+                          )}
                         </div>
-                    ))
-                    ) : (
-                    <div className="col-12">
-                        <BlankState message="No clients available" />
+                        <div
+                          className="dropdown d-flex"
+                          style={{ position: 'absolute', top: '16px', right: '10px' }}
+                        >
+                          <a
+                            href="/#"
+                            className="nav-link icon d-none d-md-flex ml-1"
+                            data-toggle="dropdown"
+                            title="More options"
+                          >
+                            <i className="fa fa-ellipsis-v" />
+                          </a>
+
+                          <div
+                            className="dropdown-menu dropdown-menu-right"
+                            style={{
+                              minWidth: '100px',
+                              padding: '0',
+                              borderRadius: '8px',
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                            }}
+                          >
+                            <button
+                              className="dropdown-item text-center"
+                              type="button"
+                              title="Edit"
+                              onClick={() => this.handleOpenEditClientField(client)}
+                              style={{
+                                padding: '8px 12px',
+                                fontSize: '14px',
+                                color: '#333',
+                                backgroundColor: 'transparent',
+
+                              }}
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              className="dropdown-item text-center"
+                              type="button"
+                              title="Delete"
+                              onClick={() => this.handleOpenDeleteModal(client)}
+                              style={{
+                                padding: '8px 12px',
+                                fontSize: '14px',
+                                color: '#d9534f',
+                                backgroundColor: 'transparent',
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+
+
+                        {/* Client info with fixed spacing */}
+                        <div style={{ minHeight: '40px' }}>
+                          <h6 className="mt-3 mb-0">{client.client_name || ' '}</h6>
+                          <span style={{ fontSize: '15px' }}>{client.client_email || ' '}</span>
+                        </div>
+
+                        {/* View Profile button */}
+                        <ul className="mt-3 list-unstyled d-flex justify-content-center" >
+                          <button className="btn btn-default btn-sm"
+                            onClick={() => this.handleViewProfile(client)} >
+                            View Profile
+                          </button>
+                        </ul>
+
+                        {/* Stats section with fixed height */}
+                        <div className="row text-center mt-4" style={{ minHeight: '80px' }}>
+                          <div className="col-lg-6 border-right">
+                            <label className="mb-0">Project</label>
+                            <h4 className="font-18">
+                              <Link to={`/project-list`}>
+                                {client.project_count}
+                              </Link>
+                            </h4>
+                          </div>
+                          <div className="col-lg-6">
+                            <label className="mb-0">Employee</label>
+                            <h4 className="font-18">
+                              <Link to={`/hr-employee`}>
+                                {client.employee_count}
+                              </Link>
+                            </h4>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="col-12">
+                  <BlankState message="No clients available" />
+                </div>
+              )}
 
             </div>
           </div>
         </div>
         {showClientModal && (
-            <ClientInfoModal
-                client={selectedClient}
-                onClose={this.handleCloseClientModal}
-            />
+          <ClientInfoModal
+            client={selectedClient}
+            onClose={this.handleCloseClientModal}
+          />
         )}
         {/* Client Field Modal for Add/Edit */}
         {showClientFieldModal && (
@@ -522,7 +522,7 @@ handleConfirmDelete = () => {
           />
         )}
       </>
-      
+
     );
   }
 }

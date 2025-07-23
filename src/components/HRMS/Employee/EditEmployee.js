@@ -268,8 +268,6 @@ class EditEmployee extends Component {
             return {
                 [fieldName === 'frontend' ? 'skillsFrontend' : 'skillsBackend']: updatedSkills,
             };
-        }, () => {
-            console.log(fieldName === 'frontend' ? 'Updated skillsFrontend' : 'Updated skillsBackend', this.state[fieldName === 'frontend' ? 'skillsFrontend' : 'skillsBackend']);
         });
     };    
 

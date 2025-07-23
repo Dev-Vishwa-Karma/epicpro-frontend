@@ -5,8 +5,6 @@ import { Switch, Route, NavLink } from 'react-router-dom';
 import Header from '../Shared/Header';
 import Footer from '../Shared/Footer';
 import DefaultLink from './DefaultLink';
-
-
 import {
 	darkModeAction, darkHeaderAction, fixNavbarAction,
 	darkMinSidebarAction, darkSidebarAction, iconColorAction,
@@ -18,7 +16,7 @@ import {
 	statisticsCloseAction, friendListCloseAction, toggleLeftMenuAction
 } from '../../actions/settingsAction';
 import Routes from '../Route';
-import ProtectedRoute from '../ProtectedRoutes'; // Import the ProtectedRoute component
+import ProtectedRoute from '../ProtectedRoutes';
 
 const masterNone = {
 	display: 'none',
@@ -29,7 +27,6 @@ const masterBlock = {
 };
 
 // const adminAccessURL -
-
 class Menu extends Component {
 	constructor(props) {
 		super(props);
@@ -196,21 +193,6 @@ class Menu extends Component {
 						"label": "Dashboard",
 						"to": "/"
 					},
-					/* {
-						"id": 4,
-						"label": "Users",
-						"to": "/hr-users"
-					}, */
-					/* {
-						"id": 5,
-						"label": "Department",
-						"to": "/hr-department"
-					}, */
-					/* {
-						"id": 6,
-						"label": "Employee",
-						"to": "/hr-employee"
-					}, */
 					{
 						"id": 7,
 						"label": "Activities",
@@ -289,15 +271,6 @@ class Menu extends Component {
 						// Insert "Users" right after "Dashboard"
 						hrmsSection.content.splice(usersIndex + 1, 0, departmentItem);
 					}
-					
-					// Add the "Reports" item to the HRMS section
-					/* hrmsSection.content.push(
-						{
-							"id": 12,
-							"label": "Reports",
-							"to": "/hr-report"
-						}
-					); */
 
 					// Add the "Employee" item to the HRMS section after the department item
 					const activities = {
@@ -327,37 +300,6 @@ class Menu extends Component {
 						// Insert "Employee" before "Activities"
 						hrmsSection.content.splice(statisticsIndex + 1, 0, statistics);
 					}
-
-
-					// // Add the "Payroll" for admin/super_admin item to the HRMS section after the Events item
-					// const payroll = {
-					// 	"id": 10,
-					// 	"label": "Payroll",
-					// 	"to": "/hr-payroll"
-					// };
-
-					// // Find the index of "Events" (id: 5)
-					// const eventsIndex = hrmsSection.content.findIndex(item => item.id === 9);
-
-					// if (eventsIndex !== -1) {
-					// 	// Insert "Employee" before "Activities"
-					// 	hrmsSection.content.splice(eventsIndex + 1, 0, payroll);
-					// }
-
-					// // Add the "Accounts" for admin/super_admin item to the HRMS section after the Payroll item
-					// const accounts = {
-					// 	"id": 11,
-					// 	"label": "Accounts",
-					// 	"to": "/hr-accounts"
-					// };
-
-					// // Find the index of "Payroll" (id: 10)
-					// const payrollIndex = hrmsSection.content.findIndex(item => item.id === 10);
-
-					// if (payrollIndex !== -1) {
-					// 	// Insert "Employee" before "Activities"
-					// 	hrmsSection.content.splice(payrollIndex + 1, 0, accounts);
-					// }
 				}
 
 				// Find the index of "Projects section"
@@ -380,89 +322,10 @@ class Menu extends Component {
 									"label": "Clients",
 									"to": "/project-clients"
 								},
-								// {
-								// 	"id": 20,
-								// 	"label": "Todo List",
-								// 	"to": "/project-todo"
-								// }
 							]
 						},
 					);
 				}
-
-				// Find the index of "Job Portal"
-				// const jobPortalSection = content.find(item => item.id === 21);
-				
-				// if (!jobPortalSection) {
-				// 	// Add the "Job Portal" section if it's missing for admin/super_admin roles
-				// 	content.push({
-				// 		"id": 21,
-				// 		"icon": "icon-briefcase",
-				// 		"label": "Job Portal",
-				// 		"content": [
-				// 			{
-				// 				"id": 22,
-				// 				"label": "Job Dashboard",
-				// 				"to": "/jobportal-dashboard"
-				// 			},
-				// 			{
-				// 				"id": 23,
-				// 				"label": "Positions",
-				// 				"to": "/jobportal-positions"
-				// 			},
-				// 			{
-				// 				"id": 24,
-				// 				"label": "Applicant",
-				// 				"to": "/jobportal-applicants"
-				// 			},
-				// 			{
-				// 				"id": 25,
-				// 				"label": "Resumes",
-				// 				"to": "/jobportal-resumes"
-				// 			},
-				// 			{
-				// 				"id": 26,
-				// 				"label": "Settings",
-				// 				"to": "/jobportal-settings"
-				// 			}
-				// 		]
-				// 	});
-				// }
-
-				// // Find the index of "authentication section"
-				// const authenticationSection = content.find(item => item.id === 27);
-
-				// if (!authenticationSection) {
-				// 	content.push(
-				// 		{
-				// 			"id": 27,
-				// 			"icon": "icon-lock",
-				// 			"label": "Authentication",
-				// 			content: [
-				// 				{
-				// 					"id": 28,
-				// 					"label": "Login",
-				// 					"to": "/login"
-				// 				},
-				// 				{
-				// 					"id": 30,
-				// 					"label": "Forgot Password",
-				// 					"to": "/forgotpassword"
-				// 				},
-				// 				{
-				// 					"id": 31,
-				// 					"label": "404 error",
-				// 					"to": "/notfound"
-				// 				},
-				// 				{
-				// 					"id": 32,
-				// 					"label": "500 Error",
-				// 					"to": "/internalserver"
-				// 				}
-				// 			]
-				// 		}
-				// 	);
-				// }
 			}
 		}
 
@@ -503,16 +366,6 @@ class Menu extends Component {
 														title="Settings"
 													/>
 												</span>
-												{/* <p className="nav-link user_btn" onClick={this.toggleUserMenu}>
-													<img
-														className="avatar"
-														src="/assets/images/user.png"
-														alt="fake_alr"
-														data-toggle="tooltip"
-														data-placement="right"
-														title="User Menu"
-													/>
-												</p> */}
 											</div>
 										)}
 										<p className="nav-link icon menu_toggle" onClick={() => this.toggleLeftMenu(!istoggleLeftMenu)}>

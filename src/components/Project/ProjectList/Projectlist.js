@@ -297,7 +297,6 @@ class ProjectList extends Component {
             projectFormData.append('project_id', editingProjectId);
         }
 
-        const action = isEditing ? 'edit' : 'add';
         const successMessage = isEditing ? 'Project updated successfully!' : 'Project added successfully!';
 
          const apiCall = isEditing 

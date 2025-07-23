@@ -210,7 +210,6 @@ class CalendarWithTabs extends Component {
     }
 
     loadEmployeeData = () => {
-        const baseUrl = process.env.REACT_APP_API_URL;
         let employeeId = this.props.employeeId;
 
         if (!employeeId) {
@@ -365,8 +364,6 @@ class CalendarWithTabs extends Component {
             return {
                 [fieldName === 'frontend' ? 'skillsFrontend' : 'skillsBackend']: updatedSkills,
             };
-        }, () => {
-            console.log(fieldName === 'frontend' ? 'Updated skillsFrontend' : 'Updated skillsBackend', this.state[fieldName === 'frontend' ? 'skillsFrontend' : 'skillsBackend']);
         });
     };
 
