@@ -4,6 +4,7 @@ import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import DeleteModal from '../../common/DeleteModal';
 import BlankState from '../../common/BlankState';
+import ImageModal from './ImageModal';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -696,7 +697,7 @@ class Gallery extends Component {
                                             <li className="page-item">
                                                 <button className="page-link" onClick={() => this.handlePageChange(totalPages)}>
                                                     {totalPages}
-                                            </button>
+                                                </button>
                                         </li>
                                         </>
                                     )}
@@ -713,39 +714,14 @@ class Gallery extends Component {
                     </div>
                 </div>
                 {/* Modal for image preview, delete, and download */}
-                {this.state.showImageModal && this.state.selectedImageForModal && (
-                    <div className="modal-backdrop modal-backdrop-type">
-                        <div className="modal-backdrop-content">
-                        <button
-                            onClick={this.closeImageModal}
-                            className="gallery-closeImageModal"
-                            aria-label="Close"
-                        >
-                            &times;
-                        </button>
-                        <img
-                            src={`${process.env.REACT_APP_API_URL}/${this.state.selectedImageForModal.url}`}
-                                alt="Gallery Large"
-                                className="gallery-large"
-                        />
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-                            <button
-                            className="btn btn-danger"
-                            onClick={this.handleDeleteFromModal}
-                            >
-                            DELETE
-                             </button>
-                               <button
-                            className="btn btn-primary"
-                            onClick={this.handleDownload}
-                            >
-                            DOWNLOAD
-                            </button>
-
-                        </div>
-                        </div>
-                    </div>
-                    )}
+                <ImageModal
+                    show={this.state.showImageModal}
+                    image={this.state.selectedImageForModal}
+                    onClose={this.closeImageModal}
+                    onDownload={this.handleDownload}
+                    onDelete={this.handleDeleteFromModal}
+                    downloadLoading={this.state.downloadLoading}
+                />
 
             </>
         )
