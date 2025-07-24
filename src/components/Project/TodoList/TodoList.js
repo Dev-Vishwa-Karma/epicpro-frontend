@@ -303,7 +303,8 @@ class TodoList extends Component {
     };
 
     handleUpdateTodo = () => {
-        const { selectedTodo, logged_in_employee_id, isUnchecking } = this.state;
+        const { selectedTodo, logged_in_employee_id, isUnchecking, logged_in_employee_role } = this.state;
+        console.log('update_status',selectedTodo)
         if (!selectedTodo) return;
 
         const newStatus = isUnchecking ? 'pending' : 'completed';
@@ -315,7 +316,10 @@ class TodoList extends Component {
         formData.append('id', selectedTodo.id);
         formData.append('status', newStatus);
         formData.append('logged_in_employee_id', logged_in_employee_id);
-        
+        formData.append('logged_in_employee_role', logged_in_employee_role);
+        formData.append('to_do_created_by', selectedTodo.created_by);
+        formData.append('to_do_created_for', selectedTodo.employee_id);
+        formData.append('logged_in_employee_name', selectedTodo.first_name);
         getService.addCall('project_todo.php', 'update_status', formData)
         .then(data => {
             if (data.status === 'success') {

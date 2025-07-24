@@ -300,6 +300,21 @@ class Menu extends Component {
 						// Insert "Employee" before "Activities"
 						hrmsSection.content.splice(statisticsIndex + 1, 0, statistics);
 					}
+
+					const notifications = {
+						"id": 40,
+						"label": "Notifications",
+						"to": "/notifications"
+					};
+
+					// Find the index of "Department" (id: 5)
+					const notificationIndex = hrmsSection.content.findIndex(item => item.id === 8);
+
+					if (statisticsIndex !== -1) {
+						// Insert "Employee" before "Activities"
+						hrmsSection.content.splice(notificationIndex + 1, 0, notifications);
+					}
+
 				}
 
 				// Find the index of "Projects section"

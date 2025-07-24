@@ -673,6 +673,7 @@ class Report extends Component {
         formData.append("break_duration_in_minutes", break_duration_in_minutes);
         formData.append("todays_working_hours", todays_working_hours);
         formData.append("todays_total_hours", todays_total_hours);
+        formData.append("logged_in_employee_role", window.user.role);
         formData.append("note", editNotes);
 
 		// API call to save the report and punch-out
