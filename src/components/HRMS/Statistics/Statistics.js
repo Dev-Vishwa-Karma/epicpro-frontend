@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
-import dayjs from 'dayjs';
 import { getService } from "../../../services/getService";
 
 class Statistics extends Component {
@@ -209,104 +208,24 @@ class Statistics extends Component {
     return attendanceByDate;
   }
 
-  countLeavesPerEmployee = (leavesData, selectedYear, selectedMonth) => {
-    const { holidaysData, alternateSaturdayData } = this.state;
+  initalizeEmployeeData = (employeesData) => {
     const counts = {};
-
-    leavesData.forEach((leave) => {
-      const { employee_id, from_date, to_date, is_half_day } = leave;
-      const from = new Date(from_date);
-      const to = new Date(to_date);
-      const year = selectedYear;
-      const month = selectedMonth;
-
-      let current = new Date(from);
-      while (current <= to) {
-        let formattedDate = dayjs(new Date(current)).format('YYYY-MM-DD');
-        const isSunday = current.getDay() === 0;
-        const isAlternateSaturday = alternateSaturdayData.includes(formattedDate);
-        const isHoliday = holidaysData.includes(formattedDate)
-
-        if (!(isSunday || isAlternateSaturday || isHoliday)) {
-          if (current.getFullYear() === year && current.getMonth() + 1 === month) {
-            if (is_half_day === "1" || is_half_day === 1) {
-              counts[employee_id] = (counts[employee_id] || 0) + 0.5;
-            } else {
-              counts[employee_id] = (counts[employee_id] || 0) + 1;
-            }
-          }
-        }
-
-        current.setDate(current.getDate() + 1);
-      }
+    employeesData.forEach(employee => {
+      counts[employee.id] = 0;
     });
 
     return counts;
   };
 
+  calculateWorking = (hours) => {
+    if (hours >= 4 && hours < 8) {
+      return 0.5;
+    } else if (hours >= 8) {
+      return 1;
+    }
 
-  calculateHalfLeaves = (attendanceByDate, employeesData, monthDays) => {
-    const { holidaysData, alternateSaturdayData } = this.state;
-
-    const halfLeaveCounts = {};
-
-    monthDays.forEach(day => {
-      const attendance = attendanceByDate[day.key] || {};
-
-      employeesData.forEach(employee => {
-        const rawHours = attendance[employee.id];
-        const isAlternateSaturday = alternateSaturdayData.includes(day.key);
-
-        const dateObj = new Date(day.key);
-        const isSunday = dateObj.getDay() === 0;
-        const isHoliday = holidaysData.includes(day.key);
-
-        const workedOnSpecialDay = rawHours !== "" && (
-          isSunday || isAlternateSaturday || isHoliday
-        );
-
-        if (rawHours && rawHours !== "" && rawHours.includes(":")) {
-          const [hours, minutes] = rawHours.split(":").map(Number);
-          const totalHours = hours + minutes / 60;
-
-          if (!workedOnSpecialDay && totalHours >= 4 && totalHours < 8) {
-            halfLeaveCounts[employee.id] = (halfLeaveCounts[employee.id] || 0) + 0.5;
-          }
-        }
-      });
-    });
-
-    return halfLeaveCounts;
-  };
-
-  calculateExtraWorkingDays = (attendanceByDate, employeesData, monthDays, alternateSaturdayData) => {
-    const extraWorkCounts = {};
-    const { holidaysData } = this.state;
-
-    monthDays.forEach(day => {
-      const dateObj = new Date(day.key);
-      const isSunday = dateObj.getDay() === 0;
-      const isAlternateSaturday = alternateSaturdayData.includes(day.key);
-      const isHoliday = holidaysData.includes(day.key);
-      if (!isSunday && !isAlternateSaturday && !isHoliday) return;
-      const attendance = attendanceByDate[day.key] || {};
-      employeesData.forEach(employee => {
-
-        const rawHours = attendance[employee.id];
-
-        if (rawHours && rawHours !== "" && rawHours.includes(":")) {
-          const [hours, minutes] = rawHours.split(":").map(Number);
-          const totalHours = hours + minutes / 60;
-          if (totalHours >= 8) {
-            extraWorkCounts[employee.id] = (extraWorkCounts[employee.id] || 0) + 1;
-          } else if (totalHours >= 0) {
-            extraWorkCounts[employee.id] = (extraWorkCounts[employee.id] || 0) + 0.5;
-          }
-        }
-      });
-    });
-    return extraWorkCounts;
-  };
+    return 0;
+  }
 
   render() {
     const { fixNavbar } = this.props;
@@ -315,9 +234,9 @@ class Statistics extends Component {
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
     const attendanceByDate = this.prepareAttendanceFromReports();
-    const leaveCounts = this.countLeavesPerEmployee(leavesData, selectedYear, selectedMonth);
-    const halfLeaveCounts = this.calculateHalfLeaves(attendanceByDate, employeesData, monthDays);
-    const extraWorkingCounts = this.calculateExtraWorkingDays(attendanceByDate, employeesData, monthDays, alternateSaturdayData);
+    const leaveCounts = this.initalizeEmployeeData(employeesData);
+    // const halfLeaveCounts = this.initalizeEmployeeData(employeesData);
+    const extraWorkingCounts = this.initalizeEmployeeData(employeesData);
 
     return (
       <>
@@ -367,7 +286,7 @@ class Statistics extends Component {
                 <div className="loader" />
               </div>
             ) : (
-              <div className="statistics">
+              <div style={{ overflowX: 'auto', scrollbarWidth: 'thin', scrollbarColor: '#a2c4c9 #ffffff',scrollBehavior: 'smooth' }}>
                 <table className="table table-bordered table-sm text-center" style={{ minWidth: '600px' }}>
                   <thead style={{ backgroundColor: "#a2c4c9" }}>
                     <tr>
@@ -379,7 +298,6 @@ class Statistics extends Component {
                   </thead>
                   <tbody>
                     {monthDays.map((day, rowIndex) => {
-
                       const dayAttendance = attendanceByDate[day.key] || {};
                       const isAlternateSaturday = alternateSaturdayData.includes(day.key);
                       const dateObj = new Date(day.key);
@@ -415,37 +333,49 @@ class Statistics extends Component {
 
                               hoursNumber = parts[0] + parts[1] / 60;
 
-                              if (hoursNumber >= 0 && hoursNumber < 4) {
-                                if (!workedOnSpecialDay) {
-                                  leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) + 1;
-                                }
-                                cellStyle = { backgroundColor: "#ff0000", color: "#fff" };
-                              } else if (hoursNumber >= 4 && hoursNumber < 8) {
-                                cellStyle = { backgroundColor: "#00ffff", color: "#000" };
+                              if (workedOnSpecialDay) {
+                                cellStyle = { backgroundColor: "#28a745", color: "#000" }; // Green for working on a special day
+                                extraWorkingCounts[employee.id] = extraWorkingCounts[employee.id] + hoursNumber >= 8 ? 1 : 0.5;
                               }
                             }
-
+                            const calculateDay = this.calculateWorking(hoursNumber);
                             const today = new Date();
                             const currentDate = new Date(day.key);
                             today.setHours(0, 0, 0, 0);
                             currentDate.setHours(0, 0, 0, 0);
 
-                            if (workedOnSpecialDay) {
-                              cellStyle = { backgroundColor: "#28a745", color: "#000" }; // Green for working on a special day
-                            } else if (isOnLeave) {
-                              if (!isMissingReport) {
-                                leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) - (isHalfDayLeave ? 0.5 : 1);
-                              } else {
-                                if (isHalfDayLeave && isMissingReport) {
+                            if (isOnLeave) {
+                              if (currentDate >= today && isMissingReport) {
+                                if (isHalfDayLeave) {
                                   cellStyle = { backgroundColor: "#00ffff", color: "#000" }; // Cyan for half-day
+                                  leaveCounts[employee.id] = leaveCounts[employee.id] + 0.5;
                                 } else {
                                   cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
+                                  leaveCounts[employee.id] = leaveCounts[employee.id] + 1;
+                                }
+                              } else if (isMissingReport) {
+                                cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
+                                leaveCounts[employee.id] = leaveCounts[employee.id] + 1;
+                              } else {
+                                if (calculateDay == '0.5') {
+                                  cellStyle = { backgroundColor: "#00ffff", color: "#000" }; // Cyan for half-day
+                                  leaveCounts[employee.id] = leaveCounts[employee.id] + calculateDay;
+                                } else if (calculateDay == '0') {
+                                  cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
+                                  leaveCounts[employee.id] = leaveCounts[employee.id] + 1;                                  
                                 }
                               }
                             } else if (isMissingReport && !highlightRow && currentDate < today) {
-                              // Missing report and it is not alternae sat,sun or hoilday
-                              cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Override red 
-                              leaveCounts[employee.id] = (leaveCounts[employee.id] || 0) + 1;
+                              cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
+                              leaveCounts[employee.id] = leaveCounts[employee.id] + 1;
+                            } else if (!isMissingReport) {
+                              if (calculateDay == '0.5' && !workedOnSpecialDay) {
+                                cellStyle = { backgroundColor: "#00ffff", color: "#000" }; // Cyan for half-day
+                                leaveCounts[employee.id] = leaveCounts[employee.id] + calculateDay;
+                              } else if (calculateDay == '0' && !workedOnSpecialDay) {
+                                cellStyle = { backgroundColor: "#ff0000", color: "#fff" }; // Red for full-day
+                                leaveCounts[employee.id] = leaveCounts[employee.id] + 1;
+                              }
                             }
 
                             let splitValue = dayAttendance[employee.id] || "";
@@ -475,8 +405,8 @@ class Statistics extends Component {
                       <td style={{ backgroundColor: '#999999' }}>Leave Taken(-)</td>
                       {employeesData.map((emp) => {
                         const fullLeaves = leaveCounts[emp.id] || 0;
-                        const halfLeaves = halfLeaveCounts[emp.id] || 0;
-                        const total = Math.round((fullLeaves + halfLeaves) * 10) / 10; // Round to 1 decimal
+                        // const halfLeaves = halfLeaveCounts[emp.id] || 0;
+                        const total = Math.round((fullLeaves) * 10) / 10; // Round to 1 decimal
                         return <td key={emp.id}>{total}</td>;
                       })}
                     </tr>
@@ -502,9 +432,9 @@ class Statistics extends Component {
                       <td>Deduction/Paid</td>
                       {employeesData.map((emp) => {
                         const fullLeaves = leaveCounts[emp.id] || 0;
-                        const halfLeaves = halfLeaveCounts[emp.id] || 0;
+                        // const halfLeaves = halfLeaveCounts[emp.id] || 0;
                         const extraWorkCounts = extraWorkingCounts[emp.id] || 0;
-                        const totalDeduction = (extraWorkCounts + 1) - (fullLeaves + halfLeaves); // Subtract 1 paid leave
+                        const totalDeduction = (extraWorkCounts + 1) - (fullLeaves); // Subtract 1 paid leave
                         return (
                           <td key={emp.id}>{totalDeduction}</td>
                         );
@@ -516,9 +446,9 @@ class Statistics extends Component {
                       <td>No Of Days Salary To Be Credited</td>
                       {employeesData.map((emp) => {
                         const fullLeaves = leaveCounts[emp.id] || 0;
-                        const halfLeaves = halfLeaveCounts[emp.id] || 0;
+                        // const halfLeaves = halfLeaveCounts[emp.id] || 0;
                         const extraWorkCounts = extraWorkingCounts[emp.id] || 0;
-                        const deduction = (extraWorkCounts + 1) - (fullLeaves + halfLeaves);
+                        const deduction = (extraWorkCounts + 1) - (fullLeaves);
                         const salaryDays = deduction + 30;
                         return (
                           <td key={emp.id}>{salaryDays}</td>
