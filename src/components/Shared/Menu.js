@@ -224,11 +224,11 @@ class Menu extends Component {
 						"label": "Todo List",
 						"to": "/project-todo"
 					},
-					{
-						"id": 40,
-						"label": "Link",
-						"to": "/link"
-					}
+					// {
+					// 	"id": 40,
+					// 	"label": "Link",
+					// 	"to": "/Link"
+					// }
 				]
 			},
 			
@@ -327,6 +327,11 @@ class Menu extends Component {
 									"label": "Clients",
 									"to": "/project-clients"
 								},
+								{
+									"id": 40,
+									"label": "Link",
+									"to": "/Link"
+								}
 							]
 						},
 					);

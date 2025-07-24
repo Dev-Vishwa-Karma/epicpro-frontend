@@ -20,7 +20,7 @@ import Positions from './JobPortal/Positions/Positions';
 import Resumes from './JobPortal/Resumes/Resumes';
 import Login from './Authentication/login';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
-import Link from './HRMS/Link/link';
+import Link from './HRMS/Link/Link';
 
 const Routes = [
     {
@@ -181,8 +181,8 @@ const Routes = [
 
     //Git-Excel-Codebase
     {
-        path: "/link",
-        name: 'link-work',
+        path: "/Link",
+        name: 'Link-Work',
         exact: true,
         pageTitle: "Link",
         roles: ['admin', 'super_admin'],
