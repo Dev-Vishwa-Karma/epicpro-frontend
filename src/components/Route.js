@@ -21,6 +21,7 @@ import Resumes from './JobPortal/Resumes/Resumes';
 import Login from './Authentication/login';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
 import Link from './HRMS/Link/Link';
+import Notifications from './HRMS/notifications/Notifications';
 
 const Routes = [
     {
@@ -189,6 +190,14 @@ const Routes = [
         component: Link
     },
 
+    {
+        path: "/notifications",
+        name: 'NOtifications',
+        exact: true,
+        pageTitle: "Notifications",
+        roles: ['admin', 'super_admin'],
+        component: Notifications
+    },
     //job portal
     {
         path: "/jobportal-dashboard",

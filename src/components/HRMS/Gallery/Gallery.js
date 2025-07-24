@@ -45,7 +45,7 @@ class Gallery extends Component {
         this.setState({ loading: true });
         getService.getCall('gallery.php', {
             action: 'view',
-            employee_id: params,
+            user_id: params,
             sortOrder: sortOrder
         })
         .then(data => {

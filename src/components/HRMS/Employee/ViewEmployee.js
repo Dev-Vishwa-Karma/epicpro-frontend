@@ -189,7 +189,7 @@ class ViewEmployee extends Component {
     getEmployeeGallery = (id, page = 1, limit = 12) => {
         getService.getCall('gallery.php', {
             action: 'view',
-            employee_id:id,
+            user_id:id,
             page:page,
             limit:limit
         })
