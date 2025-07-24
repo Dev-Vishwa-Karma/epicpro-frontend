@@ -945,18 +945,8 @@ class Employee extends Component {
 																				className="avatar avatar-blue add-space me-2"
 																				alt={`${employee.first_name} ${employee.last_name}`}
 																				title={`${employee.first_name} ${employee.last_name}`}
-																				onError={(e) => {
-																				e.target.style.display = 'none';
-																				const initialsSpan = document.createElement('span');
-																				initialsSpan.className = 'avatar avatar-blue add-space me-2';
-																				initialsSpan.setAttribute('title', `${employee.first_name} ${employee.last_name}`);
-																				initialsSpan.textContent = `${employee.first_name.charAt(0).toUpperCase()}${employee.last_name.charAt(0).toUpperCase()}`;
-																				e.target.parentNode.insertBefore(initialsSpan, e.target.nextSibling);
-																				initialsSpan.style.display = 'inline-flex';
-																				initialsSpan.style.alignItems = 'center';
-																				initialsSpan.style.justifyContent = 'center';
-																				initialsSpan.style.width = '35px';
-																				initialsSpan.style.height = '35px';
+																				onError={e => {
+																					e.target.src = '/assets/images/sm/avatar2.jpg';
 																				}}
 																			/>
 																			) : (
@@ -1158,20 +1148,8 @@ class Employee extends Component {
 																							borderRadius: '50%', 
 																							objectFit: 'cover'
 																						}}
-																						onError={(e) => {
-																						e.target.style.display = 'none';
-																						const initialsSpan = document.createElement('span');
-																						initialsSpan.className = 'avatar avatar-blue add-space';
-																						initialsSpan.setAttribute('data-toggle', 'tooltip');
-																						initialsSpan.setAttribute('data-placement', 'top');
-																						initialsSpan.setAttribute('title', `${leave.first_name} ${leave.last_name}`);
-																						initialsSpan.style.display = 'inline-flex';
-																						initialsSpan.style.alignItems = 'center';
-																						initialsSpan.style.justifyContent = 'center';
-																						initialsSpan.style.width = '40px';
-																						initialsSpan.style.height = '40px';
-																						initialsSpan.textContent = `${leave.first_name.charAt(0).toUpperCase()}${leave.last_name.charAt(0).toUpperCase()}`;
-																						e.target.parentNode.appendChild(initialsSpan);
+																						onError={e => {
+																							e.target.src = '/assets/images/sm/avatar2.jpg';
 																						}}
 																					/>
 																				) : (

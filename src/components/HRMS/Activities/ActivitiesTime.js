@@ -111,27 +111,9 @@ class ActivitiesTime extends Component {
                                 objectFit: 'cover',
                                 border: '2px solid #f5f5f5'
                                 }}
-                                onError={(e) => {
-                                e.target.style.display = 'none';
-                                const initialsSpan = document.createElement('span');
-                                initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
-                                initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                initialsSpan.setAttribute('data-placement', 'top');
-                                initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
-                                initialsSpan.style.display = 'inline-flex';
-                                initialsSpan.style.alignItems = 'center';
-                                initialsSpan.style.justifyContent = 'center';
-                                initialsSpan.style.width = '35px';
-                                initialsSpan.style.height = '35px';
-                                initialsSpan.style.borderRadius = '50%';
-                                initialsSpan.style.background = '#C5C4C8';
-                                initialsSpan.style.color = '#fff';
-                                initialsSpan.style.fontWeight = '600';
-                                initialsSpan.style.border = '2px solid #f5f5f5';
-                                initialsSpan.textContent = 
-                                    `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
-                                e.target.parentNode.appendChild(initialsSpan);
-                                }}
+                                onError={e => {
+                                      e.target.src = '/assets/images/sm/avatar2.jpg';
+                                  }}
                             />
                             ) : (
                             <span
@@ -193,27 +175,9 @@ class ActivitiesTime extends Component {
                                 objectFit: 'cover',
                                 border: '2px solid #f5f5f5'
                                 }}
-                                onError={(e) => {
-                                e.target.style.display = 'none';
-                                const initialsSpan = document.createElement('span');
-                                initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
-                                initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                initialsSpan.setAttribute('data-placement', 'top');
-                                initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
-                                initialsSpan.style.display = 'inline-flex';
-                                initialsSpan.style.alignItems = 'center';
-                                initialsSpan.style.justifyContent = 'center';
-                                initialsSpan.style.width = '35px';
-                                initialsSpan.style.height = '35px';
-                                initialsSpan.style.borderRadius = '50%';
-                                initialsSpan.style.background = '#C5C4C8';
-                                initialsSpan.style.color = '#fff';
-                                initialsSpan.style.fontWeight = '600';
-                                initialsSpan.style.border = '2px solid #f5f5f5';
-                                initialsSpan.textContent = 
-                                    `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
-                                e.target.parentNode.appendChild(initialsSpan);
-                                }}
+                                onError={e => {
+                                      e.target.src = '/assets/images/sm/avatar2.jpg';
+                                  }}
                             />
                             ) : (
                             <span
@@ -273,27 +237,9 @@ class ActivitiesTime extends Component {
                                 objectFit: 'cover',
                                 border: '2px solid #f5f5f5'
                                 }}
-                                onError={(e) => {
-                                e.target.style.display = 'none';
-                                const initialsSpan = document.createElement('span');
-                                initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
-                                initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                initialsSpan.setAttribute('data-placement', 'top');
-                                initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
-                                initialsSpan.style.display = 'inline-flex';
-                                initialsSpan.style.alignItems = 'center';
-                                initialsSpan.style.justifyContent = 'center';
-                                initialsSpan.style.width = '35px';
-                                initialsSpan.style.height = '35px';
-                                initialsSpan.style.borderRadius = '50%';
-                                initialsSpan.style.background = '#C5C4C8';
-                                initialsSpan.style.color = '#fff';
-                                initialsSpan.style.fontWeight = '600';
-                                initialsSpan.style.border = '2px solid #f5f5f5';
-                                initialsSpan.textContent = 
-                                    `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
-                                e.target.parentNode.appendChild(initialsSpan);
-                                }}
+                                onError={e => {
+                                      e.target.src = '/assets/images/sm/avatar2.jpg';
+                                  }}
                             />
                             ) : (
                             <span
@@ -351,27 +297,9 @@ class ActivitiesTime extends Component {
                                 objectFit: 'cover',
                                 border: '2px solid #f5f5f5'
                                 }}
-                                onError={(e) => {
-                                e.target.style.display = 'none';
-                                const initialsSpan = document.createElement('span');
-                                initialsSpan.className = 'avatar avatar-blue add-space tl_avatar';
-                                initialsSpan.setAttribute('data-toggle', 'tooltip');
-                                initialsSpan.setAttribute('data-placement', 'top');
-                                initialsSpan.setAttribute('title', `${activity.first_name} ${activity.last_name}`);
-                                initialsSpan.style.display = 'inline-flex';
-                                initialsSpan.style.alignItems = 'center';
-                                initialsSpan.style.justifyContent = 'center';
-                                initialsSpan.style.width = '35px';
-                                initialsSpan.style.height = '35px';
-                                initialsSpan.style.borderRadius = '50%';
-                                initialsSpan.style.background = '#C5C4C8';
-                                initialsSpan.style.color = '#fff';
-                                initialsSpan.style.fontWeight = '600';
-                                initialsSpan.style.border = '2px solid #f5f5f5';
-                                initialsSpan.textContent = 
-                                    `${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`;
-                                e.target.parentNode.appendChild(initialsSpan);
-                                }}
+                                onError={e => {
+                                      e.target.src = '/assets/images/sm/avatar2.jpg';
+                                  }}
                             />
                             ) : (
                             <span

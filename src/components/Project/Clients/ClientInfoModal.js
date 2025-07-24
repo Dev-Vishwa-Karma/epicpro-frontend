@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styles from './client.module.css';
 const ClientInfoModal = ({ client, onClose }) => {
   if (!client) return null;
+  const isActive = client.client_status === "1";
 
   return (
     <div
@@ -94,9 +95,7 @@ const ClientInfoModal = ({ client, onClose }) => {
                                   style={{marginLeft: idx === 0 ? 0 : -14,}}
                                   title={member.full_name}
                                   onError={e => {
-                                    if (!e.target.src.includes('/assets/images/sm/avatar2.jpg')) {
                                       e.target.src = '/assets/images/sm/avatar2.jpg';
-                                    }
                                   }}
                                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
                                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
