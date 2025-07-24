@@ -892,9 +892,7 @@ class ProjectList extends Component {
                         cursor: 'pointer',
                       }}
                       onError={e => {
-                        if (!e.target.src.includes('/assets/images/sm/avatar2.jpg')) {
                           e.target.src = '/assets/images/sm/avatar2.jpg';
-                        }
                       }}
                     />
                   ))}

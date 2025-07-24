@@ -253,3 +253,48 @@ border-left: 6px solid #e6140d !important;
 .custom-control-input{
   cursor: pointer !important;
 }
+
+
+/* Gallery.js */
+
+.modal-backdrop-type{
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0,0,0,0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+.modal-backdrop-content{
+  background: #fff !important;
+  padding: 24px !important;
+  border-radius: 8px !important;
+  position: relative !important;
+  max-width: 600px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+.gallery-closeImageModal{
+  position: absolute !important;
+  top: 12px !important;
+  right:12px !important;
+  background: none !important;
+  border: none !important;
+  font-size: 24px !important;
+  cursor: pointer !important;
+}
+.gallery-large{
+  width: 100% !important;
+  max-height: 60vh !important;
+  object-fit: contain !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+}

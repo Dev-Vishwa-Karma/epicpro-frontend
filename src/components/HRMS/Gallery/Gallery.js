@@ -4,6 +4,7 @@ import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import DeleteModal from '../../common/DeleteModal';
 import BlankState from '../../common/BlankState';
+import ImageModal from './ImageModal';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -29,9 +30,46 @@ class Gallery extends Component {
             showDeleteModal: false,
             imageToDelete: null,
             deleteLoading: false,
+            // Modal for image preview
+            showImageModal: false,
+            selectedImageForModal: null,
+            downloadLoading: false,
         };
         this.fileInputRef = React.createRef();
     }
+
+    fetchImages = () => {
+        const { sortOrder } = this.state;
+        const { role, id } = window.user;
+        const params = role === "employee" ? id : null;
+        this.setState({ loading: true });
+        getService.getCall('gallery.php', {
+            action: 'view',
+            employee_id: params,
+            sortOrder: sortOrder
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                this.setState({
+                    images: data.data,
+                    filteredImages: data.data,
+                    loading: false
+                });
+            } else {
+                this.setState({ loading: false });
+            }
+        })
+        .catch(() => {
+            this.setState({ loading: false });
+        });
+    };
+
+    handleSortChange = (event) => {
+        const newSortOrder = event.target.value;
+        this.setState({ sortOrder: newSortOrder }, () => {
+            this.fetchImages();
+        });
+    };
 
     componentDidMount() {
         const {role, id} = window.user;
@@ -63,29 +101,8 @@ class Gallery extends Component {
                 console.error(err);
             });
         }
-
-        // Fetch gallery data
-        const params = role === "employee" ? id : null;
-        getService.getCall('gallery.php', {
-            action: 'view',
-            employee_id:params 
-        })
-            .then(data => {
-                if (data.status === 'success') {
-                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                    this.setState({
-                        images: sortedImages,
-                        filteredImages: sortedImages,
-                        loading: false
-                    });
-                } else {
-                    this.setState({ message: data.message, loading: false });
-                }
-            })
-            .catch(err => {
-                this.setState({ message: 'Failed to fetch data', loading: false });
-                console.error(err);
-            });
+        // Fetch gallery data with sortOrder
+        this.fetchImages();
     }
 
     openModal = () => {
@@ -254,14 +271,6 @@ class Gallery extends Component {
     };
 
     // Handle Sort Order Change
-    handleSortChange = (event) => {
-        const newSortOrder = event.target.value;
-        this.setState(prevState => ({
-            sortOrder: newSortOrder,
-            filteredImages: this.sortImages(prevState.images, newSortOrder)
-        }));
-    };
-
     sortImages = (images, sortOrder) => {
         return [...images].sort((a, b) => {
             return sortOrder === "asc"
@@ -355,6 +364,77 @@ class Gallery extends Component {
             setTimeout(this.dismissMessages, 3000);
         });
 };
+    
+    // Modal handlers for image preview
+    openImageModal = (image) => {
+        this.setState({ showImageModal: true, selectedImageForModal: image });
+    };
+
+    closeImageModal = () => {
+        this.setState({ showImageModal: false, selectedImageForModal: null });
+    };
+
+    handleDeleteFromModal = () => {
+        this.openDeleteModal(this.state.selectedImageForModal);
+        this.closeImageModal();
+    };
+
+    handleDownload = () => {
+        const { selectedImageForModal } = this.state;
+        if (!selectedImageForModal) return;
+
+        this.setState({ downloadLoading: true });
+
+        // Validate file extension
+        var validExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
+        var fileName = selectedImageForModal.url.split('/').pop();
+        var fileExtension = fileName.split('.').pop().toLowerCase();
+
+        if (validExtensions.indexOf('.' + fileExtension) === -1) {
+            this.setState({
+                downloadLoading: false,
+                errorMessage: 'Only PNG, JPG, JPEG, and WEBP images are supported',
+                showError: true
+            });
+            setTimeout(this.dismissMessages, 3000);
+            return;
+        }
+
+        // backend endpoint for download
+        var imageUrl = process.env.REACT_APP_API_URL + '/gallery.php?action=view_image&img=' + encodeURIComponent(fileName);
+
+        fetch(imageUrl)
+            .then(function (response) {
+                return response.blob();
+            })
+            .then(function (blob) {
+                const imageDataUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = imageDataUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(imageDataUrl);
+            })
+            .catch((error) => {
+                this.setState({
+                    downloadLoading: false,
+                    errorMessage: 'Failed to download image',
+                    showError: true
+                });
+                setTimeout(this.dismissMessages, 3000);
+                console.error('Error downloading image:', error);
+            })
+            .finally(() => {
+                this.setState({
+                    downloadLoading: false,
+                    successMessage: 'Download started successfully',
+                    showSuccess: true
+                });
+                setTimeout(this.dismissMessages, 3000);
+            });
+    };
     
     render() {
         const { fixNavbar } = this.props;
@@ -490,7 +570,7 @@ class Gallery extends Component {
                                                                                     alt="Preview"
                                                                                     className="img-thumbnail"
                                                                                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                                                                                />
+                                                                                />  
                                                                                 <button
                                                                                     className="btn btn-danger btn-sm position-absolute"
                                                                                     style={{ top: '-5px', right: '-5px', borderRadius: '50%' }}
@@ -534,30 +614,21 @@ class Gallery extends Component {
                                     </div>
                                 </div>
                             )}
-            
-                            {/* {!loading && window.user?.role === "employee" && (
-                                <div className="col-12">
-                                    <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <span className="text-danger fw-bold">Access Denied</span>
-                                    </div>
-                                </div>
-                            )} */}
                             
                             {!loading && filteredImages.length > 0 && ( // If not employee, show images if available
                                 currentImages.map((image, index) => (
                                     <div className="col-sm-6 col-lg-3" key={image.id || index}>
-                                        <div className="card p-3 position-relative">
-                                            {/* Delete Icon */}
-                                            <button
-                                                type="button"
-                                                className="btn btn-link p-0 position-absolute"
-                                                style={{ top: '1px', right: '4px', zIndex: 2 }}
-                                                title="Delete Image"
-                                                onClick={() => this.openDeleteModal(image)}
-                                            >
-                                                <i className="fa fa-trash " style={{ fontSize: '1rem', color:'red' }}></i>
-                                            </button>
-                                            <img src={`${process.env.REACT_APP_API_URL}/${image.url}`} alt="Gallery" className="rounded" />
+                                        <div className="card p-3 position-relative gallery-card">
+                                            <div className="gallery-image-wrapper">
+                                            <img 
+                                                src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
+                                                alt="Gallery" 
+                                                className="rounded w-100 h-auto" 
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => this.openImageModal(image)}
+                                            />
+                                            {/* Delete button removed from here, now in modal */}
+                                            </div>
                                         </div>
                                     </div>
                                 ))
@@ -626,7 +697,7 @@ class Gallery extends Component {
                                             <li className="page-item">
                                                 <button className="page-link" onClick={() => this.handlePageChange(totalPages)}>
                                                     {totalPages}
-                                            </button>
+                                                </button>
                                         </li>
                                         </>
                                     )}
@@ -642,6 +713,16 @@ class Gallery extends Component {
                         )}
                     </div>
                 </div>
+                {/* Modal for image preview, delete, and download */}
+                <ImageModal
+                    show={this.state.showImageModal}
+                    image={this.state.selectedImageForModal}
+                    onClose={this.closeImageModal}
+                    onDownload={this.handleDownload}
+                    onDelete={this.handleDeleteFromModal}
+                    downloadLoading={this.state.downloadLoading}
+                />
+
             </>
         )
     }
