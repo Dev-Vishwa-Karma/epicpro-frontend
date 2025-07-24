@@ -509,7 +509,10 @@ class TodoList extends Component {
 
     // Add handler for status filter
     handleStatusFilterChange = (e) => {
-        this.setState({ statusFilter: e.target.value });
+        this.setState({
+            statusFilter: e.target.value,
+            currentPageTodos: 1
+        });
         // Make the GET API call when the component is mounted
 		getService.getCall('project_todo.php', {
             action: 'view',
@@ -685,13 +688,9 @@ class TodoList extends Component {
                                                                                 borderRadius: '50%',
                                                                                 objectFit: 'cover',
                                                                                 }}
-                                                                                onError={() => {
-                                                                                this.setState(prevState => ({
-                                                                                    todos: prevState.todos.map(t =>
-                                                                                    t.id === todo.id ? { ...t, imageError: true } : t
-                                                                                    ),
-                                                                                }));
-                                                                                }}
+                                                                                onError={e => {
+																					e.target.src = '/assets/images/sm/avatar2.jpg';
+																				}}
                                                                             />
                                                                         ) : (
                                                                             <span
