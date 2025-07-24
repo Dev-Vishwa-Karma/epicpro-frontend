@@ -63,7 +63,7 @@ class Notifications extends Component {
                 if (data.status === 'success') {
                     this.setState({ notificationData: data.data, loading: false }); 
                 } else {
-                    this.setState({ message: data.message, loading: false });
+                    this.setState({ notificationData: [], message: data.message, loading: false });
                 }
             })
             .catch(err => {
