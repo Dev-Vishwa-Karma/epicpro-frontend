@@ -344,3 +344,8 @@ border-left: 6px solid #e6140d !important;
   font-weight: bold !important;
   color: #333 !important;
 }
+
+.git-modal-body{
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+}

@@ -36,15 +36,14 @@ class Link extends Component {
       dataPerPage: 10,
       searchQuery: '', // Add search query state
     };
+    this.searchDebounceTimer = null;
   }
 
-  componentDidMount() {
-    this.fetchLinks();
-  }
-
-  fetchLinks = () => {
+  fetchLinks = (search = '') => {
     this.setState({ loading: true });
-    getService.getCall('resources.php', { action: 'view' })
+    const params = { action: 'view' };
+    if (search) params.search = search;
+    getService.getCall('resources.php', params)
       .then(res => {
         if (res.status === 'success') {
           const gitLinks = res.data.filter(l => l.type && l.type.toLowerCase() === 'git');
@@ -115,16 +114,16 @@ class Link extends Component {
             deleteId: null,
             loading: false,
             showSuccess: true,
-            successMessage: res.message || 'Link deleted successfully!',
+            successMessage: res.message || 'Data deleted successfully!',
           });
           this.fetchLinks();
         } else {
-          this.setState({ showError: true, errorMessage: res.message || 'Failed to delete link', loading: false });
+          this.setState({ showError: true, errorMessage: res.message || 'Failed to delete data', loading: false });
         }
         setTimeout(this.dismissMessages, 3000);
       })
       .catch(err => {
-        this.setState({ showError: true, errorMessage: err.message || 'Failed to delete link', loading: false });
+        this.setState({ showError: true, errorMessage: err.message || 'Failed to delete data', loading: false });
         setTimeout(this.dismissMessages, 3000);
       });
   };
@@ -220,17 +219,17 @@ class Link extends Component {
             errors: {},
             editId: null,
             showSuccess: true,
-            successMessage: res.message || (isEdit ? 'Link updated successfully!' : 'Link added successfully!'),
+            successMessage: res.message || (isEdit ? 'Data updated successfully!' : 'Data added successfully!'),
             loading: false,
           });
           this.fetchLinks();
         } else {
-          this.setState({ showError: true, errorMessage: res.message || 'Failed to save link', loading: false });
+          this.setState({ showError: true, errorMessage: res.message || 'Failed to save data', loading: false });
         }
         setTimeout(this.dismissMessages, 3000);
       })
       .catch(err => {
-        this.setState({ showError: true, errorMessage: err.message || 'Failed to save link', loading: false });
+        this.setState({ showError: true, errorMessage: err.message || 'Failed to save data', loading: false });
         setTimeout(this.dismissMessages, 3000);
       });
   };
@@ -259,9 +258,30 @@ class Link extends Component {
   };
 
   handleSearch = (event) => {
-    const query = event.target.value.toLowerCase();
-    this.setState({ searchQuery: query });
+    const query = event.target.value;
+    this.setState({ 
+      searchQuery: query, 
+      currentPageGit: 1, 
+      currentPageExcel: 1, 
+      currentPageCodebase: 1 
+    });
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+    this.searchDebounceTimer = setTimeout(() => {
+      this.fetchLinks(query);
+    }, 1000);
   };
+
+  componentDidMount() {
+    this.fetchLinks();
+  }
+
+  componentWillUnmount() {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+  }
 
   renderPagination = (tab, totalItems) => {
     const pageKey = this.getPageKey(tab);
@@ -346,33 +366,21 @@ class Link extends Component {
       currentPageGit, currentPageExcel, currentPageCodebase, dataPerPage, searchQuery
     } = this.state;
 
-    // Filter data by search query for the current tab
-    const filterLinks = (links) => {
-      if (!searchQuery) return links;
-      return links.filter(link =>
-        (link.title && link.title.toLowerCase().includes(searchQuery)) ||
-        (link.url && link.url.toLowerCase().includes(searchQuery))
-      );
-    };
-
-    // Pagination logic for each tab (with search filter)
-    const filteredGitLinks = filterLinks(gitLinks);
+    // Pagination logic for each tab (no frontend search filter)
     const indexOfLastGit = currentPageGit * dataPerPage;
     const indexOfFirstGit = indexOfLastGit - dataPerPage;
-    const currentGitLinks = filteredGitLinks.slice(indexOfFirstGit, indexOfLastGit);
-    const totalPagesGit = Math.ceil(filteredGitLinks.length / dataPerPage);
+    const currentGitLinks = gitLinks.slice(indexOfFirstGit, indexOfLastGit);
+    const totalPagesGit = Math.ceil(gitLinks.length / dataPerPage);
 
-    const filteredExcelLinks = filterLinks(excelLinks);
     const indexOfLastExcel = currentPageExcel * dataPerPage;
     const indexOfFirstExcel = indexOfLastExcel - dataPerPage;
-    const currentExcelLinks = filteredExcelLinks.slice(indexOfFirstExcel, indexOfLastExcel);
-    const totalPagesExcel = Math.ceil(filteredExcelLinks.length / dataPerPage);
+    const currentExcelLinks = excelLinks.slice(indexOfFirstExcel, indexOfLastExcel);
+    const totalPagesExcel = Math.ceil(excelLinks.length / dataPerPage);
 
-    const filteredCodebaseLinks = filterLinks(codebaseLinks);
     const indexOfLastCodebase = currentPageCodebase * dataPerPage;
     const indexOfFirstCodebase = indexOfLastCodebase - dataPerPage;
-    const currentCodebaseLinks = filteredCodebaseLinks.slice(indexOfFirstCodebase, indexOfLastCodebase);
-    const totalPagesCodebase = Math.ceil(filteredCodebaseLinks.length / dataPerPage);
+    const currentCodebaseLinks = codebaseLinks.slice(indexOfFirstCodebase, indexOfLastCodebase);
+    const totalPagesCodebase = Math.ceil(codebaseLinks.length / dataPerPage);
 
     return (
       <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
@@ -456,7 +464,7 @@ class Link extends Component {
                 </div>
                 <div className="card-body">
                   <LinkTable data={currentGitLinks} type="Git" onEdit={this.handleEdit} onDelete={this.handleDelete} />
-                  {this.renderPagination('Git', filteredGitLinks.length)}
+                  {this.renderPagination('Git', gitLinks.length)}
                 </div>
               </div>
             </div>
@@ -481,7 +489,7 @@ class Link extends Component {
                 </div>
                 <div className="card-body">
                   <LinkTable data={currentExcelLinks} type="Excel" onEdit={this.handleEdit} onDelete={this.handleDelete} />
-                  {this.renderPagination('Excel', filteredExcelLinks.length)}
+                  {this.renderPagination('Excel', excelLinks.length)}
                 </div>
               </div>
             </div>
@@ -506,7 +514,7 @@ class Link extends Component {
                 </div>
                 <div className="card-body">
                   <LinkTable data={currentCodebaseLinks} type="Codebase" onEdit={this.handleEdit} onDelete={this.handleDelete} />
-                  {this.renderPagination('Codebase', filteredCodebaseLinks.length)}
+                  {this.renderPagination('Codebase', codebaseLinks.length)}
                 </div>
               </div>
             </div>

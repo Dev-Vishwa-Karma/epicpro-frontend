@@ -104,7 +104,7 @@ class LinkModal extends React.Component {
                   <h5 className="modal-title">{isEdit ? `Edit ${activeTab}` : `Add ${activeTab}`}</h5>
                   <button type="button" className="close" onClick={onClose}><span aria-hidden="true">×</span></button>
                 </div>
-                <div className="modal-body">
+                <div className="modal-body git-modal-body">
                   <div className="form-group">
                     <label htmlFor="title" className="form-label">Title</label>
                     <input

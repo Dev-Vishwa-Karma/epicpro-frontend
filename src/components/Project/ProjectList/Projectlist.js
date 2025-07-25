@@ -888,12 +888,14 @@ class ProjectList extends Component {
                         marginLeft: idx === 0 ? 0 : -14,
                         background: '#fff',
                         zIndex: 10 + idx,
-                        transition: 'z-index 0.2s',
+                        transition: 'z-index 0.2s, transform 0.2s',
                         cursor: 'pointer',
                       }}
                       onError={e => {
                           e.target.src = '/assets/images/sm/avatar2.jpg';
                       }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
                     />
                   ))}
                 </div>
