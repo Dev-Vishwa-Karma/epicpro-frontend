@@ -23,7 +23,7 @@ class Link extends Component {
       editId: null,
       // Alert and delete modal state
       showDeleteModal: false,
-      deleteTab: null,
+      deleteType: null,
       deleteId: null,
       showSuccess: false,
       showError: false,
@@ -34,6 +34,7 @@ class Link extends Component {
       currentPageExcel: 1,
       currentPageCodebase: 1,
       dataPerPage: 10,
+      searchQuery: '', // Add search query state
     };
   }
 
@@ -43,12 +44,12 @@ class Link extends Component {
 
   fetchLinks = () => {
     this.setState({ loading: true });
-    getService.getCall('link.php', { action: 'view' })
+    getService.getCall('resources.php', { action: 'view' })
       .then(res => {
         if (res.status === 'success') {
-          const gitLinks = res.data.filter(l => l.tab === 'Git');
-          const excelLinks = res.data.filter(l => l.tab === 'Excel');
-          const codebaseLinks = res.data.filter(l => l.tab === 'Codebase');
+          const gitLinks = res.data.filter(l => l.type && l.type.toLowerCase() === 'git');
+          const excelLinks = res.data.filter(l => l.type && l.type.toLowerCase() === 'excel');
+          const codebaseLinks = res.data.filter(l => l.type && l.type.toLowerCase() === 'codebase');
           this.setState({ gitLinks, excelLinks, codebaseLinks, loading: false });
         } else {
           this.setState({ showError: true, errorMessage: res.message || 'Failed to fetch links', loading: false });
@@ -63,7 +64,6 @@ class Link extends Component {
     this.setState({ activeTab: tabId });
   };
 
-  // Handle Add button click
   handleAddClick = () => {
     this.setState({
       showModal: true,
@@ -74,23 +74,22 @@ class Link extends Component {
     });
   };
 
-  // Handle edit button click
-  handleEditClick = (tab, id) => {
-    const dataKey = this.getDataKey(tab);
+  handleEdit = (type, id) => {
+    const dataKey = this.getDataKey(type);
     const item = this.state[dataKey].find((row) => row.id === id);
     this.setState({
       showModal: true,
       isEdit: true,
-      formData: { ...item, tab },
+      formData: { ...item, type },
       errors: {},
       editId: id,
     });
   };
 
-  handleDelete = (tab, id) => {
+  handleDelete = (type, id) => {
     this.setState({
       showDeleteModal: true,
-      deleteTab: tab,
+      deleteType: type,
       deleteId: id,
     });
   };
@@ -98,7 +97,7 @@ class Link extends Component {
   handleDeleteModalClose = () => {
     this.setState({
       showDeleteModal: false,
-      deleteTab: null,
+      deleteType: null,
       deleteId: null,
       loading: false,
     });
@@ -107,12 +106,12 @@ class Link extends Component {
   confirmDelete = () => {
     const { deleteId } = this.state;
     this.setState({ loading: true });
-    getService.deleteCall('link.php', 'delete', deleteId)
+    getService.deleteCall('resources.php', 'delete', deleteId)
       .then(res => {
         if (res.status === 'success') {
           this.setState({
             showDeleteModal: false,
-            deleteTab: null,
+            deleteType: null,
             deleteId: null,
             loading: false,
             showSuccess: true,
@@ -139,17 +138,16 @@ class Link extends Component {
     });
   };
 
-  // Handle input change for editing fields
   handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
     this.setState((prevState) => ({
       formData: {
         ...prevState.formData,
-        [name]: type === 'file' ? files[0] : value, // Dynamically update the field
+        [name]: type === 'file' ? files[0] : value,
       },
       errors: {
         ...prevState.errors,
-        [name]: '', // Clear error when typing
+        [name]: '',
       },
     }));
   };
@@ -174,16 +172,16 @@ class Link extends Component {
       isValid = false;
     }
     if (activeTab === 'Git') {
-      if (!formData.link || !formData.link.trim()) {
-        errors.link = 'Link is required.';
+      if (!formData.url || !formData.url.trim()) {
+        errors.url = 'URL is required.';
         isValid = false;
       }
     } else if (activeTab === 'Excel' || activeTab === 'Codebase') {
-      const hasLink = formData.link && formData.link.trim();
-      const hasFile = !!formData.file;
-      if (!hasLink && !hasFile) {
-        errors.link = 'Either Link or File is required.';
-        errors.file = 'Either Link or File is required.';
+      const hasUrl = formData.url && formData.url.trim();
+      const hasFile = !!formData.file_path;
+      if (!hasUrl && !hasFile) {
+        errors.url = 'Either URL or File is required.';
+        errors.file_path = 'Either URL or File is required.';
         isValid = false;
       }
     }
@@ -197,21 +195,22 @@ class Link extends Component {
     const dataKey = this.getDataKey(activeTab);
     const apiAction = isEdit ? 'edit' : 'add';
     const submitData = new FormData();
-    submitData.append('tab', activeTab);
+    submitData.append('type', activeTab);
     submitData.append('title', formData.title);
-    submitData.append('link', formData.link || '');
+    submitData.append('url', formData.url || '');
     if (activeTab === 'Excel' || activeTab === 'Codebase') {
-      if (formData.file instanceof File) {
-        submitData.append('file', formData.file);
-      } else if (isEdit && formData.file) {
-        submitData.append('file', formData.file); // for edit, keep existing file path
+      if (formData.file_path instanceof File) {
+        submitData.append('file_path', formData.file_path);
+      } else if (isEdit && formData.file_path) {
+        submitData.append('file_path', formData.file_path); // for edit, keep existing file path
       }
     }
     if (isEdit) {
       submitData.append('id', editId);
     }
     this.setState({ loading: true });
-    getService.addCall('link.php', apiAction, submitData)
+    console.log('submitData',submitData)
+    getService.addCall('resources.php', apiAction, submitData)
       .then(res => {
         if (res.status === 'success') {
           this.setState({
@@ -236,10 +235,10 @@ class Link extends Component {
       });
   };
 
-  getDataKey = (tab) => {
-    if (tab === 'Git') return 'gitLinks';
-    if (tab === 'Excel') return 'excelLinks';
-    if (tab === 'Codebase') return 'codebaseLinks';
+  getDataKey = (type) => {
+    if (type === 'Git') return 'gitLinks';
+    if (type === 'Excel') return 'excelLinks';
+    if (type === 'Codebase') return 'codebaseLinks';
     return '';
   };
 
@@ -257,6 +256,11 @@ class Link extends Component {
     if (newPage >= 1 && newPage <= totalPages) {
       this.setState({ [pageKey]: newPage });
     }
+  };
+
+  handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    this.setState({ searchQuery: query });
   };
 
   renderPagination = (tab, totalItems) => {
@@ -322,14 +326,14 @@ class Link extends Component {
 
   getFormData = () => {
     const { formData, activeTab } = this.state;
-    if (formData && (formData.title || formData.link || formData.file)) {
+    if (formData && (formData.title || formData.url || formData.file_path)) {
       return formData;
     } else {
       // Default fields for each tab
       if (activeTab === 'Excel') {
-        return { title: '', link: '', file: null };
+        return { title: '', url: '', file_path: null };
       } else {
-        return { title: '', link: '' };
+        return { title: '', url: '' };
       }
     }
   };
@@ -339,24 +343,36 @@ class Link extends Component {
     const {
       activeTab, gitLinks, excelLinks, codebaseLinks, showModal, isEdit, errors, loading, modalId,
       showDeleteModal, showSuccess, showError, successMessage, errorMessage,
-      currentPageGit, currentPageExcel, currentPageCodebase, dataPerPage
+      currentPageGit, currentPageExcel, currentPageCodebase, dataPerPage, searchQuery
     } = this.state;
 
-    // Pagination logic for each tab
+    // Filter data by search query for the current tab
+    const filterLinks = (links) => {
+      if (!searchQuery) return links;
+      return links.filter(link =>
+        (link.title && link.title.toLowerCase().includes(searchQuery)) ||
+        (link.url && link.url.toLowerCase().includes(searchQuery))
+      );
+    };
+
+    // Pagination logic for each tab (with search filter)
+    const filteredGitLinks = filterLinks(gitLinks);
     const indexOfLastGit = currentPageGit * dataPerPage;
     const indexOfFirstGit = indexOfLastGit - dataPerPage;
-    const currentGitLinks = gitLinks.slice(indexOfFirstGit, indexOfLastGit);
-    const totalPagesGit = Math.ceil(gitLinks.length / dataPerPage);
+    const currentGitLinks = filteredGitLinks.slice(indexOfFirstGit, indexOfLastGit);
+    const totalPagesGit = Math.ceil(filteredGitLinks.length / dataPerPage);
 
+    const filteredExcelLinks = filterLinks(excelLinks);
     const indexOfLastExcel = currentPageExcel * dataPerPage;
     const indexOfFirstExcel = indexOfLastExcel - dataPerPage;
-    const currentExcelLinks = excelLinks.slice(indexOfFirstExcel, indexOfLastExcel);
-    const totalPagesExcel = Math.ceil(excelLinks.length / dataPerPage);
+    const currentExcelLinks = filteredExcelLinks.slice(indexOfFirstExcel, indexOfLastExcel);
+    const totalPagesExcel = Math.ceil(filteredExcelLinks.length / dataPerPage);
 
+    const filteredCodebaseLinks = filterLinks(codebaseLinks);
     const indexOfLastCodebase = currentPageCodebase * dataPerPage;
     const indexOfFirstCodebase = indexOfLastCodebase - dataPerPage;
-    const currentCodebaseLinks = codebaseLinks.slice(indexOfFirstCodebase, indexOfLastCodebase);
-    const totalPagesCodebase = Math.ceil(codebaseLinks.length / dataPerPage);
+    const currentCodebaseLinks = filteredCodebaseLinks.slice(indexOfFirstCodebase, indexOfLastCodebase);
+    const totalPagesCodebase = Math.ceil(filteredCodebaseLinks.length / dataPerPage);
 
     return (
       <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
@@ -421,40 +437,76 @@ class Link extends Component {
           <div className="tab-content">
             <div className={`tab-pane fade ${activeTab === 'Git' ? 'show active' : ''}`} id="Git" role="tabpanel">
               <div className="card">
+                <div className="card-header d-flex justify-content-between align-items-center">
+                  <h3 className="card-title mb-0">Git Links</h3>
+                  <div className="input-group" style={{ maxWidth: 300 }}>
+                    <div className="input-icon">
+                      <span className="input-icon-addon">
+                        <i className="fe fe-search" />
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by title or URL..."
+                        value={searchQuery}
+                        onChange={this.handleSearch}
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="card-body">
-                  <LinkTable
-                    data={currentGitLinks}
-                    tab="Git"
-                    onEdit={this.handleEditClick}
-                    onDelete={this.handleDelete}
-                  />
-                  {this.renderPagination('Git', gitLinks.length)}
+                  <LinkTable data={currentGitLinks} type="Git" onEdit={this.handleEdit} onDelete={this.handleDelete} />
+                  {this.renderPagination('Git', filteredGitLinks.length)}
                 </div>
               </div>
             </div>
             <div className={`tab-pane fade ${activeTab === 'Excel' ? 'show active' : ''}`} id="Excel" role="tabpanel">
               <div className="card">
+                <div className="card-header d-flex justify-content-between align-items-center">
+                  <h3 className="card-title mb-0">Excel Links</h3>
+                  <div className="input-group" style={{ maxWidth: 300 }}>
+                    <div className="input-icon">
+                      <span className="input-icon-addon">
+                        <i className="fe fe-search" />
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by title or URL..."
+                        value={searchQuery}
+                        onChange={this.handleSearch}
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="card-body">
-                  <LinkTable
-                    data={currentExcelLinks}
-                    tab="Excel"
-                    onEdit={this.handleEditClick}
-                    onDelete={this.handleDelete}
-                  />
-                  {this.renderPagination('Excel', excelLinks.length)}
+                  <LinkTable data={currentExcelLinks} type="Excel" onEdit={this.handleEdit} onDelete={this.handleDelete} />
+                  {this.renderPagination('Excel', filteredExcelLinks.length)}
                 </div>
               </div>
             </div>
             <div className={`tab-pane fade ${activeTab === 'Codebase' ? 'show active' : ''}`} id="Codebase" role="tabpanel">
               <div className="card">
+                <div className="card-header d-flex justify-content-between align-items-center">
+                  <h3 className="card-title mb-0">Codebase Links</h3>
+                  <div className="input-group" style={{ maxWidth: 300 }}>
+                    <div className="input-icon">
+                      <span className="input-icon-addon">
+                        <i className="fe fe-search" />
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by title or URL..."
+                        value={searchQuery}
+                        onChange={this.handleSearch}
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="card-body">
-                  <LinkTable
-                    data={currentCodebaseLinks}
-                    tab="Codebase"
-                    onEdit={this.handleEditClick}
-                    onDelete={this.handleDelete}
-                  />
-                  {this.renderPagination('Codebase', codebaseLinks.length)}
+                  <LinkTable data={currentCodebaseLinks} type="Codebase" onEdit={this.handleEdit} onDelete={this.handleDelete} />
+                  {this.renderPagination('Codebase', filteredCodebaseLinks.length)}
                 </div>
               </div>
             </div>

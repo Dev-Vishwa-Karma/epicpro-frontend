@@ -224,11 +224,6 @@ class Menu extends Component {
 						"label": "Todo List",
 						"to": "/project-todo"
 					},
-					// {
-					// 	"id": 40,
-					// 	"label": "Link",
-					// 	"to": "/Link"
-					// }
 				]
 			},
 			
@@ -306,6 +301,21 @@ class Menu extends Component {
 						hrmsSection.content.splice(statisticsIndex + 1, 0, statistics);
 					}
 
+					// Add the "Link" item to the HRMS section after the Todo List item (id: 20)
+					const linkItem = {
+						"id": 40,
+						"label": "Link",
+						"to": "/Link"
+					};
+					// Find the index of "Todo List" (id: 20)
+					const todoListIndex = hrmsSection.content.findIndex(item => item.id === 20);
+					if (todoListIndex !== -1) {
+						hrmsSection.content.splice(todoListIndex + 1, 0, linkItem);
+					} else {
+						// If Todo List is not found, add Link at the end
+						hrmsSection.content.push(linkItem);
+					}
+
 					const notifications = {
 						"id": 40,
 						"label": "Notifications",
@@ -342,11 +352,6 @@ class Menu extends Component {
 									"label": "Clients",
 									"to": "/project-clients"
 								},
-								{
-									"id": 40,
-									"label": "Link",
-									"to": "/Link"
-								}
 							]
 						},
 					);

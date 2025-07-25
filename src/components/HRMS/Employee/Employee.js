@@ -510,11 +510,10 @@ class Employee extends Component {
   if (!status) { errors.status = "Status is required."; isValid = false; }
 
   if (!isValid) {
-    this.setState({ addLeaveErrors: errors, showError: true, errorMessage: "Please fill in all required fields.", ButtonLoading: false });
-    setTimeout(() => this.setState({ showError: false }), 3000);
+    this.setState({ addLeaveErrors: errors, ButtonLoading: false });
     return;
   } else {
-    this.setState({ addLeaveErrors: {} });
+	this.setState({ addLeaveErrors: {} });
   }
 
         // Validate form inputs
@@ -807,7 +806,7 @@ class Employee extends Component {
 				<AlertMessages
                     showSuccess={showSuccess}
                     successMessage={successMessage}
-                    showError={showError}
+                    showError={showError && !!errorMessage}
                     errorMessage={errorMessage}
                     setShowSuccess={(val) => this.setState({ showSuccess: val })}
                     setShowError={(val) => this.setState({ showError: val })}

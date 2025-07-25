@@ -298,3 +298,49 @@ border-left: 6px solid #e6140d !important;
   border-radius: 8px !important;
   margin-bottom: 8px !important;
 }
+
+
+/* Link Modal or */
+.or-content{
+  display: flex !important;
+  align-items: center !important;
+  margin: 10px 0 !important;
+
+}
+
+.or-line{
+  flex: 1 !important;
+  height: 1px !important;
+}
+
+.or-main{
+  margin: 0 10px !important;
+  font-weight: bold !important;
+  color: #888 !important;
+}
+
+.drag-and-drop-file{
+  border: 2px dashed #ccc !important;
+  border-radius: 8px !important;
+  padding: 24px !important;
+  text-align: center !important;
+  background: #fafbfc !important;
+  cursor: pointer !important;
+  margin-bottom: 8px !important;
+}
+
+.drag-drop-content{
+  font-size: 16px !important;
+  color: #888 !important;
+}
+
+.drag-browser{
+  color: #007bff !important;
+  text-decoration: underline !important;
+}
+
+.file-name{
+  margin-top: 8px !important;
+  font-weight: bold !important;
+  color: #333 !important;
+}

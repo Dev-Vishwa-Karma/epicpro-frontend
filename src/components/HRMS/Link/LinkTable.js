@@ -1,12 +1,11 @@
 import React from 'react';
 import NoDataRow from '../../common/NoDataRow';
 
-const LinkTable = ({ data, tab, onEdit, onDelete }) => {
+const LinkTable = ({ data, type, onEdit, onDelete }) => {
   // Download handler for file URLs
   const getAbsoluteUrl = (fileUrl) => {
     if (!fileUrl) return '';
     if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
-    // Ensure no double slashes
     const base = process.env.REACT_APP_API_URL?.replace(/\/$/, '') || '';
     return base + '/' + fileUrl.replace(/^\//, '');
   };
@@ -37,24 +36,24 @@ const LinkTable = ({ data, tab, onEdit, onDelete }) => {
               <tr key={row.id}>
                 <td>{row.title}</td>
                 <td>
-                  {tab === 'Git' ? (
-                    row.link ? (
-                      <a href={row.link} target="_blank" rel="noopener noreferrer">{row.link}</a>
+                  {type === 'Git' ? (
+                    row.url ? (
+                      <a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a>
                     ) : (
                       <span>-</span>
                     )
                   ) : (
-                    row.link ? (
-                      <a href={row.link} target="_blank" rel="noopener noreferrer">{row.link}</a>
-                    ) : row.file ? (
-                      typeof row.file === 'string' ? (
+                    row.url ? (
+                      <a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a>
+                    ) : row.file_path ? (
+                      typeof row.file_path === 'string' ? (
                         <>
-                          <a href={getAbsoluteUrl(row.file)} target="_blank" rel="noopener noreferrer">File</a>
+                          <a href={getAbsoluteUrl(row.file_path)} target="_blank" rel="noopener noreferrer">File</a>
                           <button
                             className="btn btn-link btn-sm ml-2"
                             title="Download"
                             style={{ padding: 0, border: 'none', background: 'none' }}
-                            onClick={() => handleDownload(row.file)}
+                            onClick={() => handleDownload(row.file_path)}
                           >
                             <i className="fa fa-download" />
                           </button>
@@ -71,14 +70,14 @@ const LinkTable = ({ data, tab, onEdit, onDelete }) => {
                   <button
                     className="btn btn-icon btn-sm mr-2"
                     title="Edit"
-                    onClick={() => onEdit(tab, row.id)}
+                    onClick={() => onEdit(type, row.id)}
                   >
                     <i className="fa fa-edit" />
                   </button>
                   <button
                     className="btn btn-icon btn-sm js-sweetalert"
                     title="Delete"
-                    onClick={() => onDelete(tab, row.id)}
+                    onClick={() => onDelete(type, row.id)}
                   >
                     <i className="fa fa-trash-o text-danger" />
                   </button>
