@@ -5,7 +5,7 @@ import DeleteModal from '../../common/DeleteModal';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
-
+import Pagination from '../../common/Pagination';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -37,7 +37,8 @@ class TodoList extends Component {
       		showError: false,
 			loading: true,
             ButtonLoading: false,
-            currentPageTodos: 1 //pagination
+            currentPageTodos: 1, //pagination
+            dataPerPage: 10,
 		}
 	}
 
@@ -541,17 +542,21 @@ class TodoList extends Component {
 		});
     };
 
+    handlePageChange = (newPage) => {
+        const totalPages = Math.ceil(this.state.todos.length / this.state.dataPerPage);
+        if (newPage >= 1 && newPage <= totalPages) {
+            this.setState({ currentPageTodos: newPage });
+        }
+    };
+
     render() {
         const { fixNavbar } = this.props;
-        const { todos, loading, logged_in_employee_role, statusFilter, showSuccess, successMessage, showError, errorMessage,showDeleteModal } = this.state;
-
-        // Pagination logic
-        const dataPerPage = 10;
-        const currentPageTodos = this.state.currentPageTodos || 1;
-        const totalPagesTodos = Math.ceil((todos && todos.length ? todos.length : 0) / dataPerPage);
-        const indexOfLastTodo = currentPageTodos * dataPerPage;
+        const { todos, loading, logged_in_employee_role, statusFilter, showSuccess, successMessage, showError, errorMessage,showDeleteModal,dataPerPage, currentPageTodos } = this.state;
+        
+        const indexOfLastTodo = this.state.currentPageTodos * dataPerPage;
         const indexOfFirstTodo = indexOfLastTodo - dataPerPage;
         const currentTodos = todos && todos.length > 0 ? todos.slice(indexOfFirstTodo, indexOfLastTodo) : [];
+        const totalPagesTodos = Math.ceil((todos && todos.length ? todos.length : 0) / dataPerPage);
 
         return (
             <>
@@ -762,67 +767,11 @@ class TodoList extends Component {
                                         </div>
                                        {/* Pagination for todos */}
                                        {totalPagesTodos > 1 && (
-                                         <nav aria-label="Page navigation">
-                                           <ul className="pagination mb-0 justify-content-end">
-                                             {/* Previous button */}
-                                             <li className={`page-item ${currentPageTodos === 1 ? 'disabled' : ''}`}>
-                                               <button className="page-link" onClick={() => this.setState({ currentPageTodos: currentPageTodos - 1 })}>
-                                                 Previous
-                                               </button>
-                                             </li>
-                                             {/* First page */}
-                                             {currentPageTodos > 3 && (
-                                               <>
-                                                 <li className="page-item">
-                                                   <button className="page-link" onClick={() => this.setState({ currentPageTodos: 1 })}>
-                                                     1
-                                                   </button>
-                                                 </li>
-                                                 {currentPageTodos > 4 && (
-                                                   <li className="page-item disabled">
-                                                     <span className="page-link">...</span>
-                                                   </li>
-                                                 )}
-                                               </>
-                                             )}
-                                             {/* Page numbers */}
-                                             {Array.from({ length: totalPagesTodos }, (_, i) => i + 1)
-                                               .filter(pageNum => pageNum >= currentPageTodos - 1 && pageNum <= currentPageTodos + 1)
-                                               .map(pageNum => {
-                                                 if (pageNum > 0 && pageNum <= totalPagesTodos) {
-                                                   return (
-                                                     <li key={pageNum} className={`page-item ${currentPageTodos === pageNum ? 'active' : ''}`}>
-                                                       <button className="page-link" onClick={() => this.setState({ currentPageTodos: pageNum })}>
-                                                         {pageNum}
-                                                       </button>
-                                                     </li>
-                                                   );
-                                                 }
-                                                 return null;
-                                               })}
-                                             {/* Ellipsis if needed */}
-                                             {currentPageTodos < totalPagesTodos - 2 && (
-                                               <>
-                                                 {currentPageTodos < totalPagesTodos - 3 && (
-                                                   <li className="page-item disabled">
-                                                     <span className="page-link">...</span>
-                                                   </li>
-                                                 )}
-                                                 <li className="page-item">
-                                                   <button className="page-link" onClick={() => this.setState({ currentPageTodos: totalPagesTodos })}>
-                                                     {totalPagesTodos}
-                                                   </button>
-                                                 </li>
-                                               </>
-                                             )}
-                                             {/* Next button */}
-                                             <li className={`page-item ${currentPageTodos === totalPagesTodos ? 'disabled' : ''}`}>
-                                               <button className="page-link" onClick={() => this.setState({ currentPageTodos: currentPageTodos + 1 })}>
-                                                 Next
-                                               </button>
-                                             </li>
-                                           </ul>
-                                         </nav>
+                                            <Pagination
+                                                currentPage={currentPageTodos}
+                                                totalPages={totalPagesTodos}
+                                                onPageChange={this.handlePageChange}
+                                            />
                                        )}
                                     </div>
                                 </div>

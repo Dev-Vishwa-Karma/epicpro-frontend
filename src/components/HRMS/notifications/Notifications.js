@@ -41,7 +41,7 @@ class Notifications extends Component {
     }
 
     getNotifications = () => {
-        const { filterFromDate,filterToDate,filterEmployeeId } = this.state;
+        const { filterFromDate,filterToDate } = this.state;
         let requestData = {
             action: 'get_notifications'
         };
@@ -54,8 +54,8 @@ class Notifications extends Component {
             requestData.end_date = filterToDate;
         }
 
-        if (filterEmployeeId) {
-            requestData.user_id = filterEmployeeId;
+        if (window.user.id) {
+            requestData.user_id = window.user.id;
         }
 
         getService.getCall('notifications.php', requestData)
@@ -397,25 +397,7 @@ class Notifications extends Component {
                                             onChange={(e) => this.setState({ filterToDate: e.target.value })}
                                         />
                                     </div>
-                                    {((window.user.role === "admin" || window.user.role === "super_admin")) && (
-                                    <div className={`col-md-${col}`}>
-                                        <label>Employee</label>
-                                        <select
-                                        className="form-control"
-                                        value={this.state.filterEmployeeId}
-                                        onChange={(e) =>
-                                            this.setState({ filterEmployeeId: e.target.value })
-                                        }
-                                        >
-                                        <option value="">All Employees</option>
-                                        {this.state.employeeData.map((emp) => (
-                                            <option key={emp.id} value={emp.id}>
-                                            {emp.first_name} {emp.last_name}
-                                            </option>
-                                        ))}
-                                        </select>
-                                    </div>
-                                    )}
+
                                     <div className={`col-md-${col}`}>
                                         <button
                                             className="btn btn-primary"
@@ -425,9 +407,9 @@ class Notifications extends Component {
                                             Apply
                                         </button>
                                     
-                                        <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={() => this.handleAddClick()}>
+                                        {/* <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={() => this.handleAddClick()}>
                                             <i className="fe fe-plus mr-2" />Add
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>
@@ -455,7 +437,7 @@ class Notifications extends Component {
                                             <NotificationTable 
                                                 notificationData={notificationData} 
                                                 message={message}
-                                                onEditClick={this.handleEditClick} 
+                                               // onEditClick={this.handleEditClick} 
                                                 onDeleteClick={this.openModal} 
                                             />
                                         )}

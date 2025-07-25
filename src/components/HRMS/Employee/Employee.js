@@ -7,7 +7,7 @@ import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
-
+import Pagination from '../../common/Pagination';
 
 import {
 	statisticsAction,
@@ -732,18 +732,11 @@ class Employee extends Component {
 		});
     };
 
-	// Handle Pagination of employee listing and employee leaves listing
-	handlePageChange = (newPage, listType) => {
-		if (listType === 'employees') {
-			const totalPages = Math.ceil(this.state.employeeData.length / this.state.dataPerPage);
-			if (newPage >= 1 && newPage <= totalPages) {
-				this.setState({ currentPageEmployees: newPage });
-			}
-		} else if (listType === 'leaves') {
-			const totalPages = Math.ceil(this.state.employeeLeavesData.length / this.state.dataPerPage);
-			if (newPage >= 1 && newPage <= totalPages) {
-				this.setState({ currentPageLeaves: newPage });
-			}
+	// Handle Pagination of employee leaves listing
+	handlePageChange = (newPage) => {
+		const totalPages = Math.ceil(this.state.employeeLeavesData.length / this.state.dataPerPage);
+		if (newPage >= 1 && newPage <= totalPages) {
+			this.setState({ currentPageLeaves: newPage });
 		}
 	};	
 
@@ -1267,73 +1260,11 @@ class Employee extends Component {
 
 										{/* Only show pagination if there are employee leaves */}
 										{totalPagesLeaves > 1 && (
-											<nav aria-label="Page navigation">
-												<ul className="pagination mb-0 justify-content-end">
-													{/* Previous button */}
-													<li className={`page-item ${currentPageLeaves === 1 ? 'disabled' : ''}`}>
-														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves - 1, 'leaves')}>
-															Previous
-														</button>
-													</li>
-
-													{/* First page */}
-													{currentPageLeaves > 3 && (
-														<>
-															<li className="page-item">
-																<button className="page-link" onClick={() => this.handlePageChange(1, 'leaves')}>
-																	1
-																</button>
-															</li>
-															{currentPageLeaves > 4 && (
-																<li className="page-item disabled">
-																	<span className="page-link">...</span>
-																</li>
-															)}
-														</>
-													)}
-
-													{/* Page numbers */}
-													{Array.from({ length: totalPagesLeaves }, (_, i) => i + 1)
-														.filter(pageNum => 
-															pageNum >= currentPageLeaves - 1 && pageNum <= currentPageLeaves + 1
-														)
-														.map(pageNum => {
-															if (pageNum > 0 && pageNum <= totalPagesLeaves) {
-																return (
-																	<li key={pageNum} className={`page-item ${currentPageLeaves === pageNum ? 'active' : ''}`}>
-																		<button className="page-link" onClick={() => this.handlePageChange(pageNum, 'leaves')}>
-																			{pageNum}
-																		</button>
-																	</li>
-																);
-															}
-															return null;
-														})}
-
-													{/* Ellipsis if needed */}
-													{currentPageLeaves < totalPagesLeaves - 2 && (
-														<>
-															{currentPageLeaves < totalPagesLeaves - 3 && (
-																<li className="page-item disabled">
-																	<span className="page-link">...</span>
-																</li>
-															)}
-															<li className="page-item">
-																<button className="page-link" onClick={() => this.handlePageChange(totalPagesLeaves, 'leaves')}>
-																	{totalPagesLeaves}
-																</button>
-															</li>
-														</>
-													)}
-
-													{/* Next button */}
-													<li className={`page-item ${currentPageLeaves === totalPagesLeaves ? 'disabled' : ''}`}>
-														<button className="page-link" onClick={() => this.handlePageChange(currentPageLeaves + 1, 'leaves')}>
-															Next
-														</button>
-													</li>
-												</ul>
-											</nav>
+											<Pagination
+												currentPage={currentPageLeaves}
+												totalPages={totalPagesLeaves}
+												onPageChange={this.handlePageChange}
+											/>
 										)}
 									</div>
 								</div>

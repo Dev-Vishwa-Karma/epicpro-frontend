@@ -36,7 +36,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                                 <div className="font-15">{notification.full_name}</div>
                             </td>
                             <td>
-                                <button
+                                {/* <button
                                     type="button"
                                     className="btn btn-icon"
                                     title="Edit"
@@ -45,7 +45,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                                     onClick={() => onEditClick(notification)}
                                 >
                                     <i className="fa fa-edit" />
-                                </button>
+                                </button> */}
                                 <button
                                     type="button"
                                     className="btn btn-icon btn-sm js-sweetalert"

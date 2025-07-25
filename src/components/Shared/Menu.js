@@ -224,6 +224,11 @@ class Menu extends Component {
 						"label": "Todo List",
 						"to": "/project-todo"
 					},
+					{
+						"id": 41,
+						"label": "Notifications",
+						"to": "/notifications"
+					}
 				]
 			},
 			
@@ -316,19 +321,19 @@ class Menu extends Component {
 						hrmsSection.content.push(linkItem);
 					}
 
-					const notifications = {
-						"id": 40,
-						"label": "Notifications",
-						"to": "/notifications"
-					};
+					// const notifications = {
+					// 	"id": 40,
+					// 	"label": "Notifications",
+					// 	"to": "/notifications"
+					// };
 
-					// Find the index of "Department" (id: 5)
-					const notificationIndex = hrmsSection.content.findIndex(item => item.id === 8);
+					// // Find the index of "Department" (id: 5)
+					// const notificationIndex = hrmsSection.content.findIndex(item => item.id === 8);
 
-					if (statisticsIndex !== -1) {
-						// Insert "Employee" before "Activities"
-						hrmsSection.content.splice(notificationIndex + 1, 0, notifications);
-					}
+					// if (statisticsIndex !== -1) {
+					// 	// Insert "Employee" before "Activities"
+					// 	hrmsSection.content.splice(notificationIndex + 1, 0, notifications);
+					// }
 
 				}
 
