@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
+import Pagination from '../../common/Pagination';
 class Holidays extends Component {
 	constructor(props) {
 		super(props);
@@ -561,27 +562,11 @@ class Holidays extends Component {
 									</div>
 									{/* Only show pagination if there are holidays */}
 									{totalPages > 1 && (
-										<nav aria-label="Page navigation">
-											<ul className="pagination mb-0 justify-content-end">
-												<li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-													<button className="page-link" onClick={() => this.handlePageChange(currentPage - 1)}>
-														Previous
-													</button>
-												</li>
-												{[...Array(totalPages)].map((_, i) => (
-													<li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-														<button className="page-link" onClick={() => this.handlePageChange(i + 1)}>
-															{i + 1}
-														</button>
-													</li>
-												))}
-												<li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-													<button className="page-link" onClick={() => this.handlePageChange(currentPage + 1)}>
-														Next
-													</button>
-												</li>
-											</ul>
-										</nav>
+										<Pagination
+											currentPage={currentPage}
+											totalPages={totalPages}
+											onPageChange={this.handlePageChange}
+										/>
 									)}
 								</div>
 							</div>

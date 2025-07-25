@@ -183,7 +183,7 @@ const Routes = [
         name: 'NOtifications',
         exact: true,
         pageTitle: "Notifications",
-        roles: ['admin', 'super_admin'],
+        roles: ['admin', 'super_admin','employee'],
         component: Notifications
     },
     //job portal
