@@ -474,6 +474,7 @@ class Notifications extends Component {
                                                 message={message}
                                                // onEditClick={this.handleEditClick} 
                                                 onDeleteClick={this.openModal} 
+                                                userRole={window.user.role}
                                             />
                                         )}
                                     </div>
@@ -524,3 +525,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({})
 export default connect(mapStateToProps, mapDispatchToProps)(Notifications);
+
+
+

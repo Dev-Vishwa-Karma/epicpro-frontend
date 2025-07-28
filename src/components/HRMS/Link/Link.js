@@ -476,7 +476,7 @@ class Link extends Component {
               <div className="card">
                 <div className="card-header d-flex justify-content-between align-items-center">
                   <h3 className="card-title mb-0">Git Links</h3>
-                  <div className="input-group" style={{ maxWidth: 300 }}>
+                  <div className="input-group ms-auto" style={{ maxWidth: 250, marginRight: 0 }}>
                     <div className="input-icon">
                       <span className="input-icon-addon">
                         <i className="fe fe-search" />
@@ -501,7 +501,7 @@ class Link extends Component {
               <div className="card">
                 <div className="card-header d-flex justify-content-between align-items-center">
                   <h3 className="card-title mb-0">Excel Links</h3>
-                  <div className="input-group" style={{ maxWidth: 300 }}>
+                  <div className="input-group ms-auto" style={{ maxWidth: 250, marginRight: 0 }}>
                     <div className="input-icon">
                       <span className="input-icon-addon">
                         <i className="fe fe-search" />
@@ -526,10 +526,11 @@ class Link extends Component {
               <div className="card">
                 <div className="card-header d-flex justify-content-between align-items-center">
                   <h3 className="card-title mb-0">Codebase Links</h3>
-                  <div className="input-group" style={{ maxWidth: 300 }}>
+                  <div className="input-group ms-auto" style={{ maxWidth: 250, marginRight: 0 }}>
                     <div className="input-icon">
                       <span className="input-icon-addon">
                         <i className="fe fe-search" />
+
                       </span>
                       <input
                         type="text"

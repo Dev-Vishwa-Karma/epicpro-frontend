@@ -8,6 +8,7 @@ import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
+import { validateFields } from '../../common/validations';
 
 import {
 	statisticsAction,
@@ -506,26 +507,29 @@ class Employee extends Component {
 
         const { employee_id, from_date, to_date, reason, status, halfDayCheckbox, logged_in_employee_role} = this.state;
 		
-		let errors = {};
-  let isValid = true;
+		// Apply Validation component
+		const validationSchema = [
+			{ name: 'employee_id', value: employee_id, required: true, messageName: 'Employee selection'},
+			{ name: 'from_date', value: from_date, type: 'date', required: true, messageName: 'From date'},
+			{ name: 'to_date', value: to_date, type: 'date', required: true, messageName: 'To date',
+				customValidator: (val) => {
+					if (from_date && val && new Date(val) < new Date(from_date)) {
+						return "To date not less than from date:";
+					}
+					return undefined;
+				}
+			},
+			{ name: 'reason', value: reason, required: true, messageName: 'Reason'},
+			{ name: 'status', value: status, required: true, messageName: 'Status'}
+		];
+		const errors = validateFields(validationSchema);
 
-  if (!employee_id) { errors.employee_id = "Select employee is required."; isValid = false; }
-  if (!from_date) { errors.from_date = "From date is required."; isValid = false; }
-  if (!to_date) { errors.to_date = "To date is required."; isValid = false; }
-  if (!reason) { errors.reason = "Reason is required."; isValid = false; }
-  if (!status) { errors.status = "Status is required."; isValid = false; }
-
-  if (!isValid) {
-    this.setState({ addLeaveErrors: errors, ButtonLoading: false });
-    return;
-  } else {
-	this.setState({ addLeaveErrors: {} });
-  }
-
-        // Validate form inputs
-        if (!from_date || !to_date || !reason) {
-            return;
-        }
+		if (Object.keys(errors).length > 0) {
+			this.setState({ addLeaveErrors: errors, ButtonLoading: false });
+			return;
+		} else {
+			this.setState({ addLeaveErrors: {} });
+		}
 
 		// If role is 'employee', force status to 'pending'
 		// const finalStatus = logged_in_employee_role === "employee" ? "pending" : status;
@@ -595,14 +599,36 @@ class Employee extends Component {
 
 	
 	// Handle employee leave edit button
-    handleEditClickForEmployeeLeave = (employeeLeave) => {
-		this.setState({ selectedEmployeeLeave: employeeLeave });
+    	handleEditClickForEmployeeLeave = (employeeLeave) => {
+		this.setState({ selectedEmployeeLeave: employeeLeave, addLeaveErrors: {} });
     };
 	
 	// API endpoint to update/edit employee leave data
 	updateEmployeeLeave = () => {
 		const { selectedEmployeeLeave } = this.state;
 		if (!selectedEmployeeLeave) return;
+
+		// Apply Validation component for edit
+		const validationSchema = [
+			{ name: 'employee_id', value: selectedEmployeeLeave.employee_id, required: true, messageName: 'Employee selection'},
+			{ name: 'from_date', value: selectedEmployeeLeave.from_date, type: 'date', required: true, messageName: 'From date'},
+			{ name: 'to_date', value: selectedEmployeeLeave.to_date, type: 'date', required: true, messageName: 'To date',
+				customValidator: (val) => {
+					if (selectedEmployeeLeave.from_date && val && new Date(val) < new Date(selectedEmployeeLeave.from_date)) {
+						return "To date not less than from date:";
+					}
+					return undefined;
+				}
+			},
+			{ name: 'reason', value: selectedEmployeeLeave.reason, required: true, messageName: 'Reason'},
+			{ name: 'status', value: selectedEmployeeLeave.status, required: true, messageName: 'Status'}
+		];
+		const errors = validateFields(validationSchema);
+
+		if (Object.keys(errors).length > 0) {
+			this.setState({ addLeaveErrors: errors, ButtonLoading: false });
+			return;
+		}
 
 		this.setState({ ButtonLoading: true });
 
@@ -1452,7 +1478,7 @@ class Employee extends Component {
 														<label className="form-label">Select Employee</label>
 														<select 
 															name="employee_id"
-															className="form-control"
+															className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id ? ' is-invalid' : ''}`}
 															onChange={this.handleInputChangeForEditEmployeeLeave}
 															value={selectedEmployeeLeave?.employee_id || ""} 
 														>
@@ -1463,6 +1489,9 @@ class Employee extends Component {
 																</option>
 															))}
 														</select>
+														{this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id && (
+															<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.employee_id}</div>
+														)}
 													</div>
 												</div>
 											)}
@@ -1471,12 +1500,15 @@ class Employee extends Component {
 													<label className="form-label">From Date</label>
 													<input
 														type="date"
-														className="form-control"
+														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.from_date ? ' is-invalid' : ''}`}
 														value={selectedEmployeeLeave?.from_date || ""} 
 														onChange={this.handleInputChangeForEditEmployeeLeave}
 														name="from_date"
 														min={new Date().toISOString().split("T")[0]} 
 													/>
+													{this.state.addLeaveErrors && this.state.addLeaveErrors.from_date && (
+														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>
+													)}
 												</div>
 											</div>
 											<div className="col-md-6">
@@ -1484,12 +1516,15 @@ class Employee extends Component {
 													<label className="form-label">To Date</label>
 													<input
 														type="date"
-														className="form-control"
+														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.to_date ? ' is-invalid' : ''}`}
 														value={selectedEmployeeLeave?.to_date || ""} 
 														onChange={this.handleInputChangeForEditEmployeeLeave}
 														name="to_date"
 														min={selectedEmployeeLeave?.from_date || new Date().toISOString().split("T")[0]}
 													/>
+													{this.state.addLeaveErrors && this.state.addLeaveErrors.to_date && (
+														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.to_date}</div>
+													)}
 												</div>
 											</div>
 											<div className="col-md-12">
@@ -1497,11 +1532,14 @@ class Employee extends Component {
 													<label className="form-label">Reason</label>
 													<input
 														type="text"
-														className="form-control"
+														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.reason ? ' is-invalid' : ''}`}
 														value={selectedEmployeeLeave?.reason || ""} 
 														onChange={this.handleInputChangeForEditEmployeeLeave}
 														name="reason"
 													/>
+													{this.state.addLeaveErrors && this.state.addLeaveErrors.reason && (
+														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.reason}</div>
+													)}
 												</div>
 											</div>
 											<div className="col-sm-6 col-md-6">
@@ -1509,7 +1547,7 @@ class Employee extends Component {
 													<label className="form-label">Status</label>
 													<select 
 														name="status"
-														className="form-control"
+														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.status ? ' is-invalid' : ''}`}
 														id='status'
 														value={selectedEmployeeLeave?.status || ""}
 														onChange={this.handleInputChangeForEditEmployeeLeave}
@@ -1532,6 +1570,9 @@ class Employee extends Component {
 															</>
 														)}
 													</select>
+													{this.state.addLeaveErrors && this.state.addLeaveErrors.status && (
+														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.status}</div>
+													)}
 												</div>
 											</div>
 											<div className="col-md-12">
