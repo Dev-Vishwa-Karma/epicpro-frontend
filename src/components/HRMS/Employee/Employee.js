@@ -253,10 +253,13 @@ class Employee extends Component {
     }
 
 	handleApplyFilters = () => {
-		this.setState({ ButtonLoading: true });
-        this.fetchEmployeeLeaves();
-		//setTimeout(() => this.setState({ ButtonLoading: false }), 3000);
-		 this.setState({ ButtonLoading: false });
+		this.setState({ 
+			ButtonLoading: true,
+			currentPageLeaves: 1 // Reset to first page
+		}, () => {
+			this.fetchEmployeeLeaves();
+			this.setState({ ButtonLoading: false });
+		});
     };
 		
 	goToEditEmployee(employee, employeeId) {
@@ -343,7 +346,10 @@ class Employee extends Component {
     };
 
 	handleEmployeeChange = (event) => {
-        this.setState({ selectedLeaveEmployee: event.target.value, currentPageLeaves: 1 });
+        this.setState({ 
+			selectedLeaveEmployee: event.target.value, 
+			currentPageLeaves: 1 // Reset to first page
+		});
     };
 
 	// Function for "Add" button based on active tab

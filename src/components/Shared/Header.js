@@ -10,6 +10,7 @@ import TextEditor from "../common/TextEditor";
 import DueTasksAlert from "../common/DueTasksAlert";
 import { getService } from "../../services/getService";
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { validateFields } from "../common/validations";
 
 class Header extends Component {
   constructor(props) {
@@ -432,7 +433,15 @@ class Header extends Component {
     const end = endTimeFormatted;
     const breakMinutes = this.props.breakDuration;
     this.calculateWorkingHours(start, end, breakMinutes);
-    this.setState({ showModal: true });
+    this.setState({ 
+      showModal: true,
+      error: {
+        report: "",
+        start_time: "",
+        end_time: "",
+        break_duration_in_minutes: "",
+      }
+    });
   };
 
   convertToDateTime(timeString) {
@@ -488,7 +497,15 @@ class Header extends Component {
   }
 
   closeModal = () => {
-    this.setState({ showModal: false });
+    this.setState({ 
+      showModal: false,
+      error: {
+        report: "",
+        start_time: "",
+        end_time: "",
+        break_duration_in_minutes: "",
+      }
+    });
   };
 
   formatToYMD(dateStr) {
@@ -525,42 +542,17 @@ class Header extends Component {
 
   validateReportForm = () => {
     const { report, start_time, end_time } = this.state;
-    let error = {};
-    let isValid = true;
+    
+    // Apply Validation component
+    const validationSchema = [
+      { name: 'report', value: report, required: true, messageName: 'Report'},
+      { name: 'start_time', value: start_time, required: true, messageName: 'Start time'},
+      { name: 'end_time', value: end_time, required: true, messageName: 'End time'},
+    ];
+    const errors = validateFields(validationSchema);
 
-    if (!report || report.trim() === "") {
-      error.report = "Report is required.";
-      isValid = false;
-    }
-
-    if (!start_time) {
-      error.start_time = "Start time is required.";
-      isValid = false;
-    }
-
-    if (!end_time) {
-      error.end_time = "End time is required.";
-      isValid = false;
-    }
-
-    if (start_time && end_time) {
-      let start =
-        typeof start_time === "string" ? new Date(start_time) : start_time;
-      let end = typeof end_time === "string" ? new Date(end_time) : end_time;
-
-      if (start.getTime() === end.getTime()) {
-        error.start_time = "Start and end time cannot be the same.";
-        error.end_time = "Start and end time cannot be the same.";
-        isValid = false;
-      } else if (start > end) {
-        error.start_time = "Start time must be before end time.";
-        error.end_time = "End time must be after start time.";
-        isValid = false;
-      }
-    }
-
-    this.setState({ error });
-    return isValid;
+    this.setState({ error: errors });
+    return Object.keys(errors).length === 0;
   };
 
   handleAddReport = () => {

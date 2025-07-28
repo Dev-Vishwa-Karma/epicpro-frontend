@@ -7,6 +7,7 @@ import ClientFieldModal from "./ClientFieldModal";
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from "../../../services/getService";
 import BlankState from "../../common/BlankState";
+import { validateFields } from '../../common/validations';
 class Clients extends Component {
   constructor(props) {
     super(props);
@@ -140,12 +141,14 @@ class Clients extends Component {
   handleClientFieldSubmit = () => {
 
     const { clientFieldFormData, isEditClientField, editingClientId } = this.state;
-    let errors = {};
-
-    // Validation
-    if (!clientFieldFormData.name) errors.name = 'Name is required';
-    if (!clientFieldFormData.email) errors.email = 'Email is required';
-    if (!clientFieldFormData.status) errors.status = 'Status is required';
+    
+    // Apply Validation component
+    const validationSchema = [
+      { name: 'name', value: clientFieldFormData.name, type: 'name', required: true, messageName: 'Name'},
+      { name: 'email', value: clientFieldFormData.email, type: 'email', required: true, messageName: 'Email'},
+      { name: 'status', value: clientFieldFormData.status, required: true, messageName: 'Status'}
+    ];
+    const errors = validateFields(validationSchema);
 
     if (Object.keys(errors).length > 0) {
       this.setState({ clientFieldErrors: errors });

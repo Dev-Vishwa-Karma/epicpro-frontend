@@ -9,6 +9,7 @@ import EditModal from './EditModal';
 import { getService } from '../../../services/getService';
 import authService from '../../Authentication/authService';
 import BlankState from '../../common/BlankState';
+import { validateFields } from '../../common/validations';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -200,59 +201,47 @@ class ProjectList extends Component {
     // Validate Add Project Form
 	validateAddProjectForm = (e) => {
 		const { projectName, projectDescription, projectTechnology, teamMembers, projectStartDate, projectEndDate} = this.state;
-        let errors = {};
-        let isValid = true;
-
-        // Name Validation (Only letters and spaces)
-        const namePattern = /^[a-zA-Z\s]+$/;
-        if (!projectName.trim()) {
-            errors.projectName = "Project Name is required.";
-            isValid = false;
-        } else if (!namePattern.test(projectName)) {
-            errors.projectName = "Project Name must only contain letters and spaces.";
-            isValid = false;
-        }
-
-        // Description Validation (Required, Min 10 characters)
-        if (!projectDescription.trim()) {
-            errors.projectDescription = "Project Description is required.";
-            isValid = false;
-        } else if (projectDescription.length < 10) {
-            errors.projectDescription = "Project Description must be at least 10 characters.";
-            isValid = false;
-        }
-
-        // Technology Validation (Required, allows comma-separated words)
-        const technologyPattern = /^[a-zA-Z\s,]+$/;
-        if (!projectTechnology.trim()) {
-            errors.projectTechnology = "Project Technology is required.";
-            isValid = false;
-        } else if (!technologyPattern.test(projectTechnology)) {
-            errors.projectTechnology = "Projet Technology must only contain letters, commas, and spaces.";
-            isValid = false;
-        }
-
-
-        // Team Members Validation (At least one team member should be selected)
-        if (!teamMembers || (Array.isArray(teamMembers) && teamMembers.length === 0)) {
-            errors.teamMembers = "Please assign at least one team member.";
-            isValid = false;
-        }
-
-        // Date Validation (Start Date & End Date)
-        if (!projectStartDate) {
-            errors.projectStartDate = "Project Start Date is required.";
-            isValid = false;
-        }
-
-        // End Date Validation (Optional, but must be after Start Date if provided)
-        if (projectStartDate && projectEndDate && new Date(projectEndDate) < new Date(projectStartDate)) {
-            errors.projectEndDate = "Project End Date must be after the Start Date.";
-            isValid = false;
-        }
-
-        this.setState({ errors });
-        return isValid;
+		
+		// Apply Validation component
+		const validationSchema = [
+			{ name: 'projectName', value: projectName, type: 'name', required: true, messageName: 'Project Name'},
+			{ name: 'projectDescription', value: projectDescription, required: true, minLength: 10,messageName: 'Project Description'},
+			{ name: 'projectTechnology', value: projectTechnology, required: true, messageName: 'Project Technology',},
+			{ 
+				name: 'teamMembers', 
+				value: teamMembers, 
+				required: true, 
+				messageName: 'Team Members',
+				customValidator: (val) => {
+					if (!val || (Array.isArray(val) && val.length === 0)) {
+						return "Please assign at least one team member.";
+					}
+					return undefined;
+				}
+			},
+			{ 
+				name: 'projectStartDate', 
+				value: projectStartDate, 
+				type: 'date', 
+				required: true, 
+				messageName: 'Project Start Date'
+			},
+			{ 
+				name: 'projectEndDate', 
+				value: projectEndDate, 
+				required: false,
+				customValidator: (val) => {
+					if (projectStartDate && val && new Date(val) < new Date(projectStartDate)) {
+						return "Project End Date must be after the Start Date.";
+					}
+					return undefined;
+				}
+			}
+		];
+		const errors = validateFields(validationSchema);
+		
+		this.setState({ errors });
+		return Object.keys(errors).length === 0;
 	};
 
     getEmployeeName = (employeeId, namePart) => {

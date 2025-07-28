@@ -6,6 +6,7 @@ import DeleteModal from '../../common/DeleteModal';
 import DepartmentTable from './DepartmentTable';
 import DepartmentGrid from './DepartmentGrid';
 import { getService } from '../../../services/getService';
+import { validateFields } from '../../common/validations';
 class departments extends Component {
   constructor(props) {
     super(props);
@@ -95,36 +96,18 @@ class departments extends Component {
 
   validateEditDepartmentForm = () => {
     const { selectedDepartment } = this.state;
-    let errors = {};
-    let isValid = true;
-
+    
     if (!selectedDepartment) return false;
 
-    // Validation rules (only letters and spaces)
-    const namePattern = /^[a-zA-Z\s]+$/;
-
-    // Department Name Validation
-    const deptName = selectedDepartment.department_name ? selectedDepartment.department_name : "";
-    if (!deptName.trim()) {
-      errors.department_name = "Department Name is required.";
-      isValid = false;
-    } else if (!namePattern.test(deptName)) {
-      errors.department_name = "Department Name must only contain letters and spaces.";
-      isValid = false;
-    }
-
-    // Department Head Validation
-    const deptHead = selectedDepartment.department_head ? selectedDepartment.department_head : "";
-    if (!deptHead.trim()) {
-      errors.department_head = "Department Head is required.";
-      isValid = false;
-    } else if (!namePattern.test(deptHead)) {
-      errors.department_head = "Department Head must only contain letters and spaces.";
-      isValid = false;
-    }
-
+    // Apply Validation component
+    const validationSchema = [
+      { name: 'department_name', value: selectedDepartment.department_name, type: 'name', required: true, messageName: 'Department Name'},
+      { name: 'department_head', value: selectedDepartment.department_head, type: 'name', required: true, messageName: 'Department Head'},
+    ];
+    const errors = validateFields(validationSchema);
+    
     this.setState({ errors });
-    return isValid;
+    return Object.keys(errors).length === 0;
   };
 
   // Save the changes (API call)
@@ -257,30 +240,16 @@ class departments extends Component {
   // Validate Add Department Form
   validateDepartmentForm = (e) => {
     const { department_name, department_head } = this.state;
-    let errors = {};
-    let isValid = true;
-
-    // Department Name validation (only letters and spaces)
-    const namePattern = /^[a-zA-Z\s]+$/;
-    if (!department_name.trim()) {
-      errors.department_name = "Department Name is required.";
-      isValid = false;
-    } else if (!namePattern.test(department_name)) {
-      errors.department_name = "Department Name must only contain letters and spaces.";
-      isValid = false;
-    }
-
-    // Department Head validation (only letters and spaces)
-    if (!department_head.trim()) {
-      errors.department_head = "Department Head is required.";
-      isValid = false;
-    } else if (!namePattern.test(department_head)) {
-      errors.department_head = "Department Head must only contain letters and spaces.";
-      isValid = false;
-    }
-
+    
+    // Apply Validation component
+    const validationSchema = [
+      { name: 'department_name', value: department_name, type: 'name', required: true, messageName: 'Department Name'},
+      { name: 'department_head', value: department_head, type: 'name', required: true, messageName: 'Department Head'},
+    ];
+    const errors = validateFields(validationSchema);
+    
     this.setState({ errors });
-    return isValid;
+    return Object.keys(errors).length === 0;
   };
 
   // Add department data API call
