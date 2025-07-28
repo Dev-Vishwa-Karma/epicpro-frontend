@@ -6,6 +6,7 @@ import DeleteModal from '../../common/DeleteModal';
 import BlankState from '../../common/BlankState';
 import ImageModal from './ImageModal';
 import Pagination from '../../common/Pagination';
+import { validateFields } from '../../common/validations';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -167,48 +168,68 @@ class Gallery extends Component {
     submitImages = () => {
         const { selectedImages, logged_in_employee_id, selectedEmployeeId } = this.state;
 
-        let errors = {};
-        let isValid = true;
-
         // Determine employee_id based on role
         const userRole = window.user?.role;
-
         let employeeIdToSend = "";
 
+        // Apply Validation component
+        const validationSchema = [
+            { 
+                name: 'selectedEmployeeId', 
+                value: selectedEmployeeId, 
+                required: (userRole === "admin" || userRole === "super_admin"), 
+                messageName: 'Employee selection',
+                customValidator: (val) => {
+                    if ((userRole === "admin" || userRole === "super_admin") && !val) {
+                        return "Please select an employee.";
+                    }
+                    return undefined;
+                }
+            },
+            { 
+                name: 'selectedImages', 
+                value: selectedImages, 
+                required: true, 
+                messageName: 'Image selection',
+                customValidator: (val) => {
+                    if (!val || val.length === 0) {
+                        return "Please select at least one image.";
+                    }
+                    
+                    const validImageTypes = ["image/jpeg", "image/png", "image/webp"];
+                    const invalidFiles = val.filter(file => !validImageTypes.includes(file.type));
+                    
+                    if (invalidFiles.length > 0) {
+                        return "Only image files (JPG, PNG, WEBP) are allowed.";
+                    }
+                    
+                    return undefined;
+                }
+            }
+        ];
+        const errors = validateFields(validationSchema);
+
+        // Set employee ID based on role
         if (userRole === "admin" || userRole === "super_admin") {
-            if (!selectedEmployeeId) {
-                errors.selectedEmployeeId = "Please select an employee.";
-                isValid = false;
-            } else {
+            if (selectedEmployeeId) {
                 employeeIdToSend = selectedEmployeeId;
             }
         } else if (userRole === "employee") {
             employeeIdToSend = logged_in_employee_id;
         }
 
-        if (selectedImages.length === 0) {
-            errors.selectedImages = "Please select at least one image.";
-            isValid = false;
-        }
-
-        const validImageTypes = ["image/jpeg", "image/png", "image/webp"];
-        const invalidFiles = selectedImages.filter(file => !validImageTypes.includes(file.type));
-
-        if (invalidFiles.length > 0) {
-            errors.selectedImages = "Only image files (JPG, PNG, WEBP) are allowed.";
-            isValid = false;
-        }
-
-        // If validation fails, set error messages and return
-        if (!isValid) {
+        if (Object.keys(errors).length > 0) {
             this.setState({ errors });
-            return isValid;
+            return false;
         }
 
         // Prepare FormData to send images via AJAX
         const uploadImageData = new FormData();
         uploadImageData.append('employee_id', employeeIdToSend);
         uploadImageData.append('created_by', logged_in_employee_id);
+
+        // Define valid image types
+        const validImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
         // Ensure only image files are processed
         selectedImages.forEach((image) => {

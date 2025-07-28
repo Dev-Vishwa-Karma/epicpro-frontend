@@ -5,6 +5,7 @@ import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import DeleteModal from '../../common/DeleteModal';
 import Pagination from '../../common/Pagination';
+import { validateFields } from '../../common/validations';
 
 class Users extends Component {
 	constructor(props) {
@@ -137,41 +138,26 @@ class Users extends Component {
     addUser = () => {
         this.setState({ ButtonLoading: true });
         const {logged_in_employee_id, logged_in_employee_role, employeeCode, firstName, lastName, email, selectedRole, dob, gender, mobileNo, selectedDepartment, password, confirmPassword} = this.state;
-        let errors = {};
-        // Validation for required fields
-        const namePattern = /^[A-Za-z\s]+$/;
-        if (!firstName || firstName.trim() === "") {
-            errors.firstName = "First Name is required.";
-        } else if (!namePattern.test(firstName)) {
-            errors.firstName = "First Name can only contain letters and spaces.";
-        }
-        if (!email || email.trim() === "") {
-            errors.email = "Email ID is required.";
-        }
-        if (!gender || gender.trim() === "") {
-            errors.gender = "Gender is required.";
-        }
-        if (!dob || dob.trim() === "") {
-            errors.dob = "DOB is required.";
-        }
-        if (!password || password.trim() === "") {
-            errors.password = "Password is required.";
-        }
-        if (!confirmPassword || confirmPassword.trim() === "") {
-            errors.confirmPassword = "Confirm Password is required.";
-        }
-        if (password && confirmPassword && password !== confirmPassword) {
-            errors.confirmPassword = "Passwords do not match.";
-        }
-        if (lastName && lastName.trim() !== "" && !namePattern.test(lastName)) {
-            errors.lastName = "Last Name can only contain letters and spaces.";
-        }
-        if (Object.keys(errors).length > 0) {
-            this.setState({ errors, ButtonLoading: false });
-            return;
-        } else {
-            this.setState({ errors: {} });
-        }
+
+		// Apply Validation component
+        const validationSchema = [
+			{ name: 'firstName', value: firstName, type: 'name', required: true, messageName: 'First Name'},
+			{ name: 'lastName', value: lastName, type: 'name', required: false, messageName: 'Last Name can only contain letters and spaces.'},
+			{ name: 'email', value: email, type: 'email', required: true, messageName: 'Email ID'},
+			{ name: 'gender', value: gender, required: true, messageName: 'Gender'},
+			{ name: 'dob', value: dob, type: 'date', required: true, messageName: 'DOB'},
+			{ name: 'password', value: password, required: true, messageName: 'Password'},
+			{ name: 'confirmPassword', value: confirmPassword, required: true, messageName: 'Confirm Password',
+				customValidator: (val) => (password && val && password !== val ? 'Passwords do not match.' : undefined)
+			}
+		];
+		const errors = validateFields(validationSchema);
+		if (Object.keys(errors).length > 0) {
+		this.setState({ errors, ButtonLoading: false });
+		return;
+		} else {
+		this.setState({ errors: {} });
+		}
 
         const addUserData = new FormData();
         addUserData.append('department_id', selectedDepartment);
@@ -263,16 +249,12 @@ class Users extends Component {
 
         this.setState({ ButtonLoading: true });
 
-        let errors = {};
-        const namePattern = /^[A-Za-z\s]+$/;
-        if (!selectedUser.first_name || selectedUser.first_name.trim() === "") {
-            errors.firstName = "First Name is required.";
-        } else if (!namePattern.test(selectedUser.first_name)) {
-            errors.firstName = "First Name can only contain letters and spaces.";
-        }
-        if (selectedUser.last_name && selectedUser.last_name.trim() !== "" && !namePattern.test(selectedUser.last_name)) {
-            errors.lastName = "Last Name can only contain letters and spaces.";
-        }
+        // Apply Validation component
+        const validationSchema = [
+            { name: 'firstName', value: selectedUser.first_name, type: 'name', required: true, messageName: 'First Name'},
+            { name: 'lastName', value: selectedUser.last_name, type: 'name', required: false, messageName: 'Last Name'},
+        ];
+        const errors = validateFields(validationSchema);
         if (Object.keys(errors).length > 0) {
             this.setState({ errors, ButtonLoading: false });
             return;
@@ -441,6 +423,11 @@ class Users extends Component {
 			}, 500);
 	};
 
+	handleTabChange = () => {
+		// Clear errors when switching tabs
+		this.setState({ errors: {} });
+	};
+
 	render() {
 
 		const { fixNavbar } = this.props;
@@ -472,12 +459,13 @@ class Users extends Component {
 											id="user-tab"
 											data-toggle="tab"
 											href="#user-list"
+											onClick={this.handleTabChange}
 										>
 											List
 										</a>
 									</li>
 									<li className="nav-item">
-										<a className="nav-link" id="user-tab" data-toggle="tab" href="#user-add">
+										<a className="nav-link" id="user-tab" data-toggle="tab" href="#user-add" onClick={this.handleTabChange}>
 											Add New
 										</a>
 									</li>

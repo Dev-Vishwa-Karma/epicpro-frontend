@@ -4,6 +4,7 @@ import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
 import TodoList from './TodoList';
 import { getService } from '../../../services/getService';
+import { validateFields } from '../../common/validations';
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -293,35 +294,28 @@ handleYearChange = (event) => {
 	// Validate form inputs
 	validateForm = (e) => {
 		e.preventDefault();
-		
-		let errors = { ...this.state.errors }; // Copy errors to avoid direct mutation
-    	let isValid = true;
+		let isValid = true;
 
 		// Check if we're editing or adding an event
 		const eventData = this.state.selectedEvent || this.state;
 		const { event_name, event_date } = eventData;
 
-		// Validate event name (only letters and spaces)
-		const namePattern = /^[a-zA-Z\s]+$/;
-		if (!event_name) {
-			errors.event_name = "Event name is required.";
-			isValid = false;
-		} else if (!namePattern.test(event_name)) {
-		  errors.event_name = 'Event name must only contain letters and spaces.';
+		// Usage:
+		const validationSchema = [
+		  { name: 'event_name', value: event_name, type: 'name', required: true, messageName: 'Event name' },
+		  { name: 'event_date', value: event_date, type: 'date', required: true, messageName: 'Event date' }
+		];
+
+		const errors = validateFields(validationSchema);
+
+		if (Object.keys(errors).length > 0) {
+		  this.setState({ errors });
 		  isValid = false;
 		} else {
-		  errors.event_name = '';
+		  this.setState({ errors: {} });
+		  isValid = true;
 		}
 
-		// Validate event date
-		if (!event_date) {
-			errors.event_date = "Event date is required.";
-			isValid = false;
-		} else {
-		  errors.event_date = '';
-		}
-
-		this.setState({ errors });
 		return isValid;
 	};
 

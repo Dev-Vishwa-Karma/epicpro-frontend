@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
+import { validateFields } from '../../common/validations';
 class Holidays extends Component {
 	constructor(props) {
 		super(props);
@@ -122,35 +123,19 @@ class Holidays extends Component {
 	validateForm = (e) => {
 		e.preventDefault();
 		
-		let errors = { ...this.state.errors };
-    	let isValid = true;
-
 		// Check if we're editing or adding an event
 		const eventData = this.state.selectedHoliday || this.state;
 		const { event_name, event_date } = eventData;
 
-		// Validate event name (only letters and spaces)
-		const namePattern = /^[a-zA-Z\s]+$/;
-		if (!event_name) {
-			errors.event_name = "Holiday name is required.";
-			isValid = false;
-		} else if (!namePattern.test(event_name)) {
-			errors.event_name = 'Holiday name must only contain letters and spaces.';
-		  	isValid = false;
-		} else {
-		  	errors.event_name = '';
-		}
-
-		// Validate event date
-		if (!event_date) {
-			errors.event_date = "Holiday date is required.";
-			isValid = false;
-		} else {
-		  	errors.event_date = '';
-		}
-
+		// Apply Validation component
+		const validationSchema = [
+			{ name: 'event_name', value: event_name, type: 'name', required: true, messageName: 'Holiday name'},
+			{ name: 'event_date', value: event_date, type: 'date', required: true, messageName: 'Holiday date'},
+		];
+		const errors = validateFields(validationSchema);
+		
 		this.setState({ errors });
-		return isValid;
+		return Object.keys(errors).length === 0;
 	};
 
 	addHoliday = (e) => {

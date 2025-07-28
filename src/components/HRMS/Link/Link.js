@@ -5,6 +5,7 @@ import LinkModal from './LinkModal';
 import DeleteModal from '../../common/DeleteModal';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
+import { validateFields } from '../../common/validations';
 
 class Link extends Component {
   constructor(props) {
@@ -165,28 +166,55 @@ class Link extends Component {
 
   validateForm = () => {
     const { formData, activeTab } = this.state;
-    let errors = {};
-    let isValid = true;
-    if (!formData.title || !formData.title.trim()) {
-      errors.title = 'Title is required.';
-      isValid = false;
-    }
-    if (activeTab === 'Git') {
-      if (!formData.url || !formData.url.trim()) {
-        errors.url = 'URL is required.';
-        isValid = false;
+    
+    // Apply Validation component
+    const validationSchema = [
+      { 
+        name: 'title', 
+        value: formData.title, 
+        required: true, 
+        messageName: 'Title'
+      },
+      { 
+        name: 'url', 
+        value: formData.url, 
+        required: (activeTab === 'Git'), 
+        messageName: 'URL',
+        customValidator: (val) => {
+          if (activeTab === 'Git') {
+            if (!val || !val.trim()) {
+              return 'URL is required.';
+            }
+          } else if (activeTab === 'Excel' || activeTab === 'Codebase') {
+            const hasUrl = val && val.trim();
+            const hasFile = !!formData.file_path;
+            if (!hasUrl && !hasFile) {
+              return 'Either URL or File is required.';
+            }
+          }
+          return undefined;
+        }
+      },
+      { 
+        name: 'file_path', 
+        value: formData.file_path, 
+        required: false,
+        customValidator: (val) => {
+          if (activeTab === 'Excel' || activeTab === 'Codebase') {
+            const hasUrl = formData.url && formData.url.trim();
+            const hasFile = !!val;
+            if (!hasUrl && !hasFile) {
+              return 'Either URL or File is required.';
+            }
+          }
+          return undefined;
+        }
       }
-    } else if (activeTab === 'Excel' || activeTab === 'Codebase') {
-      const hasUrl = formData.url && formData.url.trim();
-      const hasFile = !!formData.file_path;
-      if (!hasUrl && !hasFile) {
-        errors.url = 'Either URL or File is required.';
-        errors.file_path = 'Either URL or File is required.';
-        isValid = false;
-      }
-    }
+    ];
+    const errors = validateFields(validationSchema);
+    
     this.setState({ errors });
-    return isValid;
+    return Object.keys(errors).length === 0;
   };
 
   handleModalSubmit = () => {

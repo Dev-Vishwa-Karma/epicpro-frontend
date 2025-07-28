@@ -6,6 +6,7 @@ import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
+import { validateFields } from '../../common/validations';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -109,45 +110,17 @@ class TodoList extends Component {
     // Validate Add Department Form
 	validateAddTodoForm = (e) => {
 		const { title, due_date, priority } = this.state;
-        let errors = {};
-        let isValid = true;
-
-        // title validation (only letters and spaces)
-        const namePattern = /^[a-zA-Z\s.,!?'-]+$/;
-        if (!title.trim()) {
-            errors.title = "Please enter a todo title.";
-            isValid = false;
-        } else if (!namePattern.test(title)) {
-            errors.title = "Todo title can only contain letters, spaces, and punctuation.";
-            isValid = false;
-        }
-
-        // Due date validation
-        if (!due_date.trim()) {
-            errors.due_date = "Please select a due date.";
-            isValid = false;
-        } else {
-            const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
-            if (due_date < today) {
-                errors.due_date = "Due date cannot be in the past.";
-                isValid = false;
-            }
-        }
-
-        // Todo Priority validation
-        if (!priority.trim()) {
-            errors.priority = "Please select todo priority.";
-            isValid = false;
-        }
-
-        // Employee selection validation (only for admin/super_admin)
-        // if ((logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && !selectedEmployeeId.trim()) {
-        //     errors.selectedEmployeeId = "Please select an employee to assign todo.";
-        //     isValid = false;
-        // }
-
-        this.setState({ errors });
-        return isValid;
+		
+		// Apply Validation component
+		const validationSchema = [
+			{ name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
+			{ name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date'},
+			{ name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
+		];
+		const errors = validateFields(validationSchema);
+		
+		this.setState({ errors });
+		return Object.keys(errors).length === 0;
 	};
 
     // Add Todo data API call
