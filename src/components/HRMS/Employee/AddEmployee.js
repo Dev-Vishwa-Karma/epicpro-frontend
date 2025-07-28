@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
 import CropperModal from './CropperModal';
 import { getService } from "../../../services/getService";
+import { validateFields } from "../../common/validations";
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -201,57 +202,24 @@ class AddEmployee extends Component {
       statisticsVisibilityStatus
     } = this.state;
 
-    // Name validation: only letters and spaces allowed
-    const namePattern = /^[A-Za-z\s]+$/;
-    let errors = {};
-    // Required field validation
-    if (!firstName || firstName.trim() === "") {
-      errors.firstName = "First Name is required.";
-    } else if (!namePattern.test(firstName)) {
-      errors.firstName = "First Name must not contain special characters or numbers.";
-    }
-    if (!lastName || lastName.trim() === "") {
-      errors.lastName = "Last Name is required.";
-    } else if (!namePattern.test(lastName)) {
-      errors.lastName = "Last Name must not contain special characters or numbers.";
-    }
-    if (!email || email.trim() === "") {
-      errors.email = "Email address is required.";
-    }
-    if (!selectedDepartment || selectedDepartment === "") {
-      errors.selectedDepartment = "Department is required.";
-    }
-    if (!gender || gender.trim() === "") {
-      errors.gender = "Gender is required.";
-    }
-    if (!dob || dob.trim() === "") {
-      errors.dob = "DOB is required.";
-    }
-    if (mobile1 && !/^\d{10}$/.test(mobile1)) {
-      errors.mobile1 = "Mobile number must be exactly 10 digits.";
-    }
-    if (mobile2 && !/^\d{10}$/.test(mobile2)) {
-      errors.mobile2 = "Mobile number must be exactly 10 digits.";
-    }
-    if (emergencyContact1 && !/^\d{10}$/.test(emergencyContact1)) {
-      errors.emergencyContact1 = "Mobile number must be exactly 10 digits.";
-    }
-    if (emergencyContact2 && !/^\d{10}$/.test(emergencyContact2)) {
-      errors.emergencyContact2 = "Mobile number must be exactly 10 digits.";
-    }
-    if (emergencyContact3 && !/^\d{10}$/.test(emergencyContact3)) {
-      errors.emergencyContact3 = "Mobile number must be exactly 10 digits.";
-    }
-    if (!joiningDate || joiningDate.trim() === "") {
-      errors.joiningDate = "Joining Date is required.";
-    }
-    if (!Number.isInteger(Number(visibilityPriority)) || Number(visibilityPriority) < 0) {
-      errors.visibilityPriority = "Visibility Priority must valid integer.";
-    }
-    // Show errors if any
+    const validationSchema = [
+      { name: 'firstName', value: firstName, type: 'name', required: true },
+      { name: 'lastName', value: lastName, type: 'name', required: true },
+      { name: 'email', value: email, type: 'email', required: true },
+      { name: 'mobile1', value: mobile1, type: 'mobile' },
+      { name: 'mobile2', value: mobile2, type: 'mobile' },
+      { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile' },
+      { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile' },
+      { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile' },
+      { name: 'joiningDate', value: joiningDate, type: 'date', required: true },
+      { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority' }
+    ];
+
+    const errors = validateFields(validationSchema);
+
     if (Object.keys(errors).length > 0) {
       this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false });
-      return;
+      return
     } else {
       this.setState({ errors: {} });
     }
