@@ -12,7 +12,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                         <th>Body</th>
                         <th>Type</th>
                         <th>Status</th>
-                        <th>Employee</th>
+                        <th><i className="fa fa-user"></i></th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -32,8 +32,35 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                                     {notification.read == '1' ? 'Read' : 'Unread'}
                                 </span>
                             </td>
-                            <td>
-                                <div className="font-15">{notification.full_name}</div>
+                            <td className="d-flex">
+                                {notification.profile ? (
+                                    <img
+                                        src={`${process.env.REACT_APP_API_URL}/${notification.profile}`}
+                                        className="avatar avatar-blue add-space me-2"
+                                        alt={notification.full_name || 'User'}
+                                        title={notification.full_name || 'User'}
+                                        onError={e => {
+                                            e.target.src = '/assets/images/sm/avatar2.jpg';
+                                        }}
+                                    />
+                                ) : (
+                                    <span
+                                        className="avatar avatar-blue add-space me-2"
+                                        title={notification.full_name || 'User'}
+                                        style={{
+                                            width: '35px',
+                                            height: '35px',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        {notification.full_name ? 
+                                            notification.full_name.split(' ').map(name => name.charAt(0).toUpperCase()).join('') : 
+                                            'U'
+                                        }
+                                    </span>
+                                )}
                             </td>
                             <td>
                                 {/* <button

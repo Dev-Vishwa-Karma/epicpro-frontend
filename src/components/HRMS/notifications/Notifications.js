@@ -6,6 +6,7 @@ import { getService } from '../../../services/getService';
 import dayjs from 'dayjs';
 import DeleteModal from '../../common/DeleteModal';
 import NotificationModal from './NotificationModal';
+import Pagination from '../../common/Pagination';
 
 class Notifications extends Component {
     constructor(props) {
@@ -31,7 +32,10 @@ class Notifications extends Component {
             type:"",
             read:0,
             col: (window.user.role === "admin" || window.user.role === "super_admin") ? 3 : 4,
-            selectedEmployee: ''
+            selectedEmployee: '',
+            // Pagination state variables
+            currentPage: 1,
+            dataPerPage: 10
 		};
 	}
 
@@ -92,7 +96,9 @@ class Notifications extends Component {
     }
 
     handleApplyFilter = async () => {
-        this.getNotifications()
+        this.setState({ currentPage: 1 }, () => {
+            this.getNotifications();
+        });
     };
 
     openModal = (notificationId) => {
@@ -115,7 +121,7 @@ class Notifications extends Component {
     } 
 
     confirmDelete = () => {
-        const { notificationToDelete } = this.state;
+        const { notificationToDelete, currentPage, notificationData, dataPerPage } = this.state;
         if (!notificationToDelete) return;
 
         this.setState({ ButtonLoading: true });
@@ -123,14 +129,28 @@ class Notifications extends Component {
         getService.deleteCall('notifications.php','delete', notificationToDelete )
         .then((data) => {
         if (data.success) {
+            // Update notifications state after deletion
+            const updatedNotifications = notificationData.filter((d) => d.id !== notificationToDelete);
+
+            // Calculate the total pages after deletion
+            const totalPages = Math.ceil(updatedNotifications.length / dataPerPage);
+
+            // Adjust currentPage if necessary (if we're on a page that no longer has data)
+            let newPage = currentPage;
+            if (updatedNotifications.length === 0) {
+                newPage = 1;
+            } else if (currentPage > totalPages) {
+                newPage = totalPages;
+            }
+
             this.setState((prevState) => ({
-                notificationData: prevState.notificationData.filter((d) => d.id !== notificationToDelete),
+                notificationData: updatedNotifications,
+                currentPage: newPage,
                 successMessage: "Notification deleted successfully",
                 showSuccess: true,
                 errorMessage: '',
                 showError: false,
                 ButtonLoading: false,
-
             }));
             this.onCloseDeleteModal();
             setTimeout(this.dismissMessages, 3000);
@@ -152,6 +172,14 @@ class Notifications extends Component {
             });
         });
         
+    };
+
+    // Handle Pagination of notifications listing
+    handlePageChange = (newPage) => {
+        const totalPages = Math.ceil(this.state.notificationData.length / this.state.dataPerPage);
+        if (newPage >= 1 && newPage <= totalPages) {
+            this.setState({ currentPage: newPage });
+        }
     };
 
     handleAddClick = () => {
@@ -363,7 +391,14 @@ class Notifications extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { notificationData,message, loading,showSuccess,successMessage,showError,errorMessage,col,selectedNotification,showModal ,selectedEmployee, employeeData} = this.state;
+        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, selectedEmployee, employeeData, currentPage, dataPerPage } = this.state;
+        
+        // Pagination logic for notifications
+        const indexOfLastNotification = currentPage * dataPerPage;
+        const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
+        const currentNotifications = notificationData.slice(indexOfFirstNotification, indexOfLastNotification);
+        const totalPages = Math.ceil(notificationData.length / dataPerPage);
+        
         return (
             <>
                 <AlertMessages
@@ -435,7 +470,7 @@ class Notifications extends Component {
                                             </div>
                                         ) : (
                                             <NotificationTable 
-                                                notificationData={notificationData} 
+                                                notificationData={currentNotifications} 
                                                 message={message}
                                                // onEditClick={this.handleEditClick} 
                                                 onDeleteClick={this.openModal} 
@@ -447,6 +482,16 @@ class Notifications extends Component {
                         </div>
                     </div>
                 </div>
+
+                {/* Only show pagination if there are notifications */}
+                {totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={this.handlePageChange}
+                    />
+                )}
+
                 <NotificationModal
                     isEdit={!!selectedNotification}
                     show={showModal}

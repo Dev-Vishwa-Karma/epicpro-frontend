@@ -90,7 +90,7 @@ class Employee extends Component {
 			searchQuery: "",
 			currentPageEmployees: 1,
 			currentPageLeaves: 1,
-            dataPerPage: 10,
+            dataPerPage: 8,
 			loading: true,
 			showSuccess: false,
 			successMessage: '',
@@ -1244,11 +1244,6 @@ class Employee extends Component {
 																		</tr>
 																	))
 																) : (
-																	// <tr>
-																	// 	<td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-																	// 		No leaves found
-																	// 	</td>
-                                                                    // </tr>
 																	<NoDataRow colSpan={7} message="No leaves found" />
 																)}
 															</tbody>
