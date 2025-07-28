@@ -604,8 +604,6 @@ class Gallery extends Component {
                                 </div>
                             </div>
                         </div>
-                        {/* Images listing */}
-                        <div className="row row-cards">
                             {loading && ( // Show Loader while fetching images
                                 <div className="col-12">
                                     <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
@@ -615,26 +613,25 @@ class Gallery extends Component {
                                     </div>
                                 </div>
                             )}
-                            
-                            {!loading && filteredImages.length > 0 && ( // If not employee, show images if available
-                                currentImages.map((image, index) => (
-                                    <div className="col-sm-6 col-lg-3" key={image.id || index}>
+                            <div className="masonry">
+                                {!loading && filteredImages.length > 0 && ( 
+                                    currentImages.map((image, index) => (
+                                    <div className="masonry-item" key={image.id || index}>
                                         <div className="card p-3 position-relative gallery-card">
-                                            <div className="gallery-image-wrapper">
+                                        <div className="gallery-image-wrapper">
                                             <img 
-                                                src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
-                                                alt="Gallery" 
-                                                className="rounded w-100 h-auto" 
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => this.openImageModal(image)}
+                                            src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
+                                            alt="Gallery" 
+                                            className="rounded w-100 h-auto" 
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => this.openImageModal(image)}
                                             />
-                                            {/* Delete button removed from here, now in modal */}
-                                            </div>
+                                        </div>
                                         </div>
                                     </div>
-                                ))
-                            )}
-                            
+                                    ))
+                                )}
+                            </div>
                             {!loading && filteredImages.length === 0 && (
                                 <div className="col-12">
                                     <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
@@ -642,7 +639,8 @@ class Gallery extends Component {
                                     </div>
                                 </div>
                             )}
-                        </div>
+                      
+
 
                         {/* Only show pagination if there are images */}
                         {filteredImages.length > 0 && totalPages > 1 && (

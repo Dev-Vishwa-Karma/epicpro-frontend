@@ -752,7 +752,7 @@ class Header extends Component {
 											data-toggle="dropdown"
 										>
 											<i className="fa fa-bell" />
-                      {notifications.filter(notification => notification.read === 0).length > 0 && (
+                      {notifications.filter(notification => notification.read == 0).length > 0 && (
                         <span className="badge badge-primary nav-unread" />
                       )}
 										</a>
@@ -787,7 +787,7 @@ class Header extends Component {
                                       <li
                                           key={index}
                                           style={{
-                                              backgroundColor: notification.read === 0 ? '#E8E9E9' : 'transparent',
+                                              backgroundColor: notification.read == 0 ? '#E8E9E9' : 'transparent',
                                               cursor: 'pointer',
                                               borderBottom: '1px solid #ddd'
                                           }}
@@ -797,7 +797,7 @@ class Header extends Component {
                                           }}
                                       >
                                           <div className="feeds-body">
-                                              <h4 className={`title text-danger ${notification.read === 0 ? 'font-weight-bold' : ''}`}>
+                                              <h4 className={`title text-danger ${notification.read == 0 ? 'font-weight-bold' : ''}`}>
                                                   {notification.title}
                                                   <small className="float-right text-muted">{formattedDate}</small>
                                               </h4>

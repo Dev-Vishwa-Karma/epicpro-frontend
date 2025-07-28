@@ -60,7 +60,8 @@ class Link extends Component {
   };
 
   handleTabChange = (tabId) => {
-    this.setState({ activeTab: tabId });
+    this.setState({ activeTab: tabId, searchQuery:''});
+    this.fetchLinks()
   };
 
   handleAddClick = () => {
