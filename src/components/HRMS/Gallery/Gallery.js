@@ -26,7 +26,7 @@ class Gallery extends Component {
             searchQuery: "",
             currentPage: 1,
             imagesPerPage: 8,
-            sortOrder: "asc", // Default to newest first
+            sortOrder: "desc", // Default to newest first
             loading: true,
             ButtonLoading: false,
             showDeleteModal: false,
@@ -78,7 +78,7 @@ class Gallery extends Component {
         if (window.user?.id) {
             this.setState({
                 logged_in_employee_id: window.user.id,
-                sortOrder: "asc",
+                sortOrder: "desc",
             });
         }
         // Check if user is admin or superadmin
@@ -295,7 +295,7 @@ class Gallery extends Component {
     // Handle Sort Order Change
     sortImages = (images, sortOrder) => {
         return [...images].sort((a, b) => {
-            return sortOrder === "asc"
+            return sortOrder === "desc"
                 ? new Date(b.created_at) - new Date(a.created_at)  // Newest first
                 : new Date(a.created_at) - new Date(b.created_at); // Oldest first
         });
@@ -504,8 +504,8 @@ class Gallery extends Component {
                                         </div>
                                         <div className="page-options d-flex">
                                             <select className="form-control custom-select w-auto" onChange={this.handleSortChange} value={sortOrder}>
-                                                <option value="asc">Newest</option>
-                                                <option value="desc">Oldest</option>
+                                                <option value="desc">Newest</option>
+                                                <option value="asc">Oldest</option>
                                             </select>
                                             <div className="input-icon ml-2">
                                                 <span className="input-icon-addon">
