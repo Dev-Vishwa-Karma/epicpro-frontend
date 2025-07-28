@@ -345,7 +345,7 @@ handleYearChange = (event) => {
 	addEvent = (e) => {
 		// Prevent default form submission behavior
 		e.preventDefault();
-		this.setState({ ButtonLoading: true });
+		this.setState({ ButtonLoading: false });
 		// Reset selectedEvent before adding a new event
 		if (this.state.selectedEvent) {
 			this.setState({

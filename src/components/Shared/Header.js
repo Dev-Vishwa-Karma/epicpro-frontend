@@ -323,6 +323,11 @@ class Header extends Component {
     });
   };
 
+  // Navigate to notifications page
+  navigateToNotifications = () => {
+    this.props.history.push('/notifications');
+  };
+
   getActivities = () => {
     getService.getCall('activities.php', {
       action: 'break_calculation',
@@ -786,7 +791,10 @@ class Header extends Component {
                                               cursor: 'pointer',
                                               borderBottom: '1px solid #ddd'
                                           }}
-                                          onClick={() => this.markAsRead(notification.id)}
+                                          onClick={() => {
+                                              this.markAsRead(notification.id);
+                                              this.navigateToNotifications();
+                                          }}
                                       >
                                           <div className="feeds-body">
                                               <h4 className={`title text-danger ${notification.read === 0 ? 'font-weight-bold' : ''}`}>
