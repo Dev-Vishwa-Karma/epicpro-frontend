@@ -323,19 +323,20 @@ class EditEmployee extends Component {
         // Usage:
 
         const validationSchema = [
-        { name: 'firstName', value: firstName, type: 'name', required: true },
-        { name: 'lastName', value: lastName, type: 'name', required: true },
-        { name: 'email', value: email, type: 'email', required: true },
-        { name: 'selectedDepartment', value: selectedDepartment, required: true },
-        { name: 'gender', value: gender, required: true },
-        { name: 'dob', value: dob, type: 'date', required: true },
-        { name: 'mobile1', value: mobile1, type: 'mobile' },
-        { name: 'mobile2', value: mobile2, type: 'mobile' },
-        { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile' },
-        { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile' },
-        { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile' },
-        { name: 'joiningDate', value: joiningDate, type: 'date', required: true },
-        { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority' },
+        { name: 'firstName', value: firstName, type: 'name', required: true, messageName:'First Name'  },
+        { name: 'lastName', value: lastName, type: 'name', required: true, messageName:'Last Name' },
+        { name: 'email', value: email, type: 'email', required: true, messageName:'Email' },
+        { name: 'selectedDepartment', value: selectedDepartment, required: true, messageName:'Department' },
+        { name: 'gender', value: gender, required: true, messageName:'Gender' },
+        { name: 'dob', value: dob, type: 'date', required: true, messageName:'DOB' },
+        { name: 'password', value: dob, type: 'date', required: true, messageName:'DOB' },
+        { name: 'mobile1', value: mobile1, type: 'mobile', required: true, messageName:'Mobile Number' },
+        { name: 'mobile2', value: mobile2, type: 'mobile', messageName:'Mobile Number' },
+        { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile', messageName:'Mobile Number' },
+        { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile',  messageName:'Mobile Number' },
+        { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile',  messageName:'Mobile Number'  },
+        { name: 'joiningDate', value: joiningDate, type: 'date', required: true,  messageName:'Joining Date'  },
+        { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'visibility Priority' },
         ];
 
         const errors = validateFields(validationSchema);

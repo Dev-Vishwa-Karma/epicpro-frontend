@@ -1,7 +1,7 @@
 import React from 'react';
 import NoDataRow from '../../common/NoDataRow';
 
-const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => {
+const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userRole }) => {
     return (
         <div className="table-responsive">
             <table className="table table-striped table-vcenter table-hover mb-0">
@@ -12,7 +12,9 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                         <th>Body</th>
                         <th>Type</th>
                         <th>Status</th>
-                        <th><i className="fa fa-user"></i></th>
+                        {(userRole === "admin" || userRole === "super_admin") && (
+                            <th><i className="icon-user" /></th>
+                        )}
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -32,7 +34,8 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                                     {notification.read == '1' ? 'Read' : 'Unread'}
                                 </span>
                             </td>
-                            <td className="d-flex">
+                            {(userRole === "admin" || userRole === "super_admin") && (
+                                <td className="d-flex">
                                 {notification.profile ? (
                                     <img
                                         src={`${process.env.REACT_APP_API_URL}/${notification.profile}`}
@@ -62,6 +65,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                                     </span>
                                 )}
                             </td>
+                            )}
                             <td>
                                 {/* <button
                                     type="button"
@@ -88,7 +92,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick }) => 
                         </tr>
                     ))
                 ) : (
-                    <NoDataRow colSpan={7} message="Notifications not found" />
+                    <NoDataRow colSpan={userRole === "admin" || userRole === "super_admin" ? 7 : 6} message="Notifications not found" />
                 )}
             </tbody>
             </table>

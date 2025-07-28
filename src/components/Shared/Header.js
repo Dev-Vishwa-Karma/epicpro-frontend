@@ -785,7 +785,6 @@ class Header extends Component {
                                           }}
                                           onClick={() => {
                                               this.markAsRead(notification.id);
-                                              this.navigateToNotifications();
                                           }}
                                       >
                                           <div className="feeds-body">
@@ -817,7 +816,10 @@ class Header extends Component {
                           <a
                             href="#"
                             className="dropdown-item text-center text-muted-dark readall"
-                            onClick={() => this.markAsRead()}
+                            onClick={() => {
+                              this.markAsRead();
+                              this.navigateToNotifications();
+                            }}
                           >
                             Mark all as read
                           </a>

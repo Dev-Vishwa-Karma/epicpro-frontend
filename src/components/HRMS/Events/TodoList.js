@@ -99,15 +99,7 @@ class TodoList extends Component {
                 ) : todos.length > 0 ? (
                   todos.map((todo) => (
                     <li key={todo.id}>
-                      <label className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          name="example-checkbox1"
-                          defaultValue="option1"
-                        />
-                        <span className="custom-control-label">{todo.title}</span>
-                      </label>
+                      <span className="custom-control-label">{todo.title}</span>
                     </li>
                   ))
                 ) : (

@@ -114,7 +114,15 @@ class TodoList extends Component {
 		// Apply Validation component
 		const validationSchema = [
 			{ name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
-			{ name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date'},
+			{ name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
+				customValidator: (val) => {
+					const today = new Date().toISOString().split("T")[0];
+					if (val < today) {
+						return "Due date not less than current date:";
+					}
+					return undefined;
+				}
+			},
 			{ name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
 		];
 		const errors = validateFields(validationSchema);
@@ -360,7 +368,24 @@ class TodoList extends Component {
     updateTodoData = () => {
         const { selectedTodo, logged_in_employee_id, logged_in_employee_role, title, due_date, priority, selectedEmployeeId } = this.state;
 
-        if (!this.validateAddTodoForm()) {
+        // Apply Validation component for edit
+        const validationSchema = [
+            { name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
+            { name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
+                customValidator: (val) => {
+                    const today = new Date().toISOString().split("T")[0];
+                    if (val < today) {
+                        return "Due date not less than current date:";
+                    }
+                    return undefined;
+                }
+            },
+            { name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
+        ];
+        const errors = validateFields(validationSchema);
+        
+        if (Object.keys(errors).length > 0) {
+            this.setState({ errors });
             return; // Stop execution if validation fails
         }
 
@@ -597,8 +622,9 @@ class TodoList extends Component {
                                                         </th>
                                                         <th className="w150 text-right">Due</th>
                                                         <th className="w100">Priority</th>
-                                                     
+                                                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                         <th className="w80"><i className="icon-user" /></th>
+                                                        )}
                                                            {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                         <th className="w150">Action</th>
                                                         )}
@@ -654,7 +680,7 @@ class TodoList extends Component {
                                                                         {todo.priority.toUpperCase()}
                                                                     </span>
                                                                 </td>
-    
+                                                                {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                     <td>
                                                                         {todo.profile && !todo.imageError ? (
                                                                             <img
@@ -694,6 +720,7 @@ class TodoList extends Component {
                                                                             </span>
                                                                             )}
                                                                     </td>
+                                                                    )}
                                                                         {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                     <td>
                                                                         <div className="d-flex align-items-center">
@@ -738,7 +765,7 @@ class TodoList extends Component {
                                                 )}
                                             </table>
                                         </div>
-                                       {/* Pagination for todos */}
+                                        <div className="mt-3">
                                        {totalPagesTodos > 1 && (
                                             <Pagination
                                                 currentPage={currentPageTodos}
@@ -746,6 +773,7 @@ class TodoList extends Component {
                                                 onPageChange={this.handlePageChange}
                                             />
                                        )}
+                                       </div>
                                     </div>
                                 </div>
                             </div>
