@@ -49,7 +49,6 @@ class Header extends Component {
       disableButton:false,
       page: 1,
       hasMore: true,
-      loading: false,
       limit: 5,
     };
   }

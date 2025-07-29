@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getService } from '../../../services/getService';
-import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
 import DeleteModal from '../../common/DeleteModal';
 import { validateFields } from '../../common/validations';
@@ -396,7 +395,7 @@ class Holidays extends Component {
 
 	render() {
 		const { fixNavbar } = this.props;
-		const { holidays, message, showAddHolidayModal, selectedHoliday, currentPage, dataPerPage, loading, logged_in_user_role, showSuccess, successMessage, showError, errorMessage,} = this.state;
+		const { holidays, message, currentPage, dataPerPage, loading, logged_in_user_role, showSuccess, successMessage, showError, errorMessage,} = this.state;
 		// Pagination Logic
         const indexOfLastHoliday = currentPage * dataPerPage;
         const indexOfFirstHoliday = indexOfLastHoliday - dataPerPage;

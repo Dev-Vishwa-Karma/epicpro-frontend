@@ -220,7 +220,6 @@ class Link extends Component {
   handleModalSubmit = () => {
     if (!this.validateForm()) return;
     const { isEdit, activeTab, formData, editId } = this.state;
-    const dataKey = this.getDataKey(activeTab);
     const apiAction = isEdit ? 'edit' : 'add';
     const submitData = new FormData();
     submitData.append('type', activeTab);
@@ -399,17 +398,14 @@ class Link extends Component {
     const indexOfLastGit = currentPageGit * dataPerPage;
     const indexOfFirstGit = indexOfLastGit - dataPerPage;
     const currentGitLinks = gitLinks.slice(indexOfFirstGit, indexOfLastGit);
-    const totalPagesGit = Math.ceil(gitLinks.length / dataPerPage);
 
     const indexOfLastExcel = currentPageExcel * dataPerPage;
     const indexOfFirstExcel = indexOfLastExcel - dataPerPage;
     const currentExcelLinks = excelLinks.slice(indexOfFirstExcel, indexOfLastExcel);
-    const totalPagesExcel = Math.ceil(excelLinks.length / dataPerPage);
 
     const indexOfLastCodebase = currentPageCodebase * dataPerPage;
     const indexOfFirstCodebase = indexOfLastCodebase - dataPerPage;
     const currentCodebaseLinks = codebaseLinks.slice(indexOfFirstCodebase, indexOfLastCodebase);
-    const totalPagesCodebase = Math.ceil(codebaseLinks.length / dataPerPage);
 
     return (
       <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
