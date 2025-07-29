@@ -98,7 +98,7 @@ class LinkModal extends React.Component {
       <>
         {show && (
           <div className="modal fade show d-block" id={modalId} tabIndex={-1} role="dialog" aria-modal="true">
-            <div className="modal-dialog" role="document">
+            <div className="modal-dialog modal-dialog-scrollable" role="document">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">{isEdit ? `Edit ${activeTab}` : `Add ${activeTab}`}</h5>

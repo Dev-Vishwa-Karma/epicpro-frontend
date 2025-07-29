@@ -24,7 +24,7 @@ const TodoModal = ({
     <>
       {show && (
         <div className="modal fade show d-block" id={modalId} tabIndex={-1} role="dialog" aria-modal="true" data-backdrop="static" data-keyboard="false">
-          <div className="modal-dialog" role="document">
+          <div className="modal-dialog modal-dialog-scrollable" role="document">
             <div className="modal-content">
 
               <div className="modal-header">

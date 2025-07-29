@@ -405,40 +405,29 @@ class Clients extends Component {
                           </a>
 
                           <div
-                            className="dropdown-menu dropdown-menu-right"
+                            className="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
                             style={{
-                              minWidth: '100px',
-                              padding: '0',
-                              borderRadius: '8px',
-                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                            }}
+                                minWidth: '100px',
+                                padding: '4px 0',
+                                overflow: 'hidden'
+                              }}
                           >
                             <button
-                              className="dropdown-item text-center"
+                              className="dropdown-item project-dropdown-item"
                               type="button"
                               title="Edit"
                               onClick={() => this.handleOpenEditClientField(client)}
-                              style={{
-                                padding: '8px 12px',
-                                fontSize: '14px',
-                                color: '#333',
-                                backgroundColor: 'transparent',
-
-                              }}
                             >
                               Edit
                             </button>
 
                             <button
-                              className="dropdown-item text-center"
+                              className="dropdown-item project-dropdown-item"
                               type="button"
                               title="Delete"
                               onClick={() => this.handleOpenDeleteModal(client)}
                               style={{
-                                padding: '8px 12px',
-                                fontSize: '14px',
                                 color: '#d9534f',
-                                backgroundColor: 'transparent',
                               }}
                             >
                               Delete

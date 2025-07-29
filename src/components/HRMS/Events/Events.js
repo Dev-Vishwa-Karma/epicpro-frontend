@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Fullcalender from '../../common/fullcalender';
 import ReportModal from '../Report/ReportModal';
 import TodoList from './TodoList';
+import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
 class Events extends Component {
@@ -413,7 +414,8 @@ handleYearChange = (event) => {
     };
 
 	// add handle events delete
-	handleDeleteEvent = (eventId) => {
+	handleDeleteEvent = () => {
+		const eventId = this.state.eventIdToDelete;
 		this.setState({ ButtonLoading: true });
 		const eventToDelete = this.state.events.find(ev => ev.id === eventId);
 		if (!eventToDelete) {
@@ -435,7 +437,7 @@ handleYearChange = (event) => {
 					showSuccess: true,
 					loading: false,
 					ButtonLoading: false,
-					showDeleteModal:false
+					showDeleteModal: false
 				}));
 				this.closeDeleteModal(); // Close the modal after successful delete
 				setTimeout(() => this.setState({ showSuccess: false }), 2000);
@@ -1264,39 +1266,14 @@ formatDateTimeAMPM = (timeString) => {
 					/>
 				)}
 
-				{this.state.showDeleteModal && (
-					// <DeleteModal
-                    //     onConfirm={this.handleDeleteEvent(this.state.eventIdToDelete)}
-                    //     isLoading={this.state.ButtonLoading}
-                    //     deleteBody='Are you sure you want to delete this event?'
-                    //     modalId=""
-                    // />
-					<div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-						<div className="modal-dialog" role="document">
-							<div className="modal-content">
-								<div className="modal-body">
-									<p>Are you sure you want to delete this event?</p>
-								</div>
-								<div className="modal-footer">
-									<button type="button" className="btn btn-secondary" onClick={this.closeDeleteModal}>
-										Cancel
-									</button>
-									<button
-										type="button"
-										className="btn btn-danger"
-										onClick={() => this.handleDeleteEvent(this.state.eventIdToDelete)}
-										disabled={this.state.ButtonLoading}
-									>
-										{this.state.ButtonLoading && (
-											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-										)}
-										Delete
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
+				<DeleteModal
+					show={this.state.showDeleteModal}
+					onConfirm={this.handleDeleteEvent}
+					onClose={this.closeDeleteModal}
+					isLoading={this.state.ButtonLoading}
+					deleteBody='Are you sure you want to delete this event?'
+					modalId="deleteEventModal"
+				/>
             </>
         )
     }

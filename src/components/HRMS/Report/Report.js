@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import TextEditor from '../../common/TextEditor';
+import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
@@ -58,6 +59,7 @@ class Report extends Component {
             showSuccess: false,
             successMessage: "",
             ButtonLoading: false,
+            showDeleteModal: false,
         };
         this.reportMessageTimeout = null;
     }
@@ -299,12 +301,14 @@ class Report extends Component {
         getService.deleteCall('activities.php','delete', activityId, window.user.id, null, null)
             .then((data) => {
                 if (data.status === "success") {
-                    this.setState({ reportSuccess: data.message });
+                    this.setState({ 
+                        reportSuccess: data.message,
+                        showDeleteModal: false,
+                        activityId: null
+                    });
                     setTimeout(() => {
                         this.setState({ reportSuccess: null });
                     }, 5000)
-                    // Close the modal
-                    document.querySelector("#deleteReportModal .close").click();
                     this.componentDidMount();
                 } else {
                     this.setState({ reportError: data.message });
@@ -319,6 +323,20 @@ class Report extends Component {
                     this.setState({ reportError: null });
                 }, 5000);
             });
+    };
+
+    openDeleteModal = (activityId) => {
+        this.setState({
+            activityId: activityId,
+            showDeleteModal: true
+        });
+    };
+
+    closeDeleteModal = () => {
+        this.setState({
+            showDeleteModal: false,
+            activityId: null
+        });
     };
 
     // Handle dropdown change for employee
@@ -851,7 +869,8 @@ class Report extends Component {
             showSuccess, 
             successMessage, 
             showError, 
-            errorMessage
+            errorMessage,
+            showDeleteModal
         } = this.state;
 
         // Handle empty employee data safely
@@ -1286,25 +1305,14 @@ class Report extends Component {
                     </div>
     
                     {/* Modal for deleting report details */}
-                    <div className="modal fade" id="deleteReportModal" tabIndex={-1} role="dialog" aria-labelledby="deleteReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-                        <div className="modal-dialog" role="dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="deleteReportModal">Delete</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                                </div>
-                                <div className="modal-body">
-                                    <div className="row clearfix">
-                                        Are you sure you want to delete this Record?
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                    <button type="button" className="btn btn-primary" onClick={this.deleteReport}>Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <DeleteModal
+                        show={this.state.showDeleteModal}
+                        onConfirm={this.deleteReport}
+                        onClose={this.closeDeleteModal}
+                        isLoading={this.state.ButtonLoading}
+                        deleteBody='Are you sure you want to delete this Record?'
+                        modalId="deleteReportModal"
+                    />
                     {/* Add Break Modal */}
                     <div className="modal fade" id="addReportModal" tabIndex={-1} role="dialog" aria-labelledby="addReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                         <div className="modal-dialog" role="dialog">

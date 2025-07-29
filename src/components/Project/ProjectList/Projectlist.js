@@ -772,57 +772,46 @@ class ProjectList extends Component {
               </label>
               {(logged_in_employee_role === 'admin' ||
                 logged_in_employee_role === 'super_admin') && (
-                <div className="dropdown d-flex">
+                    <div className="dropdown d-flex">
                     <a
-                    href="/#"
-                    className="nav-link icon d-none d-md-flex ml-1"
-                    data-toggle="dropdown"
-                    title="More options"
+                      href="/#"
+                      className="nav-link icon d-none d-md-flex ml-1"
+                      data-toggle="dropdown"
+                      title="More options"
                     >
-                    <i className="fa fa-ellipsis-v" />
+                      <i className="fa fa-ellipsis-v" />
                     </a>
-
-                    <div
-                    className="dropdown-menu dropdown-menu-right"
-                    style={{
+                  
+                    <div 
+                      className="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
+                      style={{
                         minWidth: '100px',
-                        padding: '0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    }}
+                        padding: '4px 0',
+                        overflow: 'hidden'
+                      }}
                     >
-                    <button
-                        className="dropdown-item text-center"
+                      <button
+                        className="dropdown-item project-dropdown-item"
                         type="button"
                         title="Edit"
                         onClick={() => this.handleEditProject(project)}
-                        style={{
-                        padding: '8px 12px',
-                        fontSize: '14px',
-                        color: '#333',
-                        backgroundColor: 'transparent',
-                        borderBottom: '1px solid #eee',
-                        }}
-                    >
+                      >
                         Edit
-                    </button>
-
-                    <button
-                        className="dropdown-item text-center"
+                      </button>
+                                    
+                      <button
+                        className="dropdown-item project-dropdown-item"
                         type="button"
                         title="Delete"
                         onClick={() => this.handleDeleteProject(project.project_id, project.project_name)}
                         style={{
-                        padding: '8px 12px',
-                        fontSize: '14px',
-                        color: '#d9534f',
-                        backgroundColor: 'transparent',
+                          color: '#d9534f'
                         }}
-                    >
+                      >
                         Delete
-                    </button>
+                      </button>
                     </div>
-                </div>
+                  </div>
               )}
             </div>
           </div>

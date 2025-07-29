@@ -525,7 +525,7 @@ class Gallery extends Component {
                                                 aria-hidden={!this.state.isModalOpen}
                                                 style={{ display: this.state.isModalOpen ? 'block' : 'none', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
                                             >
-                                                <div className="modal-dialog" role="document" aria-hidden="true">
+                                                <div className="modal-dialog modal-dialog-scrollable" role="document" aria-hidden="true">
                                                     <div className="modal-content">
                                                         <div className="modal-header">
                                                             <h5 className="modal-title" id="uploadImageModalLabel">

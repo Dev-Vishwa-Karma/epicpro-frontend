@@ -530,7 +530,7 @@ class Activities extends Component {
             id="addBreakReasonModal"
             tabIndex="-1"
             role="dialog">
-            <div className="modal-dialog" role="dialog">
+            <div className="modal-dialog modal-dialog-scrollable" role="dialog">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title" id="addBreakReasonModalLabel">Break Reason</h5>

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
+import DeleteModal from '../../common/DeleteModal';
 import { validateFields } from '../../common/validations';
 class Holidays extends Component {
 	constructor(props) {
@@ -28,7 +29,8 @@ class Holidays extends Component {
 			currentPage: 1,
 			dataPerPage: 10,
 			loading: true,
-			ButtonLoading: false
+			ButtonLoading: false,
+			showDeleteModal: false
 		};
 	}
 
@@ -303,6 +305,14 @@ class Holidays extends Component {
 	openDeleteHolidayModal = (holidayId) => {
         this.setState({
             deleteHoliday: holidayId,
+            showDeleteModal: true
+        });
+    };
+
+	closeDeleteModal = () => {
+        this.setState({
+            showDeleteModal: false,
+            deleteHoliday: null
         });
     };
 
@@ -337,9 +347,10 @@ class Holidays extends Component {
 					currentPage: newPage, // Update currentPage to the new page
 					deleteHoliday: null,  // Clear the deleteHoliday state
 					ButtonLoading: false,
+					showDeleteModal: false
 				});
 
-				document.querySelector("#deleteHolidayModal .close").click();
+				this.closeDeleteModal(); // Close the modal after successful delete
 
 				setTimeout(() => {
 					this.setState({
@@ -562,7 +573,7 @@ class Holidays extends Component {
 				{/* Modal for Add Holiday */}
 				{showAddHolidayModal && (
 				<div className="modal fade show d-block" id="addHolidayModal" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-					<div className="modal-dialog" role="document">
+					<div className="modal-dialog " role="document">
 						<div className="modal-content">
 							<div className="modal-header">
 								<h5 className="modal-title">Add Holiday</h5>
@@ -707,29 +718,14 @@ class Holidays extends Component {
 					</div>
 				</div>
 
-				{/* Create modal for delete holiday */}
-				<div className="modal fade" id="deleteHolidayModal" tabIndex={-1} role="dialog" aria-labelledby="deleteHolidayModalLabel">
-					<div className="modal-dialog" role="document">
-						<div className="modal-content">
-							<div className="modal-header" style={{ display: 'none' }}>
-								<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-							</div>
-							<div className="modal-body">
-								<div className="row clearfix">
-									<p>Are you sure you want to delete the holiday?</p>
-								</div>
-							</div>
-							<div className="modal-footer">
-								<button type="button" className="btn btn-secondary" data-dismiss="modal" >Cancel</button>
-								<button type="button" onClick={this.confirmDelete}  className="btn btn-danger" disabled={this.state.ButtonLoading}>
-									{this.state.ButtonLoading && (
-										<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-									)}
-									Delete</button>
-							</div>
-						</div>
-					</div>
-				</div>
+				<DeleteModal
+					show={this.state.showDeleteModal}
+					onConfirm={this.confirmDelete}
+					onClose={this.closeDeleteModal}
+					isLoading={this.state.ButtonLoading}
+					deleteBody='Are you sure you want to delete the holiday?'
+					modalId="deleteHolidayModal"
+				/>
 			</>
 		);
 	}
