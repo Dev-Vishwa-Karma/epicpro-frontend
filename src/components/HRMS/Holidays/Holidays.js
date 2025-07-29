@@ -5,6 +5,10 @@ import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
 import DeleteModal from '../../common/DeleteModal';
 import { validateFields } from '../../common/validations';
+import HolidaysTable from './HolidaysTable';
+import AddHolidayModal from './AddHolidayModal';
+import EditHolidayModal from './EditHolidayModal';
+import AlertMessages from '../../common/AlertMessages';
 class Holidays extends Component {
 	constructor(props) {
 		super(props);
@@ -392,7 +396,7 @@ class Holidays extends Component {
 
 	render() {
 		const { fixNavbar } = this.props;
-		const { holidays, message, showAddHolidayModal, selectedHoliday, currentPage, dataPerPage, loading, logged_in_user_role} = this.state;
+		const { holidays, message, showAddHolidayModal, selectedHoliday, currentPage, dataPerPage, loading, logged_in_user_role, showSuccess, successMessage, showError, errorMessage,} = this.state;
 		// Pagination Logic
         const indexOfLastHoliday = currentPage * dataPerPage;
         const indexOfFirstHoliday = indexOfLastHoliday - dataPerPage;
@@ -401,54 +405,14 @@ class Holidays extends Component {
 		return (
 			<>
 				<div>
-					{/* Show success and error messages */}
-					{/* Add the alert for success messages */}
-					<div 
-						className={`alert alert-success alert-dismissible fade show ${this.state.showSuccess ? "d-block" : "d-none"}`} 
-						role="alert" 
-						style={{ 
-							position: "fixed", 
-							top: "20px", 
-							right: "20px", 
-							zIndex: 1050, 
-							minWidth: "250px", 
-							boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-						}}
-					>
-						<i className="fa-solid fa-circle-check me-2"></i>
-						{this.state.successMessage}
-						<button
-							type="button"
-							className="close"
-							aria-label="Close"
-							onClick={() => this.setState({ showSuccess: false })}
-						>
-						</button>
-					</div>
-
-					{/* Add the alert for error messages */}
-					<div 
-						className={`alert alert-danger alert-dismissible fade show ${this.state.showError ? "d-block" : "d-none"}`} 
-						role="alert" 
-						style={{ 
-							position: "fixed", 
-							top: "20px", 
-							right: "20px", 
-							zIndex: 1050, 
-							minWidth: "250px", 
-							boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" 
-						}}
-					>
-						<i className="fa-solid fa-triangle-exclamation me-2"></i>
-						{this.state.errorMessage}
-						<button
-							type="button"
-							className="close"
-							aria-label="Close"
-							onClick={() => this.setState({ showError: false })}
-						>
-						</button>
-					</div>
+					<AlertMessages
+						showSuccess={showSuccess}
+						successMessage={successMessage}
+						showError={showError}
+						errorMessage={errorMessage}
+						setShowSuccess={(val) => this.setState({ showSuccess: val })}
+						setShowError={(val) => this.setState({ showError: val })}
+					/>
 					<div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
 						<div className="container-fluid">
 							<div className="d-flex justify-content-end align-items-center mb-3 mt-3">
@@ -470,91 +434,15 @@ class Holidays extends Component {
 										<div className='card-header'>
 											<h3 className='card-title'>Holiday List</h3>	
 										</div>
-										{loading ? (
-											<div className="card-body">
-												<div className="dimmer active mb-4">
-													<div className="loader" />
-												</div>
-											</div>	
-											// Show Message if no holidays found
-										) : holidays.length === 0 && !message ? (
-											<div className="text-center">
-												<div className="text-muted" style={{ fontSize: '1rem', padding: '2rem 0' }}>
-													Holidays data not found
-												</div>
-											</div>
-										) : ( // Show Table after loading is false
-											<div className="card-body">
-												<div className="table-responsive">
-													<table className="table table_custom spacing5 border-style mb-0">
-														<thead>
-															<tr>
-																<th>DAY</th>
-																<th>DATE</th>
-																<th>HOLIDAY</th>
-																{(logged_in_user_role === 'admin' || logged_in_user_role === 'super_admin') && (
-																	<th>Action</th>
-																)}
-															</tr>
-														</thead>
-														<tbody>
-															{currentHolidays.length > 0 ? (
-																currentHolidays
-																	.filter((holiday) => holiday.event_type === 'holiday')
-																	.map((holiday, index) => (
-																	<tr key={index}>
-																		<td>
-																			<span>
-																				{new Date(holiday.event_date).toLocaleDateString('en-US', { weekday: 'long' })}
-																			</span>
-																		</td>
-																		<td>
-																			<span>
-																				{new Intl.DateTimeFormat('en-US', {
-																					day: '2-digit',
-																					month: 'short',
-																					year: 'numeric',
-																				}).format(new Date(holiday.event_date))}
-																			</span>
-																		</td>
-																		<td>
-																			<span>{holiday.event_name}</span>
-																		</td>
-																		{(logged_in_user_role === 'admin' || logged_in_user_role === 'super_admin') && (
-																			<td>
-																				<button 
-																					type="button"
-																					className="btn btn-icon btn-sm"
-																					title="Edit"
-																					data-toggle="modal"
-																					data-target="#editHolidayModal"
-																					onClick={() => this.handleEditClickForHoliday(holiday)}
-																				>
-																					<i className="fa fa-edit" />
-																				</button>
-																				<button
-																					type="button"
-																					className="btn btn-icon btn-sm js-sweetalert"
-																					title="Delete"
-																					data-type="confirm"
-																					data-toggle="modal"
-																					data-target="#deleteHolidayModal"
-																					onClick={() => this.openDeleteHolidayModal(holiday.id)}
-																				>
-																					<i className="fa fa-trash-o text-danger" />
-																				</button>
-																			</td>
-																		)}
-																	</tr>
-																))
-															): (
-																<NoDataRow colSpan={5} message="Holidays data not found" />
-															)}
-														</tbody>
-													</table>
-												</div>
-											</div>
-										)}
+										<HolidaysTable
+											loading={loading}
+											holidays={holidays}
+											message={message}
+											logged_in_user_role={logged_in_user_role}
+											currentHolidays={currentHolidays}
+											handleEditClickForHoliday={this.handleEditClickForHoliday}
+											openDeleteHolidayModal={this.openDeleteHolidayModal}
+										/>
 									</div>
 									{/* Only show pagination if there are holidays */}
 									{totalPages > 1 && (
@@ -571,152 +459,26 @@ class Holidays extends Component {
 				</div>
 
 				{/* Modal for Add Holiday */}
-				{showAddHolidayModal && (
-				<div className="modal fade show d-block" id="addHolidayModal" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-					<div className="modal-dialog " role="document">
-						<div className="modal-content">
-							<div className="modal-header">
-								<h5 className="modal-title">Add Holiday</h5>
-								<button type="button" className="close" onClick={this.closeAddHolidayModal}>
-									<span>&times;</span>
-								</button>
-							</div>
-							<form onSubmit={this.addHoliday}>
-								<div className="modal-body">
-									<div className="row clearfix">
-										<input
-											type="hidden"
-											className="form-control"
-											placeholder="employeeId"
-											name='employeeId'
-											value={this.state.employee_id}
-											onChange={this.handleInputChangeForAddHoliday}
-										/>
-										<div className="col-md-12">
-											<div className="form-group">
-												<label className="form-label" htmlFor="event_name">Holiday Name</label>
-												<input
-													type="text"
-													className={`form-control ${this.state.errors.event_name ? "is-invalid" : ""}`}
-													name='event_name'
-													id='event_name'
-													value={this.state.event_name}
-													onChange={this.handleInputChangeForAddHoliday}
-												/>
-												{this.state.errors.event_name && (
-													<div className="invalid-feedback">{this.state.errors.event_name}</div>
-												)}
-											</div>
-										</div>
-										<div className="col-md-12">
-											<div className="form-group">
-												<label className="form-label" htmlFor="event_date">Holiday Date</label>
-												<input
-													type="date"
-													className={`form-control ${this.state.errors.event_date ? "is-invalid" : ""}`}
-													name='event_date'
-													id='event_date'
-													value={this.state.event_date}
-													onChange={this.handleInputChangeForAddHoliday}
-												/>
-												{this.state.errors.event_date && (
-													<div className="invalid-feedback">{this.state.errors.event_date}</div>
-												)}
-											</div>
-										</div>
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button type="button" className="btn btn-secondary" onClick={this.closeAddHolidayModal}>
-										Close
-									</button>
-									<button
-										type="submit"
-										className="btn btn-primary"
-										disabled={this.state.ButtonLoading}
-									>
-										{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-										Add Holiday
-									</button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-				)}
+				<AddHolidayModal
+					showAddHolidayModal={this.state.showAddHolidayModal}
+					closeAddHolidayModal={this.closeAddHolidayModal}
+					handleInputChangeForAddHoliday={this.handleInputChangeForAddHoliday}
+					addHoliday={this.addHoliday}
+					ButtonLoading={this.state.ButtonLoading}
+					errors={this.state.errors}
+					employee_id={this.state.employee_id}
+					event_name={this.state.event_name}
+					event_date={this.state.event_date}
+				/>
 
 				{/* Modal for Update/Edit Holiday */}
-				<div className="modal fade" id="editHolidayModal" tabIndex={-1} role="dialog" aria-labelledby="editHolidayModalLabel">
-					<div className="modal-dialog" role="document">
-						<div className="modal-content">
-							<div className="modal-header">
-								<h5 className="modal-title">Update Holiday</h5>
-								<button type="button" className="close" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">×</span></button>
-							</div>
-							{selectedHoliday && (
-							<form onSubmit={this.updateHoliday}>
-								<div className="modal-body">
-									<div className="row clearfix">
-										<input
-											type="hidden"
-											className="form-control"
-											placeholder="employeeId"
-											name='employee_id'
-											value={selectedHoliday?.employee_id || ""}
-											onChange={this.handleInputChangeForEditHoliday}
-										/>
-										<div className="col-md-12">
-											<div className="form-group">
-												<label className="form-label" htmlFor="event_name">Holiday Name</label>
-												<input
-													type="text"
-													className={`form-control ${this.state.errors.event_name ? "is-invalid" : ""}`}
-													name='event_name'
-													id='event_name'
-													value={selectedHoliday?.event_name || ""}
-													onChange={this.handleInputChangeForEditHoliday}
-												/>
-												{this.state.errors.event_name && (
-													<div className="invalid-feedback">{this.state.errors.event_name}</div>
-												)}
-											</div>
-										</div>
-										<div className="col-md-12">
-											<div className="form-group">
-												<label className="form-label" htmlFor="event_date">Holiday Date</label>
-												<input
-													type="date"
-													className={`form-control ${this.state.errors.event_date ? "is-invalid" : ""}`}
-													name='event_date'
-													id='event_date'
-													value={selectedHoliday?.event_date || ""}
-													onChange={this.handleInputChangeForEditHoliday}
-												/>
-												{this.state.errors.event_date && (
-													<div className="invalid-feedback">{this.state.errors.event_date}</div>
-												)}
-											</div>
-										</div>
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-									<button
-										type="submit"
-										className="btn btn-primary"
-										disabled={this.state.ButtonLoading}
-									>
-										{this.state.ButtonLoading && (
-											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-										)}
-										Update Holiday
-									</button>
-								</div>
-							</form>
-							)}
-						</div>
-					</div>
-				</div>
+				<EditHolidayModal
+					selectedHoliday={this.state.selectedHoliday}
+					handleInputChangeForEditHoliday={this.handleInputChangeForEditHoliday}
+					updateHoliday={this.updateHoliday}
+					errors={this.state.errors}
+					ButtonLoading={this.state.ButtonLoading}
+				/>
 
 				<DeleteModal
 					show={this.state.showDeleteModal}

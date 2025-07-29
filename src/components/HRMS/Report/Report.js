@@ -8,6 +8,7 @@ import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
+import DateFilterForm from '../../common/DateFilterForm';
 class Report extends Component {
 
     constructor(props) {
@@ -912,76 +913,19 @@ class Report extends Component {
                                 <div className="tab-pane fade show active" id="Report-Invoices" role="tabpanel">
                                     <div className="card">
                                         <div className="card-header">
-                                                <div className="row">
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">From Date</label>
-                                                            <DatePicker
-                                                                selected={fromDate}
-                                                                onChange={(date) => this.handleDateChange(date, 'fromDate')}
-                                                                className="form-control"
-                                                                dateFormat="yyyy-MM-dd"
-                                                                placeholderText="From Date"
-                                                                maxDate={new Date()}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">To Date</label>
-                                                            <DatePicker
-                                                                selected={toDate}
-                                                                onChange={(date) => this.handleDateChange(date, 'toDate')}
-                                                                className="form-control"
-                                                                dateFormat="yyyy-MM-dd"
-                                                                placeholderText="To Date"
-                                                                minDate={fromDate}
-                                                                maxDate={new Date()}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Select Employee</label>
-                                                            <select 
-                                                                className="form-control" 
-                                                                value={selectedReportEmployee} 
-                                                                onChange={this.handleEmployeeChange}
-                                                            >
-                                                                <option value="">All Employees</option>
-                                                                {employeeData
-                                                                    .filter(employee => {
-                                                                        const role = (employee.role || '').toLowerCase();
-                                                                        return role !== 'admin' && role !== 'super_admin';
-                                                                    })
-                                                                    .map((employee) => (
-                                                                        <option key={employee.id} value={employee.id}>
-                                                                            {employee.first_name} {employee.last_name}
-                                                                        </option>
-                                                                    ))}
-                                                            </select>
-                                                        </div>
-                                                    </div> 
-                                                    )}
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">&nbsp;</label>
-                                                            <button 
-                                                                type="button" 
-                                                                className="btn btn-primary btn-block"
-                                                                onClick={this.handleApplyFilters}
-                                                                disabled={this.state.ButtonLoading}
-                                                            >
-                                                                {this.state.ButtonLoading ? (
-                                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                                                                ) : null}
-                                                                Apply
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <DateFilterForm
+                                                fromDate={fromDate}
+                                                toDate={toDate}
+                                                selectedLeaveEmployee={selectedReportEmployee}
+                                                allEmployeesData={employeeData}
+                                                ButtonLoading={this.state.ButtonLoading}
+                                                handleDateChange={this.handleDateChange}
+                                                handleEmployeeChange={this.handleEmployeeChange}
+                                                handleApplyFilters={this.handleApplyFilters}
+                                                minDate={fromDate}
+                                                maxDate={new Date()}
+                                            />
+                                        </div>
 
                                         {/* Display activity success message outside the modal */}
                                         {reportSuccess && (

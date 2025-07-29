@@ -6,14 +6,19 @@ import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
-import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
-
+import EmployeeLeaveTable from './EmployeeLeaveTable';
+import EmployeeTable from './EmployeeTable';
 import {
 	statisticsAction,
 	statisticsCloseAction
 } from '../../../actions/settingsAction';
+import AddLeaveRequestModal from './AddLeaveRequestModal';
+import EditLeaveRequestModal from './EditLeaveRequestModal';
+import LeaveStats from './LeaveStats';
+import DateFilterForm from '../../common/DateFilterForm';
+
 class Employee extends Component {
 	constructor(props) {
 		super(props);
@@ -103,7 +108,9 @@ class Employee extends Component {
 			fromDate: null,
 			toDate: null,
 			selectedLeaveEmployee: (window.user.role === 'admin' || window.user.role === 'super_admin') ? "" : window.user.id,
-			ButtonLoading: false
+			ButtonLoading: false,
+    		showEditLeaveModal: false, 
+
 		};
 	}
 	handleStatistics(e) {
@@ -263,7 +270,7 @@ class Employee extends Component {
 		});
     };
 		
-	goToEditEmployee(employee, employeeId) {
+	goToEditEmployee = (employee, employeeId) => {
 		// Fetch salary details based on employee_id
 		getService.getCall('employee_salary_details.php', {
 					action: 'view',
@@ -288,7 +295,7 @@ class Employee extends Component {
         });
 	}
 
-	viewEmployee(employee, employeeId) {
+	viewEmployee = (employee, employeeId) => {
 		if (window.user.role === 'super_admin' || window.user.role === 'admin') {
 			this.props.history.push({
 				pathname: `/view-employee/${employeeId}/profile`,
@@ -460,6 +467,7 @@ class Employee extends Component {
 	// Function to close the modal
     closeModal = () => {
         this.setState({ showAddLeaveRequestModal: false });
+		this.setState({ showEditLeaveModal: false });
     };
 
 	// Handle input changes for employee leave
@@ -600,7 +608,8 @@ class Employee extends Component {
 	
 	// Handle employee leave edit button
     	handleEditClickForEmployeeLeave = (employeeLeave) => {
-		this.setState({ selectedEmployeeLeave: employeeLeave, addLeaveErrors: {} });
+		this.setState({ selectedEmployeeLeave: employeeLeave, addLeaveErrors: {},showEditLeaveModal: true, });
+		
     };
 	
 	// API endpoint to update/edit employee leave data
@@ -820,6 +829,13 @@ class Employee extends Component {
 			return (b.id || 0) - (a.id || 0);
 		});
 
+		const leaveData = [
+			{ label: 'Total Leaves', value: totalLeaves },
+			{ label: 'Approved Leaves', value: approvedLeaves },
+			{ label: 'Rejected Leaves', value: rejectedLeaves },
+			{ label: 'Pending Leaves', value: pendingLeaves }
+		];
+
 		// Pagination logic for employee leaves
 		const indexOfLastLeave = this.state.currentPageLeaves * dataPerPage;
 		const indexOfFirstLeave = indexOfLastLeave - dataPerPage;
@@ -880,30 +896,13 @@ class Employee extends Component {
 								</div>
 								{/* Show leave count */}
 								<div className="row justify-content-center align-items-stretch">
-									{[
-										{ label: "Total Leaves", value: totalLeaves },
-										{ label: "Approved Leaves", value: approvedLeaves },
-										{ label: "Rejected Leaves", value: rejectedLeaves },
-										{ label: "Pending Leaves", value: pendingLeaves }
-									].map((item, index) => (
-										<div className="col-6 col-sm-6 col-md-3 mb-3 d-flex align-items-stretch" key={index}>
-											<div className="card w-100 h-100">
-												<div className="card-body w_sparkline d-flex flex-column justify-content-center align-items-center">
-													<span>{item.label}</span>
-													{loading ? (
-														<div className="d-flex" style={{ height: "20px" }}>
-															<div className="spinner-border" role="status" style={{ width: "20px", height: "20px", borderWidth: "2px" }}>
-																<span className="sr-only">Loading...</span>
-															</div>
-														</div>
-													) : (
-														<h3 className="mb-0 counter">
-															<CountUp end={item.value} />
-														</h3>
-													)}
-												</div>
-											</div>
-										</div>
+									{leaveData.map((item, index) => (
+										<LeaveStats
+											key={index}
+											label={item.label}
+											value={item.value}
+											loading={loading}
+										/>
 									))}
 								</div>
 							</div>
@@ -933,356 +932,36 @@ class Employee extends Component {
 													</div>
 												</div>
 											</div>
-											<div className="card-body">
-												{loading ? (
-													<div className="card-body">
-														<div className="dimmer active">
-															<div className="loader" />
-														</div>
-													</div>
-                                                ) : ( // Show Table after loading is false
-													<div className="table-responsive">
-														<table className="table table-hover table-striped table-vcenter text-nowrap mb-0">
-															<thead>
-																<tr>
-																	<th>#</th>
-																	<th>Name</th>
-																	<th>Employee ID</th>
-																	<th>Phone</th>
-																	<th>Join Date</th>
-																	<th>Role</th>
-																	<th>Action</th>
-																</tr>
-															</thead>
-															<tbody>
-																{employeeList.length > 0 ? (
-																	employeeList.map((employee, index) => (
-																		<tr key={index}>
-																			<td className="w40">
-																				{(index + 1).toString().padStart(2, '0')}
-																			</td>
-																			<td className="d-flex">
-																				
-																		{employee.profile ? (
-																			<img
-																				src={`${process.env.REACT_APP_API_URL}/${employee.profile}`}
-																				className="avatar avatar-blue add-space me-2"
-																				alt={`${employee.first_name} ${employee.last_name}`}
-																				title={`${employee.first_name} ${employee.last_name}`}
-																				onError={e => {
-																					e.target.src = '/assets/images/sm/avatar2.jpg';
-																				}}
-																			/>
-																			) : (
-																			<span
-																				className="avatar avatar-blue add-space me-2"
-																				title={`${employee.first_name} ${employee.last_name}`}
-																				style={{
-																				width: '35px',
-																				height: '35px',
-																				display: 'inline-flex',
-																				alignItems: 'center',
-																				justifyContent: 'center',
-																				}}
-																			>
-																				{`${employee.first_name.charAt(0).toUpperCase()}${employee.last_name.charAt(0).toUpperCase()}`}
-																			</span>
-																			)}
-
-																				<div className="ml-3">
-																					<h6 className="mb-0">
-																						{`${employee.first_name} ${employee.last_name}`}
-																					</h6>
-																					<span className="text-muted">
-																						{employee.email}
-																					</span>
-																				</div>
-																			</td>
-																			<td>
-																				<span>{employee.code}</span>
-																			</td>
-																			<td>
-																				<span>{employee.mobile_no1}</span>
-																			</td>
-																			<td>
-																				{new Intl.DateTimeFormat('en-US', {
-																					day: '2-digit',
-																					month: 'short',
-																					year: 'numeric',
-																				}).format(new Date(employee.joining_date))}
-																			</td>
-																			<td>{employee.department_name}</td>
-																			<td>
-																				<button 
-																					type="button"
-																					className="btn btn-icon btn-sm"
-																					title="View"
-																					onClick={() => this.viewEmployee(employee, employee.id)}
-																				>
-																					<i className="fa fa-eye" />
-																				</button>
-																				<button
-																					onClick={() => this.goToEditEmployee(employee, employee.id)}
-																					type="button"
-																					className="btn btn-icon btn-sm"
-																					title="Edit"
-																				>
-																					<i className="fa fa-edit" />
-																				</button>
-																				<button 
-																					type="button"
-																					className="btn btn-icon btn-sm js-sweetalert"
-																					title="Delete"
-																					data-type="confirm"
-																					data-toggle="modal"
-																					data-target="#deleteEmployeeModal"
-																					onClick={() => this.openDeleteModal(employee.id)}
-																				>
-																					<i className="fa fa-trash-o text-danger" />
-																				</button>
-																			</td>
-																		</tr>
-																	))
-																): (
-																	!message && (
-																		<tr>
-																			<td colSpan={7} style={{ textAlign: 'center', fontWeight: 500, color: '#888', fontSize: '1.1rem', padding: '32px 0' }}>
-																				No employees found
-																			</td>
-																		</tr>
-																	)
-																)}
-															</tbody>
-														</table>
-													</div>
-												)}
-											</div>
+											<EmployeeTable
+												loading={loading}
+												employeeList={employeeList}
+												viewEmployee={this.viewEmployee}
+												goToEditEmployee={this.goToEditEmployee}
+												openDeleteModal={this.openDeleteModal}
+												message={message}
+											/>
 										</div>
 									</div>
 									<div className="tab-pane fade" id="Employee-Request" role="tabpanel">
 										<div className="card">
 											<div className="card-header">
-                                                <div className="row">
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">From Date</label>
-                                                            <DatePicker
-                                                                selected={this.state.fromDate ? new Date(this.state.fromDate) : null}
-                                                                onChange={(date) => this.handleDateChange(date, 'fromDate')}
-                                                                className="form-control"
-                                                                dateFormat="yyyy-MM-dd"
-                                                                placeholderText="From Date"
-
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">To Date</label>
-                                                            <DatePicker
-                                                                selected={this.state.toDate ? new Date(this.state.toDate) : null}
-                                                                onChange={(date) => this.handleDateChange(date, 'toDate')}
-                                                                className="form-control"
-                                                                dateFormat="yyyy-MM-dd"
-                                                                placeholderText="To Date"
-                                                               // minDate={fromDate}
-                                                               // maxDate={new Date()}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Select Employee</label>
-                                                            <select 
-                                                                className="form-control" 
-                                                                value={selectedLeaveEmployee} 
-                                                                onChange={this.handleEmployeeChange}
-                                                            >
-                                                                <option value="">All Employees</option>
-                                                                {this.state.allEmployeesData.map((employee) => (
-                                                                    <option key={employee.id} value={employee.id}>
-                                                                        {employee.first_name} {employee.last_name}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
-                                                    </div> 
-                                                    )}
-                                                    <div className="col-md-3">
-                                                        <div className="form-group">
-                                                            <label className="form-label">&nbsp;</label>
-                                                            <button 
-                                                                type="button" 
-                                                                className="btn btn-primary btn-block"
-                                                                onClick={this.handleApplyFilters}
-																disabled={this.state.ButtonLoading}
-                                                            >
-																{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-                                                                Apply
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <DateFilterForm
+													fromDate={this.state.fromDate}
+													toDate={this.state.toDate}
+													selectedLeaveEmployee={selectedLeaveEmployee}
+													allEmployeesData={this.state.allEmployeesData}
+													ButtonLoading={this.state.ButtonLoading}
+													handleDateChange={this.handleDateChange}
+													handleEmployeeChange={this.handleEmployeeChange}
+													handleApplyFilters={this.handleApplyFilters}
+												/>
 											</div>
-											<div className="card-body">
-												{loading ? (
-													<div className="card-body">
-														<div className="dimmer active">
-															<div className="loader" />
-														</div>
-													</div>
-                                                ) : ( // Show Table after loading is false
-													<div className="table-responsive">
-														<table className="table table-hover table-striped table-vcenter text-nowrap mb-0">
-															<thead>
-																<tr>
-																	<th>#</th>
-																	<th>Name</th>
-																	<th>Date</th>
-																	<th>Reason</th>
-																	<th>Leave On</th>
-																	<th>Status</th>
-																	<th>Action</th>
-																</tr>
-															</thead>
-															<tbody>
-																{currentEmployeeLeaves.length > 0 ? (
-																	currentEmployeeLeaves.filter(l => l).map((leave, index) => (
-																		<tr key={index}>
-																			<td className="width45">
-																				{/* <span
-																					className="avatar avatar-orange"
-																					data-toggle="tooltip"
-																					title="Avatar Name"
-																				>
-																					{(leave.first_name ? leave.first_name.charAt(0).toUpperCase() : '')}{(leave.last_name ? leave.last_name.charAt(0).toUpperCase() : '')}
-																				</span> */}
-																				{leave.profile ? (
-																					<img 
-																						src={`${process.env.REACT_APP_API_URL}/${leave.profile}`} 
-																						className="avatar avatar-blue add-space" 
-																						alt={`${leave.first_name} ${leave.last_name}`}
-																						data-toggle="tooltip" 
-																						data-placement="top" 
-																						title={`${leave.first_name} ${leave.last_name}`}
-																						style={{
-																							width: '40px', 
-																							height: '40px', 
-																							borderRadius: '50%', 
-																							objectFit: 'cover'
-																						}}
-																						onError={e => {
-																							e.target.src = '/assets/images/sm/avatar2.jpg';
-																						}}
-																					/>
-																				) : (
-																					<span
-																						className="avatar avatar-blue add-space"
-																						data-toggle="tooltip"
-																						data-placement="top"
-																						title={`${leave.first_name} ${leave.last_name}`}
-																						style={{
-																							width: '40px',
-																							height: '40px',
-																							display: 'inline-flex',
-																							alignItems: 'center',
-																							justifyContent: 'center'
-																						}}
-																					>
-																						{leave.first_name.charAt(0).toUpperCase()}{leave.last_name.charAt(0).toUpperCase()}
-																					</span>
-																				)}
-																			</td>
-																			<td>
-																				<div className="font-15">
-																					{`${leave.first_name} ${leave.last_name}`}
-																				</div>
-																			</td>
-																			<td>
-																			{leave.from_date && !isNaN(new Date(leave.from_date)) && leave.to_date && !isNaN(new Date(leave.to_date)) ? (
-                                                                                `${new Intl.DateTimeFormat('en-US', {
-                                                                                day: '2-digit',
-                                                                                month: 'short',
-                                                                                year: 'numeric',
-                                                                                }).format(new Date(leave.from_date))} to ${new Intl.DateTimeFormat('en-US', {
-                                                                                day: '2-digit',
-                                                                                month: 'short',
-                                                                                year: 'numeric',
-                                                                                }).format(new Date(leave.to_date))}`
-                                                                            ) : (
-                                                                                '-' // fallback if date is missing or invalid
-                                                                            )}
-																			</td>
-																			<td>{leave.reason}</td>
-																																														<td>
-																				<span className={
-																				`tag ${
-																					leave.is_half_day === '1'
-																					? 'tag-blue'
-																					: leave.is_half_day === '0'
-																					? 'tag-red'
-																					: ''
-																				}`
-																				}>
-																				<span className={
-																					`tag ${
-																						leave.is_half_day === '1'
-																						? 'tag-blue'
-																						: leave.is_half_day === '0'
-																						? 'tag-red'
-																						: ''
-																					}`
-																					}>
-																					{leave.is_half_day === '1' ? 'Half Day' : 'Full Day'}
-																					</span>
-																				</span>
-																			</td>
-																			<td>
-																				<span className={
-																					`tag ${
-																					leave.status === 'approved'
-																					? 'tag-success'
-																					: leave.status === 'pending'
-																					? 'tag-warning'
-																					: 'tag-danger'
-																					}`}>
-																					{leave.status}
-																				</span>
-																			</td>
-																			<td>
-																				<button 
-																					type="button"
-																					className="btn btn-icon btn-sm"
-																					title="Edit"
-																					data-toggle="modal"
-																					data-target="#editLeaveRequestModal"
-																					onClick={() => this.handleEditClickForEmployeeLeave(leave)}
-																				>
-																					<i className="fa fa-edit" />
-																				</button>
-																				<button
-																					type="button"
-																					className="btn btn-icon btn-sm js-sweetalert"
-																					title="Delete"
-																					data-type="confirm"
-																					data-toggle="modal"
-																					data-target="#deleteLeaveRequestModal"
-																					onClick={() => this.openDeleteLeaveModal(leave.id)}
-																				>
-																					<i className="fa fa-trash-o text-danger" />
-																				</button>
-																			</td>
-																		</tr>
-																	))
-																) : (
-																	<NoDataRow colSpan={7} message="No leaves found" />
-																)}
-															</tbody>
-														</table>
-													</div>
-												)}
-											</div>
+											<EmployeeLeaveTable
+												currentEmployeeLeaves={currentEmployeeLeaves}
+												loading={loading}
+												handleEditClickForEmployeeLeave={this.handleEditClickForEmployeeLeave}
+												openDeleteLeaveModal={this.openDeleteLeaveModal}
+											/>
 										</div>
 
 										{/* Only show pagination if there are employee leaves */}
@@ -1301,313 +980,35 @@ class Employee extends Component {
 				</div>
 
 				{/* Modal for Add Leave Request */}
-				{showAddLeaveRequestModal && (
-				<div className="modal fade show d-block" id="addLeaveRequestModal" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-					<div className="modal-dialog" role="document">
-						<div className="modal-content">
-							<div className="modal-header">
-								<h5 className="modal-title">Add Leave Request</h5>
-								<button type="button" className="close" onClick={this.closeModal}>
-									<span>&times;</span>
-								</button>
-							</div>
-							<div className="modal-body">
-								<div className="row clearfix">
-									<input
-										type="hidden"
-										className="form-control"
-										placeholder="employeeId"
-										name='employeeId'
-										value={this.state.employee_id}
-										onChange={this.handleInputChangeForAddLeaves}
-									/>
-									{this.state.addLeaveErrors.employeeId && (
-  											<div className="small mt-1" style={{color:"red"}}>{this.state.addLeaveErrors.employeeId}</div>
-											)}
-									{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
-										<div className="col-md-12">
-											<div className="form-group">
-												<label className="form-label">Select Employee</label>
-												<select 
-													name="employee_id"
-													className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id ? ' is-invalid' : ''}`}
-													onChange={this.handleInputChangeForAddLeaves}
-													value={this.state.employee_id}
-												>
-													<option value="">Select Employee</option>
-													{this.state.employeeData.map((emp) => (
-														<option key={emp.id} value={emp.id}>
-															{emp.first_name} {emp.last_name}
-														</option>
-													))}
-												</select>
-												{this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id && (
-													<div className="invalid-feedback d-block">{this.state.addLeaveErrors.employee_id}</div>
-												)}
-											</div>
-										</div>
-									)}
+				<AddLeaveRequestModal
+					showModal={this.state.showAddLeaveRequestModal}
+					employeeData={this.state.employeeData}
+					logged_in_employee_role={this.state.logged_in_employee_role}
+					handleInputChangeForAddLeaves={this.handleInputChangeForAddLeaves}
+					handleLeaveStatus={this.handleLeaveStatus}
+					addLeaveErrors={this.state.addLeaveErrors}
+					halfDayCheckbox={this.state.halfDayCheckbox}
+					addLeave={this.addLeave}
+					closeModal={this.closeModal}
+					ButtonLoading={this.state.ButtonLoading}
+					from_date={this.state.from_date}
+					to_date={this.state.to_date}
+					reason={this.state.reason}
+					employee_id={this.state.employee_id}
+					status={this.state.status}
+				/>
 
-									<div className="col-md-6">
-										<div className="form-group">
-											<label className="form-label">From Date</label>
-											<input
-												type="date"
-												className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.from_date ? ' is-invalid' : ''}`}
-												name='from_date'
-												value={this.state.from_date}
-												onChange={this.handleInputChangeForAddLeaves}
-											/>
-											{this.state.addLeaveErrors.from_date && (
-  											<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>
-											)}
-										</div>
-									</div>
-									<div className="col-md-6">
-										<div className="form-group">
-											<label className="form-label">To Date</label>
-											<input
-												type="date"
-												className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.to_date ? ' is-invalid' : ''}`}
-												name='to_date'
-												value={this.state.to_date}
-												onChange={this.handleInputChangeForAddLeaves}
-												min={this.state.from_date ? this.state.from_date : new Date().toISOString().split("T")[0]}
-											/>
-											{this.state.addLeaveErrors.to_date && (
-  											<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.to_date}</div>
-											)} 
-										</div>
-									</div>
-									<div className="col-md-12">
-										<div className="form-group">
-											<label className="form-label">Reason</label>
-											<input
-												type="text"
-												className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.reason ? ' is-invalid' : ''}`}
-												name='reason'
-												placeholder="Reason"
-												value={this.state.reason}
-												onChange={this.handleInputChangeForAddLeaves}
-											/>
-													{this.state.addLeaveErrors.reason && (
-													<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.reason}</div>
-														)}
-										</div>
-									</div>
-									{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
-										<div className="col-sm-6 col-md-6">
-											<div className="form-group">
-												<label className="form-label">Status</label>
-												<select 
-													name="status"
-													className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.status ? ' is-invalid' : ''}`}
-													id="status"
-													onChange={this.handleLeaveStatus}
-													value={this.state.status}
-												>
-													<option value="pending">Pending</option>
-													<option value="cancelled">Cancelled</option> 
-													<option value="approved">Approved</option>
-													<option value="rejected">Rejected</option>
-												</select>
-												{this.state.addLeaveErrors.status && (
-  											<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.status}</div>
-											)}
-											</div>
-										</div>
-									)}
-									<div className="col-md-12">
-										<div className="form-group form-check">
-											<input
-												name='halfDayCheckbox'
-												className="form-check-input"
-												type="checkbox"
-												id="halfDayCheckbox"
-												checked={this.state.halfDayCheckbox === 1}
-												onChange={this.handleInputChangeForAddLeaves}
-											/>
-											<label className="form-label" htmlFor="halfDayCheckbox">
-												Half day
-											</label>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div className="modal-footer">
-								<button type="button" className="btn btn-secondary" onClick={this.closeModal}>
-									Close
-								</button>
-								<button
-									type="button"
-									className="btn btn-primary"
-									onClick={this.addLeave}
-									disabled={this.state.ButtonLoading}
-								>
-									{this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-									Add Leave
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-				)}
-
-				{/* Edit Leave Request Modal */}
-				<div className="modal fade" id="editLeaveRequestModal" tabIndex={-1} role="dialog" aria-labelledby="editLeaveRequestModalLabel">
-					<div className="modal-dialog" role="document">
-						<div className="modal-content">
-							<div className="modal-header">
-								<h5 className="modal-title" id="editLeaveRequestModalLabel">Edit Leave Request</h5>
-								<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-							</div>
-							<form>
-								<div className="modal-body">
-									{selectedEmployeeLeave ? (
-										<div className="row clearfix">
-											<input
-												type="hidden"
-												className="form-control"
-												value={selectedEmployeeLeave?.employee_id || ""} 
-												onChange={this.handleInputChangeForEditEmployeeLeave}
-												name="employee_id"
-											/>
-											{(this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin") && (
-												<div className="col-md-12">
-													<div className="form-group">
-														<label className="form-label">Select Employee</label>
-														<select 
-															name="employee_id"
-															className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id ? ' is-invalid' : ''}`}
-															onChange={this.handleInputChangeForEditEmployeeLeave}
-															value={selectedEmployeeLeave?.employee_id || ""} 
-														>
-															<option value="">Select Employee</option>
-															{this.state.employeeData.map((emp) => (
-																<option key={emp.id} value={emp.id}>
-																	{emp.first_name} {emp.last_name}
-																</option>
-															))}
-														</select>
-														{this.state.addLeaveErrors && this.state.addLeaveErrors.employee_id && (
-															<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.employee_id}</div>
-														)}
-													</div>
-												</div>
-											)}
-											<div className="col-md-6">
-												<div className="form-group">
-													<label className="form-label">From Date</label>
-													<input
-														type="date"
-														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.from_date ? ' is-invalid' : ''}`}
-														value={selectedEmployeeLeave?.from_date || ""} 
-														onChange={this.handleInputChangeForEditEmployeeLeave}
-														name="from_date"
-														min={new Date().toISOString().split("T")[0]} 
-													/>
-													{this.state.addLeaveErrors && this.state.addLeaveErrors.from_date && (
-														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.from_date}</div>
-													)}
-												</div>
-											</div>
-											<div className="col-md-6">
-												<div className="form-group">
-													<label className="form-label">To Date</label>
-													<input
-														type="date"
-														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.to_date ? ' is-invalid' : ''}`}
-														value={selectedEmployeeLeave?.to_date || ""} 
-														onChange={this.handleInputChangeForEditEmployeeLeave}
-														name="to_date"
-														min={selectedEmployeeLeave?.from_date || new Date().toISOString().split("T")[0]}
-													/>
-													{this.state.addLeaveErrors && this.state.addLeaveErrors.to_date && (
-														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.to_date}</div>
-													)}
-												</div>
-											</div>
-											<div className="col-md-12">
-												<div className="form-group">
-													<label className="form-label">Reason</label>
-													<input
-														type="text"
-														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.reason ? ' is-invalid' : ''}`}
-														value={selectedEmployeeLeave?.reason || ""} 
-														onChange={this.handleInputChangeForEditEmployeeLeave}
-														name="reason"
-													/>
-													{this.state.addLeaveErrors && this.state.addLeaveErrors.reason && (
-														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.reason}</div>
-													)}
-												</div>
-											</div>
-											<div className="col-sm-6 col-md-6">
-												<div className="form-group">
-													<label className="form-label">Status</label>
-													<select 
-														name="status"
-														className={`form-control${this.state.addLeaveErrors && this.state.addLeaveErrors.status ? ' is-invalid' : ''}`}
-														id='status'
-														value={selectedEmployeeLeave?.status || ""}
-														onChange={this.handleInputChangeForEditEmployeeLeave}
-													>
-														{/* Instead of "Select Status", show the assigned status */}
-														<option value={selectedEmployeeLeave?.status}>
-															{selectedEmployeeLeave?.status.charAt(0).toUpperCase() + selectedEmployeeLeave?.status.slice(1)}
-														</option>
-														{this.state.logged_in_employee_role === "admin" || this.state.logged_in_employee_role === "super_admin" ? (
-															<>
-																{selectedEmployeeLeave?.status !== "approved" && <option value="approved">Approved</option>}
-																{selectedEmployeeLeave?.status !== "pending" && <option value="pending">Pending</option>}
-																{selectedEmployeeLeave?.status !== "rejected" && <option value="rejected">Rejected</option>}
-															</>
-														) : (
-															<>
-																{this.state.logged_in_employee_role === "employee" && selectedEmployeeLeave?.status === "pending" && (
-																	<option value="cancelled">Cancelled</option>
-																)}
-															</>
-														)}
-													</select>
-													{this.state.addLeaveErrors && this.state.addLeaveErrors.status && (
-														<div className="invalid-feedback d-block" style={{color:"red"}}>{this.state.addLeaveErrors.status}</div>
-													)}
-												</div>
-											</div>
-											<div className="col-md-12">
-												<div className="form-group form-check">
-													<input
-														name='is_half_day'
-														className="form-check-input"
-														type="checkbox"
-														id="halfDayCheckbox"
-														checked={selectedEmployeeLeave?.is_half_day === '1'}
-														onChange={this.handleInputChangeForEditEmployeeLeave}
-													/>
-													<label className="form-label" htmlFor="halfDayCheckbox">
-														Half day
-													</label>
-												</div>
-											</div>
-										</div>
-									) : (
-										<p>Loading employee leave data...</p>
-									)}
-								</div>
-								<div className="modal-footer">
-									<button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-									<button type="button" onClick={this.updateEmployeeLeave} className="btn btn-primary" disabled={this.state.ButtonLoading}>
-										{this.state.ButtonLoading && (
-											<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-										)}
-										Save
-									</button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
+				<EditLeaveRequestModal
+					showModal={this.state.showEditLeaveModal}
+					selectedEmployeeLeave={this.state.selectedEmployeeLeave}
+					employeeData={this.state.employeeData}
+					logged_in_employee_role={this.state.logged_in_employee_role}
+					handleInputChangeForEditEmployeeLeave={this.handleInputChangeForEditEmployeeLeave}
+					addLeaveErrors={this.state.addLeaveErrors}
+					updateEmployeeLeave={this.updateEmployeeLeave}
+					ButtonLoading={this.state.ButtonLoading}
+					closeModal={this.closeModal}
+				/>
 
 				{/* Delete Leave Request Modal */}
 				<DeleteModal
