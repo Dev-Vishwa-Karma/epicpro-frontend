@@ -2,7 +2,7 @@ export const validateFields = (fields) => {
   const errors = {};
 
   fields.forEach((field) => {
-    const { name, value, type, required, pattern, minLength, maxLength, customValidator, messageName } = field;
+    const { name, value, type, required, minLength, maxLength, customValidator, messageName } = field;
 
     // Ensure value is treated as a string if it's not already
     const valueAsString = value ? String(value) : "";
