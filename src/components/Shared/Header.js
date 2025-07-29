@@ -943,7 +943,7 @@ class Header extends Component {
             tabIndex="-1"
             role="dialog"
           >
-            <div className="modal-dialog modal-xl" role="document">
+            <div className="modal-dialog modal-dialog-scrollable modal-xl" role="document">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title" id="addReportModalLabel">
@@ -1096,6 +1096,11 @@ class Header extends Component {
           {`
             .notification-body {
                 overflow: visible !important;
+                display: block !important;
+                white-space: normal !important;
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
+                width:350px !important;
             }
           `}
       </style>
