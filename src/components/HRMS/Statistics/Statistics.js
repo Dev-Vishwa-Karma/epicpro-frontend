@@ -4,6 +4,7 @@ import AlertMessages from "../../common/AlertMessages";
 import { getService } from "../../../services/getService";
 import YearSelector from "../../common/YearSelector";
 import MonthSelector from "../../common/MonthSelector";
+import AttendanceTableSkeleton from "../../common/skeletons/AttendanceTableSkeleton";
 
 class Statistics extends Component {
   constructor(props) {
@@ -276,9 +277,10 @@ class Statistics extends Component {
             </div>
 
             {isLoading ? (
-              <div className="dimmer active p-5">
-                <div className="loader" />
-              </div>
+              <AttendanceTableSkeleton
+                  employeeCount={employeesData.length || 5}
+                  dayCount={monthDays.length || 10}
+              />
             ) : (
               <div style={{ overflowX: 'auto', scrollbarWidth: 'thin', scrollbarColor: '#a2c4c9 #ffffff',scrollBehavior: 'smooth' }}>
                 <table className="table table-bordered table-sm text-center" style={{ minWidth: '600px' }}>

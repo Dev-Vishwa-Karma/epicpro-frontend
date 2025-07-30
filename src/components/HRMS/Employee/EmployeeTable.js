@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 
 const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, openDeleteModal, message }) => {
     return (
@@ -7,7 +8,7 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
             {loading ? (
                 <div className="card-body">
                     <div className="dimmer active">
-                        <div className="loader" />
+                       <TableSkeleton columns={7} rows={5} />
                     </div>
                 </div>
             ) : (
