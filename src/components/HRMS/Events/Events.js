@@ -7,6 +7,9 @@ import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
 import AlertMessages from '../../common/AlertMessages';
+import YearSelector from '../../common/YearSelector';
+import EventList from './EventList';
+import AddEventModal from './AddEventModal';
 class Events extends Component {
 	constructor(props) {
     super(props);
@@ -917,19 +920,11 @@ formatDateTimeAMPM = (timeString) => {
                                 <div className="card">
                                     <div className="card-body">
                                         <div className="row">
-										<div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-											<label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
-											Year:
-											</label>
-											<select id="year-selector" className='w-70 custom-select' value={selectedYear}
-											onChange={this.handleYearChange}>
-											{years.map(year => (
-											<option key={year} value={year}>
-												{year}
-											</option>
-											))}
-											</select>
-										</div>
+											<YearSelector 
+												selectedYear={selectedYear} 
+												years={years} 
+												handleYearChange={this.handleYearChange} 
+											/>
 										</div>
                                     </div>
                                 </div>
@@ -951,109 +946,28 @@ formatDateTimeAMPM = (timeString) => {
 											)}
 										</div>
 										<div className="card-body">
-											{loading ? (
-												<div className="dimmer active mb-4 p-3 px-3">
-													<div className="loader" />
-												</div>
-											) : (
-												<div id="event-list" className="fc event_list" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-								{uniqueFilteredEvents2.length > 0 ? (
-															uniqueFilteredEvents2.map((event) => {
-																let key = '';
-																if (event.event_type === 'event') {
-																	key = event.event_name + '_' + event.event_date;
-																} else if (event.event_type === 'birthday') {
-																	key = 'birthday_' + event.id;
-																} else if (event.event_type === 'holiday') {
-																	key = 'holiday_' + event.id;
-																} else {
-																	key = event.id || event.event_name || Math.random();
-																}
-																return (
-																	this.formatDate(event.event_date) >= this.formatDate(new Date()) ?
-																		<div key={key} className="event-card card mb-0">
-																		<div className="d-flex justify-content-between align-items-center">
-																		<div
-																			className={`fc-event ${
-																			event.event_type === 'holiday'
-																				? 'holiday-event'
-																				: event.event_type === 'event'
-																				? 'regular-event'
-																				: event.event_type === 'birthday'
-																				? 'birthday-event'
-																				: 'other-event'
-																			}`}
-																			data-class={
-																			event.event_type === 'holiday'
-																				? 'bg-danger'
-																				: event.event_type === 'event'
-																				? 'bg-info'
-																				: event.event_type === 'birthday'
-																				? 'bg-success'
-																				: 'bg-primary'
-																			}
-																			style={{ flex: 1 }}
-																		>
+										<EventList
+											loading={loading}
+											uniqueFilteredEvents2={uniqueFilteredEvents2}
+											logged_in_employee_role={logged_in_employee_role}
+											formatDate={this.formatDate}
+											openDeleteModal={this.openDeleteModal}
+										/>
 
-																			{/* Show trash icon only for 'event' type and for admin/super_admin */}
-																		{event.event_type === 'event' &&
-																			(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-																			<button
-																				className="btn btn-link text-danger position-absolute"
-																				title="Delete Event"
-																				onClick={() => this.openDeleteModal(event.id)}
-																				style={{
-																				top: '2px',
-																				right: '2px',
-																				padding: '2px 6px',
-																				fontSize: '0.75rem',
-																				lineHeight: 1,
-																				}}
-																			>
-																				<i className="fa fa-trash" aria-hidden="true" style={{color:"red"}}></i>
-																			</button>
-																			)}
-
-																			<strong className="d-block">
-																				{event.event_type === 'birthday'}
-																				{event.event_name}
-																			</strong>
-																			<small>
-																			{event.event_date
-																				? new Date(event.event_date).toLocaleDateString('en-US', {
-																					year: 'numeric',
-																					month: 'short',
-																					day: 'numeric',
-																				})
-																				: 'No Date'}
-																			</small>
-																		</div>
-
-																	
-																		
-																		</div>
-																			</div> :
-																			null
-																);
-															})
-								) : (
-									<div className="fc-event bg-info" data-class="bg-info">
-									No events found for this year.
-									</div>
-								)}
-								</div>
-
-											)}
-
-											{(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+										{(logged_in_employee_role === "admin" ||
+											logged_in_employee_role === "super_admin") && (
 											<div className="todo_list mt-4">
-
-											{(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-                      						<TodoList employees={employees} logged_in_employee_role={logged_in_employee_role} />
-                    						)}												
-											</div>
+											{(logged_in_employee_role === "admin" ||
+												logged_in_employee_role === "super_admin") && (
+												<TodoList
+												employees={employees}
+												logged_in_employee_role={logged_in_employee_role}
+												/>
 											)}
-										</div>
+											</div>
+										)}
+										</div>;
+
 									</div>
 								</div>
 								<div className="col-lg-8 col-md-12">
@@ -1149,76 +1063,16 @@ formatDateTimeAMPM = (timeString) => {
                 </div>
 
 				{/* Modal for Add Event */}
-				{showAddEventModal && (
-					<div className="modal fade show d-block" id="addEventModal" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-						<div className="modal-dialog" role="document">
-							<div className="modal-content">
-								<div className="modal-header">
-									<h5 className="modal-title">Add Event</h5>
-									<button type="button" className="close" onClick={this.closeAddEventModal}>
-										<span>&times;</span>
-									</button>
-								</div>
-								<form onSubmit={this.addEvent}>
-									<div className="modal-body">
-										<div className="row clearfix">
-											{/* Remove Employee Selection Section */}
-											<div className="col-md-12">
-												<div className="form-group">
-													<label className="form-label" htmlFor="event_name">Event Name</label>
-													<input
-														type="text"
-														className={`form-control ${this.state.errors.event_name ? "is-invalid" : ""}`}
-														name='event_name'
-														id='event_name'
-														value={this.state.event_name}
-														onChange={this.handleInputChangeForAddEvent}
-													/>
-													{this.state.errors.event_name && (
-														<div className="invalid-feedback">{this.state.errors.event_name}</div>
-													)}
-												</div>
-											</div>
-											<div className="col-md-12">
-												<div className="form-group">
-													<label className="form-label" htmlFor="event_date">Event Date</label>
-													<input
-														type="date"
-														className={`form-control ${this.state.errors.event_date ? "is-invalid" : ""}`}
-														name='event_date'
-														id='event_date'
-														value={this.state.event_date}
-														onChange={this.handleInputChangeForAddEvent}
-														min={new Date().toISOString().split('T')[0]} 
-													/>
-													{this.state.errors.event_date && (
-														<div className="invalid-feedback">{this.state.errors.event_date}</div>
-													)}
-												</div>
-											</div>
-										</div>
-									</div>
-									<div className="modal-footer">
-										<button type="button" className="btn btn-secondary" onClick={this.closeAddEventModal}>
-											Close
-										</button>
-										<button
-											type="submit"
-											className="btn btn-primary"
-											disabled={this.state.ButtonLoading}
-										>
-											{this.state.ButtonLoading ? (
-												<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-											) : null}
-											Add Event
-										</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-				)}
-
+				<AddEventModal
+					showAddEventModal={showAddEventModal}
+					closeAddEventModal={this.closeAddEventModal}
+					addEvent={this.addEvent}
+					handleInputChangeForAddEvent={this.handleInputChangeForAddEvent}
+					errors={this.state.errors}
+					event_name={this.state.event_name}
+					event_date={this.state.event_date}
+					ButtonLoading={this.state.ButtonLoading}
+				/>
 
 				{this.state.showReportModal && this.state.selectedReport && (
 					<ReportModal

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { getService } from '../../../services/getService';
+import EmployeeSelector from '../../common/EmployeeSelector';
 class TodoList extends Component {
   constructor(props) {
     super(props);
@@ -63,27 +64,12 @@ class TodoList extends Component {
         )}
 
         {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-          <div className="form-group mt-3">
-            <label htmlFor="employeeSelect" className="form-label font-weight-bold">
-              Select Employee
-            </label>
-            <select
-              name="selectedEmployeeIdForTodo"
-              id="selectedEmployeeIdForTodo"
-              className="form-control custom-select"
-              value={selectedEmployeeIdForTodo}
-              onChange={this.handleEmployeeSelection}
-            >
-              <option value="">Select an Employee</option>
-                {employees
-                  .filter(emp => emp.role !== 'admin' && emp.role !== 'super_admin') // Filter out admins
-                  .map((employee) => (
-                    <option key={employee.id} value={employee.id}>
-                      {employee.first_name} {employee.last_name}
-                    </option>
-                  ))}
-            </select>
-          </div>
+          <EmployeeSelector
+              allEmployeesData={employees}
+              selectedEmployee={selectedEmployeeIdForTodo}
+              handleEmployeeChange={this.handleEmployeeSelection}
+              showAllInOption={false}
+          />
         )}
 
         {loading ? (
