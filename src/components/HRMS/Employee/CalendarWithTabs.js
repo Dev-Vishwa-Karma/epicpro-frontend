@@ -5,6 +5,7 @@ import ReportModal from '../Report/ReportModal';
 import ActivitiesTime from '../Activities/ActivitiesTime';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
+import { validateFields } from '../../common/validations';
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
@@ -49,6 +50,7 @@ class CalendarWithTabs extends Component {
             images: [],
             filterFromDate: todayStr,
             filterToDate: todayStr,
+            errors: {},
         };
         localStorage.removeItem('empId');
         localStorage.removeItem('startDate');
@@ -56,6 +58,23 @@ class CalendarWithTabs extends Component {
         localStorage.removeItem('eventEndDate');
         localStorage.removeItem('endDate');
         localStorage.removeItem('defaultView');
+
+        // Create refs for form fields for error scrolling
+        this.fieldRefs = {
+            first_name: React.createRef(),
+            last_name: React.createRef(),
+            email: React.createRef(),
+            gender: React.createRef(),
+            department_id: React.createRef(),
+            dob: React.createRef(),
+            joining_date: React.createRef(),
+            mobile_no1: React.createRef(),
+            mobile_no2: React.createRef(),
+            emergency_contact1: React.createRef(),
+            emergency_contact2: React.createRef(),
+            emergency_contact3: React.createRef(),
+            password: React.createRef(),
+        };
     }
 
     // Function to dismiss messages
@@ -444,52 +463,48 @@ class CalendarWithTabs extends Component {
     updateProfile = () => {
         const { employee, skillsFrontend, skillsBackend } = this.state;
 
-        // Validation for required fields
-        const namePattern = /^[A-Za-z\s]+$/;
-        let errors = {};
-        if (!employee.first_name || employee.first_name.trim() === "") {
-            errors.first_name = "First Name is required.";
-        } else if (!namePattern.test(employee.first_name)) {
-            errors.first_name = "First Name must not contain special characters or numbers.";
-        }
-        if (!employee.last_name || employee.last_name.trim() === "") {
-            errors.last_name = "Last Name is required.";
-        } else if (!namePattern.test(employee.last_name)) {
-            errors.last_name = "Last Name must not contain special characters or numbers.";
-        }
-        if (!employee.email || employee.email.trim() === "") {
-            errors.email = "Email address is required.";
-        }
-        if (!employee.gender || employee.gender.trim() === "") {
-            errors.gender = "Gender is required.";
-        }
-        if (!employee.department_id || employee.department_id === "") {
-            errors.department_id = "Department is required.";
-        }
-        if (!employee.dob || employee.dob.trim() === "") {
-            errors.dob = "DOB is required.";
-        }
+        // Validation using validateFields
+        const validationSchema = [
+            { name: 'first_name', value: employee.first_name, type: 'name', required: true, messageName: 'First Name' },
+            { name: 'last_name', value: employee.last_name, type: 'name', required: true, messageName: 'Last Name' },
+            { name: 'email', value: employee.email, type: 'email', required: true, messageName: 'Email' },
+            { name: 'gender', value: employee.gender, required: true, messageName: 'Gender' },
+            { name: 'department_id', value: employee.department_id, required: true, messageName: 'Department' },
+            { name: 'dob', value: employee.dob, type: 'date', required: true, messageName: 'DOB',
+                customValidator: (val) => {
+                    if (val) {
+                        const inputDate = new Date(val);
+                        const currentDate = new Date();
+                        currentDate.setHours(23, 59, 59, 999);
+                        if (inputDate > currentDate) {
+                            return 'DOB cannot be greater than current date.';
+                        }
+                    }
+                    return undefined;
+                }
+            },
+            { name: 'joining_date', value: employee.joining_date, type: 'date', required: true, messageName: 'Joining Date' },
+            { name: 'mobile_no1', value: employee.mobile_no1, type: 'mobile', required: true, messageName: 'Mobile Number' },
+            { name: 'mobile_no2', value: employee.mobile_no2, type: 'mobile', messageName: 'Mobile Number' },
+            { name: 'emergency_contact1', value: employee.emergency_contact1, type: 'mobile', messageName: 'Mobile Number' },
+            { name: 'emergency_contact2', value: employee.emergency_contact2, type: 'mobile', messageName: 'Mobile Number' },
+            { name: 'emergency_contact3', value: employee.emergency_contact3, type: 'mobile', messageName: 'Mobile Number' },
+            { name: 'password', value: employee.password, required: true, messageName: 'Password' },
+        ];
 
-        if (!employee.joining_date || employee.joining_date.trim() === "") {
-            errors.joining_date = "Joining Date is required.";
-        }
-        if (employee.mobile_no1 && !/^\d{10}$/.test(employee.mobile_no1)) {
-            errors.mobile_no1 = "Mobile number must be exactly 10 digits.";
-        }
-        if (employee.mobile_no2 && !/^\d{10}$/.test(employee.mobile_no2)) {
-            errors.mobile_no2 = "Mobile number must be exactly 10 digits.";
-        }
-        if (employee.emergency_contact1 && !/^\d{10}$/.test(employee.emergency_contact1)) {
-            errors.emergency_contact1 = "Mobile number must be exactly 10 digits.";
-        }
-        if (employee.emergency_contact2 && !/^\d{10}$/.test(employee.emergency_contact2)) {
-            errors.emergency_contact2 = "Mobile number must be exactly 10 digits.";
-        }
-        if (employee.emergency_contact3 && !/^\d{10}$/.test(employee.emergency_contact3)) {
-            errors.emergency_contact3 = "Mobile number must be exactly 10 digits.";
-        }
+        const errors = validateFields(validationSchema);
+
         if (Object.keys(errors).length > 0) {
-            this.setState({ errors });
+            this.setState({ errors }, () => {
+                const firstErrorField = Object.keys(errors)[0];
+                const ref = this.fieldRefs[firstErrorField];
+                if (ref && ref.current) {
+                    ref.current.focus();
+                    ref.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                } else {
+                    console.warn('No ref found for field:', firstErrorField);
+                }
+            });
             return;
         } else {
             this.setState({ errors: {} });
@@ -818,6 +833,7 @@ class CalendarWithTabs extends Component {
                                                                 value={employee.first_name || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
+                                                                ref={this.fieldRefs.first_name}
                                                             />
                                                             {this.state.errors && this.state.errors.first_name && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.first_name}</div>
@@ -835,6 +851,7 @@ class CalendarWithTabs extends Component {
                                                                 value={employee.last_name || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
+                                                                ref={this.fieldRefs.last_name}
                                                             />
                                                             {this.state.errors && this.state.errors.last_name && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.last_name}</div>
@@ -852,6 +869,7 @@ class CalendarWithTabs extends Component {
                                                                 value={employee.email || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
+                                                                ref={this.fieldRefs.email}
                                                             />
                                                             {this.state.errors && this.state.errors.email && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.email}</div>
@@ -868,6 +886,7 @@ class CalendarWithTabs extends Component {
                                                                 value={employee.gender || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
+                                                                ref={this.fieldRefs.gender}
                                                             >
                                                                 <option value="">Select Gender</option>
                                                                 <option value="male" >Male</option>
@@ -889,6 +908,7 @@ class CalendarWithTabs extends Component {
                                                                 value={employee.dob || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 required
+                                                                ref={this.fieldRefs.dob}
                                                             />
                                                             {this.state.errors && this.state.errors.dob && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
@@ -904,6 +924,7 @@ class CalendarWithTabs extends Component {
                                                                 onChange={this.handleProfileChange}
                                                                 name="department_id"
                                                                 disabled={window.user && (window.user.role === 'employee')}
+                                                                ref={this.fieldRefs.department_id}
                                                             >
                                                                 <option value="">Select Department</option>
                                                                 {this.state.departments.map((dept) => (
@@ -928,6 +949,7 @@ class CalendarWithTabs extends Component {
                                                                 value={employee.joining_date || ""}
                                                                 onChange={this.handleProfileChange}
                                                                 disabled={window.user && (window.user.role === 'employee')}
+                                                                ref={this.fieldRefs.joining_date}
                                                             />
                                                             {this.state.errors && this.state.errors.joining_date && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.joining_date}</div>
@@ -949,6 +971,7 @@ class CalendarWithTabs extends Component {
                                                                 onInput={(e) => {
                                                                     e.target.value = e.target.value.replace(/\D/g, '');
                                                                 }}
+                                                                ref={this.fieldRefs.mobile_no1}
                                                             />
                                                              {this.state.errors && this.state.errors.mobile_no1 && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.mobile_no1}</div>
@@ -970,6 +993,7 @@ class CalendarWithTabs extends Component {
                                                                 onInput={(e) => {
                                                                     e.target.value = e.target.value.replace(/\D/g, '');
                                                                 }}
+                                                                ref={this.fieldRefs.mobile_no2}
                                                             />
                                                             {this.state.errors && this.state.errors.mobile_no2 && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.mobile_no2}</div>
@@ -983,11 +1007,15 @@ class CalendarWithTabs extends Component {
                                                                 type="password"
                                                                 name="password"
                                                                 id="password"
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors && this.state.errors.password ? ' is-invalid' : ''}`}
                                                                 placeholder=" Enter password"
                                                                 value={employee.password || ""}
                                                                 onChange={this.handleProfileChange}
+                                                                ref={this.fieldRefs.password}
                                                             />
+                                                            {this.state.errors && this.state.errors.password && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.password}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-md-12">
@@ -1032,6 +1060,7 @@ class CalendarWithTabs extends Component {
                                                             onInput={(e) => {
                                                                 e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
+                                                            ref={this.fieldRefs.emergency_contact1}
                                                         />
                                                         {this.state.errors && this.state.errors.emergency_contact1 && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.emergency_contact1}</div>
@@ -1051,7 +1080,7 @@ class CalendarWithTabs extends Component {
                                                             onInput={(e) => {
                                                                 e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
-                                                            
+                                                            ref={this.fieldRefs.emergency_contact2}
                                                         />
                                                          {this.state.errors && this.state.errors.emergency_contact2 && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.emergency_contact2}</div>
@@ -1071,6 +1100,7 @@ class CalendarWithTabs extends Component {
                                                             onInput={(e) => {
                                                                 e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
+                                                            ref={this.fieldRefs.emergency_contact3}
                                                         />
                                                         {this.state.errors && this.state.errors.emergency_contact3 && (
                                                                 <div className="invalid-feedback d-block">{this.state.errors.emergency_contact3}</div>

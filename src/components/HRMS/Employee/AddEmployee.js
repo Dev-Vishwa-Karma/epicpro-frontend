@@ -69,6 +69,23 @@ class AddEmployee extends Component {
       panCardFile: React.createRef(),
       resume: React.createRef(),
     };
+
+    // Create refs for form fields for error scrolling
+    this.fieldRefs = {
+      firstName: React.createRef(),
+      lastName: React.createRef(),
+      email: React.createRef(),
+      selectedDepartment: React.createRef(),
+      gender: React.createRef(),
+      dob: React.createRef(),
+      joiningDate: React.createRef(),
+      mobile1: React.createRef(),
+      mobile2: React.createRef(),
+      emergencyContact1: React.createRef(),
+      emergencyContact2: React.createRef(),
+      emergencyContact3: React.createRef(),
+      bankAccountNo: React.createRef(),
+    };
   }
 
   // Function to dismiss messages
@@ -207,20 +224,57 @@ class AddEmployee extends Component {
       { name: 'lastName', value: lastName, type: 'name', required: true, messageName:'Last Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName:'Email' },
       { name: 'gender', value: gender, type: 'name', required: true, messageName:'Gender' },
-      { name: 'dob', value: dob, type: 'date', required: true, messageName:'Date of Birth' },
+      { name: 'dob', value: dob, type: 'date', required: true, messageName:'Date of Birth',
+        customValidator: (val) => {
+          if (val) {
+            const inputDate = new Date(val);
+            const currentDate = new Date();
+            currentDate.setHours(23, 59, 59, 999);
+            if (inputDate > currentDate) {
+              return 'Date of Birth cannot be greater than current date.';
+            }
+          }
+          return undefined;
+        }
+      },
+      { name: 'selectedDepartment', value: selectedDepartment, required: true, messageName:'Department' },
       { name: 'mobile1', value: mobile1, type: 'mobile', required: true, messageName:'Mobile Number' },
       { name: 'mobile2', value: mobile2, type: 'mobile', messageName:'Mobile Number' },
       { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile', messageName:'Mobile Number' },
       { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile', messageName:'Mobile Number' },
       { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile', messageName:'Mobile Number' },
       { name: 'joiningDate', value: joiningDate, type: 'date', required: true, messageName:'Joining Date'},
+      { name: 'bankAccountNo', value: bankAccountNo, messageName:'Account Number',
+        customValidator: (val) => {
+          if (val && val.toString().length > 20) {
+            return 'Account Number must not exceed 20 digits.';
+          }
+          return undefined;
+        }
+      },
       { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'visibility Priority' }
     ];
 
     const errors = validateFields(validationSchema);
 
+    // Validate salary amounts
+    salaryDetails.forEach((detail, index) => {
+      if (detail.salaryAmount && detail.salaryAmount.toString().length > 8) {
+        errors[`salaryAmount_${index}`] = 'Salary Amount must not exceed 8 digits.';
+      }
+    });
+
     if (Object.keys(errors).length > 0) {
-      this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false });
+      this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false }, () => {
+        const firstErrorField = Object.keys(errors)[0];
+        const ref = this.fieldRefs[firstErrorField];
+        if (ref && ref.current) {
+          ref.current.focus();
+          ref.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        } else {
+          console.warn('No ref found for field:', firstErrorField);
+        }
+      });
       return
     } else {
       this.setState({ errors: {} });
@@ -481,6 +535,7 @@ class AddEmployee extends Component {
                               placeholder="Enter First Name"
                               value={firstName}
                               onChange={this.handleChange}
+                              ref={this.fieldRefs.firstName}
                             />
                             {this.state.errors.firstName && (
                               <div className="invalid-feedback d-block">{this.state.errors.firstName}</div>
@@ -498,6 +553,7 @@ class AddEmployee extends Component {
                               placeholder="Enter Last Name"
                               value={lastName}
                               onChange={this.handleChange}
+                              ref={this.fieldRefs.lastName}
                             />
                             {this.state.errors.lastName && (
                               <div className="invalid-feedback d-block">{this.state.errors.lastName}</div>
@@ -515,6 +571,7 @@ class AddEmployee extends Component {
                               placeholder="Enter Email Address"
                               value={email}
                               onChange={this.handleChange}
+                              ref={this.fieldRefs.email}
                             />
                             {this.state.errors.email && (
                               <div className="invalid-feedback d-block">{this.state.errors.email}</div>
@@ -531,6 +588,7 @@ class AddEmployee extends Component {
                               value={this.state.selectedDepartment}
                               onChange={this.handleChange}
                               name="selectedDepartment"
+                              ref={this.fieldRefs.selectedDepartment}
                             >
                               <option value="">Select Department</option>
                               {this.state.departments.map((dept) => (
@@ -553,6 +611,7 @@ class AddEmployee extends Component {
                               id="gender"
                               value={gender}
                               onChange={this.handleChange}
+                              ref={this.fieldRefs.gender}
                             >
                               <option value="">Select Gender</option>
                               <option value="male">Male</option>
@@ -586,6 +645,7 @@ class AddEmployee extends Component {
                               value={dob}
                               onChange={this.handleChange}
                               max={new Date().toISOString().split("T")[0]}
+                              ref={this.fieldRefs.dob}
                             />
                             {this.state.errors.dob && (
                               <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
@@ -602,6 +662,7 @@ class AddEmployee extends Component {
                               className={`form-control${this.state.errors.joiningDate ? ' is-invalid' : ''}`}
                               value={joiningDate}
                               onChange={this.handleChange}
+                              ref={this.fieldRefs.joiningDate}
                             />
                             {this.state.errors.joiningDate && (
                               <div className="invalid-feedback d-block">{this.state.errors.joiningDate}</div>
@@ -623,6 +684,7 @@ class AddEmployee extends Component {
                               onInput={(e) => {
                                 e.target.value = e.target.value.replace(/\D/g, '');
                               }}
+                              ref={this.fieldRefs.mobile1}
                             />
                             {this.state.errors.mobile1 && (
                               <div className="invalid-feedback d-block">{this.state.errors.mobile1}</div>
@@ -644,6 +706,7 @@ class AddEmployee extends Component {
                               onInput={(e) => {
                                 e.target.value = e.target.value.replace(/\D/g, '');
                               }}
+                              ref={this.fieldRefs.mobile2}
                             />
                             {this.state.errors.mobile2 && (
                               <div className="invalid-feedback d-block">{this.state.errors.mobile2}</div>
@@ -707,6 +770,7 @@ class AddEmployee extends Component {
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
                             }}
+                            ref={this.fieldRefs.emergencyContact1}
                           />
                           {this.state.errors.emergencyContact1 && (
                               <div className="invalid-feedback d-block">{this.state.errors.emergencyContact1}</div>
@@ -728,6 +792,7 @@ class AddEmployee extends Component {
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
                             }}
+                            ref={this.fieldRefs.emergencyContact2}
                           />
                           {this.state.errors.emergencyContact2 && (
                               <div className="invalid-feedback d-block">{this.state.errors.emergencyContact2}</div>
@@ -749,6 +814,7 @@ class AddEmployee extends Component {
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
                             }}
+                            ref={this.fieldRefs.emergencyContact3}
                           />
                           {this.state.errors.emergencyContact3 && (
                               <div className="invalid-feedback d-block">{this.state.errors.emergencyContact3}</div>
@@ -853,11 +919,16 @@ class AddEmployee extends Component {
                                 type="number"
                                 name="bankAccountNo"
                                 id="bankAccountNo"
-                                className="form-control"
+                                className={`form-control${this.state.errors.bankAccountNo ? ' is-invalid' : ''}`}
                                 placeholder="Account Number"
                                 value={bankAccountNo}
                                 onChange={this.handleChange}
+                                ref={this.fieldRefs.bankAccountNo}
+                                maxLength="20"
                               />
+                              {this.state.errors.bankAccountNo && (
+                                <div className="invalid-feedback d-block">{this.state.errors.bankAccountNo}</div>
+                              )}
                             </div>
                           </div>
                           <div className="col-sm-6 col-md-4">
@@ -951,7 +1022,7 @@ class AddEmployee extends Component {
                                       type="number"
                                       name="salaryAmount"
                                       id="salaryAmount"
-                                      className="form-control"
+                                      className={`form-control${this.state.errors[`salaryAmount_${index}`] ? ' is-invalid' : ''}`}
                                       placeholder="Enter salary amount"
                                       value={entry.salaryAmount}
                                       onChange={(e) =>
@@ -961,7 +1032,11 @@ class AddEmployee extends Component {
                                           e.target.value
                                         )
                                       }
+                                      maxLength="8"
                                     />
+                                    {this.state.errors[`salaryAmount_${index}`] && (
+                                      <div className="invalid-feedback d-block">{this.state.errors[`salaryAmount_${index}`]}</div>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="col-sm-6 col-md-2">
@@ -1193,6 +1268,7 @@ class AddEmployee extends Component {
                                   className={`form-control${this.state.errors.visibilityPriority ? ' is-invalid' : ''}`}
                                   value={visibilityPriority}
                                   onChange={this.handleChange}
+                                  ref={this.fieldRefs.visibilityPriority}
                                 />
                                 {this.state.errors.visibilityPriority && (
                                   <div className="invalid-feedback d-block">{this.state.errors.visibilityPriority}</div>

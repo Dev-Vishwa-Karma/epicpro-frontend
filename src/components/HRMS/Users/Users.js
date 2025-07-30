@@ -142,10 +142,31 @@ class Users extends Component {
 		// Apply Validation component
         const validationSchema = [
 			{ name: 'firstName', value: firstName, type: 'name', required: true, messageName: 'First Name'},
-			{ name: 'lastName', value: lastName, type: 'name', required: false, messageName: 'Last Name can only contain letters and spaces.'},
+			{ name: 'lastName', value: lastName, type: 'name', required: false, messageName: 'Last Name'},
 			{ name: 'email', value: email, type: 'email', required: true, messageName: 'Email ID'},
-			{ name: 'gender', value: gender, required: true, messageName: 'Gender'},
-			{ name: 'dob', value: dob, type: 'date', required: true, messageName: 'DOB'},
+			{ name: 'gender', value: gender, required: true, messageName: 'Gender' },
+			{ name: 'selectedDepartment', value: selectedDepartment, required: true, messageName: 'Department' },
+			{ name: 'dob', value: dob, type: 'date', required: true, messageName: 'DOB',
+				customValidator: (val) => {
+					if (val) {
+						const inputDate = new Date(val);
+						const currentDate = new Date();
+						currentDate.setHours(23, 59, 59, 999);
+						if (inputDate > currentDate) {
+							return 'DOB cannot be greater than current date.';
+						}
+					}
+					return undefined;
+				}
+			},
+			{ name: 'mobileNo', value: mobileNo, required: false, messageName: 'Mobile Number',
+				customValidator: (val) => {
+					if (val && !/^\d{10}$/.test(val)) {
+						return 'Mobile Number must be exactly 10 digits.';
+					}
+					return undefined;
+				}
+			},
 			{ name: 'password', value: password, required: true, messageName: 'Password'},
 			{ name: 'confirmPassword', value: confirmPassword, required: true, messageName: 'Confirm Password',
 				customValidator: (val) => (password && val && password !== val ? 'Passwords do not match.' : undefined)
@@ -252,7 +273,21 @@ class Users extends Component {
         // Apply Validation component
         const validationSchema = [
             { name: 'firstName', value: selectedUser.first_name, type: 'name', required: true, messageName: 'First Name'},
-            { name: 'lastName', value: selectedUser.last_name, type: 'name', required: false, messageName: 'Last Name'},
+			{ name: 'lastName', value: selectedUser.last_name, type: 'name', required: false, messageName: 'Last Name' },
+			{ name: 'email', value: selectedUser.email, type: 'email', required: true, messageName: 'Email Address'},
+            { name: 'dob', value: selectedUser.dob, type: 'date', required: false, messageName: 'Date of Birth',
+                customValidator: (val) => {
+                    if (val) {
+                        const inputDate = new Date(val);
+                        const currentDate = new Date();
+                        currentDate.setHours(23, 59, 59, 999);
+                        if (inputDate > currentDate) {
+                            return 'Date of Birth cannot be greater than current date.';
+                        }
+                    }
+                    return undefined;
+                }
+            },
         ];
         const errors = validateFields(validationSchema);
         if (Object.keys(errors).length > 0) {
@@ -696,12 +731,16 @@ class Users extends Component {
 													<div className="form-group">
 														<input
 															type="text"
-															className="form-control"
+															className={`form-control${this.state.errors.mobileNo ? ' is-invalid' : ''}`}
 															placeholder="Mobile No"
 															name='mobileNo'
 															value={this.state.mobileNo}
 															onChange={this.handleInputChangeForAddUser}
+															maxLength="10"
 														/>
+														{this.state.errors.mobileNo && (
+															<div className="invalid-feedback d-block">{this.state.errors.mobileNo}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-4 col-sm-12">
@@ -743,7 +782,7 @@ class Users extends Component {
 												<div className="col-md-4 col-sm-12">
 													<div className="form-group">
 														<select
-															className="form-control show-tick"
+															className={`form-control show-tick${this.state.errors.selectedDepartment ? ' is-invalid' : ''}`}
 															value={this.state.selectedDepartment}
 															onChange={this.handleSelectChange}
 															name="selectedDepartment"
@@ -755,6 +794,9 @@ class Users extends Component {
 																</option>
 															))}
 														</select>
+														{this.state.errors.selectedDepartment && (
+															<div className="invalid-feedback d-block">{this.state.errors.selectedDepartment}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-sm-6 col-md-4">
@@ -982,11 +1024,14 @@ class Users extends Component {
 														<label className="form-label">Email Address</label>
 														<input
 															type="text"
-															className="form-control"
+															className={`form-control${this.state.errors.email ? ' is-invalid' : ''}`}
 															value={selectedUser?.email || ""} 
 															onChange={this.handleInputChangeForEditUser}
                                                             name="email"
 														/>
+														{this.state.errors.email && (
+															<div className="invalid-feedback d-block">{this.state.errors.email}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-12">
@@ -994,12 +1039,15 @@ class Users extends Component {
 														<label className="form-label">Date of Birth</label>
 														<input
 															type="date"
-															className="form-control"
+															className={`form-control${this.state.errors.dob ? ' is-invalid' : ''}`}
 															value={selectedUser?.dob || ""} 
 															onChange={this.handleInputChangeForEditUser}
                                                             name="dob"
                                                             max={new Date().toISOString().split("T")[0]}
 														/>
+														{this.state.errors.dob && (
+															<div className="invalid-feedback d-block">{this.state.errors.dob}</div>
+														)}
 													</div>
 												</div>
 												<div className="col-md-6">
