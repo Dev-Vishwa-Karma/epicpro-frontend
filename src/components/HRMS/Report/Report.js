@@ -61,6 +61,7 @@ class Report extends Component {
             successMessage: "",
             ButtonLoading: false,
             showDeleteModal: false,
+            col: (window.user.role === "admin" || window.user.role === "super_admin") ? 3 : 4
         };
         this.reportMessageTimeout = null;
     }
@@ -913,18 +914,21 @@ class Report extends Component {
                                 <div className="tab-pane fade show active" id="Report-Invoices" role="tabpanel">
                                     <div className="card">
                                         <div className="card-header">
-                                            <DateFilterForm
-                                                fromDate={fromDate}
-                                                toDate={toDate}
-                                                selectedLeaveEmployee={selectedReportEmployee}
-                                                allEmployeesData={employeeData}
-                                                ButtonLoading={this.state.ButtonLoading}
-                                                handleDateChange={this.handleDateChange}
-                                                handleEmployeeChange={this.handleEmployeeChange}
-                                                handleApplyFilters={this.handleApplyFilters}
-                                                minDate={fromDate}
-                                                maxDate={new Date()}
-                                            />
+                                            <div className="row">
+                                                <DateFilterForm
+                                                    fromDate={fromDate}
+                                                    toDate={toDate}
+                                                    selectedEmployee={selectedReportEmployee}
+                                                    allEmployeesData={employeeData}
+                                                    ButtonLoading={this.state.ButtonLoading}
+                                                    handleDateChange={this.handleDateChange}
+                                                    handleEmployeeChange={this.handleEmployeeChange}
+                                                    handleApplyFilters={this.handleApplyFilters}
+                                                    minDate={fromDate}
+                                                    maxDate={new Date()}
+                                                    col={this.state.col}
+                                                />
+											</div>
                                         </div>
 
                                         {/* Display activity success message outside the modal */}

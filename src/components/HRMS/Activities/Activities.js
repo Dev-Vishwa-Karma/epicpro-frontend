@@ -4,7 +4,9 @@ import { breakInAction, breakDurationCalAction } from '../../../actions/settings
 import AlertMessages from '../../common/AlertMessages';
 import ActivitiesTime from './ActivitiesTime';
 import { getService } from '../../../services/getService';
-
+import DateFilterForm from '../../common/DateFilterForm';
+import AddBreakModal from './AddBreakModal';
+import BreakReasonModal from './BreakReasonModal';
 class Activities extends Component {
   constructor(props) {
     super(props);
@@ -32,7 +34,8 @@ class Activities extends Component {
       filterFromDate: todayStr,
       filterToDate: todayStr,
       onHandleApply: false,
-      col: (window.user.role === "admin" || window.user.role === "super_admin") ? 3 : 4
+      colbutton: (window.user.role === "admin" || window.user.role === "super_admin") ? 4 : 6,
+      col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2
     };
   }
 
@@ -94,6 +97,29 @@ class Activities extends Component {
     }
   }
 
+    handleDateChange = (date, type) => {
+              const formatDate = (date) => {
+          if (!date) return '';
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0'); 
+          const day = String(date.getDate()).padStart(2, '0'); 
+          return `${year}-${month}-${day}`; 
+      };
+      if (date) {
+          const newDate = formatDate(new Date(date));
+          if (type === 'fromDate') {
+              this.setState({ filterFromDate: newDate });
+              
+          } else if (type === 'toDate') {
+              this.setState({ filterToDate: newDate });
+          }
+        
+      } else {
+          this.setState({ [type]: null });
+      }
+  };
+
+
   openbreakReasonModal = () => {
     if (!this.props.punchIn) {
       this.setState({
@@ -108,7 +134,7 @@ class Activities extends Component {
     this.setState({ breakReasonModal: true });
   };
 
-  closebreakReasonModal = () => {
+  closeModal = () => {
     this.setState({ breakReasonModal: false });
   };
 
@@ -184,16 +210,17 @@ class Activities extends Component {
     getService.addCall('activities.php', 'add-by-user', formData)
       .then((data) => {
         if (data.status === "success") {
+          console.log( data.message, )
           this.setState({
             isBreakedIn: false,
             breakReason: '',
             successMessage: data.message,
             showError: false,
             showSuccess: true,
-            ButtonLoading: false
+            ButtonLoading: false,
+            breakReasonModal:false
           });
           setTimeout(this.dismissMessages, 3000);
-          document.querySelector("#addBreakReasonModal .close").click();
           this.componentDidMount();
         } else {
           this.setState({
@@ -218,6 +245,11 @@ class Activities extends Component {
 
   handleEmployeeChange = (event) => {
     this.setState({ selectedEmployee: event.target.value });
+  };
+
+  handleEmployeeChange1 = (event) => {
+    this.setState({ filterEmployeeId: event.target.value });
+    console.log(this.state.filterEmployeeId)
   };
 
   handleStatusChange = (event) => {
@@ -364,7 +396,7 @@ class Activities extends Component {
   };
 
   render() {
-    const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess, successMessage, showError, errorMessage, col } = this.state;
+    const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess, successMessage, showError, errorMessage, col, colbutton } = this.state;
     return (
       <>
         <AlertMessages
@@ -381,59 +413,26 @@ class Activities extends Component {
               <div className="card m-4">
                 <div className="card-body">
                   <div className="row">
-                    <div className={`col-md-${col}`}>
-                      <label>From Date</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={this.state.filterFromDate}
-                        onChange={(e) => this.setState({ filterFromDate: e.target.value })}
+                      <DateFilterForm
+                          fromDate={this.state.filterFromDate}
+                          toDate={this.state.filterToDate}
+                          selectedEmployee={this.state.filterEmployeeId}
+                          allEmployeesData={this.state.employeeData}
+                          ButtonLoading={this.state.ButtonLoading}
+                          handleDateChange={this.handleDateChange}
+                          handleEmployeeChange={this.handleEmployeeChange1}
+                          handleApplyFilters={this.handleApplyFilter}
+                          col={col}
                       />
-                    </div>
-                    <div className={`col-md-${col}`}>
-                      <label>To Date</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={this.state.filterToDate}
-                        onChange={(e) => this.setState({ filterToDate: e.target.value })}
-                      />
-                    </div>
-                    {((window.user.role === "admin" || window.user.role === "super_admin")) && (
-                      <div className={`col-md-${col}`}>
-                        <label>Employee</label>
-                        <select
-                          className="form-control"
-                          value={this.state.filterEmployeeId}
-                          onChange={(e) =>
-                            this.setState({ filterEmployeeId: e.target.value })
-                          }
-                        >
-                          <option value="">All Employees</option>
-                          {this.state.employeeData.map((emp) => (
-                            <option key={emp.id} value={emp.id}>
-                              {emp.first_name} {emp.last_name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    <div className={`col-md-${col}`}>
-                      <button
-                        className="btn btn-primary"
-                        style={{ marginTop: 34 }}
-                        onClick={this.handleApplyFilter}
-                      >
-                        Apply
-                      </button>
+                    <div className={`col-md-${colbutton}`}>
                       {window.user.role !== 'employee' && (
-                        <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={this.openAddBreakModal}>
+                        <button style={{ float: "right", marginTop: 24 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={this.openAddBreakModal}>
                           <i className="fe fe-plus mr-2" />Add
                         </button>
                       )}
                       {window.user.role === 'employee' && (
                         <button
-                          style={{ float: "right", marginTop: 34 }}
+                          style={{ float: "right", marginTop: 22 }}
                           className="btn btn-primary"
                           onClick={this.state.isBreakedIn ? this.handleBreakOut : this.openbreakReasonModal}
                         >
@@ -458,112 +457,30 @@ class Activities extends Component {
         </>
 
         {/* Add Break Modal */}
-        {window.user.role !== 'employee' && (
-          <div className="modal fade" id="addBreakModal" tabIndex={-1} role="dialog" aria-labelledby="addBreakModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-            <div className="modal-dialog" role="dialog">
-              <div className={`modal-content ${loading ? 'dimmer active' : 'dimmer'}`}>
-                <div className="modal-header">
-                  <h5 className="modal-title" id="addBreakModalLabel">Add Activity for Employee</h5>
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                  {loading && <div className="loader"></div>}
-                </div>
-                <div className="dimmer-content">
-                  <div className="modal-body">
-                    <div className="row clearfix">
-                      <div className="col-md-12">
-                        <div className="form-group">
-                          <select className="form-control" value={selectedEmployee} onChange={this.handleEmployeeChange}>
-                            <option value="">Select Employee</option>
-                            {employeeData.length > 0 ? (
-                              employeeData.map((employee, index) => (
-                                <option key={index} value={employee.id}>
-                                  {`${employee.first_name} ${employee.last_name}`}
-                                </option>
-                              ))
-                            ) : (
-                              <option value="">No Employees Available</option>
-                            )}
-                          </select>
-                        </div>
-                      </div>
-                      <div className="col-md-12">
-                        <div className="form-group">
-                          <select className="form-control" value={selectedStatus} onChange={this.handleStatusChange}>
-                            <option value="">Select Status</option>
-                            <option value="active">Break In</option>
-                            <option value="completed">Break Out</option>
-                          </select>
-                        </div>
-                      </div>
-                      {selectedStatus === "active" && (
-                        <div className="col-md-12">
-                          <div className="form-group">
-                            <textarea
-                              className="form-control"
-                              placeholder="Please provide the reason for your break"
-                              value={breakReason}
-                              onChange={this.handleReasonChange}
-                              rows="10"
-                              cols="50"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-primary" onClick={this.addActivityForEmployee} disabled={this.state.ButtonLoading}>
-                      {this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-                      Save changes
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {this.state.role !== 'employee' && (
+          <AddBreakModal
+            loading={loading}
+            employeeData={employeeData}
+            selectedEmployee={selectedEmployee}
+            selectedStatus={selectedStatus}
+            breakReason={breakReason}
+            handleEmployeeChange={this.handleEmployeeChange}
+            handleStatusChange={this.handleStatusChange}
+            handleReasonChange={this.handleReasonChange}
+            addActivityForEmployee={this.addActivityForEmployee}
+            buttonLoading={this.state.ButtonLoading}
+          />
         )}
 
         {/* Add Break reason Modal for loggedin employee */}
-        {this.state.breakReasonModal && (
-          <div
-            className="modal fade show d-block"
-            id="addBreakReasonModal"
-            tabIndex="-1"
-            role="dialog">
-            <div className="modal-dialog modal-dialog-scrollable" role="dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="addBreakReasonModalLabel">Break Reason</h5>
-                  <button type="button" className="close" onClick={this.closebreakReasonModal} aria-label="Close"><span aria-hidden="true">×</span></button>
-                </div>
-                <div className="dimmer-content">
-                  <div className="modal-body">
-                    <div className="row clearfix">
-                      <div className="col-md-12">
-                        <div className="form-group">
-                          <textarea
-                            className="form-control"
-                            placeholder="Please provide the reason for your break"
-                            value={breakReason}
-                            onChange={this.handleReasonChange}
-                            rows="10"
-                            cols="50"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-primary" onClick={this.handleSaveBreakIn} disabled={this.state.ButtonLoading}>
-                      {this.state.ButtonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-                      Save changes
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <BreakReasonModal
+          showModal={this.state.breakReasonModal}
+          breakReason={breakReason}
+          handleReasonChange={this.handleReasonChange}
+          handleSaveBreakIn={this.handleSaveBreakIn}
+          closeModal={this.closeModal}
+          ButtonLoading={this.state.ButtonLoading}
+        />
       </>
     );
   }

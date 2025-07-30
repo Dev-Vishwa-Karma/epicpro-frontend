@@ -13,11 +13,12 @@ const DateFilterForm = ({
     handleEmployeeChange,
     handleApplyFilters,
     minDate,
-    maxDate
+    maxDate,
+    col
 }) => {
     return (
-        <div className="row">
-            <div className="col-md-3">
+        <>
+            <div className={`col-md-${col}`}>
                 <div className="form-group">
                     <label className="form-label">From Date</label>
                     <DatePicker
@@ -27,11 +28,12 @@ const DateFilterForm = ({
                         dateFormat="yyyy-MM-dd"
                         placeholderText="From Date"
                         maxDate={maxDate}
+                        wrapperClassName=""
                     />
                 </div>
             </div>
 
-            <div className="col-md-3">
+            <div className={`col-md-${col}`}>
                 <div className="form-group">
                     <label className="form-label">To Date</label>
                     <DatePicker
@@ -42,19 +44,23 @@ const DateFilterForm = ({
                         placeholderText="To Date"
                         minDate={minDate}
                         maxDate={maxDate}
+                        wrapperClassName=""
                     />
                 </div>
             </div>
 
-            {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                <EmployeeSelector
-                    allEmployeesData={allEmployeesData}
-                    selectedEmployee={selectedEmployee}
-                    handleEmployeeChange={handleEmployeeChange}
-                />
+            {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && allEmployeesData && (
+                <div className={`col-md-${col}`}>
+                    <EmployeeSelector
+                        allEmployeesData={allEmployeesData}
+                        selectedEmployee={selectedEmployee}
+                        handleEmployeeChange={handleEmployeeChange}
+                        showAllInOption={true}
+                    />
+                </div>
             )}
 
-            <div className="col-md-3">
+            <div className={`col-md-${col}`}>
                 <div className="form-group">
                     <label className="form-label">&nbsp;</label>
                     <button
@@ -70,7 +76,7 @@ const DateFilterForm = ({
                     </button>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
