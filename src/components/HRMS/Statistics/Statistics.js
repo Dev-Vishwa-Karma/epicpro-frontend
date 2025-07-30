@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
 import { getService } from "../../../services/getService";
+import YearSelector from "../../common/YearSelector";
+import MonthSelector from "../../common/MonthSelector";
 
 class Statistics extends Component {
   constructor(props) {
@@ -30,12 +32,6 @@ class Statistics extends Component {
     this.getAlternateSaturdays();
     this.getHolidays();
   }
-
-  getMonths = () => {
-    return Array.from({ length: 12 }, (_, index) => {
-      return new Date(2000, index, 1).toLocaleString('default', { month: 'long' });
-    });
-  };
 
   getEmployees = () => {
     const { selectedYear, selectedMonth } = this.state;
@@ -231,8 +227,6 @@ class Statistics extends Component {
     const { fixNavbar } = this.props;
     const { selectedYear, selectedMonth, employeesData, leavesData, alternateSaturdayData, holidaysData, isLoading, showSuccess, successMessage, showError, errorMessage } = this.state;
     const monthDays = this.getAllDatesOfMonth(selectedYear, selectedMonth);
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
     const attendanceByDate = this.prepareAttendanceFromReports();
     const leaveCounts = this.initalizeEmployeeData(employeesData);
     // const halfLeaveCounts = this.initalizeEmployeeData(employeesData);
@@ -255,21 +249,21 @@ class Statistics extends Component {
             {/* Filters */}
             <div className="d-flex flex-wrap align-items-center mb-3">
               <div className="d-flex align-items-center mr-3 mb-2">
-                <label htmlFor="year-selector" className="mr-2 mb-0">Year:</label>
-                <select id="year-selector" className="custom-select" value={selectedYear} onChange={this.handleYearChange}>
-                  {years.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
+                <YearSelector
+                  selectedYear={selectedYear}
+                  handleYearChange={this.handleYearChange}
+                  labelClass='mr-2 mb-0'
+                  selectClass='custom-select w-auto'
+                />
               </div>
 
               <div className="d-flex align-items-center mb-2">
-                <label htmlFor="month-selector" className="mr-2 mb-0">Month:</label>
-                <select id="month-selector" className="custom-select" value={selectedMonth} onChange={this.handleMonthChange}>
-                  {this.getMonths().map((month, index) => (
-                    <option key={index} value={index + 1}>{month}</option>
-                  ))}
-                </select>
+                <MonthSelector
+                  selectedMonth={selectedMonth}
+                  handleMonthChange={this.handleMonthChange}
+                  labelClass="mr-2 mb-0"
+                  selectClass="custom-select w-auto"
+                />
               </div>
 
               <div className="ml-auto">

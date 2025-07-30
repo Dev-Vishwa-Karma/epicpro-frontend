@@ -1,14 +1,22 @@
 import React from 'react';
 
-const YearSelector = ({ selectedYear, years, handleYearChange }) => {
+const YearSelector = ({ selectedYear, handleYearChange, labelClass, selectClass }) => {
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear;
+    const endYear = currentYear + 10;
+    const years = Array.from(
+      { length: endYear - startYear + 1 },
+      (_, i) => startYear + i
+    );
+
   return (
-    <div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-      <label htmlFor="year-selector" className='d-flex card-title mr-3'>
+    <div>
+      <label htmlFor="year-selector" className={labelClass}>
         Year:
       </label>
       <select 
         id="year-selector" 
-        className='w-70 custom-select' 
+        className={selectClass} 
         value={selectedYear}
         onChange={handleYearChange}
       >

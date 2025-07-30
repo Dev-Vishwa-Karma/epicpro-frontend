@@ -32,7 +32,7 @@ class Notifications extends Component {
             body:"",
             type:"",
             read:0,
-            col: (window.user.role === "admin" || window.user.role === "super_admin") ? 3 : 3,
+            col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
             selectedEmployee: '',
             // Pagination state variables
             currentPage: 1,
