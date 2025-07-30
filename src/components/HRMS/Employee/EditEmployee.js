@@ -79,6 +79,7 @@ class EditEmployee extends Component {
             emergencyContact1: React.createRef(),
             emergencyContact2: React.createRef(),
             emergencyContact3: React.createRef(),
+            bankAccountNo: React.createRef(),
         };
     }
 
@@ -327,19 +328,46 @@ class EditEmployee extends Component {
         { name: 'lastName', value: lastName, type: 'name', required: true, messageName:'Last Name' },
         { name: 'email', value: email, type: 'email', required: true, messageName:'Email' },
         { name: 'selectedDepartment', value: selectedDepartment, required: true, messageName:'Department' },
-        { name: 'gender', value: gender, required: true, messageName:'Gender' },
-        { name: 'dob', value: dob, type: 'date', required: true, messageName:'DOB' },
-        { name: 'password', value: dob, type: 'date', required: true, messageName:'DOB' },
+        { name: 'gender', value: gender, required: true, messageName: 'Gender' },
+        { name: 'password', value: password, type: 'password', required: true, messageName:'Password' },
+        { name: 'dob', value: dob, type: 'date', required: true, messageName:'DOB',
+            customValidator: (val) => {
+                if (val) {
+                    const inputDate = new Date(val);
+                    const currentDate = new Date();
+                    currentDate.setHours(23, 59, 59, 999);
+                    if (inputDate > currentDate) {
+                        return 'DOB cannot be greater than current date.';
+                    }
+                }
+                return undefined;
+            }
+        },
         { name: 'mobile1', value: mobile1, type: 'mobile', required: true, messageName:'Mobile Number' },
         { name: 'mobile2', value: mobile2, type: 'mobile', messageName:'Mobile Number' },
         { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile', messageName:'Mobile Number' },
         { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile',  messageName:'Mobile Number' },
         { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile',  messageName:'Mobile Number'  },
         { name: 'joiningDate', value: joiningDate, type: 'date', required: true,  messageName:'Joining Date'  },
+        { name: 'bankAccountNo', value: bankAccountNo, messageName:'Account Number',
+            customValidator: (val) => {
+                if (val && val.toString().length > 20) {
+                    return 'Account Number must not exceed 20 digits.';
+                }
+                return undefined;
+            }
+        },
         { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'visibility Priority' },
         ];
 
         const errors = validateFields(validationSchema);
+
+        // Validate salary amounts
+        salaryDetails.forEach((detail, index) => {
+            if (detail.salaryAmount && detail.salaryAmount.toString().length > 8) {
+                errors[`salaryAmount_${index}`] = 'Salary Amount must not exceed 8 digits.';
+            }
+        });
 
         // Show errors if any and scrolled on there
         if (Object.keys(errors).length > 0) {
@@ -881,11 +909,16 @@ class EditEmployee extends Component {
                                                                 type="number"
                                                                 name="bankAccountNo"
                                                                 id="bankAccountNo"
-                                                                className="form-control"
+                                                                className={`form-control${this.state.errors.bankAccountNo ? ' is-invalid' : ''}`}
                                                                 placeholder="Account Number"
                                                                 value={bankAccountNo}
                                                                 onChange={this.handleChange}
+                                                                ref={this.fieldRefs.bankAccountNo}
+                                                                maxLength="20"
                                                             />
+                                                            {this.state.errors.bankAccountNo && (
+                                                                <div className="invalid-feedback d-block">{this.state.errors.bankAccountNo}</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="col-sm-6 col-md-4">
@@ -964,11 +997,15 @@ class EditEmployee extends Component {
                                                                             type="number"
                                                                             name="salaryAmount"
                                                                             id="salaryAmount"
-                                                                            className="form-control"
+                                                                            className={`form-control${this.state.errors[`salaryAmount_${index}`] ? ' is-invalid' : ''}`}
                                                                             placeholder="Enter salary amount"
                                                                             value={entry.salaryAmount || ""}
                                                                             onChange={(e) => this.handleSalaryDetails(index, "salaryAmount", e.target.value)}
+                                                                            maxLength="8"
                                                                         />
+                                                                        {this.state.errors[`salaryAmount_${index}`] && (
+                                                                            <div className="invalid-feedback d-block">{this.state.errors[`salaryAmount_${index}`]}</div>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                                 <div className="col-sm-6 col-md-3">
