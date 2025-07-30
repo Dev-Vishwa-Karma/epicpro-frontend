@@ -112,12 +112,6 @@ const ClientInfoModal = ({ client, onClose }) => {
                 </div>
               ) : (
                 <div className="card p-3 text-center">
-                  {/* <div>
-                    <b>No. of Projects:</b> {client.project_count || 0}
-                  </div>
-                  <div>
-                    <b>No. of Team Members:</b> {client.employee_count || 0}
-                  </div> */}
                 </div>
               )}
             </div>

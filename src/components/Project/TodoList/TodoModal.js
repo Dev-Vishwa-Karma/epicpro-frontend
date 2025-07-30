@@ -87,9 +87,6 @@ const TodoModal = ({
                     </div>
                   </div>
                   
-
-                  {/* Show dropdown only for admin */}
-                  {/* Show dropdown only for admin and only when not in edit mode */}
                     {(loggedInEmployeeRole === "admin" || loggedInEmployeeRole === "super_admin") && !isEdit && (
                       <div className="col-md-12 col-sm-12">
                         <label htmlFor="selectedEmployeeId" className="form-label font-weight-bold">Select Employee</label>

@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
 import AlertMessages from "../../common/AlertMessages";
 import ClientInfoModal from "./ClientInfoModal";
 import ClientFieldModal from "./ClientFieldModal";
+import ClientCards from "./ClientCards";
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from "../../../services/getService";
-import BlankState from "../../common/BlankState";
 import { validateFields } from '../../common/validations';
 class Clients extends Component {
   constructor(props) {
@@ -356,129 +355,13 @@ class Clients extends Component {
                   </div>
                 </div>
               </div>
-              {loading ? (
-                <div className="col-12">
-                  <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                    <div className="dimmer active">
-                      <div className="loader" />
-                    </div>
-                  </div>
-                </div>
-
-              ) : clients && clients.length > 0 ? (
-                clients.map((client, index) => (
-                  <div key={index} className="col-xl-3 col-lg-4 col-md-6 mb-4">
-                    <div className="card h-100">
-                      <div className="card-body text-center ribbon" style={{ minHeight: '300px' }}>
-                        <div className={`ribbon-box ${client.client_country ? 'green' : 'transparent'}`}>
-                          {client.client_country || ' '}
-                        </div>
-
-                        <div className="d-flex justify-content-center" style={{ height: '100px', margin: '20px 0' }}>
-                          {client.client_profile ? (
-                            <img
-                              className="rounded-circle img-thumbnail"
-                              src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
-                              alt="Client Profile"
-                              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                          ) : (
-                            <img
-                              className="rounded-circle img-thumbnail"
-                              src="../../../assets/images/sm/avatar2.jpg"
-                              alt="Default Avatar"
-                              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                          )}
-                        </div>
-                        <div
-                          className="dropdown d-flex"
-                          style={{ position: 'absolute', top: '16px', right: '10px' }}
-                        >
-                          <a
-                            href="/#"
-                            className="nav-link icon d-none d-md-flex ml-1"
-                            data-toggle="dropdown"
-                            title="More options"
-                          >
-                            <i className="fa fa-ellipsis-v" />
-                          </a>
-
-                          <div
-                            className="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
-                            style={{
-                                minWidth: '100px',
-                                padding: '4px 0',
-                                overflow: 'hidden'
-                              }}
-                          >
-                            <button
-                              className="dropdown-item project-dropdown-item"
-                              type="button"
-                              title="Edit"
-                              onClick={() => this.handleOpenEditClientField(client)}
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              className="dropdown-item project-dropdown-item"
-                              type="button"
-                              title="Delete"
-                              onClick={() => this.handleOpenDeleteModal(client)}
-                              style={{
-                                color: '#d9534f',
-                              }}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-
-
-                        {/* Client info with fixed spacing */}
-                        <div style={{ minHeight: '40px' }}>
-                          <h6 className="mt-3 mb-0">{client.client_name || ' '}</h6>
-                          <span style={{ fontSize: '15px' }}>{client.client_email || ' '}</span>
-                        </div>
-
-                        {/* View Profile button */}
-                        <ul className="mt-3 list-unstyled d-flex justify-content-center" >
-                          <button className="btn btn-default btn-sm"
-                            onClick={() => this.handleViewProfile(client)} >
-                            View Profile
-                          </button>
-                        </ul>
-
-                        {/* Stats section with fixed height */}
-                        <div className="row text-center mt-4" style={{ minHeight: '80px' }}>
-                          <div className="col-lg-6 border-right">
-                            <label className="mb-0">Project</label>
-                            <h4 className="font-18">
-                              <Link to={`/project-list`}>
-                                {client.project_count}
-                              </Link>
-                            </h4>
-                          </div>
-                          <div className="col-lg-6">
-                            <label className="mb-0">Employee</label>
-                            <h4 className="font-18">
-                              <Link to={`/hr-employee`}>
-                                {client.employee_count}
-                              </Link>
-                            </h4>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="col-12">
-                  <BlankState message="No clients available" />
-                </div>
-              )}
-
+              <ClientCards
+                clients={clients}
+                loading={loading}
+                onViewProfile={this.handleViewProfile}
+                onEditClient={this.handleOpenEditClientField}
+                onDeleteClient={this.handleOpenDeleteModal}
+              />
             </div>
           </div>
         </div>

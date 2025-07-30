@@ -5,9 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import TextEditor from '../../common/TextEditor';
 import DeleteModal from '../../common/DeleteModal';
+import ReportTable from './ReportTable';
 import { getService } from '../../../services/getService';
-import NoDataRow from '../../common/NoDataRow';
-import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 class Report extends Component {
 
@@ -44,8 +43,6 @@ class Report extends Component {
 			break_duration_in_minutes: 0,
 			todays_total_hours: '',
             note: '',
-			currentPageReports: 1,
-            dataPerPage: 10,
 			fromDate: null,
 			toDate: null,
 			error: {
@@ -802,14 +799,6 @@ class Report extends Component {
         );
     };
 
-    // Handle Pagination of employee listing and employee leaves listing
-	handlePageChange = (newPage) => {
-        const totalPages = Math.ceil(this.state.reports.length / this.state.dataPerPage);
-        if (newPage >= 1 && newPage <= totalPages) {
-            this.setState({ currentPageReports: newPage });
-        }
-	};
-
     // Add new method for handling date changes
     handleDateChange = (date, type) => {
         if (date) {
@@ -861,11 +850,8 @@ class Report extends Component {
             break_duration_in_minutes, 
             todays_working_hours, 
             end_time, 
-            currentPageReports, 
-            dataPerPage,
             fromDate,
             toDate,
-            filteredReports,
             selectedModalReport,
             showSuccess, 
             successMessage, 
@@ -875,13 +861,7 @@ class Report extends Component {
         } = this.state;
 
         // Handle empty employee data safely
-        const reportList = (filteredReports || reports || []).length > 0 ? (filteredReports || reports) : [];
-
-        // Pagination Logic for Reports
-        const indexOfLastReport = currentPageReports * dataPerPage;
-        const indexOfFirstReport = indexOfLastReport - dataPerPage;
-        const currentReports = reportList.slice(indexOfFirstReport, indexOfLastReport);
-        const totalPagesReports = Math.ceil(reportList.length / dataPerPage);
+        const reportList = (reports || []).length > 0 ? reports : [];
 
         return (
             <>  
@@ -935,109 +915,16 @@ class Report extends Component {
                                         {reportError && (
                                             <div className="alert alert-danger mb-0">{reportError}</div>
                                         )}
-                                        <div className="card-body">
-                                            {loading ? (
-												<div className="dimmer active p-3">
-													<div className="loader" />
-												</div>
-											) : (
-                                                <div className="table-responsive">
-                                                    <table className="table table-hover table-striped table-vcenter mb-0">
-                                                        <thead>
-                                                            <tr>
-                                                                {window.user && window.user.role !== 'employee' && (
-                                                                    <th>Employee Name</th>
-                                                                )}
-                                                                <th>Date</th>
-                                                                <th>Start Time</th>
-                                                                <th>Break Duration</th>
-                                                                <th>End Time</th>
-                                                                <th>Working Hours</th>
-                                                                <th>Total Hours</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {currentReports.length > 0 ? (
-                                                                currentReports.map((report, index) => (
-                                                                    <tr key={index}>
-                                                                        {window.user && window.user.role !== 'employee' && (
-                                                                            <td>{report.full_name}</td>
-                                                                        )}
-                                                                        <td>
-                                                                        {report.created_at && !isNaN(new Date(report.created_at).getTime())
-                                                                        ? new Intl.DateTimeFormat('en-US', {
-                                                                            day: '2-digit',
-                                                                            month: 'short',
-                                                                            year: 'numeric',
-                                                                        }).format(new Date(report.created_at))
-                                                                        : 'N/A'}
-                                                                        </td>
-                                                                        <td>{this.formatDateTimeAMPM(report.start_time)}</td>
-                                                                        <td>{report.break_duration_in_minutes} Mins</td>
-                                                                        <td>{this.formatDateTimeAMPM(report.end_time)}</td>
-                                                                        <td>{report.todays_working_hours?.slice(0, 5)}</td>
-                                                                        <td>{report.todays_total_hours?.slice(0, 5)}</td>
-                                                                        <td width="15%">
-                                                                            <button 
-                                                                                type="button" 
-                                                                                className="btn btn-icon btn-sm" 
-                                                                                title="View" 
-                                                                                data-toggle="modal" 
-                                                                                data-target="#viewpunchOutReportModal" 
-                                                                                onClick={() => this.openReportModal(report)}
-                                                                            >
-                                                                                <i className="icon-eye text-danger"></i>
-                                                                            </button>
-
-                                                                            {/* Admin/Super Admin can edit any report */}
-                                                                            {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                                                                                <button
-                                                                                    type="button"
-                                                                                    className="btn btn-icon btn-sm"
-                                                                                    title="Edit"
-                                                                                    data-toggle="modal"
-                                                                                    data-target="#editpunchOutReportModal"
-                                                                                    onClick={() => this.openReportModal(report)}
-                                                                                >
-                                                                                    <i className="icon-pencil text-primary"></i>
-                                                                                </button>
-                                                                            )}
-
-                                                                            {/* Employee can edit only today's report */}
-                                                                            {window.user && window.user.role === 'employee' && this.isToday(report.created_at) && (
-                                                                                <button 
-                                                                                    type="button" 
-                                                                                    className="btn btn-icon btn-sm"
-                                                                                    title="Edit"
-                                                                                    data-toggle="modal" 
-                                                                                    data-target= "#editpunchOutReportModal"
-                                                                                    onClick={() => this.openReportModal(report)}
-                                                                                >
-                                                                                    <i className="icon-pencil text-danger"></i>
-                                                                                </button>
-                                                                            )}
-                                                                        </td>
-                                                                    </tr>
-                                                                ))
-                                                            ) : (
-                                                                <NoDataRow colSpan={7} message="No reports available" />
-                                                            )}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Only show pagination if there are reports */}
-                                    {totalPagesReports > 1 && (
-                                        <Pagination
-                                            currentPage={currentPageReports}
-                                            totalPages={totalPagesReports}
-                                            onPageChange={this.handlePageChange}
+                                        
+                                        <ReportTable
+                                            reports={reports}
+                                            loading={loading}
+                                            onViewReport={this.openReportModal}
+                                            onEditReport={this.openReportModal}
+                                            onDeleteReport={this.openDeleteModal}
+                                            userRole={window.user.role}
                                         />
-                                    )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
