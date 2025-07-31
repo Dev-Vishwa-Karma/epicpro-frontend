@@ -3,7 +3,8 @@ import React from 'react';
 
 const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSaveBreakIn, closeModal, ButtonLoading }) => {
   return (
-    showModal && (
+    <>
+    {showModal && (
       <div className="modal fade show d-block" id="addBreakReasonModal" tabIndex="-1" role="dialog">
         <div className="modal-dialog" role="dialog" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
           <div className="modal-content">
@@ -47,7 +48,9 @@ const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSa
           </div>
         </div>
       </div>
-    )
+    )}
+    {showModal && <div className="modal-backdrop fade show" />}
+    </>
   );
 };
 

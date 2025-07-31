@@ -39,7 +39,7 @@ const ViewReportModal = ({
                                     <strong>Total Hours:</strong> {selectedModalReport.todays_total_hours?.slice(0, 5)}
                                 </div>
                                 {
-                                    selectedModalReport.note !== '' &&
+                                    selectedModalReport.note && selectedModalReport.note.trim() !== '' &&
                                     <div className="col-md-12 p-3 mb-2 alert alert-danger alert-dismissible fade show">
                                         <strong>Note:</strong> {selectedModalReport.note}
                                     </div>

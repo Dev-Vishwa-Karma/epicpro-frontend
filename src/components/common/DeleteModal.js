@@ -4,13 +4,14 @@ const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId 
     if (!show) return null;
   
     return (
-        <div
-            className="modal fade show"
-            style={{ display: 'block' }}
-            tabIndex={-1}
-            role="dialog"
-            aria-modal="true"
-        >
+        <>
+            <div
+                className="modal fade show"
+                style={{ display: 'block' }}
+                tabIndex={-1}
+                role="dialog"
+                aria-modal="true"
+            >
             <div className="modal-dialog" role="document">
                 <div className="modal-content">
                     {/* Header (optional hidden) */}
@@ -60,6 +61,8 @@ const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId 
                 </div>
             </div>
         </div>
+        <div className="modal-backdrop fade show" />
+        </>
     );
 };
 

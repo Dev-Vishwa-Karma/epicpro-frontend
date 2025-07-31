@@ -1085,6 +1085,7 @@ class Header extends Component {
             </div>
           </div>
         )}
+        {this.state.showModal && <div className="modal-backdrop fade show" />}
         {is_task_due_today && showDueAlert && dueTasks?.length > 0 && (
           <DueTasksAlert
             dueTasks={dueTasks}

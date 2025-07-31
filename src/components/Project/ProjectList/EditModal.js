@@ -20,19 +20,20 @@ const EditModal = ({
     const labelId = `${modalId}Label`;
     
     return (
-        <div
-            className={`modal fade ${isOpen ? 'show' : ''}`}
-            id={modalId}
-            tabIndex={-1}
-            role="dialog"
-            aria-labelledby={labelId}
-            style={{ display: isOpen ? 'block' : 'none', zIndex: 1050 }}
-            onClick={(e) => {
-                if (e.target.id === modalId) {
-                    onClose();
-                }
-            }}
-        >
+        <>
+            <div
+                className={`modal fade ${isOpen ? 'show' : ''}`}
+                id={modalId}
+                tabIndex={-1}
+                role="dialog"
+                aria-labelledby={labelId}
+                style={{ display: isOpen ? 'block' : 'none', zIndex: 1050 }}
+                onClick={(e) => {
+                    if (e.target.id === modalId) {
+                        onClose();
+                    }
+                }}
+            >
             <div className="modal-dialog modal-dialog-scrollable" role="document">
                 <div className="modal-content" tabIndex={-1}>
                     <div className="modal-header">
@@ -229,6 +230,8 @@ const EditModal = ({
                 </div>
             </div>
         </div>
+        {isOpen && <div className="modal-backdrop fade show" style={{ zIndex: 1040 }} />}
+        </>
     );
 };
 

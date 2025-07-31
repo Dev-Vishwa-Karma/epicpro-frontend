@@ -12,7 +12,8 @@ const EditLeaveRequestModal = ({
   closeModal
 }) => {
   return (
-    showModal && (
+   <>
+    {showModal && (
       <div
         className="modal fade show d-block"
         id="editLeaveRequestModal"
@@ -200,7 +201,9 @@ const EditLeaveRequestModal = ({
           </div>
         </div>
       </div>
-    )
+    )}
+    {showModal && <div className="modal-backdrop fade show" />}
+    </>
   );
 };
 
