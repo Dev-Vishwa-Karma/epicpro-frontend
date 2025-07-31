@@ -670,7 +670,7 @@ class EditEmployee extends Component {
                                                             name="photo"
                                                             className="form-control"
                                                             onChange={this.handleFileChange}
-                                                            accept="image/*"
+                                                            accept="image/png,image/jpg,image/jpeg,image/webp"
                                                         />
 
                                                         {photo ? (
@@ -897,6 +897,7 @@ class EditEmployee extends Component {
                                                                 id="bankAccountName"
                                                                 className="form-control"
                                                                 placeholder="Account Holder Name"
+                                                                maxLength="90"
                                                                 value={bankAccountName}
                                                                 onChange={this.handleChange}
                                                             />
@@ -1303,6 +1304,7 @@ class EditEmployee extends Component {
                                                             className="form-control"
                                                             placeholder="Select your resume"
                                                             onChange={this.handleFileChange}
+                                                            accept=".pdf,.doc,.docx,.txt,.rtf,.gdoc"
                                                         />
                                                         {/* Resume Preview Link */}
                                                         {resume ? (

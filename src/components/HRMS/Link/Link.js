@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import LinkTable from './LinkTable';
 import LinkModal from './LinkModal';
 import DeleteModal from '../../common/DeleteModal';
+import DownloadModal from '../../common/DownloadModal';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
@@ -26,6 +27,11 @@ class Link extends Component {
       showDeleteModal: false,
       deleteType: null,
       deleteId: null,
+      // Download confirmation modal state
+      showDownloadModal: false,
+      downloadFileUrl: null,
+      downloadFileName: '',
+      downloadFileExtension: '',
       showSuccess: false,
       showError: false,
       successMessage: '',
@@ -101,6 +107,52 @@ class Link extends Component {
       deleteType: null,
       deleteId: null,
       loading: false,
+    });
+  };
+
+  handleDownloadClick = (fileUrl) => {
+    const fileName = fileUrl.split('/').pop();
+    const fileExtension = fileName.split('.').pop();
+    this.setState({
+      showDownloadModal: true,
+      downloadFileUrl: fileUrl,
+      downloadFileName: fileName,
+      downloadFileExtension: fileExtension
+    });
+  };
+
+  handleDownloadConfirm = () => {
+    const { downloadFileUrl } = this.state;
+    // Get absolute URL
+    const getAbsoluteUrl = (fileUrl) => {
+      if (!fileUrl) return '';
+      if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
+      const base = process.env.REACT_APP_API_URL?.replace(/\/$/, '') || '';
+      return base + '/' + fileUrl.replace(/^\//, '');
+    };
+    
+    const absUrl = getAbsoluteUrl(downloadFileUrl);
+    const link = document.createElement('a');
+    link.href = absUrl;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    this.setState({
+      showDownloadModal: false,
+      downloadFileUrl: null,
+      downloadFileName: '',
+      downloadFileExtension: ''
+    });
+  };
+
+  handleDownloadModalClose = () => {
+    this.setState({
+      showDownloadModal: false,
+      downloadFileUrl: null,
+      downloadFileName: '',
+      downloadFileExtension: ''
     });
   };
 
@@ -390,7 +442,7 @@ class Link extends Component {
     const { fixNavbar } = this.props;
     const {
       activeTab, gitLinks, excelLinks, codebaseLinks, showModal, isEdit, errors, loading, modalId,
-      showDeleteModal, showSuccess, showError, successMessage, errorMessage,
+      showDeleteModal, showDownloadModal, downloadFileName, downloadFileExtension, showSuccess, showError, successMessage, errorMessage,
       currentPageGit, currentPageExcel, currentPageCodebase, dataPerPage, searchQuery
     } = this.state;
 
@@ -488,7 +540,7 @@ class Link extends Component {
                   </div>
                 </div>
                 <div className="card-body">
-                  <LinkTable data={currentGitLinks} type="Git" onEdit={this.handleEdit} onDelete={this.handleDelete} />
+                  <LinkTable data={currentGitLinks} type="Git" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
                   {this.renderPagination('Git', gitLinks.length)}
                 </div>
               </div>
@@ -513,7 +565,7 @@ class Link extends Component {
                   </div>
                 </div>
                 <div className="card-body">
-                  <LinkTable data={currentExcelLinks} type="Excel" onEdit={this.handleEdit} onDelete={this.handleDelete} />
+                  <LinkTable data={currentExcelLinks} type="Excel" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
                   {this.renderPagination('Excel', excelLinks.length)}
                 </div>
               </div>
@@ -539,7 +591,7 @@ class Link extends Component {
                   </div>
                 </div>
                 <div className="card-body">
-                  <LinkTable data={currentCodebaseLinks} type="Codebase" onEdit={this.handleEdit} onDelete={this.handleDelete} />
+                  <LinkTable data={currentCodebaseLinks} type="Codebase" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
                   {this.renderPagination('Codebase', codebaseLinks.length)}
                 </div>
               </div>
@@ -565,6 +617,14 @@ class Link extends Component {
           deleteBody='Are you sure you want to delete this link?'
           modalId="deleteLinkModal"
           onClose={this.handleDeleteModalClose}
+        />
+        <DownloadModal
+          show={showDownloadModal}
+          onConfirm={this.handleDownloadConfirm}
+          isLoading={false}
+          deleteBody={`Are you sure you want to download this file? ${downloadFileName} ${downloadFileExtension}`}
+          modalId="downloadFileModal"
+          onClose={this.handleDownloadModalClose}
         />
       </div>
     );

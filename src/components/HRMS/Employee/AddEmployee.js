@@ -631,6 +631,7 @@ class AddEmployee extends Component {
                               className="form-control"
                               onChange={this.handleFileChange}
                               ref={this.fileInputRefs.photo}
+                              accept="image/png,image/jpg,image/jpeg,image/webp"
                             />
                           </div>
                         </div>
@@ -905,6 +906,7 @@ class AddEmployee extends Component {
                                 id="bankAccountName"
                                 className="form-control"
                                 placeholder="Account Holder Name"
+                                maxLength="90"
                                 value={bankAccountName}
                                 onChange={this.handleChange}
                               />
@@ -1304,6 +1306,7 @@ class AddEmployee extends Component {
                               placeholder="Select your resume"
                               onChange={this.handleFileChange}
                               ref={this.fileInputRefs.resume}
+                              accept=".pdf,.doc,.docx,.txt,.rtf,.gdoc"
                             />
                           </div>
                         </div>

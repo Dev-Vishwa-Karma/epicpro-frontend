@@ -3,12 +3,15 @@ import { connect } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
-import TextEditor from '../../common/TextEditor';
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
-import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
+import ReportTable from './ReportTable';
+import ViewReportModal from './ViewReportModal';
+import EditReportModal from './EditReportModal';
+import AddBreakModal from './AddBreakModal';
+import EditReportDetailsModal from './EditReportDetailsModal';
 class Report extends Component {
 
     constructor(props) {
@@ -61,6 +64,7 @@ class Report extends Component {
             successMessage: "",
             ButtonLoading: false,
             showDeleteModal: false,
+            col: (window.user.role === "admin" || window.user.role === "super_admin") ? 3 : 4
         };
         this.reportMessageTimeout = null;
     }
@@ -913,18 +917,21 @@ class Report extends Component {
                                 <div className="tab-pane fade show active" id="Report-Invoices" role="tabpanel">
                                     <div className="card">
                                         <div className="card-header">
-                                            <DateFilterForm
-                                                fromDate={fromDate}
-                                                toDate={toDate}
-                                                selectedLeaveEmployee={selectedReportEmployee}
-                                                allEmployeesData={employeeData}
-                                                ButtonLoading={this.state.ButtonLoading}
-                                                handleDateChange={this.handleDateChange}
-                                                handleEmployeeChange={this.handleEmployeeChange}
-                                                handleApplyFilters={this.handleApplyFilters}
-                                                minDate={fromDate}
-                                                maxDate={new Date()}
-                                            />
+                                            <div className="row">
+                                                <DateFilterForm
+                                                    fromDate={fromDate}
+                                                    toDate={toDate}
+                                                    selectedEmployee={selectedReportEmployee}
+                                                    allEmployeesData={employeeData}
+                                                    ButtonLoading={this.state.ButtonLoading}
+                                                    handleDateChange={this.handleDateChange}
+                                                    handleEmployeeChange={this.handleEmployeeChange}
+                                                    handleApplyFilters={this.handleApplyFilters}
+                                                    minDate={fromDate}
+                                                    maxDate={new Date()}
+                                                    col={this.state.col}
+                                                />
+											</div>
                                         </div>
 
                                         {/* Display activity success message outside the modal */}
@@ -935,99 +942,13 @@ class Report extends Component {
                                         {reportError && (
                                             <div className="alert alert-danger mb-0">{reportError}</div>
                                         )}
-                                        <div className="card-body">
-                                            {loading ? (
-												<div className="dimmer active p-3">
-													<div className="loader" />
-												</div>
-											) : (
-                                                <div className="table-responsive">
-                                                    <table className="table table-hover table-striped table-vcenter mb-0">
-                                                        <thead>
-                                                            <tr>
-                                                                {window.user && window.user.role !== 'employee' && (
-                                                                    <th>Employee Name</th>
-                                                                )}
-                                                                <th>Date</th>
-                                                                <th>Start Time</th>
-                                                                <th>Break Duration</th>
-                                                                <th>End Time</th>
-                                                                <th>Working Hours</th>
-                                                                <th>Total Hours</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {currentReports.length > 0 ? (
-                                                                currentReports.map((report, index) => (
-                                                                    <tr key={index}>
-                                                                        {window.user && window.user.role !== 'employee' && (
-                                                                            <td>{report.full_name}</td>
-                                                                        )}
-                                                                        <td>
-                                                                        {report.created_at && !isNaN(new Date(report.created_at).getTime())
-                                                                        ? new Intl.DateTimeFormat('en-US', {
-                                                                            day: '2-digit',
-                                                                            month: 'short',
-                                                                            year: 'numeric',
-                                                                        }).format(new Date(report.created_at))
-                                                                        : 'N/A'}
-                                                                        </td>
-                                                                        <td>{this.formatDateTimeAMPM(report.start_time)}</td>
-                                                                        <td>{report.break_duration_in_minutes} Mins</td>
-                                                                        <td>{this.formatDateTimeAMPM(report.end_time)}</td>
-                                                                        <td>{report.todays_working_hours?.slice(0, 5)}</td>
-                                                                        <td>{report.todays_total_hours?.slice(0, 5)}</td>
-                                                                        <td width="15%">
-                                                                            <button 
-                                                                                type="button" 
-                                                                                className="btn btn-icon btn-sm" 
-                                                                                title="View" 
-                                                                                data-toggle="modal" 
-                                                                                data-target="#viewpunchOutReportModal" 
-                                                                                onClick={() => this.openReportModal(report)}
-                                                                            >
-                                                                                <i className="icon-eye text-danger"></i>
-                                                                            </button>
-
-                                                                            {/* Admin/Super Admin can edit any report */}
-                                                                            {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                                                                                <button
-                                                                                    type="button"
-                                                                                    className="btn btn-icon btn-sm"
-                                                                                    title="Edit"
-                                                                                    data-toggle="modal"
-                                                                                    data-target="#editpunchOutReportModal"
-                                                                                    onClick={() => this.openReportModal(report)}
-                                                                                >
-                                                                                    <i className="icon-pencil text-primary"></i>
-                                                                                </button>
-                                                                            )}
-
-                                                                            {/* Employee can edit only today's report */}
-                                                                            {window.user && window.user.role === 'employee' && this.isToday(report.created_at) && (
-                                                                                <button 
-                                                                                    type="button" 
-                                                                                    className="btn btn-icon btn-sm"
-                                                                                    title="Edit"
-                                                                                    data-toggle="modal" 
-                                                                                    data-target= "#editpunchOutReportModal"
-                                                                                    onClick={() => this.openReportModal(report)}
-                                                                                >
-                                                                                    <i className="icon-pencil text-danger"></i>
-                                                                                </button>
-                                                                            )}
-                                                                        </td>
-                                                                    </tr>
-                                                                ))
-                                                            ) : (
-                                                                <NoDataRow colSpan={7} message="No reports available" />
-                                                            )}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            )}
-                                        </div>
+                                        <ReportTable 
+                                            currentReports={currentReports}
+                                            loading={loading}
+                                            formatDateTimeAMPM={this.formatDateTimeAMPM}
+                                            isToday={this.isToday}
+                                            openReportModal={this.openReportModal}
+                                        />
                                     </div>
 
                                     {/* Only show pagination if there are reports */}
@@ -1043,210 +964,28 @@ class Report extends Component {
                         </div>
                     </div>
                     {/* Modal for viewing report details */}
-                    <div className="modal fade" id="viewpunchOutReportModal" tabIndex={-1} role="dialog" aria-labelledby="viewpunchOutReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-                        <div className="modal-dialog" role="dialog">
-                            <div className="modal-content">
-                                <div className="modal-body">
-                                    {selectedModalReport && typeof selectedModalReport === 'object' && selectedModalReport.report != null ? (
-                                        <div className="row">
-                                            {window.user && window.user.role !== 'employee' && (
-                                                <div className="col-md-12 mb-3">
-                                                    <strong>Employee Name:</strong> {selectedModalReport.full_name}
-                                                </div>
-                                            )}
-                                            <div className="col-md-12 mb-4">
-                                                <div
-                                                    className="multiline-text"
-                                                    dangerouslySetInnerHTML={{ __html: selectedModalReport?.report || '' }}
-                                                />
-                                            </div>
-                                            <div className="col-md-12 mb-2">
-                                                <strong>Start Time:</strong> {this.formatDateTimeAMPM(selectedModalReport.start_time)}
-                                            </div>
-                                            <div className="col-md-12 mb-2">
-                                                <strong>End Time:</strong> {this.formatDateTimeAMPM(selectedModalReport.end_time)}
-                                            </div>
-                                            <div className="col-md-12 mb-2">
-                                                <strong>Break Duration:</strong> {selectedModalReport.break_duration_in_minutes} Mins
-                                            </div>
-                                            <div className="col-md-12 mb-2">
-                                                <strong>Working Hours:</strong> {selectedModalReport.todays_working_hours?.slice(0, 5)}
-                                            </div>
-                                            <div className="col-md-12 mb-2">
-                                                <strong>Total Hours:</strong> {selectedModalReport.todays_total_hours?.slice(0, 5)}
-                                            </div>
-                                            {
-                                                selectedModalReport.note !== null &&
-                                                <div className="col-md-12 p-3 mb-2 alert alert-danger alert-dismissible fade show">
-                                                    <strong>Note:</strong> {selectedModalReport.note}
-                                                </div>
-                                            }
-                                        </div>
-                                    ) : (
-                                        <p>No report data available.</p>
-                                    )}
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.closeReportModal}>Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <ViewReportModal 
+                        selectedModalReport={selectedModalReport}
+                        formatDateTimeAMPM={this.formatDateTimeAMPM}
+                        closeReportModal={this.closeReportModal}
+                    />
 
                     {/* Edit Report Modal for employees */}
-                    <div className="modal fade" id="editpunchOutReportModal" tabIndex={-1} role="dialog" aria-labelledby="editpunchOutReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-                        <div className="modal-dialog modal-xl" role="document">
-                            <div className="modal-content">
-
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="editpunchoutReportModalLabel">Update Report</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.closeReportModal}>
-                                        <span aria-hidden="true">×</span>
-                                    </button>
-                                </div>
-                                    {/* Edit Modal */}
-                                <div className="modal-body">
-                                    <div className="row">
-
-                                        {/* Left side - Report TextArea */}
-                                        <div className="col-md-6">
-                                            <div className="form-group">
-                                                <TextEditor
-                                                    name="report"
-                                                    value={this.state.report || ''}
-                                                    onChange={(value) => this.handleChange('report', value)}
-                                                    error={this.state.error?.report}
-                                                    />
-                                            </div>
-                                        </div>
-
-                                        {/* Right side - Form fields */}
-                                        <div className="col-md-6">
-                                            <div className="row">
-
-                                                    {/* Start time */}
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label" htmlFor="event_name">Start time</label>
-                                                            <DatePicker
-                                                            selected={this.getTimeAsDate(start_time)}
-                                                            onChange={(time) => this.handleChange('start_time', time)}
-                                                            showTimeSelect
-                                                            showTimeSelectOnly
-                                                            timeIntervals={15}
-                                                            timeCaption="Start time"
-                                                            dateFormat="h:mm aa"
-                                                            placeholderText="Select time"
-                                                            className={`form-control ${this.state.error?.start_time ? "is-invalid" : ""}`}
-                                                            readOnly
-                                                            />
-                                                            {this.state.error?.start_time && (
-                                                            <div className="invalid-feedback d-block">{this.state.error.start_time}</div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Break duration */}
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label" htmlFor="break_duration_in_minutes">Break duration in minutes</label>
-                                                            <input
-                                                            readOnly
-                                                            disabled
-                                                            type="number"
-                                                            value={break_duration_in_minutes || 0}
-                                                            onChange={(e) => this.handleChange('break_duration_in_minutes', e.target.value)}
-                                                            />
-                                                            {this.state.error?.break_duration_in_minutes && (
-                                                            <div className="invalid-feedback">{this.state.error.break_duration_in_minutes}</div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* End time */}
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label" htmlFor="event_name">End time</label>
-                                                            <DatePicker
-                                                            selected={this.getTimeAsDate(end_time)}
-                                                            onChange={(time) => this.handleChange('end_time', time)}
-                                                            showTimeSelect
-                                                            showTimeSelectOnly
-                                                            timeIntervals={15}
-                                                            timeCaption="End time"
-                                                            dateFormat="h:mm aa"
-                                                            placeholderText="Select End time"
-                                                            className={`form-control ${this.state.error?.end_time ? "is-invalid" : ""}`}
-                                                            disabled={window.user.role !== 'admin' && window.user.role !== 'super_admin'}
-                                                            />
-                                                            {this.state.error?.end_time && (
-                                                            <div className="invalid-feedback d-block">{this.state.error.end_time}</div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Today's working hours */}
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label" htmlFor="todays_working_hours">Today's working hours</label>
-                                                            <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            name="todays_working_hours"
-                                                            id="todays_working_hours"
-                                                            placeholder="Today's working hours"
-                                                            value={todays_working_hours?.slice(0, 5) || ''}
-                                                            readOnly
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Today's total hours */}
-                                                    <div className="col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label" htmlFor="todays_total_hours">Today's total hours</label>
-                                                            <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            name="todays_total_hours"
-                                                            id="todays_total_hours"
-                                                            placeholder="Today's total hours"
-                                                            value={todays_total_hours?.slice(0, 5) || ''}
-                                                            readOnly
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="col-md-6">
-                                                        {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                                                            <div className="form-group">
-                                                                <label className="form-label"><strong>Note</strong></label>
-                                                                <textarea
-                                                                    className="form-control"
-                                                                    rows="3"
-                                                                    placeholder="Add note for this update..."
-                                                                    name="note"
-                                                                    id="note"
-                                                                    value={this.state.editNotes}
-                                                                    onChange={this.handleNotesChange}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                    </div>
-                                </div>
-
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.closeReportModal}>Close</button>
-                                    <button type="button" className="btn btn-primary" onClick={this.updateReport}>Update Report</button>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
+                    <EditReportModal 
+                        selectedModalReport={selectedModalReport}
+                        start_time={start_time}
+                        end_time={end_time}
+                        break_duration_in_minutes={break_duration_in_minutes}
+                        todays_working_hours={todays_working_hours}
+                        todays_total_hours={todays_total_hours}
+                        report={this.state.report}
+                        error={this.state.error}
+                        getTimeAsDate={this.getTimeAsDate}
+                        handleChange={this.handleChange}
+                        handleNotesChange={this.handleNotesChange}
+                        closeReportModal={this.closeReportModal}
+                        updateReport={this.updateReport}
+                    />
     
                     {/* Modal for deleting report details */}
                     <DeleteModal
@@ -1258,137 +997,33 @@ class Report extends Component {
                         modalId="deleteReportModal"
                     />
                     {/* Add Break Modal */}
-                    <div className="modal fade" id="addReportModal" tabIndex={-1} role="dialog" aria-labelledby="addReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-                        <div className="modal-dialog" role="dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="addReportModalLabel">Register Employee Punch-In/Out</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                                </div>
-                                <div className="modal-body">
-                                    {/* Display activity error message outside the modal */}
-                                    {addReportByAdminError && (
-                                        <div className="alert alert-danger mb-0">{addReportByAdminError}</div>
-                                    )}
-                                    <div className="row clearfix">
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <select className="form-control" value={selectedEmployee} onChange={this.handleEmployeeChange}>
-                                                    <option value="">Select Employee</option>
-                                                    {employeeData.length > 0 ? (
-                                                        employeeData.map((employee, index) => (
-                                                            <option key={index} value={employee.id}>
-                                                                {`${employee.first_name} ${employee.last_name}`}
-                                                            </option>
-                                                        ))
-                                                    ) : (
-                                                        <option value="">No Employees Available</option>
-                                                    )}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <select className="form-control" value={selectedStatus} onChange={this.handleStatusChange}>
-                                                    <option value="">Select Status</option>
-                                                    <option value="active">Punch In</option>
-                                                    <option value="completed">Punch Out</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        {selectedStatus === "completed" && (
-                                            <div className="col-md-12">
-                                                <div className="form-group">
-                                                    <textarea
-                                                        className="form-control"
-                                                        placeholder="Report"
-                                                        value={punchOutReport || ''}
-                                                        onChange={this.handleReportChange}
-                                                        rows="30"
-                                                        cols="50"
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-primary" onClick={this.addReportByAdmin}>Save changes</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <AddBreakModal 
+                        selectedEmployee={selectedEmployee}
+                        selectedStatus={selectedStatus}
+                        punchOutReport={punchOutReport}
+                        employeeData={employeeData}
+                        addReportByAdminError={addReportByAdminError}
+                        handleEmployeeChange={this.handleEmployeeChange}
+                        handleStatusChange={this.handleStatusChange}
+                        handleReportChange={this.handleReportChange}
+                        addReportByAdmin={this.addReportByAdmin}
+                    />
 
                     {/* Modal for edit report details */}
-                    <div className="modal fade" id="editReportModal" tabIndex={-1} role="dialog" aria-labelledby="editReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-                        <div className="modal-dialog" role="dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="editReportModal">Edit Report</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                                </div>
-                                {/* Display activity error message outside the modal */}
-                                {editReportByAdminError && (
-                                    <div className="alert alert-danger mb-0">{editReportByAdminError}</div>
-                                )}
-                                <div className="modal-body">
-                                    <div className="row clearfix">
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label">Employee</label>
-                                                <input type="text" className="form-control" name="example-disabled-input" placeholder="Disabled.." readOnly value={existingFullName} />
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label">Activity Type</label>
-                                                <input type="text" className="form-control" name="example-disabled-input" placeholder="Disabled.." value={existingActivityType} readOnly/>
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label">Description</label>
-                                                <textarea
-                                                    className="form-control"
-                                                    placeholder="Description"
-                                                    value={existingActivityDescription}
-                                                    rows="10"
-                                                    cols="50"
-                                                    onChange={this.handleEditActivityDescriptionChange}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label">In Time</label>
-                                                <input type="text" className="form-control" value={existingActivityInTime} onChange={this.handleEditActivityInTimeChange} />
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label">Out Time</label>
-                                                <input type="text" className="form-control" value={existingActivityOutTime || ''} onChange={this.handleEditActivityOutTimeChange} />
-                                            </div>
-                                        </div>
-                                        <div className="col-md-12">
-                                            <div className="form-group">
-                                                <label className="form-label">Status</label>
-                                                <select className="form-control" value={existingActivitySatus} onChange={this.handleEditActivityStatusChange}>
-                                                    <option value="">Select Status</option>
-                                                    <option value="active">Active</option>
-                                                    <option value="completed">Completed</option>
-                                                    <option value="auto closed">Auto Closed</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-primary" onClick={this.editReportByAdmin}>Save Changes</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <EditReportDetailsModal 
+                        existingFullName={existingFullName}
+                        existingActivityType={existingActivityType}
+                        existingActivityDescription={existingActivityDescription}
+                        existingActivityInTime={existingActivityInTime}
+                        existingActivityOutTime={existingActivityOutTime}
+                        existingActivitySatus={existingActivitySatus}
+                        editReportByAdminError={editReportByAdminError}
+                        handleEditActivityDescriptionChange={this.handleEditActivityDescriptionChange}
+                        handleEditActivityInTimeChange={this.handleEditActivityInTimeChange}
+                        handleEditActivityOutTimeChange={this.handleEditActivityOutTimeChange}
+                        handleEditActivityStatusChange={this.handleEditActivityStatusChange}
+                        editReportByAdmin={this.editReportByAdmin}
+                    />
                 </div>
                 {/* Add the alert for error messages */}
                 <div 
