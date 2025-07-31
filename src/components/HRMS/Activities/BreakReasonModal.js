@@ -5,7 +5,7 @@ const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSa
   return (
     showModal && (
       <div className="modal fade show d-block" id="addBreakReasonModal" tabIndex="-1" role="dialog">
-        <div className="modal-dialog modal-dialog-scrollable" role="dialog">
+        <div className="modal-dialog" role="dialog" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Break Reason</h5>

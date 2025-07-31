@@ -43,7 +43,7 @@ const DownloadModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalI
                         <button
                             type="button"
                             onClick={onConfirm}
-                            className="btn btn-danger"
+                            className="btn btn-download"
                             disabled={isLoading}
                         >
                             {isLoading && (
@@ -53,34 +53,6 @@ const DownloadModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalI
                                     aria-hidden="true"
                                 ></span>
                             )}
-                            <style>
-                            {`
-                                .btn-danger {
-                                    background-color: rgb(8, 134, 14);
-                                    color: #fff;
-                                    border: none;
-                                    border-radius: 5px;
-                                    cursor: pointer;
-                                    font-size: 16px;
-                                    transition: all 0.3s ease;
-                                }
-                                .btn-danger:hover {
-                                    background-color: rgb(8, 134, 14);
-                                    color: #fff;
-                                    opacity: 0.8;
-                                }
-                                .btn-danger:focus {
-                                    background-color: rgb(8, 134, 14);
-                                    color: #fff;
-                                    box-shadow: 0 0 0 0.2rem rgba(8, 134, 14, 0.25);
-                                }
-                                .btn-danger:active {
-                                    background-color: rgb(8, 134, 14);
-                                    color: #fff;
-                                    opacity: 0.9;
-                                }
-                            `}
-                        </style>
                             Download
                         </button>
                     </div>

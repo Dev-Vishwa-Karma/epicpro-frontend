@@ -100,39 +100,6 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
 
   return (
     <div className="table-responsive">
-      <style>
-        {`
-          .file-icon {
-            cursor: pointer;
-            position: relative;
-          }
-          .file-icon:hover::before {
-            content: "Click to download";
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            white-space: nowrap;
-            z-index: 1000;
-            margin-bottom: 5px;
-          }
-          .file-icon:hover::after {
-            content: "";
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 4px solid transparent;
-            border-top-color: #333;
-            margin-bottom: 1px;
-          }
-        `}
-      </style>
       <table className="table table-hover table-striped table-vcenter mb-0">
         <thead>
           <tr>
