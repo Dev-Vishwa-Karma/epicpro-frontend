@@ -7,6 +7,7 @@ import { getService } from '../../../services/getService';
 import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -635,7 +636,7 @@ class TodoList extends Component {
                                                         <tr>
                                                             <td colSpan="5">
                                                                 <div className="d-flex justify-content-center align-items-center" style={{ height: "150px" }}>
-                                                                    <div className="loader" />
+                                                                   <TableSkeleton columns={4} rows={5} />
                                                                 </div>
                                                             </td>
                                                         </tr>

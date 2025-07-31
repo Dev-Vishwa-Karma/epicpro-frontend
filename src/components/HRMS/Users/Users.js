@@ -6,6 +6,7 @@ import NoDataRow from '../../common/NoDataRow';
 import DeleteModal from '../../common/DeleteModal';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 
 class Users extends Component {
 	constructor(props) {
@@ -536,7 +537,7 @@ class Users extends Component {
 											{loading ? (
 												<div className="card-body">
 													<div className="dimmer active">
-														<div className="loader" />
+														<TableSkeleton columns={4} rows={5} />
 													</div>
 												</div>
 											) : ( // Show Table after loading is false

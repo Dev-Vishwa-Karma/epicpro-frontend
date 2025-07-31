@@ -8,7 +8,7 @@ import DeleteModal from '../../common/DeleteModal';
 import NotificationModal from './NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
-
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 class Notifications extends Component {
     constructor(props) {
 		super(props);
@@ -469,7 +469,7 @@ class Notifications extends Component {
                                         {loading ? (
                                             <div className="card-body">
                                                 <div className="dimmer active">
-                                                    <div className="loader" />
+                                                     <TableSkeleton columns={6} rows={5} />
                                                 </div>
                                             </div>
                                         ) : (
