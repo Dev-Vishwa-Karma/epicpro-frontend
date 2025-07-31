@@ -1,5 +1,7 @@
 import React from 'react';
 import CountUp from 'react-countup';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const LeaveStats = ({ label, value, loading }) => {
   return (
@@ -9,14 +11,10 @@ const LeaveStats = ({ label, value, loading }) => {
           <span>{label}</span>
           {loading ? (
             <div className="d-flex" style={{ height: '20px' }}>
-              <div
-                className="spinner-border"
-                role="status"
-                style={{ width: '20px', height: '20px', borderWidth: '2px' }}
-              >
-                <span className="sr-only">Loading...</span>
-              </div>
+            <Skeleton width={30} height={20} />
             </div>
+
+ 
           ) : (
             <h3 className="mb-0 counter">
               <CountUp end={value} />

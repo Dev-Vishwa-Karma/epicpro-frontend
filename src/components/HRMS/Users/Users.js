@@ -468,7 +468,7 @@ class Users extends Component {
 	render() {
 
 		const { fixNavbar } = this.props;
-		const { users, selectedUser, currentPage, dataPerPage, loading, showSuccess, successMessage, showError, errorMessage } = this.state;
+		const { users, currentPage, dataPerPage, loading, showSuccess, successMessage, showError, errorMessage } = this.state;
 
 		// Pagination Logic
         const indexOfLastUser = currentPage * dataPerPage;

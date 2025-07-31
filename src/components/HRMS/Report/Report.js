@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';

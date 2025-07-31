@@ -292,13 +292,6 @@ class SaturdaySettings extends Component {
     const { fixNavbar } = this.props;
     const { selectedYear, toggle, showSuccess, successMessage, showError, errorMessage } =
       this.state;
-    const currentYear = new Date().getFullYear();
-    const startYear = currentYear;
-    const endYear = currentYear + 10;
-    const years = Array.from(
-      { length: endYear - startYear + 1 },
-      (_, i) => startYear + i
-    );
 
     return (
       <>
