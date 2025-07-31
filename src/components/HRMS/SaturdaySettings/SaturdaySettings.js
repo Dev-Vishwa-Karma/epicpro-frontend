@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
 import { getService } from "../../../services/getService";
+import YearSelector from "../../common/YearSelector";
 class SaturdaySettings extends Component {
   constructor(props) {
     super(props);
@@ -313,22 +314,12 @@ class SaturdaySettings extends Component {
           <div className="container-fluid">
             <div className="d-flex justify-content-between align-items-center flex-wrap mb-3">
               <div className="d-flex align-items-center mb-2 mb-md-0">
-                <label htmlFor="year-selector" className="mr-2 mb-0">
-                  Year:
-                </label>
-
-                <select
-                  id="year-selector"
-                  className="custom-select w-auto"
-                  value={selectedYear}
-                  onChange={this.handleYearChange}
-                >
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
+                <YearSelector
+                  selectedYear={selectedYear}
+                  handleYearChange={this.handleYearChange}
+                  labelClass='mr-2 mb-0'
+                  selectClass='custom-select w-auto'
+                />
               </div>
 
               <div className="d-flex align-items-center">

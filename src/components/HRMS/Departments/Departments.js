@@ -7,6 +7,8 @@ import DepartmentTable from './DepartmentTable';
 import DepartmentGrid from './DepartmentGrid';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
+import TableSkeleton from "../../common/skeletons/TableSkeleton";
+import GridSkeleton from '../../common/skeletons/GridSkeleton';
 class departments extends Component {
   constructor(props) {
     super(props);
@@ -370,7 +372,7 @@ class departments extends Component {
                     {loading ? (
                       <div className="card-body">
                         <div className="dimmer active">
-                          <div className="loader" />
+                          <TableSkeleton columns={5} rows={5} />
                         </div>
                       </div>
                     ) : (
@@ -385,11 +387,15 @@ class departments extends Component {
                 </div>
               </div>
               <div className="tab-pane fade" id="Departments-grid" role="tabpanel">
-                <DepartmentGrid
-                  departmentData={departmentData}
-                  onEditClick={this.handleEditClick}
-                  onDeleteClick={this.openModal}
+                {loading ? (
+                  <GridSkeleton count={4} />
+                ) : (
+                  <DepartmentGrid
+                    departmentData={departmentData}
+                    onEditClick={this.handleEditClick}
+                    onDeleteClick={this.openModal}
                 />
+                )}
               </div>
             </div>
           </div>

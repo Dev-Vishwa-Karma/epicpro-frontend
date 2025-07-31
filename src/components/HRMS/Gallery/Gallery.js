@@ -7,6 +7,7 @@ import BlankState from '../../common/BlankState';
 import ImageModal from './ImageModal';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
+import ImageUploadModal from './ImageUploadModal';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -516,110 +517,19 @@ class Gallery extends Component {
                                             <button type="button" className="btn btn-primary ml-2" onClick={this.openModal}>
                                                 Upload New
                                             </button>
-                                            <div
-                                                className={`modal fade ${this.state.isModalOpen ? 'show' : ''}`}
-                                                id="uploadImageModal"
-                                                tabIndex={-1}
-                                                role="dialog"
-                                                aria-labelledby="uploadImageModalLabel"
-                                                aria-hidden={!this.state.isModalOpen}
-                                                style={{ display: this.state.isModalOpen ? 'block' : 'none', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-                                            >
-                                                <div className="modal-dialog modal-dialog-scrollable" role="document" aria-hidden="true">
-                                                    <div className="modal-content">
-                                                        <div className="modal-header">
-                                                            <h5 className="modal-title" id="uploadImageModalLabel">
-                                                                Upload Images
-                                                            </h5>
-                                                            <button type="button" className="close" aria-label="Close" onClick={this.closeModal}>
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                        <div className="modal-body">
-                                                            {/* Success and Error Messages */}
-                                                            {/* {this.state.showSuccess && (
-                                                                <div className="alert alert-success">{this.state.successMessage}</div>
-                                                            )} */}
-                                                            
-                                                            {/* Employee Selection Section */}
-                                                            {(window.user?.role === "admin" || window.user?.role === "super_admin") && (
-                                                                <div className="mt-3">
-                                                                    <label htmlFor="employeeSelect" className="form-label">Select Employee</label>
-                                                                    <select
-                                                                        id="employeeSelect"
-                                                                        className="form-control"
-                                                                        value={this.state.selectedEmployeeId}
-                                                                        onChange={this.handleEmployeeSelection}
-                                                                    >
-                                                                        <option value="">Select an Employee</option>
-                                                                        {employees.map((employee) => (
-                                                                            <option key={employee.id} value={employee.id}>
-                                                                                {employee.first_name} {employee.last_name}
-                                                                            </option>
-                                                                        ))}
-                                                                    </select>
-                                                                    {this.state.errors.selectedEmployeeId && (
-                                                                        <small className={`invalid-feedback ${this.state.errors.selectedEmployeeId ? 'd-block' : ''}`}>{this.state.errors.selectedEmployeeId}</small>
-                                                                    )}
-                                                                </div>
-                                                            )}
-
-                                                            {/* File Input */}
-                                                            <div className="mt-3">
-                                                                <label htmlFor="image" className="form-label">Select Image</label>
-                                                                <input
-                                                                    type="file"
-                                                                    onChange={this.handleImageSelection}
-                                                                    className="form-control"
-                                                                    multiple
-                                                                    ref={this.fileInputRef}
-                                                                />
-                                                            </div>
-                                                            {/* Show error message if an invalid file is selected */}
-                                                            {this.state.errors.selectedImages && (
-                                                                <small className={`invalid-feedback ${this.state.errors.selectedImages ? 'd-block' : ''}`}>{this.state.errors.selectedImages}</small>
-                                                            )}
-
-                                                            {/* Preview Section */}
-                                                            {this.state.selectedImages.length > 0 && (
-                                                                <div className="mt-3">
-                                                                    <p>Selected Images:</p>
-                                                                    <div className="d-flex flex-wrap">
-                                                                        {this.state.selectedImages.map((image, index) => (
-                                                                            <div key={index} className="position-relative m-2">
-                                                                                <img
-                                                                                    src={URL.createObjectURL(image)}
-                                                                                    alt="Preview"
-                                                                                    className="img-thumbnail"
-                                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                                                                                />  
-                                                                                <button
-                                                                                    className="btn btn-danger btn-sm position-absolute"
-                                                                                    style={{ top: '-5px', right: '-5px', borderRadius: '50%' }}
-                                                                                    onClick={() => this.removeImage(index)}
-                                                                                >
-                                                                                    &times;
-                                                                                </button>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="modal-footer">
-                                                            <button type="button" className="btn btn-secondary" onClick={this.closeModal}>
-                                                                Cancel
-                                                            </button>
-                                                            <button type="button" className="btn btn-primary" onClick={this.submitImages} disabled={this.state.ButtonLoading}>
-                                                                {this.state.ButtonLoading ? (
-                                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                                                                ) : null}
-                                                                Upload Images
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <ImageUploadModal
+                                                isOpen={this.state.isModalOpen}
+                                                closeModal={this.closeModal}
+                                                employees={employees}
+                                                selectedEmployeeId={this.state.selectedEmployeeId}
+                                                handleEmployeeSelection={this.handleEmployeeSelection}
+                                                selectedImages={this.state.selectedImages}
+                                                handleImageSelection={this.handleImageSelection}
+                                                removeImage={this.removeImage}
+                                                submitImages={this.submitImages}
+                                                errors={this.state.errors}
+                                                ButtonLoading={this.state.ButtonLoading}
+                                            />
                                         </div>
                                     </div>
                                 </div>

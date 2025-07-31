@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import DeleteModal from '../../common/DeleteModal';
 import NotificationModal from './NotificationModal';
 import Pagination from '../../common/Pagination';
+import DateFilterForm from '../../common/DateFilterForm';
 
 class Notifications extends Component {
     constructor(props) {
@@ -31,7 +32,7 @@ class Notifications extends Component {
             body:"",
             type:"",
             read:0,
-            col: (window.user.role === "admin" || window.user.role === "super_admin") ? 3 : 4,
+            col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
             selectedEmployee: '',
             // Pagination state variables
             currentPage: 1,
@@ -236,7 +237,29 @@ class Notifications extends Component {
     };
     
     handleEmployeeChange = (event) => {
-        this.setState({ selectedEmployee: event.target.value });
+            this.setState({ selectedEmployee: event.target.value });
+    };
+
+    handleDateChange = (date, type) => {
+        const formatDate = (date) => {
+            if (!date) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); 
+            const day = String(date.getDate()).padStart(2, '0'); 
+            return `${year}-${month}-${day}`; 
+        };
+        if (date) {
+        const newDate = formatDate(new Date(date));
+        if (type === 'fromDate') {
+            this.setState({ filterFromDate: newDate });
+            
+        } else if (type === 'toDate') {
+            this.setState({ filterToDate: newDate });
+        }
+
+        } else {
+        this.setState({ [type]: null });
+        }
     };
 
     validateNotificationForm = (title, body, type) => {
@@ -414,38 +437,19 @@ class Notifications extends Component {
                         <div className="card">
                             <div className="card-body">
                                 <div className="row">
-                                    <div className={`col-md-${col}`}>
-                                        <label>From Date</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            value={this.state.filterFromDate}
-                                            onChange={(e) => this.setState({ filterFromDate: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className={`col-md-${col}`}>
-                                        <label>To Date</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            value={this.state.filterToDate}
-                                            onChange={(e) => this.setState({ filterToDate: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className={`col-md-${col}`}>
-                                        <button
-                                            className="btn btn-primary"
-                                            style={{ marginTop: 34 }}
-                                            onClick={this.handleApplyFilter}
-                                        >
-                                            Apply
-                                        </button>
-                                    
-                                        {/* <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={() => this.handleAddClick()}>
+                                    <DateFilterForm
+                                        fromDate={this.state.filterFromDate}
+                                        toDate={this.state.filterToDate}
+                                        ButtonLoading={this.state.ButtonLoading}
+                                        handleDateChange={this.handleDateChange}
+                                        handleApplyFilters={this.handleApplyFilter}
+                                        col={col}
+                                    />
+                                    {/* <div className={`col-md-${col}`}>
+                                        <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={() => this.handleAddClick()}>
                                             <i className="fe fe-plus mr-2" />Add
-                                        </button> */}
-                                    </div>
+                                        </button>
+                                    </div> */}
                                 </div>
                             </div>
                         </div>

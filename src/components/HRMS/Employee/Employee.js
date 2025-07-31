@@ -108,7 +108,7 @@ class Employee extends Component {
 			selectedLeaveEmployee: (window.user.role === 'admin' || window.user.role === 'super_admin') ? "" : window.user.id,
 			ButtonLoading: false,
     		showEditLeaveModal: false, 
-
+			col: 3
 		};
 	}
 	handleStatistics(e) {
@@ -943,17 +943,20 @@ class Employee extends Component {
 									<div className="tab-pane fade" id="Employee-Request" role="tabpanel">
 										<div className="card">
 											<div className="card-header">
-                                                <DateFilterForm
-													fromDate={this.state.fromDate}
-													toDate={this.state.toDate}
-													selectedLeaveEmployee={selectedLeaveEmployee}
-													allEmployeesData={this.state.allEmployeesData}
-													ButtonLoading={this.state.ButtonLoading}
-													handleDateChange={this.handleDateChange}
-													handleEmployeeChange={this.handleEmployeeChange}
-													handleApplyFilters={this.handleApplyFilters}
-												/>
-											</div>
+													<div className="row">
+														<DateFilterForm
+															fromDate={this.state.fromDate}
+															toDate={this.state.toDate}
+															selectedEmployee={selectedLeaveEmployee}
+															allEmployeesData={this.state.allEmployeesData}
+															ButtonLoading={this.state.ButtonLoading}
+															handleDateChange={this.handleDateChange}
+															handleEmployeeChange={this.handleEmployeeChange}
+															handleApplyFilters={this.handleApplyFilters}
+															col={this.state.col}
+														/>
+													</div>
+												</div>
 											<EmployeeLeaveTable
 												currentEmployeeLeaves={currentEmployeeLeaves}
 												loading={loading}

@@ -109,3 +109,6 @@ code {
   justify-content: center;
 }
 
+.react-datepicker-wrapper {
+    display: unset !important; 
+}
