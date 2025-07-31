@@ -1,5 +1,6 @@
 import React from 'react';
 import NoDataRow from '../../common/NoDataRow';
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 
 const HolidaysTable = ({
   loading,
@@ -14,7 +15,7 @@ const HolidaysTable = ({
     <div className="card-body">
       {loading ? (
         <div className="dimmer active mb-4">
-          <div className="loader" />
+          <TableSkeleton columns={5} rows={5} />
         </div>
       ) : holidays.length === 0 && !message ? (
         <div className="text-center">

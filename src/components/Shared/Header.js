@@ -751,7 +751,7 @@ class Header extends Component {
                             <div
                           id="notificationScrollArea"
                           style={{
-                    height: notifications.length > 2 ? '310px' : 'auto',
+                    height: notifications.length > 4 ? '310px' : 'auto',
                     overflow: 'auto',
                     
                   }}

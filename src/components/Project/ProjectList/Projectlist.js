@@ -11,6 +11,7 @@ import { getService } from '../../../services/getService';
 import authService from '../../Authentication/authService';
 import BlankState from '../../common/BlankState';
 import { validateFields } from '../../common/validations';
+import ProjectCardSkeleton from '../../common/skeletons/ProjectCardSkeleton';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -749,7 +750,11 @@ class ProjectList extends Component {
                         <div className="tab-content">
                             <div className="tab-pane fade show active" id="Project-OnGoing" role="tabpanel">
                             <div className="row">
-                                {visibleProjects && visibleProjects.length > 0 ? (
+                                {this.state.loading ? (
+                                    Array.from({ length: 6 }).map((_, index) => (
+                                        <ProjectCardSkeleton key={index} />
+                                    ))
+                                    ) : visibleProjects && visibleProjects.length > 0 ? (
                                     visibleProjects.map((project, index) => (
                                         <ProjectCard
                                             key={index}
@@ -762,13 +767,13 @@ class ProjectList extends Component {
                                             collapsedCards={this.state.collapsedCards}
                                         />
                                     ))
-                                ) : (
+                                    ) : (
                                     !message && (
                                         <div className="col-12">
-                                            <BlankState message="Projects not available" />
+                                        <BlankState message="Projects not available" />
                                         </div>
                                     )
-                                )}
+                                    )}
                                 </div>
 
                             </div>

@@ -3,7 +3,7 @@ import React from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-const DepartmentGridSkeleton = ({ count = 4 }) => {
+const GridSkeleton = ({ count = 4 }) => {
   return (
     <div className="row clearfix">
       {[...Array(count)].map((_, index) => (
@@ -32,4 +32,4 @@ const DepartmentGridSkeleton = ({ count = 4 }) => {
   );
 };
 
-export default DepartmentGridSkeleton;
+export default GridSkeleton;
