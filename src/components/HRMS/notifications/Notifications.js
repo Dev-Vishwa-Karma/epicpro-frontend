@@ -8,7 +8,7 @@ import DeleteModal from '../../common/DeleteModal';
 import NotificationModal from './NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
-
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 class Notifications extends Component {
     constructor(props) {
 		super(props);
@@ -43,6 +43,7 @@ class Notifications extends Component {
     componentDidMount() {
         this.getNotifications()
         this.getEmployees()
+       // this.markAsRead();
     }
 
     getNotifications = () => {
@@ -76,6 +77,28 @@ class Notifications extends Component {
                 console.error(err);
         });
     }
+
+    // markAsRead = (notification_id) => {
+    //  getService.getCall('notifications.php', {
+    //         action: 'mark_read',
+    //         user_id:window.user.id,
+    //     }).then(data => {
+    //     if (data.status === "success") {
+    //         this.setState({
+    //         page: 1,
+    //         notifications: [], 
+    //     }, () => {
+    //         this.getNotifications(); 
+    //     });
+    //     } else {
+    //     console.error('Error marking notification as read');
+    //     }
+    //     })
+    // .catch((err) => {
+    //     console.error('Error marking notification as read', err);
+    // });
+    // };
+    
 
     getEmployees = () => {
         getService.getCall('get_employees.php', {
@@ -469,7 +492,7 @@ class Notifications extends Component {
                                         {loading ? (
                                             <div className="card-body">
                                                 <div className="dimmer active">
-                                                    <div className="loader" />
+                                                     <TableSkeleton columns={6} rows={5} />
                                                 </div>
                                             </div>
                                         ) : (

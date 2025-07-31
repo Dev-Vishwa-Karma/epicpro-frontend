@@ -1,11 +1,12 @@
 import React from "react";
+import ListSkeleton from "../../common/skeletons/ListSkeleton";
 
 const EventList = ({ loading, uniqueFilteredEvents2, logged_in_employee_role, formatDate, openDeleteModal }) => {
   return (
     <div>
       {loading ? (
         <div className="dimmer active mb-4 p-3 px-3">
-          <div className="loader" />
+          <ListSkeleton rows={5} />
         </div>
       ) : (
         <div

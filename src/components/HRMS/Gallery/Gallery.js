@@ -8,6 +8,7 @@ import ImageModal from './ImageModal';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import ImageUploadModal from './ImageUploadModal';
+import GallerySkeleton from '../../common/skeletons/GallerySkeleton';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -535,52 +536,47 @@ class Gallery extends Component {
                                 </div>
                             </div>
                         </div>
-                            {loading && ( // Show Loader while fetching images
-                                <div className="col-12">
-                                    <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <div className="dimmer active">
-                                            <div className="loader" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="masonry">
-                                {!loading && filteredImages.length > 0 && ( 
-                                    currentImages.map((image, index) => (
+                        <div className="masonry">
+                                {loading ? (
+                                    <GallerySkeleton rows={3} columns={4} />
+                                ) : filteredImages.length > 0 ? (
+                                // Show actual images once data is loaded
+                                currentImages.map((image, index) => (
                                     <div className="masonry-item" key={image.id || index}>
-                                        <div className="card p-3 position-relative gallery-card">
+                                    <div className="card p-3 position-relative gallery-card">
                                         <div className="gallery-image-wrapper">
-                                            <img 
-                                            src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
-                                            alt="Gallery" 
-                                            className="rounded w-100 h-auto" 
+                                        <img
+                                            src={`${process.env.REACT_APP_API_URL}/${image.url}`}
+                                            alt="Gallery"
+                                            className="rounded w-100 h-auto"
                                             style={{ cursor: 'pointer' }}
                                             onClick={() => this.openImageModal(image)}
-                                            />
-                                        </div>
+                                        />
                                         </div>
                                     </div>
-                                    ))
-                                )}
-                            </div>
-                            {!loading && filteredImages.length === 0 && (
+                                    </div>
+                                ))
+                                ) : (
+                                // Show BlankState if no images are found
                                 <div className="col-12">
-                                    <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                                        <BlankState message="Image not available" />
+                                    <div
+                                    className="card p-3 d-flex align-items-center justify-content-center"
+                                    style={{ height: '300px' }}
+                                    >
+                                    <BlankState message="Image not available" />
                                     </div>
                                 </div>
-                            )}
-                      
+                                )}
+                            </div>
 
-
-                        {/* Only show pagination if there are images */}
-                        {filteredImages.length > 0 && totalPages > 1 && (
-                            <Pagination
+                            {/* Show Pagination if there are images */}
+                            {filteredImages.length > 0 && totalPages > 1 && (
+                                <Pagination
                                 currentPage={currentPage}
                                 totalPages={totalPages}
                                 onPageChange={this.handlePageChange}
-                            />
-                        )}
+                                />
+                            )}
                     </div>
                 </div>
                 {/* Modal for image preview, delete, and download */}

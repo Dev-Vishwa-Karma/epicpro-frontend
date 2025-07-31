@@ -1,12 +1,13 @@
 import React from 'react';
 import NoDataRow from '../../common/NoDataRow';
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 
 const DashboardTable = ({ projects, loading }) => {
   return (
     <div className="card-body">
       {loading ? (
         <div className="dimmer active p-3">
-          <div className="loader" />
+          <TableSkeleton columns={5} rows={5} />
         </div>
       ) : (
         <div className="table-responsive">

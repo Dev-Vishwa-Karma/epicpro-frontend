@@ -9,6 +9,7 @@ import DeleteModal from '../../common/DeleteModal';
 import { getService } from "../../../services/getService";
 import BlankState from "../../common/BlankState";
 import { validateFields } from '../../common/validations';
+import ClientCardSkeleton from "../../common/skeletons/ClientCardSkeleton";
 class Clients extends Component {
   constructor(props) {
     super(props);
@@ -309,7 +310,9 @@ class Clients extends Component {
       deletingClient,
       deleteLoading,
     } = this.state;
+    const skeletonCount = clients.length === 0 ? 4 : clients.length;
     return (
+      
       <>
         <AlertMessages
           showSuccess={showSuccess}
@@ -358,14 +361,9 @@ class Clients extends Component {
                 </div>
               </div>
               {loading ? (
-                <div className="col-12">
-                  <div className="card p-3 d-flex align-items-center justify-content-center" style={{ height: '300px' }}>
-                    <div className="dimmer active">
-                      <div className="loader" />
-                    </div>
-                  </div>
-                </div>
-
+                Array.from({ length: skeletonCount }).map((_, index) => (
+                    <ClientCardSkeleton key={index} />
+                ))
               ) : clients && clients.length > 0 ? (
                 clients.map((client, index) => (
                   <ClientCard
