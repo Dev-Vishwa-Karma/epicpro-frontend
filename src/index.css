@@ -112,3 +112,60 @@ code {
 .react-datepicker-wrapper {
     display: unset !important; 
 }
+
+/* For Link Table */
+.file-icon {
+    cursor: pointer !important;
+    position: relative !important;
+  }
+  .file-icon:hover::before {
+    content: "Click to download" !important;
+    position: absolute !important;
+    bottom: 100% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: #333 !important;
+    color: white !important;
+    padding: 5px 8px !important;
+    border-radius: 4px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    z-index: 1000 !important;
+    margin-bottom: 5px !important;
+  }
+  .file-icon:hover::after {
+    content: "" !important;
+    position: absolute !important;
+    bottom: 100% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    border: 4px solid transparent !important;
+    border-top-color: #333 !important;
+    margin-bottom: 1px !important;
+  }
+
+  /* For Download Modal */
+  .btn-download {
+    background-color: rgb(8, 134, 14) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+    transition: all 0.3s ease !important;
+}
+.btn-download:hover {
+    background-color: rgb(8, 134, 14) !important;
+    color: #fff !important;
+    opacity: 0.8 !important;
+}
+.btn-download:focus {
+    background-color: rgb(8, 134, 14) !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 0.2rem rgba(8, 134, 14, 0.25) !important;
+}
+.btn-download:active {
+    background-color: rgb(8, 134, 14) !important;
+    color: #fff !important;
+    opacity: 0.9 !important;
+}
