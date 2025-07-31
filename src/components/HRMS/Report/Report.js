@@ -262,7 +262,7 @@ class Report extends Component {
         formData.append('out_time', existingActivityOutTime);
         formData.append('status', existingActivitySatus);
         formData.append('updated_by', window.user.id); //updated by admin
-        formData.append('note', this.state.editNotes);
+        formData.append('note', this.state.editNotes || '');
 
         // API call to add break
         getService.editCall('activities.php', 'report-by-admin', formData, null, null)
@@ -698,7 +698,7 @@ class Report extends Component {
         formData.append("todays_working_hours", todays_working_hours);
         formData.append("todays_total_hours", todays_total_hours);
         formData.append("logged_in_employee_role", window.user.role);
-        formData.append("note", editNotes);
+        formData.append("note", editNotes || '');
 
 		// API call to save the report and punch-out
         getService.editCall('reports.php', 'update-report-by-user', formData, report_id, null)
@@ -985,6 +985,7 @@ class Report extends Component {
                         handleNotesChange={this.handleNotesChange}
                         closeReportModal={this.closeReportModal}
                         updateReport={this.updateReport}
+                        editNotes={this.state.editNotes}
                     />
     
                     {/* Modal for deleting report details */}

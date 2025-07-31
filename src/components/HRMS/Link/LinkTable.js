@@ -37,11 +37,102 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
     }
   };
 
-
+  // Function to get file type icon based on file extension
+  const getFileTypeIcon = (filePath) => {
+    if (!filePath) return null;
+    
+    const fileName = filePath.split('/').pop() || filePath;
+    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+    
+    switch (fileExtension) {
+      case 'pdf':
+        return <i className="fa fa-file-pdf-o file-icon" title="PDF File" />;
+      case 'zip':
+      case 'rar':
+      case '7z':
+      case 'tar':
+      case 'gz':
+        return <i className="fa fa-file-archive-o file-icon" title="Archive File" />;
+      case 'doc':
+      case 'docx':
+        return <i className="fa fa-file-word-o file-icon" title="Word Document" />;
+      case 'xls':
+      case 'xlsx':
+        return <i className="fa fa-file-excel-o file-icon" title="Excel Spreadsheet" />;
+      case 'ppt':
+      case 'pptx':
+        return <i className="fa fa-file-powerpoint-o file-icon" title="PowerPoint Presentation" />;
+      case 'txt':
+        return <i className="fa fa-file-text-o file-icon" title="Text File" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'bmp':
+      case 'svg':
+      case 'webp':
+        return <i className="fa fa-file-image-o file-icon" title="Image File" />;
+      case 'mp3':
+      case 'wav':
+      case 'ogg':
+      case 'flac':
+        return <i className="fa fa-file-audio-o file-icon" title="Audio File" />;
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+      case 'wmv':
+      case 'flv':
+        return <i className="fa fa-file-video-o file-icon" title="Video File" />;
+      case 'html':
+      case 'htm':
+      case 'css':
+      case 'js':
+      case 'php':
+      case 'py':
+      case 'java':
+      case 'cpp':
+      case 'c':
+        return <i className="fa fa-file-code-o file-icon" title="Code File" />;
+      default:
+        return <i className="fa fa-file-o text-muted file-icon" title="File" />;
+    }
+  };
 
   return (
     <div className="table-responsive">
-
+      <style>
+        {`
+          .file-icon {
+            cursor: pointer;
+            position: relative;
+          }
+          .file-icon:hover::before {
+            content: "Click to download";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+          }
+          .file-icon:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: #333;
+            margin-bottom: 1px;
+          }
+        `}
+      </style>
       <table className="table table-hover table-striped table-vcenter mb-0">
         <thead>
           <tr>
@@ -82,13 +173,14 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
                     ) : row.file_path ? (
                       typeof row.file_path === 'string' ? (
                         <>
+                          
                           <button
                             className="btn btn-link btn-sm ml-2"
                             title="Download"
                             style={{ padding: 0, border: 'none', background: 'none' }}
                             onClick={() => handleDownload(row.file_path)}
                           >
-                            <i className="fa fa-download" />
+                            {getFileTypeIcon(row.file_path)}
                           </button>
                         </>
                       ) : (

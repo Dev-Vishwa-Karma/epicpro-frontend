@@ -13,7 +13,6 @@ const DownloadModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalI
         >
             <div className="modal-dialog" role="document">
                 <div className="modal-content">
-                    {/* Header (optional hidden) */}
                     <div className="modal-header" style={{ display: 'none' }}>
                         <button
                             type="button"
@@ -39,12 +38,12 @@ const DownloadModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalI
                             className="btn btn-secondary"
                             onClick={onClose}
                         >
-                            Close
+                            Cancel
                         </button>
                         <button
                             type="button"
                             onClick={onConfirm}
-                            className="btn btn-primary"
+                            className="btn btn-danger"
                             disabled={isLoading}
                         >
                             {isLoading && (
@@ -54,6 +53,34 @@ const DownloadModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalI
                                     aria-hidden="true"
                                 ></span>
                             )}
+                            <style>
+                            {`
+                                .btn-danger {
+                                    background-color: rgb(8, 134, 14);
+                                    color: #fff;
+                                    border: none;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    transition: all 0.3s ease;
+                                }
+                                .btn-danger:hover {
+                                    background-color: rgb(8, 134, 14);
+                                    color: #fff;
+                                    opacity: 0.8;
+                                }
+                                .btn-danger:focus {
+                                    background-color: rgb(8, 134, 14);
+                                    color: #fff;
+                                    box-shadow: 0 0 0 0.2rem rgba(8, 134, 14, 0.25);
+                                }
+                                .btn-danger:active {
+                                    background-color: rgb(8, 134, 14);
+                                    color: #fff;
+                                    opacity: 0.9;
+                                }
+                            `}
+                        </style>
                             Download
                         </button>
                     </div>

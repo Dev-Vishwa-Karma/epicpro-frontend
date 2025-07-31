@@ -15,7 +15,8 @@ const EditReportModal = ({
     handleChange,
     handleNotesChange,
     closeReportModal,
-    updateReport
+    updateReport,
+    editNotes
 }) => {
     return (
         <div className="modal fade" id="editpunchOutReportModal" tabIndex={-1} role="dialog" aria-labelledby="editpunchOutReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -148,6 +149,7 @@ const EditReportModal = ({
                                                     placeholder="Add note for this update..."
                                                     name="note"
                                                     id="note"
+                                                    value={editNotes || ''}
                                                     onChange={handleNotesChange}
                                                 />
                                             </div>
