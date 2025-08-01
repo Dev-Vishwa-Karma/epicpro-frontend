@@ -140,7 +140,9 @@ class Gallery extends Component {
             if (updatedImages.length > 0) {
                 const dataTransfer = new DataTransfer();
                 updatedImages.forEach((file) => dataTransfer.items.add(file));
-                this.fileInputRef.current.files = dataTransfer.files;
+                if (this.fileInputRef.current) {
+                    this.fileInputRef.current.files = dataTransfer.files;
+                }
             } else if (this.fileInputRef.current) {
                 // Reset the input field when no images are left
                 this.fileInputRef.current.value = "";
@@ -150,11 +152,38 @@ class Gallery extends Component {
 
     handleImageSelection = (event) => {
         const files = Array.from(event.target.files);
-
+        const validImageTypes = ["image/jpeg", "image/png", "image/webp"];
+        
+        // Clear previous errors first
         this.setState({
-            selectedImages: files,
             errors: { ...this.state.errors, selectedImages: '' }
         });
+        
+        // Filter out invalid files
+        const validFiles = files.filter(file => {
+            if (!validImageTypes.includes(file.type)) {
+                // Set error in the errors state for display in modal
+                this.setState({
+                    errors: { 
+                        ...this.state.errors, 
+                        selectedImages: `"${file.name}" is not a valid image file. Only JPG, PNG, and WEBP files are allowed.`
+                    }
+                });
+                return false;
+            }
+            return true;
+        });
+
+        // Only update state with valid files
+        this.setState({
+            selectedImages: validFiles,
+            errors: { ...this.state.errors, selectedImages: validFiles.length === 0 && files.length > 0 ? 'Please select at least one valid image file.' : '' }
+        });
+
+        // Clear the file input if there were invalid files
+        if (validFiles.length !== files.length) {
+            event.target.value = '';
+        }
     };
 
     handleEmployeeSelection = (e) => {
