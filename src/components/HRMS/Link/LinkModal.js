@@ -1,4 +1,5 @@
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 class LinkModal extends React.Component {
   constructor(props) {
@@ -105,32 +106,25 @@ class LinkModal extends React.Component {
                   <button type="button" className="close" onClick={onClose}><span aria-hidden="true">×</span></button>
                 </div>
                 <div className="modal-body git-modal-body">
-                  <div className="form-group">
-                    <label htmlFor="title" className="form-label">Title</label>
-                    <input
-                      id="title"
-                      type="text"
-                      className={`form-control ${errors.title ? 'is-invalid' : ''}`}
-                      name="title"
-                      value={title}
-                      onChange={onChange}
-                      placeholder="Title"
-                    />
-                    {errors.title && <small className="invalid-feedback">{errors.title}</small>}
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="url" className="form-label">URL</label>
-                    <input
-                      id="url"
-                      type="text"
-                      className={`form-control ${errors.url ? 'is-invalid' : ''}`}
-                      name="url"
-                      value={url}
-                      onChange={onChange}
-                      placeholder="URL"
-                    />
-                    {errors.url && <small className="invalid-feedback">{errors.url}</small>}
-                  </div>
+                  <InputField
+                    label="Title"
+                    name="title"
+                    type="text"
+                    value={title}
+                    onChange={onChange}
+                    placeholder="Title"
+                    error={errors.title}
+                  />
+
+                  <InputField
+                    label="URL"
+                    name="url"
+                    type="text"
+                    value={url}
+                    onChange={onChange}
+                    placeholder="URL"
+                    error={errors.url}
+                  />
                   {showFileInput && (
                     <>
                       <div className='or-content'>
