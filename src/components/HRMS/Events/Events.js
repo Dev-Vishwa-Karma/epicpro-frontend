@@ -196,10 +196,6 @@ class Events extends Component {
 
     this.setState({ loading: true });
 
-    // fetch(`${process.env.REACT_APP_API_URL}/project_todo.php?action=view&employee_id=${employeeId}`, {
-    // 	method: "GET",
-    // })
-    // .then((res) => res.json())
     getService
       .getCall("project_todo.php", {
         action: "view",
@@ -1009,7 +1005,6 @@ class Events extends Component {
                         formatDate={this.formatDate}
                         openDeleteModal={this.openDeleteModal}
                       />
-
                       {(logged_in_employee_role === "admin" ||
                         logged_in_employee_role === "super_admin") && (
                         <div className="todo_list mt-4">
@@ -1023,7 +1018,6 @@ class Events extends Component {
                         </div>
                       )}
                     </div>
-                    ;
                   </div>
                 </div>
                 <div className="col-lg-8 col-md-12">
