@@ -646,17 +646,16 @@ class Header extends Component {
 
     getService.addCall('activities.php', 'add-by-user', formData)
     .then(response => {
-      let data = response.data;
-      if (data.status === "success") {
+      if (response.status === "success") {
         this.setState({
-          successMessage: data.message,
+          successMessage: response.message,
           showError: false,
           showSuccess: true,
         });
         setTimeout(this.dismissMessages, 3000);
       } else {
         this.setState({
-          errorMessage: data.message,
+          errorMessage: response.message,
           showError: true,
           showSuccess: false,
         });
