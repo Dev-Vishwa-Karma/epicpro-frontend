@@ -1,4 +1,5 @@
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const AddUserForm = ({
 	state,
@@ -9,186 +10,134 @@ const AddUserForm = ({
 	return (
 		<div className="row clearfix">
 			<div className="col-lg-12 col-md-12 col-sm-12">
-				<div className="form-group">
-					<input
-						type="text"
-						className="form-control"
-						placeholder="Employee Code *"
-						name="employeeCode"
-						value={state.employeeCode}
-						onChange={handleInputChangeForAddUser}
-					/>
-				</div>
+				<InputField
+					name="employeeCode"
+					type="text"
+					placeholder="Employee Code *"
+					value={state.employeeCode}
+					onChange={handleInputChangeForAddUser}
+				/>
 			</div>
 
 			<div className="col-lg-6 col-md-6 col-sm-12">
-				<div className="form-group">
-					<input
-						type="text"
-						className={`form-control${state.errors.firstName ? ' is-invalid' : ''}`}
-						placeholder="First Name *"
-						name="firstName"
-						value={state.firstName}
-						onChange={handleInputChangeForAddUser}
-					/>
-					{state.errors.firstName && (
-						<div className="invalid-feedback d-block">{state.errors.firstName}</div>
-					)}
-				</div>
+				<InputField
+					name="firstName"
+					type="text"
+					placeholder="First Name *"
+					value={state.firstName}
+					onChange={handleInputChangeForAddUser}
+					error={state.errors.firstName}
+					required
+				/>
 			</div>
 
 			<div className="col-lg-6 col-md-6 col-sm-12">
-				<div className="form-group">
-					<input
-						type="text"
-						className={`form-control${state.errors.lastName ? ' is-invalid' : ''}`}
-						placeholder="Last Name"
-						name="lastName"
-						value={state.lastName}
-						onChange={handleInputChangeForAddUser}
-					/>
-					{state.errors.lastName && (
-						<div className="invalid-feedback d-block">{state.errors.lastName}</div>
-					)}
-				</div>
+				<InputField
+					name="lastName"
+					type="text"
+					placeholder="Last Name"
+					value={state.lastName}
+					onChange={handleInputChangeForAddUser}
+					error={state.errors.lastName}
+				/>
 			</div>
 
 			<div className="col-md-4 col-sm-12">
-				<div className="form-group">
-					<input
-						type="text"
-						className={`form-control${state.errors.email ? ' is-invalid' : ''}`}
-						placeholder="Email ID *"
-						name="email"
-						value={state.email}
-						onChange={handleInputChangeForAddUser}
-					/>
-					{state.errors.email && (
-						<div className="invalid-feedback d-block">{state.errors.email}</div>
-					)}
-				</div>
+				<InputField
+					name="email"
+					type="text"
+					placeholder="Email ID *"
+					value={state.email}
+					onChange={handleInputChangeForAddUser}
+					error={state.errors.email}
+				/>
 			</div>
 
 			<div className="col-md-4 col-sm-12">
-				<div className="form-group">
-					<input
-						type="text"
-						className={`form-control${state.errors.mobileNo ? ' is-invalid' : ''}`}
-						placeholder="Mobile No"
-						name="mobileNo"
-						value={state.mobileNo}
-						onChange={handleInputChangeForAddUser}
-						maxLength="10"
-					/>
-					{state.errors.mobileNo && (
-						<div className="invalid-feedback d-block">{state.errors.mobileNo}</div>
-					)}
-				</div>
+				<InputField
+					name="mobileNo"
+					type="text"
+					placeholder="Mobile No"
+					value={state.mobileNo}
+					onChange={handleInputChangeForAddUser}
+					error={state.errors.mobileNo}
+					maxLength={10}
+				/>
 			</div>
 
 			<div className="col-md-4 col-sm-12">
-				<div className="form-group">
-					<select
-						className="form-control show-tick"
-						value={state.selectedRole}
-						onChange={handleSelectChange}
-						name="selectedRole"
-					>
-						<option>Select Role Type</option>
-						<option value="super_admin">Super Admin</option>
-						<option value="admin">Admin</option>
-					</select>
-				</div>
+				<InputField
+					name="selectedRole"
+					type="select"
+					value={state.selectedRole}
+					onChange={handleSelectChange}
+					options={[
+							{ value: 'super_admin', label: 'Super Admin' },
+							{ value: 'admin', label: 'Admin' }
+							]}
+				/>
 			</div>
 
 			<div className="col-sm-6 col-md-4">
-				<div className="form-group">
-					<select
-						name="gender"
-						className={`form-control${state.errors.gender ? ' is-invalid' : ''}`}
-						id="gender"
-						value={state.gender}
-						onChange={handleSelectChange}
-						required
-					>
-						<option value="">Select Gender</option>
-						<option value="male">Male</option>
-						<option value="female">Female</option>
-					</select>
-					{state.errors.gender && (
-						<div className="invalid-feedback d-block">{state.errors.gender}</div>
-					)}
-				</div>
+				<InputField
+					name="gender"
+					type="select"
+					value={state.gender}
+					onChange={handleSelectChange}
+					error={state.errors.gender}
+					options={[
+						{ value: 'male', label: 'Male' },
+						{ value: 'female', label: 'Female' }
+					]}
+					required
+				/>
 			</div>
 
 			<div className="col-md-4 col-sm-12">
-				<div className="form-group">
-					<select
-						className={`form-control show-tick${state.errors.selectedDepartment ? ' is-invalid' : ''}`}
-						value={state.selectedDepartment}
-						onChange={handleSelectChange}
-						name="selectedDepartment"
-					>
-						<option value="">Select Department</option>
-						{state.departments.map((dept) => (
-							<option key={dept.id} value={dept.id}>
-								{dept.department_name}
-							</option>
-						))}
-					</select>
-					{state.errors.selectedDepartment && (
-						<div className="invalid-feedback d-block">{state.errors.selectedDepartment}</div>
-					)}
-				</div>
+				<InputField
+					name="selectedDepartment"
+					type="select"
+					value={state.selectedDepartment}
+					onChange={handleSelectChange}
+					error={state.errors.selectedDepartment}
+					options={state.departments.map(dept => 
+					({
+						value: dept.id,
+						label: dept.department_name
+					}))}
+				/>
 			</div>
 
 			<div className="col-sm-6 col-md-4">
-				<div className="form-group">
-					<input
-						type="date"
-						id="dob"
-						name="dob"
-						title="dob"
-						className={`form-control${state.errors.dob ? ' is-invalid' : ''}`}
-						value={state.dob}
-						onChange={handleInputChangeForAddUser}
-					/>
-					{state.errors.dob && (
-						<div className="invalid-feedback d-block">{state.errors.dob}</div>
-					)}
-				</div>
+				<InputField
+					name="dob"
+					type="date"
+					value={state.dob}
+					onChange={handleInputChangeForAddUser}
+					error={state.errors.dob}
+				/>
 			</div>
 
 			<div className="col-md-4 col-sm-12">
-				<div className="form-group">
-					<input
-						type="password"
-						className={`form-control${state.errors.password ? ' is-invalid' : ''}`}
-						placeholder="Password"
-						name="password"
-						value={state.password}
-						onChange={handleInputChangeForAddUser}
-					/>
-					{state.errors.password && (
-						<div className="invalid-feedback d-block">{state.errors.password}</div>
-					)}
-				</div>
+				<InputField
+					name="password"
+					type="password"
+					placeholder="Password"
+					value={state.password}
+					onChange={handleInputChangeForAddUser}
+					error={state.errors.password}
+				/>
 			</div>
 
 			<div className="col-md-4 col-sm-12">
-				<div className="form-group">
-					<input
-						type="password"
-						className={`form-control${state.errors.confirmPassword ? ' is-invalid' : ''}`}
-						placeholder="Confirm Password"
-						name="confirmPassword"
-						value={state.confirmPassword}
-						onChange={handleInputChangeForAddUser}
-					/>
-					{state.errors.confirmPassword && (
-						<div className="invalid-feedback d-block">{state.errors.confirmPassword}</div>
-					)}
-				</div>
+				<InputField
+					name="confirmPassword"
+					type="password"
+					placeholder="Confirm Password"
+					value={state.confirmPassword}
+					onChange={handleInputChangeForAddUser}
+					error={state.errors.confirmPassword}
+				/>
 			</div>
 
 			<div className="col-12">

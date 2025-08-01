@@ -6,6 +6,10 @@ import ActivitiesTime from '../Activities/ActivitiesTime';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
+import DateFilterForm from '../../common/DateFilterForm';
+import InputField from '../../common/formInputs/InputField';
+import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
+
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
@@ -51,6 +55,7 @@ class CalendarWithTabs extends Component {
             filterFromDate: todayStr,
             filterToDate: todayStr,
             errors: {},
+            col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
         };
         localStorage.removeItem('empId');
         localStorage.removeItem('startDate');
@@ -629,8 +634,30 @@ class CalendarWithTabs extends Component {
             })       
     };
 
+    handleDateChange = (date, type) => {
+        const formatDate = (date) => {
+            if (!date) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); 
+            const day = String(date.getDate()).padStart(2, '0'); 
+            return `${year}-${month}-${day}`; 
+        };
+        if (date) {
+            const newDate = formatDate(new Date(date));
+            if (type === 'fromDate') {
+                this.setState({ filterFromDate: newDate });
+               
+            } else if (type === 'toDate') {
+                this.setState({ filterToDate: newDate });
+            }
+         
+        } else {
+            this.setState({ [type]: null });
+        }
+    };
+
     render() {
-        const { activities, employee, calendarEventsData, skillsFrontend, skillsBackend, showSuccess,successMessage,showError, errorMessage } = this.state;
+        const { activities, employee, calendarEventsData, skillsFrontend, skillsBackend, showSuccess,successMessage,showError, errorMessage, col, errors } = this.state;
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
         // Handle case where employee data is not available
@@ -765,39 +792,14 @@ class CalendarWithTabs extends Component {
                                             <div className="card mb-3">
                                                 <div className="card-body">
                                                     <div className="row">
-                                                        <div className="col-md-3">
-                                                            <label>From Date</label>
-                                                            <input
-                                                                type="date"
-                                                                className="form-control"
-                                                                value={this.state.filterFromDate}
-                                                                onChange={(e) => this.setState({ filterFromDate: e.target.value })}
-                                                            />
-                                                        </div>
-                                                        <div className="col-md-3">
-                                                            <label>To Date</label>
-                                                            <input
-                                                                type="date"
-                                                                className="form-control"
-                                                                value={this.state.filterToDate}
-                                                                onChange={(e) => this.setState({ filterToDate: e.target.value })}
-                                                            />
-                                                        </div>
-                                                            <div
-                                                            className={
-                                                                window.user.role === "admin" || window.user.role === "super_admin"
-                                                                ? "col-md-3"
-                                                                : "col-md-4"
-                                                            }
-                                                            >
-                                                            <button
-                                                                className="btn btn-primary"
-                                                                style={{ marginTop: 34 }}
-                                                                onClick={this.handleApplyFilter}
-                                                            >
-                                                                Apply
-                                                            </button>
-                                                        </div>
+                                                        <DateFilterForm
+                                                            fromDate={this.state.filterFromDate}
+                                                            toDate={this.state.filterToDate}
+                                                            ButtonLoading={this.state.ButtonLoading}
+                                                            handleDateChange={this.handleDateChange}
+                                                            handleApplyFilters={this.handleApplyFilter}
+                                                            col={col}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
@@ -812,339 +814,241 @@ class CalendarWithTabs extends Component {
                                             <div className="card-body">
                                                 <div className="row clearfix">
                                                     <div className="col-sm-6 col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label">First Name</label>
-                                                            <input
-                                                                type="text"
-                                                                name='first_name'
-                                                                className={`form-control${this.state.errors && this.state.errors.first_name ? ' is-invalid' : ''}`} placeholder="First Name"
-                                                                value={employee.first_name || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                required
-                                                                ref={this.fieldRefs.first_name}
-                                                            />
-                                                            {this.state.errors && this.state.errors.first_name && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.first_name}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="First Name"
+                                                            name="first_name"
+                                                            value={employee.first_name}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="First Name"
+                                                            error={errors.first_name}
+                                                            refInput={this.fieldRefs.first_name}
+                                                            required
+                                                        />
                                                     </div>
                                                     <div className="col-sm-6 col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Last Name</label>
-                                                            <input
-                                                                type="text"
-                                                                name='last_name'
-                                                                className={`form-control${this.state.errors && this.state.errors.last_name ? ' is-invalid' : ''}`}
-                                                                placeholder="Last Name"
-                                                                value={employee.last_name || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                required
-                                                                ref={this.fieldRefs.last_name}
-                                                            />
-                                                            {this.state.errors && this.state.errors.last_name && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.last_name}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Last Name"
+                                                            name="last_name"
+                                                            value={employee.last_name}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="Last Name"
+                                                            error={errors.last_name}
+                                                            refInput={this.fieldRefs.last_name}
+                                                            required
+                                                        />
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Email address</label>
-                                                            <input
-                                                                type="email"
-                                                                name='email'
-                                                                className={`form-control${this.state.errors && this.state.errors.email ? ' is-invalid' : ''}`}
-                                                                placeholder="Email"
-                                                                value={employee.email || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                required
-                                                                ref={this.fieldRefs.email}
-                                                            />
-                                                            {this.state.errors && this.state.errors.email && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.email}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Email Address"
+                                                            name="email"
+                                                            value={employee.email}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="Email"
+                                                            error={errors.email}
+                                                            refInput={this.fieldRefs.email}
+                                                            type="email"
+                                                            required
+                                                        />
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Gender</label>
-                                                            <select
-                                                                name="gender"
-                                                                className={`form-control${this.state.errors && this.state.errors.gender ? ' is-invalid' : ''}`}
-                                                                id='gender'
-                                                                value={employee.gender || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                required
-                                                                ref={this.fieldRefs.gender}
-                                                            >
-                                                                <option value="">Select Gender</option>
-                                                                <option value="male" >Male</option>
-                                                                <option value="female" >Female</option>
-                                                            </select>
-                                                            {this.state.errors && this.state.errors.gender && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.gender}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Gender"
+                                                            name="gender"
+                                                            value={employee.gender}
+                                                            onChange={this.handleProfileChange}
+                                                            error={errors.gender}
+                                                            refInput={this.fieldRefs.gender}
+                                                            type="select"
+                                                            options={[
+                                                            { value: 'male', label: 'Male' },
+                                                            { value: 'female', label: 'Female' }
+                                                            ]}
+                                                            required
+                                                        />
                                                     </div>
                                                     <div className="col-md-4 col-sm-12">
-                                                        <div className="form-group">
-                                                            <label className="form-label">DOB</label>
-                                                            <input
-                                                                type="date"
-                                                                id="dob"
-                                                                name="dob"
-                                                                className={`form-control${this.state.errors && this.state.errors.dob ? ' is-invalid' : ''}`}
-                                                                value={employee.dob || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                required
-                                                                ref={this.fieldRefs.dob}
-                                                            />
-                                                            {this.state.errors && this.state.errors.dob && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="DOB"
+                                                            name="dob"
+                                                            value={employee.dob}
+                                                            onChange={this.handleProfileChange}
+                                                            error={errors.dob}
+                                                            refInput={this.fieldRefs.dob}
+                                                            type="date"
+                                                            required
+                                                        />
                                                     </div>
                                                     <div className="col-sm-6 col-md-6">
-                                                        <label className="form-label">Select Department</label>
-                                                        <div className="form-group">
-                                                            <select
-                                                                className={`form-control show-tick${this.state.errors && this.state.errors.department_id ? ' is-invalid' : ''}`}
-                                                                value={employee.department_id || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                name="department_id"
-                                                                disabled={window.user && (window.user.role === 'employee')}
-                                                                ref={this.fieldRefs.department_id}
-                                                            >
-                                                                <option value="">Select Department</option>
-                                                                {this.state.departments.map((dept) => (
-                                                                    <option key={dept.id} value={dept.id}>
-                                                                        {dept.department_name}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                            {this.state.errors && this.state.errors.department_id && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.department_id}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Select Department"
+                                                            name="department_id"
+                                                            value={employee.department_id}
+                                                            onChange={this.handleProfileChange}
+                                                            error={errors.department_id}
+                                                            refInput={this.fieldRefs.department_id}
+                                                            type="select"
+                                                            options={this.state.departments.map(dept => ({
+                                                            value: dept.id,
+                                                            label: dept.department_name
+                                                            }))}
+                                                            disabled={window.user && window.user.role === 'employee'}
+                                                            required
+                                                        />
                                                     </div>
                                                     <div className="col-sm-6 col-md-6">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Joining Date</label>
-                                                            <input
-                                                                type="date"
-                                                                id="joining_date"
-                                                                name="joining_date"
-                                                                className={`form-control${this.state.errors && this.state.errors.joining_date ? ' is-invalid' : ''}`}
-                                                                value={employee.joining_date || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                disabled={window.user && (window.user.role === 'employee')}
-                                                                ref={this.fieldRefs.joining_date}
-                                                            />
-                                                            {this.state.errors && this.state.errors.joining_date && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.joining_date}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Joining Date"
+                                                            name="joining_date"
+                                                            value={employee.joining_date}
+                                                            onChange={this.handleProfileChange}
+                                                            error={errors.joining_date}
+                                                            refInput={this.fieldRefs.joining_date}
+                                                            type="date"
+                                                            disabled={window.user && (window.user.role === 'employee')}
+                                                        />
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Mobile No (1)</label>
-                                                            <input
-                                                                type="tel"
-                                                                name="mobile_no1"
-                                                                id="mobile_no1"
-                                                                className={`form-control${this.state.errors && this.state.errors.mobile_no1 ? ' is-invalid' : ''}`}
-                                                                placeholder="Enter Mobile No"
-                                                                maxLength="10"
-                                                                value={employee.mobile_no1 || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                onInput={(e) => {
-                                                                    e.target.value = e.target.value.replace(/\D/g, '');
-                                                                }}
-                                                                ref={this.fieldRefs.mobile_no1}
-                                                            />
-                                                             {this.state.errors && this.state.errors.mobile_no1 && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.mobile_no1}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Mobile No (1)"
+                                                            name="mobile_no1"
+                                                            value={employee.mobile_no1}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="Enter Mobile No"
+                                                            error={errors.mobile_no1}
+                                                            refInput={this.fieldRefs.mobile_no1}
+                                                            type="tel"
+                                                            maxLength="10"
+                                                            onInput={(e) => {
+                                                            e.target.value = e.target.value.replace(/\D/g, '');
+                                                            }}
+                                                        />
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Mobile No (2)</label>
-                                                            <input
-                                                                type="tel"
-                                                                name="mobile_no2"
-                                                                id="mobile_no2"
-                                                                className={`form-control${this.state.errors && this.state.errors.mobile_no2 ? ' is-invalid' : ''}`}
-                                                                placeholder="Enter Mobile No"
-                                                                maxLength="10"
-                                                                value={employee.mobile_no2 || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                onInput={(e) => {
-                                                                    e.target.value = e.target.value.replace(/\D/g, '');
-                                                                }}
-                                                                ref={this.fieldRefs.mobile_no2}
-                                                            />
-                                                            {this.state.errors && this.state.errors.mobile_no2 && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.mobile_no2}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Mobile No (2)"
+                                                            name="mobile_no2"
+                                                            value={employee.mobile_no2}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="Enter Mobile No"
+                                                            error={errors.mobile_no2}
+                                                            refInput={this.fieldRefs.mobile_no2}
+                                                            type="tel"
+                                                            maxLength="10"
+                                                            onInput={(e) => {
+                                                            e.target.value = e.target.value.replace(/\D/g, ''); // Allow only numbers
+                                                            }}
+                                                        />
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Password</label>
-                                                            <input
-                                                                type="password"
-                                                                name="password"
-                                                                id="password"
-                                                                className={`form-control${this.state.errors && this.state.errors.password ? ' is-invalid' : ''}`}
-                                                                placeholder=" Enter password"
-                                                                value={employee.password || ""}
-                                                                onChange={this.handleProfileChange}
-                                                                ref={this.fieldRefs.password}
-                                                            />
-                                                            {this.state.errors && this.state.errors.password && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.password}</div>
-                                                            )}
-                                                        </div>
+                                                        <InputField
+                                                            label="Password"
+                                                            name="password"
+                                                            value={employee.password}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="Enter password"
+                                                            error={errors.password}
+                                                            refInput={this.fieldRefs.password}
+                                                            type="password"
+                                                            required
+                                                        />
                                                     </div>
                                                     <div className="col-md-12">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Address Line 1</label>
-                                                            <input
-                                                                type="text"
-                                                                name="address_line1"
-                                                                id="address_line1"
-                                                                className="form-control"
-                                                                placeholder="Enter Address Line 1"
-                                                                value={employee.address_line1 || ""}
-                                                                onChange={this.handleProfileChange}
-                                                            />
-                                                        </div>
+                                                    <InputField
+                                                        label="Address Line 1"
+                                                        name="address_line1"
+                                                        value={employee.address_line1}
+                                                        onChange={this.handleProfileChange}
+                                                        placeholder="Enter Address Line 1"
+                                                        refInput={this.fieldRefs.address_line1}
+                                                    />
                                                     </div>
                                                     <div className="col-md-12">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Address Line 2</label>
-                                                            <input
-                                                                type="text"
-                                                                name="address_line2"
-                                                                id="address_line2"
-                                                                className="form-control"
-                                                                placeholder="Enter Address Line 2"
-                                                                value={employee.address_line2 || ""}
-                                                                onChange={this.handleProfileChange}
-                                                            />
-                                                        </div>
+                                                        <InputField
+                                                            label="Address Line 2"
+                                                            name="address_line2"
+                                                            value={employee.address_line2}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="Enter Address Line 2"
+                                                            refInput={this.fieldRefs.address_line2}
+                                                        />
                                                     </div>
                                                     <div className="col-sm-6 col-md-4 mb-4">
-                                                        <label className="form-label">Emergency Contact 1</label>
-                                                        <input
-                                                            type="tel"
+                                                        <InputField
+                                                            label="Emergency Contact 1"
                                                             name="emergency_contact1"
-                                                            id="emergency_contact1"
-                                                            className={`form-control${this.state.errors && this.state.errors.emergency_contact1 ? ' is-invalid' : ''}`}
-                                                            maxLength="10"
-                                                            placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact1}
                                                             onChange={this.handleProfileChange}
+                                                            placeholder="Enter Emergency Contact"
+                                                            error={errors.emergency_contact1}
+                                                            refInput={this.fieldRefs.emergency_contact1}
+                                                            type="tel"
+                                                            maxLength="10"
                                                             onInput={(e) => {
-                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
                                                             }}
-                                                            ref={this.fieldRefs.emergency_contact1}
                                                         />
-                                                        {this.state.errors && this.state.errors.emergency_contact1 && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.emergency_contact1}</div>
-                                                            )}
                                                     </div>
                                                     <div className="col-sm-6 col-md-4 mb-4">
-                                                        <label className="form-label">Emergency Contact 2</label>
-                                                        <input
-                                                            type="tel"
+                                                        <InputField
+                                                            label="Emergency Contact 2"
                                                             name="emergency_contact2"
-                                                            id="emergency_contact2"
-                                                            className={`form-control${this.state.errors && this.state.errors.emergency_contact2 ? ' is-invalid' : ''}`}
-                                                            maxLength="10"
-                                                            placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact2}
                                                             onChange={this.handleProfileChange}
+                                                            placeholder="Enter Emergency Contact"
+                                                            error={errors.emergency_contact2}
+                                                            refInput={this.fieldRefs.emergency_contact2}
+                                                            type="tel"
+                                                            maxLength="10"
                                                             onInput={(e) => {
-                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
                                                             }}
-                                                            ref={this.fieldRefs.emergency_contact2}
                                                         />
-                                                         {this.state.errors && this.state.errors.emergency_contact2 && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.emergency_contact2}</div>
-                                                            )}
                                                     </div>
                                                     <div className="col-sm-6 col-md-4 mb-4">
-                                                        <label className="form-label">Emergency Contact 3</label>
-                                                        <input
-                                                            type="tel"
+                                                        <InputField
+                                                            label="Emergency Contact 3"
                                                             name="emergency_contact3"
-                                                            id="emergency_contact3"
-                                                            className={`form-control${this.state.errors && this.state.errors.emergency_contact3 ? ' is-invalid' : ''}`}
-                                                            maxLength="10"
-                                                            placeholder="Enter Emergency Contact"
                                                             value={employee.emergency_contact3}
                                                             onChange={this.handleProfileChange}
+                                                            placeholder="Enter Emergency Contact"
+                                                            error={errors.emergency_contact3}
+                                                            refInput={this.fieldRefs.emergency_contact3}
+                                                            type="tel"
+                                                            maxLength="10"
                                                             onInput={(e) => {
-                                                                e.target.value = e.target.value.replace(/\D/g, '');
+                                                            e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
                                                             }}
-                                                            ref={this.fieldRefs.emergency_contact3}
                                                         />
-                                                        {this.state.errors && this.state.errors.emergency_contact3 && (
-                                                                <div className="invalid-feedback d-block">{this.state.errors.emergency_contact3}</div>
-                                                            )}
                                                     </div>
 
-                                                    {/* Frontend Skills */}
                                                     <div className="row mb-4">
                                                         <h5 className="w-100">Skills</h5>
-                                                        <div className="col-sm-6 col-md-12">
-                                                            <label className="form-label">Frontend</label>
-                                                            <div className="d-flex flex-wrap">
-                                                                {frontendSkills.map((skill) => (
-                                                                    <label key={skill} className="colorinput mr-3 mb-2">
-                                                                        <input
-                                                                            name="color"
-                                                                            type="checkbox"
-                                                                            value={skill}
-                                                                            checked={skillsFrontend.includes(skill)}
-                                                                            onChange={(e) => this.handleSkillChange(e, 'frontend')}
-                                                                            className="colorinput-input"
-                                                                        />
-                                                                        <span className="colorinput-color bg-blue" />
-                                                                        <span className={`ml-2 tag tag-${this.getColor(skill)} py-1 px-2`}>{skill}</span>
-                                                                    </label>
-                                                                ))}
-                                                            </div>
-                                                        </div>
+                                                        <CheckboxGroup
+                                                            label="Frontend"
+                                                            options={frontendSkills}
+                                                            selected={skillsFrontend}
+                                                            onChange={(e) => this.handleSkillChange(e, 'frontend')}
+                                                            getColor={this.getColor}
+                                                        />
 
-                                                        {/* Backend Skills */}
-                                                        <div className="col-sm-6 col-md-12">
-                                                            <label className="form-label">Backend</label>
-                                                            <div className="d-flex flex-wrap">
-                                                                {backendSkills.map((skill) => (
-                                                                    <label key={skill} className="colorinput mr-3 mb-2">
-                                                                        <input
-                                                                            name="color"
-                                                                            type="checkbox"
-                                                                            value={skill}
-                                                                            checked={skillsBackend.includes(skill)}
-                                                                            onChange={(e) => this.handleSkillChange(e, 'backend')}
-                                                                            className="colorinput-input"
-                                                                        />
-                                                                        <span className="colorinput-color bg-blue" />
-                                                                        <span className={`ml-2 tag tag-${this.getColor(skill)} py-1 px-2`}>{skill}</span>
-                                                                    </label>
-                                                                ))}
-                                                            </div>
-                                                        </div>
+                                                        <CheckboxGroup
+                                                            label="Backend"
+                                                            options={backendSkills}
+                                                            selected={skillsBackend}
+                                                            onChange={(e) => this.handleSkillChange(e, 'backend')}
+                                                            getColor={this.getColor}
+                                                        />
                                                     </div>
 
                                                     <div className="col-md-12">
-                                                        <div className="form-group mb-0">
-                                                            <label className="form-label">About Me</label>
-                                                            <textarea rows={5} name='about_me' className="form-control" placeholder="Here can be your description" value={employee.about_me || ""} onChange={this.handleProfileChange} />
-                                                        </div>
+                                                       <InputField
+                                                            label="About Me"
+                                                            name="about_me"
+                                                            type="textarea"
+                                                            placeholder="Here can be your description"
+                                                            value={employee.about_me || ""}
+                                                            onChange={this.handleProfileChange}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>

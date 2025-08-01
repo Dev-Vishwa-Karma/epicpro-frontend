@@ -1,4 +1,5 @@
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const EditModal = ({ 
     modalId, 
@@ -52,81 +53,56 @@ const EditModal = ({
                     <div className="modal-body">
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="form-group">
-                                    <label className="form-label" htmlFor="projectName">Project Name</label>
-                                    <input
-                                        type="text"
-                                        className={`form-control ${errors.projectName ? "is-invalid" : ""}`}
-                                        placeholder="Project Name"
-                                        name="projectName"
-                                        value={formData.projectName || ""}
-                                        onChange={onInputChange}
-                                    />
-                                    {errors.projectName && (
-                                        <small className="invalid-feedback">{errors.projectName}</small>
-                                    )}
-                                </div>
+                                <InputField
+                                label="Project Name"
+                                name="projectName"
+                                type="text"
+                                placeholder="Project Name"
+                                value={formData.projectName || ""}
+                                onChange={onInputChange}
+                                error={errors.projectName}
+                                />
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
-                                    <label className="form-label" htmlFor="projectDescription">Project Description</label>
-                                    <textarea
-                                        className={`form-control ${errors.projectDescription ? "is-invalid" : ""}`}
-                                        placeholder="Project Description"
-                                        name="projectDescription"
-                                        value={formData.projectDescription || ""}
-                                        onChange={onInputChange}
-                                        rows={3}
-                                    />
-                                    {errors.projectDescription && (
-                                        <small className="invalid-feedback">{errors.projectDescription}</small>
-                                    )}
-                                </div>
+                                <InputField
+                                label="Project Description"
+                                name="projectDescription"
+                                type="textarea"
+                                placeholder="Project Description"
+                                value={formData.projectDescription || ""}
+                                onChange={onInputChange}
+                                error={errors.projectDescription}
+                                />
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
-                                    <label className="form-label" htmlFor="projectTechnology">Project Technology</label>
-                                    <input
-                                        type="text"
-                                        className={`form-control ${errors.projectTechnology ? "is-invalid" : ""}`}
-                                        placeholder="Enter technologies (comma-separated)"
-                                        name="projectTechnology"
-                                        value={formData.projectTechnology || ""}
-                                        onChange={onInputChange}
-                                    />
-                                    {errors.projectTechnology && (
-                                        <small className="invalid-feedback">{errors.projectTechnology}</small>
-                                    )}
-                                </div>
+                                <InputField
+                                label="Project Technology"
+                                name="projectTechnology"
+                                type="text"
+                                placeholder="Enter technologies (comma-separated)"
+                                value={formData.projectTechnology || ""}
+                                onChange={onInputChange}
+                                error={errors.projectTechnology}
+                                />
                             </div>
                             {/* Client Details */}
                             <div className="col-md-6">
-                                <div className="form-group">
-                                    <label className="form-label" htmlFor="selectedClient">Select Client</label>
-                                    <select
-                                        name='selectedClient'
-                                        id="selectedClient"
-                                        className={`form-control ${errors.selectedClient ? "is-invalid" : ""}`}
-                                        value={formData.selectedClient || ""}
-                                        onChange={onSelectionChange}
-                                    >
-                                        {clients && clients.length > 0 ? (
-                                            <>
-                                                <option value="">Select a Client</option>
-                                                {clients.map((client) => (
-                                                    <option key={client.id} value={client.id}>
-                                                        {client.name}
-                                                    </option>
-                                                ))}
-                                            </>
-                                        ) : (
-                                            <option value="">No clients available</option>
-                                        )}
-                                    </select>
-                                    {errors.selectedClient && (
-                                        <small className="invalid-feedback">{errors.selectedClient}</small>
-                                    )}
-                                </div>
+                                <InputField
+                                label="Select Client"
+                                name="selectedClient"
+                                type="select"
+                                value={formData.selectedClient || ""}
+                                onChange={onSelectionChange}
+                                error={errors.selectedClient}
+                                options={
+                                    clients && clients.length > 0
+                                    ? [...clients.map(client => ({
+                                        value: client.id,
+                                        label: client.name,
+                                        }))]
+                                    : [{ value: "", label: "No clients available" }]
+                                }
+                                />
                             </div>
 
                             <div className="col-md-6">
@@ -176,34 +152,24 @@ const EditModal = ({
                             </div>
 
                             <div className="col-md-6">
-                                <div className="form-group">
-                                    <label className="form-label" htmlFor="projectStartDate">Project start date</label>
-                                    <input
-                                        type="date"
-                                        className={`form-control ${errors.projectStartDate ? "is-invalid" : ""}`}
-                                        name="projectStartDate"
-                                        value={formData.projectStartDate || ""}
-                                        onChange={onInputChange}
-                                    />
-                                    {errors.projectStartDate && (
-                                        <small className="invalid-feedback">{errors.projectStartDate}</small>
-                                    )}
-                                </div>
+                                <InputField
+                                label="Project start date"
+                                name="projectStartDate"
+                                type="date"
+                                value={formData.projectStartDate || ""}
+                                onChange={onInputChange}
+                                error={errors.projectStartDate}
+                                />
                             </div>
                             <div className="col-md-6">
-                                <div className="form-group">
-                                    <label className="form-label" htmlFor="projectEndDate">Project end date</label>
-                                    <input
-                                        type="date"
-                                        className={`form-control ${errors.projectEndDate ? "is-invalid" : ""}`}
-                                        name="projectEndDate"
-                                        value={formData.projectEndDate || ""}
-                                        onChange={onInputChange}
-                                    />
-                                    {errors.projectEndDate && (
-                                        <small className="invalid-feedback">{errors.projectEndDate}</small>
-                                    )}
-                                </div>
+                                <InputField
+                                label="Project end date"
+                                name="projectEndDate"
+                                type="date"
+                                value={formData.projectEndDate || ""}
+                                onChange={onInputChange}
+                                error={errors.projectEndDate}
+                                />
                             </div>
                         </div>
                     </div>

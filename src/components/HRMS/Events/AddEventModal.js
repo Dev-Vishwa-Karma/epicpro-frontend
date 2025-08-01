@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 class AddEventModal extends Component {
   render() {
@@ -18,39 +19,30 @@ class AddEventModal extends Component {
               <form onSubmit={addEvent}>
                 <div className="modal-body">
                   <div className="row clearfix">
-                    <div className="col-md-12">
-                      <div className="form-group">
-                        <label className="form-label" htmlFor="event_name">Event Name</label>
-                        <input
-                          type="text"
-                          className={`form-control ${errors.event_name ? "is-invalid" : ""}`}
-                          name="event_name"
-                          id="event_name"
-                          value={event_name}
-                          onChange={handleInputChangeForAddEvent}
-                        />
-                        {errors.event_name && (
-                          <div className="invalid-feedback">{errors.event_name}</div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="col-md-12">
-                      <div className="form-group">
-                        <label className="form-label" htmlFor="event_date">Event Date</label>
-                        <input
-                          type="date"
-                          className={`form-control ${errors.event_date ? "is-invalid" : ""}`}
-                          name="event_date"
-                          id="event_date"
-                          value={event_date}
-                          onChange={handleInputChangeForAddEvent}
-                          min={new Date().toISOString().split('T')[0]}
-                        />
-                        {errors.event_date && (
-                          <div className="invalid-feedback">{errors.event_date}</div>
-                        )}
-                      </div>
-                    </div>
+                  <div className="col-md-12">
+                    <InputField
+                      label="Event Name"
+                      name="event_name"
+                      type="text"
+                      value={event_name}
+                      onChange={handleInputChangeForAddEvent}
+                      error={errors.event_name}
+                      placeholder="Enter event name"
+                    />
+                  </div>
+
+                  <div className="col-md-12">
+                    <InputField
+                      label="Event Date"
+                      name="event_date"
+                      type="date"
+                      value={event_date}
+                      onChange={handleInputChangeForAddEvent}
+                      error={errors.event_date}
+                      min={new Date().toISOString().split('T')[0]} 
+                    />
+                  </div>
+
                   </div>
                 </div>
                 <div className="modal-footer">

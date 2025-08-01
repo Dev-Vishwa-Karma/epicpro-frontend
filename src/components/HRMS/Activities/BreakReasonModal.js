@@ -1,5 +1,6 @@
 // BreakReasonModal.js
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSaveBreakIn, closeModal, ButtonLoading, errors = {} }) => {
   return (
@@ -18,21 +19,17 @@ const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSa
               <div className="modal-body">
                 <div className="row clearfix">
                   <div className="col-md-12">
-                    <div className="form-group">
-                      <label className="form-label">Break Reason</label>
-                      <textarea
-                        className={`form-control${errors.breakReason ? ' is-invalid' : ''}`}
-                        placeholder="Please provide the reason for your break"
-                        value={breakReason}
-                        onChange={handleReasonChange}
-                        rows="10"
-                        cols="50"
-                        ref={errors.breakReason ? (el) => el && el.focus() : null}
-                      />
-                      {errors.breakReason && (
-                        <div className="invalid-feedback d-block">{errors.breakReason}</div>
-                      )}
-                    </div>
+                    <InputField
+                      label="Break Reason"
+                      name="breakReason"
+                      type="textarea"
+                      value={breakReason}
+                      onChange={handleReasonChange}
+                      error={errors.breakReason}
+                      placeholder="Please provide the reason for your break"
+                      rows={10}
+                      refInput={errors.breakReason ? (el) => el && el.focus() : null}
+                    />
                   </div>
                 </div>
               </div>

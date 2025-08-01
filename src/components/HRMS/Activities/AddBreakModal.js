@@ -1,5 +1,6 @@
 import React from 'react';
 import EmployeeSelector from '../../common/EmployeeSelector';
+import InputField from '../../common/formInputs/InputField';
 
 const AddBreakModal = ({
   loading,
@@ -42,38 +43,31 @@ const AddBreakModal = ({
                   </div>
                 </div>
                 <div className="col-md-12">
-                  <div className="form-group">
-                    <label className="form-label">Select Status</label>
-                    <select 
-                      className={`form-control${errors.selectedStatus ? ' is-invalid' : ''}`} 
-                      value={selectedStatus} 
-                      onChange={handleStatusChange}
-                    >
-                      <option value="">Select Status</option>
-                      <option value="active">Break In</option>
-                      <option value="completed">Break Out</option>
-                    </select>
-                    {errors.selectedStatus && (
-                      <div className="invalid-feedback d-block">{errors.selectedStatus}</div>
-                    )}
-                  </div>
+                  <InputField
+                    label="Select Status"
+                    name="selectedStatus"
+                    type="select"
+                    value={selectedStatus}
+                    onChange={handleStatusChange}
+                    error={errors.selectedStatus}
+                    options={[
+                      { value: 'active', label: 'Break In' },
+                      { value: 'completed', label: 'Break Out' },
+                    ]}
+                  />
                 </div>
                 {selectedStatus === "active" && (
                   <div className="col-md-12">
-                    <div className="form-group">
-                      <label className="form-label">Break Reason</label>
-                      <textarea
-                        className={`form-control${errors.breakReason ? ' is-invalid' : ''}`}
-                        placeholder="Please provide the reason for your break"
-                        value={breakReason}
-                        onChange={handleReasonChange}
-                        rows="10"
-                        cols="50"
-                      />
-                      {errors.breakReason && (
-                        <div className="invalid-feedback d-block">{errors.breakReason}</div>
-                      )}
-                    </div>
+                    <InputField
+                      label="Break Reason"
+                      name="breakReason"
+                      type="textarea"
+                      value={breakReason}
+                      onChange={handleReasonChange}
+                      error={errors.breakReason}
+                      placeholder="Please provide the reason for your break"
+                      rows={10}
+                    />
                   </div>
                 )}
               </div>

@@ -1,5 +1,6 @@
 // components/modals/DepartmentModal.jsx
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const DepartmentModal = ({
   isEdit = false,
@@ -27,33 +28,22 @@ const DepartmentModal = ({
               </div>
 
               <div className="modal-body">
-                <div className="form-group">
-                  <label htmlFor="department_name" className="form-label">Department Name</label>
-                  <input
-                    id="department_name"
-                    type="text"
-                    className={`form-control ${errors.department_name ? 'is-invalid' : ''}`}
-                    name="department_name"
-                    value={department_name}
-                    onChange={onChange}
-                    placeholder="Department Name"
-                  />
-                  {errors.department_name && <small className="invalid-feedback">{errors.department_name}</small>}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="department_head" className="form-label">Department Head</label>
-                  <input
-                    id="department_head"
-                    type="text"
-                    className={`form-control ${errors.department_head ? 'is-invalid' : ''}`}
-                    name="department_head"
-                    value={department_head}
-                    onChange={onChange}
-                    placeholder="Department Head"
-                  />
-                  {errors.department_head && <small className="invalid-feedback">{errors.department_head}</small>}
-                </div>
+                      <InputField
+                          label="Department Name"
+                          name="department_name"
+                          value={department_name}
+                          onChange={onChange}
+                          placeholder="Department Name"
+                          error={errors.department_name}
+                      />
+                      <InputField
+                          label="Department Head"
+                          name="department_head"
+                          value={department_head}
+                          onChange={onChange}
+                          placeholder="Department Head"
+                          error={errors.department_head}
+                      />
               </div>
 
               <div className="modal-footer">
