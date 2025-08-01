@@ -7,6 +7,7 @@ import { getService } from '../../../services/getService';
 import DateFilterForm from '../../common/DateFilterForm';
 import AddBreakModal from './AddBreakModal';
 import BreakReasonModal from './BreakReasonModal';
+import { validateFields } from '../../common/validations';
 class Activities extends Component {
   constructor(props) {
     super(props);
@@ -35,7 +36,9 @@ class Activities extends Component {
       filterToDate: todayStr,
       onHandleApply: false,
       colbutton: (window.user.role === "admin" || window.user.role === "super_admin") ? 4 : 6,
-      col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2
+      col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
+      errors: {},
+      breakReasonErrors: {}
     };
   }
 
@@ -131,11 +134,17 @@ class Activities extends Component {
       return;
     }
 
-    this.setState({ breakReasonModal: true });
+    this.setState({ 
+      breakReasonModal: true,
+      breakReasonErrors: {}
+    });
   };
 
   closeModal = () => {
-    this.setState({ breakReasonModal: false });
+    this.setState({ 
+      breakReasonModal: false,
+      breakReasonErrors: {}
+    });
   };
 
   handleBreakOut = () => {
@@ -192,13 +201,24 @@ class Activities extends Component {
   }
 
   handleSaveBreakIn = () => {
+    const { breakReason } = this.state;
     this.setState({ ButtonLoading: true });
-    if (!this.state.breakReason) {
-      this.setState({ activityError: 'Please provide the reason for your break', ButtonLoading: false });
-      setTimeout(() => {
-        this.setState({ activityError: null });
-      }, 5000)
+
+    // Apply validation
+    const validationSchema = [
+      { name: 'breakReason', value: breakReason, required: true, messageName: 'Break reason' }
+    ];
+
+    const errors = validateFields(validationSchema);
+
+    if (Object.keys(errors).length > 0) {
+      this.setState({ 
+        breakReasonErrors: errors, 
+        ButtonLoading: false 
+      });
       return;
+    } else {
+      this.setState({ breakReasonErrors: {} });
     }
 
     const formData = new FormData();
@@ -218,7 +238,8 @@ class Activities extends Component {
             showError: false,
             showSuccess: true,
             ButtonLoading: false,
-            breakReasonModal:false
+            breakReasonModal: false,
+            breakReasonErrors: {}
           });
           setTimeout(this.dismissMessages, 3000);
           this.componentDidMount();
@@ -264,47 +285,25 @@ class Activities extends Component {
     const { selectedEmployee, selectedStatus, breakReason } = this.state;
     this.setState({ ButtonLoading: true });
 
-    if (!selectedEmployee && !selectedStatus) {
-      this.setState({
-        errorMessage: "Please select an employee and status",
-        showError: true,
-        showSuccess: false,
-        ButtonLoading: false
-      });
-      return;
-    }
+    // Apply validation
+    const validationSchema = [
+      { name: 'selectedEmployee', value: selectedEmployee, required: true, messageName: 'Employee selection' },
+      { name: 'selectedStatus', value: selectedStatus, required: true, messageName: 'Status' },
+      { name: 'breakReason', value: breakReason, required: selectedStatus === 'active', messageName: 'Break reason' }
+    ];
 
-    if (!selectedEmployee) {
-      this.setState({
-        errorMessage: "Please select an employee",
-        showError: true,
-        showSuccess: false,
-        ButtonLoading: false
-      });
-      setTimeout(this.dismissMessages, 3000);
-      return;
-    }
+    const errors = validateFields(validationSchema);
 
-    if (!selectedStatus) {
-      this.setState({
-        errorMessage: "Please select a status",
-        showError: true,
-        showSuccess: false,
-        ButtonLoading: false
+    if (Object.keys(errors).length > 0) {
+      this.setState({ 
+        errors, 
+        ButtonLoading: false, 
+        showError: false, 
+        showSuccess: false 
       });
-      setTimeout(this.dismissMessages, 3000);
       return;
-    }
-
-    if (selectedStatus === 'active' && !breakReason) {
-      this.setState({
-        errorMessage: "Please enter the reason for break",
-        showError: true,
-        showSuccess: false,
-        ButtonLoading: false
-      });
-      setTimeout(this.dismissMessages, 3000);
-      return;
+    } else {
+      this.setState({ errors: {} });
     }
 
     this.setState({ loading: true });
@@ -357,7 +356,8 @@ class Activities extends Component {
     this.setState({
       selectedEmployee: "",
       selectedStatus: "",
-      breakReason: ""
+      breakReason: "",
+      errors: {}
     });
   };
 
@@ -396,7 +396,7 @@ class Activities extends Component {
   };
 
   render() {
-    const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess, successMessage, showError, errorMessage, col, colbutton } = this.state;
+    const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess, successMessage, showError, errorMessage, col, colbutton, errors, breakReasonErrors } = this.state;
     return (
       <>
         <AlertMessages
@@ -469,6 +469,7 @@ class Activities extends Component {
             handleReasonChange={this.handleReasonChange}
             addActivityForEmployee={this.addActivityForEmployee}
             buttonLoading={this.state.ButtonLoading}
+            errors={this.state.errors}
           />
         )}
 
@@ -480,6 +481,7 @@ class Activities extends Component {
           handleSaveBreakIn={this.handleSaveBreakIn}
           closeModal={this.closeModal}
           ButtonLoading={this.state.ButtonLoading}
+          errors={breakReasonErrors}
         />
       </>
     );

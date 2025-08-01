@@ -5,6 +5,7 @@ import LinkModal from './LinkModal';
 import DeleteModal from '../../common/DeleteModal';
 import DownloadModal from '../../common/DownloadModal';
 import AlertMessages from '../../common/AlertMessages';
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
 
@@ -47,7 +48,6 @@ class Link extends Component {
   }
 
   fetchLinks = (search = '') => {
-    this.setState({ loading: true });
     const params = { action: 'view' };
     if (search) params.search = search;
     getService.getCall('resources.php', params)
@@ -67,7 +67,7 @@ class Link extends Component {
   };
 
   handleTabChange = (tabId) => {
-    this.setState({ activeTab: tabId, searchQuery:''});
+    this.setState({ activeTab: tabId, searchQuery: '', loading: true });
     this.fetchLinks()
   };
 
@@ -349,11 +349,13 @@ class Link extends Component {
       clearTimeout(this.searchDebounceTimer);
     }
     this.searchDebounceTimer = setTimeout(() => {
+      this.setState({ loading: true });
       this.fetchLinks(query);
     }, 1000);
   };
 
   componentDidMount() {
+    this.setState({ loading: true });
     this.fetchLinks();
   }
 
@@ -540,8 +542,16 @@ class Link extends Component {
                   </div>
                 </div>
                 <div className="card-body">
-                  <LinkTable data={currentGitLinks} type="Git" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
-                  {this.renderPagination('Git', gitLinks.length)}
+                  {loading ? (
+                    <div className="dimmer active">
+                      <TableSkeleton columns={3} rows={5} />
+                    </div>
+                  ) : (
+                    <>
+                      <LinkTable data={currentGitLinks} type="Git" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
+                      {this.renderPagination('Git', gitLinks.length)}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -565,8 +575,16 @@ class Link extends Component {
                   </div>
                 </div>
                 <div className="card-body">
-                  <LinkTable data={currentExcelLinks} type="Excel" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
-                  {this.renderPagination('Excel', excelLinks.length)}
+                  {loading ? (
+                    <div className="dimmer active">
+                      <TableSkeleton columns={3} rows={5} />
+                    </div>
+                  ) : (
+                    <>
+                      <LinkTable data={currentExcelLinks} type="Excel" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
+                      {this.renderPagination('Excel', excelLinks.length)}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -591,8 +609,16 @@ class Link extends Component {
                   </div>
                 </div>
                 <div className="card-body">
-                  <LinkTable data={currentCodebaseLinks} type="Codebase" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
-                  {this.renderPagination('Codebase', codebaseLinks.length)}
+                  {loading ? (
+                    <div className="dimmer active">
+                      <TableSkeleton columns={3} rows={5} />
+                    </div>
+                  ) : (
+                    <>
+                      <LinkTable data={currentCodebaseLinks} type="Codebase" onEdit={this.handleEdit} onDelete={this.handleDelete} onDownload={this.handleDownloadClick} />
+                      {this.renderPagination('Codebase', codebaseLinks.length)}
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -11,7 +11,8 @@ const AddBreakModal = ({
   handleStatusChange,
   handleReasonChange,
   addActivityForEmployee,
-  buttonLoading
+  buttonLoading,
+  errors = {}
 }) => {
   return (
     <div className="modal fade" id="addBreakModal" tabIndex={-1} role="dialog" aria-labelledby="addBreakModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -28,33 +29,50 @@ const AddBreakModal = ({
             <div className="modal-body">
               <div className="row clearfix">
                 <div className="col-md-12">
-                  <EmployeeSelector
-                      allEmployeesData={employeeData}
-                      selectedEmployee={selectedEmployee}
-                      handleEmployeeChange={handleEmployeeChange}
-                      showAllInOption={false}
-                  />
+                  <div className="form-group">
+                    <EmployeeSelector
+                        allEmployeesData={employeeData}
+                        selectedEmployee={selectedEmployee}
+                        handleEmployeeChange={handleEmployeeChange}
+                        showAllInOption={false}
+                    />
+                    {errors.selectedEmployee && (
+                      <div className="invalid-feedback d-block">{errors.selectedEmployee}</div>
+                    )}
+                  </div>
                 </div>
                 <div className="col-md-12">
                   <div className="form-group">
-                    <select className="form-control" value={selectedStatus} onChange={handleStatusChange}>
+                    <label className="form-label">Select Status</label>
+                    <select 
+                      className={`form-control${errors.selectedStatus ? ' is-invalid' : ''}`} 
+                      value={selectedStatus} 
+                      onChange={handleStatusChange}
+                    >
                       <option value="">Select Status</option>
                       <option value="active">Break In</option>
                       <option value="completed">Break Out</option>
                     </select>
+                    {errors.selectedStatus && (
+                      <div className="invalid-feedback d-block">{errors.selectedStatus}</div>
+                    )}
                   </div>
                 </div>
                 {selectedStatus === "active" && (
                   <div className="col-md-12">
                     <div className="form-group">
+                      <label className="form-label">Break Reason</label>
                       <textarea
-                        className="form-control"
+                        className={`form-control${errors.breakReason ? ' is-invalid' : ''}`}
                         placeholder="Please provide the reason for your break"
                         value={breakReason}
                         onChange={handleReasonChange}
                         rows="10"
                         cols="50"
                       />
+                      {errors.breakReason && (
+                        <div className="invalid-feedback d-block">{errors.breakReason}</div>
+                      )}
                     </div>
                   </div>
                 )}

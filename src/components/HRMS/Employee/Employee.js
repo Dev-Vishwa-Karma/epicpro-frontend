@@ -516,15 +516,8 @@ class Employee extends Component {
 		// Apply Validation component
 		const validationSchema = [
 			{ name: 'employee_id', value: employee_id, required: true, messageName: 'Employee selection'},
-			{ name: 'from_date', value: from_date, type: 'date', required: true, messageName: 'From date'},
-			{ name: 'to_date', value: to_date, type: 'date', required: true, messageName: 'To date',
-				customValidator: (val) => {
-					if (from_date && val && new Date(val) < new Date(from_date)) {
-						return "To date not less than from date:";
-					}
-					return undefined;
-				}
-			},
+			{ name: 'from_date', value: from_date, type: 'leave_date', required: true, messageName: 'From date'},
+			{ name: 'to_date', value: to_date, type: 'leave_date', required: true, messageName: 'To date'},
 			{ name: 'reason', value: reason, required: true, messageName: 'Reason'},
 			{ name: 'status', value: status, required: true, messageName: 'Status'}
 		];
@@ -618,15 +611,8 @@ class Employee extends Component {
 		// Apply Validation component for edit
 		const validationSchema = [
 			{ name: 'employee_id', value: selectedEmployeeLeave.employee_id, required: true, messageName: 'Employee selection'},
-			{ name: 'from_date', value: selectedEmployeeLeave.from_date, type: 'date', required: true, messageName: 'From date'},
-			{ name: 'to_date', value: selectedEmployeeLeave.to_date, type: 'date', required: true, messageName: 'To date',
-				customValidator: (val) => {
-					if (selectedEmployeeLeave.from_date && val && new Date(val) < new Date(selectedEmployeeLeave.from_date)) {
-						return "To date not less than from date:";
-					}
-					return undefined;
-				}
-			},
+			{ name: 'from_date', value: selectedEmployeeLeave.from_date, type: 'leave_date', required: true, messageName: 'From date'},
+			{ name: 'to_date', value: selectedEmployeeLeave.to_date, type: 'leave_date', required: true, messageName: 'To date'},
 			{ name: 'reason', value: selectedEmployeeLeave.reason, required: true, messageName: 'Reason'},
 			{ name: 'status', value: selectedEmployeeLeave.status, required: true, messageName: 'Status'}
 		];
@@ -635,6 +621,8 @@ class Employee extends Component {
 		if (Object.keys(errors).length > 0) {
 			this.setState({ addLeaveErrors: errors, ButtonLoading: false });
 			return;
+		} else {
+			this.setState({ addLeaveErrors: {} });
 		}
 
 		this.setState({ ButtonLoading: true });

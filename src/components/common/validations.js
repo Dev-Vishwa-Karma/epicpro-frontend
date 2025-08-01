@@ -1,9 +1,19 @@
 export const validateFields = (fields) => {
   const errors = {};
+  let fromDateValue = null;
 
+  // First pass: find from_date value
+  fields.forEach((field) => {
+    if (field.name === 'from_date' && field.value) {
+      fromDateValue = new Date(field.value);
+      fromDateValue.setHours(0, 0, 0, 0);
+    }
+  });
+
+  // Second pass: validate all fields
   fields.forEach((field) => {
     const { name, value, type, required, minLength, maxLength, customValidator, messageName } = field;
-
+    
     // Ensure value is treated as a string if it's not already
     const valueAsString = value ? String(value) : "";
 
@@ -38,8 +48,47 @@ export const validateFields = (fields) => {
     }
 
     // Date validation (for 'date' type like DOB or Joining Date)
-    if (type === 'date' && valueAsString && new Date(valueAsString).toString() === "Invalid Date") {
-      errors[name] = `${messageName} is invalid.`;
+    if (type === 'date' && valueAsString) {
+      const parsedDate = new Date(valueAsString);
+      const currentDate = new Date();
+ 
+      if (parsedDate.toString() === "Invalid Date") {
+        errors[name] = `${messageName} is invalid.`;
+      } else if (parsedDate > currentDate) {
+        errors[name] = `${messageName} cannot be a future date.`;
+      }
+    }
+    // if (type === 'date' && valueAsString) {
+    //   const parsedDate = new Date(valueAsString);
+    //   const currentDate = new Date();
+    //   currentDate.setHours(0, 0, 0, 0);
+
+    //   if (parsedDate.toString() === "Invalid Date") {
+    //     errors[name] = `${messageName} is invalid.`;
+    //   } else if (parsedDate > currentDate) {
+    //     errors[name] = `${messageName} cannot be a future date.`;
+    //   } else if (name === 'to_date' && fromDateValue && parsedDate) {
+    //     parsedDate.setHours(0, 0, 0, 0);
+    //     console.log('Comparing to_date:', parsedDate, 'with from_date:', fromDateValue);
+    //     if (parsedDate < fromDateValue) {
+    //       errors[name] = "To date cannot be earlier than from date";
+    //     }
+    //   }
+    // }
+
+    // Leave date validation (allows future dates)
+    if (type === 'leave_date' && valueAsString) {
+      const parsedDate = new Date(valueAsString);
+
+      if (parsedDate.toString() === "Invalid Date") {
+        errors[name] = `${messageName} is invalid.`;
+      } else if (name === 'to_date' && fromDateValue && parsedDate) {
+        parsedDate.setHours(0, 0, 0, 0);
+        console.log('Comparing leave to_date:', parsedDate, 'with from_date:', fromDateValue);
+        if (parsedDate < fromDateValue) {
+          errors[name] = "To date cannot be earlier than from date";
+        }
+      }
     }
 
     // Visibility Priority (integer validation)

@@ -76,10 +76,13 @@ class EditEmployee extends Component {
             joiningDate: React.createRef(),
             mobile1: React.createRef(),
             mobile2: React.createRef(),
+            password: React.createRef(),
             emergencyContact1: React.createRef(),
             emergencyContact2: React.createRef(),
             emergencyContact3: React.createRef(),
             bankAccountNo: React.createRef(),
+            visibilityPriority: React.createRef(),
+            salaryAmount: React.createRef(),
         };
     }
 
@@ -311,6 +314,7 @@ class EditEmployee extends Component {
             panCardNumber,
             panCardFile,
             facebook,
+            salaryAmount,
             twitter,
             linkedin,
             instagram,
@@ -321,6 +325,8 @@ class EditEmployee extends Component {
             status
         } = this.state;
 
+
+
         // Usage:
 
         const validationSchema = [
@@ -329,48 +335,38 @@ class EditEmployee extends Component {
         { name: 'email', value: email, type: 'email', required: true, messageName:'Email' },
         { name: 'selectedDepartment', value: selectedDepartment, required: true, messageName:'Department' },
         { name: 'gender', value: gender, required: true, messageName: 'Gender' },
-        { name: 'password', value: password, type: 'password', required: true, messageName:'Password' },
-        { name: 'dob', value: dob, type: 'date', required: true, messageName:'DOB',
-            customValidator: (val) => {
-                if (val) {
-                    const inputDate = new Date(val);
-                    const currentDate = new Date();
-                    currentDate.setHours(23, 59, 59, 999);
-                    if (inputDate > currentDate) {
-                        return 'DOB cannot be greater than current date.';
-                    }
-                }
-                return undefined;
-            }
-        },
+        { name: 'password', value: password, type: 'password', required: false, messageName:'Password' },
+        { name: 'dob', value: dob, type: 'date', required: true, messageName:'Date of Birth'},
         { name: 'mobile1', value: mobile1, type: 'mobile', required: true, messageName:'Mobile Number' },
         { name: 'mobile2', value: mobile2, type: 'mobile', messageName:'Mobile Number' },
         { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile', messageName:'Mobile Number' },
         { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile',  messageName:'Mobile Number' },
         { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile',  messageName:'Mobile Number'  },
         { name: 'joiningDate', value: joiningDate, type: 'date', required: true,  messageName:'Joining Date'  },
-        { name: 'bankAccountNo', value: bankAccountNo, messageName:'Account Number',
-            customValidator: (val) => {
-                if (val && val.toString().length > 20) {
-                    return 'Account Number must not exceed 20 digits.';
-                }
-                return undefined;
-            }
-        },
-        { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'visibility Priority' },
+            { name: 'bankAccountNo', value: bankAccountNo, messageName: 'Account Number', maxLength: 20 },
+        { name: 'salaryAmount', value:salaryAmount, messageName: 'Salary Amount', maxLength: 8 },
+        { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'Visibility Priority' },
         ];
+
+        // Add salary amount validation only if salary details exist
+        // if (salaryDetails && salaryDetails.length > 0 && salaryDetails[0].salaryAmount) {
+        //     validationSchema.push({ 
+        //         name: 'salaryAmount', 
+        //         value: salaryDetails[0].salaryAmount, 
+        //         messageName: 'Salary Amount', 
+        //         maxLength: 8 
+        //     });
+        // }
 
         const errors = validateFields(validationSchema);
 
-        // Validate salary amounts
-        salaryDetails.forEach((detail, index) => {
-            if (detail.salaryAmount && detail.salaryAmount.toString().length > 8) {
-                errors[`salaryAmount_${index}`] = 'Salary Amount must not exceed 8 digits.';
-            }
-        });
+        // Debug: Log validation results
+        console.log('Validation Schema:', validationSchema);
+        console.log('Validation Errors:', errors);
 
         // Show errors if any and scrolled on there
         if (Object.keys(errors).length > 0) {
+            console.log('Validation errors found:', errors);
             this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false }, () => {
                 const firstErrorField = Object.keys(errors)[0];
                 const ref = this.fieldRefs[firstErrorField];
@@ -381,9 +377,9 @@ class EditEmployee extends Component {
                     console.warn('No ref found for field:', firstErrorField);
                 }
             });
-        return;
+            return;
         } else {
-        this.setState({ errors: {} });
+            this.setState({ errors: {} });
         }
 
         this.setState({ ButtonLoading: true });
@@ -499,7 +495,9 @@ class EditEmployee extends Component {
     };
     render() {
         const { fixNavbar } = this.props;
-        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status, showSuccess,successMessage,showError, errorMessage } = this.state;
+        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status, showSuccess,successMessage,showError, errorMessage, errors } = this.state;
+        
+
         // Frontend and Backend Skill Options
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
@@ -998,14 +996,15 @@ class EditEmployee extends Component {
                                                                             type="number"
                                                                             name="salaryAmount"
                                                                             id="salaryAmount"
-                                                                            className={`form-control${this.state.errors[`salaryAmount_${index}`] ? ' is-invalid' : ''}`}
+                                                                            className={`form-control${this.state.errors.salaryAmount ? ' is-invalid' : ''}`}
                                                                             placeholder="Enter salary amount"
                                                                             value={entry.salaryAmount || ""}
                                                                             onChange={(e) => this.handleSalaryDetails(index, "salaryAmount", e.target.value)}
                                                                             maxLength="8"
+                                                                            ref={this.fieldRefs.salaryAmount}
                                                                         />
-                                                                        {this.state.errors[`salaryAmount_${index}`] && (
-                                                                            <div className="invalid-feedback d-block">{this.state.errors[`salaryAmount_${index}`]}</div>
+                                                                        {this.state.errors.salaryAmount && (
+                                                                            <div className="invalid-feedback d-block">{this.state.errors.salaryAmount}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>

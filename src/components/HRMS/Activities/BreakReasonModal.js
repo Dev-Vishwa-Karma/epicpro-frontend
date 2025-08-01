@@ -1,7 +1,7 @@
 // BreakReasonModal.js
 import React from 'react';
 
-const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSaveBreakIn, closeModal, ButtonLoading }) => {
+const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSaveBreakIn, closeModal, ButtonLoading, errors = {} }) => {
   return (
     <>
     {showModal && (
@@ -19,14 +19,19 @@ const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSa
                 <div className="row clearfix">
                   <div className="col-md-12">
                     <div className="form-group">
+                      <label className="form-label">Break Reason</label>
                       <textarea
-                        className="form-control"
+                        className={`form-control${errors.breakReason ? ' is-invalid' : ''}`}
                         placeholder="Please provide the reason for your break"
                         value={breakReason}
                         onChange={handleReasonChange}
                         rows="10"
                         cols="50"
+                        ref={errors.breakReason ? (el) => el && el.focus() : null}
                       />
+                      {errors.breakReason && (
+                        <div className="invalid-feedback d-block">{errors.breakReason}</div>
+                      )}
                     </div>
                   </div>
                 </div>

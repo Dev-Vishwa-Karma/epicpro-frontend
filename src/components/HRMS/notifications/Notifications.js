@@ -496,13 +496,25 @@ class Notifications extends Component {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <NotificationTable 
-                                                notificationData={currentNotifications} 
-                                                message={message}
-                                               // onEditClick={this.handleEditClick} 
-                                                onDeleteClick={this.openModal} 
-                                                userRole={window.user.role}
-                                            />
+                                            <>
+                                                <NotificationTable 
+                                                    notificationData={currentNotifications} 
+                                                    message={message}
+                                                   // onEditClick={this.handleEditClick} 
+                                                    onDeleteClick={this.openModal} 
+                                                    userRole={window.user.role}
+                                                />
+                                                {/* Pagination inside card body */}
+                                                {totalPages > 1 && (
+                                                    <div className="d-flex justify-content-end mt-3">
+                                                        <Pagination
+                                                            currentPage={currentPage}
+                                                            totalPages={totalPages}
+                                                            onPageChange={this.handlePageChange}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -510,15 +522,6 @@ class Notifications extends Component {
                         </div>
                     </div>
                 </div>
-
-                {/* Only show pagination if there are notifications */}
-                {totalPages > 1 && (
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={this.handlePageChange}
-                    />
-                )}
 
                 <NotificationModal
                     isEdit={!!selectedNotification}

@@ -137,18 +137,20 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
                       >
                         {shortenUrl(row.url)}
                       </a>
-                    ) : row.file_path ? (
+                    ) :                     row.file_path ? (
                       typeof row.file_path === 'string' ? (
                         <>
-                          
-                          <button
-                            className="btn btn-link btn-sm ml-2"
-                            title="Download"
-                            style={{ padding: 0, border: 'none', background: 'none' }}
-                            onClick={() => handleDownload(row.file_path)}
-                          >
-                            {getFileTypeIcon(row.file_path)}
-                          </button>
+                          <div className="file-icon-container">
+                            <button
+                              className="btn btn-link btn-sm ml-2"
+                              title="Download"
+                              style={{ padding: 0, border: 'none', background: 'none' }}
+                              onClick={() => handleDownload(row.file_path)}
+                            >
+                              {getFileTypeIcon(row.file_path)}
+                            </button>
+                            <div className="file-icon-tooltip">Click to download</div>
+                          </div>
                         </>
                       ) : (
                         <span>File</span>

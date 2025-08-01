@@ -470,26 +470,14 @@ class CalendarWithTabs extends Component {
             { name: 'email', value: employee.email, type: 'email', required: true, messageName: 'Email' },
             { name: 'gender', value: employee.gender, required: true, messageName: 'Gender' },
             { name: 'department_id', value: employee.department_id, required: true, messageName: 'Department' },
-            { name: 'dob', value: employee.dob, type: 'date', required: true, messageName: 'DOB',
-                customValidator: (val) => {
-                    if (val) {
-                        const inputDate = new Date(val);
-                        const currentDate = new Date();
-                        currentDate.setHours(23, 59, 59, 999);
-                        if (inputDate > currentDate) {
-                            return 'DOB cannot be greater than current date.';
-                        }
-                    }
-                    return undefined;
-                }
-            },
+            { name: 'dob', value: employee.dob, type: 'date', required: true, messageName: 'Date of Birth'},
             { name: 'joining_date', value: employee.joining_date, type: 'date', required: true, messageName: 'Joining Date' },
             { name: 'mobile_no1', value: employee.mobile_no1, type: 'mobile', required: true, messageName: 'Mobile Number' },
             { name: 'mobile_no2', value: employee.mobile_no2, type: 'mobile', messageName: 'Mobile Number' },
             { name: 'emergency_contact1', value: employee.emergency_contact1, type: 'mobile', messageName: 'Mobile Number' },
             { name: 'emergency_contact2', value: employee.emergency_contact2, type: 'mobile', messageName: 'Mobile Number' },
             { name: 'emergency_contact3', value: employee.emergency_contact3, type: 'mobile', messageName: 'Mobile Number' },
-            { name: 'password', value: employee.password, required: true, messageName: 'Password' },
+            { name: 'password', value: employee.password, required: false, messageName: 'Password' },
         ];
 
         const errors = validateFields(validationSchema);

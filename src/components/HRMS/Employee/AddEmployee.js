@@ -224,45 +224,20 @@ class AddEmployee extends Component {
       { name: 'lastName', value: lastName, type: 'name', required: true, messageName:'Last Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName:'Email' },
       { name: 'gender', value: gender, type: 'name', required: true, messageName:'Gender' },
-      { name: 'dob', value: dob, type: 'date', required: true, messageName:'Date of Birth',
-        customValidator: (val) => {
-          if (val) {
-            const inputDate = new Date(val);
-            const currentDate = new Date();
-            currentDate.setHours(23, 59, 59, 999);
-            if (inputDate > currentDate) {
-              return 'Date of Birth cannot be greater than current date.';
-            }
-          }
-          return undefined;
-        }
-      },
+      { name: 'dob', value: dob, type: 'date', required: true, messageName:'Date of Birth',},
       { name: 'selectedDepartment', value: selectedDepartment, required: true, messageName:'Department' },
       { name: 'mobile1', value: mobile1, type: 'mobile', required: true, messageName:'Mobile Number' },
       { name: 'mobile2', value: mobile2, type: 'mobile', messageName:'Mobile Number' },
       { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile', messageName:'Mobile Number' },
       { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile', messageName:'Mobile Number' },
-      { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile', messageName:'Mobile Number' },
+      { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile', messageName: 'Mobile Number' },
       { name: 'joiningDate', value: joiningDate, type: 'date', required: true, messageName:'Joining Date'},
-      { name: 'bankAccountNo', value: bankAccountNo, messageName:'Account Number',
-        customValidator: (val) => {
-          if (val && val.toString().length > 20) {
-            return 'Account Number must not exceed 20 digits.';
-          }
-          return undefined;
-        }
-      },
+      { name: 'bankAccountNo', value: bankAccountNo, messageName: 'Account Number', maxLength: 20 },
+      { name: 'salaryAmount', value: this.state.salaryDetails[0].salaryAmount, messageName: 'Salary Amount', maxLength: 8 },
       { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'visibility Priority' }
     ];
 
     const errors = validateFields(validationSchema);
-
-    // Validate salary amounts
-    salaryDetails.forEach((detail, index) => {
-      if (detail.salaryAmount && detail.salaryAmount.toString().length > 8) {
-        errors[`salaryAmount_${index}`] = 'Salary Amount must not exceed 8 digits.';
-      }
-    });
 
     if (Object.keys(errors).length > 0) {
       this.setState({ errors, ButtonLoading: false, showError: false, showSuccess: false }, () => {
@@ -512,7 +487,7 @@ class AddEmployee extends Component {
             <div className="container-fluid">
               <div className="row">
                 <div className="col-12 col-lg-12">
-                  <form className="card" onSubmit={this.addEmployee}>
+                  <form className="card" noValidate onSubmit={this.addEmployee}>
                     <div className="card-body">
                       <h3 className="card-title">Add Employee</h3>
                       <div className="row">
@@ -1024,7 +999,7 @@ class AddEmployee extends Component {
                                       type="number"
                                       name="salaryAmount"
                                       id="salaryAmount"
-                                      className={`form-control${this.state.errors[`salaryAmount_${index}`] ? ' is-invalid' : ''}`}
+                                      className={`form-control${this.state.errors.salaryAmount ? ' is-invalid' : ''}`}
                                       placeholder="Enter salary amount"
                                       value={entry.salaryAmount}
                                       onChange={(e) =>
@@ -1036,8 +1011,8 @@ class AddEmployee extends Component {
                                       }
                                       maxLength="8"
                                     />
-                                    {this.state.errors[`salaryAmount_${index}`] && (
-                                      <div className="invalid-feedback d-block">{this.state.errors[`salaryAmount_${index}`]}</div>
+                                    {this.state.errors.salaryAmount && (
+                                      <div className="invalid-feedback d-block">{this.state.errors.salaryAmount}</div>
                                     )}
                                   </div>
                                 </div>

@@ -148,27 +148,8 @@ class Users extends Component {
 			{ name: 'email', value: email, type: 'email', required: true, messageName: 'Email ID'},
 			{ name: 'gender', value: gender, required: true, messageName: 'Gender' },
 			{ name: 'selectedDepartment', value: selectedDepartment, required: true, messageName: 'Department' },
-			{ name: 'dob', value: dob, type: 'date', required: true, messageName: 'DOB',
-				customValidator: (val) => {
-					if (val) {
-						const inputDate = new Date(val);
-						const currentDate = new Date();
-						currentDate.setHours(23, 59, 59, 999);
-						if (inputDate > currentDate) {
-							return 'DOB cannot be greater than current date.';
-						}
-					}
-					return undefined;
-				}
-			},
-			{ name: 'mobileNo', value: mobileNo, required: false, messageName: 'Mobile Number',
-				customValidator: (val) => {
-					if (val && !/^\d{10}$/.test(val)) {
-						return 'Mobile Number must be exactly 10 digits.';
-					}
-					return undefined;
-				}
-			},
+			{ name: 'dob', value: dob, type: 'date', required: true, messageName: 'Date of Birth'},
+			{ name: 'mobileNo', value: mobileNo, required: false, messageName: 'Mobile Number', maxLength:20},
 			{ name: 'password', value: password, required: true, messageName: 'Password'},
 			{ name: 'confirmPassword', value: confirmPassword, required: true, messageName: 'Confirm Password',
 				customValidator: (val) => (password && val && password !== val ? 'Passwords do not match.' : undefined)
@@ -277,19 +258,7 @@ class Users extends Component {
             { name: 'firstName', value: selectedUser.first_name, type: 'name', required: true, messageName: 'First Name'},
 			{ name: 'lastName', value: selectedUser.last_name, type: 'name', required: false, messageName: 'Last Name' },
 			{ name: 'email', value: selectedUser.email, type: 'email', required: true, messageName: 'Email Address'},
-            { name: 'dob', value: selectedUser.dob, type: 'date', required: false, messageName: 'Date of Birth',
-                customValidator: (val) => {
-                    if (val) {
-                        const inputDate = new Date(val);
-                        const currentDate = new Date();
-                        currentDate.setHours(23, 59, 59, 999);
-                        if (inputDate > currentDate) {
-                            return 'Date of Birth cannot be greater than current date.';
-                        }
-                    }
-                    return undefined;
-                }
-            },
+            { name: 'dob', value: selectedUser.dob, type: 'date', required: false, messageName: 'Date of Birth'},
         ];
         const errors = validateFields(validationSchema);
         if (Object.keys(errors).length > 0) {

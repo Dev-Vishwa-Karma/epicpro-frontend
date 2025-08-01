@@ -536,11 +536,11 @@ class Gallery extends Component {
                                 </div>
                             </div>
                         </div>
-                        <div className="masonry">
+                        <div className="container-fluid px-0">
+                            <div className="masonry">
                                 {loading ? (
-                                    <GallerySkeleton rows={3} columns={4} />
+                                <GallerySkeleton rows={3} columns={4} />
                                 ) : filteredImages.length > 0 ? (
-                                // Show actual images once data is loaded
                                 currentImages.map((image, index) => (
                                     <div className="masonry-item" key={image.id || index}>
                                     <div className="card p-3 position-relative gallery-card">
@@ -557,7 +557,6 @@ class Gallery extends Component {
                                     </div>
                                 ))
                                 ) : (
-                                // Show BlankState if no images are found
                                 <div className="col-12">
                                     <div
                                     className="card p-3 d-flex align-items-center justify-content-center"
@@ -568,6 +567,8 @@ class Gallery extends Component {
                                 </div>
                                 )}
                             </div>
+                            </div>
+
 
                             {/* Show Pagination if there are images */}
                             {filteredImages.length > 0 && totalPages > 1 && (

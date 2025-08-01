@@ -23,7 +23,7 @@ const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }
                   <div className="font-15">{department.department_name}</div>
                 </td>
                 <td>{department.department_head}</td>
-                <td>{department.total_employee}</td>
+                <td>{department.total_employee || 0}</td>
                 <td>
                   <button
                     type="button"
