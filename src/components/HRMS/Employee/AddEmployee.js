@@ -145,10 +145,40 @@ class AddEmployee extends Component {
   handleFileChange = (e) => {
     const { name, files } = e.target;
     const file = files[0];
+    
     if (file && name === "photo") {
+      // Validate file type for photo
+      const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+      const fileType = file.type.toLowerCase();
+      
+      if (!allowedTypes.includes(fileType)) {
+        this.setState({
+          errorMessage: "only allowed PNG, JPG, or JPEG image files for the photo.",
+          showError: true,
+          showSuccess: false
+        });
+        setTimeout(this.dismissMessages, 3000);
+        // Clear the file input
+        e.target.value = '';
+        return;
+      }
+      
+      // Validate file size (5MB limit)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        this.setState({
+          errorMessage: "Photo file size should be less than 5MB.",
+          showError: true,
+          showSuccess: false
+        });
+        setTimeout(this.dismissMessages, 3000);
+        e.target.value = '';
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = (ev) => {
-    this.setState({
+        this.setState({
           cropperImage: ev.target.result,
           showCropper: true,
           photoInputName: name,
@@ -158,7 +188,7 @@ class AddEmployee extends Component {
     } else if (file) {
       this.setState({
         [name]: file,
-    });
+      });
     }
   };
 
@@ -606,7 +636,7 @@ class AddEmployee extends Component {
                               className="form-control"
                               onChange={this.handleFileChange}
                               ref={this.fileInputRefs.photo}
-                              accept="image/png,image/jpg,image/jpeg,image/webp"
+                              accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
                             />
                           </div>
                         </div>

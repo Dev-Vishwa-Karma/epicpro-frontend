@@ -58,19 +58,54 @@ class ViewEmployee extends Component {
 
     handleFileChange = async (event) => {
         this.setState({
-            selectedImage:null
+            selectedImage: null,
+            errorMessage: "",
+            showError: false
         });
+        
         const file = event.target.files[0];
+        
+        // Validate file type
         if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            //this.setState({ croppperPreviewImage: reader.result });
-           // this.saveCroppedImage();
-        };
-        reader.readAsDataURL(file);
+            const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+            const fileType = file.type.toLowerCase();
+            
+            if (!allowedTypes.includes(fileType)) {
+                this.setState({
+                    errorMessage: "Please select only PNG, JPG, or JPEG image files.",
+                    showError: true,
+                    showSuccess: false
+                });
+                setTimeout(this.dismissMessages, 3000);
+                // Clear the file input
+                event.target.value = '';
+                return;
+            }
+            
+            // Validate file size (optional - 5MB limit)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                this.setState({
+                    errorMessage: "File size should be less than 5MB.",
+                    showError: true,
+                    showSuccess: false
+                });
+                setTimeout(this.dismissMessages, 3000);
+                event.target.value = '';
+                return;
+            }
         }
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                //this.setState({ croppperPreviewImage: reader.result });
+               // this.saveCroppedImage();
+            };
+            reader.readAsDataURL(file);
+        }
+        
         try {
-            const file = event.target.files[0];
             const uploadImageData = new FormData();
             uploadImageData.append('employee_id', this.state.employeeId);
             uploadImageData.append('created_by', window.user.id);
@@ -99,7 +134,12 @@ class ViewEmployee extends Component {
             }
         } catch (error) {
             console.error("Error uploading the image in gallery: ", error);
-
+            this.setState({
+                errorMessage: "An error occurred while uploading the image.",
+                showError: true,
+                showSuccess: false
+            });
+            setTimeout(this.dismissMessages, 3000);
         }
     }
 
@@ -373,6 +413,20 @@ class ViewEmployee extends Component {
                                     justifyContent: 'center'
                                 }}>
                                     <div className="mb-3 w-100">
+                                        {/* Error Message Display */}
+                                        {this.state.showError && this.state.errorMessage && (
+                                            <div className="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                                                {this.state.errorMessage}
+                                            </div>
+                                        )}
+                                        
+                                        {/* Success Message Display */}
+                                        {this.state.showSuccess && this.state.successMessage && (
+                                            <div className="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                                                {this.state.successMessage}
+                                            </div>
+                                        )}
+                                        
                                         <p className="text-muted text-center mb-4">
                                             {!showGallery ? "Crop your profile image" : "Choose from existing images or upload a new one"}
                                         </p>
@@ -438,7 +492,7 @@ class ViewEmployee extends Component {
                                                         <input 
                                                             type="file" 
                                                             className="d-none" 
-                                                            accept="image/*"
+                                                            accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
                                                             onChange={this.handleFileChange}
                                                         />
                                                     </div>

@@ -232,6 +232,35 @@ class EditEmployee extends Component {
         const file = files[0];
     
         if (file && name === "photo") {
+            // Validate file type for photo
+            const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+            const fileType = file.type.toLowerCase();
+            
+            if (!allowedTypes.includes(fileType)) {
+                this.setState({
+                    errorMessage: "only allowed PNG, JPG, or JPEG image files for the photo.",
+                    showError: true,
+                    showSuccess: false
+                });
+                setTimeout(this.dismissMessages, 3000);
+                // Clear the file input
+                e.target.value = '';
+                return;
+            }
+            
+            // Validate file size (5MB limit)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                this.setState({
+                    errorMessage: "Photo file size should be less than 5MB.",
+                    showError: true,
+                    showSuccess: false
+                });
+                setTimeout(this.dismissMessages, 3000);
+                e.target.value = '';
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = (ev) => {
                 this.setState({
@@ -343,7 +372,7 @@ class EditEmployee extends Component {
         { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile',  messageName:'Mobile Number' },
         { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile',  messageName:'Mobile Number'  },
         { name: 'joiningDate', value: joiningDate, type: 'date', required: true,  messageName:'Joining Date'  },
-            { name: 'bankAccountNo', value: bankAccountNo, messageName: 'Account Number', maxLength: 20 },
+        { name: 'bankAccountNo', value: bankAccountNo, messageName: 'Account Number', maxLength: 20 },
         { name: 'salaryAmount', value:salaryAmount, messageName: 'Salary Amount', maxLength: 8 },
         { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'Visibility Priority' },
         ];
@@ -668,7 +697,7 @@ class EditEmployee extends Component {
                                                             name="photo"
                                                             className="form-control"
                                                             onChange={this.handleFileChange}
-                                                            accept="image/png,image/jpg,image/jpeg,image/webp"
+                                                            accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
                                                         />
 
                                                         {photo ? (
