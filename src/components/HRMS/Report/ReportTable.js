@@ -1,5 +1,6 @@
 import React from 'react';
 import NoDataRow from '../../common/NoDataRow';
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 
 const ReportTable = ({ 
     currentReports, 
@@ -12,7 +13,7 @@ const ReportTable = ({
         <div className="card-body">
             {loading ? (
                 <div className="dimmer active p-3">
-                    <div className="loader" />
+                    <TableSkeleton columns={8} rows={5} />
                 </div>
             ) : (
                 <div className="table-responsive">

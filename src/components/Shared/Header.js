@@ -11,6 +11,7 @@ import DueTasksAlert from "../common/DueTasksAlert";
 import { getService } from "../../services/getService";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { validateFields } from "../common/validations";
+import NotificationSkeleton from "../common/skeletons/NotificationSkeleton";
 
 class Header extends Component {
   constructor(props) {
@@ -645,17 +646,16 @@ class Header extends Component {
 
     getService.addCall('activities.php', 'add-by-user', formData)
     .then(response => {
-      let data = response.data;
-      if (data.status === "success") {
+      if (response.status === "success") {
         this.setState({
-          successMessage: data.message,
+          successMessage: response.message,
           showError: false,
           showSuccess: true,
         });
         setTimeout(this.dismissMessages, 3000);
       } else {
         this.setState({
-          errorMessage: data.message,
+          errorMessage: response.message,
           showError: true,
           showSuccess: false,
         });
@@ -765,7 +765,7 @@ class Header extends Component {
                           }, 1000);
                       }}
                       hasMore={this.state.hasMore && this.state.notifications.length > 2}
-                      loader={this.state.loadingMore ? <p className="text-center mt-2">Loading...</p> : null} // Show loading spinner when loadingMore is true
+                      loader={this.state.loadingMore ? <NotificationSkeleton rows={5} /> : null} // Show loading spinner when loadingMore is true
                       scrollableTarget="notificationScrollArea"
                   >
                       <ul className="list-unstyled feeds_widget">
