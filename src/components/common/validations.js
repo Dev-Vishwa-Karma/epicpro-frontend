@@ -1,6 +1,8 @@
 export const validateFields = (fields) => {
   const errors = {};
   let fromDateValue = null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
 
   // First pass: find from_date value
   fields.forEach((field) => {
@@ -48,33 +50,19 @@ export const validateFields = (fields) => {
     }
 
     // Date validation (for 'date' type like DOB or Joining Date)
+
+    // if (type === 'date' && valueAsString && new Date(valueAsString).toString() === "Invalid Date") {
+    //   errors[name] = `${messageName} is invalid.`;
+    // }
+
     if (type === 'date' && valueAsString) {
       const parsedDate = new Date(valueAsString);
-      const currentDate = new Date();
- 
       if (parsedDate.toString() === "Invalid Date") {
         errors[name] = `${messageName} is invalid.`;
-      } else if (parsedDate > currentDate) {
-        errors[name] = `${messageName} cannot be a future date.`;
+      } else if (name.toLowerCase().includes('dob') && parsedDate > today) {
+        errors[name] = `${messageName} cannot be in the future.`;
       }
     }
-    // if (type === 'date' && valueAsString) {
-    //   const parsedDate = new Date(valueAsString);
-    //   const currentDate = new Date();
-    //   currentDate.setHours(0, 0, 0, 0);
-
-    //   if (parsedDate.toString() === "Invalid Date") {
-    //     errors[name] = `${messageName} is invalid.`;
-    //   } else if (parsedDate > currentDate) {
-    //     errors[name] = `${messageName} cannot be a future date.`;
-    //   } else if (name === 'to_date' && fromDateValue && parsedDate) {
-    //     parsedDate.setHours(0, 0, 0, 0);
-    //     console.log('Comparing to_date:', parsedDate, 'with from_date:', fromDateValue);
-    //     if (parsedDate < fromDateValue) {
-    //       errors[name] = "To date cannot be earlier than from date";
-    //     }
-    //   }
-    // }
 
     // Leave date validation (allows future dates)
     if (type === 'leave_date' && valueAsString) {
