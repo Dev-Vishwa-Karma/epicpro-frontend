@@ -1,4 +1,5 @@
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const EditLeaveRequestModal = ({
   showModal,
@@ -46,118 +47,80 @@ const EditLeaveRequestModal = ({
 
                     {['admin', 'super_admin'].includes(logged_in_employee_role) && (
                       <div className="col-md-12">
-                        <div className="form-group">
-                          <label className="form-label">Select Employee</label>
-                          <select
-                            name="employee_id"
-                            className={`form-control${addLeaveErrors && addLeaveErrors.employee_id ? ' is-invalid' : ''}`}
-                            onChange={handleInputChangeForEditEmployeeLeave}
-                            value={selectedEmployeeLeave?.employee_id || ""}
-                          >
-                            <option value="">Select Employee</option>
-                            {employeeData.map((emp) => (
-                              <option key={emp.id} value={emp.id}>
-                                {emp.first_name} {emp.last_name}
-                              </option>
-                            ))}
-                          </select>
-                          {addLeaveErrors && addLeaveErrors.employee_id && (
-                            <div className="invalid-feedback d-block" style={{ color: "red" }}>
-                              {addLeaveErrors.employee_id}
-                            </div>
-                          )}
-                        </div>
+                        <InputField
+                          label="Select Employee"
+                          name="employee_id"
+                          type="select"
+                          value={selectedEmployeeLeave?.employee_id || ""}
+                          onChange={handleInputChangeForEditEmployeeLeave}
+                          error={addLeaveErrors && addLeaveErrors.employee_id}
+                          options={[
+                            { value: "", label: "Select Employee" },
+                            ...employeeData.map((emp) => ({
+                              value: emp.id,
+                              label: `${emp.first_name} ${emp.last_name}`
+                            }))
+                          ]}
+                        />
                       </div>
                     )}
 
                     <div className="col-md-6">
-                      <div className="form-group">
-                        <label className="form-label">From Date</label>
-                        <input
-                          type="date"
-                          className={`form-control${addLeaveErrors && addLeaveErrors.from_date ? ' is-invalid' : ''}`}
-                          value={selectedEmployeeLeave?.from_date || ""}
-                          onChange={handleInputChangeForEditEmployeeLeave}
-                          name="from_date"
-                          min={new Date().toISOString().split("T")[0]}
-                        />
-                        {addLeaveErrors && addLeaveErrors.from_date && (
-                          <div className="invalid-feedback d-block" style={{ color: "red" }}>
-                            {addLeaveErrors.from_date}
-                          </div>
-                        )}
-                      </div>
+                      <InputField
+                        label="From Date"
+                        name="from_date"
+                        type="date"
+                        value={selectedEmployeeLeave?.from_date || ""}
+                        onChange={handleInputChangeForEditEmployeeLeave}
+                        error={addLeaveErrors && addLeaveErrors.from_date}
+                        min={new Date().toISOString().split("T")[0]}
+                      />
                     </div>
 
                     <div className="col-md-6">
-                      <div className="form-group">
-                        <label className="form-label">To Date</label>
-                        <input
-                          type="date"
-                          className={`form-control${addLeaveErrors && addLeaveErrors.to_date ? ' is-invalid' : ''}`}
-                          value={selectedEmployeeLeave?.to_date || ""}
-                          onChange={handleInputChangeForEditEmployeeLeave}
-                          name="to_date"
-                          min={selectedEmployeeLeave?.from_date || new Date().toISOString().split("T")[0]}
-                        />
-                        {addLeaveErrors && addLeaveErrors.to_date && (
-                          <div className="invalid-feedback d-block" style={{ color: "red" }}>
-                            {addLeaveErrors.to_date}
-                          </div>
-                        )}
-                      </div>
+                      <InputField
+                        label="To Date"
+                        name="to_date"
+                        type="date"
+                        value={selectedEmployeeLeave?.to_date || ""}
+                        onChange={handleInputChangeForEditEmployeeLeave}
+                        error={addLeaveErrors && addLeaveErrors.to_date}
+                        min={selectedEmployeeLeave?.from_date || new Date().toISOString().split("T")[0]}
+                      />
                     </div>
 
                     <div className="col-md-12">
-                      <div className="form-group">
-                        <label className="form-label">Reason</label>
-                        <input
-                          type="text"
-                          className={`form-control${addLeaveErrors && addLeaveErrors.reason ? ' is-invalid' : ''}`}
-                          value={selectedEmployeeLeave?.reason || ""}
-                          onChange={handleInputChangeForEditEmployeeLeave}
-                          name="reason"
-                        />
-                        {addLeaveErrors && addLeaveErrors.reason && (
-                          <div className="invalid-feedback d-block" style={{ color: "red" }}>
-                            {addLeaveErrors.reason}
-                          </div>
-                        )}
-                      </div>
+                      <InputField
+                        label="Reason"
+                        name="reason"
+                        type="text"
+                        value={selectedEmployeeLeave?.reason || ""}
+                        onChange={handleInputChangeForEditEmployeeLeave}
+                        error={addLeaveErrors && addLeaveErrors.reason}
+                      />
                     </div>
 
                     <div className="col-sm-6 col-md-6">
-                      <div className="form-group">
-                        <label className="form-label">Status</label>
-                        <select
-                          name="status"
-                          className={`form-control${addLeaveErrors && addLeaveErrors.status ? ' is-invalid' : ''}`}
-                          id="status"
-                          value={selectedEmployeeLeave?.status || ""}
-                          onChange={handleInputChangeForEditEmployeeLeave}
-                        >
-                          <option value={selectedEmployeeLeave?.status}>
-                            {selectedEmployeeLeave?.status.charAt(0).toUpperCase() + selectedEmployeeLeave?.status.slice(1)}
-                          </option>
-
-                          {['admin', 'super_admin'].includes(logged_in_employee_role) ? (
-                            <>
-                              {selectedEmployeeLeave?.status !== "approved" && <option value="approved">Approved</option>}
-                              {selectedEmployeeLeave?.status !== "pending" && <option value="pending">Pending</option>}
-                              {selectedEmployeeLeave?.status !== "rejected" && <option value="rejected">Rejected</option>}
-                            </>
-                          ) : (
-                            logged_in_employee_role === "employee" && selectedEmployeeLeave?.status === "pending" && (
-                              <option value="cancelled">Cancelled</option>
-                            )
-                          )}
-                        </select>
-                        {addLeaveErrors && addLeaveErrors.status && (
-                          <div className="invalid-feedback d-block" style={{ color: "red" }}>
-                            {addLeaveErrors.status}
-                          </div>
-                        )}
-                      </div>
+                      <InputField
+                        label="Status"
+                        name="status"
+                        type="select"
+                        value={selectedEmployeeLeave?.status || ""}
+                        onChange={handleInputChangeForEditEmployeeLeave}
+                        error={addLeaveErrors && addLeaveErrors.status}
+                        options={[
+                          { value: selectedEmployeeLeave?.status, label: selectedEmployeeLeave?.status.charAt(0).toUpperCase() + selectedEmployeeLeave?.status.slice(1) },
+                          ...(['admin', 'super_admin'].includes(logged_in_employee_role) ? [
+                            ...(selectedEmployeeLeave?.status !== "approved" ? [{ value: "approved", label: "Approved" }] : []),
+                            ...(selectedEmployeeLeave?.status !== "pending" ? [{ value: "pending", label: "Pending" }] : []),
+                            ...(selectedEmployeeLeave?.status !== "rejected" ? [{ value: "rejected", label: "Rejected" }] : [])
+                          ] : (
+                            logged_in_employee_role === "employee" && selectedEmployeeLeave?.status === "pending" ? [
+                              { value: "cancelled", label: "Cancelled" }
+                            ] : []
+                          ))
+                        ]}
+                      />
                     </div>
 
                     <div className="col-md-12">

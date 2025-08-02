@@ -15,10 +15,13 @@ const InputField = ({
   maxLength = null,
   onInput = null,
   min = null,
-  rows = 5
+  rows = 5,
+  accept = '',
+  multiple = false,
+  style = {},
 }) => {
   return (
-    <div className="form-group">
+    <div className={type !== 'file' ? 'form-group' : ''}>
       {label && <label className="form-label" htmlFor={name}>{label}</label>}
 
       {type === 'textarea' ? (
@@ -54,6 +57,20 @@ const InputField = ({
             </option>
           ))}
         </select>
+      ) : type === 'file' ? (
+        <input
+          id={name}
+          type="file"
+          name={name}
+          className={`form-control${error ? ' is-invalid' : ''}`}
+          onChange={onChange}
+          required={required}
+          ref={refInput}
+          disabled={disabled}
+          accept={accept}
+          multiple={multiple}
+          style={style}
+        />
       ) : (
         <input
           id={name}

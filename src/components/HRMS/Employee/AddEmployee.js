@@ -4,6 +4,8 @@ import AlertMessages from "../../common/AlertMessages";
 import CropperModal from './CropperModal';
 import { getService } from "../../../services/getService";
 import { validateFields } from "../../common/validations";
+import InputField from "../../common/formInputs/InputField";
+import CheckboxGroup from '../../common/formInputs/CheckboxGroup'
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -576,460 +578,293 @@ class AddEmployee extends Component {
                                                     </div>
                                                 </div> */}
                         <div className="col-sm-6 col-md-6">
-                          <div className="form-group">
-                            <label className="form-label" htmlFor="firstName">
-                              First Name
-                            </label>
-                            <input
-                              type="text"
-                              name="firstName"
-                              id="firstName"
-                              className={`form-control${this.state.errors.firstName ? ' is-invalid' : ''}`}
-                              placeholder="Enter First Name"
-                              value={firstName}
-                              onChange={this.handleChange}
-                              ref={this.fieldRefs.firstName}
-                            />
-                            {this.state.errors.firstName && (
-                              <div className="invalid-feedback d-block">{this.state.errors.firstName}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="First Name"
+                            name="firstName"
+                            type="text"
+                            value={firstName}
+                            onChange={this.handleChange}
+                            placeholder="Enter First Name"
+                            error={this.state.errors.firstName}
+                            refInput={this.fieldRefs.firstName}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-6">
-                          <div className="form-group">
-                            <label className="form-label">Last Name</label>
-                            <input
-                              type="text"
-                              name="lastName"
-                              id="lastName"
-                              className={`form-control${this.state.errors.lastName ? ' is-invalid' : ''}`}
-                              placeholder="Enter Last Name"
-                              value={lastName}
-                              onChange={this.handleChange}
-                              ref={this.fieldRefs.lastName}
-                            />
-                            {this.state.errors.lastName && (
-                              <div className="invalid-feedback d-block">{this.state.errors.lastName}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="Last Name"
+                            name="lastName"
+                            type="text"
+                            value={lastName}
+                            onChange={this.handleChange}
+                            placeholder="Enter Last Name"
+                            error={this.state.errors.lastName}
+                            refInput={this.fieldRefs.lastName}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">Email address</label>
-                            <input
-                              type="email"
-                              name="email"
-                              id="email"
-                              className={`form-control${this.state.errors.email ? ' is-invalid' : ''}`}
-                              placeholder="Enter Email Address"
-                              value={email}
-                              onChange={this.handleChange}
-                              ref={this.fieldRefs.email}
-                            />
-                            {this.state.errors.email && (
-                              <div className="invalid-feedback d-block">{this.state.errors.email}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="Email address"
+                            name="email"
+                            type="email"
+                            value={email}
+                            onChange={this.handleChange}
+                            placeholder="Enter Email Address"
+                            error={this.state.errors.email}
+                            refInput={this.fieldRefs.email}
+                          />
                         </div>
                         <div className="col-md-4 col-sm-12">
-                          <label className="form-label">
-                            Select Department
-                          </label>
-                          <div className="form-group">
-                            <select
-                              className={`form-control show-tick${this.state.errors.selectedDepartment ? ' is-invalid' : ''}`}
-                              value={this.state.selectedDepartment}
-                              onChange={this.handleChange}
-                              name="selectedDepartment"
-                              ref={this.fieldRefs.selectedDepartment}
-                            >
-                              <option value="">Select Department</option>
-                              {this.state.departments.map((dept) => (
-                                <option key={dept.id} value={dept.id}>
-                                  {dept.department_name}
-                                </option>
-                              ))}
-                            </select>
-                            {this.state.errors.selectedDepartment && (
-                              <div className="invalid-feedback d-block">{this.state.errors.selectedDepartment}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="Select Department"
+                            name="selectedDepartment"
+                            type="select"
+                            value={this.state.selectedDepartment}
+                            onChange={this.handleChange}
+                            error={this.state.errors.selectedDepartment}
+                            refInput={this.fieldRefs.selectedDepartment}
+                            options={this.state.departments.map((dept) => ({
+                              value: dept.id,
+                              label: dept.department_name
+                            }))}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">Gender</label>
-                            <select
-                              name="gender"
-                              className={`form-control${this.state.errors.gender ? ' is-invalid' : ''}`}
-                              id="gender"
-                              value={gender}
-                              onChange={this.handleChange}
-                              ref={this.fieldRefs.gender}
-                            >
-                              <option value="">Select Gender</option>
-                              <option value="male">Male</option>
-                              <option value="female">Female</option>
-                            </select>
-                            {this.state.errors.gender && (
-                              <div className="invalid-feedback d-block">{this.state.errors.gender}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="Gender"
+                            name="gender"
+                            type="select"
+                            value={gender}
+                            onChange={this.handleChange}
+                            error={this.state.errors.gender}
+                            refInput={this.fieldRefs.gender}
+                            options={[
+                              { value: 'male', label: 'Male' },
+                              { value: 'female', label: 'Female' }
+                            ]}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">Photo</label>
-                            <input
-                              type="file"
-                              name="photo"
-                              className={`form-control${this.state.errors.photo ? ' is-invalid' : ''}`}
-                              onChange={this.handleFileChange}
-                              ref={this.fileInputRefs.photo}
-                              accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
-                            />
-                            {this.state.errors.photo && (
-                              <div className="invalid-feedback d-block">{this.state.errors.photo}</div>
-                            )}
-                          </div>
+                          <InputField
+                            type="file"
+                            name="photo"
+                            label="Photo"
+                            onChange={this.handleFileChange}
+                            refInput={this.fileInputRefs.photo}
+                            accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
+                            error={this.state.errors.photo}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">DOB</label>
-                            <input
-                              type="date"
-                              id="dob"
-                              name="dob"
-                              className={`form-control${this.state.errors.dob ? ' is-invalid' : ''}`}
-                              value={dob}
-                              onChange={this.handleChange}
-                              max={new Date().toISOString().split("T")[0]}
-                              ref={this.fieldRefs.dob}
-                            />
-                            {this.state.errors.dob && (
-                              <div className="invalid-feedback d-block">{this.state.errors.dob}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="DOB"
+                            name="dob"
+                            type="date"
+                            value={dob}
+                            onChange={this.handleChange}
+                            error={this.state.errors.dob}
+                            refInput={this.fieldRefs.dob}
+                            max={new Date().toISOString().split("T")[0]}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">Joining Date</label>
-                            <input
-                              type="date"
-                              id="joiningDate"
-                              name="joiningDate"
-                              className={`form-control${this.state.errors.joiningDate ? ' is-invalid' : ''}`}
-                              value={joiningDate}
-                              onChange={this.handleChange}
-                              ref={this.fieldRefs.joiningDate}
-                            />
-                            {this.state.errors.joiningDate && (
-                              <div className="invalid-feedback d-block">{this.state.errors.joiningDate}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="Joining Date"
+                            name="joiningDate"
+                            type="date"
+                            value={joiningDate}
+                            onChange={this.handleChange}
+                            error={this.state.errors.joiningDate}
+                            refInput={this.fieldRefs.joiningDate}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">Mobile No (1)</label>
-                            <input
-                              type="tel"
-                              name="mobile1"
-                              id="mobile1"
-                              className={`form-control${this.state.errors.mobile1 ? ' is-invalid' : ''}`}
-                              placeholder="Enter Mobile No"
-                              maxLength="10"
-                              value={mobile1}
-                              onChange={this.handleChange}
-                              onInput={(e) => {
-                                e.target.value = e.target.value.replace(/\D/g, '');
-                              }}
-                              ref={this.fieldRefs.mobile1}
-                            />
-                            {this.state.errors.mobile1 && (
-                              <div className="invalid-feedback d-block">{this.state.errors.mobile1}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="Mobile No (1)"
+                            name="mobile1"
+                            type="tel"
+                            value={mobile1}
+                            onChange={this.handleChange}
+                            placeholder="Enter Mobile No"
+                            error={this.state.errors.mobile1}
+                            refInput={this.fieldRefs.mobile1}
+                            maxLength="10"
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(/\D/g, '');
+                            }}
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">Mobile No (2)</label>
-                            <input
-                              type="tel"
-                              name="mobile2"
-                              id="mobile2"
-                              className={`form-control${this.state.errors.mobile2 ? ' is-invalid' : ''}`}
-                              placeholder="Enter Mobile No"
-                              maxLength="10"
-                              value={mobile2}
-                              onChange={this.handleChange}
-                              onInput={(e) => {
-                                e.target.value = e.target.value.replace(/\D/g, '');
-                              }}
-                              ref={this.fieldRefs.mobile2}
-                            />
-                            {this.state.errors.mobile2 && (
-                              <div className="invalid-feedback d-block">{this.state.errors.mobile2}</div>
-                            )}
-                          </div>
+                          <InputField
+                            label="Mobile No (2)"
+                            name="mobile2"
+                            type="tel"
+                            value={mobile2}
+                            onChange={this.handleChange}
+                            placeholder="Enter Mobile No"
+                            error={this.state.errors.mobile2}
+                            refInput={this.fieldRefs.mobile2}
+                            maxLength="10"
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(/\D/g, '');
+                            }}
+                          />
                         </div>
                         <div className="col-md-4 col-sm-12">
-                          <div className="form-group">
-                            <label className="form-label">Password</label>
-                            <input
-                              type="password"
-                              className="form-control"
-                              placeholder="Password"
-                              name="password"
-                              value={password}
-                              onChange={this.handleChange}
-                            />
-                          </div>
+                          <InputField
+                            label="Password"
+                            name="password"
+                            type="password"
+                            value={password}
+                            onChange={this.handleChange}
+                            placeholder="Password"
+                          />
                         </div>
                         <div className="col-md-12">
-                          <div className="form-group">
-                            <label className="form-label">Address Line 1</label>
-                            <input
-                              type="text"
-                              name="address1"
-                              id="address1"
-                              className="form-control"
-                              placeholder="Enter Address Line 1"
-                              value={address1}
-                              onChange={this.handleChange}
-                            />
-                          </div>
+                          <InputField
+                            label="Address Line 1"
+                            name="address1"
+                            type="text"
+                            value={address1}
+                            onChange={this.handleChange}
+                            placeholder="Enter Address Line 1"
+                          />
                         </div>
                         <div className="col-md-12">
-                          <div className="form-group">
-                            <label className="form-label">Address Line 2</label>
-                            <input
-                              type="text"
-                              name="address2"
-                              id="address2"
-                              className="form-control"
-                              placeholder="Enter Address Line 2"
-                              value={address2}
-                              onChange={this.handleChange}
-                            />
-                          </div>
+                          <InputField
+                            label="Address Line 2"
+                            name="address2"
+                            type="text"
+                            value={address2}
+                            onChange={this.handleChange}
+                            placeholder="Enter Address Line 2"
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4 mb-4">
-                          <label className="form-label">
-                            Emergency Contact 1
-                          </label>
-                          <input
-                            type="tel"
+                           <InputField
+                            label="Emergency Contact 1"
                             name="emergencyContact1"
-                            id="emergencyContact1"
-                            className={`form-control${this.state.errors.emergencyContact1 ? ' is-invalid' : ''}`}
-                            placeholder="Enter Emergency Contact"
-                            maxLength="10"
+                            type="tel"
                             value={emergencyContact1}
                             onChange={this.handleChange}
+                            placeholder="Enter Emergency Contact"
+                            error={this.state.errors.emergencyContact1}
+                            refInput={this.fieldRefs.emergencyContact1}
+                            maxLength="10"
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
                             }}
-                            ref={this.fieldRefs.emergencyContact1}
                           />
-                          {this.state.errors.emergencyContact1 && (
-                              <div className="invalid-feedback d-block">{this.state.errors.emergencyContact1}</div>
-                          )}
                         </div>
                         <div className="col-sm-6 col-md-4 mb-4">
-                          <label className="form-label">
-                            Emergency Contact 2
-                          </label>
-                          <input
-                            type="tel"
+                          <InputField
+                            label="Emergency Contact 2"
                             name="emergencyContact2"
-                            id="emergencyContact2"
-                            className={`form-control${this.state.errors.emergencyContact2 ? ' is-invalid' : ''}`}
-                            placeholder="Enter Emergency Contact"
-                            maxLength="10"
+                            type="tel"
                             value={emergencyContact2}
                             onChange={this.handleChange}
+                            placeholder="Enter Emergency Contact"
+                            error={this.state.errors.emergencyContact2}
+                            refInput={this.fieldRefs.emergencyContact2}
+                            maxLength="10"
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
                             }}
-                            ref={this.fieldRefs.emergencyContact2}
                           />
-                          {this.state.errors.emergencyContact2 && (
-                              <div className="invalid-feedback d-block">{this.state.errors.emergencyContact2}</div>
-                          )}
                         </div>
                         <div className="col-sm-6 col-md-4 mb-4">
-                          <label className="form-label">
-                            Emergency Contact 3
-                          </label>
-                          <input
-                            type="tel"
+                          <InputField
+                            label="Emergency Contact 3"
                             name="emergencyContact3"
-                            id="emergencyContact3"
-                            className={`form-control${this.state.errors.emergencyContact3 ? ' is-invalid' : ''}`}
-                            placeholder="Enter Emergency Contact"
-                            maxLength="10"
+                            type="tel"
                             value={emergencyContact3}
                             onChange={this.handleChange}
+                            placeholder="Enter Emergency Contact"
+                            error={this.state.errors.emergencyContact3}
+                            refInput={this.fieldRefs.emergencyContact3}
+                            maxLength="10"
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
                             }}
-                            ref={this.fieldRefs.emergencyContact3}
                           />
-                          {this.state.errors.emergencyContact3 && (
-                              <div className="invalid-feedback d-block">{this.state.errors.emergencyContact3}</div>
-                          )}
                         </div>
 
                         {/* Frontend Skills */}
                         <div className="row mb-4">
                           <h5 className="w-100">Skills</h5>
-                          <div className="col-sm-6 col-md-12">
-                            <label className="form-label">Frontend</label>
-                            <div className="d-flex flex-wrap">
-                              {frontendSkills.map((skill) => (
-                                <label
-                                  key={skill}
-                                  className="colorinput mr-3 mb-2"
-                                >
-                                  <input
-                                    name="color"
-                                    type="checkbox"
-                                    value={skill}
-                                    checked={skillsFrontend.includes(skill)}
-                                    onChange={(e) =>
-                                      this.handleSkillChange(
-                                        e,
-                                        "skillsFrontend"
-                                      )
-                                    }
-                                    className="colorinput-input"
-                                  />
-                                  <span className="colorinput-color bg-blue" />
-                                  <span
-                                    className={`ml-2 tag tag-${this.getColor(
-                                      skill
-                                    )} py-1 px-2`}
-                                  >
-                                    {skill}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
+                          <CheckboxGroup
+                            label="Frontend"
+                            options={frontendSkills}
+                            selected={skillsFrontend}
+                            onChange={(e) => this.handleSkillChange(e, "skillsFrontend")}
+                            getColor={this.getColor}
+                          />
 
                           {/* Backend Skills */}
-                          <div className="col-sm-6 col-md-12">
-                            <label className="form-label">Backend</label>
-                            <div className="d-flex flex-wrap">
-                              {backendSkills.map((skill) => (
-                                <label
-                                  key={skill}
-                                  className="colorinput mr-3 mb-2"
-                                >
-                                  <input
-                                    name="color"
-                                    type="checkbox"
-                                    value={skill}
-                                    checked={skillsBackend.includes(skill)}
-                                    onChange={(e) =>
-                                      this.handleSkillChange(e, "skillsBackend")
-                                    }
-                                    className="colorinput-input"
-                                  />
-                                  <span className="colorinput-color bg-blue" />
-                                  <span
-                                    className={`ml-2 tag tag-${this.getColor(
-                                      skill
-                                    )} py-1 px-2`}
-                                  >
-                                    {skill}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
+                           <CheckboxGroup
+                            label="Backend"
+                            options={backendSkills}
+                            selected={skillsBackend}
+                            onChange={(e) => this.handleSkillChange(e, "skillsBackend")}
+                            getColor={this.getColor}
+                          />
                         </div>
 
                         {/* Bank Account Detail */}
                         <div className="row mb-4">
                           <h5 className="w-100">Bank Account Details</h5>
                           <div className="col-sm-6 col-md-6">
-                            <div className="form-group">
-                              <label className="form-label">
-                                Account Holder Name
-                              </label>
-                              <input
-                                type="text"
-                                name="bankAccountName"
-                                id="bankAccountName"
-                                className="form-control"
-                                placeholder="Account Holder Name"
-                                maxLength="90"
-                                value={bankAccountName}
-                                onChange={this.handleChange}
-                              />
-                            </div>
+                            <InputField
+                              label="Account Holder Name"
+                              name="bankAccountName"
+                              type="text"
+                              value={bankAccountName}
+                              onChange={this.handleChange}
+                              placeholder="Account Holder Name"
+                              maxLength="90"
+                            />
                           </div>
                           <div className="col-sm-6 col-md-6">
-                            <div className="form-group">
-                              <label className="form-label">
-                                Account Number
-                              </label>
-                              <input
-                                type="number"
-                                name="bankAccountNo"
-                                id="bankAccountNo"
-                                className={`form-control${this.state.errors.bankAccountNo ? ' is-invalid' : ''}`}
-                                placeholder="Account Number"
-                                value={bankAccountNo}
-                                onChange={this.handleChange}
-                                ref={this.fieldRefs.bankAccountNo}
-                                maxLength="20"
-                              />
-                              {this.state.errors.bankAccountNo && (
-                                <div className="invalid-feedback d-block">{this.state.errors.bankAccountNo}</div>
-                              )}
-                            </div>
+                            <InputField
+                              label="Account Number"
+                              name="bankAccountNo"
+                              type="number"
+                              value={bankAccountNo}
+                              onChange={this.handleChange}
+                              placeholder="Account Number"
+                              error={this.state.errors.bankAccountNo}
+                              refInput={this.fieldRefs.bankAccountNo}
+                              maxLength="20"
+                            />
                           </div>
                           <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">Bank Name</label>
-                              <input
-                                type="text"
-                                name="bankName"
-                                id="bankName"
-                                className="form-control"
-                                placeholder="Bank Name"
-                                value={bankName}
-                                onChange={this.handleChange}
-                              />
-                            </div>
+                            <InputField
+                              label="Bank Name"
+                              name="bankName"
+                              type="text"
+                              value={bankName}
+                              onChange={this.handleChange}
+                              placeholder="Bank Name"
+                            />
                           </div>
                           <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">IFSC Code</label>
-                              <input
-                                type="text"
-                                name="ifscCode"
-                                id="ifscCode"
-                                className="form-control"
-                                placeholder="IFSC Code"
-                                value={ifscCode}
-                                onChange={this.handleChange}
-                              />
-                            </div>
+                            <InputField
+                              label="IFSC Code"
+                              name="ifscCode"
+                              type="text"
+                              value={ifscCode}
+                              onChange={this.handleChange}
+                              placeholder="IFSC Code"
+                            />
                           </div>
                           <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">Bank Address</label>
-                              <input
-                                type="text"
-                                name="bankAddress"
-                                id="bankAddress"
-                                className="form-control"
-                                placeholder="Bank Address"
-                                value={bankAddress}
-                                onChange={this.handleChange}
-                              />
-                            </div>
+                            <InputField
+                              label="Bank Address"
+                              name="bankAddress"
+                              type="text"
+                              value={bankAddress}
+                              onChange={this.handleChange}
+                              placeholder="Bank Address"
+                            />
                           </div>
                         </div>
 
@@ -1040,100 +875,75 @@ class AddEmployee extends Component {
                             <div key={index} className="w-100 col-sm-12">
                               <div className="row">
                                 <div className="col-sm-6 col-md-3">
-                                  <div className="form-group">
-                                    <label className="form-label">
-                                      Salary Source
-                                    </label>
-                                    <select
-                                      name="salarySource"
-                                      className="form-control"
-                                      id="salarySource"
-                                      value={entry.salarySource}
-                                      onChange={(e) =>
-                                        this.handleSalaryDetails(
-                                          index,
-                                          "salarySource",
-                                          e.target.value
-                                        )
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="IDBI Bank">
-                                        IDBI Bank
-                                      </option>
-                                      <option value="HDFC Bank">
-                                        HDFC Bank
-                                      </option>
-                                      <option value="Cash Payout">
-                                        Cash Payout
-                                      </option>
-                                      <option value="NEFT">NEFT</option>
-                                    </select>
-                                  </div>
+                                  <InputField
+                                    label="Salary Source"
+                                    name="salarySource"
+                                    type="select"
+                                    value={entry.salarySource}
+                                    onChange={(e) =>
+                                      this.handleSalaryDetails(
+                                        index,
+                                        "salarySource",
+                                        e.target.value
+                                      )
+                                    }
+                                    options={[
+                                      { value: "IDBI Bank", label: "IDBI Bank" },
+                                      { value: "HDFC Bank", label: "HDFC Bank" },
+                                      { value: "Cash Payout", label: "Cash Payout" },
+                                      { value: "NEFT", label: "NEFT" }
+                                    ]}
+                                  />
                                 </div>
                                 <div className="col-sm-6 col-md-3">
-                                  <div className="form-group">
-                                    <label className="form-label">
-                                      Salary Amount
-                                    </label>
-                                    <input
-                                      type="number"
-                                      name="salaryAmount"
-                                      id="salaryAmount"
-                                      className={`form-control${this.state.errors.salaryAmount ? ' is-invalid' : ''}`}
-                                      placeholder="Enter salary amount"
-                                      value={entry.salaryAmount}
-                                      onChange={(e) =>
-                                        this.handleSalaryDetails(
-                                          index,
-                                          "salaryAmount",
-                                          e.target.value
-                                        )
-                                      }
-                                      maxLength="8"
-                                    />
-                                    {this.state.errors.salaryAmount && (
-                                      <div className="invalid-feedback d-block">{this.state.errors.salaryAmount}</div>
-                                    )}
-                                  </div>
+                                  <InputField
+                                    label="Salary Amount"
+                                    name="salaryAmount"
+                                    type="number"
+                                    value={entry.salaryAmount}
+                                    onChange={(e) =>
+                                      this.handleSalaryDetails(
+                                        index,
+                                        "salaryAmount",
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="Enter salary amount"
+                                    error={this.state.errors.salaryAmount}
+                                    maxLength="8"
+                                  />
                                 </div>
                                 <div className="col-sm-6 col-md-2">
-                                  <div className="form-group">
-                                    <label className="form-label">From</label>
-                                    <input
-                                      type="date"
-                                      name="fromDate"
-                                      id="fromDate"
-                                      className="form-control"
-                                      value={entry.fromDate}
-                                      onChange={(e) =>
-                                        this.handleSalaryDetails(
-                                          index,
-                                          "fromDate",
-                                          e.target.value
-                                        )
-                                      }
-                                    />
-                                  </div>
+                                  <InputField
+                                    label="From"
+                                    name="fromDate"
+                                    id="fromDate"
+                                    type="date"
+                                    value={entry.fromDate}
+                                    onChange={(e) =>
+                                      this.handleSalaryDetails(
+                                        index,
+                                        "fromDate",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
                                 </div>
                                 <div className="col-sm-6 col-md-2">
-                                  <div className="form-group">
-                                    <label className="form-label">To</label>
-                                    <input
-                                      type="date"
-                                      name="toDate"
-                                      id="toDate"
-                                      className="form-control"
-                                      value={entry.toDate}
-                                      onChange={(e) =>
-                                        this.handleSalaryDetails(
-                                          index,
-                                          "toDate",
-                                          e.target.value
-                                        )
-                                      }
-                                    />
-                                  </div>
+                                  <InputField
+                                    label="To"
+                                    name="toDate"
+                                    id="toDate"
+                                    type="date"
+                                    value={entry.toDate}
+                                    onChange={(e) =>
+                                      this.handleSalaryDetails(
+                                        index,
+                                        "toDate",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
                                 </div>
                                 {salaryDetails.length > 1 && (
                                   <div className="col-sm-6 col-md-2">
@@ -1173,72 +983,56 @@ class AddEmployee extends Component {
                         <div className="row mb-4">
                           <h5 className="w-100">Govt Issue ID</h5>
                           <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">Aadhar Card</label>
-                              <input
-                                type="text"
-                                name="aadharCardNumber"
-                                id="aadharCardNumber"
-                                className="form-group form-control"
-                                placeholder="Aadhar Card Number"
-                                value={aadharCardNumber}
-                                onChange={this.handleChange}
-                              />
-                              <input
-                                type="file"
-                                name="aadharCardFile"
-                                className="form-control"
-                                placeholder="Aadhar Card File"
-                                onChange={this.handleFileChange}
-                                ref={this.fileInputRefs.aadharCardFile}
-                              />
-                            </div>
+                            <InputField
+                              label="Aadhar Card"
+                              name="aadharCardNumber"
+                              type="text"
+                              placeholder="Aadhar Card Number"
+                              value={aadharCardNumber}
+                              onChange={this.handleChange}
+                            />
+                            <InputField
+                              name="aadharCardFile"
+                              type="file"
+                              onChange={this.handleFileChange}
+                              refInput={this.fileInputRefs.aadharCardFile}
+                              
+                            />
+                          </div>
+
+                          <div className="col-sm-6 col-md-4">
+                            <InputField
+                              label="Driving License"
+                              name="drivingLicenseNumber"
+                              type="text"
+                              placeholder="Driving License Number"
+                              value={drivingLicenseNumber}
+                              onChange={this.handleChange}
+                            />
+                            <InputField
+                              name="drivingLicenseFile"
+                              type="file"
+                              onChange={this.handleFileChange}
+                              refInput={this.fileInputRefs.drivingLicenseFile}
+                              placeholder="Driving License"
+                            />
                           </div>
                           <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">
-                                Driving License
-                              </label>
-                              <input
-                                type="text"
-                                name="drivingLicenseNumber"
-                                id="drivingLicenseNumber"
-                                className="form-group form-control"
-                                placeholder="Driving License Number"
-                                value={drivingLicenseNumber}
-                                onChange={this.handleChange}
-                              />
-                              <input
-                                type="file"
-                                name="drivingLicenseFile"
-                                className="form-control"
-                                placeholder="Driving License"
-                                onChange={this.handleFileChange}
-                                ref={this.fileInputRefs.drivingLicenseFile}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">Pan Card</label>
-                              <input
-                                type="text"
-                                name="panCardNumber"
-                                id="panCardNumber"
-                                className="form-group form-control"
-                                placeholder="Pan Card Number"
-                                value={panCardNumber}
-                                onChange={this.handleChange}
-                              />
-                              <input
-                                type="file"
-                                name="panCardFile"
-                                className="form-control"
-                                placeholder="Pan Card"
-                                onChange={this.handleFileChange}
-                                ref={this.fileInputRefs.panCardFile}
-                              />
-                            </div>
+                            <InputField
+                              label="Pan Card"
+                              name="panCardNumber"
+                              type="text"
+                              placeholder="Pan Card Number"
+                              value={panCardNumber}
+                              onChange={this.handleChange}
+                            />
+                            <InputField
+                              name="panCardFile"
+                              type="file"
+                              placeholder="Pan Card"
+                              onChange={this.handleFileChange}
+                              refInput={this.fileInputRefs.panCardFile}
+                            />
                           </div>
                         </div>
 
@@ -1246,123 +1040,95 @@ class AddEmployee extends Component {
                         <div className="row mb-4">
                           <h5 className="w-100">Social Media</h5>
                           <div className="col-lg-6 col-md-6">
-                            <div className="form-group">
-                              <label className="form-label">Facebook</label>
-                              <input
-                                type="url"
-                                name="facebook"
-                                className="form-control"
-                                value={facebook}
-                                onChange={this.handleChange}
-                                placeholder="https://facebook.com/yourprofile"
-                              />
-                            </div>
+                            <InputField
+                              label="Facebook"
+                              name="facebook"
+                              type="url"
+                              value={facebook}
+                              onChange={this.handleChange}
+                              placeholder="https://facebook.com/yourprofile"
+                            />
                           </div>
                           <div className="col-lg-6 col-md-6">
-                            <div className="form-group">
-                              <label className="form-label">Twitter</label>
-                              <input
-                                type="url"
-                                name="twitter"
-                                className="form-control"
-                                value={twitter}
-                                onChange={this.handleChange}
-                                placeholder="https://twitter.com/yourprofile"
-                              />
-                            </div>
+                            <InputField
+                              label="Twitter"
+                              name="twitter"
+                              type="url"
+                              value={twitter}
+                              onChange={this.handleChange}
+                              placeholder="https://twitter.com/yourprofile"
+                            />
                           </div>
                           <div className="col-lg-6 col-md-6">
-                            <div className="form-group">
-                              <label className="form-label">Linkedin</label>
-                              <input
-                                type="url"
-                                name="linkedin"
-                                className="form-control"
-                                value={linkedin}
-                                onChange={this.handleChange}
-                                placeholder="https://linkedin.com/yourprofile"
-                              />
-                            </div>
+                            <InputField
+                              label="Linkedin"
+                              name="linkedin"
+                              type="url"
+                              value={linkedin}
+                              onChange={this.handleChange}
+                              placeholder="https://linkedin.com/yourprofile"
+                            />
                           </div>
                           <div className="col-lg-6 col-md-6">
-                            <div className="form-group">
-                              <label className="form-label">Instagram</label>
-                              <input
-                                type="url"
-                                className="form-control"
-                                name="instagram"
-                                value={instagram}
-                                onChange={this.handleChange}
-                                placeholder="https://instagram.com/yourprofile"
-                              />
-                            </div>
+                            <InputField
+                              label="Instagram"
+                              name="instagram"
+                              type="url"
+                              value={instagram}
+                              onChange={this.handleChange}
+                              placeholder="https://instagram.com/yourprofile"
+                            />
                           </div>
                         </div>
 
                         {/* Upwork Profile */}
                         <div className="col-md-12">
-                          <div className="form-group">
-                            <label className="form-label">Upwork Profile</label>
-                            <input
-                              type="url"
-                              name="upworkProfile"
-                              className="form-control"
-                              placeholder="Upwork Profile"
-                              value={upworkProfile}
-                              onChange={this.handleChange}
-                            />
-                          </div>
+                          <InputField
+                            label="Upwork Profile"
+                            name="upworkProfile"
+                            type="url"
+                            value={upworkProfile}
+                            onChange={this.handleChange}
+                            placeholder="Upwork Profile"
+                          />
                         </div>
                         {/* Visible status */}
                         <div className="col-md-6">
-                          <div className="form-group">
-                                <label className="form-label">
-                                  Visibility Priority
-                                </label>
-                                <input
-                                  type="text"
-                                  name="visibilityPriority"
-                                  id="visibilityPriority"
-                                  className={`form-control${this.state.errors.visibilityPriority ? ' is-invalid' : ''}`}
-                                  value={visibilityPriority}
-                                  onChange={this.handleChange}
-                                  ref={this.fieldRefs.visibilityPriority}
-                                />
-                                {this.state.errors.visibilityPriority && (
-                                  <div className="invalid-feedback d-block">{this.state.errors.visibilityPriority}</div>
-                                )}
-                          </div>
-                       
+                          <InputField
+                            label="Visibility Priority"
+                            name="visibilityPriority"
+                            type="text"
+                            value={visibilityPriority}
+                            onChange={this.handleChange}
+                            error={this.state.errors.visibilityPriority}
+                            refInput={this.fieldRefs.visibilityPriority}
+                          />
                         </div>
                         {/* Visible statistics status */}
                            <div className="col-md-6">
-                              <div className="form-group">
-                                  <label className="form-label">
-                                      Statistics Visibility Status
-                                  </label>
-                                  <select
-                                      className="form-control show-tick"
-                                      value={statisticsVisibilityStatus}
-                                      onChange={this.handleChange}
-                                      name="statisticsVisibilityStatus"
-                                  >
-                                      <option value="1">Active</option>
-                                      <option value="0">Inactive</option>
-                                  </select>
-                              </div>
+                              <InputField
+                                  label="Statistics Visibility Status"
+                                  name="statisticsVisibilityStatus"
+                                  type="select"
+                                  value={statisticsVisibilityStatus}
+                                  onChange={this.handleChange}
+                                  options={[
+                                      { value: "1", label: "Active" },
+                                      { value: "0", label: "Inactive" }
+                                  ]}
+                              />
                           </div>
                         {/* Resume */}
                         <div className="col-md-12">
                           <div className="form-group">
                             <label className="form-label">Resume</label>
-                            <input
+                            <InputField
                               type="file"
                               name="resume"
-                              className="form-control"
                               placeholder="Select your resume"
                               onChange={this.handleFileChange}
-                              ref={this.fileInputRefs.resume}
-                              accept=".pdf,.doc,.docx,.txt,.rtf,.gd oc"
+                              refInput={this.fileInputRefs.resume}
+                              accept=".pdf,.doc,.docx,.txt,.rtf,.gdoc"
                             />
                             {this.state.errors.resume && (
                               <div className="invalid-feedback d-block">{this.state.errors.resume}</div>
