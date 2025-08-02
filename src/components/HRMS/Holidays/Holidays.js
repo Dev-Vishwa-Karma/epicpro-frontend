@@ -8,6 +8,8 @@ import HolidaysTable from './HolidaysTable';
 import AddHolidayModal from './AddHolidayModal';
 import EditHolidayModal from './EditHolidayModal';
 import AlertMessages from '../../common/AlertMessages';
+import moment from 'moment';
+
 class Holidays extends Component {
 	constructor(props) {
 		super(props);
