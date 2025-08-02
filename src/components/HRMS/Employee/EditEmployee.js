@@ -4,6 +4,7 @@ import AlertMessages from '../../common/AlertMessages';
 import CropperModal from './CropperModal';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
+import InputField from '../../common/formInputs/InputField';
 class EditEmployee extends Component {
     constructor(props) {
         super(props);
@@ -663,10 +664,9 @@ class EditEmployee extends Component {
                                                 <div className="col-sm-6 col-md-4">
                                                     <div className="form-group">
                                                         <label className="form-label">Photo</label>
-                                                        <input
+                                                        <InputField
                                                             type="file"
                                                             name="photo"
-                                                            className="form-control"
                                                             onChange={this.handleFileChange}
                                                             accept="image/png,image/jpg,image/jpeg,image/webp"
                                                         />
@@ -1041,130 +1041,131 @@ class EditEmployee extends Component {
 
                                                 {/* Govt Issue ID */}
                                                 <div className="row mb-4">
-                                                    <h5 className="w-100">Govt Issue ID</h5>
-                                                    <div className="col-sm-6 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Aadhar Card</label>
-                                                            
-                                                            {/* Aadhaar Card Number Input */}
-                                                            <input
-                                                                type="text"
-                                                                name="aadharCardNumber"
-                                                                id="aadharCardNumber"
-                                                                className="form-group form-control"
-                                                                placeholder="Aadhar Card Number"
-                                                                value={aadharCardNumber}
-                                                                onChange={this.handleChange}
-                                                            />
+                                                <h5 className="w-100">Govt Issue ID</h5>
 
-                                                            {/* File Upload */}
-                                                            <input
-                                                                type="file"
-                                                                name="aadharCardFile"
-                                                                className="form-control"
-                                                                onChange={this.handleFileChange}
-                                                            />
-
-                                                            {/* File Preview Link */}
-                                                            {aadharCardFile && aadharCardFile !== "" ? (
-                                                                <div className="d-inline-block" style={{ display: "inline-block" }}>
-                                                                    <a
-                                                                        href={
-                                                                            aadharCardFileUrl ? aadharCardFileUrl : `${process.env.REACT_APP_API_URL}/${aadharCardFile.name || aadharCardFile}`
-                                                                        }
-                                                                        className="text-primary small"
-                                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                    >
-                                                                        {aadharCardFile instanceof File ? aadharCardFile.name : aadharCardFile.split('/').pop().replace(/^\w+-/, '')}
-                                                                    </a>
-                                                                </div>
-                                                            ) : (
-                                                                <small className="text-primary small" style={{ fontWeight: "500" }}>Aadhaar card not uploaded</small>
-                                                            )}
-                                                        </div>
+                                                {/* Aadhar Card Section */}
+                                                <div className="col-sm-6 col-md-4">
+                                                    <InputField
+                                                        label="Aadhar Card"
+                                                        name="aadharCardNumber"
+                                                        type="text"
+                                                        placeholder="Aadhar Card Number"
+                                                        value={aadharCardNumber}
+                                                        onChange={this.handleChange}
+                                                    />
+                                                    <InputField
+                                                        type="file"
+                                                        name="aadharCardFile"
+                                                        onChange={this.handleFileChange}
+                                                    />
+                                                    {aadharCardFile && aadharCardFile !== "" ? (
+                                                    <div className="d-inline-block">
+                                                        <a
+                                                        href={
+                                                            aadharCardFileUrl
+                                                            ? aadharCardFileUrl
+                                                            : `${process.env.REACT_APP_API_URL}/${aadharCardFile.name || aadharCardFile}`
+                                                        }
+                                                        className="text-primary small"
+                                                        style={{ fontWeight: "500", display: "inline-block" }}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        >
+                                                        {aadharCardFile instanceof File
+                                                            ? aadharCardFile.name
+                                                            : aadharCardFile.split("/").pop().replace(/^\w+-/, "")}
+                                                        </a>
                                                     </div>
-                                                    <div className="col-sm-6 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Driving License</label>
-                                                            <input
-                                                                type="text"
-                                                                name="drivingLicenseNumber"
-                                                                id="drivingLicenseNumber"
-                                                                className="form-group form-control"
-                                                                placeholder="Driving License Number"
-                                                                value={drivingLicenseNumber}
-                                                                onChange={this.handleChange}
-                                                            />
-                                                            <input
-                                                                type="file"
-                                                                name="drivingLicenseFile"
-                                                                className="form-control"
-                                                                placeholder="Driving License"
-                                                                onChange={this.handleFileChange}
-                                                            />
-                                                            {/* File Preview Link */}
-                                                            {drivingLicenseFile ? (
-                                                                <div className="d-inline-block">
-                                                                    <a
-                                                                        href={
-                                                                            drivingLicenseFileUrl ? drivingLicenseFileUrl : `${process.env.REACT_APP_API_URL}/${drivingLicenseFile.name || drivingLicenseFile}`
-                                                                        }
-                                                                        className="text-primary small"
-                                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                    >
-                                                                        {drivingLicenseFile instanceof File ? drivingLicenseFile.name : drivingLicenseFile.split('/').pop().replace(/^\w+-/, '')}
-                                                                    </a>
-                                                                </div>
-                                                            ) : (
-                                                                <small className="text-primary small" style={{ fontWeight: "500" }}>Driving license not uploaded</small>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-sm-6 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label">Pan Card</label>
-                                                            <input
-                                                                type="text"
-                                                                name="panCardNumber"
-                                                                id="panCardNumber"
-                                                                className="form-group form-control"
-                                                                placeholder="Pan Card Number"
-                                                                value={panCardNumber}
-                                                                onChange={this.handleChange}
-                                                            />
-                                                            <input
-                                                                type="file"
-                                                                name="panCardFile"
-                                                                className="form-control"
-                                                                placeholder="Pan Card"
-                                                                onChange={this.handleFileChange}
-                                                            />
-
-                                                            {/* File Preview Link */}
-                                                            {panCardFile ? (
-                                                                <div className="d-inline-block">
-                                                                    <a
-                                                                        href={
-                                                                            panCardFileUrl ? panCardFileUrl : `${process.env.REACT_APP_API_URL}/${panCardFile.name || panCardFile}`
-                                                                        }
-                                                                        className="text-primary small"
-                                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                    >
-                                                                        {panCardFile instanceof File ? panCardFile.name : panCardFile.split('/').pop().replace(/^\w+-/, '')}
-                                                                    </a>
-                                                                </div>
-                                                            ) : (
-                                                                <small className="text-primary small" style={{ fontWeight: "500" }}>Pan card not uploaded</small>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                    ) : (
+                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
+                                                        Aadhaar card not uploaded
+                                                    </small>
+                                                    )}
                                                 </div>
+
+                                                {/* Driving License Section */}
+                                                <div className="col-sm-6 col-md-4">
+                                                    <InputField
+                                                        label="Driving License"
+                                                        name="drivingLicenseNumber"
+                                                        type="text"
+                                                        placeholder="Driving License Number"
+                                                        value={drivingLicenseNumber}
+                                                        onChange={this.handleChange}
+                                                    />
+                                                    <InputField
+                                                        name="drivingLicenseFile"
+                                                        type="file"
+                                                        onChange={this.handleFileChange}
+                                                        placeholder="Driving License"
+                                                    />
+                                                    {drivingLicenseFile ? (
+                                                    <div className="d-inline-block">
+                                                        <a
+                                                        href={
+                                                            drivingLicenseFileUrl
+                                                            ? drivingLicenseFileUrl
+                                                            : `${process.env.REACT_APP_API_URL}/${drivingLicenseFile.name || drivingLicenseFile}`
+                                                        }
+                                                        className="text-primary small"
+                                                        style={{ fontWeight: "500", display: "inline-block" }}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        >
+                                                        {drivingLicenseFile instanceof File
+                                                            ? drivingLicenseFile.name
+                                                            : drivingLicenseFile.split("/").pop().replace(/^\w+-/, "")}
+                                                        </a>
+                                                    </div>
+                                                    ) : (
+                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
+                                                        Driving license not uploaded
+                                                    </small>
+                                                    )}
+                                                </div>
+
+                                                {/* Pan Card Section */}
+                                                <div className="col-sm-6 col-md-4">
+                                                    <InputField
+                                                        label="Pan Card"
+                                                        name="panCardNumber"
+                                                        type="text"
+                                                        placeholder="Pan Card Number"
+                                                        value={panCardNumber}
+                                                        onChange={this.handleChange}
+                                                    />
+                                                    <InputField
+                                                        name="panCardFile"
+                                                        type="file"
+                                                        onChange={this.handleFileChange}
+                                                        placeholder="Pan Card"
+                                                    />
+                                                    {panCardFile ? (
+                                                    <div className="d-inline-block">
+                                                        <a
+                                                        href={
+                                                            panCardFileUrl
+                                                            ? panCardFileUrl
+                                                            : `${process.env.REACT_APP_API_URL}/${panCardFile.name || panCardFile}`
+                                                        }
+                                                        className="text-primary small"
+                                                        style={{ fontWeight: "500", display: "inline-block" }}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        >
+                                                        {panCardFile instanceof File
+                                                            ? panCardFile.name
+                                                            : panCardFile.split("/").pop().replace(/^\w+-/, "")}
+                                                        </a>
+                                                    </div>
+                                                    ) : (
+                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
+                                                        Pan card not uploaded
+                                                    </small>
+                                                    )}
+                                                </div>
+                                                </div>
+
 
                                                 {/* Social Media */}
                                                 <div className="row mb-4">
@@ -1297,11 +1298,9 @@ class EditEmployee extends Component {
                                                 <div className="col-md-12">
                                                     <div className="form-group">
                                                         <label className="form-label">Resume</label>
-                                                        <input
+                                                        <InputField
                                                             type="file"
                                                             name="resume"
-                                                            className="form-control"
-                                                            placeholder="Select your resume"
                                                             onChange={this.handleFileChange}
                                                             accept=".pdf,.doc,.docx,.txt,.rtf,.gdoc"
                                                         />

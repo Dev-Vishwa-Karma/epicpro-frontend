@@ -141,14 +141,13 @@ class LinkModal extends React.Component {
                         className='drag-and-drop-file'
                       >
                         <label htmlFor="file_path" className="form-label">File</label>
-                        <input
-                          id="file_path"
-                          ref={this.setFileInputRef}
+                        <InputField
                           type="file"
-                          style={{ display: 'none' }}
-                          className={`form-control ${errors.file_path ? 'is-invalid' : ''}`}
                           name="file_path"
+                          id="file_path"
                           onChange={this.handleFileInputChange}
+                          refInput={this.setFileInputRef}
+                          style={{ display: 'none' }}
                         />
                         <div className='drag-drop-content'>
                           Drag & drop a file here, or <span className='drag-browser'>browse</span>

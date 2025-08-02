@@ -4,6 +4,7 @@ import AlertMessages from "../../common/AlertMessages";
 import CropperModal from './CropperModal';
 import { getService } from "../../../services/getService";
 import { validateFields } from "../../common/validations";
+import InputField from "../../common/formInputs/InputField";
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -598,17 +599,14 @@ class AddEmployee extends Component {
                           </div>
                         </div>
                         <div className="col-sm-6 col-md-4">
-                          <div className="form-group">
-                            <label className="form-label">Photo</label>
-                            <input
-                              type="file"
-                              name="photo"
-                              className="form-control"
-                              onChange={this.handleFileChange}
-                              ref={this.fileInputRefs.photo}
-                              accept="image/png,image/jpg,image/jpeg,image/webp"
-                            />
-                          </div>
+                          <InputField
+                            type="file"
+                            name="photo"
+                            label="Photo"
+                            onChange={this.handleFileChange}
+                            refInput={this.fileInputRefs.photo}
+                            accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
+                          />
                         </div>
                         <div className="col-sm-6 col-md-4">
                           <div className="form-group">
@@ -1092,72 +1090,56 @@ class AddEmployee extends Component {
                         <div className="row mb-4">
                           <h5 className="w-100">Govt Issue ID</h5>
                           <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">Aadhar Card</label>
-                              <input
-                                type="text"
-                                name="aadharCardNumber"
-                                id="aadharCardNumber"
-                                className="form-group form-control"
-                                placeholder="Aadhar Card Number"
-                                value={aadharCardNumber}
-                                onChange={this.handleChange}
-                              />
-                              <input
-                                type="file"
-                                name="aadharCardFile"
-                                className="form-control"
-                                placeholder="Aadhar Card File"
-                                onChange={this.handleFileChange}
-                                ref={this.fileInputRefs.aadharCardFile}
-                              />
-                            </div>
+                            <InputField
+                              label="Aadhar Card"
+                              name="aadharCardNumber"
+                              type="text"
+                              placeholder="Aadhar Card Number"
+                              value={aadharCardNumber}
+                              onChange={this.handleChange}
+                            />
+                            <InputField
+                              name="aadharCardFile"
+                              type="file"
+                              onChange={this.handleFileChange}
+                              refInput={this.fileInputRefs.aadharCardFile}
+                              
+                            />
+                          </div>
+
+                          <div className="col-sm-6 col-md-4">
+                            <InputField
+                              label="Driving License"
+                              name="drivingLicenseNumber"
+                              type="text"
+                              placeholder="Driving License Number"
+                              value={drivingLicenseNumber}
+                              onChange={this.handleChange}
+                            />
+                            <InputField
+                              name="drivingLicenseFile"
+                              type="file"
+                              onChange={this.handleFileChange}
+                              refInput={this.fileInputRefs.drivingLicenseFile}
+                              placeholder="Driving License"
+                            />
                           </div>
                           <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">
-                                Driving License
-                              </label>
-                              <input
-                                type="text"
-                                name="drivingLicenseNumber"
-                                id="drivingLicenseNumber"
-                                className="form-group form-control"
-                                placeholder="Driving License Number"
-                                value={drivingLicenseNumber}
-                                onChange={this.handleChange}
-                              />
-                              <input
-                                type="file"
-                                name="drivingLicenseFile"
-                                className="form-control"
-                                placeholder="Driving License"
-                                onChange={this.handleFileChange}
-                                ref={this.fileInputRefs.drivingLicenseFile}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-sm-6 col-md-4">
-                            <div className="form-group">
-                              <label className="form-label">Pan Card</label>
-                              <input
-                                type="text"
-                                name="panCardNumber"
-                                id="panCardNumber"
-                                className="form-group form-control"
-                                placeholder="Pan Card Number"
-                                value={panCardNumber}
-                                onChange={this.handleChange}
-                              />
-                              <input
-                                type="file"
-                                name="panCardFile"
-                                className="form-control"
-                                placeholder="Pan Card"
-                                onChange={this.handleFileChange}
-                                ref={this.fileInputRefs.panCardFile}
-                              />
-                            </div>
+                            <InputField
+                              label="Pan Card"
+                              name="panCardNumber"
+                              type="text"
+                              placeholder="Pan Card Number"
+                              value={panCardNumber}
+                              onChange={this.handleChange}
+                            />
+                            <InputField
+                              name="panCardFile"
+                              type="file"
+                              placeholder="Pan Card"
+                              onChange={this.handleFileChange}
+                              refInput={this.fileInputRefs.panCardFile}
+                            />
                           </div>
                         </div>
 
@@ -1274,13 +1256,12 @@ class AddEmployee extends Component {
                         <div className="col-md-12">
                           <div className="form-group">
                             <label className="form-label">Resume</label>
-                            <input
+                            <InputField
                               type="file"
                               name="resume"
-                              className="form-control"
                               placeholder="Select your resume"
                               onChange={this.handleFileChange}
-                              ref={this.fileInputRefs.resume}
+                              refInput={this.fileInputRefs.resume}
                               accept=".pdf,.doc,.docx,.txt,.rtf,.gdoc"
                             />
                           </div>
