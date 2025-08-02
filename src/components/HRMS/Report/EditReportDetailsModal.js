@@ -1,4 +1,5 @@
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const EditReportDetailsModal = ({ 
     existingFullName,
@@ -12,7 +13,8 @@ const EditReportDetailsModal = ({
     handleEditActivityInTimeChange,
     handleEditActivityOutTimeChange,
     handleEditActivityStatusChange,
-    editReportByAdmin
+    editReportByAdmin,
+    errors = {}
 }) => {
     return (
         <div className="modal fade" id="editReportModal" tabIndex={-1} role="dialog" aria-labelledby="editReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -29,19 +31,35 @@ const EditReportDetailsModal = ({
                     <div className="modal-body">
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="form-label">Employee</label>
                                     <input type="text" className="form-control" name="example-disabled-input" placeholder="Disabled.." readOnly value={existingFullName} />
-                                </div>
+                                </div> */}
+                                <InputField
+                                    label="Employee"
+                                    name="existingFullName"
+                                    type="text"
+                                    value={existingFullName}
+                                    disabled={true}
+                                    placeholder="Disabled.."
+                                />
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="form-label">Activity Type</label>
                                     <input type="text" className="form-control" name="example-disabled-input" placeholder="Disabled.." value={existingActivityType} readOnly/>
-                                </div>
+                                </div> */}
+                                <InputField
+                                    label="Activity Type"
+                                    name="existingActivityType"
+                                    type="text"
+                                    value={existingActivityType}
+                                    disabled={true}
+                                    placeholder="Disabled.."
+                                />
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="form-label">Description</label>
                                     <textarea
                                         className="form-control"
@@ -51,22 +69,48 @@ const EditReportDetailsModal = ({
                                         cols="50"
                                         onChange={handleEditActivityDescriptionChange}
                                     />
-                                </div>
+                                </div> */}
+                                <InputField
+                                    label="Description"
+                                    name="existingActivityDescription"
+                                    type="textarea"
+                                    value={existingActivityDescription}
+                                    onChange={handleEditActivityDescriptionChange}
+                                    placeholder="Description"
+                                    rows={10}
+                                    error={errors.existingActivityDescription}
+                                />
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="form-label">In Time</label>
                                     <input type="text" className="form-control" value={existingActivityInTime} onChange={handleEditActivityInTimeChange} />
-                                </div>
+                                </div> */}
+                                <InputField
+                                    label="In Time"
+                                    name="existingActivityInTime"
+                                    type="text"
+                                    value={existingActivityInTime}
+                                    onChange={handleEditActivityInTimeChange}
+                                    error={errors.existingActivityInTime}
+                                />
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="form-label">Out Time</label>
                                     <input type="text" className="form-control" value={existingActivityOutTime || ''} onChange={handleEditActivityOutTimeChange} />
-                                </div>
+                                </div> */}
+                                <InputField
+                                    label="Out Time"
+                                    name="existingActivityOutTime"
+                                    type="text"
+                                    value={existingActivityOutTime || ''}
+                                    onChange={handleEditActivityOutTimeChange}
+                                    error={errors.existingActivityOutTime}
+                                />
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="form-label">Status</label>
                                     <select className="form-control" value={existingActivitySatus} onChange={handleEditActivityStatusChange}>
                                         <option value="">Select Status</option>
@@ -74,7 +118,20 @@ const EditReportDetailsModal = ({
                                         <option value="completed">Completed</option>
                                         <option value="auto closed">Auto Closed</option>
                                     </select>
-                                </div>
+                                </div> */}
+                                <InputField
+                                    label="Status"
+                                    name="existingActivitySatus"
+                                    type="select"
+                                    value={existingActivitySatus}
+                                    onChange={handleEditActivityStatusChange}
+                                    error={errors.existingActivitySatus}
+                                    options={[
+                                        { value: 'active', label: 'Active' },
+                                        { value: 'completed', label: 'Completed' },
+                                        { value: 'auto closed', label: 'Auto Closed' },
+                                    ]}
+                                />
                             </div>
                         </div>
                     </div>

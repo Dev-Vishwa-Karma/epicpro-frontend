@@ -154,25 +154,29 @@ class AddEmployee extends Component {
       
       if (!allowedTypes.includes(fileType)) {
         this.setState({
-          errorMessage: "only allowed PNG, JPG, or JPEG image files for the photo.",
-          showError: true,
-          showSuccess: false
+          errors: { 
+            ...this.state.errors, 
+            photo: "Only allowed PNG, JPG, or JPEG image files for the photo."
+          },
+          showError: false,
+          errorMessage: ""
         });
-        setTimeout(this.dismissMessages, 3000);
         // Clear the file input
         e.target.value = '';
         return;
       }
       
       // Validate file size (5MB limit)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         this.setState({
-          errorMessage: "Photo file size should be less than 5MB.",
-          showError: true,
-          showSuccess: false
+          errors: { 
+            ...this.state.errors, 
+            photo: "Photo file size should be less than 5MB."
+          },
+          showError: false,
+          errorMessage: ""
         });
-        setTimeout(this.dismissMessages, 3000);
         e.target.value = '';
         return;
       }
@@ -186,6 +190,50 @@ class AddEmployee extends Component {
         });
       };
       reader.readAsDataURL(file);
+    } else if (file && name === "resume") {
+      // Validate file type for resume
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/rtf'];
+      const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.gd oc'];
+      const fileType = file.type.toLowerCase();
+      const fileName = file.name.toLowerCase();
+      
+      // Check both MIME type and file extension
+      const isValidType = allowedTypes.includes(fileType) || 
+                         allowedExtensions.some(ext => fileName.endsWith(ext.toLowerCase()));
+      
+      if (!isValidType) {
+        this.setState({
+          errors: { 
+            ...this.state.errors, 
+            resume: `File is not a valid resume file. Only PDF, DOC, DOCX, TXT, RTF, and GD OC files are allowed.`
+          },
+          showError: false,
+          errorMessage: ""
+        });
+        // Clear the file input
+        e.target.value = '';
+        return;
+      }
+      
+      // Validate file size (10MB limit for resume)
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.setState({
+          errors: { 
+            ...this.state.errors, 
+            resume: "Resume file size should be less than 10MB."
+          },
+          showError: false,
+          errorMessage: ""
+        });
+        e.target.value = '';
+        return;
+      }
+      
+      this.setState({
+        [name]: file,
+        errors: { ...this.state.errors, resume: '' }
+      });
     } else if (file) {
       this.setState({
         [name]: file,
@@ -1294,6 +1342,9 @@ class AddEmployee extends Component {
                               refInput={this.fileInputRefs.resume}
                               accept=".pdf,.doc,.docx,.txt,.rtf,.gdoc"
                             />
+                            {this.state.errors.resume && (
+                              <div className="invalid-feedback d-block">{this.state.errors.resume}</div>
+                            )}
                           </div>
                         </div>
                       </div>
