@@ -52,21 +52,20 @@ class Holidays extends Component {
 		.then(data => {
 			if (data.status === 'success') {
 				const holidaysData = data.data;
-				const today = new Date();
-				today.setHours(0, 0, 0, 0);
+				const today = moment().startOf('day'); 
 				
 				const upcomingHolidays = holidaysData
 				.filter(holiday => {
 					if (holiday.event_type !== 'holiday') return false;
-					const eventDate = new Date(holiday.event_date);
-					eventDate.setHours(0, 0, 0, 0);
-					return eventDate >= today;
+					const eventDate = moment(holiday.event_date).startOf('day'); 
+					return eventDate.isSameOrAfter(today, 'day');
 				})
-				.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));// Sort by ASC order
-				
-				this.setState(
-					{ holidays: upcomingHolidays, loading: false}
-				);
+				.sort((a, b) => moment(a.event_date).isBefore(moment(b.event_date)) ? -1 : 1);
+
+				this.setState({
+					holidays: upcomingHolidays,
+					loading: false
+				});
 			} else {
 				this.setState({ message: data.message, loading: false });
 			}
