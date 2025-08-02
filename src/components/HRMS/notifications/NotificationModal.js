@@ -1,4 +1,5 @@
 import React from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const NotificationModal = ({
   isEdit = false,
@@ -34,91 +35,76 @@ const NotificationModal = ({
               </div>
 
               <div className="modal-body">
-                <div className="form-group">
-                  <label htmlFor="title">Title</label>
-                  <input
-                    id="title"
-                    type="text"
-                    name="title"
-                    value={title}
-                    onChange={onChange}
-                    className={`form-control ${errors.title ? 'is-invalid' : ''}`}
-                    placeholder="Enter title"
-                  />
-                  {errors.title && <small className="invalid-feedback">{errors.title}</small>}
-                </div>
+                <InputField
+                  label="Title"
+                  name="title"
+                  type="text"
+                  value={title}
+                  onChange={onChange}
+                  placeholder="Enter title"
+                  error={errors.title}
+                />
 
-                <div className="form-group">
-                  <label htmlFor="body">Body</label>
-                  <textarea
-                    id="body"
-                    name="body"
-                    value={body}
-                    onChange={onChange}
-                    className={`form-control ${errors.body ? 'is-invalid' : ''}`}
-                    placeholder="Enter body"
-                  />
-                  {errors.body && <small className="invalid-feedback">{errors.body}</small>}
-                </div>
+                <InputField
+                  label="Body"
+                  name="body"
+                  type="textarea"
+                  value={body}
+                  onChange={onChange}
+                  placeholder="Enter body"
+                  error={errors.body}
+                />
 
-                <div className="form-group">
-                  <label htmlFor="type">Type</label>
-                  <select
-                    id="type"
-                    name="type"
-                    value={type}
-                    onChange={onChange}
-                    className={`form-control ${errors.type ? 'is-invalid' : ''}`}
-                  >
-                    <option value="">Select Type</option>
-                    <option value="event_added">Add New Event</option>
-                    <option value="Birthday">Birthday</option>
-                    <option value="task_added">Task Add</option>
-                    <option value="task_updated">Task Update</option>
-                    <option value="task_completed">Task Complete</option>
-                    <option value="task_due">Task Due</option>
-                    <option value="report_note">Report Note</option>
-                  </select>
-                  {errors.type && <small className="invalid-feedback">{errors.type}</small>}
-                </div>
+                <InputField
+                  label="Type"
+                  name="type"
+                  type="select"
+                  value={type}
+                  onChange={onChange}
+                  error={errors.type}
+                  options={[
+                    { value: 'event_added', label: 'Add New Event' },
+                    { value: 'Birthday', label: 'Birthday' },
+                    { value: 'task_added', label: 'Task Add' },
+                    { value: 'task_updated', label: 'Task Update' },
+                    { value: 'task_completed', label: 'Task Complete' },
+                    { value: 'task_due', label: 'Task Due' },
+                    { value: 'report_note', label: 'Report Note' },
+                  ]}
+                />
 
-                <div className="form-group">
-                  <label htmlFor="status">Status</label>
-                  <select
-                    id="read"
-                    name="read"
-                    value={read}
-                    onChange={onChange}
-                    className={`form-control ${errors.read ? 'is-invalid' : ''}`}
-                  >
-                    <option value="">Select Status</option>
-                    <option value="1">Read</option>
-                    <option value="0">Unread</option>
-                  </select>
-                  {errors.read && <small className="invalid-feedback">{errors.read}</small>}
-                </div>
+                <InputField
+                  label="Status"
+                  name="read"
+                  type="select"
+                  value={read}
+                  onChange={onChange}
+                  error={errors.read}
+                  options={[
+                    { value: '1', label: 'Read' },
+                    { value: '0', label: 'Unread' },
+                  ]}
+                />
 
-                {/* Employee Select Dropdown */}
-                <div className="form-group">
-                  <label className="form-label">Select Employee</label>
-                  <select 
-                    className="form-control" 
-                    value={selectedEmployee} 
-                    onChange={handleEmployeeChange}
-                  >
-                    <option value="" disabled>Select Employees</option>
-                    {employeeData
-                      .filter(employee => {
-                        const role = (employee.role || '').toLowerCase();
+                <InputField
+                  label="Select Employee"
+                  name="selectedEmployee"
+                  type="select"
+                  value={selectedEmployee}
+                  onChange={handleEmployeeChange}
+                  error={errors.selectedEmployee}
+                  options={[
+                    ...employeeData
+                      .filter(emp => {
+                        const role = (emp.role || '').toLowerCase();
                         return role !== 'admin' && role !== 'super_admin';
                       })
-                      .map(employee => (
-                        <option key={employee.id} value={employee.id}>
-                          {employee.first_name} {employee.last_name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
+                      .map(emp => ({
+                        value: emp.id,
+                        label: `${emp.first_name} ${emp.last_name}`,
+                      })),
+                  ]}
+                />
               </div>
 
               <div className="modal-footer">

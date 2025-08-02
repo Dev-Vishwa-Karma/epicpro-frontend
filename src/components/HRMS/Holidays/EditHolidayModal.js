@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 class EditHolidayModal extends Component {
   render() {
@@ -32,36 +33,26 @@ class EditHolidayModal extends Component {
                       onChange={handleInputChangeForEditHoliday}
                     />
                     <div className="col-md-12">
-                      <div className="form-group">
-                        <label className="form-label" htmlFor="event_name">Holiday Name</label>
-                        <input
-                          type="text"
-                          className={`form-control ${errors.event_name ? "is-invalid" : ""}`}
-                          name="event_name"
-                          id="event_name"
-                          value={selectedHoliday?.event_name || ""}
-                          onChange={handleInputChangeForEditHoliday}
-                        />
-                        {errors.event_name && (
-                          <div className="invalid-feedback">{errors.event_name}</div>
-                        )}
-                      </div>
+                      <InputField
+                        label="Holiday Name"
+                        name="event_name"
+                        type="text"
+                        value={selectedHoliday?.event_name || ""}
+                        onChange={handleInputChangeForEditHoliday}
+                        error={errors.event_name}
+                        placeholder="Enter holiday name"
+                      />
                     </div>
                     <div className="col-md-12">
-                      <div className="form-group">
-                        <label className="form-label" htmlFor="event_date">Holiday Date</label>
-                        <input
-                          type="date"
-                          className={`form-control ${errors.event_date ? "is-invalid" : ""}`}
-                          name="event_date"
-                          id="event_date"
-                          value={selectedHoliday?.event_date || ""}
-                          onChange={handleInputChangeForEditHoliday}
-                        />
-                        {errors.event_date && (
-                          <div className="invalid-feedback">{errors.event_date}</div>
-                        )}
-                      </div>
+                      <InputField
+                        label="Holiday Date"
+                        name="event_date"
+                        type="date"
+                        value={selectedHoliday?.event_date || ""}
+                        onChange={handleInputChangeForEditHoliday}
+                        error={errors.event_date}
+                        placeholder="Select date"
+                      />
                     </div>
                   </div>
                 </div>

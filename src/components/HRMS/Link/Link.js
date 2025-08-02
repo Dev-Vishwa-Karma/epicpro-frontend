@@ -288,7 +288,6 @@ class Link extends Component {
       submitData.append('id', editId);
     }
     this.setState({ loading: true });
-    console.log('submitData',submitData)
     getService.addCall('resources.php', apiAction, submitData)
       .then(res => {
         if (res.status === 'success') {
