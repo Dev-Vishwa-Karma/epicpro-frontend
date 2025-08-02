@@ -1,9 +1,10 @@
 import React from 'react';
+import moment from 'moment';
 
 const MonthSelector = ({ selectedMonth, handleMonthChange, labelClass, selectClass }) => {
   const getMonths = () => {
     return Array.from({ length: 12 }, (_, index) =>
-      new Date(2000, index, 1).toLocaleString('default', { month: 'long' })
+      moment().month(index).format('MMMM')
     );
   };
 

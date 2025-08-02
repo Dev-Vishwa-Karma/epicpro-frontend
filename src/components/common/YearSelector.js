@@ -1,13 +1,9 @@
 import React from 'react';
+import moment from 'moment';
 
 const YearSelector = ({ selectedYear, handleYearChange, labelClass, selectClass }) => {
-    const currentYear = new Date().getFullYear();
-    const startYear = currentYear;
-    const endYear = currentYear + 10;
-    const years = Array.from(
-      { length: endYear - startYear + 1 },
-      (_, i) => startYear + i
-    );
+  const currentYear = moment().year();
+  const years = Array.from({ length: 11 }, (_, i) => currentYear + i);
 
   return (
     <div>

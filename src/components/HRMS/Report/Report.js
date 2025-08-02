@@ -11,6 +11,8 @@ import ViewReportModal from './ViewReportModal';
 import EditReportModal from './EditReportModal';
 import AddBreakModal from './AddBreakModal';
 import EditReportDetailsModal from './EditReportDetailsModal';
+import moment from 'moment';
+
 class Report extends Component {
 
     constructor(props) {
@@ -69,11 +71,8 @@ class Report extends Component {
     }
 
     componentDidMount() {
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0); // Set to start of day
-        today.setHours(0, 0, 0, 0); // Set to start of day
+        const today = moment().startOf('day').toDate();
+        const yesterday = moment().subtract(1, 'days').startOf('day').toDate();
         
         this.setState({ 
             fromDate: yesterday,
@@ -429,24 +428,11 @@ class Report extends Component {
     };
 
     parseTimeStringToDate = (timeString) => {
-        // Handles both "10:30 AM" and "2025-04-21 10:30"
-        const ampmMatch = timeString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-        if (!ampmMatch) return null;
-        let hours = parseInt(ampmMatch[1]);
-
-        const minutes = parseInt(ampmMatch[2]);
-        const ampm = ampmMatch[3]?.toUpperCase();
-
-        if (ampm === 'PM' && hours < 12) hours += 12;
-        if (ampm === 'AM' && hours === 12) hours = 0;
-
-        const date = new Date();
-        date.setHours(hours);
-        date.setMinutes(minutes);
-        date.setSeconds(0);
-        date.setMilliseconds(0);
-
-        return date;
+        const momentObj = moment(timeString, ["YYYY-MM-DD HH:mm", "hh:mm A"], true);
+        
+        if (!momentObj.isValid()) return null;
+        
+        return momentObj.toDate();
     };
 
     // Format date and time
@@ -459,24 +445,12 @@ class Report extends Component {
             timeString = parts[1]; // Extract the time part
         }
 
-        const [hours, minutes, seconds = '00'] = timeString.split(':');
-        const now = new Date();
+        // Use moment.js to parse the time string and format it in AM/PM format
+        const formattedTime = moment(timeString, "HH:mm:ss").isValid()
+            ? moment(timeString, "HH:mm:ss").format("hh:mm A")
+            : moment(timeString, "HH:mm").format("hh:mm A");
 
-        now.setHours(parseInt(hours, 10));
-        now.setMinutes(parseInt(minutes, 10));
-        now.setSeconds(parseInt(seconds, 10));
-        now.setMilliseconds(0);
-
-        if (isNaN(now.getTime())) {
-            console.warn("Invalid time format:", timeString);
-            return '';
-        }
-
-        return now.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        });
+        return formattedTime || '';
     };
 
     getTimeAsDate = (time) => {
@@ -487,32 +461,19 @@ class Report extends Component {
             // If it includes date part, extract just the time
             if (time.includes(' ')) {
                 const parts = time.split(' ');
-                const timePart = parts.length === 2 ? parts[1] : parts[0];
-                time = timePart;
+                time = parts.length === 2 ? parts[1] : parts[0];  // Only keep the time part
             }
-    
-            // Handle AM/PM
-            const ampmMatch = time.match(/(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
-            if (!ampmMatch) return null;
-    
-            let hours = parseInt(ampmMatch[1]);
-            const minutes = parseInt(ampmMatch[2]);
-            const ampm = ampmMatch[3]?.toUpperCase();
-    
-            if (ampm === 'PM' && hours < 12) hours += 12;
-            if (ampm === 'AM' && hours === 12) hours = 0;
-    
-            const now = new Date();
-            now.setHours(hours);
-            now.setMinutes(minutes);
-            now.setSeconds(0);
-            now.setMilliseconds(0);
-    
-            return now;
+
+            // Use moment.js to parse the time and handle AM/PM
+            const formattedTime = moment(time, ["HH:mm", "h:mm A"]);
+            
+            if (!formattedTime.isValid()) return null;  // If invalid, return null
+
+            return formattedTime.toDate(); // Convert to JavaScript Date
         }
-    
-        if (time instanceof Date) return time;
-    
+
+        if (time instanceof Date) return time;  // If it's already a Date, return it as is.
+
         return null;
     };    
 
@@ -550,11 +511,11 @@ class Report extends Component {
             ? parseInt(value || 0, 10)
             : parseInt(break_duration_in_minutes || 0, 10);
 
-        // Parse using consistent utility
-        const startDate = this.getTimeAsDate(rawStart);
-        const endDate = this.getTimeAsDate(rawEnd);
-    
-        if (startDate && endDate) {
+        // Parse using moment.js
+        const startDate = moment(rawStart, ["HH:mm", "h:mm A"]);
+        const endDate = moment(rawEnd, ["HH:mm", "h:mm A"]);
+
+        if (startDate.isValid() && endDate.isValid()) {
             const workingDuration = this.calculateWorkingHours(startDate, endDate, breakMinutes);
             const totalDuration = this.calculateWorkingHours(startDate, endDate, 0);
     
@@ -566,68 +527,73 @@ class Report extends Component {
     };    
 
     calculateWorkingHours = (start, end, breakMinutes) => {
-		try {
-            start = this.getTimeAsDate(start);
-            end = this.getTimeAsDate(end);
+        try {
+            // Parse times using moment.js
+            const startMoment = moment(start, ["HH:mm", "h:mm A"]);
+            const endMoment = moment(end, ["HH:mm", "h:mm A"]);
 
-			if (!(start instanceof Date) || isNaN(start)) return "00:00";
-			if (!(end instanceof Date) || isNaN(end)) return "00:00";
-	
-			breakMinutes = parseInt(breakMinutes || 0);
-			if (isNaN(breakMinutes)) breakMinutes = 0;
-	
-			// Remove seconds/milliseconds for cleaner diff
-			start.setSeconds(0, 0);
-			end.setSeconds(0, 0);
-	
-			let diff = (end.getTime() - start.getTime()) / (1000 * 60); // in minutes
-	
-			if (diff < 0) diff += 1440;
-			diff -= breakMinutes;
-			if (diff < 0) diff = 0;
-	
-			const hours = Math.floor(diff / 60);
-			const minutes = Math.round(diff % 60);
-	
-			return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-		} catch (err) {
-			return "00:00";
-		}
-	};
+            // Check if the parsed moments are valid
+            if (!startMoment.isValid() || !endMoment.isValid()) return "00:00";
+            
+            // Default break minutes if not provided
+            breakMinutes = parseInt(breakMinutes || 0);
+            if (isNaN(breakMinutes)) breakMinutes = 0;
+
+            // Calculate the duration in minutes
+            let diff = endMoment.diff(startMoment, 'minutes'); // Duration in minutes
+
+            if (diff < 0) {
+                // If end time is earlier than start time, assume it's for the next day
+                diff += 1440; // 24 hours in minutes
+            }
+
+            // Subtract break time from the total duration
+            diff -= breakMinutes;
+            if (diff < 0) diff = 0;
+
+            // Calculate hours and minutes from the remaining duration
+            const hours = Math.floor(diff / 60);
+            const minutes = Math.round(diff % 60);
+
+            // Return the formatted time
+            return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+        } catch (err) {
+            console.error('Error calculating working hours:', err);
+            return "00:00";
+        }
+    };
+
 
     formatToMySQLDateTime = (input) => {
-        const pad = (n) => n.toString().padStart(2, '0');
+        if (!input) return null;
+
         let date;
-    
+
+        // If input is a valid Date object
         if (input instanceof Date && !isNaN(input)) {
-            date = input;
-        } else if (typeof input === 'string') {
+            date = moment(input);
+        }
+        // If input is a string
+        else if (typeof input === 'string') {
+            // Handle full datetime string: "2025-04-21 12:00"
             if (input.includes(' ')) {
-                // Handle full datetime string: "2025-04-21 12:00"
-                const [, timePart] = input.split(' ');
-                const [hours, minutes] = timePart.split(':').map(Number);
-                date = new Date();
-                date.setHours(hours || 0);
-                date.setMinutes(minutes || 0);
-                date.setSeconds(0);
-                date.setMilliseconds(0);
-            } else if (input.includes(':')) {
-                // Handle "HH:mm" or "HH:mm:ss"
-                const [hours, minutes] = input.split(':').map(Number);
-                date = new Date();
-                date.setHours(hours || 0);
-                date.setMinutes(minutes || 0);
-                date.setSeconds(0);
-                date.setMilliseconds(0);
+                const [datePart, timePart] = input.split(' ');
+                date = moment(`${datePart} ${timePart}`, 'YYYY-MM-DD HH:mm');
+            }
+            // Handle "HH:mm" or "HH:mm:ss"
+            else if (input.includes(':')) {
+                date = moment(input, 'HH:mm');
             } else {
                 return null;
             }
         } else {
             return null;
         }
-    
-        return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-    };    
+
+        // Format the output as 'HH:mm' (MySQL time format)
+        return date.isValid() ? date.format('HH:mm') : null;
+    };
+        
 
     validateUpdateReportForm = () => {
 		const { report, start_time, end_time, break_duration_in_minutes, todays_total_hours } = this.state;
@@ -735,20 +701,11 @@ class Report extends Component {
 
     fetchReports = () => {
         const { fromDate, toDate, selectedReportEmployee } = this.state;
-    
-        const formatDate = (date) => {
-            if (!date) return '';
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); 
-            const day = String(date.getDate()).padStart(2, '0'); 
-            return `${year}-${month}-${day}`; 
-        };
-
         getService.getCall('reports.php', {
             action: 'view',
             user_id:selectedReportEmployee,
-            from_date:formatDate(fromDate),
-            to_date:formatDate(toDate)
+            from_date: moment(fromDate).format('YYYY-MM-DD'),
+            to_date: moment(toDate).format('YYYY-MM-DD')
         })
         .then(data => {
             if (data.status === 'success') {
@@ -795,14 +752,10 @@ class Report extends Component {
 
     // Get the todays date and based on this update the edit report button
     isToday = (dateString) => {
-        const inputDate = new Date(dateString);
-        const today = new Date();
-    
-        return (
-            inputDate.getFullYear() === today.getFullYear() &&
-            inputDate.getMonth() === today.getMonth() &&
-            inputDate.getDate() === today.getDate()
-        );
+        const inputDate = moment(dateString);
+        const today = moment().startOf('day'); // Set the time part to 00:00:00 for comparison
+        
+        return inputDate.isSame(today, 'day');
     };
 
     // Handle Pagination of employee listing and employee leaves listing

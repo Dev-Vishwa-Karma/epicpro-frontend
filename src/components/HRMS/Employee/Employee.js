@@ -16,6 +16,7 @@ import AddLeaveRequestModal from './AddLeaveRequestModal';
 import EditLeaveRequestModal from './EditLeaveRequestModal';
 import LeaveStats from './LeaveStats';
 import DateFilterForm from '../../common/DateFilterForm';
+import moment from 'moment';
 
 class Employee extends Component {
 	constructor(props) {
@@ -158,20 +159,8 @@ class Employee extends Component {
 				logged_in_employee_role: role || null,
 			});
 
-			const now = new Date();
-			const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-			const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-			// Set the state for fromDate and toDate
-			// this.setState({
-			// 	fromDate: firstDay,
-			// 	toDate: lastDay
-			// });
-			const formatDate = (date) => {
-				const year = date.getFullYear();
-				const month = String(date.getMonth() + 1).padStart(2, '0'); 
-				const day = String(date.getDate()).padStart(2, '0'); 
-				return `${year}-${month}-${day}`; 
-			};
+			const firstDay = moment().startOf('month').format('YYYY-MM-DD');
+			const lastDay = moment().endOf('month').format('YYYY-MM-DD');
 
 			// Fetch employees & leaves based on role using EmployeeService
 			Promise.all([
@@ -182,8 +171,8 @@ class Employee extends Component {
 				}),
 				getService.getCall('employee_leaves.php', {
 					action: 'view',
-					start_date:formatDate(firstDay),
-					end_date: formatDate(lastDay),
+					start_date:firstDay,
+					end_date:lastDay,
 					role:role === "admin" || role === "super_admin" ? null : id
 				})
 			])
@@ -221,17 +210,9 @@ class Employee extends Component {
 
 	fetchEmployeeLeaves = () => {
 		const { fromDate, toDate, selectedLeaveEmployee } = this.state;
-        
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); 
-            const day = String(date.getDate()).padStart(2, '0'); 
-            return `${year}-${month}-${day}`; 
-        };
-
-        const fromDateFormatted = fromDate ? formatDate(fromDate) : null;
-        const toDateFormatted = toDate ? formatDate(toDate) : null;
-
+		const formatDate = (date) => date ? moment(date).format('YYYY-MM-DD') : null;
+		const fromDateFormatted = formatDate(fromDate);
+		const toDateFormatted = formatDate(toDate);
 		getService.getCall('employee_leaves.php', {
 			action: 'view',
 			start_date:fromDateFormatted,
@@ -310,9 +291,8 @@ class Employee extends Component {
     handleTabChange = (tabId) => {
         this.setState({ activeTab: tabId });
 		if(tabId === 'Employee-Request'){
-			const now = new Date();
-			const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-			const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+			const firstDay = moment().startOf('month').toDate();
+			const lastDay = moment().endOf('month').toDate();
 			// Set the state for fromDate and toDate
 			this.setState({
 				fromDate: firstDay,

@@ -5,6 +5,7 @@ import CropperModal from './CropperModal';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
 import InputField from '../../common/formInputs/InputField';
+import CheckFileAvailability from './CheckFileAvailability';
 class EditEmployee extends Component {
     constructor(props) {
         super(props);
@@ -1139,29 +1140,11 @@ class EditEmployee extends Component {
                                                         name="aadharCardFile"
                                                         onChange={this.handleFileChange}
                                                     />
-                                                    {aadharCardFile && aadharCardFile !== "" ? (
-                                                    <div className="d-inline-block">
-                                                        <a
-                                                        href={
-                                                            aadharCardFileUrl
-                                                            ? aadharCardFileUrl
-                                                            : `${process.env.REACT_APP_API_URL}/${aadharCardFile.name || aadharCardFile}`
-                                                        }
-                                                        className="text-primary small"
-                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        >
-                                                        {aadharCardFile instanceof File
-                                                            ? aadharCardFile.name
-                                                            : aadharCardFile.split("/").pop().replace(/^\w+-/, "")}
-                                                        </a>
-                                                    </div>
-                                                    ) : (
-                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
-                                                        Aadhaar card not uploaded
-                                                    </small>
-                                                    )}
+                                                     <CheckFileAvailability
+                                                        file={aadharCardFile} 
+                                                        fileUrl={aadharCardFileUrl} 
+                                                        label="Aadhaar card" 
+                                                    />
                                                 </div>
 
                                                 {/* Driving License Section */}
@@ -1180,29 +1163,11 @@ class EditEmployee extends Component {
                                                         onChange={this.handleFileChange}
                                                         placeholder="Driving License"
                                                     />
-                                                    {drivingLicenseFile ? (
-                                                    <div className="d-inline-block">
-                                                        <a
-                                                        href={
-                                                            drivingLicenseFileUrl
-                                                            ? drivingLicenseFileUrl
-                                                            : `${process.env.REACT_APP_API_URL}/${drivingLicenseFile.name || drivingLicenseFile}`
-                                                        }
-                                                        className="text-primary small"
-                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        >
-                                                        {drivingLicenseFile instanceof File
-                                                            ? drivingLicenseFile.name
-                                                            : drivingLicenseFile.split("/").pop().replace(/^\w+-/, "")}
-                                                        </a>
-                                                    </div>
-                                                    ) : (
-                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
-                                                        Driving license not uploaded
-                                                    </small>
-                                                    )}
+                                                    <CheckFileAvailability
+                                                        file={drivingLicenseFile} 
+                                                        fileUrl={drivingLicenseFileUrl} 
+                                                        label="Driving license" 
+                                                    />
                                                 </div>
 
                                                 {/* Pan Card Section */}
@@ -1221,29 +1186,11 @@ class EditEmployee extends Component {
                                                         onChange={this.handleFileChange}
                                                         placeholder="Pan Card"
                                                     />
-                                                    {panCardFile ? (
-                                                    <div className="d-inline-block">
-                                                        <a
-                                                        href={
-                                                            panCardFileUrl
-                                                            ? panCardFileUrl
-                                                            : `${process.env.REACT_APP_API_URL}/${panCardFile.name || panCardFile}`
-                                                        }
-                                                        className="text-primary small"
-                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        >
-                                                        {panCardFile instanceof File
-                                                            ? panCardFile.name
-                                                            : panCardFile.split("/").pop().replace(/^\w+-/, "")}
-                                                        </a>
-                                                    </div>
-                                                    ) : (
-                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
-                                                        Pan card not uploaded
-                                                    </small>
-                                                    )}
+                                                    <CheckFileAvailability
+                                                        file={panCardFile} 
+                                                        fileUrl={panCardFileUrl} 
+                                                        label="Pan card" 
+                                                    />
                                                 </div>
                                                 </div>
 

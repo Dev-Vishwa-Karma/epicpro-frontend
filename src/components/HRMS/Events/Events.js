@@ -10,6 +10,8 @@ import AlertMessages from "../../common/AlertMessages";
 import YearSelector from "../../common/YearSelector";
 import EventList from "./EventList";
 import AddEventModal from "./AddEventModal";
+import moment from 'moment';
+
 class Events extends Component {
   constructor(props) {
     super(props);
@@ -17,7 +19,7 @@ class Events extends Component {
     this.state = {
       events: [],
       workingHoursReports: [],
-      selectedYear: new Date().getFullYear(),
+      selectedYear: moment().year(),
       // Add this for admin
       leaveViewEmployeeId: "",
       showAddEventModal: false,
@@ -48,7 +50,7 @@ class Events extends Component {
       leaveData: [],
       allEvents: [],
       showReportModal: false,
-      defaultDate: new Date(),
+      defaultDate: moment().toDate(),
       selectedReport: null,
       showDeleteModal: false,
       eventIdToDelete: null,
@@ -83,9 +85,9 @@ class Events extends Component {
     );
     this.fetchEmployees();
     this.fetchWorkingHoursReports(null);
-    const start_date = `${this.state.selectedYear}-01-01`;
-    const end_date = `${this.state.selectedYear}-12-31`;
-    this.fetchLeaveData(id, start_date, end_date);
+    const startDate = moment(`${this.state.selectedYear}-01-01`).format('YYYY-MM-DD');
+    const endDate = moment(`${this.state.selectedYear}-12-31`).format('YYYY-MM-DD');
+    this.fetchLeaveData(id, startDate, endDate);
     this.getAlternateSaturday();
   }
 
@@ -107,12 +109,10 @@ class Events extends Component {
     let endDate = localStorage.getItem("endDate");
 
     if (!startDate || !endDate) {
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-      const formatDate = (date) => date.toISOString().split("T")[0];
-      startDate = formatDate(firstDay);
-      endDate = formatDate(lastDay);
+      const firstDay = moment().startOf('month').format('YYYY-MM-DD');
+      const lastDay = moment().endOf('month').format('YYYY-MM-DD');
+      startDate = firstDay;
+      endDate = lastDay;
     }
 
     getService
@@ -243,17 +243,17 @@ class Events extends Component {
   handleYearChange = (event) => {
     const year = Number(event.target.value);
 
-    const newDate = `${year}-01-01`;
-    const eventStartDate = `${year}-01-01`;
-    const newEndDate = `${year}-01-31`;
-    const eventEndDate = `${year}-12-31`;
-    this.setState((prevState) => ({
+    // Use moment.js to handle year manipulation
+    const newDate = moment().year(year).startOf('year').format('YYYY-MM-DD');
+    const eventStartDate = moment().year(year).startOf('year').format('YYYY-MM-DD');
+    const newEndDate = moment().year(year).endOf('month').format('YYYY-MM-DD');  
+    const eventEndDate = moment().year(year).endOf('year').format('YYYY-MM-DD');
+
+    this.setState({
       selectedYear: year,
-    }));
+    });
     localStorage.setItem("startDate", newDate);
     localStorage.setItem("eventStartDate", eventStartDate);
-    localStorage.setItem("startDate", newDate);
-
     localStorage.setItem("eventEndDate", eventEndDate);
     this.fetchEvents();
     this.fetchWorkingHoursReports();
@@ -341,17 +341,17 @@ class Events extends Component {
   };
 
   getAlternateSaturday = async () => {
-    const now = localStorage.getItem("startDate")
-      ? new Date(localStorage.getItem("startDate"))
-      : new Date();
+    const startDate = localStorage.getItem("startDate")
+      ? moment(localStorage.getItem("startDate"))
+      : moment();
     try {
       const data = await getService.getCall("alternate_saturdays.php", {
         action: "view",
-        year: now.getFullYear(),
+        year: startDate.year(),  // Use moment to get the year
       });
 
       this.setState({
-        alternateSatudays: data?.data,
+        alternateSaturdays: data?.data, // Corrected the typo in "alternateSatudays"
       });
     } catch (error) {
       console.error("Failed to fetch saved Saturdays:", error);
@@ -492,35 +492,23 @@ class Events extends Component {
   formatLeaveEvents = (leaveData) => {
     if (!Array.isArray(leaveData)) return [];
     const events = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = moment().startOf('day'); 
+
     leaveData.forEach((leave) => {
-      const start = new Date(leave.from_date);
-      const end = new Date(leave.to_date);
-      if (end >= today) {
-        const loopStart = start < today ? new Date(today) : new Date(start);
-        for (
-          let d = new Date(loopStart);
-          d <= end;
-          d.setDate(d.getDate() + 1)
-        ) {
-          if (d >= today) {
-            if (leave.is_half_day === "1") {
-              events.push({
-                title: "",
-                start: this.formatDate(d),
-                className: "half-day-leave-event",
-                allDay: true,
-                // color: "#FFA500"
-              });
-            } else {
-              events.push({
-                title: "",
-                start: this.formatDate(d),
-                className: "leave-event",
-                allDay: true,
-              });
-            }
+      const start = moment(leave.from_date);
+      const end = moment(leave.to_date);
+
+      if (end.isSameOrAfter(today)) {
+        const loopStart = start.isBefore(today) ? today : start;
+
+        for (let d = loopStart.clone(); d.isBefore(end) || d.isSame(end, 'day'); d.add(1, 'days')) {
+          if (d.isSameOrAfter(today)) {
+            events.push({
+              title: "",
+              start: d.format('YYYY-MM-DD'),
+              className: leave.is_half_day === "1" ? "half-day-leave-event" : "leave-event",
+              allDay: true,
+            });
           }
         }
       }
@@ -529,23 +517,18 @@ class Events extends Component {
   };
 
   formatDate = (date) => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = `0${d.getMonth() + 1}`.slice(-2);
-    const day = `0${d.getDate()}`.slice(-2);
-    return `${year}-${month}-${day}`;
+   return moment(date).format('YYYY-MM-DD');
   };
 
   // Add this method to calculate missing reports for any employee
   getMissingReportEvents = (workingHoursReports, selectedYear) => {
     const missingReportEvents = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startDate = new Date(selectedYear, 0, 1);
-    const endDate = new Date(selectedYear, 11, 31);
-    let currentDate = new Date(startDate);
+    const today = moment().startOf('day');
+    const startDate = moment().year(selectedYear).startOf('year');
+    const endDate = moment().year(selectedYear).endOf('year');
+    let currentDate = moment(startDate);
 
-    while (currentDate < today && currentDate <= endDate) {
+    while (currentDate.isBefore(today) && currentDate.isSameOrBefore(endDate)) {
       const dateStr = this.formatDate(currentDate);
 
       const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
@@ -560,7 +543,7 @@ class Events extends Component {
         });
       }
 
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.add(1, 'days');
     }
 
     return missingReportEvents;
@@ -570,28 +553,25 @@ class Events extends Component {
     let startDate = localStorage.getItem("eventStartDate");
     let endDate = localStorage.getItem("eventEndDate");
     if (!startDate || !endDate) {
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), 1, 1);
-      const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the current year
-      const formatDate = (date) => date.toISOString().split("T")[0];
-      startDate = formatDate(firstDay);
-      endDate = formatDate(lastDay);
+      const firstDay = moment().startOf('year').format('YYYY-MM-DD');
+      const lastDay = moment().endOf('year').format('YYYY-MM-DD');
+
+      startDate = firstDay;
+      endDate = lastDay;
     }
     const birthdayEvents = this.state.employees
       .map((employee) => {
         if (!employee.dob) {
           return null;
         }
-        // Create birthday event for the selected year
-        const dob = new Date(employee.dob);
-        const month = dob.getMonth();
-        const day = dob.getDate();
+        
+        const dob = moment(employee.dob); 
         const selectedYear = this.state.selectedYear;
-        const birthdayDate = new Date(selectedYear, month, day);
+        const birthdayDate = dob.year(selectedYear).format('YYYY-MM-DD');
         return {
           id: `birthday_${employee.id}`,
           event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
-          event_date: this.formatDate(birthdayDate),
+          event_date: birthdayDate,
           event_type: "birthday",
           employee_id: employee.id,
         };
@@ -607,22 +587,14 @@ class Events extends Component {
       .then((data) => {
         if (data.status === "success") {
           const eventsData = data.data;
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
+          const allEvents = eventsData && eventsData.length > 0
+            ? [...eventsData, ...birthdayEvents]
+            : birthdayEvents;
 
-          // Combine regular events with birthday events
-          if (eventsData && eventsData.length > 0) {
-            const allEvents = [...eventsData, ...birthdayEvents];
-            this.setState({
-              events: allEvents,
-              loading: false,
-            });
-          } else {
-            this.setState({
-              events: birthdayEvents,
-              loading: false,
-            });
-          }
+          this.setState({
+            events: allEvents,
+            loading: false,
+          });
         } else {
           this.setState({ message: data.message, loading: false });
         }
@@ -685,27 +657,16 @@ class Events extends Component {
     // If input is in format "YYYY-MM-DD HH:mm" or "YYYY-MM-DD HH:mm:ss"
     if (timeString.includes(" ")) {
       const parts = timeString.split(" ");
-      timeString = parts[1]; // Extract the time part
+      timeString = parts[1]; 
     }
 
-    const [hours, minutes, seconds = "00"] = timeString.split(":");
-    const now = new Date();
-
-    now.setHours(parseInt(hours, 10));
-    now.setMinutes(parseInt(minutes, 10));
-    now.setSeconds(parseInt(seconds, 10));
-    now.setMilliseconds(0);
-
-    if (isNaN(now.getTime())) {
+    const formattedTime = moment(timeString, "HH:mm:ss").format("hh:mm A");
+    if (!moment(timeString, "HH:mm:ss", true).isValid()) {
       console.warn("Invalid time format:", timeString);
       return "";
     }
 
-    return now.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return formattedTime;
   };
 
   render() {
@@ -726,8 +687,8 @@ class Events extends Component {
     } = this.state;
 
     // Dynamic generation of years (last 50 years to next 10 years)
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = moment().year(); // Get the current year using moment
+    const currentMonth = moment().month() + 1; // Get the current month using moment
     this.state.defaultDate =
       localStorage.getItem("startDate") ??
       `${selectedYear}-${String(currentMonth).padStart(2, "0")}-01`;
@@ -743,32 +704,29 @@ class Events extends Component {
     );
     const filteredEvents = events
       ?.map((event) => {
-        let eventDate = new Date(event.event_date);
-        let eventYear = eventDate.getFullYear();
+        let eventDate = moment(event.event_date); // Use moment instead of new Date
+        let eventYear = eventDate.year();
 
         // For birthday events, keep them in the current year
         if (event.event_type === "birthday") {
-          // Extract month and day from the original date
-          const month = eventDate.getMonth();
-          const day = eventDate.getDate();
-          // Create new date with selected year
-          eventDate = new Date(selectedYear, month, day);
+          const month = eventDate.month();
+          const day = eventDate.date();
+          eventDate = moment().year(selectedYear).month(month).date(day); // Use moment to set the year
         }
         // For regular events, update year if from previous year
         else if (event.event_type === "event" && eventYear < selectedYear) {
-          eventDate.setFullYear(selectedYear);
+          eventDate.year(selectedYear); // Use moment to set the year
         }
 
         return {
           ...event,
-          event_date: this.formatDate(eventDate), // Convert back to YYYY-MM-DD format
+          event_date: eventDate.format("YYYY-MM-DD"), // Convert back to YYYY-MM-DD format
         };
       })
       .filter((event) => {
-        const eventDate = new Date(event.event_date);
-        const eventYear = eventDate.getFullYear();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const eventDate = moment(event.event_date); // Use moment for date comparison
+        const eventYear = eventDate.year();
+        const today = moment().startOf('day'); // Use moment to get the start of today
 
         // For birthday events, show them for the selected year
         if (event.event_type === "birthday") {
@@ -788,12 +746,11 @@ class Events extends Component {
         return false;
       })
       .sort((a, b) => {
-        // Sort by date
-        const dateA = new Date(a.event_date);
-        const dateB = new Date(b.event_date);
+        const dateA = moment(a.event_date); // Use moment for date comparison
+        const dateB = moment(b.event_date); // Use moment for date comparison
 
         // If dates are the same, sort by event type (birthday first, then holiday, then event)
-        if (dateA.getTime() === dateB.getTime()) {
+        if (dateA.isSame(dateB)) {
           const typeOrder = { birthday: 0, holiday: 1, event: 2 };
           return typeOrder[a.event_type] - typeOrder[b.event_type];
         }
@@ -828,19 +785,18 @@ class Events extends Component {
     const formattedEvents = uniqueFilteredEvents
       .map((event) => {
         if (event.event_type === "event") {
-          const eventDate = new Date(event.event_date);
+          const eventDate = moment(event.event_date);
           const formattedEventForAllYears = [];
 
           for (let year = startYear; year <= endYear; year++) {
-            const newEventDate = new Date(eventDate);
-            newEventDate.setFullYear(year);
+            const newEventDate = eventDate.clone().year(year);
             formattedEventForAllYears.push({
               title:
                 event.event_name.length > 6
                   ? event.event_name.substring(0, 6).concat("...")
                   : event.event_name,
-              toottip: event.event_name,
-              start: newEventDate.toISOString().split("T")[0],
+              tooltip: event.event_name,
+              start: newEventDate.format("YYYY-MM-DD"),
               className: "green-event",
             });
           }
@@ -854,8 +810,8 @@ class Events extends Component {
               event.event_name.length > 6
                 ? event.event_name.substring(0, 6).concat("....")
                 : event.event_name,
-            toottip: event.event_name,
-            start: event.event_date,
+            tooltip: event.event_name,
+            start: moment(event.event_date).format("YYYY-MM-DD"),
             className: "red-event",
           };
         }
@@ -866,9 +822,8 @@ class Events extends Component {
               event.event_name.length > 6
                 ? event.event_name.substring(0, 6).concat("....")
                 : event.event_name,
-            toottip: event.event_name,
-
-            start: event.event_date,
+            tooltip: event.event_name, // Fixed typo from "toottip" to "tooltip"
+            start: moment(event.event_date).format("YYYY-MM-DD"), // Use moment for date formatting
             className: "blue-event",
           };
         }
@@ -897,8 +852,8 @@ class Events extends Component {
     }
     const uniqueFilteredEvents2 = Array.from(uniqueEventsMap2.values());
 
-    //Add new changes and create new functions
-    //add this function for calculate totalworking hour or coloring according to  workinh hours
+    // Add new changes and create new functions
+    // Add this function for calculating total working hours or coloring according to working hours
     const workingHoursEvents = workingHoursReports.map((report) => {
       const hoursStr = report.todays_working_hours?.slice(0, 5);
       const hours = parseFloat(hoursStr);
@@ -907,12 +862,10 @@ class Events extends Component {
       if (hours < 4) className = "red-event";
       else if (hours >= 4 && hours < 8) className = "half-day-leave-event";
 
-      // else if (hours < 8) backgroundColor = "#87ceeb";
-
       const event = {
         id: report.id,
         title: `${hoursStr}`,
-        start: report.created_at?.split(" ")[0],
+        start: moment(report.created_at).format("YYYY-MM-DD"),
         display: "background",
         allDay: true,
         className: className,
