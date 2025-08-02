@@ -257,7 +257,7 @@ class Events extends Component {
     localStorage.setItem("eventEndDate", eventEndDate);
     this.fetchEvents();
     this.fetchWorkingHoursReports();
-    this.getMissingReportEvents();
+    this.getMissingReportEvents([], this.state.selectedYear);
     this.fetchLeaveData(localStorage.getItem("empId"), newDate, newEndDate);
   };
 
