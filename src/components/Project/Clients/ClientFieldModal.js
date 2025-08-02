@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
 import InputField from '../../common/formInputs/InputField';
 class ClientFieldModal extends Component {
+  constructor(props) {
+    super(props);
+    this.fileInputRef = React.createRef();
+  }
+
+  handleCameraClick = () => {
+    this.fileInputRef.current.click();
+  };
+
   componentDidMount() {
     if (this.props.show) {
       this.setDefaultStatus();
@@ -82,8 +91,7 @@ class ClientFieldModal extends Component {
                         className="img-thumbnail"
                         style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: '50%', border: '2px solid #fff' }}
                       />
-                      <label
-                        htmlFor="profilePicInput"
+                      <div
                         style={{
                           position: 'absolute',
                           bottom: 0,
@@ -100,17 +108,19 @@ class ClientFieldModal extends Component {
                           boxShadow: '0 1px 4px rgba(0,0,0,0.12)'
                         }}
                         title="Change photo"
+                        onClick={this.handleCameraClick}
                       >
                         <i className="fa fa-camera" style={{ fontSize: 18 }} />
-                        <InputField
-                          id="profilePicInput"
-                          type="file"
-                          name="profilePic"
-                          accept="image/*"
-                          style={{ display: 'none' }}
-                          onChange={onChange}
-                        />
-                      </label>
+                      </div>
+                      <InputField
+                        id="profilePicInput"
+                        type="file"
+                        name="profilePic"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={onChange}
+                        refInput={this.fileInputRef}
+                      />
                     </div>
                   </div>
                   {errors.profilePic && (

@@ -140,20 +140,6 @@ const AddLeaveRequestModal = ({
                       Half day
                     </label>
                   </div>
-                  {/* <CheckboxGroup
-                    options={["Half day"]}
-                    selected={halfDayCheckbox === 1 ? ["Half day"] : []}
-                    onChange={(e) => {
-                      const newEvent = {
-                        target: {
-                          name: "halfDayCheckbox",
-                          value: e.target.checked ? 1 : 0
-                        }
-                      };
-                      handleInputChangeForAddLeaves(newEvent);
-                    }}
-                    getColor={() => "transparent"}
-                  /> */}
                 </div>
               </div>
             </div>
