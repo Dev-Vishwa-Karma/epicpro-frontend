@@ -8,6 +8,7 @@ import CalendarWithTabs from './CalendarWithTabs';
 import AlertMessages from '../../common/AlertMessages';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getService } from '../../../services/getService';
+import InputField from '../../common/formInputs/InputField';
 class ViewEmployee extends Component {
     constructor(props) {
         super(props);
@@ -489,11 +490,11 @@ class ViewEmployee extends Component {
                                                         >
                                                             <i className="fe fe-plus fs-4" />
                                                         </div>
-                                                        <input 
-                                                            type="file" 
-                                                            className="d-none" 
-                                                            accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
+                                                        <InputField
+                                                            type="file"
                                                             onChange={this.handleFileChange}
+                                                            accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
+                                                            style={{ display: 'none' }} 
                                                         />
                                                     </div>
                                                 </label>

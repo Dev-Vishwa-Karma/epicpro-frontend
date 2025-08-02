@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import InputField from '../../common/formInputs/InputField';
 
 const ImageUploadModal = ({
   isOpen,
@@ -60,12 +61,12 @@ const ImageUploadModal = ({
 
             <div className="mt-3">
               <label htmlFor="image" className="form-label">Select Image</label>
-              <input
+              <InputField
                 type="file"
                 onChange={handleImageSelection}
                 className="form-control"
-                multiple
-                ref={fileInputRef}
+                multiple={true}
+                refInput={fileInputRef}
               />
             </div>
             {errors.selectedImages && (
