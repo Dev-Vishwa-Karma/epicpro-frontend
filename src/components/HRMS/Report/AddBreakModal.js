@@ -1,4 +1,6 @@
 import React from 'react';
+import EmployeeSelector from '../../common/EmployeeSelector'
+import InputField from '../../common/formInputs/InputField';
 
 const AddBreakModal = ({ 
     selectedEmployee,
@@ -9,7 +11,8 @@ const AddBreakModal = ({
     handleEmployeeChange,
     handleStatusChange,
     handleReportChange,
-    addReportByAdmin
+    addReportByAdmin,
+    errors={}
 }) => {
     return (
         <div className="modal fade" id="addReportModal" tabIndex={-1} role="dialog" aria-labelledby="addReportModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -27,41 +30,43 @@ const AddBreakModal = ({
                         <div className="row clearfix">
                             <div className="col-md-12">
                                 <div className="form-group">
-                                    <select className="form-control" value={selectedEmployee} onChange={handleEmployeeChange}>
-                                        <option value="">Select Employee</option>
-                                        {employeeData.length > 0 ? (
-                                            employeeData.map((employee, index) => (
-                                                <option key={index} value={employee.id}>
-                                                    {`${employee.first_name} ${employee.last_name}`}
-                                                </option>
-                                            ))
-                                        ) : (
-                                            <option value="">No Employees Available</option>
-                                        )}
-                                    </select>
+                                    <EmployeeSelector
+                                        allEmployeesData={employeeData}
+                                        selectedEmployee={selectedEmployee}
+                                        handleEmployeeChange={handleEmployeeChange}
+                                        showAllInOption={false}
+                                    />
+                                    {errors.selectedEmployee && (
+                                        <div className="invalid-feedback d-block">{errors.selectedEmployee}</div>
+                                    )}
                                 </div>
                             </div>
                             <div className="col-md-12">
-                                <div className="form-group">
-                                    <select className="form-control" value={selectedStatus} onChange={handleStatusChange}>
-                                        <option value="">Select Status</option>
-                                        <option value="active">Punch In</option>
-                                        <option value="completed">Punch Out</option>
-                                    </select>
-                                </div>
+                                <InputField
+                                    label="Select Status"
+                                    name="selectedStatus"
+                                    type="select"
+                                    value={selectedStatus}
+                                    onChange={handleStatusChange}
+                                    error={errors.selectedStatus}
+                                    options={[
+                                        { value: 'active', label: 'Punch In' },
+                                        { value: 'completed', label: 'Punch Out' },
+                                    ]}
+                                />
                             </div>
                             {selectedStatus === "completed" && (
                                 <div className="col-md-12">
-                                    <div className="form-group">
-                                        <textarea
-                                            className="form-control"
-                                            placeholder="Report"
-                                            value={punchOutReport || ''}
-                                            onChange={handleReportChange}
-                                            rows="30"
-                                            cols="50"
-                                        />
-                                    </div>
+                                    <InputField
+                                        label="Report"
+                                        name="punchOutReport"
+                                        type="textarea"
+                                        value={punchOutReport || ''}
+                                        onChange={handleReportChange}
+                                        error={errors.punchOutReport}
+                                        placeholder="Report"
+                                        rows={30}
+                                    />
                                 </div>
                             )}
                         </div>

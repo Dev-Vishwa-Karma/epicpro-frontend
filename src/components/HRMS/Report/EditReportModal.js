@@ -1,6 +1,7 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
 import TextEditor from '../../common/TextEditor';
+import InputField from '../../common/formInputs/InputField'
 
 const EditReportModal = ({ 
     selectedModalReport,
@@ -70,19 +71,15 @@ const EditReportModal = ({
 
                                     {/* Break duration */}
                                     <div className="col-md-6">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="break_duration_in_minutes">Break duration in minutes</label>
-                                            <input
-                                                readOnly
-                                                disabled
-                                                type="number"
-                                                value={break_duration_in_minutes || 0}
-                                                onChange={(e) => handleChange('break_duration_in_minutes', e.target.value)}
-                                            />
-                                            {error?.break_duration_in_minutes && (
-                                                <div className="invalid-feedback">{error.break_duration_in_minutes}</div>
-                                            )}
-                                        </div>
+                                        <InputField
+                                            label="Break duration in minutes"
+                                            name="break_duration_in_minutes"
+                                            type="number"
+                                            value={break_duration_in_minutes || 0}
+                                            onChange={(e) => handleChange('break_duration_in_minutes', e.target.value)}
+                                            error={error?.break_duration_in_minutes}
+                                            disabled={true}
+                                        />
                                     </div>
 
                                     {/* End time */}
@@ -109,50 +106,39 @@ const EditReportModal = ({
 
                                     {/* Today's working hours */}
                                     <div className="col-md-6">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="todays_working_hours">Today's working hours</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                name="todays_working_hours"
-                                                id="todays_working_hours"
-                                                placeholder="Today's working hours"
-                                                value={todays_working_hours?.slice(0, 5) || ''}
-                                                readOnly
-                                            />
-                                        </div>
+                                        <InputField
+                                            label="Today's working hours"
+                                            name="todays_working_hours"
+                                            type="text"
+                                            value={todays_working_hours?.slice(0, 5) || ''}
+                                            placeholder="Today's working hours"
+                                            disabled={true}
+                                        />
                                     </div>
 
                                     {/* Today's total hours */}
                                     <div className="col-md-6">
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="todays_total_hours">Today's total hours</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                name="todays_total_hours"
-                                                id="todays_total_hours"
-                                                placeholder="Today's total hours"
-                                                value={todays_total_hours?.slice(0, 5) || ''}
-                                                readOnly
-                                            />
-                                        </div>
+                                        <InputField
+                                            label="Today's total hours"
+                                            name="todays_total_hours"
+                                            type="text"
+                                            value={todays_total_hours?.slice(0, 5) || ''}
+                                            placeholder="Today's total hours"
+                                            disabled={true}
+                                        />
                                     </div>
 
                                     <div className="col-md-6">
                                         {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                                            <div className="form-group">
-                                                <label className="form-label"><strong>Note</strong></label>
-                                                <textarea
-                                                    className="form-control"
-                                                    rows="3"
-                                                    placeholder="Add note for this update..."
-                                                    name="note"
-                                                    id="note"
-                                                    value={editNotes || ''}
-                                                    onChange={handleNotesChange}
-                                                />
-                                            </div>
+                                            <InputField
+                                                label={<strong>Note</strong>}
+                                                name="note"
+                                                type="textarea"
+                                                value={editNotes || ''}
+                                                onChange={handleNotesChange}
+                                                placeholder="Add note for this update..."
+                                                rows={3}
+                                            />
                                         )}
                                     </div>
                                 </div>
