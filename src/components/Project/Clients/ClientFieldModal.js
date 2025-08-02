@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import InputField from '../../common/formInputs/InputField';
 class ClientFieldModal extends Component {
   componentDidMount() {
     if (this.props.show) {
@@ -102,7 +102,7 @@ class ClientFieldModal extends Component {
                         title="Change photo"
                       >
                         <i className="fa fa-camera" style={{ fontSize: 18 }} />
-                        <input
+                        <InputField
                           id="profilePicInput"
                           type="file"
                           name="profilePic"
