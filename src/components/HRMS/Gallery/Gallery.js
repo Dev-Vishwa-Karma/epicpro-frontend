@@ -76,7 +76,7 @@ class Gallery extends Component {
     };
 
     componentDidMount() {
-        const {role, id} = window.user;
+        const {role} = window.user;
         if (window.user?.id) {
             this.setState({
                 logged_in_employee_id: window.user.id,

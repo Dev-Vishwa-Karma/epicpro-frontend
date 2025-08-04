@@ -401,7 +401,7 @@ class Activities extends Component {
   };
 
   render() {
-    const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess, successMessage, showError, errorMessage, col, colbutton, errors, breakReasonErrors } = this.state;
+    const { activities, employeeData, selectedStatus, selectedEmployee, breakReason, loading, showSuccess, successMessage, showError, errorMessage, col, colbutton, breakReasonErrors } = this.state;
     return (
       <>
         <AlertMessages

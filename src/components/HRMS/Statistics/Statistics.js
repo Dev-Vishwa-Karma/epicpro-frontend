@@ -5,6 +5,7 @@ import { getService } from "../../../services/getService";
 import YearSelector from "../../common/YearSelector";
 import MonthSelector from "../../common/MonthSelector";
 import AttendanceTableSkeleton from "../../common/skeletons/AttendanceTableSkeleton";
+import moment from 'moment';
 
 class Statistics extends Component {
   constructor(props) {
@@ -59,10 +60,10 @@ class Statistics extends Component {
 
   getReports = () => {
     const { selectedYear, selectedMonth } = this.state;
-    const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
-    const lastDay = new Date(selectedYear, selectedMonth, 0);
-    const fromDate = firstDay.toISOString().split('T')[0]; // Format as "YYYY-MM-DD"
-    const toDate = lastDay.toISOString().split('T')[0];
+    const firstDay = moment({ year: selectedYear, month: selectedMonth - 1 }).startOf('month');
+    const lastDay = moment({ year: selectedYear, month: selectedMonth - 1 }).endOf('month');
+    const fromDate = firstDay.format('YYYY-MM-DD');
+    const toDate = lastDay.format('YYYY-MM-DD');
 
     getService.getCall('reports.php', {
       action: 'view',

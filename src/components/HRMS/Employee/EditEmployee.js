@@ -6,6 +6,7 @@ import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
 import InputField from '../../common/formInputs/InputField';
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
+import CheckFileAvailability from './CheckFileAvailability';
 
 class EditEmployee extends Component {
     constructor(props) {
@@ -576,7 +577,7 @@ class EditEmployee extends Component {
     };
     render() {
         const { fixNavbar } = this.props;
-        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status, showSuccess,successMessage,showError, errorMessage, errors } = this.state;
+        const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status, showSuccess,successMessage,showError, errorMessage } = this.state;
         
 
         // Frontend and Backend Skill Options
@@ -712,23 +713,11 @@ class EditEmployee extends Component {
                                                             <div className="invalid-feedback d-block">{this.state.errors.photo}</div>
                                                         )}
 
-                                                        {photo ? (
-                                                            <div className="d-inline-block">
-                                                                <a
-                                                                    href={
-                                                                        photoUrl ? photoUrl : `${process.env.REACT_APP_API_URL}/${photo.name || photo}`
-                                                                    }
-                                                                    className="text-primary small"
-                                                                    style={{ fontWeight: "500", display: "inline-block" }}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                >
-                                                                    {photo instanceof File ? this.state.photo.name : this.state.photo.split('/').pop().replace(/^\w+-/, '')}
-                                                                </a>
-                                                            </div>
-                                                        ) : (
-                                                            <small>Profile not uploaded</small>
-                                                        )}
+                                                        <CheckFileAvailability
+                                                            file={photo} 
+                                                            fileUrl={photoUrl} 
+                                                            label="Photo" 
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div className="col-sm-6 col-md-4">
@@ -1009,29 +998,11 @@ class EditEmployee extends Component {
                                                         name="aadharCardFile"
                                                         onChange={this.handleFileChange}
                                                     />
-                                                    {aadharCardFile && aadharCardFile !== "" ? (
-                                                    <div className="d-inline-block">
-                                                        <a
-                                                        href={
-                                                            aadharCardFileUrl
-                                                            ? aadharCardFileUrl
-                                                            : `${process.env.REACT_APP_API_URL}/${aadharCardFile.name || aadharCardFile}`
-                                                        }
-                                                        className="text-primary small"
-                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        >
-                                                        {aadharCardFile instanceof File
-                                                            ? aadharCardFile.name
-                                                            : aadharCardFile.split("/").pop().replace(/^\w+-/, "")}
-                                                        </a>
-                                                    </div>
-                                                    ) : (
-                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
-                                                        Aadhaar card not uploaded
-                                                    </small>
-                                                    )}
+                                                    <CheckFileAvailability
+                                                        file={aadharCardFile} 
+                                                        fileUrl={aadharCardFileUrl} 
+                                                        label="Aadhaar card" 
+                                                    />
                                                 </div>
 
                                                 {/* Driving License Section */}
@@ -1050,29 +1021,11 @@ class EditEmployee extends Component {
                                                         onChange={this.handleFileChange}
                                                         placeholder="Driving License"
                                                     />
-                                                    {drivingLicenseFile ? (
-                                                    <div className="d-inline-block">
-                                                        <a
-                                                        href={
-                                                            drivingLicenseFileUrl
-                                                            ? drivingLicenseFileUrl
-                                                            : `${process.env.REACT_APP_API_URL}/${drivingLicenseFile.name || drivingLicenseFile}`
-                                                        }
-                                                        className="text-primary small"
-                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        >
-                                                        {drivingLicenseFile instanceof File
-                                                            ? drivingLicenseFile.name
-                                                            : drivingLicenseFile.split("/").pop().replace(/^\w+-/, "")}
-                                                        </a>
-                                                    </div>
-                                                    ) : (
-                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
-                                                        Driving license not uploaded
-                                                    </small>
-                                                    )}
+                                                    <CheckFileAvailability
+                                                        file={drivingLicenseFile} 
+                                                        fileUrl={drivingLicenseFileUrl} 
+                                                        label="Driving license" 
+                                                    />
                                                 </div>
 
                                                 {/* Pan Card Section */}
@@ -1091,29 +1044,11 @@ class EditEmployee extends Component {
                                                         onChange={this.handleFileChange}
                                                         placeholder="Pan Card"
                                                     />
-                                                    {panCardFile ? (
-                                                    <div className="d-inline-block">
-                                                        <a
-                                                        href={
-                                                            panCardFileUrl
-                                                            ? panCardFileUrl
-                                                            : `${process.env.REACT_APP_API_URL}/${panCardFile.name || panCardFile}`
-                                                        }
-                                                        className="text-primary small"
-                                                        style={{ fontWeight: "500", display: "inline-block" }}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        >
-                                                        {panCardFile instanceof File
-                                                            ? panCardFile.name
-                                                            : panCardFile.split("/").pop().replace(/^\w+-/, "")}
-                                                        </a>
-                                                    </div>
-                                                    ) : (
-                                                    <small className="text-primary small" style={{ fontWeight: "500" }}>
-                                                        Pan card not uploaded
-                                                    </small>
-                                                    )}
+                                                    <CheckFileAvailability
+                                                        file={panCardFile} 
+                                                        fileUrl={panCardFileUrl} 
+                                                        label="Pan card" 
+                                                    />
                                                 </div>
                                                 </div>
 
@@ -1229,23 +1164,11 @@ class EditEmployee extends Component {
                                                             <div className="invalid-feedback d-block">{this.state.errors.resume}</div>
                                                         )}
                                                         {/* Resume Preview Link */}
-                                                        {resume ? (
-                                                            <div className="d-inline-block">
-                                                                <a
-                                                                    href={
-                                                                        resumeUrl ? resumeUrl : `${process.env.REACT_APP_API_URL}/${resume.name || resume}`
-                                                                    }
-                                                                    className="text-primary small"
-                                                                    style={{ fontWeight: "500", display: "inline-block" }}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                >
-                                                                    {resume instanceof File ? resume.name : resume.split('/').pop().replace(/^\w+-/, '')}
-                                                                </a>
-                                                            </div>
-                                                        ) : (
-                                                            <small className="text-primary small" style={{ fontWeight: "500" }}>Resume not uploaded</small>
-                                                        )}
+                                                          <CheckFileAvailability
+                                                            file={resume} 
+                                                            fileUrl={resumeUrl} 
+                                                            label="Resume" 
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>

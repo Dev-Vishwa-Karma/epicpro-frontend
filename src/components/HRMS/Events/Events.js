@@ -735,12 +735,6 @@ class Events extends Component {
 
     const startYear = currentYear - 1;
     const endYear = currentYear + 10;
-
-    // Generate an array of years
-    const years = Array.from(
-      { length: endYear - startYear + 1 },
-      (_, i) => startYear + i
-    );
     const filteredEvents = events
       ?.map((event) => {
         let eventDate = new Date(event.event_date);
