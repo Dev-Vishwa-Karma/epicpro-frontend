@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import BlankState from '../../common/BlankState';
+import Avatar from '../../common/Avatar';
 
 class ActivitiesTime extends Component {
     constructor(props) {
@@ -282,48 +283,20 @@ class ActivitiesTime extends Component {
                         {/* Out Time Entry */}
                         {activity.type === 'Punch_out' && (
                             <div className="timeline_item ">
-                        {profilePic ? (
-                            <img 
-                                src={profilePic} 
-                                className="avatar avatar-blue add-space tl_avatar" 
-                                alt={`${activity.first_name} ${activity.last_name}`}
-                                data-toggle="tooltip" 
-                                data-placement="top" 
-                                title={`${activity.first_name} ${activity.last_name}`}
-                                style={{
-                                width: '35px', 
-                                height: '35px', 
-                                borderRadius: '50%', 
-                                objectFit: 'cover',
-                                border: '2px solid #f5f5f5'
-                                }}
-                                onError={e => {
-                                      e.target.src = '/assets/images/sm/avatar2.jpg';
-                                  }}
-                            />
-                            ) : (
-                            <span
-                                className="avatar avatar-blue add-space tl_avatar"
-                                data-toggle="tooltip"
-                                data-placement="top"
-                                title={`${activity.first_name} ${activity.last_name}`}
-                                style={{
-                                width: '35px',
-                                height: '35px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '50%',
-                                background: '#C5C4C8',
-                                color: '#fff',
-                                fontWeight: '600',
-                                border: '2px solid #f5f5f5',
-                                textTransform: 'uppercase',
-                                }}
-                            >
-                                {`${activity.first_name?.charAt(0).toUpperCase() || ''}${activity.last_name?.charAt(0).toUpperCase() || ''}`}
-                            </span>
-                            )}
+                            <Avatar
+                                    profile={profilePic}
+                                    first_name={activity.first_name}
+                                    last_name={activity.last_name}
+                                    size={35}
+                                    className="avatar avatar-blue add-space tl_avatar"
+                                    style={{
+                                        width: '35px', 
+                                        height: '35px', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover',
+                                        border: '2px solid #f5f5f5'
+                                    }}
+                                />
                             <span>
                                 <a href="#" style={{fontWeight:"800"}}>{activity.first_name} {activity.last_name}</a>
                                 <span className="mx-2">|</span>

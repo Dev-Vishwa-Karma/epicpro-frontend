@@ -1,6 +1,7 @@
 import React from 'react';
 import NoDataRow from '../../common/NoDataRow';  // Ensure the correct path to NoDataRow component
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
+import Avatar from '../../common/Avatar';
 
 const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickForEmployeeLeave, openDeleteLeaveModal }) => {
   return (
@@ -28,41 +29,14 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
                 currentEmployeeLeaves.filter(l => l).map((leave, index) => (
                   <tr key={index}>
                     <td className="width45">
-                      {leave.profile ? (
-                        <img
-                          src={`${process.env.REACT_APP_API_URL}/${leave.profile}`}
-                          className="avatar avatar-blue add-space"
-                          alt={`${leave.first_name} ${leave.last_name}`}
-                          data-toggle="tooltip"
-                          data-placement="top"
-                          title={`${leave.first_name} ${leave.last_name}`}
-                          style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                          }}
-                          onError={e => {
-                            e.target.src = '/assets/images/sm/avatar2.jpg';
-                          }}
-                        />
-                      ) : (
-                        <span
-                          className="avatar avatar-blue add-space"
-                          data-toggle="tooltip"
-                          data-placement="top"
-                          title={`${leave.first_name} ${leave.last_name}`}
-                          style={{
-                            width: '40px',
-                            height: '40px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {leave.first_name.charAt(0).toUpperCase()}{leave.last_name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
+                      <Avatar
+                        profile={leave.profile}
+                        first_name={leave.first_name}
+                        last_name={leave.last_name}
+                        size={40}
+                        className="avatar avatar-blue add-space me-2"
+                        onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
+                      />
                     </td>
                     <td>
                       <div className="font-15">

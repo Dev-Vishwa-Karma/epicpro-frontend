@@ -2,6 +2,7 @@
 import React from 'react';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
 import NoDataRow from '../../common/NoDataRow';
+import Avatar from '../../common/Avatar';
 
 const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) => {
   return (
@@ -29,41 +30,20 @@ const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) 
               currentUsers.map((user, index) => (
                 <tr key={index}>
                   <td className="width45">
-                    {user.profile ? (
-                      <img 
-                        src={`${process.env.REACT_APP_API_URL}/${user.profile}`} 
-                        className="avatar avatar-blue add-space" 
-                        alt={`${user.first_name} ${user.last_name}`}
-                        data-toggle="tooltip" 
-                        data-placement="top" 
-                        title={`${user.first_name} ${user.last_name}`}
-                        style={{
-                          width: '40px', 
-                          height: '40px', 
-                          borderRadius: '50%', 
-                          objectFit: 'cover'
-                        }}
-                        onError={e => {
-                          e.target.src = '/assets/images/sm/avatar2.jpg';
-                        }}
-                      />
-                    ) : (
-                      <span
-                        className="avatar avatar-blue add-space"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title={`${user.first_name} ${user.last_name}`}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
+                    <Avatar
+                      profile={user.profile}
+                      first_name={user.first_name}
+                      last_name={user.last_name}
+                      size={45}
+                      className="avatar avatar-blue add-space"
+                      style={{
+                        objectFit: 'cover',
+                      }}
+                      onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      title={`${user.first_name} ${user.last_name}`}
+                    />
                   </td>
                   <td>
                     <h6 className="mb-0">{`${user.first_name} ${user.last_name}`}</h6>

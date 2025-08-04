@@ -1,4 +1,5 @@
 import React from "react";
+import Avatar from "../../common/Avatar";
 
 const ProjectCard = ({ 
   project, 
@@ -112,29 +113,17 @@ const ProjectCard = ({
             <div className="col-8 py-1">
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {project.team_members.map((member, idx) => (
-                  <img
-                    key={member.id || member.employee_id}
-                    src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
-                    alt={`${member.first_name} ${member.last_name}`}
-                    title={`${member.first_name} ${member.last_name}`}
-                    style={{
-                      width: 35,
-                      height: 35,
-                      borderRadius: '50%',
-                      border: '2px solid #fff',
-                      objectFit: 'cover',
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
-                      marginLeft: idx === 0 ? 0 : -14,
-                      background: '#fff',
-                      zIndex: 10 + idx,
-                      transition: 'z-index 0.2s, transform 0.2s',
-                      cursor: 'pointer',
-                    }}
-                    onError={e => {
-                      e.target.src = '/assets/images/sm/avatar2.jpg';
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
+                <Avatar
+                    id = {idx}
+                    profile={member.profile}
+                    first_name={member.first_name}
+                    last_name={member.last_name}
+                    size={40}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                    className="avatar-img"
+                    style={{ marginLeft: idx === 0 ? 0 : -14 }}
+                    onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
                   />
                 ))}
               </div>

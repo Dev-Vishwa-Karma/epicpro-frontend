@@ -1,5 +1,6 @@
 import React from 'react';
 import NoDataRow from '../../common/NoDataRow';
+import Avatar from '../../common/Avatar';
 
 const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userRole }) => {
     return (
@@ -36,34 +37,19 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
                             </td>
                             {(userRole === "admin" || userRole === "super_admin") && (
                                 <td className="d-flex">
-                                {notification.profile ? (
-                                    <img
-                                        src={`${process.env.REACT_APP_API_URL}/${notification.profile}`}
-                                        className="avatar avatar-blue add-space me-2"
-                                        alt={notification.full_name || 'User'}
-                                        title={notification.full_name || 'User'}
-                                        onError={e => {
-                                            e.target.src = '/assets/images/sm/avatar2.jpg';
-                                        }}
+                                    <Avatar
+                                    profile={notification.profile}
+                                    first_name={notification.full_name ? notification.full_name.split(' ')[0] : ''}
+                                    last_name={notification.full_name ? notification.full_name.split(' ')[1] : ''}
+                                    size={35}
+                                    className="avatar avatar-blue add-space me-2"
+                                    style={{
+                                        objectFit: 'cover',
+                                    }}
+                                    onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
+                                    title={notification.full_name || 'User'}
                                     />
-                                ) : (
-                                    <span
-                                        className="avatar avatar-blue add-space me-2"
-                                        title={notification.full_name || 'User'}
-                                        style={{
-                                            width: '35px',
-                                            height: '35px',
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                        }}
-                                    >
-                                        {notification.full_name ? 
-                                            notification.full_name.split(' ').map(name => name.charAt(0).toUpperCase()).join('') : 
-                                            'U'
-                                        }
-                                    </span>
-                                )}
+
                             </td>
                             )}
                             <td>
