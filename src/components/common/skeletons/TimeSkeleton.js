@@ -2,81 +2,26 @@ import React from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const TimeSkeleton = ({ width = "20px", height = "20px" }) => {
+const TimeSkeleton = () => {
     return (
-        <span style={{ display: "inline-flex", gap: "1px", alignItems: "center", verticalAlign: "middle" }}>
+        <span style={{ display: "inline-flex", gap: "2px", alignItems: "center", verticalAlign: "middle" }}>
             <Skeleton 
-                width="3px" 
-                height={height} 
+                width={10}
                 style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
                     backgroundColor: "#7B7493",
-                }} 
+                }}
             />
+            <div style={{ width: "3px" }}>:</div>
             <Skeleton 
-                width="3px" 
-                height={height} 
+                width={10} 
                 style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
                     backgroundColor: "#7B7493",
-                }} 
+                }}
             />
-            <div style={{ width: "1px" }}></div>
+            <div style={{ width: "3px" }}>:</div>
             <Skeleton 
-                width="3px" 
-                height={height} 
-                style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
-                    backgroundColor: "#7B7493",
-                }} 
-            />
-            <Skeleton 
-                width="3px" 
-                height={height} 
-                style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
-                    backgroundColor: "#7B7493",
-                }} 
-            />
-            <div style={{ width: "1px" }}></div>
-            <Skeleton 
-                width="3px" 
-                height={height} 
-                style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
-                    backgroundColor: "#7B7493",
-                }} 
-            />
-            <Skeleton 
-                width="3px" 
-                height={height} 
-                style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
-                    backgroundColor: "#7B7493",
-                }} 
-            />
-            <div style={{ width: "1px" }}></div>
-            <Skeleton 
-                width="3px" 
-                height={height} 
-                style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
-                    backgroundColor: "#7B7493",
-                }} 
-            />
-            <Skeleton 
-                width="3px" 
-                height={height} 
-                style={{ 
-                    display: "inline-block",
-                    borderRadius: "1px",
+                width={10} 
+                  style={{ 
                     backgroundColor: "#7B7493",
                 }} 
             />
