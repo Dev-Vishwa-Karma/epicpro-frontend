@@ -85,6 +85,11 @@ class Header extends Component {
       });
      
     }
+    window.addEventListener('refreshActivities', this.handleApplyFilter);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('refreshActivities', this.handleApplyFilter);
   }
 
 
@@ -372,6 +377,9 @@ class Header extends Component {
       if (data.status === "success") {
         const currentTime = new Date();
 
+        // trigger activities refresh
+        window.dispatchEvent(new CustomEvent('refreshActivities'));
+
         this.setState(
           {
             punchInTime: currentTime,
@@ -426,6 +434,9 @@ class Header extends Component {
       minute: "2-digit",
       hour12: true,
     });
+
+    // trigger activities refresh
+    window.dispatchEvent(new CustomEvent('refreshActivities'));
 
     this.setState({ end_time: endTimeFormatted });
 
@@ -596,6 +607,10 @@ class Header extends Component {
             detail: { report: newReport },
           })
         );
+
+        // Add this line to trigger activities refresh
+        window.dispatchEvent(new CustomEvent('refreshActivities'));
+
         this.closeModal();
       
         this.setState({
@@ -652,6 +667,7 @@ class Header extends Component {
           showError: false,
           showSuccess: true,
         });
+        window.dispatchEvent(new CustomEvent('refreshActivities'));
         setTimeout(this.dismissMessages, 3000);
       } else {
         this.setState({
@@ -733,6 +749,7 @@ class Header extends Component {
                     style={{width: "190px", height: "35px", fontSize: "14px"}}
                   >
                     {isPunchedIn ? `Punch Out : ${elapsedFormatted}` : "Punch In"}
+                    
                   </button>
                 )}
                 <div className="notification d-flex">

@@ -90,8 +90,13 @@ class Activities extends Component {
 
     // Fetch today's activities by default
     this.handleApplyFilter();
+    window.addEventListener('refreshActivities', this.handleApplyFilter);
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('refreshActivities', this.handleApplyFilter);
+  }
+  
   componentDidUpdate(prevProps) {
     if (prevProps.selectedEmployeeId !== this.props.selectedEmployeeId) {
       if (this.props.selectedEmployeeId) {
