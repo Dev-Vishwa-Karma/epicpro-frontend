@@ -90,6 +90,7 @@ class Header extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('refreshActivities', this.handleApplyFilter);
+    clearInterval(this.state.timer);
   }
 
 
@@ -102,10 +103,6 @@ class Header extends Component {
             this.fetchNotifications(); 
         });
     }, 40000);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.state.timer);
   }
 
   checktodayDueDate = () => {
@@ -712,8 +709,7 @@ class Header extends Component {
       is_task_due_today,
       showDueAlert,
       dueTasks,
-      disableButton,
-      hasMore
+      disableButton
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
 

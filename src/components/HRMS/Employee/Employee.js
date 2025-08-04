@@ -793,7 +793,7 @@ class Employee extends Component {
 	render() {
 		const { fixNavbar, /* statisticsOpen, statisticsClose */ } = this.props;
 			
-		const { activeTab, showAddLeaveRequestModal, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message, selectedEmployeeLeave,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee, showSuccess, successMessage, showError, errorMessage  } = this.state;
+		const { activeTab, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee, showSuccess, successMessage, showError, errorMessage  } = this.state;
 
 		// Handle empty employee data safely
 		const employeeList = (employeeData || []).length > 0

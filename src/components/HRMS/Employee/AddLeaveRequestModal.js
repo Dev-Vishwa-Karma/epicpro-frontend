@@ -1,5 +1,4 @@
 import React from 'react';
-import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
 import InputField from '../../common/formInputs/InputField';
 
 const AddLeaveRequestModal = ({

@@ -873,8 +873,7 @@ class Report extends Component {
             showSuccess, 
             successMessage, 
             showError, 
-            errorMessage,
-            showDeleteModal
+            errorMessage
         } = this.state;
 
         // Handle empty employee data safely
