@@ -8,6 +8,7 @@ import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
+import Avatar from '../../common/Avatar';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -683,43 +684,22 @@ class TodoList extends Component {
                                                                 </td>
                                                                 {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                                     <td>
-                                                                        {todo.profile && !todo.imageError ? (
-                                                                            <img
-                                                                                src={`${process.env.REACT_APP_API_URL}/${todo.profile}`}
-                                                                                className="avatar avatar-blue add-space"
-                                                                                alt={`${todo.first_name || ''} ${todo.last_name || ''}`}
-                                                                                data-toggle="tooltip"
-                                                                                data-placement="top"
-                                                                                title={`${todo.first_name || ''} ${todo.last_name || ''}`}
-                                                                                style={{
-                                                                                width: '40px',
-                                                                                height: '40px',
-                                                                                borderRadius: '50%',
-                                                                                objectFit: 'cover',
-                                                                                }}
-                                                                                onError={e => {
-																					e.target.src = '/assets/images/sm/avatar2.jpg';
-																				}}
-                                                                            />
-                                                                        ) : (
-                                                                            <span
-                                                                                    className="avatar avatar-blue add-space"
-                                                                                    data-toggle="tooltip"
-                                                                                    data-placement="top"
-                                                                                    title={`${todo.first_name || ''} ${todo.last_name || ''}`}
-                                                                                    style={{
-                                                                                    width: '40px',
-                                                                                    height: '40px',
-                                                                                    display: 'inline-flex',
-                                                                                    alignItems: 'center',
-                                                                                    justifyContent: 'center',
-                                                                                    borderRadius: '50%',
-                                                                                }}
-                                                                            >
-                                                                                {(todo.first_name ? todo.first_name.charAt(0) : '').toUpperCase()}
-                                                                                {(todo.last_name ? todo.last_name.charAt(0) : '').toUpperCase()}
-                                                                            </span>
-                                                                            )}
+                                                               <Avatar
+                                                                    profile={todo.profile}
+                                                                    first_name={todo.first_name}
+                                                                    last_name={todo.last_name}
+                                                                    size={40}
+                                                                    className="avatar avatar-blue add-space"
+                                                                    style={{
+                                                                        objectFit: 'cover',
+                                                                    }}
+                                                                    onError={(e) => {
+                                                                        e.target.src = '/assets/images/sm/avatar2.jpg';
+                                                                    }}
+                                                                    data-toggle="tooltip"
+                                                                    data-placement="top"
+                                                                    title={`${todo.first_name || ''} ${todo.last_name || ''}`}
+                                                                />
                                                                     </td>
                                                                     )}
                                                                         {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (

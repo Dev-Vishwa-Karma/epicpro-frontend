@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styles from './client.module.css';
+import Avatar from "../../common/Avatar";
+
 const ClientInfoModal = ({ client, onClose }) => {
   if (!client) return null;
   //const isActive = client.client_status === "1";
@@ -85,25 +87,30 @@ const ClientInfoModal = ({ client, onClose }) => {
                         {/* Team member profiles */}
                         <div className={`${styles['Team-member']}`}>
                             <div className={`${styles['Team-member-profile']}`}>
-                            {project.team_member_details && project.team_member_details.length > 0 ? (
-                              project.team_member_details.map((member, idx) => (
-                                <img
-                                  key={idx}
-                                  src={member.profile ? `${process.env.REACT_APP_API_URL}/${member.profile}` : "/assets/images/sm/avatar2.jpg"}
-                                  alt={member.full_name}
-                                  className={`${styles['avatar-img']}`}
-                                  style={{marginLeft: idx === 0 ? 0 : -14,}}
-                                  title={member.full_name}
-                                  onError={e => {
+                              {project.team_member_details && project.team_member_details.length > 0 ? (
+                                project.team_member_details.map((member, idx) => (
+                                  <Avatar
+                                    key={idx}
+                                    profile={member.profile}
+                                    first_name={member.full_name ? member.full_name.split(' ')[0] : ''}
+                                    last_name={member.full_name ? member.full_name.split(' ')[1] : ''}
+                                    size={35}
+                                    className={styles['avatar-img']}
+                                    style={{
+                                      marginLeft: idx === 0 ? 0 : -14,
+                                    }}
+                                    title={member.full_name}
+                                    onError={(e) => {
                                       e.target.src = '/assets/images/sm/avatar2.jpg';
-                                  }}
-                                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
-                                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
-                                />
-                              ))
-                            ) : (
-                              <span className="text-muted" style={{ marginLeft: 8 }}>No team members</span>
-                            )}
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
+                                  />
+                                ))
+                              ) : (
+                                <span className="text-muted" style={{ marginLeft: 8 }}>No team members</span>
+                              )}
+
                           </div>
                         </div>
                       </div>

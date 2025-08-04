@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
+import Avatar from '../../common/Avatar';
 
 const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, openDeleteModal, message }) => {
     return (
@@ -33,31 +34,14 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                                             {(index + 1).toString().padStart(2, '0')}
                                         </td>
                                         <td className="d-flex">
-                                            {employee.profile ? (
-                                                <img
-                                                    src={`${process.env.REACT_APP_API_URL}/${employee.profile}`}
-                                                    className="avatar avatar-blue add-space me-2"
-                                                    alt={`${employee.first_name} ${employee.last_name}`}
-                                                    title={`${employee.first_name} ${employee.last_name}`}
-                                                    onError={(e) => {
-                                                        e.target.src = '/assets/images/sm/avatar2.jpg';
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span
-                                                    className="avatar avatar-blue add-space me-2"
-                                                    title={`${employee.first_name} ${employee.last_name}`}
-                                                    style={{
-                                                        width: '35px',
-                                                        height: '35px',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                    }}
-                                                >
-                                                    {`${employee.first_name.charAt(0).toUpperCase()}${employee.last_name.charAt(0).toUpperCase()}`}
-                                                </span>
-                                            )}
+                                         <Avatar
+                                            profile={employee.profile}
+                                            first_name={employee.first_name}
+                                            last_name={employee.last_name}
+                                            size={40}
+                                            className="avatar avatar-blue add-space me-2"
+                                            onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
+                                            />
                                             <div className="ml-3">
                                                 <h6 className="mb-0">
                                                     {`${employee.first_name} ${employee.last_name}`}
