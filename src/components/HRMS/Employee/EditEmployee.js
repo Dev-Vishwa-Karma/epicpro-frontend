@@ -57,7 +57,7 @@ class EditEmployee extends Component {
             resumeUrl: '',
             visibilityPriority: 0,
             statisticsVisibilityStatus:0,
-            status: true,
+            status: "",
             selectedEmployee: '',
             successMessage: "",
             showSuccess: false,
@@ -163,8 +163,8 @@ class EditEmployee extends Component {
                     skillsFrontend: uniqueFrontendSkills,
                     skillsBackend: uniqueBackendSkills,
                     visibilityPriority: employee.visibility_priority || 0,
-                    statisticsVisibilityStatus: employee.statistics_visibility_status,
-                    status: employee.status,
+                    statisticsVisibilityStatus: String(employee.statistics_visibility_status || "0"),
+                    status: String(employee.status || "0"),
                 });
 
             } else {
@@ -1193,7 +1193,7 @@ class EditEmployee extends Component {
                                                         label="Statistics Visibility Status"
                                                         name="statisticsVisibilityStatus"
                                                         type="select"
-                                                        value={statisticsVisibilityStatus}
+                                                        value={statisticsVisibilityStatus || "0"}
                                                         onChange={this.handleChange}
                                                         options={[
                                                             { value: "1", label: "Active" },
@@ -1207,7 +1207,7 @@ class EditEmployee extends Component {
                                                         label="Status"
                                                         name="status"
                                                         type="select"
-                                                        value={status}
+                                                        value={status || "0"}
                                                         onChange={this.handleChange}
                                                         options={[
                                                             { value: "1", label: "Active" },

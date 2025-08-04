@@ -311,7 +311,8 @@ class AddEmployee extends Component {
       { name: 'emergencyContact1', value: emergencyContact1, type: 'mobile', messageName:'Mobile Number' },
       { name: 'emergencyContact2', value: emergencyContact2, type: 'mobile', messageName:'Mobile Number' },
       { name: 'emergencyContact3', value: emergencyContact3, type: 'mobile', messageName: 'Mobile Number' },
-      { name: 'joiningDate', value: joiningDate, type: 'date', required: true, messageName:'Joining Date'},
+      { name: 'joiningDate', value: joiningDate, type: 'date', required: true, messageName: 'Joining Date' },
+      { name: 'password', value: password, type: 'password', required:true, messageName:'Password' },
       { name: 'bankAccountNo', value: bankAccountNo, messageName: 'Account Number', maxLength: 20 },
       { name: 'salaryAmount', value: this.state.salaryDetails[0].salaryAmount, messageName: 'Salary Amount', maxLength: 8 },
       { name: 'visibilityPriority', value: visibilityPriority, type: 'visibilityPriority', messageName:'visibility Priority' }
@@ -717,6 +718,7 @@ class AddEmployee extends Component {
                             value={password}
                             onChange={this.handleChange}
                             placeholder="Password"
+                            error={this.state.errors.password}
                           />
                         </div>
                         <div className="col-md-12">

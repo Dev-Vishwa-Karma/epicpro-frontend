@@ -12,6 +12,7 @@ import { getService } from "../../services/getService";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { validateFields } from "../common/validations";
 import NotificationSkeleton from "../common/skeletons/NotificationSkeleton";
+import TimeSkeleton from "../common/skeletons/TimeSkeleton";
 
 class Header extends Component {
   constructor(props) {
@@ -51,6 +52,7 @@ class Header extends Component {
       page: 1,
       hasMore: true,
       limit: 5,
+      isTimeLoading: false,
     };
   }
 
@@ -141,9 +143,15 @@ class Header extends Component {
       this.setState({
         elapsedTime: 0,
         elapsedFormatted: "00:00:00",
+        isTimeLoading: false,
       });
       return;
     }
+
+    // Set loading state when starting timer
+    this.setState({
+      isTimeLoading: true,
+    });
 
     const timer = setInterval(() => {
       const currentTime = new Date();
@@ -159,6 +167,7 @@ class Header extends Component {
       this.setState({
         elapsedTime: elapsed,
         elapsedFormatted: elapsedFormatted,
+        isTimeLoading: false,
       });
     }, 1000);
 
@@ -206,6 +215,7 @@ class Header extends Component {
   }
 
   getPunchInStatus = async() => {
+    this.setState({ isTimeLoading: true });
     getService.getCall('activities.php', {
       action: 'get_punch_status',
       user_id:this.state.userId
@@ -225,6 +235,7 @@ class Header extends Component {
         this.startTimerInterval(inTime);
       } else {
         this.props.punchInAction(false);
+        this.setState({ isTimeLoading: false });
       }
     })
       .catch((error) => {
@@ -365,6 +376,7 @@ class Header extends Component {
   };
 
   handlePunchIn = () => {
+    this.setState({ isTimeLoading: true });
     const formData = new FormData();
     formData.append("employee_id", this.state.userId);
     formData.append("activity_type", "Punch");
@@ -400,6 +412,7 @@ class Header extends Component {
           errorMessage: data.message,
           showError: true,
           showSuccess: false,
+          isTimeLoading: false,
         });
         this.props.punchInAction(false);
         setTimeout(this.dismissMessages, 3000);
@@ -410,6 +423,7 @@ class Header extends Component {
         errorMessage: "Something went wrong. Please try again.",
         showError: true,
         showSuccess: false,
+        isTimeLoading: false,
       });
       setTimeout(this.dismissMessages, 3000);
     });
@@ -748,7 +762,17 @@ class Header extends Component {
                     }
                     style={{width: "190px", height: "35px", fontSize: "14px"}}
                   >
-                    {isPunchedIn ? `Punch Out : ${elapsedFormatted}` : "Punch In"}
+                                        {isPunchedIn ? (
+                      this.state.isTimeLoading ? (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          Punch Out : <TimeSkeleton height="14px" />
+                        </span>
+                      ) : (
+                        `Punch Out : ${elapsedFormatted}`
+                      )
+                    ) : (
+                      "Punch In"
+                    )}
                     
                   </button>
                 )}
