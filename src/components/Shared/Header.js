@@ -1141,6 +1141,21 @@ class Header extends Component {
             }
           `}
       </style>
+
+      {["admin", "super_admin", "employee"].includes(window.user.role) && (
+        <style>
+          {`
+            @media (max-width: 576px) {
+              .notification {
+                margin-top: ${
+                  ["admin", "super_admin"].includes(window.user.role) ? "-25px" : "-45px"
+                } !important;
+              }
+            }
+          `}
+        </style>
+      )}
+
       </div>
       
     );
