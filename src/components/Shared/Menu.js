@@ -361,6 +361,27 @@ class Menu extends Component {
 						},
 					);
 				}
+
+
+				const jobPortalSection = content.find(item => item.id === 42)
+
+				if (!jobPortalSection) {
+					content.push(
+						{
+							"id": 42,
+							"icon": "icon-briefcase",
+							"label": "Job Board",
+							content: [
+								{
+									"id": 43,
+									"label": "Applicants",
+									"to": "/applicant"
+								}
+							]
+						},
+					);
+				}
+				
 			}
 		}
 

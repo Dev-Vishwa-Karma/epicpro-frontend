@@ -350,12 +350,13 @@ code {
   }
 }
 
-/* @media (max-width: 267px) {
+@media (max-width: 267px) {
   .notification .dropdown-menu {
     min-width: 200px !important;
     max-width: 240px !important;
     right: 0 !important;
   }
+  
   
   .notification #notificationScrollArea {
     max-height: 180px !important;
@@ -364,4 +365,15 @@ code {
   .notification-list {
     max-height: 180px !important;
   }
-} */
+}
+
+@media (max-width: 320px) {
+  .notification .notification-list{
+    overflow: visible !important;
+    display: block !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+}

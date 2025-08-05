@@ -22,6 +22,8 @@ import Login from './Authentication/login';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
 import Link from './HRMS/Link/Link';
 import Notifications from './HRMS/notifications/Notifications';
+import Applicant from './HRMS/Jobportal/Applicant';
+import ApllicantForm from './HRMS/Jobportal/AplliacntForm';
 
 const Routes = [
     {
@@ -200,6 +202,15 @@ const Routes = [
     },
     //job portal
     {
+        path: "/applicant",
+        name: 'ApplicantTabble',
+        exact: true,
+        pageTitle: "Applicant",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: Applicant
+    },
+    {
         path: "/jobportal-dashboard",
         name: 'jobportalDashboard',
         exact: true,
@@ -241,6 +252,13 @@ const Routes = [
         exact: true,
         pageTitle: "Tables",
         component: Login
+    },
+    {
+        path: "/job-application",
+        name: 'job-application',
+        exact: true,
+        pageTitle: "Job Application Form",
+        component: ApllicantForm
     },
 ];
 

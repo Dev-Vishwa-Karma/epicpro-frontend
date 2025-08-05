@@ -568,16 +568,10 @@ class AddEmployee extends Component {
             <div className="container-fluid">
               <div className="row">
                 <div className="col-12 col-lg-12">
-                  <form className="card" noValidate onSubmit={this.addEmployee}>
+                  <form className="card" noValidate onSubmit={this.addEmployee} autoComplete="off">
                     <div className="card-body">
                       <h3 className="card-title">Add Employee</h3>
                       <div className="row">
-                        {/* <div className="col-md-4">
-                                                    <div className="form-group">
-                                                        <label className="form-label">Employee ID</label>
-                                                        <input type="text" className="form-control" placeholder="Employee ID" />
-                                                    </div>
-                                                </div> */}
                         <div className="col-sm-6 col-md-6">
                           <InputField
                             label="First Name"
@@ -612,6 +606,7 @@ class AddEmployee extends Component {
                             placeholder="Enter Email Address"
                             error={this.state.errors.email}
                             refInput={this.fieldRefs.email}
+                            autoComplete="new-user-email"
                           />
                         </div>
                         <div className="col-md-4 col-sm-12">

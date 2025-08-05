@@ -817,10 +817,17 @@ class Header extends Component {
                                           style={{
                                               backgroundColor: notification.read == 0 ? '#E8E9E9' : 'transparent',
                                               cursor: 'pointer',
-                                              borderBottom: '1px solid #ddd'
+                                              borderBottom: '1px solid #ddd',
+                                              transition: 'background-color 0.2s ease'
                                           }}
                                           onClick={() => {
                                               this.markAsRead(notification.id);
+                                          }}
+                                          onTouchStart={(e) => {
+                                              e.currentTarget.style.backgroundColor = notification.read == 0 ? '#d0d0d0' : '#f5f5f5';
+                                          }}
+                                          onTouchEnd={(e) => {
+                                              e.currentTarget.style.backgroundColor = notification.read == 0 ? '#E8E9E9' : 'transparent';
                                           }}
                                       >
                                           <div className="feeds-body">
@@ -1137,7 +1144,15 @@ class Header extends Component {
                 white-space: normal !important;
                 word-wrap: break-word !important;
                 overflow-wrap: break-word !important;
-                width:350px !important;
+                width: 350px !important;
+                max-width: 350px !important;
+            }
+            
+            @media (max-width: 768px) {
+              .notification-body {
+                max-width: none !important;
+                width: 100% !important;
+              }
             }
           `}
       </style>

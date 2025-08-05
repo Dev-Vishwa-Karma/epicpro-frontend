@@ -487,9 +487,10 @@ class Users extends Component {
 										<div className="card-header">
 											<h3 className="card-title">User List</h3>
 											<div className="card-options">
+											<form autoComplete="off">
 												<div className="input-icon ml-2">
 													<span className="input-icon-addon">
-														<i className="fe fe-search" />
+												    <i className="fe fe-search" />
 													</span>
 													<input
 														type="text"
@@ -498,8 +499,11 @@ class Users extends Component {
 														name="search"
 														value={this.state.searchUser}
 														onChange={this.handleSearch}
+														autoComplete="new-user-email"
 													/>
 												</div>
+												</form>
+
 											</div>
 										</div>
 										<div className="card-body">
