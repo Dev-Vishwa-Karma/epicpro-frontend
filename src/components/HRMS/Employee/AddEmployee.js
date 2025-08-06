@@ -572,12 +572,6 @@ class AddEmployee extends Component {
                     <div className="card-body">
                       <h3 className="card-title">Add Employee</h3>
                       <div className="row">
-                        {/* <div className="col-md-4">
-                                                    <div className="form-group">
-                                                        <label className="form-label">Employee ID</label>
-                                                        <input type="text" className="form-control" placeholder="Employee ID" />
-                                                    </div>
-                                                </div> */}
                         <div className="col-sm-6 col-md-6">
                           <InputField
                             label="First Name"

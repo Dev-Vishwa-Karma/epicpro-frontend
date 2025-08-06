@@ -1129,7 +1129,7 @@ class Header extends Component {
             onClose={() => this.setState({ showDueAlert: false })}
           />
         )}
-        <style>
+         <style>
           {`
             .notification-body {
                 overflow: visible !important;
@@ -1137,7 +1137,15 @@ class Header extends Component {
                 white-space: normal !important;
                 word-wrap: break-word !important;
                 overflow-wrap: break-word !important;
-                width:350px !important;
+                width: 350px !important;
+                max-width: 350px !important;
+            }
+            
+            @media (max-width: 768px) {
+              .notification-body {
+                max-width: none !important;
+                width: 100% !important;
+              }
             }
           `}
       </style>

@@ -487,7 +487,8 @@ class Users extends Component {
 										<div className="card-header">
 											<h3 className="card-title">User List</h3>
 											<div className="card-options">
-												<div className="input-icon ml-2">
+												<form autoComplete='off' >
+													<div className="input-icon ml-2">
 													<span className="input-icon-addon">
 														<i className="fe fe-search" />
 													</span>
@@ -497,9 +498,11 @@ class Users extends Component {
 														placeholder="Search user..."
 														name="search"
 														value={this.state.searchUser}
-														onChange={this.handleSearch}
+															onChange={this.handleSearch}
+															autoCapitalize='new-email'
 													/>
 												</div>
+												</form>
 											</div>
 										</div>
 										<div className="card-body">
