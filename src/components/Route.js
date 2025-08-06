@@ -23,7 +23,7 @@ import ViewEmployee from './HRMS/Employee/ViewEmployee';
 import Link from './HRMS/Link/Link';
 import Notifications from './HRMS/notifications/Notifications';
 import Applicant from './HRMS/Jobportal/Applicant';
-import ApllicantForm from './HRMS/Jobportal/AplliacntForm';
+import ApplicantForm from './HRMS/Jobportal/ApplicantForm';
 
 const Routes = [
     {
@@ -258,7 +258,7 @@ const Routes = [
         name: 'job-application',
         exact: true,
         pageTitle: "Job Application",
-        component: ApllicantForm
+        component: ApplicantForm
     },
 ];
 

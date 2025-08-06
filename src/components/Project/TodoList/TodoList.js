@@ -4,11 +4,9 @@ import TodoModal from './TodoModal';
 import DeleteModal from '../../common/DeleteModal';
 import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
-import NoDataRow from '../../common/NoDataRow';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
-import TableSkeleton from '../../common/skeletons/TableSkeleton';
-import Avatar from '../../common/Avatar';
+import TodoTable from './TodoTable';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -615,137 +613,26 @@ class TodoList extends Component {
                             <div className="col-12">
                                 <div className="card">
                                     <div className="card-body">
-                                        <div className="table-responsive todo_list">
-                                            <table className="table table-hover table-striped table-vcenter mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th>
-                                                                <p className="w150">Task</p>
-                                                        </th>
-                                                        <th className="w150 text-right">Due</th>
-                                                        <th className="w100">Priority</th>
-                                                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                                        <th className="w80"><i className="icon-user" /></th>
-                                                        )}
-                                                           {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                                        <th className="w150">Action</th>
-                                                        )}
-                                                    </tr>
-                                                </thead>
-                                                {loading ? (
-                                                    <tbody>
-                                                        <tr>
-                                                            <td colSpan="5">
-                                                                <div className="d-flex justify-content-center align-items-center" style={{ height: "150px" }}>
-                                                                   <TableSkeleton columns={4} rows={5} />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                ) : (
-                                                    <tbody>
-                                                        {currentTodos && currentTodos.length > 0 ? (
-                                                            currentTodos.map((todo, index) => (
-                                                                <tr key={index+1} style={
-                                                                    (logged_in_employee_role !== 'employee' && todo.hidden_for_employee)
-                                                                        ? { textDecoration: 'line-through', opacity: 0.6 }
-                                                                        : {}
-                                                                }>
-                                                                <td>
-                                                                    <label className="custom-control custom-checkbox">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            className="custom-control-input"
-                                                                            name="example-checkbox1"
-                                                                            checked={todo.todoStatus === 'completed'}
-                                                                            onChange={() => this.handleCheckboxClick(todo)}
-                                                                        />
-                                                                        <span className="custom-control-label">{todo.title}</span>
-                                                                    </label>
-                                                                </td>
-                                                                <td className="text-right">
-                                                                    {new Date(todo.due_date).toLocaleString("en-US", {
-                                                                        day: "2-digit",
-                                                                        month: "short",
-                                                                        year: "numeric"
-                                                                    }).replace(",", "")}
-                                                                </td>
-                                                                <td>
-                                                                    <span className={`tag ml-0 mr-0 ${
-                                                                        todo.priority === "high"
-                                                                            ? "tag-danger"
-                                                                            : todo.priority === "medium"
-                                                                            ? "tag-warning"
-                                                                            : "tag-success"
-                                                                        }`}
-                                                                    >
-                                                                        {todo.priority.toUpperCase()}
-                                                                    </span>
-                                                                </td>
-                                                                {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                                                    <td>
-                                                               <Avatar
-                                                                    profile={todo.profile}
-                                                                    first_name={todo.first_name}
-                                                                    last_name={todo.last_name}
-                                                                    size={40}
-                                                                    className="avatar avatar-blue add-space"
-                                                                    style={{
-                                                                        objectFit: 'cover',
-                                                                    }}
-                                                                    onError={(e) => {
-                                                                        e.target.src = '/assets/images/sm/avatar2.jpg';
-                                                                    }}
-                                                                    data-toggle="tooltip"
-                                                                    data-placement="top"
-                                                                    title={`${todo.first_name || ''} ${todo.last_name || ''}`}
-                                                                />
-                                                                    </td>
-                                                                    )}
-                                                                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                                                    <td>
-                                                                        <div className="d-flex align-items-center">
-                                                                                <>
-                                                                                            <button
-                                                                                                    type="button"
-                                                                                                    className="btn btn-icon"
-                                                                                                    title="Edit"
-                                                                                                
-                                                                                                    onClick={() => this.handleEditTodo(todo)}
-                                                                                                >
-                                                                                                    <i className="fa fa-edit" />
-                                                                                                </button>
-                                                                                                <button
-                                                                                                    type="button"
-                                                                                                    className="btn btn-icon btn-sm js-sweetalert"
-                                                                                                    title="Delete"
-                                                                                                    onClick={() => {
-                                                                                            this.setState({ 
-                                                                                                showDeleteModal: true, 
-                                                                                                todoToDelete: todo 
-                                                                                            }, () => {
-                                                                                                // Show the modal using Bootstrap
-                                                                                                if (window.$) {
-                                                                                                    window.$('#deleteTodoModal').modal('show');
-                                                                                                }
-                                                                                            });
-                                                                                        }}
-                                                                                                >
-                                                                                                    <i className="fa fa-trash-o text-danger" />
-                                                                                                </button>
-                                                                                </>
-                                                                        </div>
-                                                                    </td>
-                                                                    )}
-                                                                </tr>
-                                                            ))
-                                                        ): (
-                                                            <NoDataRow colSpan={7} message="Todo not available." />
-                                                        )}
-                                                    </tbody>
-                                                )}
-                                            </table>
-                                        </div>
+                                        {/* Add Seperate Todo Table Component */}
+                                        <TodoTable
+                                            todos={todos}
+                                            loading={loading}
+                                            currentTodos={currentTodos}
+                                            logged_in_employee_role={logged_in_employee_role}
+                                            handleCheckboxClick={this.handleCheckboxClick}
+                                            handleEditTodo={this.handleEditTodo}
+                                            handleDeleteClick={(todo) => {
+                                                this.setState({ 
+                                                    showDeleteModal: true, 
+                                                    todoToDelete: todo 
+                                                }, () => {
+                                                    if (window.$) {
+                                                        window.$('#deleteTodoModal').modal('show');
+                                                    }
+                                                });
+                                            }}
+                                        />
+
                                         <div className="mt-3">
                                        {totalPagesTodos > 1 && (
                                             <Pagination

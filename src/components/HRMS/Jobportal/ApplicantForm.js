@@ -131,7 +131,8 @@ class ApplicantForm extends Component {
   };
 
   handleFileChange = (e) => {
-    this.setState({ resume: e.target.files[0] });
+    const file = e.target.files[0];
+    this.setState({ resume: file });
   };
 
   handleSubmit = (e) => {
@@ -192,7 +193,7 @@ class ApplicantForm extends Component {
         />
           <div className="container-fluid ">
             <div className="col-md-12 col-md-10 col-lg-12">
-              <form className="card shadow-sm" onSubmit={this.handleSubmit} autoComplete="off">
+              <form className="card shadow-sm" onSubmit={this.handleSubmit} noValidate autoComplete="off">
                 <div className="card-body">
                   {submitError && (
                     <div className="alert alert-danger" role="alert">

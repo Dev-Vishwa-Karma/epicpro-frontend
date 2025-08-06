@@ -312,14 +312,14 @@ class ViewEmployee extends Component {
 
         return (
             <>
-                <AlertMessages
+                {/* <AlertMessages
                     showSuccess={showSuccess}
                     successMessage={successMessage}
                     showError={showError}
                     errorMessage={errorMessage}
                     setShowSuccess={(val) => this.setState({ showSuccess: val })}
                     setShowError={(val) => this.setState({ showError: val })}
-                />
+                /> */}
 
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
                     <div className="container-fluid">
