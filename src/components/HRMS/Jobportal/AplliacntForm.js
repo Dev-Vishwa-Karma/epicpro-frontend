@@ -1,0 +1,343 @@
+import React, { Component } from 'react';
+import InputField from '../../common/formInputs/InputField';
+import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
+import { validateFields } from '../../common/validations';
+import { getService } from '../../../services/getService';
+import AlertMessages from '../../common/AlertMessages';
+
+
+const SKILLS = [
+  'HTML',
+  'CSS',
+  'JavaScript',
+  'React',
+  'Angular',
+  'Vue',
+  'TypeScript',
+  'jQuery',
+  'PHP',
+  'Laravel',
+  'Python',
+  'Node.js',
+  'Symfony',
+  'Django',
+  'Ruby on Rails'
+];
+
+function getColor(skill) {
+  const colors = {
+    HTML: 'pink',
+    CSS: 'blue',
+    JavaScript: 'yellow',
+    React: 'cyan',
+    Angular: 'red',
+    Vue: 'green',
+    TypeScript: 'blue',
+    jQuery: 'yellow',
+    PHP: 'pink',
+    Laravel: 'blue',
+    Python: 'yellow',
+    'Node.js': 'cyan',
+    Symfony: 'red',
+    Django: 'purple',
+    'Ruby on Rails': 'orange',
+  };
+  return colors[skill] || 'gray';
+}
+
+const initialState = {
+  fullname: '', 
+  email: '', 
+  phone: '', 
+  streetaddress: '', 
+  experience: '', 
+  skills: [], 
+  resume: null,
+};
+
+class ApplicantForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      ...initialState,
+      errors: {},
+      submitted: false,
+      isSubmitting: false,
+      submitError: null,
+      showSuccess: false,
+    };
+  }
+
+  submitApplication = () => {
+    this.setState({ isSubmitting: true });
+    
+    const {
+      fullname,
+      email,
+      phone,
+      streetaddress,
+      experience,
+      skills,
+      resume,
+    } = this.state;
+
+    const formData = new FormData();
+    formData.append('fullname', fullname);
+    formData.append('email', email);
+    formData.append('phone', phone);
+    formData.append('streetaddress', streetaddress);
+    formData.append('experience', experience);
+    formData.append('skills', JSON.stringify(skills));
+    formData.append('resume', resume);
+
+    getService.addCall('applicants.php', 'add', formData)
+      .then(data => {
+        if (data.status === 'success') {
+          this.setState({
+            submitted: true,
+            isSubmitting: false,
+            ...initialState,
+            showSuccess: true,
+          });
+          setTimeout(() => {
+            this.setState({ showSuccess: false });
+          }, 3000);
+        } else {
+          throw new Error(data.data?.message || 'Failed to submit application');
+        }
+      })
+      .catch(error => {
+        this.setState({
+          isSubmitting: false,
+          submitError: error.message || 'An error occurred while submitting the application'
+        });
+        console.error('Error:', error);
+      });
+  };
+
+  handleChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+  };
+
+  handleSkillsChange = (e) => {
+    const { value, checked } = e.target;
+    const { skills } = this.state;
+    if (checked) {
+      this.setState({ skills: [...skills, value] });
+    } else {
+      this.setState({ skills: skills.filter(s => s !== value) });
+    }
+  };
+
+  handleFileChange = (e) => {
+    this.setState({ resume: e.target.files[0] });
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    this.setState({ submitError: null });
+
+    const {
+      fullname,
+      email,
+      phone,
+      streetaddress,
+      experience,
+      skills,
+      resume,
+    } = this.state
+
+    const validationSchema = [
+      { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
+      { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
+      { name: 'phone', value: phone, type: 'mobile', required: true, messageName: 'Phone' },
+      { name: 'streetaddress', value: streetaddress, type: 'text', required: true, messageName: 'Address ' },
+      { name: 'experience', value: experience, type: 'text', required: true, messageName: 'experience ' },
+      { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: true, messageName: 'Skills' },
+      { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: true, messageName: 'Resume' },
+    ];
+    const errors = validateFields(validationSchema);
+    this.setState({ errors });
+    if (Object.keys(errors).length === 0) {
+      this.submitApplication();
+    }
+  };
+
+  render() {
+    const { 
+      fullname, 
+      email, 
+      phone, 
+      streetaddress, 
+      skills, 
+      experience, 
+      resume, 
+      errors, 
+      submitted,
+      submitError, 
+      isSubmitting,
+      showSuccess,
+    } = this.state;
+
+    return (
+      <>
+        <AlertMessages
+          showSuccess={showSuccess}
+          successMessage="Thank you for applying!"
+          showError={!!submitError}
+          errorMessage={submitError}
+          setShowSuccess={val => this.setState({ showSuccess: val })}
+          setShowError={val => this.setState({ submitError: val ? submitError : null })}
+        />
+          <div className="container-fluid ">
+            <div className="col-md-12 col-md-10 col-lg-12">
+              <form className="card shadow-sm" onSubmit={this.handleSubmit} autoComplete="off">
+                <div className="card-body">
+                  {submitError && (
+                    <div className="alert alert-danger" role="alert">
+                      <i className="fa fa-exclamation-circle mr-2"></i>
+                      {submitError}
+                    </div>
+                  )}
+                  
+                  <div className="row">
+                    
+                    <div className="col-md-6">
+                      <InputField
+                        label="Full Name"
+                        name="fullname"
+                        value={fullname}
+                        onChange={this.handleChange}
+                        placeholder="Enter your Full Name"
+                        error={errors.fullname}
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <InputField
+                        label="Email"
+                        name="email"
+                        type="email"
+                        value={email}
+                        onChange={this.handleChange}
+                        placeholder="Enter your email"
+                        error={errors.email}
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <InputField
+                        label="Phone"
+                        name="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={this.handleChange}
+                        placeholder="Enter your phone number"
+                        error={errors.phone}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-12">
+                      <InputField
+                        label="Street Address"
+                        name="streetaddress"
+                        value={streetaddress}
+                        onChange={this.handleChange}
+                        placeholder="Street address"
+                        error={errors.streetaddress}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-12">
+                      <CheckboxGroup
+                        label="Technical Skills"
+                        options={SKILLS} 
+                        selected={skills}
+                        onChange={this.handleSkillsChange}
+                        getColor={getColor}
+                      />
+                      {errors.skills && <div className="invalid-feedback d-block">{errors.skills}</div>}
+                      <small className="form-text text-muted">Select the skills that match your expertise.</small>
+                    </div>
+
+                    <div className="col-md-12 mt-3">
+                      <div className="form-group">
+                        <label htmlFor="resume" style={{ fontWeight: 500 }}>
+                          Resume/CV <small className="text-muted">(PDF, DOC, DOCX, TXT, RTF)</small>
+                        </label>
+                        <div className="custom-file">
+                          <InputField
+                            type="file"
+                            id="resume"
+                            name="resume"
+                            onChange={this.handleFileChange}
+                            accept=".pdf,.doc,.docx,.txt,.rtf"
+                          />
+                          <label className="custom-file-label" htmlFor="resume">
+                            {resume ? resume.name : "Choose file..."}
+                          </label>
+                            {this.state.errors.resume && (
+                              <div className="invalid-feedback d-block">{this.state.errors.resume}</div>
+                          )}
+                        </div>
+                        <small className="form-text text-muted">Max file size: 2MB. Please ensure your contact information is included.</small>
+                      </div>
+                    </div>
+
+                    <div className='col-md-4 mt-4'>
+                        <InputField
+                          id="experience"
+                          label="Years of Experience"
+                          name="experience"
+                          type="select"
+                          value={experience}
+                          onChange={this.handleChange}
+                          error={errors.experience}
+                          options={[
+                            { value: '0-1', label: '0-1 years' },
+                            { value: '1-2', label: '1-2 years' },
+                            { value: '2-4', label: '2-4 years' },
+                            { value: '4-6', label: '4-6 years' },
+                            { value: '6-8', label: '6-8 years' },
+                            { value: '8+', label: '8+ years' },
+                          ]}
+                        />
+                    </div>
+                  </div>
+
+                </div>
+                <div className="card-footer text-right" style={{ backgroundColor: '#f8f9fa', borderBottomLeftRadius: '10px', borderBottomRightRadius: '10px' }}>
+                 
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary px-5" 
+                    style={{ fontWeight: 600 }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa fa-paper-plane mr-2"></i>
+                        Submit Application
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+      </>
+    );
+  }
+}
+
+export default ApplicantForm;
