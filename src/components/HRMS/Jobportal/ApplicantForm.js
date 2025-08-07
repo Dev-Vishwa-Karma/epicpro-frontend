@@ -132,7 +132,30 @@ class ApplicantForm extends Component {
 
   handleFileChange = (e) => {
     const file = e.target.files[0];
-    this.setState({ resume: file });
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'application/rtf',
+    ];
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf'];
+    let error = '';
+    if (file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(ext)) {
+        error = 'Only PDF, DOC, DOCX, TXT, or RTF files are allowed. Image files are not permitted.';
+        this.setState(prev => ({
+          resume: null,
+          errors: { ...prev.errors, resume: error }
+        }));
+        return;
+      }
+    }
+    this.setState(prev => ({
+      resume: file,
+      errors: { ...prev.errors, resume: '' }
+    }));
   };
 
   handleSubmit = (e) => {
@@ -263,7 +286,6 @@ class ApplicantForm extends Component {
                         getColor={getColor}
                       />
                       {errors.skills && <div className="invalid-feedback d-block">{errors.skills}</div>}
-                      <small className="form-text text-muted">Select the skills that match your expertise.</small>
                     </div>
 
                     <div className="col-md-12 mt-3">
@@ -286,7 +308,7 @@ class ApplicantForm extends Component {
                               <div className="invalid-feedback d-block">{this.state.errors.resume}</div>
                           )}
                         </div>
-                        <small className="form-text text-muted">Max file size: 2MB. Please ensure your contact information is included.</small>
+                        <small className="form-text text-muted">Max file size: 2MB.</small>
                       </div>
                     </div>
 
