@@ -7,6 +7,7 @@ import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import TodoTable from './TodoTable';
+import { appendDataToFormData } from '../../../utils';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -145,12 +146,22 @@ class TodoList extends Component {
             : logged_in_employee_id;
 
         const addTodoFormData = new FormData();
-        addTodoFormData.append('employee_id', employee_id);
-        addTodoFormData.append('title', title);
-        addTodoFormData.append('due_date', due_date);
-        addTodoFormData.append('priority', priority);
-        addTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
-        addTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
+        // addTodoFormData.append('employee_id', employee_id);
+        // addTodoFormData.append('title', title);
+        // addTodoFormData.append('due_date', due_date);
+        // addTodoFormData.append('priority', priority);
+        // addTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
+        // addTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
+
+        const data = {
+            employee_id: employee_id,
+            title: title,
+            due_date:due_date,
+            priority: priority,
+            logged_in_employee_id: logged_in_employee_id,
+            logged_in_employee_role:logged_in_employee_role
+        }
+        appendDataToFormData(addTodoFormData, data)
 
         // API call to add todo using getService
         getService.addCall('project_todo.php', 'add', addTodoFormData)
@@ -295,13 +306,24 @@ class TodoList extends Component {
             : 'Todo marked as completed!';
 
         const formData = new FormData();
-        formData.append('id', selectedTodo.id);
-        formData.append('status', newStatus);
-        formData.append('logged_in_employee_id', logged_in_employee_id);
-        formData.append('logged_in_employee_role', logged_in_employee_role);
-        formData.append('to_do_created_by', selectedTodo.created_by);
-        formData.append('to_do_created_for', selectedTodo.employee_id);
-        formData.append('logged_in_employee_name', selectedTodo.first_name);
+        // formData.append('id', selectedTodo.id);
+        // formData.append('status', newStatus);
+        // formData.append('logged_in_employee_id', logged_in_employee_id);
+        // formData.append('logged_in_employee_role', logged_in_employee_role);
+        // formData.append('to_do_created_by', selectedTodo.created_by);
+        // formData.append('to_do_created_for', selectedTodo.employee_id);
+        // formData.append('logged_in_employee_name', selectedTodo.first_name);
+
+        const data = {
+            id: selectedTodo.id,
+            status: newStatus,
+            logged_in_employee_id: logged_in_employee_id,
+            logged_in_employee_role: logged_in_employee_role,
+            to_do_created_by: selectedTodo.created_by,
+            to_do_created_for: selectedTodo.employee_id,
+            logged_in_employee_name: selectedTodo.first_name
+        }
+        appendDataToFormData(formData, data)
         getService.addCall('project_todo.php', 'update_status', formData)
         .then(data => {
             if (data.status === 'success') {
@@ -395,13 +417,24 @@ class TodoList extends Component {
         : logged_in_employee_id;
 
         const updateTodoFormData = new FormData();
-        updateTodoFormData.append('todo_id', selectedTodo.id);
-        updateTodoFormData.append('employee_id', employee_id);
-        updateTodoFormData.append('title', title);
-        updateTodoFormData.append('due_date', due_date);
-        updateTodoFormData.append('priority', priority);
-        updateTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
-        updateTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
+        // updateTodoFormData.append('todo_id', selectedTodo.id);
+        // updateTodoFormData.append('employee_id', employee_id);
+        // updateTodoFormData.append('title', title);
+        // updateTodoFormData.append('due_date', due_date);
+        // updateTodoFormData.append('priority', priority);
+        // updateTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
+        // updateTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
+
+        const data = {
+            todo_id: selectedTodo.id,
+            employee_id: employee_id,
+            title: title,
+            due_date: due_date,
+            priority: priority,
+            logged_in_employee_id: logged_in_employee_id,
+            logged_in_employee_role:logged_in_employee_role
+        }
+        appendDataToFormData(updateTodoFormData, data)
 
         // API call to update todo using getService
         getService.addCall('project_todo.php', 'edit', updateTodoFormData)

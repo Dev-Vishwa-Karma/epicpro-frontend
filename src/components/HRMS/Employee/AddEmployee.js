@@ -6,6 +6,7 @@ import { getService } from "../../../services/getService";
 import { validateFields } from "../../common/validations";
 import InputField from "../../common/formInputs/InputField";
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup'
+import { appendDataToFormData } from '../../../utils';
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -337,61 +338,60 @@ class AddEmployee extends Component {
     }
 
     const addEmployeeData = new FormData();
-    addEmployeeData.append("department_id", selectedDepartment);
-    addEmployeeData.append("first_name", firstName);
-    addEmployeeData.append("last_name", lastName);
-    addEmployeeData.append("email", email);
-    addEmployeeData.append("gender", gender);
-    addEmployeeData.append("photo", photo);
-    addEmployeeData.append("dob", dob);
-    addEmployeeData.append("joining_date", joiningDate);
-    addEmployeeData.append("mobile_no1", mobile1);
-    addEmployeeData.append("mobile_no2", mobile2);
-    addEmployeeData.append("password", password);
-    addEmployeeData.append("address_line1", address1);
-    addEmployeeData.append("address_line2", address2);
-    addEmployeeData.append("emergency_contact1", emergencyContact1);
-    addEmployeeData.append("emergency_contact2", emergencyContact2);
-    addEmployeeData.append("emergency_contact3", emergencyContact3);
-    addEmployeeData.append("frontend_skills", skillsFrontend);
-    addEmployeeData.append("backend_skills", skillsBackend);
-    addEmployeeData.append("account_holder_name", bankAccountName);
-    addEmployeeData.append("account_number", bankAccountNo);
-    addEmployeeData.append("bank_name", bankName);
-    addEmployeeData.append("ifsc_code", ifscCode);
-    addEmployeeData.append("bank_address", bankAddress);
-    addEmployeeData.append("statistics_visibility_status", statisticsVisibilityStatus);
 
+    const data = {
+      department_id: selectedDepartment,
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      gender: gender,
+      photo: photo,
+      dob: dob,
+      joining_date: joiningDate,
+      mobile_no1: mobile1,
+      mobile_no2: mobile2,
+      password: password,
+      address_line1: address1,
+      address_line2: address2,
+      emergency_contact1: emergencyContact1,
+      emergency_contact2: emergencyContact2,
+      emergency_contact3: emergencyContact3,
+      // frontend_skills: skillsFrontend,
+      // backend_skills: skillsBackend,
+      frontend_skills: JSON.stringify(skillsFrontend),
+      backend_skills: JSON.stringify(skillsBackend), 
+      account_holder_name: bankAccountName,
+      account_number: bankAccountNo,
+      bank_name: bankName,
+      ifsc_code: ifscCode,
+      bank_address: bankAddress,
+      statistics_visibility_status: statisticsVisibilityStatus,
+      aadhar_card_number: aadharCardNumber,
+      aadhar_card_file: aadharCardFile,
+      driving_license_number: drivingLicenseNumber,
+      driving_license_file: drivingLicenseFile,
+      pan_card_number: panCardNumber,
+      pan_card_file: panCardFile,
+      facebook_url: facebook,
+      twitter_url: twitter,
+      linkedin_url: linkedin,
+      instagram_url: instagram,
+      upwork_profile_url: upworkProfile,
+      resume: resume,
+      visibility_priority: visibilityPriority,
+      logged_in_employee_id: id,
+      logged_in_employee_role: role,
+    };
+
+    appendDataToFormData(addEmployeeData, data); // use from utils
+
+    // Append salary details separately
     salaryDetails.forEach((detail, index) => {
-      addEmployeeData.append(
-        `salaryDetails[${index}][source]`,
-        detail.salarySource
-      );
-      addEmployeeData.append(
-        `salaryDetails[${index}][amount]`,
-        detail.salaryAmount
-      );
-      addEmployeeData.append(
-        `salaryDetails[${index}][from_date]`,
-        detail.fromDate
-      );
+      addEmployeeData.append(`salaryDetails[${index}][source]`, detail.salarySource);
+      addEmployeeData.append(`salaryDetails[${index}][amount]`, detail.salaryAmount);
+      addEmployeeData.append(`salaryDetails[${index}][from_date]`, detail.fromDate);
       addEmployeeData.append(`salaryDetails[${index}][to_date]`, detail.toDate);
     });
-    addEmployeeData.append("aadhar_card_number", aadharCardNumber);
-    addEmployeeData.append("aadhar_card_file", aadharCardFile);
-    addEmployeeData.append("driving_license_number", drivingLicenseNumber);
-    addEmployeeData.append("driving_license_file", drivingLicenseFile);
-    addEmployeeData.append("pan_card_number", panCardNumber);
-    addEmployeeData.append("pan_card_file", panCardFile);
-    addEmployeeData.append("facebook_url", facebook);
-    addEmployeeData.append("twitter_url", twitter);
-    addEmployeeData.append("linkedin_url", linkedin);
-    addEmployeeData.append("instagram_url", instagram);
-    addEmployeeData.append("upwork_profile_url", upworkProfile);
-    addEmployeeData.append("resume", resume);
-    addEmployeeData.append("visibility_priority", visibilityPriority);
-    addEmployeeData.append("logged_in_employee_id", id);
-    addEmployeeData.append("logged_in_employee_role", role);
 
 
     getService.addCall('get_employees.php','add', addEmployeeData)

@@ -10,6 +10,7 @@ import AlertMessages from "../../common/AlertMessages";
 import YearSelector from "../../common/YearSelector";
 import EventList from "./elements/EventList";
 import AddEventModal from "./elements/AddEventModal";
+import { appendDataToFormData } from "../../../utils";
 class Events extends Component {
   constructor(props) {
     super(props);
@@ -370,14 +371,17 @@ class Events extends Component {
     }
 
     if (this.validateForm(e)) {
-      const { event_name, event_date, logged_in_employee_id } = this.state;
+      const { event_name, event_date, logged_in_employee_id ,} = this.state;
 
       const addEventData = new FormData();
-      addEventData.append("employee_id", logged_in_employee_id); // Always use logged in user's ID
-      addEventData.append("event_name", event_name);
-      addEventData.append("event_date", event_date);
-      addEventData.append("event_type", "event");
-      addEventData.append("created_by", logged_in_employee_id);
+      const data = {
+        employee_id: logged_in_employee_id,
+        event_name: event_name,
+        event_date: event_date,
+        event_type: "event",
+        created_by: logged_in_employee_id
+      }
+      appendDataToFormData(addEventData, data);
 
       // API call to add event
       getService

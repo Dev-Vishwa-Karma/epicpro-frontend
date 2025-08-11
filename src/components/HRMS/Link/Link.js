@@ -8,6 +8,7 @@ import AlertMessages from '../../common/AlertMessages';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
+import { appendDataToFormData } from "../../../utils";
 
 class Link extends Component {
   constructor(props) {
@@ -274,19 +275,19 @@ class Link extends Component {
     const { isEdit, activeTab, formData, editId } = this.state;
     const apiAction = isEdit ? 'edit' : 'add';
     const submitData = new FormData();
-    submitData.append('type', activeTab);
-    submitData.append('title', formData.title);
-    submitData.append('url', formData.url || '');
-    if (activeTab === 'Excel' || activeTab === 'Codebase') {
-      if (formData.file_path instanceof File) {
-        submitData.append('file_path', formData.file_path);
-      } else if (isEdit && formData.file_path) {
-        submitData.append('file_path', formData.file_path); // for edit, keep existing file path
-      }
-    }
-    if (isEdit) {
-      submitData.append('id', editId);
-    }
+    const data = {
+      type: activeTab,
+      title: formData.title,
+      url: formData.url || '',
+      ...(formData.file_path instanceof File
+        ? { file_path: formData.file_path }
+        : isEdit
+          ? { file_path: formData.file_path }
+          : {}),
+      ...(isEdit && { id: editId })
+    };
+    appendDataToFormData(submitData, data)
+
     this.setState({ loading: true });
     getService.addCall('resources.php', apiAction, submitData)
       .then(res => {

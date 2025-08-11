@@ -9,6 +9,7 @@ import { getService } from "../../../services/getService";
 import BlankState from "../../common/BlankState";
 import { validateFields } from '../../common/validations';
 import ClientCardSkeleton from "../../common/skeletons/ClientCardSkeleton";
+import { appendDataToFormData } from "../../../utils";
 class Clients extends Component {
   constructor(props) {
     super(props);
@@ -159,22 +160,35 @@ class Clients extends Component {
     this.setState({ clientFieldLoading: true });
 
     const formData = new FormData();
-    formData.append('name', clientFieldFormData.name);
-    formData.append('email', clientFieldFormData.email);
-    formData.append('about', clientFieldFormData.about);
-    formData.append('country', clientFieldFormData.country);
-    formData.append('state', clientFieldFormData.state);
-    formData.append('city', clientFieldFormData.city);
-    formData.append('status', clientFieldFormData.status);
+    // formData.append('name', clientFieldFormData.name);
+    // formData.append('email', clientFieldFormData.email);
+    // formData.append('about', clientFieldFormData.about);
+    // formData.append('country', clientFieldFormData.country);
+    // formData.append('state', clientFieldFormData.state);
+    // formData.append('city', clientFieldFormData.city);
+    // formData.append('status', clientFieldFormData.status);
 
-    // Only append profile if it's a file (new upload)
-    if (clientFieldFormData.profilePic instanceof File) {
-      formData.append('profile', clientFieldFormData.profilePic);
-    }
+    // // Only append profile if it's a file (new upload)
+    // if (clientFieldFormData.profilePic instanceof File) {
+    //   formData.append('profile', clientFieldFormData.profilePic);
+    // }
 
-    if (isEditClientField) {
-      formData.append('client_id', editingClientId);
-    }
+    // if (isEditClientField) {
+    //   formData.append('client_id', editingClientId);
+    // }
+    const data = {
+      name: clientFieldFormData.name,
+      email: clientFieldFormData.email,
+      about: clientFieldFormData.about,
+      country: clientFieldFormData.country,
+      state: clientFieldFormData.state,
+      city: clientFieldFormData.city,
+      status: clientFieldFormData.status,
+      ...(clientFieldFormData.profilePic instanceof File && { profile: clientFieldFormData.profilePic }),
+      ...(isEditClientField && { client_id: editingClientId })
+    };
+
+    appendDataToFormData(formData, data)
 
     const apiCall = isEditClientField
       ? getService.editCall('clients.php', 'edit', formData, null, editingClientId)

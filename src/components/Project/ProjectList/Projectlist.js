@@ -12,6 +12,7 @@ import authService from '../../Authentication/authService';
 import BlankState from '../../common/BlankState';
 import { validateFields } from '../../common/validations';
 import ProjectCardSkeleton from '../../common/skeletons/ProjectCardSkeleton';
+import { appendDataToFormData } from '../../../utils';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -273,13 +274,24 @@ class ProjectList extends Component {
         }
 
         const projectFormData = new FormData();
-        projectFormData.append('logged_in_employee_id', logged_in_employee_id);
-        projectFormData.append('project_name', projectName);
-        projectFormData.append('project_description', projectDescription);
-        projectFormData.append('project_technology', projectTechnology);
-        projectFormData.append('client_id', selectedClient);
-        projectFormData.append('project_start_date', projectStartDate);
-        projectFormData.append('project_end_date', projectEndDate);
+        // projectFormData.append('logged_in_employee_id', logged_in_employee_id);
+        // projectFormData.append('project_name', projectName);
+        // projectFormData.append('project_description', projectDescription);
+        // projectFormData.append('project_technology', projectTechnology);
+        // projectFormData.append('client_id', selectedClient);
+        // projectFormData.append('project_start_date', projectStartDate);
+        // projectFormData.append('project_end_date', projectEndDate);
+
+        const data = {
+            logged_in_employee_id: logged_in_employee_id,
+            project_name: projectName,
+            project_description: projectDescription,
+            project_technology: projectTechnology,
+            client_id: selectedClient,
+            project_start_date: projectStartDate,
+            project_end_date: projectEndDate,
+        }
+        appendDataToFormData(projectFormData, data)
         
         teamMembers.forEach((member) => {
             projectFormData.append('team_members[]', member);
