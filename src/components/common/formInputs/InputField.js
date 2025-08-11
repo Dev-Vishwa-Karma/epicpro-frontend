@@ -19,6 +19,7 @@ const InputField = ({
   accept = '',
   multiple = false,
   style = {},
+  autoComplete='off'
 }) => {
   return (
     <div className={type !== 'file' ? 'form-group' : ''}>
@@ -71,7 +72,8 @@ const InputField = ({
           multiple={multiple}
           style={style}
         />
-      ) : (
+          ) : (
+        <form autoComplete={autoComplete}>
         <input
           id={name}
           type={type}
@@ -86,7 +88,9 @@ const InputField = ({
           onInput={onInput}
           disabled={disabled}
           min={min}
+          autoComplete={autoComplete || 'off'}
         />
+        </form>
       )}
 
       {error && <div className="invalid-feedback d-block">{error}</div>}

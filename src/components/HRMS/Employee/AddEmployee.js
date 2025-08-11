@@ -606,6 +606,7 @@ class AddEmployee extends Component {
                             placeholder="Enter Email Address"
                             error={this.state.errors.email}
                             refInput={this.fieldRefs.email}
+                            autoComplete="off"
                           />
                         </div>
                         <div className="col-md-4 col-sm-12">
@@ -713,6 +714,7 @@ class AddEmployee extends Component {
                             onChange={this.handleChange}
                             placeholder="Password"
                             error={this.state.errors.password}
+                            autoComplete="new-password"
                           />
                         </div>
                         <div className="col-md-12">
