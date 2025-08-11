@@ -5,9 +5,10 @@ import { getService } from '../../../services/getService';
 import DeleteModal from '../../common/DeleteModal';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
-import UserTable from './UserTable';
-import AddUserForm from './AddUserForm';
-import EditUserModal from './EditUserModal';
+import UserTable from './elements/UserTable';
+import AddUserForm from './elements/AddUserForm';
+import EditUserModal from './elements/EditUserModal';
+import { appendDataToFormData } from '../../../utils';
 
 class Users extends Component {
 	constructor(props) {
@@ -163,19 +164,24 @@ class Users extends Component {
 		this.setState({ errors: {} });
 		}
 
-        const addUserData = new FormData();
-        addUserData.append('department_id', selectedDepartment);
-        addUserData.append('code', employeeCode);
-        addUserData.append('first_name', firstName);
-        addUserData.append('last_name', lastName);
-        addUserData.append('email', email);
-        addUserData.append('selected_role', selectedRole);
-        addUserData.append('dob', dob);
-        addUserData.append('gender', gender);
-        addUserData.append('mobile_no1', mobileNo);
-        addUserData.append('password', confirmPassword);
-		addUserData.append('logged_in_employee_id', logged_in_employee_id);
-		addUserData.append('logged_in_employee_role', logged_in_employee_role);
+		const addUserData = new FormData();
+
+		const data = {
+			department_id: selectedDepartment,
+			code: employeeCode,
+			first_name: firstName,
+			last_name: lastName,
+			email: email,
+			selected_role: selectedRole,
+			dob: dob,
+			gender: gender,
+			mobile_no1: mobileNo,
+			password: confirmPassword,
+			logged_in_employee_id: logged_in_employee_id,
+			logged_in_employee_role:logged_in_employee_role
+		};
+
+		appendDataToFormData(addUserData, data); // use from utils
 
         // API call to add user
 		getService.addCall('get_employees.php','add',addUserData )
@@ -269,15 +275,19 @@ class Users extends Component {
         }
 
 		const updateProfileData = new FormData();
-        // updateProfileData.append('employee_id', selectedUser.employeeId);
-        updateProfileData.append('first_name', selectedUser.first_name);
-        updateProfileData.append('last_name', selectedUser.last_name);
-        updateProfileData.append('email', selectedUser.email);
-        updateProfileData.append('selected_role', selectedUser.role);
-		updateProfileData.append('dob', selectedUser.dob);
-        updateProfileData.append('department_id', selectedUser.department_id);
-        updateProfileData.append('logged_in_employee_id', logged_in_employee_id);
-        updateProfileData.append('logged_in_employee_role', logged_in_employee_role);
+
+		const data = {
+			first_name: selectedUser.first_name,
+			last_name: selectedUser.last_name,
+			email: selectedUser.email,
+			selected_role: selectedUser.role,
+			dob: selectedUser.dob,
+			department_id: selectedUser.department_id,
+			logged_in_employee_id: logged_in_employee_id,
+			logged_in_employee_role:logged_in_employee_role
+		};
+
+    	appendDataToFormData(updateProfileData, data);
 
         // Example API call
 		getService.editCall('get_employees.php', 'edit', updateProfileData, null, selectedUser.id)

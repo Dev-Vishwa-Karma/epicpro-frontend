@@ -4,9 +4,9 @@ import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import DeleteModal from '../../common/DeleteModal';
 import { validateFields } from '../../common/validations';
-import HolidaysTable from './HolidaysTable';
-import AddHolidayModal from './AddHolidayModal';
-import EditHolidayModal from './EditHolidayModal';
+import HolidaysTable from './elements/HolidaysTable';
+import AddHolidayModal from './elements/AddHolidayModal';
+import EditHolidayModal from './elements/EditHolidayModal';
 import AlertMessages from '../../common/AlertMessages';
 class Holidays extends Component {
 	constructor(props) {

@@ -4,10 +4,10 @@ import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import DeleteModal from '../../common/DeleteModal';
 import BlankState from '../../common/BlankState';
-import ImageModal from './ImageModal';
+import ImageModal from './elements/ImageModal';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
-import ImageUploadModal from './ImageUploadModal';
+import ImageUploadModal from './elements/ImageUploadModal';
 import GallerySkeleton from '../../common/skeletons/GallerySkeleton';
 class Gallery extends Component {
     constructor(props) {

@@ -5,8 +5,8 @@ import {
 } from '../../../actions/settingsAction';
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
-import EditModal from './EditModal';
-import ProjectCard from './ProjectCard';
+import EditModal from './elements/EditModal';
+import ProjectCard from './elements/ProjectCard';
 import { getService } from '../../../services/getService';
 import authService from '../../Authentication/authService';
 import BlankState from '../../common/BlankState';
