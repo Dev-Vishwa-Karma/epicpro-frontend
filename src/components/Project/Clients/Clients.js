@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
-import ClientInfoModal from "./ClientInfoModal";
-import ClientFieldModal from "./ClientFieldModal";
-import ClientCard from "./ClientCard";
+import ClientInfoModal from "./elements/ClientInfoModal";
+import ClientFieldModal from "./elements/ClientFieldModal";
+import ClientCard from "./elements/ClientCard";
 import DeleteModal from '../../common/DeleteModal';
 import { getService } from "../../../services/getService";
 import BlankState from "../../common/BlankState";

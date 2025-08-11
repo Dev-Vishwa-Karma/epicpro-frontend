@@ -6,11 +6,11 @@ import DeleteModal from '../../common/DeleteModal';
 import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
-import ReportTable from './ReportTable';
-import ViewReportModal from './ViewReportModal';
-import EditReportModal from './EditReportModal';
-import AddBreakModal from './AddBreakModal';
-import EditReportDetailsModal from './EditReportDetailsModal';
+import ReportTable from './elements/ReportTable';
+import ViewReportModal from './elements/ViewReportModal';
+import EditReportModal from './elements/EditReportModal';
+import AddBreakModal from './elements/AddBreakModal';
+import EditReportDetailsModal from './elements/EditReportDetailsModal';
 class Report extends Component {
 
     constructor(props) {

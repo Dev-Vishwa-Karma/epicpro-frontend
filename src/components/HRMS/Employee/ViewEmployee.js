@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import ReactCropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
-import CalendarWithTabs from './CalendarWithTabs';
+import CalendarWithTabs from './elements/CalendarWithTabs';
 import AlertMessages from '../../common/AlertMessages';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getService } from '../../../services/getService';

@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-import AlertMessages from '../../common/AlertMessages';
-import DepartmentModal from './DepartmentModal';
-import DeleteModal from '../../common/DeleteModal';
-import DepartmentTable from './DepartmentTable';
-import DepartmentGrid from './DepartmentGrid';
 import { getService } from '../../../services/getService';
-import { validateFields } from '../../common/validations';
+import AlertMessages from '../../common/AlertMessages';
+import DeleteModal from '../../common/DeleteModal';
 import TableSkeleton from "../../common/skeletons/TableSkeleton";
 import GridSkeleton from '../../common/skeletons/GridSkeleton';
+import { validateFields } from '../../common/validations';
+import DepartmentGrid from './elements/DepartmentGrid';
+import DepartmentModal from './elements/DepartmentModal';
+import DepartmentTable from './elements/DepartmentTable';
 class departments extends Component {
   constructor(props) {
     super(props);

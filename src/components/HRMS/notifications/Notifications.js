@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
-import NotificationTable from './NotificationTable';
+import NotificationTable from './elements/NotificationTable';
 import { getService } from '../../../services/getService';
 import dayjs from 'dayjs';
 import DeleteModal from '../../common/DeleteModal';
-import NotificationModal from './NotificationModal';
+import NotificationModal from './elements/NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
