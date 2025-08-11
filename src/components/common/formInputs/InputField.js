@@ -22,7 +22,7 @@ const InputField = ({
   autoComplete='off'
 }) => {
   return (
-    <div className={type !== 'file' ? 'form-group' : ''}>
+    <div className={type !== 'file' && type !== 'checkbox' ? 'form-group' : ''}>
       {label && <label className="form-label" htmlFor={name}>{label}</label>}
 
       {type === 'textarea' ? (
@@ -72,8 +72,19 @@ const InputField = ({
           multiple={multiple}
           style={style}
         />
-          ) : (
-        <form autoComplete={autoComplete}>
+      ) : type === 'checkbox' ? (
+          <input
+            id={name}
+            type="checkbox"
+            name={name}
+            className={`form-check-input${error ? ' is-invalid' : ''}`}
+            checked={value || false}
+            onChange={onChange}
+            required={required}
+            ref={refInput}
+            disabled={disabled}
+          />
+      ) : (
         <input
           id={name}
           type={type}
@@ -90,7 +101,6 @@ const InputField = ({
           min={min}
           autoComplete={autoComplete || 'off'}
         />
-        </form>
       )}
 
       {error && <div className="invalid-feedback d-block">{error}</div>}
