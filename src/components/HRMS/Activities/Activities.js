@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { breakInAction, breakDurationCalAction } from '../../../actions/settingsAction';
-import AlertMessages from '../../common/AlertMessages';
-import ActivitiesTime from './ActivitiesTime';
 import { getService } from '../../../services/getService';
-import DateFilterForm from '../../common/DateFilterForm';
-import AddBreakModal from './AddBreakModal';
-import BreakReasonModal from './BreakReasonModal';
+import AlertMessages from '../../common/AlertMessages';
+import { breakInAction, breakDurationCalAction } from '../../../actions/settingsAction';
 import { validateFields } from '../../common/validations';
+import DateFilterForm from '../../common/DateFilterForm';
+import ActivitiesTime from './elements/ActivitiesTime';
+import AddBreakModal from './elements/AddBreakModal';
+import BreakReasonModal from './elements/BreakReasonModal';
 class Activities extends Component {
   constructor(props) {
     super(props);

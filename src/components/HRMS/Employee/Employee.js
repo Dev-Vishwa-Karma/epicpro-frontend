@@ -1,21 +1,22 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import "react-datepicker/dist/react-datepicker.css";
+import { getService } from '../../../services/getService';
 import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
-import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
-import EmployeeLeaveTable from './EmployeeLeaveTable';
-import EmployeeTable from './EmployeeTable';
+import DateFilterForm from '../../common/DateFilterForm';
 import {
 	statisticsAction,
 	statisticsCloseAction
 } from '../../../actions/settingsAction';
-import AddLeaveRequestModal from './AddLeaveRequestModal';
-import EditLeaveRequestModal from './EditLeaveRequestModal';
-import LeaveStats from './LeaveStats';
-import DateFilterForm from '../../common/DateFilterForm';
+import AddLeaveRequestModal from './elements/AddLeaveRequestModal';
+import EditLeaveRequestModal from './elements/EditLeaveRequestModal';
+import LeaveStats from './elements/LeaveStats';
+import EmployeeLeaveTable from './elements/EmployeeLeaveTable';
+import EmployeeTable from './elements/EmployeeTable';
+
 
 class Employee extends Component {
 	constructor(props) {

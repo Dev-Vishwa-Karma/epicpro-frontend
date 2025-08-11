@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
-import CropperModal from './CropperModal';
+import CropperModal from './elements/CropperModal';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
 import InputField from '../../common/formInputs/InputField';
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
-import CheckFileAvailability from './CheckFileAvailability';
+import CheckFileAvailability from './elements/CheckFileAvailability';
 
 class EditEmployee extends Component {
     constructor(props) {

@@ -2,14 +2,14 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Fullcalender from "../../common/fullcalender";
 import ReportModal from "../Report/ReportModal";
-import TodoList from "./TodoList";
+import TodoList from "./elements/TodoList";
 import DeleteModal from "../../common/DeleteModal";
 import { getService } from "../../../services/getService";
 import { validateFields } from "../../common/validations";
 import AlertMessages from "../../common/AlertMessages";
 import YearSelector from "../../common/YearSelector";
-import EventList from "./EventList";
-import AddEventModal from "./AddEventModal";
+import EventList from "./elements/EventList";
+import AddEventModal from "./elements/AddEventModal";
 class Events extends Component {
   constructor(props) {
     super(props);

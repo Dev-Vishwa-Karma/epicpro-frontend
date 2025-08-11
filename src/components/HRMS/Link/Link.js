@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import LinkTable from './LinkTable';
-import LinkModal from './LinkModal';
+import LinkTable from './elements/LinkTable';
+import LinkModal from './elements/LinkModal';
 import DeleteModal from '../../common/DeleteModal';
 import DownloadModal from '../../common/DownloadModal';
 import AlertMessages from '../../common/AlertMessages';

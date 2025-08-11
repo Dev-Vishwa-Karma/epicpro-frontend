@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import authService from "../../Authentication/authService";
 import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
 import { getService } from '../../../services/getService';
-import DashboardTable from './DashboardTable';
+import DashboardTable from './elements/DashboardTable';
 
 class Dashboard extends Component {
 	constructor(props) {
