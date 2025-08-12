@@ -1,7 +1,8 @@
 import React from "react";
 import ListSkeleton from "../../../common/skeletons/ListSkeleton";
+import { formatDate } from "../../../../utils";
 
-const EventList = ({ loading, uniqueFilteredEvents2, logged_in_employee_role, formatDate, openDeleteModal }) => {
+const EventList = ({ loading, uniqueFilteredEvents2, logged_in_employee_role, openDeleteModal }) => {
   return (
     <div>
       {loading ? (

@@ -2,6 +2,7 @@ import React from 'react';
 import DatePicker from 'react-datepicker';
 import TextEditor from '../../../common/TextEditor';
 import InputField from '../../../common/formInputs/InputField'
+import { getTimeAsDate } from '../../../../utils';
 
 const EditReportModal = ({ 
     selectedModalReport,
@@ -12,7 +13,6 @@ const EditReportModal = ({
     todays_total_hours,
     report,
     error,
-    getTimeAsDate,
     handleChange,
     handleNotesChange,
     closeReportModal,

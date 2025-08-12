@@ -1,12 +1,11 @@
 import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
+import { formatDateTimeAMPM , isToday} from '../../../../utils';
 
 const ReportTable = ({ 
     currentReports, 
-    loading, 
-    formatDateTimeAMPM, 
-    isToday, 
+    loading,  
     openReportModal 
 }) => {
     return (

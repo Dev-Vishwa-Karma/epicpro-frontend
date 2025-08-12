@@ -11,6 +11,7 @@ import ViewReportModal from './elements/ViewReportModal';
 import EditReportModal from './elements/EditReportModal';
 import AddBreakModal from './elements/AddBreakModal';
 import EditReportDetailsModal from './elements/EditReportDetailsModal';
+import { getTimeAsDate, formatDate } from '../../../utils';
 class Report extends Component {
 
     constructor(props) {
@@ -426,95 +427,7 @@ class Report extends Component {
                     this.setState({ addReportByAdminError: null });
                 }, 5000);
             });
-    };
-
-    parseTimeStringToDate = (timeString) => {
-        // Handles both "10:30 AM" and "2025-04-21 10:30"
-        const ampmMatch = timeString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-        if (!ampmMatch) return null;
-        let hours = parseInt(ampmMatch[1]);
-
-        const minutes = parseInt(ampmMatch[2]);
-        const ampm = ampmMatch[3]?.toUpperCase();
-
-        if (ampm === 'PM' && hours < 12) hours += 12;
-        if (ampm === 'AM' && hours === 12) hours = 0;
-
-        const date = new Date();
-        date.setHours(hours);
-        date.setMinutes(minutes);
-        date.setSeconds(0);
-        date.setMilliseconds(0);
-
-        return date;
-    };
-
-    // Format date and time
-    formatDateTimeAMPM = (timeString) => {
-        if (!timeString || typeof timeString !== 'string') return '';
-
-        // If input is in format "YYYY-MM-DD HH:mm" or "YYYY-MM-DD HH:mm:ss"
-        if (timeString.includes(' ')) {
-            const parts = timeString.split(' ');
-            timeString = parts[1]; // Extract the time part
-        }
-
-        const [hours, minutes, seconds = '00'] = timeString.split(':');
-        const now = new Date();
-
-        now.setHours(parseInt(hours, 10));
-        now.setMinutes(parseInt(minutes, 10));
-        now.setSeconds(parseInt(seconds, 10));
-        now.setMilliseconds(0);
-
-        if (isNaN(now.getTime())) {
-            console.warn("Invalid time format:", timeString);
-            return '';
-        }
-
-        return now.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        });
-    };
-
-    getTimeAsDate = (time) => {
-        if (!time) return null;
-    
-        // Handle "2025-04-21 19:30" or just "10:30 AM"
-        if (typeof time === 'string') {
-            // If it includes date part, extract just the time
-            if (time.includes(' ')) {
-                const parts = time.split(' ');
-                const timePart = parts.length === 2 ? parts[1] : parts[0];
-                time = timePart;
-            }
-    
-            // Handle AM/PM
-            const ampmMatch = time.match(/(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
-            if (!ampmMatch) return null;
-    
-            let hours = parseInt(ampmMatch[1]);
-            const minutes = parseInt(ampmMatch[2]);
-            const ampm = ampmMatch[3]?.toUpperCase();
-    
-            if (ampm === 'PM' && hours < 12) hours += 12;
-            if (ampm === 'AM' && hours === 12) hours = 0;
-    
-            const now = new Date();
-            now.setHours(hours);
-            now.setMinutes(minutes);
-            now.setSeconds(0);
-            now.setMilliseconds(0);
-    
-            return now;
-        }
-    
-        if (time instanceof Date) return time;
-    
-        return null;
-    };    
+    };   
 
     openReportModal = (report) => {
         this.setState({ 
@@ -551,8 +464,8 @@ class Report extends Component {
             : parseInt(break_duration_in_minutes || 0, 10);
 
         // Parse using consistent utility
-        const startDate = this.getTimeAsDate(rawStart);
-        const endDate = this.getTimeAsDate(rawEnd);
+        const startDate = getTimeAsDate(rawStart);
+        const endDate = getTimeAsDate(rawEnd);
     
         if (startDate && endDate) {
             const workingDuration = this.calculateWorkingHours(startDate, endDate, breakMinutes);
@@ -567,8 +480,8 @@ class Report extends Component {
 
     calculateWorkingHours = (start, end, breakMinutes) => {
 		try {
-            start = this.getTimeAsDate(start);
-            end = this.getTimeAsDate(end);
+            start = getTimeAsDate(start);
+            end = getTimeAsDate(end);
 
 			if (!(start instanceof Date) || isNaN(start)) return "00:00";
 			if (!(end instanceof Date) || isNaN(end)) return "00:00";
@@ -627,7 +540,9 @@ class Report extends Component {
         }
     
         return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-    };    
+    };   
+    
+    
 
     validateUpdateReportForm = () => {
 		const { report, start_time, end_time, break_duration_in_minutes, todays_total_hours } = this.state;
@@ -735,15 +650,6 @@ class Report extends Component {
 
     fetchReports = () => {
         const { fromDate, toDate, selectedReportEmployee } = this.state;
-    
-        const formatDate = (date) => {
-            if (!date) return '';
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); 
-            const day = String(date.getDate()).padStart(2, '0'); 
-            return `${year}-${month}-${day}`; 
-        };
-
         getService.getCall('reports.php', {
             action: 'view',
             user_id:selectedReportEmployee,
@@ -791,18 +697,6 @@ class Report extends Component {
             errorMessage: "",
             error: { report: '', start_time: '', end_time: '', break_duration_in_minutes: '' },
         });
-    };
-
-    // Get the todays date and based on this update the edit report button
-    isToday = (dateString) => {
-        const inputDate = new Date(dateString);
-        const today = new Date();
-    
-        return (
-            inputDate.getFullYear() === today.getFullYear() &&
-            inputDate.getMonth() === today.getMonth() &&
-            inputDate.getDate() === today.getDate()
-        );
     };
 
     // Handle Pagination of employee listing and employee leaves listing
@@ -943,8 +837,6 @@ class Report extends Component {
                                         <ReportTable 
                                             currentReports={currentReports}
                                             loading={loading}
-                                            formatDateTimeAMPM={this.formatDateTimeAMPM}
-                                            isToday={this.isToday}
                                             openReportModal={this.openReportModal}
                                         />
                                     </div>
@@ -964,7 +856,6 @@ class Report extends Component {
                     {/* Modal for viewing report details */}
                     <ViewReportModal 
                         selectedModalReport={selectedModalReport}
-                        formatDateTimeAMPM={this.formatDateTimeAMPM}
                         closeReportModal={this.closeReportModal}
                     />
 
@@ -978,7 +869,6 @@ class Report extends Component {
                         todays_total_hours={todays_total_hours}
                         report={this.state.report}
                         error={this.state.error}
-                        getTimeAsDate={this.getTimeAsDate}
                         handleChange={this.handleChange}
                         handleNotesChange={this.handleNotesChange}
                         closeReportModal={this.closeReportModal}

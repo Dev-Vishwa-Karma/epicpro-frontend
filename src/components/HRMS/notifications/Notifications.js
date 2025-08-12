@@ -9,6 +9,7 @@ import NotificationModal from './elements/NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
+import { formatDate } from '../../../utils';
 class Notifications extends Component {
     constructor(props) {
 		super(props);
@@ -264,13 +265,6 @@ class Notifications extends Component {
     };
 
     handleDateChange = (date, type) => {
-        const formatDate = (date) => {
-            if (!date) return '';
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); 
-            const day = String(date.getDate()).padStart(2, '0'); 
-            return `${year}-${month}-${day}`; 
-        };
         if (date) {
         const newDate = formatDate(new Date(date));
         if (type === 'fromDate') {
