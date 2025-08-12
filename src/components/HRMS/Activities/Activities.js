@@ -8,15 +8,10 @@ import DateFilterForm from '../../common/DateFilterForm';
 import ActivitiesTime from './elements/ActivitiesTime';
 import AddBreakModal from './elements/AddBreakModal';
 import BreakReasonModal from './elements/BreakReasonModal';
-import { appendDataToFormData } from '../../../utils';
+import { appendDataToFormData, getToday, formatDate } from '../../../utils';
 class Activities extends Component {
   constructor(props) {
     super(props);
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${yyyy}-${mm}-${dd}`;
     this.state = {
       activities: [],
       error: null,
@@ -33,8 +28,8 @@ class Activities extends Component {
       errorMessage: "",
       showError: false,
       ButtonLoading: false,
-      filterFromDate: todayStr,
-      filterToDate: todayStr,
+      filterFromDate: getToday(),
+      filterToDate: getToday(),
       onHandleApply: false,
       colbutton: (window.user.role === "admin" || window.user.role === "super_admin") ? 4 : 6,
       col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
@@ -106,14 +101,7 @@ class Activities extends Component {
     }
   }
 
-    handleDateChange = (date, type) => {
-              const formatDate = (date) => {
-          if (!date) return '';
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0'); 
-          const day = String(date.getDate()).padStart(2, '0'); 
-          return `${year}-${month}-${day}`; 
-      };
+  handleDateChange = (date, type) => {
       if (date) {
           const newDate = formatDate(new Date(date));
           if (type === 'fromDate') {

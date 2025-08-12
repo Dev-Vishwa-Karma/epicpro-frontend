@@ -1,8 +1,8 @@
 import React from 'react';
+import { formatDateTimeAMPM } from '../../../../utils';
 
 const ViewReportModal = ({ 
-    selectedModalReport, 
-    formatDateTimeAMPM, 
+    selectedModalReport,
     closeReportModal 
 }) => {
     return (

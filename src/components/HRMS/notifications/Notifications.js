@@ -3,21 +3,20 @@ import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
 import NotificationTable from './elements/NotificationTable';
 import { getService } from '../../../services/getService';
-import dayjs from 'dayjs';
 import DeleteModal from '../../common/DeleteModal';
 import NotificationModal from './elements/NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
+import { formatDate, getToday } from '../../../utils';
 class Notifications extends Component {
     constructor(props) {
 		super(props);
-        let todayStr = dayjs().format('YYYY-MM-DD');
 		this.state = {
             notificationData: [],
             employeeData:[],
-            filterFromDate: todayStr,
-            filterToDate: todayStr,
+            filterFromDate: getToday(),
+            filterToDate: getToday(),
             filterEmployeeId:"",
             loading: true,
             notificationToDelete: null,
@@ -264,13 +263,6 @@ class Notifications extends Component {
     };
 
     handleDateChange = (date, type) => {
-        const formatDate = (date) => {
-            if (!date) return '';
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); 
-            const day = String(date.getDate()).padStart(2, '0'); 
-            return `${year}-${month}-${day}`; 
-        };
         if (date) {
         const newDate = formatDate(new Date(date));
         if (type === 'fromDate') {

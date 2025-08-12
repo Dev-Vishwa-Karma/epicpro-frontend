@@ -16,7 +16,7 @@ import EditLeaveRequestModal from './elements/EditLeaveRequestModal';
 import LeaveStats from './elements/LeaveStats';
 import EmployeeLeaveTable from './elements/EmployeeLeaveTable';
 import EmployeeTable from './elements/EmployeeTable';
-
+import { formatDate } from '../../../utils';
 
 class Employee extends Component {
 	constructor(props) {
@@ -167,12 +167,6 @@ class Employee extends Component {
 			// 	fromDate: firstDay,
 			// 	toDate: lastDay
 			// });
-			const formatDate = (date) => {
-				const year = date.getFullYear();
-				const month = String(date.getMonth() + 1).padStart(2, '0'); 
-				const day = String(date.getDate()).padStart(2, '0'); 
-				return `${year}-${month}-${day}`; 
-			};
 
 			// Fetch employees & leaves based on role using EmployeeService
 			Promise.all([
@@ -222,14 +216,6 @@ class Employee extends Component {
 
 	fetchEmployeeLeaves = () => {
 		const { fromDate, toDate, selectedLeaveEmployee } = this.state;
-        
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); 
-            const day = String(date.getDate()).padStart(2, '0'); 
-            return `${year}-${month}-${day}`; 
-        };
-
         const fromDateFormatted = fromDate ? formatDate(fromDate) : null;
         const toDateFormatted = toDate ? formatDate(toDate) : null;
 
