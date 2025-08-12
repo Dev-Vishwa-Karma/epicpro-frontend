@@ -48,6 +48,8 @@ class ApplicantTable extends Component {
       onPageChange,
       onStatusChange,
       onDelete,
+      onSync,
+      syncing,
     } = this.props;
 
     const { selectedApplicant, showViewModal } = this.state;
@@ -55,8 +57,26 @@ class ApplicantTable extends Component {
     return (
       <div className="col-lg-12 col-md-12 col-sm-12">
         <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">Applicants</h3>
+          <div className="card-header d-flex align-items-center justify-content-between">
+            <h3 className="card-title mb-0">Applicants</h3>
+            <button
+              type="button"
+              className="btn btn-sm btn-primary"
+              onClick={onSync}
+              disabled={syncing}
+              title="Sync third-party applicants"
+            >
+              {syncing ? (
+                <>
+                  <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                  Syncing...
+                </>
+              ) : (
+                <>
+                  <i className="fa fa-refresh mr-1" /> Sync
+                </>
+              )}
+            </button>
           </div>
           <div className="card-body">
             <div className="table-responsive">

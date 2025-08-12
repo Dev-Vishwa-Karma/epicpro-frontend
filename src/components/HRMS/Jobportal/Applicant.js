@@ -20,6 +20,7 @@ class Applicant extends Component {
     showDeleteModal: false,
     deleteId: null,
     isDeleting: false,
+    isSyncing: false,
   };
 
   componentDidMount() {
@@ -83,6 +84,29 @@ class Applicant extends Component {
       });
   };
 
+  // New: trigger backend sync and refresh list
+  handleSync = () => {
+    if (this.state.isSyncing) return;
+    this.setState({ isSyncing: true });
+    
+    // Correct way to use addCall:
+    getService.addCall('applicants.php', 'sync_applicant')  // <-- Note the change here
+      .then(data => {
+        if (data.status === 'success') {
+          alert(`Synced ${data.data.inserted} new applicants`);
+          this.fetchApplicants();
+        } else {
+          alert(data.data.message || 'Sync failed');
+        }
+      })
+      .catch(err => {
+        alert(err?.message || 'Sync failed');
+      })
+      .finally(() => {
+        this.setState({ isSyncing: false });
+      });
+};
+
   openDeleteModal = (id) => {
     this.setState({ showDeleteModal: true, deleteId: id });
   };
@@ -118,7 +142,7 @@ class Applicant extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting } = this.state;
+    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing } = this.state;
     return (
       <>
         <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
@@ -142,6 +166,8 @@ class Applicant extends Component {
                 onPageChange={this.handlePageChange}
                 onStatusChange={this.handleStatusChange}
                 onDelete={this.openDeleteModal}
+                onSync={this.handleSync}
+                syncing={isSyncing}
               />
               {/* Delete Modal */}
               <DeleteModal
