@@ -166,6 +166,9 @@ class EditEmployee extends Component {
                     visibilityPriority: employee.visibility_priority || 0,
                     statisticsVisibilityStatus: String(employee.statistics_visibility_status || "0"),
                     status: String(employee.status || "0"),
+                }, () => {
+                    // After employee data is loaded.
+                    this.fetchLatestSalaryDetails();
                 });
 
             } else {
@@ -195,10 +198,12 @@ class EditEmployee extends Component {
                 toDate: detail.to_date || "",
             }));
     
+            console.log('Salary details from location state:', formattedSalaryDetails);
+            console.log('Setting initial salary details from location state');
             // Store formatted data in state
             this.setState({ salaryDetails: formattedSalaryDetails });
         } else {
-            console.error("No salary details found in location state.");
+            console.log('No salary details found in location state, will fetch from backend');
         }
     }
 
@@ -493,6 +498,7 @@ class EditEmployee extends Component {
         updateEmployeeData.append('ifsc_code', ifscCode);
         updateEmployeeData.append('bank_address', bankAddress);
         if (salaryDetails && Array.isArray(salaryDetails)) {
+            console.log('Salary details being sent:', salaryDetails);
             salaryDetails.forEach((detail, index) => {
                 updateEmployeeData.append(`salaryDetails[${index}][id]`, detail.salaryId);
                 updateEmployeeData.append(`salaryDetails[${index}][source]`, detail.salarySource);
@@ -519,6 +525,12 @@ class EditEmployee extends Component {
         
         updateEmployeeData.append("logged_in_employee_id", id);
         updateEmployeeData.append('logged_in_employee_role', role); // Logged-in employee role
+
+        console.log('FormData contents before sending:');
+        for (let pair of updateEmployeeData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
         getService.editCall('get_employees.php','edit',updateEmployeeData, null, employeeId )
         .then((data) => {
             if (data && data.status === "success") {
@@ -539,6 +551,12 @@ class EditEmployee extends Component {
                     };
                 });
                 this.setState({ password:"" });
+                
+                // Fetch latest salary details after successful update
+                setTimeout(() => {
+                    this.fetchLatestSalaryDetails();
+                }, 1000);
+                
                 setTimeout(this.dismissMessages, 5000);
             } else {
                 console.error("Failed to update employee. Response:", data);
@@ -575,6 +593,46 @@ class EditEmployee extends Component {
     handleCropperCancel = () => {
         this.setState({ showCropper: false, cropperImage: null });
     };
+
+    // Fetch latest salary details from backend
+    fetchLatestSalaryDetails = () => {
+        const { employeeId } = this.state;
+        console.log('fetchLatestSalaryDetails called with employeeId:', employeeId);
+        
+        if (!employeeId) {
+            console.log('No employeeId, returning early');
+            return;
+        }
+
+        console.log('Making API call to fetch salary details...');
+        getService.getCall('employee_salary_details.php', {
+            action: 'view',
+            employee_id: employeeId
+        })
+        .then(data => {
+            console.log('Salary details API response:', data);
+            if (data && data.data) {
+                // Transform the salary details to match the expected format
+                const formattedSalaryDetails = data.data.map((detail) => ({
+                    salaryId: detail.id || '',
+                    salarySource: detail.source || "",
+                    salaryAmount: detail.amount || 0,
+                    fromDate: detail.from_date || "",
+                    toDate: detail.to_date || "",
+                }));
+                
+                console.log('Current salary details in state before update:', this.state.salaryDetails);
+                this.setState({ salaryDetails: formattedSalaryDetails }, () => {
+                    console.log('State updated with new salary details:', this.state.salaryDetails);
+                });
+            } else {
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching latest salary details:", error);
+        });
+    };
+
     render() {
         const { fixNavbar } = this.props;
         const { firstName, lastName, email, gender, photo, photoUrl, dob, joiningDate, mobile1, mobile2, password, address1, address2, emergencyContact1, emergencyContact2, emergencyContact3, skillsFrontend, skillsBackend,  bankAccountName, bankAccountNo, bankName, ifscCode, bankAddress, salaryDetails, aadharCardNumber, aadharCardFile, aadharCardFileUrl, drivingLicenseNumber, drivingLicenseFile, drivingLicenseFileUrl, panCardNumber, panCardFile, panCardFileUrl, facebook, twitter, linkedin, instagram, upworkProfile, resume, resumeUrl, visibilityPriority, statisticsVisibilityStatus, status, showSuccess,successMessage,showError, errorMessage } = this.state;

@@ -8,6 +8,7 @@ import HolidaysTable from './elements/HolidaysTable';
 import AddHolidayModal from './elements/AddHolidayModal';
 import EditHolidayModal from './elements/EditHolidayModal';
 import AlertMessages from '../../common/AlertMessages';
+import { appendDataToFormData } from '../../../utils';
 class Holidays extends Component {
 	constructor(props) {
 		super(props);
@@ -158,10 +159,14 @@ class Holidays extends Component {
 			this.setState({ ButtonLoading: true });
 			const { employee_id, event_name, event_date} = this.state;
 			const addHolidayData = new FormData();
-			addHolidayData.append('employee_id', employee_id);
-			addHolidayData.append('event_name', event_name);
-			addHolidayData.append('event_date', event_date);
-			addHolidayData.append('event_type', 'holiday');
+
+			const data = {
+				employee_id: employee_id,
+				event_name: event_name,
+				event_date: event_date,
+				event_type:'holiday'
+			}
+			appendDataToFormData(addHolidayData, data)
 			// API call to add employee leave
 			 getService.addCall('events.php','add',addHolidayData )
 			.then((data) => {
@@ -249,11 +254,14 @@ class Holidays extends Component {
         if (!selectedHoliday) return;
 
 		const updateHolidayData = new FormData();
-        updateHolidayData.append('employee_id', selectedHoliday.employee_id);
-		updateHolidayData.append('event_name', selectedHoliday.event_name);
-		updateHolidayData.append('event_date', selectedHoliday.event_date);
-		updateHolidayData.append('event_type', 'holiday');
 
+		const data = {
+				employee_id: selectedHoliday.employee_id,
+				event_name: selectedHoliday.event_name,
+				event_date: selectedHoliday.event_date,
+				event_type:'holiday'
+			}
+		appendDataToFormData(updateHolidayData, data)
         // update holiday API call
 		getService.editCall('events.php', 'edit', updateHolidayData, selectedHoliday.id, null)
         .then((data) => {

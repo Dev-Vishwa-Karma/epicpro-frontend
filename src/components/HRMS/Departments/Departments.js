@@ -9,6 +9,7 @@ import { validateFields } from '../../common/validations';
 import DepartmentGrid from './elements/DepartmentGrid';
 import DepartmentModal from './elements/DepartmentModal';
 import DepartmentTable from './elements/DepartmentTable';
+import { appendDataToFormData } from '../../../utils';
 class departments extends Component {
   constructor(props) {
     super(props);
@@ -265,8 +266,14 @@ class departments extends Component {
     this.setState({ ButtonLoading: true });
 
     const addDepartmentFormData = new FormData();
-    addDepartmentFormData.append('department_name', department_name);
-    addDepartmentFormData.append('department_head', department_head);
+    // addDepartmentFormData.append('department_name', department_name);
+    // addDepartmentFormData.append('department_head', department_head);
+
+    const data = {
+      department_name: department_name,
+      department_head: department_head
+    }
+    appendDataToFormData(addDepartmentFormData, data)
 
     // API call to add department
     getService.addCall('departments.php', 'add', addDepartmentFormData)
