@@ -1,6 +1,7 @@
 import React from 'react';
+import { getColor } from '../../../utils';
 
-const CheckboxGroup = ({ label, options, selected = [], onChange, getColor }) => {
+const CheckboxGroup = ({ label, options, selected = [], onChange }) => {
   return (
     <div className="col-sm-6 col-md-12 mb-3">
       <label className="form-label">{label}</label>

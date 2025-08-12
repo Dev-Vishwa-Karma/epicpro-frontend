@@ -10,6 +10,7 @@ import AlertMessages from "../../common/AlertMessages";
 import YearSelector from "../../common/YearSelector";
 import EventList from "./elements/EventList";
 import AddEventModal from "./elements/AddEventModal";
+import { formatDate } from "../../../utils";
 class Events extends Component {
   constructor(props) {
     super(props);
@@ -110,9 +111,9 @@ class Events extends Component {
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
       const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-      const formatDate = (date) => date.toISOString().split("T")[0];
-      startDate = formatDate(firstDay);
-      endDate = formatDate(lastDay);
+      const tformatDate = (date) => date.toISOString().split("T")[0];
+      startDate = tformatDate(firstDay);
+      endDate = tformatDate(lastDay);
     }
 
     getService
@@ -508,7 +509,7 @@ class Events extends Component {
             if (leave.is_half_day === "1") {
               events.push({
                 title: "",
-                start: this.formatDate(d),
+                start: formatDate(d),
                 className: "half-day-leave-event",
                 allDay: true,
                 // color: "#FFA500"
@@ -516,7 +517,7 @@ class Events extends Component {
             } else {
               events.push({
                 title: "",
-                start: this.formatDate(d),
+                start: formatDate(d),
                 className: "leave-event",
                 allDay: true,
               });
@@ -526,14 +527,6 @@ class Events extends Component {
       }
     });
     return events;
-  };
-
-  formatDate = (date) => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = `0${d.getMonth() + 1}`.slice(-2);
-    const day = `0${d.getDate()}`.slice(-2);
-    return `${year}-${month}-${day}`;
   };
 
   // Add this method to calculate missing reports for any employee
@@ -546,7 +539,7 @@ class Events extends Component {
     let currentDate = new Date(startDate);
 
     while (currentDate < today && currentDate <= endDate) {
-      const dateStr = this.formatDate(currentDate);
+      const dateStr = formatDate(currentDate);
 
       const hasReport = this.hasReportForDate(dateStr, workingHoursReports);
       // this.state.allEvents
@@ -573,9 +566,9 @@ class Events extends Component {
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), 1, 1);
       const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the current year
-      const formatDate = (date) => date.toISOString().split("T")[0];
-      startDate = formatDate(firstDay);
-      endDate = formatDate(lastDay);
+      const tformatDate = (date) => date.toISOString().split("T")[0];
+      startDate = tformatDate(firstDay);
+      endDate = tformatDate(lastDay);
     }
     const birthdayEvents = this.state.employees
       .map((employee) => {
@@ -591,7 +584,7 @@ class Events extends Component {
         return {
           id: `birthday_${employee.id}`,
           event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
-          event_date: this.formatDate(birthdayDate),
+          event_date: formatDate(birthdayDate),
           event_type: "birthday",
           employee_id: employee.id,
         };
@@ -678,35 +671,6 @@ class Events extends Component {
     });
   };
 
-  // Add formatDateTimeAMPM function
-  formatDateTimeAMPM = (timeString) => {
-    if (!timeString || typeof timeString !== "string") return "";
-
-    // If input is in format "YYYY-MM-DD HH:mm" or "YYYY-MM-DD HH:mm:ss"
-    if (timeString.includes(" ")) {
-      const parts = timeString.split(" ");
-      timeString = parts[1]; // Extract the time part
-    }
-
-    const [hours, minutes, seconds = "00"] = timeString.split(":");
-    const now = new Date();
-
-    now.setHours(parseInt(hours, 10));
-    now.setMinutes(parseInt(minutes, 10));
-    now.setSeconds(parseInt(seconds, 10));
-    now.setMilliseconds(0);
-
-    if (isNaN(now.getTime())) {
-      console.warn("Invalid time format:", timeString);
-      return "";
-    }
-
-    return now.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
 
   render() {
     const { fixNavbar } = this.props;
@@ -755,7 +719,7 @@ class Events extends Component {
 
         return {
           ...event,
-          event_date: this.formatDate(eventDate), // Convert back to YYYY-MM-DD format
+          event_date: formatDate(eventDate), // Convert back to YYYY-MM-DD format
         };
       })
       .filter((event) => {
@@ -996,7 +960,6 @@ class Events extends Component {
                         loading={loading}
                         uniqueFilteredEvents2={uniqueFilteredEvents2}
                         logged_in_employee_role={logged_in_employee_role}
-                        formatDate={this.formatDate}
                         openDeleteModal={this.openDeleteModal}
                       />
                       {(logged_in_employee_role === "admin" ||

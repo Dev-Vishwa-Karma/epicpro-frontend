@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { formatDateTimeAMPM } from '../../../utils';
 
 class ReportModal extends Component {
 	componentDidMount() {
@@ -19,30 +20,6 @@ class ReportModal extends Component {
 	componentWillUnmount() {
 		document.body.style.overflow = '';
 	}
-
-	formatDateTimeAMPM = (timeString) => {
-		if (!timeString || typeof timeString !== 'string') return '';
-
-		if (timeString.includes(' ')) {
-			const parts = timeString.split(' ');
-			timeString = parts[1]; // Extract the time part
-		}
-
-		const [hours, minutes, seconds = '00'] = timeString.split(':');
-		const now = new Date();
-		now.setHours(parseInt(hours, 10));
-		now.setMinutes(parseInt(minutes, 10));
-		now.setSeconds(parseInt(seconds, 10));
-		now.setMilliseconds(0);
-
-		if (isNaN(now.getTime())) return '';
-
-		return now.toLocaleTimeString('en-US', {
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: true
-		});
-	};
 
 	render() {
 		const { show, report, onClose, userRole } = this.props;
@@ -97,10 +74,10 @@ class ReportModal extends Component {
 									/>
 								</div>
 								<div className="col-md-12 mb-2">
-									<strong>Start Time:</strong> {this.formatDateTimeAMPM(report.start_time)}
+									<strong>Start Time:</strong> {formatDateTimeAMPM(report.start_time)}
 								</div>
 								<div className="col-md-12 mb-2">
-									<strong>End Time:</strong> {this.formatDateTimeAMPM(report.end_time)}
+									<strong>End Time:</strong> {formatDateTimeAMPM(report.end_time)}
 								</div>
 								<div className="col-md-12 mb-2">
 									<strong>Break Duration:</strong> {report.break_duration_in_minutes} Mins

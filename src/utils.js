@@ -11,3 +11,108 @@ export function appendDataToFormData(formData, dataObject) {
     }
   }
 }
+
+export function getColor(skill) {
+    const colors = {
+      HTML: "pink",
+      CSS: "blue",
+      JavaScript: "yellow",
+      React: "cyan",
+      Angular: "red",
+      Vue: "green",
+      PHP: "pink",
+      Laravel: "blue",
+      Python: "yellow",
+      "Node.js": "cyan",
+      Symfony: "red",
+      Django: "purple",
+      "Ruby on Rails": "orange",
+    };
+    return colors[skill] || "gray";
+  }
+
+export function formatDateTimeAMPM(timeString){
+        if (!timeString || typeof timeString !== 'string') return '';
+
+        // If input is in format "YYYY-MM-DD HH:mm" or "YYYY-MM-DD HH:mm:ss"
+        if (timeString.includes(' ')) {
+            const parts = timeString.split(' ');
+            timeString = parts[1]; // Extract the time part
+        }
+
+        const [hours, minutes, seconds = '00'] = timeString.split(':');
+        const now = new Date();
+
+        now.setHours(parseInt(hours, 10));
+        now.setMinutes(parseInt(minutes, 10));
+        now.setSeconds(parseInt(seconds, 10));
+        now.setMilliseconds(0);
+
+        if (isNaN(now.getTime())) {
+            console.warn("Invalid time format:", timeString);
+            return '';
+        }
+
+        return now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+};
+
+export function getTimeAsDate (time) {
+        if (!time) return null;
+    
+        // Handle "2025-04-21 19:30" or just "10:30 AM"
+        if (typeof time === 'string') {
+            // If it includes date part, extract just the time
+            if (time.includes(' ')) {
+                const parts = time.split(' ');
+                const timePart = parts.length === 2 ? parts[1] : parts[0];
+                time = timePart;
+            }
+    
+            // Handle AM/PM
+            const ampmMatch = time.match(/(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
+            if (!ampmMatch) return null;
+    
+            let hours = parseInt(ampmMatch[1]);
+            const minutes = parseInt(ampmMatch[2]);
+            const ampm = ampmMatch[3]?.toUpperCase();
+    
+            if (ampm === 'PM' && hours < 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+    
+            const now = new Date();
+            now.setHours(hours);
+            now.setMinutes(minutes);
+            now.setSeconds(0);
+            now.setMilliseconds(0);
+    
+            return now;
+        }
+    
+        if (time instanceof Date) return time;
+    
+        return null;
+    }; 
+
+export function isToday(dateString) {
+        const inputDate = new Date(dateString);
+        const today = new Date();
+  
+        return (
+            inputDate.getFullYear() === today.getFullYear() &&
+            inputDate.getMonth() === today.getMonth() &&
+            inputDate.getDate() === today.getDate()
+        );
+    };
+
+export function formatDate(date){
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = `0${d.getMonth() + 1}`.slice(-2);
+    const day = `0${d.getDate()}`.slice(-2);
+    return `${year}-${month}-${day}`;
+};
+

@@ -798,7 +798,6 @@ class AddEmployee extends Component {
                             options={frontendSkills}
                             selected={skillsFrontend}
                             onChange={(e) => this.handleSkillChange(e, "skillsFrontend")}
-                            getColor={this.getColor}
                           />
 
                           {/* Backend Skills */}
@@ -807,7 +806,6 @@ class AddEmployee extends Component {
                             options={backendSkills}
                             selected={skillsBackend}
                             onChange={(e) => this.handleSkillChange(e, "skillsBackend")}
-                            getColor={this.getColor}
                           />
                         </div>
 
@@ -1178,25 +1176,6 @@ class AddEmployee extends Component {
     );
   }
 
-  // Helper function to assign color tags
-  getColor(skill) {
-    const colors = {
-      HTML: "pink",
-      CSS: "blue",
-      JavaScript: "yellow",
-      React: "cyan",
-      Angular: "red",
-      Vue: "green",
-      PHP: "pink",
-      Laravel: "blue",
-      Python: "yellow",
-      "Node.js": "cyan",
-      Symfony: "red",
-      Django: "purple",
-      "Ruby on Rails": "orange",
-    };
-    return colors[skill] || "gray";
-  }
 }
 
 const mapStateToProps = (state) => ({

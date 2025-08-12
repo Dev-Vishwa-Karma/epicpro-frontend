@@ -1028,7 +1028,6 @@ class CalendarWithTabs extends Component {
                                                             options={frontendSkills}
                                                             selected={skillsFrontend}
                                                             onChange={(e) => this.handleSkillChange(e, 'frontend')}
-                                                            getColor={this.getColor}
                                                         />
 
                                                         <CheckboxGroup
@@ -1036,7 +1035,6 @@ class CalendarWithTabs extends Component {
                                                             options={backendSkills}
                                                             selected={skillsBackend}
                                                             onChange={(e) => this.handleSkillChange(e, 'backend')}
-                                                            getColor={this.getColor}
                                                         />
                                                     </div>
 
@@ -1064,25 +1062,6 @@ class CalendarWithTabs extends Component {
                 </div>
             </>
         )
-    }
-
-    getColor(skill) {
-        const colors = {
-            HTML: "pink",
-            CSS: "blue",
-            JavaScript: "yellow",
-            React: "cyan",
-            Angular: "red",
-            Vue: "green",
-            PHP: "pink",
-            Laravel: "blue",
-            Python: "yellow",
-            "Node.js": "cyan",
-            Symfony: "red",
-            Django: "purple",
-            "Ruby on Rails": "orange",
-        };
-        return colors[skill] || "gray";
     }
 }
 
