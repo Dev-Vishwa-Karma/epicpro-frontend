@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import FullCalendar from 'fullcalendar-reactwrapper';
 import "fullcalendar-reactwrapper/dist/css/fullcalendar.min.css"
+import { formatDate } from '../../utils';
 
 class Fullcalender extends Component {
 	constructor(props) {
@@ -14,14 +15,6 @@ class Fullcalender extends Component {
             nextProps.defaultView !== this.props.defaultView
         );
     }
-
-    formatDate = (date) => {
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = (`0${d.getMonth() + 1}`).slice(-2);
-        const day = (`0${d.getDate()}`).slice(-2);
-        return `${year}-${month}-${day}`;
-    };
 
     render() {
         const { events, defaultDate, defaultView = 'month', alternateSatudays } = this.props;
@@ -46,24 +39,24 @@ class Fullcalender extends Component {
                     }}
                     dayRender={(date, cell) => {
                         const dateStr = date.format('YYYY-MM-DD');
-                        const startDate = this.formatDate(localStorage.getItem('startDate'));
-                        const endDate = this.formatDate(localStorage.getItem('endDate'));
+                        const startDate = formatDate(localStorage.getItem('startDate'));
+                        const endDate = formatDate(localStorage.getItem('endDate'));
 
                         if (events && events.length > 0) {
                             events.forEach((event) => {
                                 if (
                                     event.className === 'green-event' &&
                                     event.start === dateStr &&
-                                    this.formatDate(dateStr) >= startDate &&
-                                    this.formatDate(dateStr) <= endDate
+                                    formatDate(dateStr) >= startDate &&
+                                    formatDate(dateStr) <= endDate
                                 ) {
                                     cell.css('background-color', '#4FA845');
                                     cell.css('color', 'white');
                                 } else if (
                                     event.className === 'blue-event' &&
                                     event.start === dateStr &&
-                                    this.formatDate(dateStr) >= startDate &&
-                                    this.formatDate(dateStr) <= endDate
+                                    formatDate(dateStr) >= startDate &&
+                                    formatDate(dateStr) <= endDate
                                 ) {
                                     cell.css('background-color', '#0879FA');
                                     cell.css('color', 'white');
@@ -72,24 +65,24 @@ class Fullcalender extends Component {
                                         event.className === 'leave-event' ||
                                         event.className === 'missing-report-day') &&
                                     event.start === dateStr &&
-                                    this.formatDate(dateStr) >= startDate &&
-                                    this.formatDate(dateStr) <= endDate
+                                    formatDate(dateStr) >= startDate &&
+                                    formatDate(dateStr) <= endDate
                                 ) {
                                     cell.css('background-color', 'red');
                                     cell.css('color', 'white');
                                 } else if (
                                     event.className === 'daily-report' &&
                                     event.start === dateStr &&
-                                    this.formatDate(dateStr) >= startDate &&
-                                    this.formatDate(dateStr) <= endDate
+                                    formatDate(dateStr) >= startDate &&
+                                    formatDate(dateStr) <= endDate
                                 ) {
                                     cell.css('background-color', '#4FA845');
                                     cell.css('color', 'white');
                                 } else if (
                                     event.className === 'half-day-leave-event' &&
                                     event.start === dateStr &&
-                                    this.formatDate(dateStr) >= startDate &&
-                                    this.formatDate(dateStr) <= endDate
+                                    formatDate(dateStr) >= startDate &&
+                                    formatDate(dateStr) <= endDate
                                 ) {
                                     cell.css('background-color', '#87ceeb');
                                     cell.css('color', 'white');
@@ -102,7 +95,7 @@ class Fullcalender extends Component {
                                                 const saturday = JSON.parse(alternateSatuday.date);
                                                 saturday.forEach((element) => {
                                                     if (
-                                                        this.formatDate(date) === this.formatDate(element) &&
+                                                        formatDate(date) === formatDate(element) &&
                                                        ( event.className === 'missing-report-day' || 
                                                         event.className === 'leave-event')
                                                     ) {
@@ -121,7 +114,7 @@ class Fullcalender extends Component {
                                 if (
                                     cell.hasClass &&
                                     cell.hasClass('fc-sun') &&
-                                    this.formatDate(date) === this.formatDate(event.start) &&
+                                    formatDate(date) === formatDate(event.start) &&
                                     (event.className === 'leave-event' || event.className === 'missing-report-day')
                                 ) {
                                     cell.css('background-color', 'white');
@@ -131,10 +124,10 @@ class Fullcalender extends Component {
                     }}
                     viewRender={(view, element) => {
                         const type = view.name;
-                        const defaultStartDate = this.formatDate(view.intervalStart); // Use 
+                        const defaultStartDate = formatDate(view.intervalStart); // Use 
                         const endDate = new Date(view.intervalEnd);
                         endDate.setDate(endDate.getDate() - 1); // Adjust end date
-                        const defaultEndDate = this.formatDate(endDate);
+                        const defaultEndDate = formatDate(endDate);
 
                         if (
                             defaultEndDate !== localStorage.getItem('endDate') ||
