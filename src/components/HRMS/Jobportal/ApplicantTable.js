@@ -53,6 +53,7 @@ class ApplicantTable extends Component {
     } = this.props;
 
     const { selectedApplicant, showViewModal } = this.state;
+    const { syncSuccess } = this.props;
 
     return (
       <div className="col-lg-12 col-md-12 col-sm-12">
@@ -79,6 +80,12 @@ class ApplicantTable extends Component {
             </button>
           </div>
           <div className="card-body">
+            {/* Success message */}
+            {syncSuccess && (
+              <div className="alert alert-success" role="alert">
+                {syncSuccess}
+              </div>
+            )}
             <div className="table-responsive">
               <table className="table table-hover table-striped table-vcenter mb-0">
                 <thead>

@@ -11,7 +11,7 @@ import ViewReportModal from './elements/ViewReportModal';
 import EditReportModal from './elements/EditReportModal';
 import AddBreakModal from './elements/AddBreakModal';
 import EditReportDetailsModal from './elements/EditReportDetailsModal';
-import { getTimeAsDate, formatDate } from '../../../utils';
+import { getTimeAsDate, formatDate, appendDataToFormData } from '../../../utils';
 class Report extends Component {
 
     constructor(props) {
@@ -256,13 +256,25 @@ class Report extends Component {
         }
 
         const formData = new FormData();
-        formData.append('activity_id', existingActivityId);
-        formData.append('description', existingActivityDescription);
-        formData.append('in_time', existingActivityInTime);
-        formData.append('out_time', existingActivityOutTime);
-        formData.append('status', existingActivitySatus);
-        formData.append('updated_by', window.user.id); //updated by admin
-        formData.append('note', this.state.editNotes || '');
+        // formData.append('activity_id', existingActivityId);
+        // formData.append('description', existingActivityDescription);
+        // formData.append('in_time', existingActivityInTime);
+        // formData.append('out_time', existingActivityOutTime);
+        // formData.append('status', existingActivitySatus);
+        // formData.append('updated_by', window.user.id); //updated by admin
+        // formData.append('note', this.state.editNotes || '');
+
+        const data = {
+            activity_id: existingActivityId,
+            description: existingActivityDescription,
+            in_time: existingActivityInTime,
+            out_time: existingActivityOutTime,
+            status: existingActivitySatus,
+            updated_by: window.user.id,
+            note: this.state.editNotes || '',
+        }
+
+        appendDataToFormData(formData, data)
 
         // API call to add break
         getService.editCall('activities.php', 'report-by-admin', formData, null, null)
@@ -396,14 +408,24 @@ class Report extends Component {
         }
 
         const formData = new FormData();
-        formData.append('employee_id', selectedEmployee);
-        formData.append('activity_type', 'Punch');
-        formData.append('description', punchOutReport);
-        formData.append('status', selectedStatus);
-        formData.append('created_by', window.user.id); //created by admin
-        formData.append('updated_by', window.user.id); //updated by admin
-        formData.append('note', this.state.editNotes);
+        // formData.append('employee_id', selectedEmployee);
+        // formData.append('activity_type', 'Punch');
+        // formData.append('description', punchOutReport);
+        // formData.append('status', selectedStatus);
+        // formData.append('created_by', window.user.id); //created by admin
+        // formData.append('updated_by', window.user.id); //updated by admin
+        // formData.append('note', this.state.editNotes);
 
+        const data = {
+            employee_id: selectedEmployee,
+            activity_type: 'Punch',
+            description: punchOutReport,
+            status: selectedStatus,
+            created_by: window.user.id,
+            updated_by: window.user.id,
+            note: this.state.editNotes,
+        }
+        appendDataToFormData(formData, data)
         // API call to add break
         getService.addCall('activities.php','add-by-admin',formData )
             .then((data) => {
@@ -605,14 +627,26 @@ class Report extends Component {
 		const formData = new FormData();
         const finalStartTime = start_time || selectedReport.start_time;
         const finalEndTime = end_time || selectedReport.end_time;
-        formData.append("report", report);
-        formData.append("start_time", this.formatToMySQLDateTime(finalStartTime));
-        formData.append("end_time", this.formatToMySQLDateTime(finalEndTime));
-        formData.append("break_duration_in_minutes", break_duration_in_minutes);
-        formData.append("todays_working_hours", todays_working_hours);
-        formData.append("todays_total_hours", todays_total_hours);
-        formData.append("logged_in_employee_role", window.user.role);
-        formData.append("note", editNotes || '');
+        // formData.append("report", report);
+        // formData.append("start_time", this.formatToMySQLDateTime(finalStartTime));
+        // formData.append("end_time", this.formatToMySQLDateTime(finalEndTime));
+        // formData.append("break_duration_in_minutes", break_duration_in_minutes);
+        // formData.append("todays_working_hours", todays_working_hours);
+        // formData.append("todays_total_hours", todays_total_hours);
+        // formData.append("logged_in_employee_role", window.user.role);
+        // formData.append("note", editNotes || '');
+
+        const data = {
+            report: report,
+            start_time: this.formatToMySQLDateTime(finalStartTime),
+            end_time: this.formatToMySQLDateTime(finalEndTime),
+            break_duration_in_minutes: break_duration_in_minutes,
+            todays_working_hours: todays_working_hours,
+            todays_total_hours: todays_total_hours,
+            logged_in_employee_role: window.user.role,
+            note: editNotes || '',
+        }
+        appendDataToFormData(formData, data)
 
 		// API call to save the report and punch-out
         getService.editCall('reports.php', 'update-report-by-user', formData, report_id, null)

@@ -266,8 +266,6 @@ class departments extends Component {
     this.setState({ ButtonLoading: true });
 
     const addDepartmentFormData = new FormData();
-    // addDepartmentFormData.append('department_name', department_name);
-    // addDepartmentFormData.append('department_head', department_head);
 
     const data = {
       department_name: department_name,

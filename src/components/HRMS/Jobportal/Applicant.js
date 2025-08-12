@@ -4,6 +4,7 @@ import { getService } from '../../../services/getService';
 import ApplicantTable from './ApplicantTable';
 import DeleteModal from '../../common/DeleteModal';
 import ApplicantFilter from './ApplicantFilter';
+import { appendDataToFormData } from '../../../utils';
 
 class Applicant extends Component {
   state = {
@@ -21,6 +22,7 @@ class Applicant extends Component {
     deleteId: null,
     isDeleting: false,
     isSyncing: false,
+    syncSuccess: '',
   };
 
   componentDidMount() {
@@ -29,13 +31,14 @@ class Applicant extends Component {
 
   fetchApplicants = () => {
     this.setState({ loading: true });
+    const {search, status, order, currentPage, pageSize} = this.state;
     getService.getCall('applicants.php', {
       action: 'list',
-      search: this.state.search,
-      status: this.state.status,
-      order: this.state.order,
-      page: this.state.currentPage,
-      limit: this.state.pageSize,
+      search: search,
+      status: status,
+      order: order,
+      page: currentPage,
+      limit: pageSize,
     })
       .then(data => {
         if (data.status === 'success') {
@@ -67,8 +70,12 @@ class Applicant extends Component {
 
   handleStatusChange = (id, status) => {
     const formData = new FormData();
-    formData.append('id', id);
-    formData.append('status', status);
+ 
+    const data = {
+      id: id,
+      status:status
+    }
+    appendDataToFormData(formData, data)
 
     getService.addCall('applicants.php', 'update', formData)
       .then(data => {
@@ -93,7 +100,8 @@ class Applicant extends Component {
     getService.addCall('applicants.php', 'sync_applicant')  // <-- Note the change here
       .then(data => {
         if (data.status === 'success') {
-          alert(`Synced ${data.data.inserted} new applicants`);
+          // alert(`Synced ${data.data.inserted} new applicants`);
+          this.setState({ syncing: true, syncSuccess: "" });
           this.fetchApplicants();
         } else {
           alert(data.data.message || 'Sync failed');
@@ -142,7 +150,7 @@ class Applicant extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing } = this.state;
+    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing,syncSuccess } = this.state;
     return (
       <>
         <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
@@ -168,6 +176,7 @@ class Applicant extends Component {
                 onDelete={this.openDeleteModal}
                 onSync={this.handleSync}
                 syncing={isSyncing}
+                syncSuccess={syncSuccess}
               />
               {/* Delete Modal */}
               <DeleteModal

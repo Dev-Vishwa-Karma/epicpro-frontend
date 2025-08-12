@@ -363,11 +363,11 @@ class Menu extends Component {
 									"label": "Applicants",
 									"to": "/applicant"
 								},
-								{
-									"id": 44,
-									"label": "Job Application",
-									"to": "/job-application"
-								}
+								// {
+								// 	"id": 44,
+								// 	"label": "Job Application",
+								// 	"to": "/job-application"
+								// }
 							]
 						},
 					);

@@ -9,6 +9,7 @@ import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
 import { formatDate, getToday } from '../../../utils';
+import { appendDataToFormData } from '../../../utils';
 class Notifications extends Component {
     constructor(props) {
 		super(props);
@@ -310,11 +311,15 @@ class Notifications extends Component {
 
         this.setState({ ButtonLoading: true });
         const addNotificationFormData = new FormData();
-         addNotificationFormData.append('title', title);
-         addNotificationFormData.append('body', body);
-         addNotificationFormData.append('type', type);
-         addNotificationFormData.append('read', read);
-         addNotificationFormData.append('employee_id', selectedEmployee);
+
+        const data = {
+            title: title,
+            body: body,
+            type: type,
+            read: read,
+            employee_id:selectedEmployee
+        }
+        appendDataToFormData(addNotificationFormData, data)
 
         // API call to add Notification
         getService.addCall('notifications.php','add', addNotificationFormData)
@@ -368,13 +373,16 @@ class Notifications extends Component {
         const { selectedNotification } = this.state;
         if (!selectedNotification) return;
         const editNotificationFormData = new FormData();
-         editNotificationFormData.append('title', selectedNotification.title);
-         editNotificationFormData.append('body', selectedNotification.body);
-         editNotificationFormData.append('type', selectedNotification.type);
-         editNotificationFormData.append('read', selectedNotification.read);
-         editNotificationFormData.append('employee_id', selectedEmployee);
-         editNotificationFormData.append('id', selectedNotification.id);
         
+        const data = {
+            title: selectedNotification.title,
+            body: selectedNotification.body,
+            type: selectedNotification.type,
+            read: selectedNotification.read,
+            employee_id: selectedEmployee,
+            id:selectedNotification.id
+        }
+        appendDataToFormData(editNotificationFormData, data)
         getService.editCall('notifications.php','edit', editNotificationFormData)
         .then((data) => {
             if (data.status == 'success') {

@@ -17,6 +17,7 @@ import LeaveStats from './elements/LeaveStats';
 import EmployeeLeaveTable from './elements/EmployeeLeaveTable';
 import EmployeeTable from './elements/EmployeeTable';
 import { formatDate } from '../../../utils';
+import { appendDataToFormData } from '../../../utils';
 
 class Employee extends Component {
 	constructor(props) {
@@ -525,12 +526,15 @@ class Employee extends Component {
 		const selectedEmployeeId = logged_in_employee_role === "employee" ? window.user.id : employee_id;
 
         const addEmployeeLeaveData = new FormData();
-        addEmployeeLeaveData.append('employee_id', selectedEmployeeId);
-        addEmployeeLeaveData.append('from_date', from_date);
-        addEmployeeLeaveData.append('to_date', to_date);
-        addEmployeeLeaveData.append('reason', reason);
-        addEmployeeLeaveData.append('status', finalStatus);
-        addEmployeeLeaveData.append('is_half_day', halfDayCheckbox);
+		const data = {
+			employee_id:selectedEmployeeId,
+			from_date: from_date,
+			to_date: to_date,
+			reason: reason,
+			status: finalStatus,
+			is_half_day:halfDayCheckbox
+		}
+		appendDataToFormData(addEmployeeLeaveData, data)
 
 		getService.addCall('employee_leaves.php','add', addEmployeeLeaveData)
         .then((data) => {
@@ -615,12 +619,16 @@ class Employee extends Component {
 		this.setState({ ButtonLoading: true });
 
 		const updateEmployeeLeaveData = new FormData();
-		updateEmployeeLeaveData.append('employee_id', selectedEmployeeLeave.employee_id);
-		updateEmployeeLeaveData.append('from_date', selectedEmployeeLeave.from_date);
-		updateEmployeeLeaveData.append('to_date', selectedEmployeeLeave.to_date);
-		updateEmployeeLeaveData.append('reason', selectedEmployeeLeave.reason);
-        updateEmployeeLeaveData.append('status', selectedEmployeeLeave.status);
-		updateEmployeeLeaveData.append('is_half_day', selectedEmployeeLeave.is_half_day);
+
+		const data = {
+			employee_id: selectedEmployeeLeave.employee_id,
+			from_date: selectedEmployeeLeave.from_date,
+			to_date: selectedEmployeeLeave.to_date,
+			reason: selectedEmployeeLeave.reason,
+			status: selectedEmployeeLeave.status,
+			is_half_day: selectedEmployeeLeave.is_half_day,
+		}
+		appendDataToFormData(updateEmployeeLeaveData, data)
 
 		getService.editCall('employee_leaves.php','edit',updateEmployeeLeaveData, selectedEmployeeLeave.id )
 		.then((data) => {

@@ -4,6 +4,8 @@ import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
 import { validateFields } from '../../common/validations';
 import { getService } from '../../../services/getService';
 import AlertMessages from '../../common/AlertMessages';
+import { getColor } from '../../../utils';
+import { appendDataToFormData } from '../../../utils';
 
 
 const SKILLS = [
@@ -23,27 +25,6 @@ const SKILLS = [
   'Django',
   'Ruby on Rails'
 ];
-
-function getColor(skill) {
-  const colors = {
-    HTML: 'pink',
-    CSS: 'blue',
-    JavaScript: 'yellow',
-    React: 'cyan',
-    Angular: 'red',
-    Vue: 'green',
-    TypeScript: 'blue',
-    jQuery: 'yellow',
-    PHP: 'pink',
-    Laravel: 'blue',
-    Python: 'yellow',
-    'Node.js': 'cyan',
-    Symfony: 'red',
-    Django: 'purple',
-    'Ruby on Rails': 'orange',
-  };
-  return colors[skill] || 'gray';
-}
 
 const initialState = {
   fullname: '', 
@@ -82,13 +63,17 @@ class ApplicantForm extends Component {
     } = this.state;
 
     const formData = new FormData();
-    formData.append('fullname', fullname);
-    formData.append('email', email);
-    formData.append('phone', phone);
-    formData.append('streetaddress', streetaddress);
-    formData.append('experience', experience);
-    formData.append('skills', JSON.stringify(skills));
-    formData.append('resume', resume);
+
+    const data = {
+      fullname: fullname,
+      email: email,
+      phone: phone,
+      streetaddress: streetaddress,
+      experience: experience,
+      skills: JSON.stringify(skills),
+      resume:resume
+    }
+    appendDataToFormData(formData, data)
 
     getService.addCall('applicants.php', 'add', formData)
       .then(data => {
