@@ -266,13 +266,14 @@ class departments extends Component {
     this.setState({ ButtonLoading: true });
 
     const addDepartmentFormData = new FormData();
+    // addDepartmentFormData.append('department_name', department_name);
+    // addDepartmentFormData.append('department_head', department_head);
 
     const data = {
-        department_name: department_name,
-        department_head: department_head
-      };
-    
-        appendDataToFormData(addDepartmentFormData, data);
+      department_name: department_name,
+      department_head: department_head
+    }
+    appendDataToFormData(addDepartmentFormData, data)
 
     // API call to add department
     getService.addCall('departments.php', 'add', addDepartmentFormData)

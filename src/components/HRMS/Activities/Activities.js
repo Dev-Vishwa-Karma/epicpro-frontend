@@ -8,6 +8,7 @@ import DateFilterForm from '../../common/DateFilterForm';
 import ActivitiesTime from './elements/ActivitiesTime';
 import AddBreakModal from './elements/AddBreakModal';
 import BreakReasonModal from './elements/BreakReasonModal';
+import { appendDataToFormData } from '../../../utils';
 class Activities extends Component {
   constructor(props) {
     super(props);
@@ -154,10 +155,14 @@ class Activities extends Component {
 
   handleBreakOut = () => {
     const formData = new FormData();
-    formData.append('employee_id', window.user.id);
-    formData.append('activity_type', 'Break');
-    formData.append('description', null);
-    formData.append('status', 'completed');
+
+    const data = {
+      employee_id: window.user.id,
+      activity_type: 'Break',
+      description: null,
+      status: 'completed',
+    }
+    appendDataToFormData(formData, data)
 
     getService.addCall('activities.php', 'add-by-user', formData)
       .then((data) => {
@@ -227,10 +232,14 @@ class Activities extends Component {
     }
 
     const formData = new FormData();
-    formData.append('employee_id', window.user.id);
-    formData.append('activity_type', 'Break');
-    formData.append('description', this.state.breakReason);
-    formData.append('status', 'active');
+
+    const data = {
+      employee_id: window.user.id,
+      activity_type: 'Break',
+      description: this.state.breakReason,
+      status: 'active'
+    }
+    appendDataToFormData(formData, data)
 
     getService.addCall('activities.php', 'add-by-user', formData)
       .then((data) => {
@@ -313,13 +322,16 @@ class Activities extends Component {
 
     this.setState({ loading: true });
     const formData = new FormData();
-    formData.append('employee_id', selectedEmployee);
-    formData.append('activity_type', 'Break');
-    formData.append('description', breakReason);
-    formData.append('status', selectedStatus);
-    formData.append('created_by', window.user.id);
-    formData.append('updated_by', window.user.id);
 
+    const data = {
+      employee_id: selectedEmployee,
+      activity_type: 'Break',
+      description: breakReason,
+      status: selectedStatus,
+      created_by: window.user.id,
+      updated_by: window.user.id
+    }
+    appendDataToFormData(formData, data)
     getService.addCall('activities.php', 'add-by-admin', formData)
       .then((data) => {
         this.setState({ loading: false, ButtonLoading: false });

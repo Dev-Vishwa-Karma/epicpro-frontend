@@ -163,9 +163,9 @@ class Holidays extends Component {
 				employee_id: employee_id,
 				event_name: event_name,
 				event_date: event_date,
-				event_type: 'holiday'
+				event_type:'holiday'
 			}
-			appendDataToFormData(addHolidayData, data);
+			appendDataToFormData(addHolidayData, data)
 			// API call to add employee leave
 			 getService.addCall('events.php','add',addHolidayData )
 			.then((data) => {
@@ -255,13 +255,12 @@ class Holidays extends Component {
 		const updateHolidayData = new FormData();
 
 		const data = {
-			employee_id: selectedHoliday.employee_id,
-			event_name: selectedHoliday.event_name,
-			event_date: selectedHoliday.event_date,
-			event_type: 'holiday'
-		}
-		appendDataToFormData(updateHolidayData, data);
-
+				employee_id: selectedHoliday.employee_id,
+				event_name: selectedHoliday.event_name,
+				event_date: selectedHoliday.event_date,
+				event_type:'holiday'
+			}
+		appendDataToFormData(updateHolidayData, data)
         // update holiday API call
 		getService.editCall('events.php', 'edit', updateHolidayData, selectedHoliday.id, null)
         .then((data) => {

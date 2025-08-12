@@ -379,10 +379,9 @@ class Events extends Component {
         event_name: event_name,
         event_date: event_date,
         event_type: "event",
-        created_by: logged_in_employee_id
+        created_by: logged_in_employee_id,
       }
-      appendDataToFormData(addEventData, data);
-
+      appendDataToFormData(addEventData, data)
       // API call to add event
       getService
         .addCall("events.php", "add", addEventData)

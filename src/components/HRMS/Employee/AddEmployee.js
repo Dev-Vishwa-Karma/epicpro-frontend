@@ -6,7 +6,7 @@ import { getService } from "../../../services/getService";
 import { validateFields } from "../../common/validations";
 import InputField from "../../common/formInputs/InputField";
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup'
-import { appendDataToFormData } from '../../../utils';
+import { appendDataToFormData } from "../../../utils";
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -338,54 +338,51 @@ class AddEmployee extends Component {
     }
 
     const addEmployeeData = new FormData();
-
     const data = {
-      department_id: selectedDepartment,
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-      gender: gender,
-      photo: photo,
-      dob: dob,
-      joining_date: joiningDate,
-      mobile_no1: mobile1,
-      mobile_no2: mobile2,
-      password: password,
-      address_line1: address1,
-      address_line2: address2,
-      emergency_contact1: emergencyContact1,
-      emergency_contact2: emergencyContact2,
-      emergency_contact3: emergencyContact3,
-      // frontend_skills: skillsFrontend,
-      // backend_skills: skillsBackend,
-      frontend_skills: JSON.stringify(skillsFrontend),
-      backend_skills: JSON.stringify(skillsBackend), 
-      account_holder_name: bankAccountName,
-      account_number: bankAccountNo,
-      bank_name: bankName,
-      ifsc_code: ifscCode,
-      bank_address: bankAddress,
-      statistics_visibility_status: statisticsVisibilityStatus,
-      aadhar_card_number: aadharCardNumber,
-      aadhar_card_file: aadharCardFile,
-      driving_license_number: drivingLicenseNumber,
-      driving_license_file: drivingLicenseFile,
-      pan_card_number: panCardNumber,
-      pan_card_file: panCardFile,
-      facebook_url: facebook,
-      twitter_url: twitter,
-      linkedin_url: linkedin,
-      instagram_url: instagram,
-      upwork_profile_url: upworkProfile,
-      resume: resume,
-      visibility_priority: visibilityPriority,
-      logged_in_employee_id: id,
-      logged_in_employee_role: role,
-    };
+    department_id: selectedDepartment,
+    first_name: firstName,
+    last_name: lastName,
+    email: email,
+    gender: gender,
+    photo: photo,
+    dob: dob,
+    joining_date: joiningDate,
+    mobile_no1: mobile1,
+    mobile_no2: mobile2,
+    password: password,
+    address_line1: address1,
+    address_line2: address2,
+    emergency_contact1: emergencyContact1,
+    emergency_contact2: emergencyContact2,
+    emergency_contact3: emergencyContact3,
+    frontend_skills: skillsFrontend,
+    backend_skills: skillsBackend,
+    account_holder_name: bankAccountName,
+    account_number: bankAccountNo,
+    bank_name: bankName,
+    ifsc_code: ifscCode,
+    bank_address: bankAddress,
+    statistics_visibility_status: statisticsVisibilityStatus,
+    aadhar_card_number: aadharCardNumber,
+    aadhar_card_file: aadharCardFile,
+    driving_license_number: drivingLicenseNumber,
+    driving_license_file: drivingLicenseFile,
+    pan_card_number: panCardNumber,
+    pan_card_file: panCardFile,
+    facebook_url: facebook,
+    twitter_url: twitter,
+    linkedin_url: linkedin,
+    instagram_url: instagram,
+    upwork_profile_url: upworkProfile,
+    resume: resume,
+    visibility_priority: visibilityPriority,
+    logged_in_employee_id: id,
+    logged_in_employee_role: role
+};
+appendDataToFormData(addEmployeeData, data)
 
-    appendDataToFormData(addEmployeeData, data); // use from utils
 
-    // Append salary details separately
+    // Make this seperately
     salaryDetails.forEach((detail, index) => {
       addEmployeeData.append(`salaryDetails[${index}][source]`, detail.salarySource);
       addEmployeeData.append(`salaryDetails[${index}][amount]`, detail.salaryAmount);
