@@ -3,22 +3,20 @@ import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
 import NotificationTable from './elements/NotificationTable';
 import { getService } from '../../../services/getService';
-import dayjs from 'dayjs';
 import DeleteModal from '../../common/DeleteModal';
 import NotificationModal from './elements/NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
-import { formatDate } from '../../../utils';
+import { formatDate, getToday } from '../../../utils';
 class Notifications extends Component {
     constructor(props) {
 		super(props);
-        let todayStr = dayjs().format('YYYY-MM-DD');
 		this.state = {
             notificationData: [],
             employeeData:[],
-            filterFromDate: todayStr,
-            filterToDate: todayStr,
+            filterFromDate: getToday(),
+            filterToDate: getToday(),
             filterEmployeeId:"",
             loading: true,
             notificationToDelete: null,

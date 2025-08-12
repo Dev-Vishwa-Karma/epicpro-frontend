@@ -9,11 +9,11 @@ import { validateFields } from '../../../common/validations';
 import DateFilterForm from '../../../common/DateFilterForm';
 import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
+import { getToday, formatDate } from '../../../../utils';
 
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
-        const todayStr = this.formatDate(new Date());
         this.state = {
             employee: {
                 first_name: "",
@@ -52,8 +52,8 @@ class CalendarWithTabs extends Component {
             selectedReport: null,
             alternateSatudays: [],
             images: [],
-            filterFromDate: todayStr,
-            filterToDate: todayStr,
+            filterFromDate: getToday(),
+            filterToDate: getToday(),
             errors: {},
             col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
         };
@@ -117,14 +117,6 @@ class CalendarWithTabs extends Component {
             .catch(error => console.error("Error fetching departments:", error));
     }
 
-    formatDate = (date) => {
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = (`0${d.getMonth() + 1}`).slice(-2);
-        const day = (`0${d.getDate()}`).slice(-2);
-        return `${year}-${month}-${day}`;
-    };
-
     generateCalendarEvents = (reports, leaves) => {
         const missingReportEvents = [];
         const today = new Date();
@@ -139,9 +131,9 @@ class CalendarWithTabs extends Component {
         const year = date.getFullYear();
         const firstDay = new Date(year, 0, 1);
         const lastDay = new Date(year, 11, 31);
-        const formatDate = (date) => date.toISOString().split('T')[0];
-        startDate = formatDate(firstDay);
-        endDate = formatDate(lastDay);
+        const tformatDate = (date) => date.toISOString().split('T')[0];
+        startDate = tformatDate(firstDay);
+        endDate = tformatDate(lastDay);
         const employeeLeavesData = [];
         let currentDate = new Date(startDate);
 
@@ -192,7 +184,7 @@ class CalendarWithTabs extends Component {
             }
         });
 
-        while (this.formatDate(currentDate) < this.formatDate(today) && this.formatDate(currentDate) <= this.formatDate(endDate)) {
+        while (formatDate(currentDate) < formatDate(today) && formatDate(currentDate) <= formatDate(endDate)) {
             const dateStr = currentDate.toISOString().split("T")[0];
             const hasReport = reportsForMissing.some((report) => report.created_at?.split(" ")[0] === dateStr);
             if (!hasReport) {
@@ -246,9 +238,9 @@ class CalendarWithTabs extends Component {
             const now = new Date();
             const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
             const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-            const formatDate = (date) => date.toISOString().split('T')[0];
-            startDate = formatDate(firstDay);
-            endDate = formatDate(lastDay);
+            const tformatDate = (date) => date.toISOString().split('T')[0];
+            startDate = tformatDate(firstDay);
+            endDate = tformatDate(lastDay);
         }
         const currentEmployeeId = employeeId;
 
@@ -409,11 +401,11 @@ class CalendarWithTabs extends Component {
             const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
 
             // Format as YYYY-MM-DD
-            const formatDate = (date) =>
+            const tformatDate = (date) =>
                 date.toISOString().split('T')[0];
 
-            startDate = formatDate(firstDay);
-            endDate = formatDate(lastDay);
+            startDate = tformatDate(firstDay);
+            endDate = tformatDate(lastDay);
         }
 
         getService.getCall('reports.php', {
@@ -635,13 +627,6 @@ class CalendarWithTabs extends Component {
     };
 
     handleDateChange = (date, type) => {
-        const formatDate = (date) => {
-            if (!date) return '';
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); 
-            const day = String(date.getDate()).padStart(2, '0'); 
-            return `${year}-${month}-${day}`; 
-        };
         if (date) {
             const newDate = formatDate(new Date(date));
             if (type === 'fromDate') {
@@ -666,7 +651,7 @@ class CalendarWithTabs extends Component {
         }
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const defaultDate = localStorage.getItem('startDate') ?? this.formatDate(today);
+        const defaultDate = localStorage.getItem('startDate') ?? formatDate(today);
         const defaultView = localStorage.getItem('defaultView') ?? 'month';
 
         // Use calendarEventsData from state, default to empty array if not yet loaded
