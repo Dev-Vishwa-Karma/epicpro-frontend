@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
 import { getService } from "../../../services/getService";
 import YearSelector from "../../common/YearSelector";
+import Button from "../../common/formInputs/Button";
 class SaturdaySettings extends Component {
   constructor(props) {
     super(props);
@@ -387,13 +388,11 @@ class SaturdaySettings extends Component {
               </div>
 
               <div className="text-center mt-4">
-                <button
-                  onClick={this.handleSubmit}
-                  type="button"
-                  className="btn btn-primary"
-                >
-                  Submit
-                </button>
+                <Button
+                label="Submit"
+                onClick={this.handleSubmit}
+                className="btn-primary"
+              />
               </div>
             </div>
           </div>

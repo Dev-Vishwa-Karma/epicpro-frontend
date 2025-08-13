@@ -9,6 +9,7 @@ import AddHolidayModal from './elements/AddHolidayModal';
 import EditHolidayModal from './elements/EditHolidayModal';
 import AlertMessages from '../../common/AlertMessages';
 import { appendDataToFormData } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 class Holidays extends Component {
 	constructor(props) {
 		super(props);
@@ -424,13 +425,13 @@ class Holidays extends Component {
 							<div className="d-flex justify-content-end align-items-center mb-3 mt-3">
 								{(logged_in_user_role === 'admin' || logged_in_user_role === 'super_admin') && (
 									<div className="header-action">
-										<button
-											onClick={() => this.openAddHolidayModel()}
-											type="button"
-											className="btn btn-primary"
-										>
-											<i className="fe fe-plus mr-2" />Add Holiday
-										</button>
+										<Button
+										label="Add Holiday"
+										onClick={() => this.openAddHolidayModel()}
+										className="btn-primary"
+										icon="fe fe-plus"
+										iconStyle={{ marginRight: '8px' }}
+										/>
 									</div>
 								)}
 							</div>

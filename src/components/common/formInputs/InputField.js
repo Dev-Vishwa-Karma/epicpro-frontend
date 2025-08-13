@@ -48,6 +48,7 @@ const InputField = ({
           required={required}
           ref={refInput}
           disabled={disabled}
+          style={style}
         >
           <option value="">
             {label && label.toLowerCase().startsWith('select') ? label : `Select ${label || 'Option'}`}

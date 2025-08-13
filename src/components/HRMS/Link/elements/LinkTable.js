@@ -1,5 +1,6 @@
 import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';
+import Button from '../../../common/formInputs/Button';
 
 const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
   // Download handler for file URLs
@@ -141,14 +142,14 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
                       typeof row.file_path === 'string' ? (
                         <>
                           <div className="file-icon-container">
-                            <button
-                              className="btn btn-link btn-sm ml-2"
-                              title="Download"
-                              style={{ padding: 0, border: 'none', background: 'none' }}
+                            <Button
+                              label=""
                               onClick={() => handleDownload(row.file_path)}
-                            >
-                              {getFileTypeIcon(row.file_path)}
-                            </button>
+                              title="Download"
+                              className="btn-link btn-sm ml-2"
+                              style={{ padding: 0, border: 'none', background: 'none' }}
+                              icon={getFileTypeIcon(row.file_path)}
+                            />
                             <div className="file-icon-tooltip">Click to download</div>
                           </div>
                         </>
@@ -161,20 +162,20 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
                   )}
                 </td>
                 <td>
-                  <button
-                    className="btn btn-icon btn-sm mr-2"
-                    title="Edit"
-                    onClick={() => onEdit(type, row.id)}
-                  >
-                    <i className="fa fa-edit" />
-                  </button>
-                  <button
-                    className="btn btn-icon btn-sm js-sweetalert"
-                    title="Delete"
-                    onClick={() => onDelete(type, row.id)}
-                  >
-                    <i className="fa fa-trash-o text-danger" />
-                  </button>
+                <Button
+                  label=""
+                  onClick={() => onEdit(type, row.id)}
+                  title="Edit"
+                  className="btn-icon btn-sm mr-2"
+                  icon="fa fa-edit"
+                />
+                <Button
+                  label=""
+                  onClick={() => onDelete(type, row.id)}
+                  title="Delete"
+                  className="btn-icon btn-sm js-sweetalert"
+                  icon="fa fa-trash-o text-danger"
+                />
                 </td>
               </tr>
             ))

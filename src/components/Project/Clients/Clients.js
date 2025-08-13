@@ -10,6 +10,7 @@ import BlankState from "../../common/BlankState";
 import { validateFields } from '../../common/validations';
 import ClientCardSkeleton from "../../common/skeletons/ClientCardSkeleton";
 import { appendDataToFormData } from "../../../utils";
+import Button from "../../common/formInputs/Button";
 class Clients extends Component {
   constructor(props) {
     super(props);
@@ -378,19 +379,21 @@ class Clients extends Component {
                       </div>
                       <div className="col-lg-5 col-md-4 col-sm-6">
                         <div className="input-group">
-                          <button className="btn btn-primary" onClick={() => this.getClients(this.state.searchTerm)}>Search</button>
+                         <Button
+                          label="Search"
+                          onClick={() => this.getClients(this.state.searchTerm)}
+                          className="btn-primary"
+                        />
                         </div>
                       </div>
                       <div className="col-lg-3 col-md-4 col-sm-12">
-                        <button
-                          style={{ float: "right" }}
-                          type="button"
-                          className="btn btn-primary"
+                        <Button
+                          label="Add"
                           onClick={this.handleOpenAddClientField}
-                        >
-                          <i className="fe fe-plus mr-2" />
-                          Add
-                        </button>
+                          className="btn-primary"
+                          style={{ float: "right" }}
+                          icon="fe fe-plus mr-2"
+                        />
                       </div>
                     </div>
                   </div>

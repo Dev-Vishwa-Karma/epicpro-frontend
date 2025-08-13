@@ -1,6 +1,7 @@
 // components/modals/DepartmentModal.jsx
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const DepartmentModal = ({
   isEdit = false,
@@ -47,11 +48,18 @@ const DepartmentModal = ({
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
-                <button type="button" className="btn btn-primary" onClick={onSubmit} disabled={loading}>
-                  {loading && <span className="spinner-border spinner-border-sm mr-2" />}
-                  Save changes
-                </button>
+                <Button
+                  label="Close"
+                  onClick={onClose}
+                  className="btn-secondary"
+                />
+                <Button
+                  label="Save changes"
+                  onClick={onSubmit}
+                  loading={loading}
+                  disabled={loading}
+                  className="btn-primary"
+                />
               </div>
 
             </div>

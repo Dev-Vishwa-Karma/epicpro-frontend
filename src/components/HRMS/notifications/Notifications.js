@@ -469,9 +469,16 @@ class Notifications extends Component {
                                         col={col}
                                     />
                                     {/* <div className={`col-md-${col}`}>
-                                        <button style={{ float: "right", marginTop: 34 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={() => this.handleAddClick()}>
-                                            <i className="fe fe-plus mr-2" />Add
-                                        </button>
+                                        <Button
+                                        label="Add"
+                                        onClick={() => this.handleAddClick()}
+                                        className="btn-primary"
+                                        style={{ float: "right", marginTop: 34 }}
+                                        icon="fe fe-plus"
+                                        iconStyle={{ marginRight: '8px' }}
+                                        dataToggle="modal"
+                                        dataTarget="#addBreakModal"
+                                        />
                                     </div> */}
                                 </div>
                             </div>

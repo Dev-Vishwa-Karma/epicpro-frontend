@@ -2,6 +2,7 @@ import React from 'react';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
 import NoDataRow from '../../common/NoDataRow';
 import Avatar from '../../common/Avatar';
+import Button from '../../common/formInputs/Button';
 
 const TodoTable = ({
     todos,
@@ -94,22 +95,19 @@ const TodoTable = ({
                                             </td>
                                             <td>
                                                 <div className="d-flex align-items-center">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-icon"
-                                                        title="Edit"
-                                                        onClick={() => handleEditTodo(todo)}
-                                                    >
-                                                        <i className="fa fa-edit" />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-icon btn-sm js-sweetalert"
-                                                        title="Delete"
-                                                        onClick={() => handleDeleteClick(todo)}
-                                                    >
-                                                        <i className="fa fa-trash-o text-danger" />
-                                                    </button>
+                                                    <Button
+                                                    icon="fa fa-edit"
+                                                    onClick={() => handleEditTodo(todo)}
+                                                    className="btn-icon"
+                                                    title="Edit"
+                                                    />
+
+                                                    <Button
+                                                    icon="fa fa-trash-o text-danger"
+                                                    onClick={() => handleDeleteClick(todo)}
+                                                    className="btn-icon btn-sm js-sweetalert"
+                                                    title="Delete"
+                                                    />
                                                 </div>
                                             </td>
                                         </>

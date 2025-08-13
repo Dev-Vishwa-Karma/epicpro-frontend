@@ -9,6 +9,7 @@ import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import ImageUploadModal from './elements/ImageUploadModal';
 import GallerySkeleton from '../../common/skeletons/GallerySkeleton';
+import Button from '../../common/formInputs/Button';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -544,9 +545,11 @@ class Gallery extends Component {
                                                 </span>
                                                 <input type="text" className="form-control" placeholder="Search photo" value={this.state.searchQuery} onChange={this.handleSearch}/>
                                             </div>
-                                            <button type="button" className="btn btn-primary ml-2" onClick={this.openModal}>
-                                                Upload New
-                                            </button>
+                                            <Button
+                                                label="Upload New"
+                                                className="btn-primary ml-2"
+                                                onClick={this.openModal}
+                                            />
                                             <ImageUploadModal
                                                 isOpen={this.state.isModalOpen}
                                                 closeModal={this.closeModal}

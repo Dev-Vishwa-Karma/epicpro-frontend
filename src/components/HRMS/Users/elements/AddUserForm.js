@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const AddUserForm = ({
 	state,
@@ -170,17 +171,17 @@ const AddUserForm = ({
 					</table>
 				</div>
 
-				<button
-					type="button"
-					className="btn btn-primary mr-2"
+				<Button
+					label={state.ButtonLoading ? (
+						<>
+						<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+						Adding...
+						</>
+					) : "Add"}
 					onClick={addUser}
 					disabled={state.ButtonLoading}
-				>
-					{state.ButtonLoading && (
-						<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-					)}
-					Add
-				</button>
+					className="btn-primary mr-2"
+				/>
 
 				<button
 					type="button"

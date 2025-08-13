@@ -2,6 +2,7 @@ import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';  // Ensure the correct path to NoDataRow component
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Avatar from '../../../common/Avatar';
+import Button from '../../../common/formInputs/Button';
 
 const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickForEmployeeLeave, openDeleteLeaveModal }) => {
   return (
@@ -86,27 +87,23 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
                       </span>
                     </td>
                     <td>
-                      <button
-                        type="button"
-                        className="btn btn-icon btn-sm"
+                      <Button
+                        icon="fa fa-edit"
                         title="Edit"
-                        data-toggle="modal"
-                        data-target="#editLeaveRequestModal"
                         onClick={() => handleEditClickForEmployeeLeave(leave)}
-                      >
-                        <i className="fa fa-edit" />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-icon btn-sm js-sweetalert"
+                        className="btn-icon btn-sm"
+                        dataToggle="modal"
+                        dataTarget="#editLeaveRequestModal"
+                      />
+                      <Button
+                        icon="fa fa-trash-o text-danger"
                         title="Delete"
-                        data-type="confirm"
-                        data-toggle="modal"
-                        data-target="#deleteLeaveRequestModal"
                         onClick={() => openDeleteLeaveModal(leave.id)}
-                      >
-                        <i className="fa fa-trash-o text-danger" />
-                      </button>
+                        className="btn-icon btn-sm js-sweetalert"
+                        dataType="confirm"
+                        dataToggle="modal"
+                        dataTarget="#deleteLeaveRequestModal"
+                      />
                     </td>
                   </tr>
                 ))

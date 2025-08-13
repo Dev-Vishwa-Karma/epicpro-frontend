@@ -6,6 +6,8 @@ import ApplicantViewModal from './ApplicantViewModal';
 import ConfirmModal from '../../../common/ConfirmModal';
 import Moment from 'react-moment';
 
+import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 class ApplicantTable extends Component {
   static getStatusColor(status) {
     switch (status) {
@@ -102,24 +104,16 @@ class ApplicantTable extends Component {
         <div className="card">
           <div className="card-header d-flex align-items-center justify-content-between">
             <h3 className="card-title mb-0">Applicants</h3>
-            <button
-              type="button"
-              className="btn btn-sm btn-primary"
+            <Button
+              label={syncing ? "Syncing..." : "Sync"}
               onClick={onSync}
               disabled={syncing}
+              className="btn-sm btn-primary"
               title="Sync third-party applicants"
-            >
-              {syncing ? (
-                <>
-                  <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                  Syncing...
-                </>
-              ) : (
-                <>
-                  <i className="fa fa-refresh mr-1" /> Sync
-                </>
-              )}
-            </button>
+              icon={syncing ? "" : "fa fa-refresh"}
+              iconStyle={{ marginRight: syncing ? '0' : '8px' }}
+              loading={syncing}
+            />
           </div>
           <div className="card-body">
             <div className="table-responsive">
@@ -168,20 +162,22 @@ class ApplicantTable extends Component {
                         </td>
                         <td>{applicant.experience} Years</td>
                         <td>
-                          <select
+                          <InputField
                             className="custom-select"
+                            type="select"
                             value={applicant.status}
                             style={{
                                 ...ApplicantTable.getStatusColor(applicant.status),
                             }}
-                            onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="reviewed">Reviewed</option>
-                            <option value="interviewed">Interviewed</option>
-                            <option value="hired">Hired</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
+                            onChange={e => onStatusChange(applicant.id, e.target.value)}
+                            options={[
+                              { value: "pending", label: "Pending" },
+                              { value: "reviewed", label: "Reviewed" },
+                              { value: "interviewed", label: "Interviewed" },
+                              { value: "hired", label: "Hired" },
+                              { value: "rejected", label: "Rejected" }
+                            ]}
+                          />
                         </td>
                         <td>
                           <div className="item-action dropdown">

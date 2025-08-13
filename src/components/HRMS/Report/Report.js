@@ -12,6 +12,7 @@ import EditReportModal from './elements/EditReportModal';
 import AddBreakModal from './elements/AddBreakModal';
 import EditReportDetailsModal from './elements/EditReportDetailsModal';
 import { getTimeAsDate, formatDate, appendDataToFormData } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 class Report extends Component {
 
     constructor(props) {
@@ -963,13 +964,11 @@ class Report extends Component {
                 >
                     <i className="fa-solid fa-triangle-exclamation me-2"></i>
                     {this.state.errorMessage}
-                    <button
-                        type="button"
-                        className="close"
-                        aria-label="Close"
+                    <Button
                         onClick={() => this.setState({ showError: false })}
-                    >
-                    </button>
+                        className="close"
+                        ariaLabel="Close"
+                    />
                 </div>
             </>
         )

@@ -1,6 +1,7 @@
 import React from 'react';
 import EmployeeSelector from '../../../common/EmployeeSelector';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const AddBreakModal = ({
   loading,
@@ -73,15 +74,15 @@ const AddBreakModal = ({
               </div>
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-primary"
+              <Button
+                label={buttonLoading ? "Saving..." : "Save changes"}
                 onClick={addActivityForEmployee}
                 disabled={buttonLoading}
-              >
-                {buttonLoading ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> : null}
-                Save changes
-              </button>
+                className="btn-primary"
+                loading={buttonLoading}
+                icon={buttonLoading ? "" : "fa fa-save"}
+                iconStyle={{ marginRight: '8px' }}
+              />
             </div>
           </div>
         </div>

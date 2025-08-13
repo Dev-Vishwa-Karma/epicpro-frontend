@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const EditModal = ({ 
     modalId, 
@@ -174,24 +175,20 @@ const EditModal = ({
                         </div>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>
-                            Close
-                        </button>
-                        <button 
-                            type="button" 
-                            onClick={onSubmit} 
-                            className="btn btn-primary"
-                            // disabled={isLoading}
-                        >
-                            {/* {isLoading && (
-                                <span
-                                    className="spinner-border spinner-border-sm mr-2"
-                                    role="status"
-                                    aria-hidden="true"
-                                ></span>
-                            )} */}
-                            {isEditing ? 'Update Project' : 'Add Project'}
-                        </button>
+                        <Button
+                        label="Close"
+                        onClick={onClose}
+                        className="btn-secondary"
+                        />
+
+                        <Button
+                        label={isEditing ? 'Update Project' : 'Add Project'}
+                        onClick={onSubmit}
+                        className="btn-primary"
+                        // disabled={isLoading}
+                        // You can uncomment the line below if you want to handle loading state:
+                        // loading={isLoading}
+                        />
                     </div>
                 </div>
             </div>

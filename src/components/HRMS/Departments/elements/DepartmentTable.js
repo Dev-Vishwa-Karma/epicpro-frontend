@@ -1,5 +1,6 @@
 import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';
+import Button from '../../../common/formInputs/Button';
 
 const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }) => {
   return (
@@ -25,27 +26,23 @@ const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }
                 <td>{department.department_head}</td>
                 <td>{department.total_employee || 0}</td>
                 <td>
-                  <button
-                    type="button"
-                    className="btn btn-icon"
+                  <Button
+                    icon="fa fa-edit"
+                    className="btn-icon"
                     title="Edit"
-                    data-toggle="modal"
-                    data-target="#editDepartmentModal"
+                    dataToggle="modal"
+                    dataTarget="#editDepartmentModal"
                     onClick={() => onEditClick(department)}
-                  >
-                    <i className="fa fa-edit" />
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-icon btn-sm js-sweetalert"
+                  />
+                  <Button
+                    icon="fa fa-trash-o text-danger"
+                    className="btn-icon btn-sm js-sweetalert"
                     title="Delete"
-                    data-type="confirm"
-                    data-toggle="modal"
-                    data-target="#deleteDepartmentModal"
+                    dataToggle="modal"
+                    dataTarget="#deleteDepartmentModal"
                     onClick={() => onDeleteClick(department.id)}
-                  >
-                    <i className="fa fa-trash-o text-danger" />
-                  </button>
+                    dataType="confirm"
+                  />
                 </td>
               </tr>
             ))

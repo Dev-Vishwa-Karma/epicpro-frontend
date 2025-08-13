@@ -3,6 +3,7 @@ import React from 'react';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import NoDataRow from '../../../common/NoDataRow';
 import Avatar from '../../../common/Avatar';
+import Button from '../../../common/formInputs/Button';
 
 const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) => {
   return (
@@ -74,27 +75,26 @@ const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) 
                   </td>
                   <td>{user.department_name}</td>
                   <td>
-                    <button 
-                      type="button"
-                      className="btn btn-icon"
-                      title="Edit"
-                      data-toggle="modal"
-                      data-target="#editUserModal"
-                      onClick={() => handleEditClick(user)}
-                    >
-                      <i className="fa fa-edit" />
-                    </button>
-                    <button 
-                      type="button"
-                      className="btn btn-icon js-sweetalert"
-                      title="Delete"
-                      data-type="confirm"
-                      onClick={() => openDeleteModal(user.id)}
-                      data-toggle="modal"
-                      data-target="#deleteUserModal"
-                    >
-                      <i className="fa fa-trash-o text-danger" />
-                    </button>
+                  <Button
+                    label=""
+                    onClick={() => handleEditClick(user)}
+                    className="btn-icon"
+                    title="Edit"
+                    dataToggle="modal"
+                    dataTarget="#editUserModal"
+                    icon="fa fa-edit"
+                  />
+
+                  <Button
+                    label=""
+                    onClick={() => openDeleteModal(user.id)}
+                    className="btn-icon js-sweetalert"
+                    title="Delete"
+                    dataType="confirm"
+                    dataToggle="modal"
+                    dataTarget="#deleteUserModal"
+                    icon="fa fa-trash-o text-danger"
+                  />
                   </td>
                 </tr>
               ))

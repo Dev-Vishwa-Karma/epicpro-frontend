@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { formatDateTimeAMPM } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 
 class ReportModal extends Component {
 	componentDidMount() {
@@ -97,9 +98,11 @@ class ReportModal extends Component {
 						</div>
 
 						<div className="modal-footer">
-							<button type="button" className="btn btn-secondary" onClick={onClose}>
-								Close
-							</button>
+							<Button
+							label="Close"
+							onClick={onClose}
+							className="btn-secondary"
+							/>
 						</div>
 					</div>
 				</div>

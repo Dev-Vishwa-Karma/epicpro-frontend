@@ -1,6 +1,7 @@
 // DepartmentGrid.js
 import React from 'react';
 import BlankState from '../../../common/BlankState';
+import Button from '../../../common/formInputs/Button';
 
 const DepartmentGrid = ({ departmentData, onEditClick, onDeleteClick }) => {
   return (
@@ -20,25 +21,23 @@ const DepartmentGrid = ({ departmentData, onEditClick, onDeleteClick }) => {
                 <div className="text-center text-muted mb-3">
                   Total Employee : {department.total_employee}
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-icon btn-outline-primary mr-2"
+                <Button
+                  icon="fa fa-pencil"
+                  className="btn-icon btn-outline-primary mr-2"
                   title="Edit"
-                  data-toggle="modal"
-                  data-target="#editDepartmentModal"
-                  onClick={() => onEditClick(department)}>
-                  <i className="fa fa-pencil" />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-icon btn-outline-danger"
+                  dataToggle="modal"
+                  dataTarget="#editDepartmentModal"
+                  onClick={() => onEditClick(department)}
+                />
+                <Button
+                  icon="fa fa-trash"
+                  className="btn-icon btn-outline-danger"
                   title="Delete"
-                  data-type="confirm"
+                  dataToggle="modal"
+                  dataTarget="#deleteDepartmentModal"
                   onClick={() => onDeleteClick(department.id)}
-                  data-toggle="modal"
-                  data-target="#deleteDepartmentModal">
-                  <i className="fa fa-trash" />
-                </button>
+                  dataType="confirm"
+                />
               </div>
             </div>
           </div>

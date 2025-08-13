@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Button from '../../../common/formInputs/Button';
 
 class ApplicantViewModal extends Component {
   render() {
@@ -123,13 +124,11 @@ class ApplicantViewModal extends Component {
               </div>
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
+              <Button
+                label="Close"
                 onClick={onClose}
-              >
-                Close
-              </button>
+                className="btn-secondary"
+              />
             </div>
           </div>
         </div>

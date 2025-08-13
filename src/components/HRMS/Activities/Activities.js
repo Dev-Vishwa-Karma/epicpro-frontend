@@ -9,6 +9,7 @@ import ActivitiesTime from './elements/ActivitiesTime';
 import AddBreakModal from './elements/AddBreakModal';
 import BreakReasonModal from './elements/BreakReasonModal';
 import { appendDataToFormData, getToday, formatDate } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 class Activities extends Component {
   constructor(props) {
     super(props);
@@ -431,18 +432,23 @@ class Activities extends Component {
                       />
                     <div className={`col-md-${colbutton}`}>
                       {window.user.role !== 'employee' && (
-                        <button style={{ float: "right", marginTop: 24 }} type="button" className="btn btn-primary" data-toggle="modal" data-target="#addBreakModal" onClick={this.openAddBreakModal}>
-                          <i className="fe fe-plus mr-2" />Add
-                        </button>
+                        <Button
+                          label="Add"
+                          onClick={this.openAddBreakModal}
+                          className="btn-primary"
+                          style={{ float: "right", marginTop: 24 }}
+                          dataToggle="modal"
+                          dataTarget="#addBreakModal"
+                          icon="fe fe-plus mr-2"
+                        />
                       )}
                       {window.user.role === 'employee' && (
-                        <button
+                        <Button
+                          label={this.state.isBreakedIn  ? 'Break Out' : 'Break In'}
+                          onClick={this.state.isBreakedIn  ? this.handleBreakOut : this.openBreakReasonModal}
+                          className="btn-primary"
                           style={{ float: "right", marginTop: 22 }}
-                          className="btn btn-primary"
-                          onClick={this.state.isBreakedIn ? this.handleBreakOut : this.openbreakReasonModal}
-                        >
-                          {this.state.isBreakedIn ? 'Break Out' : 'Break In'}
-                        </button>
+                        />
                       )}
                     </div>
                   </div>

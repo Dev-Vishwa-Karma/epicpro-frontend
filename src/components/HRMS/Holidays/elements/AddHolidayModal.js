@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const AddHolidayModal = ({
   showAddHolidayModal,
@@ -69,27 +70,28 @@ const AddHolidayModal = ({
                 </div>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={closeAddHolidayModal}
-                >
-                  Close
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={ButtonLoading}
-                >
-                  {ButtonLoading ? (
+               <Button
+                label="Close"
+                className="btn-secondary"
+                onClick={closeAddHolidayModal}
+              />
+
+              <Button
+                label={ButtonLoading ? (
+                  <>
                     <span
                       className="spinner-border spinner-border-sm mr-2"
                       role="status"
                       aria-hidden="true"
                     ></span>
-                  ) : null}
-                  Add Holiday
-                </button>
+                    Adding Holiday...
+                  </>
+                ) : 'Add Holiday'}
+                className="btn-primary"
+                type="submit"
+                disabled={ButtonLoading}
+                loading={ButtonLoading}
+              />
               </div>
             </form>
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 class LinkModal extends React.Component {
   constructor(props) {
@@ -176,11 +177,20 @@ class LinkModal extends React.Component {
                   )}
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
-                  <button type="button" className="btn btn-primary" onClick={onSubmit} disabled={loading}>
-                    {loading && <span className="spinner-border spinner-border-sm mr-2" />}
-                    Save changes
-                  </button>
+                <Button
+                  label="Close"
+                  onClick={onClose}
+                  className="btn-secondary"
+                />
+                <Button
+                  label={loading ? "Saving..." : "Save changes"}
+                  onClick={onSubmit}
+                  disabled={loading}
+                  className="btn-primary"
+                  loading={loading}
+                  icon={loading ? "" : "fa fa-save"}
+                  iconStyle={{ marginRight: '8px' }}
+                />
                 </div>
               </div>
             </div>

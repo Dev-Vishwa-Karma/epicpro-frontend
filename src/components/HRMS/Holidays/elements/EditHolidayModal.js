@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 class EditHolidayModal extends Component {
   render() {
@@ -58,16 +59,18 @@ class EditHolidayModal extends Component {
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button
+                  <Button
+                    label={ButtonLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                        Updating Holiday...
+                      </>
+                    ) : 'Update Holiday'}
+                    className="btn-primary"
                     type="submit"
-                    className="btn btn-primary"
                     disabled={ButtonLoading}
-                  >
-                    {ButtonLoading && (
-                      <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                    )}
-                    Update Holiday
-                  </button>
+                    loading={ButtonLoading}
+                  />
                 </div>
               </form>
             )}

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Avatar from '../../../common/Avatar';
+import Button from '../../../common/formInputs/Button';
 
 const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, openDeleteModal, message }) => {
     return (
@@ -66,33 +67,27 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                                         </td>
                                         <td>{employee.department_name}</td>
                                         <td>
-                                            <button
-                                                type="button"
-                                                className="btn btn-icon btn-sm"
-                                                title="View"
-                                                onClick={() => viewEmployee(employee, employee.id)}
-                                            >
-                                                <i className="fa fa-eye" />
-                                            </button>
-                                            <button
-                                                onClick={() => goToEditEmployee(employee, employee.id)}
-                                                type="button"
-                                                className="btn btn-icon btn-sm"
-                                                title="Edit"
-                                            >
-                                                <i className="fa fa-edit" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="btn btn-icon btn-sm js-sweetalert"
-                                                title="Delete"
-                                                data-type="confirm"
-                                                data-toggle="modal"
-                                                data-target="#deleteEmployeeModal"
-                                                onClick={() => openDeleteModal(employee.id)}
-                                            >
-                                                <i className="fa fa-trash-o text-danger" />
-                                            </button>
+                                        <Button
+                                            icon="fa fa-eye"
+                                            title="View"
+                                            onClick={() => viewEmployee(employee, employee.id)}
+                                            className="btn-icon btn-sm"
+                                        />
+                                        <Button
+                                            icon="fa fa-edit"
+                                            title="Edit"
+                                            onClick={() => goToEditEmployee(employee, employee.id)}
+                                            className="btn-icon btn-sm"
+                                        />
+                                        <Button
+                                            icon="fa fa-trash-o text-danger"
+                                            title="Delete"
+                                            onClick={() => openDeleteModal(employee.id)}
+                                            className="btn-icon btn-sm js-sweetalert"
+                                            dataType="confirm"
+                                            dataToggle="modal"
+                                            dataTarget="#deleteEmployeeModal"
+                                        />
                                         </td>
                                     </tr>
                                 ))

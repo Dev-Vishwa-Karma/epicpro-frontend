@@ -7,6 +7,7 @@ import { validateFields } from "../../common/validations";
 import InputField from "../../common/formInputs/InputField";
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup'
 import { appendDataToFormData } from "../../../utils";
+import Button from "../../common/formInputs/Button";
 
 class AddEmployee extends Component {
   constructor(props) {
@@ -941,18 +942,16 @@ appendDataToFormData(addEmployeeData, data)
                                 {salaryDetails.length > 1 && (
                                   <div className="col-sm-6 col-md-2">
                                     <div className="form-group">
-                                      <button
-                                        type="button"
+                                      <Button
+                                        icon="fa fa-trash-o text-danger"
                                         title="Delete"
-                                        className="btn btn-icon"
+                                        onClick={() => this.removeEntry(index)}
+                                        className="btn-icon"
                                         style={{
                                           marginTop: "1.2em",
                                           fontSize: "1.2em",
                                         }}
-                                        onClick={() => this.removeEntry(index)}
-                                      >
-                                        <i className="fa fa-trash-o text-danger" />
-                                      </button>
+                                      />
                                     </div>
                                   </div>
                                 )}
@@ -961,13 +960,11 @@ appendDataToFormData(addEmployeeData, data)
                           ))}
                           <div className="col-sm-6 col-md-4">
                             <div className="form-group">
-                              <button
-                                type="button"
-                                className="btn btn-primary"
+                              <Button
+                                label="Add More"
                                 onClick={this.addMore}
-                              >
-                                Add More
-                              </button>
+                                className="btn-primary"
+                              />
                             </div>
                           </div>
                         </div>
@@ -1138,19 +1135,18 @@ appendDataToFormData(addEmployeeData, data)
                         gap: "10px",
                       }}
                     >
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={this.handleBack}
-                      >
-                        Back
-                      </button>
-                      <button type="submit" className="btn btn-primary" disabled={this.state.ButtonLoading}>
-                        {this.state.ButtonLoading ? (
-                          <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                        ) : null}
-                        Add Employee
-                      </button>
+                    <Button
+                      label="Back"
+                      onClick={this.handleBack}
+                      className="btn-secondary"
+                    />
+                    <Button
+                      label="Add Employee"
+                      type="submit"
+                      loading={this.state.ButtonLoading}
+                      disabled={this.state.ButtonLoading}
+                      className="btn-primary"
+                    />
                     </div>
                   </form>
                 </div>

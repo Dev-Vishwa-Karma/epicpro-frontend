@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../../../common/formInputs/Button';
 
 const ImageModal = ({
   show,
@@ -29,19 +30,18 @@ const ImageModal = ({
           className="gallery-large"
         />
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-          <button
-            className="btn btn-danger"
+          <Button
+            label="DELETE"
+            className="btn-danger"
             onClick={onDelete}
-          >
-            DELETE
-          </button>
-          <button
-            className="btn btn-primary"
+          />
+
+          <Button
+            label={downloadLoading ? 'Downloading...' : 'DOWNLOAD'}
+            className="btn-primary"
             onClick={onDownload}
-            disabled={downloadLoading}
-          >
-            {downloadLoading ? 'Downloading...' : 'DOWNLOAD'}
-          </button>
+            loading={downloadLoading}
+          />
         </div>
       </div>
     </div>

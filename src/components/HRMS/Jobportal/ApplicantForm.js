@@ -6,6 +6,7 @@ import { getService } from '../../../services/getService';
 import AlertMessages from '../../common/AlertMessages';
 import { getColor } from '../../../utils';
 import { appendDataToFormData } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 
 
 const skillOptions = [
@@ -182,8 +183,7 @@ class ApplicantForm extends Component {
       skills, 
       experience, 
       resume, 
-      errors, 
-      submitted,
+      errors,
       submitError, 
       isSubmitting,
       showSuccess,
@@ -320,25 +320,17 @@ class ApplicantForm extends Component {
 
                 </div>
                 <div className="card-footer text-right" style={{ backgroundColor: '#f8f9fa', borderBottomLeftRadius: '10px', borderBottomRightRadius: '10px' }}>
-                 
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary px-5" 
-                    style={{ fontWeight: 600 }}
+                  <Button
+                    label={isSubmitting ? "Submitting..." : "Submit Application"}
+                    onClick={this.onSubmit}
+                    type="submit"
                     disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                        Submitting...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fa fa-paper-plane mr-2"></i>
-                        Submit Application
-                      </>
-                    )}
-                  </button>
+                    className="btn-primary px-5"
+                    style={{ fontWeight: 600 }}
+                    icon={isSubmitting ? "" : "fa fa-paper-plane"}
+                    iconStyle={{ marginRight: '8px' }}
+                    loading={isSubmitting}
+                  />
                 </div>
               </form>
             </div>

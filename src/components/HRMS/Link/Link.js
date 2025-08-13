@@ -9,6 +9,7 @@ import TableSkeleton from '../../common/skeletons/TableSkeleton';
 import { getService } from '../../../services/getService';
 import { validateFields } from '../../common/validations';
 import { appendDataToFormData } from "../../../utils";
+import Button from "../../common/formInputs/Button";
 
 class Link extends Component {
   constructor(props) {
@@ -375,16 +376,20 @@ class Link extends Component {
       <nav aria-label="Page navigation">
         <ul className="pagination mb-0 justify-content-end">
           <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <button className="page-link" onClick={() => this.handlePageChange(currentPage - 1, tab)}>
-              Previous
-            </button>
+          <Button
+            label="Previous"
+            onClick={() => this.handlePageChange(currentPage - 1, tab)}
+            className="page-link"
+          />
           </li>
           {currentPage > 3 && (
             <>
               <li className="page-item">
-                <button className="page-link" onClick={() => this.handlePageChange(1, tab)}>
-                  1
-                </button>
+              <Button
+                label="1"
+                onClick={() => this.handlePageChange(1, tab)}
+                className="page-link"
+              />
               </li>
               {currentPage > 4 && (
                 <li className="page-item disabled">
@@ -397,9 +402,11 @@ class Link extends Component {
             .filter(pageNum => pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
             .map(pageNum => (
               <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
-                <button className="page-link" onClick={() => this.handlePageChange(pageNum, tab)}>
-                  {pageNum}
-                </button>
+                <Button
+                  label={pageNum}
+                  onClick={() => this.handlePageChange(pageNum, tab)}
+                  className="page-link"
+                />
               </li>
             ))}
           {currentPage < totalPages - 2 && (
@@ -410,16 +417,20 @@ class Link extends Component {
                 </li>
               )}
               <li className="page-item">
-                <button className="page-link" onClick={() => this.handlePageChange(totalPages, tab)}>
-                  {totalPages}
-                </button>
+              <Button
+                label={totalPages}
+                onClick={() => this.handlePageChange(totalPages, tab)}
+                className="page-link"
+              />
               </li>
             </>
           )}
           <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <button className="page-link" onClick={() => this.handlePageChange(currentPage + 1, tab)}>
-              Next
-            </button>
+          <Button
+            label="Next"
+            onClick={() => this.handlePageChange(currentPage + 1, tab)}
+            className="page-link"
+          />
           </li>
         </ul>
       </nav>
@@ -509,16 +520,14 @@ class Link extends Component {
               </li>
             </ul>
             <div className="header-action">
-              <button
-                onClick={this.handleAddClick}
-                type="button"
-                className="btn btn-primary"
-              >
-                <i className="fe fe-plus mr-2" />
-                {activeTab === 'Git' && 'Add'}
-                {activeTab === 'Excel' && 'Add'}
-                {activeTab === 'Codebase' && 'Add'}
-              </button>
+            <Button
+              label={activeTab === 'Git' || activeTab === 'Excel' || activeTab === 'Codebase' ? 'Add' : ''}
+              onClick={this.handleAddClick}
+              type="button"
+              className="btn-primary"
+              icon="fe fe-plus"
+              iconStyle={{ marginRight: '8px' }}
+            />
             </div>
           </div>
           <div className="tab-content">

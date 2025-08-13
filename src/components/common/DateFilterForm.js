@@ -2,6 +2,7 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
 import EmployeeSelector from './EmployeeSelector';
+import Button from './formInputs/Button';
 
 const DateFilterForm = ({
     fromDate,
@@ -63,17 +64,13 @@ const DateFilterForm = ({
             <div className={`col-md-${col}`}>
                 <div className="form-group">
                     <label className="form-label">&nbsp;</label>
-                    <button
-                        type="button"
-                        className="btn btn-primary btn-block"
-                        onClick={handleApplyFilters}
-                        disabled={ButtonLoading}
-                    >
-                        {ButtonLoading ? (
-                            <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                        ) : null}
-                        Apply
-                    </button>
+                    <Button
+                    label="Apply"
+                    onClick={handleApplyFilters}
+                    className="btn-primary btn-block"
+                    disabled={ButtonLoading}
+                    loading={ButtonLoading}
+                    />
                 </div>
             </div>
         </>
