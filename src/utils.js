@@ -108,6 +108,7 @@ export function isToday(dateString) {
         );
     };
 
+// Return Date in format DD-MM-YYYY (13-08-2025)
 export function formatDate(date){
     const d = new Date(date);
     const year = d.getFullYear();
@@ -125,7 +126,7 @@ export function getToday(){
     return todayStr;
 }
 
-// Date in format DD-MM-YYYY (13 Aug, 2025)
+// return Date in format DD MM, YYYY (13 Aug, 2025)
 export function shortformatDate(dateString) {
     const date = new Date(dateString);
     const day = date.getDate();
