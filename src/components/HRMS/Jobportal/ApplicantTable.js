@@ -80,12 +80,6 @@ class ApplicantTable extends Component {
             </button>
           </div>
           <div className="card-body">
-            {/* Success message */}
-            {syncSuccess && (
-              <div className="alert alert-success" role="alert">
-                {syncSuccess}
-              </div>
-            )}
             <div className="table-responsive">
               <table className="table table-hover table-striped table-vcenter mb-0">
                 <thead>

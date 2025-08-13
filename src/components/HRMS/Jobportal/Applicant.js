@@ -5,6 +5,7 @@ import ApplicantTable from './ApplicantTable';
 import DeleteModal from '../../common/DeleteModal';
 import ApplicantFilter from './ApplicantFilter';
 import { appendDataToFormData } from '../../../utils';
+import AlertMessages from '../../common/AlertMessages';
 
 class Applicant extends Component {
   state = {
@@ -23,6 +24,7 @@ class Applicant extends Component {
     isDeleting: false,
     isSyncing: false,
     syncSuccess: '',
+    showSuccess: false,
   };
 
   componentDidMount() {
@@ -96,12 +98,11 @@ class Applicant extends Component {
     if (this.state.isSyncing) return;
     this.setState({ isSyncing: true });
     
-    // Correct way to use addCall:
-    getService.addCall('applicants.php', 'sync_applicant')  // <-- Note the change here
+    getService.addCall('applicants.php', 'sync_applicant')
       .then(data => {
         if (data.status === 'success') {
-          // alert(`Synced ${data.data.inserted} new applicants`);
-          this.setState({ syncing: true, syncSuccess: "" });
+          this.setState({ syncSuccess: `Synced ${data.data.inserted} new applicants successfully!`, showSuccess: true });
+          setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
           this.fetchApplicants();
         } else {
           alert(data.data.message || 'Sync failed');
@@ -113,7 +114,7 @@ class Applicant extends Component {
       .finally(() => {
         this.setState({ isSyncing: false });
       });
-};
+  };
 
   openDeleteModal = (id) => {
     this.setState({ showDeleteModal: true, deleteId: id });
@@ -150,9 +151,17 @@ class Applicant extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing,syncSuccess } = this.state;
+    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess } = this.state;
     return (
       <>
+        <AlertMessages
+          showSuccess={showSuccess}
+          successMessage={syncSuccess}
+          showError={false}
+          errorMessage={''}
+          setShowSuccess={val => this.setState({ showSuccess: val })}
+          setShowError={() => {}}
+        />
         <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
           <div className="container-fluid">
             <div className="row clearfix row-deck">
@@ -176,7 +185,6 @@ class Applicant extends Component {
                 onDelete={this.openDeleteModal}
                 onSync={this.handleSync}
                 syncing={isSyncing}
-                syncSuccess={syncSuccess}
               />
               {/* Delete Modal */}
               <DeleteModal
