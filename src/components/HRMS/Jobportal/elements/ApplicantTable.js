@@ -3,6 +3,8 @@ import NoDataRow from '../../../common/NoDataRow';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Pagination from '../../../common/Pagination';
 import ApplicantViewModal from './ApplicantViewModal';
+import ConfirmModal from '../../../common/ConfirmModal';
+import Moment from 'react-moment';
 
 class ApplicantTable extends Component {
   static getStatusColor(status) {
@@ -21,6 +23,9 @@ class ApplicantTable extends Component {
     this.state = {
       selectedApplicant: null,
       showViewModal: false,
+      showConfirmModal: false,
+      pendingStatusChange: null,
+      isUpdatingStatus: false,
     };
   }
 
@@ -38,6 +43,44 @@ class ApplicantTable extends Component {
     });
   };
 
+  handleStatusChange = (applicantId, newStatus, applicantName) => {
+    this.setState({
+      showConfirmModal: true,
+      pendingStatusChange: {
+        applicantId,
+        newStatus,
+        applicantName
+      }
+    });
+  };
+
+  handleConfirmStatusChange = () => {
+    const { pendingStatusChange } = this.state;
+    const { onStatusChange } = this.props;
+    
+    if (pendingStatusChange) {
+      this.setState({ isUpdatingStatus: true });
+      
+      // Call the parent's onStatusChange function
+      onStatusChange(pendingStatusChange.applicantId, pendingStatusChange.newStatus);
+      
+      // Close the modal and reset state
+      this.setState({
+        showConfirmModal: false,
+        pendingStatusChange: null,
+        isUpdatingStatus: false,
+      });
+    }
+  };
+
+  handleCancelStatusChange = () => {
+    this.setState({
+      showConfirmModal: false,
+      pendingStatusChange: null,
+      isUpdatingStatus: false,
+    });
+  };
+
   render() {
     const {
       applicants,
@@ -52,8 +95,7 @@ class ApplicantTable extends Component {
       syncing,
     } = this.props;
 
-    const { selectedApplicant, showViewModal } = this.state;
-    const { syncSuccess } = this.props;
+    const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus } = this.state;
 
     return (
       <div className="col-lg-12 col-md-12 col-sm-12">
@@ -81,37 +123,37 @@ class ApplicantTable extends Component {
           </div>
           <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-hover table-striped table-vcenter mb-0">
+              <table className="table table-vcenter table_custom spacing5 border-style mb-0">
                 <thead>
                   <tr>
-                    <th />
+                    <th className="w40">#</th>
                     <th>Name</th>
                     <th>Mobile</th>
                     <th>Applied On</th>
+                    <th>Experience</th>
                     <th>Status</th>
-                    {/* <th>Resume</th> */}
-                    <th>Action</th>
+                    <th className="w40" />
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="7" style={{ padding: 0 }}>
-                        <TableSkeleton columns={7} rows={5} />
+                      <td colSpan="8" style={{ padding: 0 }}>
+                        <TableSkeleton columns={8} rows={5} />
                       </td>
                     </tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan="7" className="text-danger">{error}</td>
+                      <td colSpan="8" className="text-danger">{error}</td>
                     </tr>
                   ) : applicants.length === 0 ? (
-                    <NoDataRow colSpan={7} message="No applicants found." />
+                    <NoDataRow colSpan={8} message="No applicants found." />
                   ) : (
-                    applicants.map(applicant => (
+                    applicants.map((applicant, index) => (
                       <tr key={applicant.id}>
-                        <td className="w60">
-                          <span className="avatar avatar-pink">
-                          {applicant.fullname ? applicant.fullname .split(' ') .map(word => word[0]) .join('') .toUpperCase() : '?'}
+                        <td>
+                          <span className="avatar avatar-pink" data-toggle="tooltip" data-placement="top" data-original-title={applicant.fullname}>
+                            {applicant.fullname ? applicant.fullname.split(' ').map(word => word[0]).join('').toUpperCase() : '?'}
                           </span>
                         </td>
                         <td>
@@ -119,18 +161,20 @@ class ApplicantTable extends Component {
                           <span className="text-muted">{applicant.email}</span>
                         </td>
                         <td>{applicant.phone}</td>
-                        <td>{new Date(applicant.created_at).toLocaleDateString()}</td>
+                        <td>
+                          <Moment format="DD MMM, YYYY">
+                            {applicant.created_at}
+                          </Moment>
+                        </td>
+                        <td>{applicant.experience} Years</td>
                         <td>
                           <select
                             className="custom-select"
                             value={applicant.status}
                             style={{
-                              ...ApplicantTable.getStatusColor(applicant.status),
-                              WebkitAppearance: 'menulist-button',
-                              MozAppearance: 'menulist',
-                              appearance: 'menulist',
+                                ...ApplicantTable.getStatusColor(applicant.status),
                             }}
-                            onChange={e => onStatusChange(applicant.id, e.target.value)}
+                            onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
                           >
                             <option value="pending">Pending</option>
                             <option value="reviewed">Reviewed</option>
@@ -140,31 +184,25 @@ class ApplicantTable extends Component {
                           </select>
                         </td>
                         <td>
-                          <div className="d-flex">
-                            <button
-                              className="btn"
-                              onClick={() => this.handleViewApplicant(applicant)}
-                              title="View Details"
-                            >
-                              <i className="fa fa-eye"></i>
-                            </button>
-                            {/* <button
-                            className="btn"
-                            onClick={() => onDelete(applicant.id)}
-                          >
-                            <i className="fa fa-trash"></i>
-                          </button> */}
-                            {applicant.resume_path && (
-                              <a
-                                href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn"
-                                title="Download Resume"
-                              >
-                                <i className="fa fa-download"></i>
+                          <div className="item-action dropdown">
+                            <a href="fake_url" data-toggle="dropdown" aria-expanded="false">
+                              <i className="fa fa-ellipsis-h" />
+                            </a>
+                            <div className="dropdown-menu dropdown-menu-right"  style={{ position: 'absolute', willChange: 'transform', top: 0, left: 0, transform: 'translate3d(18px, 25px, 0px)' }}>
+                              <a href="fake_url" className="dropdown-item" onClick={(e) => { e.preventDefault(); this.handleViewApplicant(applicant); }}>
+                                <i className="dropdown-icon fa fa-eye" /> View Details
                               </a>
-                            )}
+                              {applicant.resume_path && (
+                                <a
+                                  href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="dropdown-item"
+                                >
+                                  <i className="dropdown-icon fa fa-cloud-download" /> Download Resume
+                                </a>
+                              )}
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -192,6 +230,22 @@ class ApplicantTable extends Component {
           onClose={this.handleCloseViewModal}
           applicant={selectedApplicant}
           getStatusColor={ApplicantTable.getStatusColor}
+        />
+
+        {/* Status Change Confirmation Modal */}
+        <ConfirmModal
+          show={showConfirmModal}
+          title="Confirm Status Change"
+          message={pendingStatusChange ? 
+            `Are you sure you want to change the status of "${pendingStatusChange.applicantName}" to "${pendingStatusChange.newStatus.charAt(0).toUpperCase() + pendingStatusChange.newStatus.slice(1)}"?` 
+            : ""
+          }
+          confirmText="Update Status"
+          cancelText="Cancel"
+          confirmButtonClass="btn-primary"
+          onConfirm={this.handleConfirmStatusChange}
+          onCancel={this.handleCancelStatusChange}
+          isLoading={isUpdatingStatus}
         />
       </div>
     );

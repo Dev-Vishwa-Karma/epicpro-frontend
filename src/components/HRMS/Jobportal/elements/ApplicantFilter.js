@@ -47,8 +47,8 @@ class ApplicantFilter extends Component {
                   value={order}
                   onChange={onInputChange}
                 >
-                  <option value="newest">Newest first</option>
-                  <option value="oldest">Oldest first</option>
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
                 </select>
               </div>
             </div>

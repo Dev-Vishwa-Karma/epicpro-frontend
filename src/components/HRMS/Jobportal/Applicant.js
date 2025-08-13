@@ -5,6 +5,7 @@ import AlertMessages from '../../common/AlertMessages';
 import DeleteModal from '../../common/DeleteModal';
 import ApplicantTable from './elements/ApplicantTable';
 import ApplicantFilter from './elements/ApplicantFilter';
+import AddApplicant from './elements/AddApplicant'
 import { appendDataToFormData } from '../../../utils';
 
 
@@ -26,6 +27,7 @@ class Applicant extends Component {
     isSyncing: false,
     syncSuccess: '',
     showSuccess: false,
+    activeTab: 'list',
   };
 
   componentDidMount() {
@@ -36,7 +38,7 @@ class Applicant extends Component {
     this.setState({ loading: true });
     const {search, status, order, currentPage, pageSize} = this.state;
     getService.getCall('applicants.php', {
-      action: 'list',
+      action: 'get',
       search: search,
       status: status,
       order: order,
@@ -117,6 +119,10 @@ class Applicant extends Component {
       });
   };
 
+  handleTabChange = (tabId) => {
+    this.setState({ activeTab: tabId });
+  };
+
   openDeleteModal = (id) => {
     this.setState({ showDeleteModal: true, deleteId: id });
   };
@@ -152,7 +158,7 @@ class Applicant extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess } = this.state;
+    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess, activeTab } = this.state;
     return (
       <>
         <AlertMessages
@@ -163,41 +169,79 @@ class Applicant extends Component {
           setShowSuccess={val => this.setState({ showSuccess: val })}
           setShowError={() => {}}
         />
-        <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
+        <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
           <div className="container-fluid">
-            <div className="row clearfix row-deck">
-              {/* Filter */}
-              <ApplicantFilter
-                search={search}
-                status={status}
-                order={order}
-                onInputChange={this.handleInputChange}
-                onFilter={this.handleFilter}
-              />
-              {/* Applicants Table */}
-              <ApplicantTable
-                applicants={applicants}
-                loading={loading}
-                error={error}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={this.handlePageChange}
-                onStatusChange={this.handleStatusChange}
-                onDelete={this.openDeleteModal}
-                onSync={this.handleSync}
-                syncing={isSyncing}
-              />
-              {/* Delete Modal */}
-              <DeleteModal
-                show={showDeleteModal}
-                onConfirm={this.confirmDelete}
-                isLoading={isDeleting}
-                onClose={this.closeDeleteModal}
-                deleteBody={"Are you sure you want to delete this applicant?"}
-              />
+            <div className="d-flex justify-content-between align-items-center">
+              <ul className="nav nav-tabs page-header-tab">
+                <li className="nav-item">
+                  <a
+                    className={`nav-link ${activeTab === 'list' ? 'active' : ''}`}
+                    id="applicant-tab"
+                    data-toggle="tab"
+                    href="#applicant-list"
+                    onClick={() => this.handleTabChange('list')}
+                  >
+                    List
+                  </a>
+                </li>
+                <li className="nav-item">
+                  <a 
+                    className={`nav-link ${activeTab === 'add' ? 'active' : ''}`}
+                    id="applicant-tab" 
+                    data-toggle="tab" 
+                    href="#applicant-add" 
+                    onClick={() => this.handleTabChange('add')}
+                  >
+                    Add New
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
+        <div className="section-body mt-3">
+          <div className="container-fluid">
+            <div className="tab-content mt-3">
+              <div className={`tab-pane fade ${activeTab === 'list' ? 'show active' : ''}`} id="applicant-list" role="tabpanel">
+                <div className="row clearfix row-deck">
+                  {/* Filter */}
+                  <ApplicantFilter
+                    search={search}
+                    status={status}
+                    order={order}
+                    onInputChange={this.handleInputChange}
+                    onFilter={this.handleFilter}
+                  />
+                  {/* Applicants Table */}
+                  <ApplicantTable
+                    applicants={applicants}
+                    loading={loading}
+                    error={error}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={this.handlePageChange}
+                    onStatusChange={this.handleStatusChange}
+                    onDelete={this.openDeleteModal}
+                    onSync={this.handleSync}
+                    syncing={isSyncing}
+                  />
+                </div>
+              </div>
+              <div className={`tab-pane fade ${activeTab === 'add' ? 'show active' : ''}`} id="applicant-add" role="tabpanel">
+                <AddApplicant />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Modal */}
+        <DeleteModal
+          show={showDeleteModal}
+          onConfirm={this.confirmDelete}
+          isLoading={isDeleting}
+          onClose={this.closeDeleteModal}
+          deleteBody={"Are you sure you want to delete this applicant?"}
+        />
       </>
     );
   }

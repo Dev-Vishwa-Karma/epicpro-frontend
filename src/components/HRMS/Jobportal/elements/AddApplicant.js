@@ -1,0 +1,374 @@
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import AlertMessages from '../../../common/AlertMessages';
+import { getService } from '../../../../services/getService';
+import { validateFields } from '../../../common/validations';
+import InputField from '../../../common/formInputs/InputField';
+import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
+import { appendDataToFormData, getColor } from '../../../../utils';
+
+const skillOptions = [
+  'HTML',
+  'CSS',
+  'JavaScript',
+  'React',
+  'Angular',
+  'Vue',
+  'TypeScript',
+  'jQuery',
+  'PHP',
+  'Laravel',
+  'Python',
+  'Node.js',
+  'Symfony',
+  'Django',
+  'Ruby on Rails'
+];
+
+class AddApplicant extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      fullname: '',
+      email: '',
+      phone: '',
+      address: '',
+      experience: '',
+      skills: [],
+      resume: null,
+      successMessage: "",
+      showSuccess: false,
+      errorMessage: "",
+      showError: false,
+      errors: {},
+      ButtonLoading: false,
+    };
+
+    this.fieldRefs = {
+      fullname: React.createRef(),
+      email: React.createRef(),
+      phone: React.createRef(),
+      address: React.createRef(),
+      experience: React.createRef(),
+      skills: React.createRef(),
+      resume: React.createRef(),
+    };
+  }
+
+  dismissMessages = () => {
+    this.setState({
+      showSuccess: false,
+      successMessage: "",
+      showError: false,
+      errorMessage: "",
+    });
+  };
+
+  handleChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({ 
+      [name]: value,
+      errors: { ...this.state.errors, [name]: "" }
+    });
+  };
+
+  handleSkillsChange = (e) => {
+    const { value, checked } = e.target;
+    const { skills } = this.state;
+    if (checked) {
+      this.setState({ skills: [...skills, value] });
+    } else {
+      this.setState({ skills: skills.filter(s => s !== value) });
+    }
+  };
+
+  handleFileChange = (e) => {
+    const file = e.target.files[0];
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'application/rtf',
+    ];
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf'];
+    let error = '';
+    
+    if (file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(ext)) {
+        error = 'Only PDF, DOC, DOCX, TXT, or RTF files are allowed. Image files are not permitted.';
+        this.setState(prev => ({
+          resume: null,
+          errors: { ...prev.errors, resume: error }
+        }));
+        return;
+      }
+    }
+    
+    this.setState(prev => ({
+      resume: file,
+      errors: { ...prev.errors, resume: '' }
+    }));
+  };
+
+  addApplicant = (e) => {
+    e.preventDefault();
+    this.setState({ ButtonLoading: true, showError: false, showSuccess: false });
+
+    const {
+      fullname,
+      email,
+      phone,
+      address,
+      experience,
+      skills,
+      resume,
+    } = this.state;
+
+    const validationSchema = [
+      { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
+      { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
+      { name: 'phone', value: phone, type: 'mobile', required: true, messageName: 'Phone' },
+      { name: 'address', value: address, type: 'text', required: true, messageName: 'Address' },
+      { name: 'experience', value: experience, type: 'text', required: true, messageName: 'Experience' },
+      { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: true, messageName: 'Skills' },
+      { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: true, messageName: 'Resume' },
+    ];
+
+    const errors = validateFields(validationSchema);
+    this.setState({ errors });
+
+    if (Object.keys(errors).length === 0) {
+      const formData = new FormData();
+
+      const data = {
+        fullname: fullname,
+        email: email,
+        phone: phone,
+        address: address,
+        experience: experience,
+        skills: JSON.stringify(skills),
+        resume: resume
+      };
+      
+      appendDataToFormData(formData, data);
+
+      getService.addCall('applicants.php', 'add', formData)
+        .then(data => {
+          if (data.status === 'success') {
+            this.setState({
+              ButtonLoading: false,
+              showSuccess: true,
+              successMessage: "Applicant added successfully!",
+              fullname: '',
+              email: '',
+              phone: '',
+              address: '',
+              experience: '',
+              skills: [],
+              resume: null,
+              errors: {},
+            });
+            setTimeout(this.dismissMessages, 3000);
+          } else {
+            throw new Error(data.data?.message || 'Failed to add applicant');
+          }
+        })
+        .catch(error => {
+          this.setState({
+            ButtonLoading: false,
+            showError: true,
+            errorMessage: error.message || 'An error occurred while adding the applicant'
+          });
+          console.error('Error:', error);
+          setTimeout(this.dismissMessages, 3000);
+        });
+    } else {
+      this.setState({ ButtonLoading: false });
+    }
+  };
+
+  handleBack = () => {
+    this.props.history.goBack();
+  };
+
+  render() {
+    const { fixNavbar } = this.props;
+    const {
+      fullname,
+      email,
+      phone,
+      address,
+      experience,
+      skills,
+      resume,
+      showSuccess,
+      successMessage,
+      showError,
+      errorMessage,
+    } = this.state;
+
+    return (
+      <>
+        <AlertMessages
+          showSuccess={showSuccess}
+          successMessage={successMessage}
+          showError={showError}
+          errorMessage={errorMessage}
+          setShowSuccess={(val) => this.setState({ showSuccess: val })}
+          setShowError={(val) => this.setState({ showError: val })}
+        />
+        <form className="card" noValidate onSubmit={this.addApplicant}>
+                    <div className="card-body">
+                      <h3 className="card-title">Add Applicant</h3>
+                      <div className="row">
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Full Name"
+                            name="fullname"
+                            type="text"
+                            value={fullname}
+                            onChange={this.handleChange}
+                            placeholder="Enter Full Name"
+                            error={this.state.errors.fullname}
+                            refInput={this.fieldRefs.fullname}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Email Address"
+                            name="email"
+                            type="email"
+                            value={email}
+                            onChange={this.handleChange}
+                            placeholder="Enter Email Address"
+                            error={this.state.errors.email}
+                            refInput={this.fieldRefs.email}
+                            autoComplete="off"
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Phone Number"
+                            name="phone"
+                            type="tel"
+                            value={phone}
+                            onChange={this.handleChange}
+                            placeholder="Enter Phone Number"
+                            error={this.state.errors.phone}
+                            refInput={this.fieldRefs.phone}
+                            maxLength="10"
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(/\D/g, '');
+                            }}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Years of Experience"
+                            name="experience"
+                            type="select"
+                            value={experience}
+                            onChange={this.handleChange}
+                            error={this.state.errors.experience}
+                            refInput={this.fieldRefs.experience}
+                            options={[
+                              { value: '0-1', label: '0-1 years' },
+                              { value: '1-2', label: '1-2 years' },
+                              { value: '2-4', label: '2-4 years' },
+                              { value: '4-6', label: '4-6 years' },
+                              { value: '6-8', label: '6-8 years' },
+                              { value: '8+', label: '8+ years' },
+                            ]}
+                          />
+                        </div>
+                        <div className="col-md-12">
+                          <InputField
+                            label="Address"
+                            name="address"
+                            type="text"
+                            value={address}
+                            onChange={this.handleChange}
+                            placeholder="Enter Complete Address"
+                            error={this.state.errors.address}
+                            refInput={this.fieldRefs.address}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Technical Skills */}
+                      <div className="row mb-4">
+                        <h5 className="w-100">Technical Skills</h5>
+                        <div className="col-md-12">
+                          <CheckboxGroup
+                            label=""
+                            options={skillOptions}
+                            selected={skills}
+                            onChange={this.handleSkillsChange}
+                            getColor={getColor}
+                          />
+                          {this.state.errors.skills && (
+                            <div className="invalid-feedback d-block">{this.state.errors.skills}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Resume Upload */}
+                      <div className="row mb-4">
+                        <h5 className="w-100">Documents</h5>
+                        <div className="col-md-12">
+                          <div className="form-group">
+                            <label className="form-label">
+                              Resume/CV <small className="text-muted">(PDF, DOC, DOCX, TXT, RTF)</small>
+                            </label>
+                            <InputField
+                              type="file"
+                              name="resume"
+                              placeholder="Select your resume"
+                              onChange={this.handleFileChange}
+                              refInput={this.fieldRefs.resume}
+                              accept=".pdf,.doc,.docx,.txt,.rtf"
+                            />
+                            {this.state.errors.resume && (
+                              <div className="invalid-feedback d-block">{this.state.errors.resume}</div>
+                            )}
+                            <small className="form-text text-muted">Max file size: 2MB.</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="card-footer text-right"
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: "10px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={this.handleBack}
+                      >
+                        Back
+                      </button>
+                      <button type="submit" className="btn btn-primary" disabled={this.state.ButtonLoading}>
+                        {this.state.ButtonLoading ? (
+                          <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                        ) : null}
+                        Add Applicant
+                      </button>
+                    </div>
+                  </form>
+      </>
+    );
+  }
+}
+
+const mapStateToProps = (state) => ({
+  fixNavbar: state.settings.isFixNavbar,
+});
+
+const mapDispatchToProps = (dispatch) => ({});
+export default connect(mapStateToProps, mapDispatchToProps)(AddApplicant); 
