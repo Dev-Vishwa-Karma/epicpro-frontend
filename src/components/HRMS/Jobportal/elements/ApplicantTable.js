@@ -4,7 +4,6 @@ import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Pagination from '../../../common/Pagination';
 import ApplicantViewModal from './ApplicantViewModal';
 import ConfirmModal from '../../../common/ConfirmModal';
-import Moment from 'react-moment';
 
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
@@ -18,6 +17,14 @@ class ApplicantTable extends Component {
       case 'rejected': return { background: '#FEE2E2', color: 'red' };
       default: return {};
     }
+  }
+
+  static formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day} ${month}, ${year}`;
   }
 
   constructor(props) {
@@ -156,9 +163,7 @@ class ApplicantTable extends Component {
                         </td>
                         <td>{applicant.phone}</td>
                         <td>
-                          <Moment format="DD MMM, YYYY">
-                            {applicant.created_at}
-                          </Moment>
+                            {ApplicantTable.formatDate(applicant.created_at)}
                         </td>
                         <td>{applicant.experience} Years</td>
                         <td>
