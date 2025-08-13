@@ -11,6 +11,7 @@ import YearSelector from "../../common/YearSelector";
 import EventList from "./elements/EventList";
 import AddEventModal from "./elements/AddEventModal";
 import { appendDataToFormData, formatDate } from "../../../utils";
+import Button from "../../common/formInputs/Button";
 class Events extends Component {
   constructor(props) {
     super(props);
@@ -946,14 +947,12 @@ class Events extends Component {
                       {(logged_in_employee_role === "admin" ||
                         logged_in_employee_role === "super_admin") && (
                         <div className="header-action">
-                          <button
-                            onClick={() => this.openAddEventModel()}
-                            type="button"
-                            className="btn btn-primary"
-                          >
-                            <i className="fe fe-plus mr-2" />
-                            Add Event
-                          </button>
+                        <Button
+                          label="Add Event"
+                          onClick={this.openAddEventModel}
+                          icon="fe fe-plus"
+                          className="btn-primary"
+                        />
                         </div>
                       )}
                     </div>

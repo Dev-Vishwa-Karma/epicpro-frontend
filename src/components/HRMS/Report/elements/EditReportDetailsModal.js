@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const EditReportDetailsModal = ({ 
     existingFullName,
@@ -136,7 +137,11 @@ const EditReportDetailsModal = ({
                         </div>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-primary" onClick={editReportByAdmin}>Save Changes</button>
+                        <Button
+                        label="Save Changes"
+                        onClick={editReportByAdmin}
+                        className="btn-primary"
+                        />
                     </div>
                 </div>
             </div>

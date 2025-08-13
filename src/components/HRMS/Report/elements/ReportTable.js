@@ -2,6 +2,7 @@ import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { formatDateTimeAMPM , isToday} from '../../../../utils';
+import Button from '../../../common/formInputs/Button';
 
 const ReportTable = ({ 
     currentReports, 
@@ -53,43 +54,40 @@ const ReportTable = ({
                                         <td>{report.todays_working_hours?.slice(0, 5)}</td>
                                         <td>{report.todays_total_hours?.slice(0, 5)}</td>
                                         <td width="15%">
-                                            <button
-                                                type="button"
-                                                className="btn btn-icon btn-sm"
-                                                title="View"
-                                                data-toggle="modal"
-                                                data-target="#viewpunchOutReportModal"
-                                                onClick={() => openReportModal(report)}
-                                            >
-                                                <i className="icon-eye text-danger"></i>
-                                            </button>
+                                            <Button
+                                            label=""
+                                            onClick={() => openReportModal(report)}
+                                            className="btn-icon btn-sm"
+                                            title="View"
+                                            dataToggle="modal"
+                                            dataTarget="#viewpunchOutReportModal"
+                                            icon="icon-eye text-danger"
+                                            />
 
                                             {/* Admin/Super Admin can edit any report */}
                                             {window.user && (window.user.role === 'admin' || window.user.role === 'super_admin') && (
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-icon btn-sm"
-                                                    title="Edit"
-                                                    data-toggle="modal"
-                                                    data-target="#editpunchOutReportModal"
-                                                    onClick={() => openReportModal(report)}
-                                                >
-                                                    <i className="icon-pencil text-primary"></i>
-                                                </button>
+                                            <Button
+                                                label=""
+                                                onClick={() => openReportModal(report)}
+                                                className="btn-icon btn-sm"
+                                                title="Edit"
+                                                dataToggle="modal"
+                                                dataTarget="#editpunchOutReportModal"
+                                                icon="icon-pencil text-primary"
+                                            />
                                             )}
 
                                             {/* Employee can edit only today's report */}
                                             {window.user && window.user.role === 'employee' && isToday(report.created_at) && (
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-icon btn-sm"
-                                                    title="Edit"
-                                                    data-toggle="modal"
-                                                    data-target="#editpunchOutReportModal"
-                                                    onClick={() => openReportModal(report)}
-                                                >
-                                                    <i className="icon-pencil text-danger"></i>
-                                                </button>
+                                            <Button
+                                                label=""
+                                                onClick={() => openReportModal(report)}
+                                                className="btn-icon btn-sm"
+                                                title="Edit"
+                                                dataToggle="modal"
+                                                dataTarget="#editpunchOutReportModal"
+                                                icon="icon-pencil text-danger"
+                                            />
                                             )}
                                         </td>
                                     </tr>

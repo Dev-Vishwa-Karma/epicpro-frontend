@@ -1,6 +1,7 @@
 import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
+import Button from '../../../common/formInputs/Button';
 
 const HolidaysTable = ({
   loading,
@@ -61,28 +62,28 @@ const HolidaysTable = ({
                       </td>
                       {(logged_in_user_role === 'admin' || logged_in_user_role === 'super_admin') && (
                         <td>
-                          <button
-                            type="button"
-                            className="btn btn-icon btn-sm"
-                            title="Edit"
-                            data-toggle="modal"
-                            data-target="#editHolidayModal"
+                          <Button
+                            label=""
                             onClick={() => handleEditClickForHoliday(holiday)}
-                          >
-                            <i className="fa fa-edit" />
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-icon btn-sm js-sweetalert"
-                            title="Delete"
-                            data-type="confirm"
-                            data-toggle="modal"
-                            data-target="#deleteHolidayModal"
+                            title="Edit"
+                            className="btn-icon btn-sm"
+                            dataToggle="modal"
+                            dataTarget="#editHolidayModal"
+                            icon="fa fa-edit"
+                          />
+
+                          {/* Delete Button */}
+                          <Button
+                            label=""
                             onClick={() => openDeleteHolidayModal(holiday.id)}
-                          >
-                            <i className="fa fa-trash-o text-danger" />
-                          </button>
-                        </td>
+                            title="Delete"
+                            className="btn-icon btn-sm js-sweetalert"
+                            dataType="confirm"
+                            dataToggle="modal"
+                            dataTarget="#deleteHolidayModal"
+                            icon="fa fa-trash-o text-danger"
+                          />
+                            </td>
                       )}
                     </tr>
                   ))

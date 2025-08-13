@@ -10,6 +10,7 @@ import DateFilterForm from '../../../common/DateFilterForm';
 import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
 import { getToday, formatDate } from '../../../../utils';
+import Button from '../../../common/formInputs/Button';
 
 class CalendarWithTabs extends Component {
     constructor(props) {
@@ -1036,7 +1037,12 @@ class CalendarWithTabs extends Component {
                                                 </div>
                                             </div>
                                             <div className="card-footer text-right">
-                                                <button type="submit" className="btn btn-primary" onClick={this.updateProfile}>Update Profile</button>
+                                                <Button
+                                                    label="Update Profile"
+                                                    onClick={this.updateProfile}
+                                                    className="btn-primary"
+                                                    type="submit"
+                                                />
                                             </div>
                                         </div>
                                     </div>

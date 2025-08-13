@@ -1,6 +1,7 @@
 // BreakReasonModal.js
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSaveBreakIn, closeModal, ButtonLoading, errors = {} }) => {
   return (
@@ -35,17 +36,15 @@ const BreakReasonModal = ({ showModal, breakReason, handleReasonChange, handleSa
               </div>
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-primary"
+              <Button
+                label={ButtonLoading ? "Saving..." : "Save changes"}
                 onClick={handleSaveBreakIn}
                 disabled={ButtonLoading}
-              >
-                {ButtonLoading && (
-                  <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                )}
-                Save changes
-              </button>
+                className="btn-primary"
+                loading={ButtonLoading}
+                icon={ButtonLoading ? "" : "fa fa-save"}
+                iconStyle={{ marginRight: '8px' }}
+              />
             </div>
           </div>
         </div>

@@ -13,6 +13,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { validateFields } from "../common/validations";
 import NotificationSkeleton from "../common/skeletons/NotificationSkeleton";
 import TimeSkeleton from "../common/skeletons/TimeSkeleton";
+import Button from "../common/formInputs/Button";
 
 class Header extends Component {
   constructor(props) {
@@ -750,27 +751,26 @@ class Header extends Component {
               </div>
               <div className="right">
                 {window.user && (window.user.role === 'employee') && (
-                  <button
-                    disabled={disableButton}
-                    className="btn btn-primary"
-                    onClick={
-                      isPunchedIn ? this.handlePunchOut : this.handlePunchIn
-                    }
-                    style={{width: "190px", height: "35px", fontSize: "14px"}}
-                  >
-                                        {isPunchedIn ? (
-                      this.state.isTimeLoading ? (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                          Punch Out : <TimeSkeleton height="14px" />
-                        </span>
+                  <Button
+                    label={
+                      isPunchedIn ? (
+                        this.state.isTimeLoading ? (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            Punch Out : <TimeSkeleton height="14px" />
+                          </span>
+                        ) : (
+                          `Punch Out : ${elapsedFormatted}`
+                        )
                       ) : (
-                        `Punch Out : ${elapsedFormatted}`
+                        "Punch In"
                       )
-                    ) : (
-                      "Punch In"
-                    )}
-                    
-                  </button>
+                    }
+                    onClick={isPunchedIn ? this.handlePunchOut : this.handlePunchIn}
+                    disabled={disableButton}
+                    className="btn-primary"
+                    style={{ width: "190px", height: "35px", fontSize: "14px" }}
+                  />
+
                 )}
                 <div className="notification d-flex">
                   <div className="dropdown d-flex">
@@ -1106,17 +1106,12 @@ class Header extends Component {
                 </div>
 
                 <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
+                  <Button
+                    label="Submit"
                     onClick={this.handleAddReport}
-                    disabled={
-                      this.state.isReportSubmitting ||
-                      this.state.isReportSubmitted
-                    }
-                  >
-                    Submit
-                  </button>
+                    disabled={this.state.isReportSubmitting || this.state.isReportSubmitted}
+                    className="btn-primary"
+                  />
                 </div>
               </div>
             </div>

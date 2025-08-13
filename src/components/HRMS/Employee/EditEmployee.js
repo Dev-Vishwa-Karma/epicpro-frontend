@@ -7,7 +7,7 @@ import { validateFields } from '../../common/validations';
 import InputField from '../../common/formInputs/InputField';
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
 import CheckFileAvailability from './elements/CheckFileAvailability';
-
+import Button from '../../common/formInputs/Button';
 class EditEmployee extends Component {
     constructor(props) {
         super(props);
@@ -1230,13 +1230,18 @@ class EditEmployee extends Component {
                                             </div>
                                         </div>
                                         <div className="card-footer text-right" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                                            <button type="button" className="btn btn-secondary" onClick={this.handleBack}>Back</button>
-                                            <button type="button" className="btn btn-primary" onClick={this.updateEmployee} disabled={this.state.ButtonLoading}>
-                                                {this.state.ButtonLoading && (
-                                                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                                                )}
-                                                Update Employee
-                                            </button>
+                                            <Button
+                                                label="Back"
+                                                onClick={this.handleBack}
+                                                className="btn-secondary"
+                                            />
+                                            <Button
+                                                label="Update Employee"
+                                                onClick={this.updateEmployee}
+                                                loading={this.state.ButtonLoading}
+                                                disabled={this.state.ButtonLoading}
+                                                className="btn-primary"
+                                            />
                                         </div>
                                     {/* </form> */}
                                 </div>

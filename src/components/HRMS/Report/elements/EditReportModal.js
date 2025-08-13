@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import TextEditor from '../../../common/TextEditor';
 import InputField from '../../../common/formInputs/InputField'
 import { getTimeAsDate } from '../../../../utils';
+import Button from '../../../common/formInputs/Button';
 
 const EditReportModal = ({ 
     selectedModalReport,
@@ -147,8 +148,17 @@ const EditReportModal = ({
                     </div>
 
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={closeReportModal}>Close</button>
-                        <button type="button" className="btn btn-primary" onClick={updateReport}>Update Report</button>
+                        <Button
+                        label="Close"
+                        onClick={closeReportModal}
+                        className="btn-secondary"
+                        dataDismiss="modal"
+                        />
+                        <Button
+                        label="Update Report"
+                        onClick={updateReport}
+                        className="btn-primary"
+                        />
                     </div>
                 </div>
             </div>

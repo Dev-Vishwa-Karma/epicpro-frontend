@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 class ClientFieldModal extends Component {
   constructor(props) {
     super(props);
@@ -234,13 +235,23 @@ class ClientFieldModal extends Component {
                 </div>
               </div>
               <div className="modal-footer" style={{ position: 'sticky', bottom: 0, background: 'white', zIndex: 1 }}>
-                <button type="button" className="btn btn-secondary" onClick={onClose}>
-                  Close
-                </button>
-                <button type="button" onClick={onSubmit} className="btn btn-primary" disabled={loading}>
-                  {loading && <span className="spinner-border spinner-border-sm mr-2" />}
-                  Save changes
-                </button>
+              <Button
+                label="Close"
+                onClick={onClose}
+                className="btn-secondary"
+              />
+
+              <Button
+                label={loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                    Saving...
+                  </>
+                ) : "Save changes"}
+                onClick={onSubmit}
+                disabled={loading}
+                className="btn-primary"
+              />
               </div>
             </div>
           </div>

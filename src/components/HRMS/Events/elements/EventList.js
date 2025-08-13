@@ -1,6 +1,7 @@
 import React from "react";
 import ListSkeleton from "../../../common/skeletons/ListSkeleton";
 import { formatDate } from "../../../../utils";
+import Button from "../../../common/formInputs/Button";
 
 const EventList = ({ loading, uniqueFilteredEvents2, logged_in_employee_role, openDeleteModal }) => {
   return (
@@ -56,24 +57,20 @@ const EventList = ({ loading, uniqueFilteredEvents2, logged_in_employee_role, op
                       {event.event_type === "event" &&
                         (logged_in_employee_role === "admin" ||
                           logged_in_employee_role === "super_admin") && (
-                          <button
-                            className="btn btn-link text-danger position-absolute"
+                          <Button
+                            icon="fa fa-trash"
                             title="Delete Event"
                             onClick={() => openDeleteModal(event.id)}
+                            className="btn-link text-danger position-absolute"
                             style={{
-                              top: "2px",
-                              right: "2px",
-                              padding: "2px 6px",
-                              fontSize: "0.75rem",
+                              top: '2px',
+                              right: '2px',
+                              padding: '2px 6px',
+                              fontSize: '0.75rem',
                               lineHeight: 1,
                             }}
-                          >
-                            <i
-                              className="fa fa-trash"
-                              aria-hidden="true"
-                              style={{ color: "red" }}
-                            ></i>
-                          </button>
+                            iconStyle={{ color: 'red' }}
+                          />
                         )}
 
                       <strong className="d-block">{event.event_name}</strong>

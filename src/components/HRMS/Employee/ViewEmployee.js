@@ -9,6 +9,7 @@ import AlertMessages from '../../common/AlertMessages';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getService } from '../../../services/getService';
 import InputField from '../../common/formInputs/InputField';
+import Button from '../../common/formInputs/Button';
 class ViewEmployee extends Component {
     constructor(props) {
         super(props);
@@ -534,39 +535,42 @@ class ViewEmployee extends Component {
 
                                 {/* Modal Footer */}
                                 <div className="modal-footer border-b-2 pt-2 d-flex justify-content-end">
-                                    <button
-                                        className="btn btn-outline-secondary me-3 px-4"
-                                        onClick={() => {
-                                            this.setState({ openFileSelectModel: false,showGallery:true ,selectedImage:null });
-                                            document.body.style.overflow = 'auto';
-                                        }}
-                                    >
-                                        Cancel
-                                    </button>
+                                    <Button
+                                    label="Cancel"
+                                    onClick={() => {
+                                        this.setState({
+                                        openFileSelectModel: false,
+                                        showGallery: true,
+                                        selectedImage: null,
+                                        });
+                                        document.body.style.overflow = 'auto';
+                                    }}
+                                    className="btn-outline-secondary me-3 px-4"
+                                    />
+
                                     {showGallery && (
-                                        <button
-                                            className="btn btn-primary px-4"
-                                            onClick={this.saveCroppedImage}
-                                            disabled={!this.state.selectedImage}
-                                        >
-                                            Select & Crop
-                                        </button>
+                                    <Button
+                                        label="Select & Crop"
+                                        onClick={this.saveCroppedImage}
+                                        disabled={!this.state.selectedImage}
+                                        className="btn-primary px-4"
+                                    />
                                     )}
+
                                     {!showGallery && (
-                                        <button
-                                            className="btn btn-primary px-4"
-                                            onClick={this.handleBack}
-                                        >
-                                            Back
-                                        </button>
+                                    <Button
+                                        label="Back"
+                                        onClick={this.handleBack}
+                                        className="btn-primary px-4"
+                                    />
                                     )}
+
                                     {!showGallery && (
-                                        <button
-                                            className="btn btn-primary px-4"
-                                            onClick={this.handleSave}
-                                        >
-                                            Save Changes
-                                        </button>
+                                    <Button
+                                        label="Save Changes"
+                                        onClick={this.handleSave}
+                                        className="btn-primary px-4"
+                                    />
                                     )}
                                 </div>
                             </div>

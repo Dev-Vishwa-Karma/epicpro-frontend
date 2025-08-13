@@ -1,6 +1,7 @@
 import React from 'react';
 import EmployeeSelector from '../../../common/EmployeeSelector'
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const AddBreakModal = ({ 
     selectedEmployee,
@@ -72,7 +73,11 @@ const AddBreakModal = ({
                         </div>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-primary" onClick={addReportByAdmin}>Save changes</button>
+                        <Button
+                        label="Save changes"
+                        onClick={addReportByAdmin}
+                        className="btn-primary"
+                        />
                     </div>
                 </div>
             </div>

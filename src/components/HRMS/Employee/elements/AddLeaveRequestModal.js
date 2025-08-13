@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const AddLeaveRequestModal = ({
   showModal,
@@ -144,20 +145,19 @@ const AddLeaveRequestModal = ({
             </div>
 
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={closeModal}>
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
+              <Button
+                label="Close"
+                onClick={closeModal}
+                className="btn-secondary"
+              />
+
+              <Button
+                label="Add Leave"
                 onClick={addLeave}
+                loading={ButtonLoading}
                 disabled={ButtonLoading}
-              >
-                {ButtonLoading && (
-                  <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                )}
-                Add Leave
-              </button>
+                className="btn-primary"
+              />
             </div>
           </div>
         </div>

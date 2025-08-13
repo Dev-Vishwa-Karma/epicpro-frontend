@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-
+import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 class ApplicantFilter extends Component {
   render() {
     const { search, status, order, onInputChange, onFilter } = this.props;
@@ -9,53 +10,56 @@ class ApplicantFilter extends Component {
           <form className="row" onSubmit={onFilter}>
             <div className="col-lg-4 col-md-4 col-sm-6">
               <label>Search</label>
-              <div className="input-group">
-                <input
-                  type="text"
+                <InputField
                   className="form-control"
-                  placeholder="Search..."
                   name="search"
                   value={search}
                   onChange={onInputChange}
+                  placeholder="Search..."
                 />
-              </div>
             </div>
             <div className="col-lg-3 col-md-4 col-sm-6">
               <label>Status</label>
               <div className="multiselect_div">
-                <select
+                <InputField
                   className="custom-select"
                   name="status"
+                  type="select"
                   value={status}
                   onChange={onInputChange}
-                >
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="reviewed">Reviewed</option>
-                  <option value="interviewed">Interviewed</option>
-                  <option value="hired">Hired</option>
-                  <option value="rejected">Rejected</option>
-                </select>
+                  options={[
+                    { value: "", label: "All Status" },
+                    { value: "pending", label: "Pending" },
+                    { value: "reviewed", label: "Reviewed" },
+                    { value: "interviewed", label: "Interviewed" },
+                    { value: "hired", label: "Hired" },
+                    { value: "rejected", label: "Rejected" }
+                  ]}
+                />
               </div>
             </div>
             <div className="col-lg-3 col-md-4 col-sm-6">
               <label>Order</label>
               <div className="form-group">
-                <select
+                <InputField
                   className="custom-select"
                   name="order"
+                  type="select"
                   value={order}
                   onChange={onInputChange}
-                >
-                  <option value="newest">Newest first</option>
-                  <option value="oldest">Oldest first</option>
-                </select>
+                  options={[
+                    { value: "newest", label: "Newest" },
+                    { value: "oldest", label: "Oldest" }
+                  ]}
+                />
               </div>
             </div>
             <div className="col-lg-2 col-md-4 col-sm-6 " style={{marginTop: '35px'}}>
-              <button type="submit" className="btn btn-sm btn-primary btn-block" >
-                Filter
-              </button>
+              <Button
+                label="Filter"
+                type="submit"
+                className="btn-sm btn-primary btn-block"
+              />
             </div>
           </form>
         </div>

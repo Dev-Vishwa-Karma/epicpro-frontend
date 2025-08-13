@@ -18,6 +18,7 @@ import EmployeeLeaveTable from './elements/EmployeeLeaveTable';
 import EmployeeTable from './elements/EmployeeTable';
 import { formatDate } from '../../../utils';
 import { appendDataToFormData } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 
 class Employee extends Component {
 	constructor(props) {
@@ -864,15 +865,12 @@ class Employee extends Component {
 									</ul>
 									{/* Render the Add buttons and icons */}
 									<div className="header-action">
-											<button
-												onClick={() => this.goToAddEmployee()}
-												type="button"
-												className="btn btn-primary"
-											>
-												<i className="fe fe-plus mr-2" />
-												{activeTab === 'Employee-list' && 'Add Employee'}
-												{activeTab === 'Employee-Request' && 'Add Leave'}
-											</button>
+											<Button
+												icon="fe fe-plus mr-2"
+												onClick={this.goToAddEmployee}
+												className="btn-primary"
+												label={activeTab === 'Employee-list' ? 'Add Employee' : activeTab === 'Employee-Request' ? 'Add Leave' : ''}
+											/>
 									</div>
 								</div>
 								{/* Show leave count */}

@@ -10,6 +10,7 @@ import DepartmentGrid from './elements/DepartmentGrid';
 import DepartmentModal from './elements/DepartmentModal';
 import DepartmentTable from './elements/DepartmentTable';
 import { appendDataToFormData } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 class departments extends Component {
   constructor(props) {
     super(props);
@@ -352,13 +353,12 @@ class departments extends Component {
                 <li className="nav-item"><a className="nav-link" id="Departments-tab" data-toggle="tab" href="#Departments-grid">Grid View</a></li>
               </ul>
               <div className="header-action">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => this.handleAddClick()}>
-                  <i className="fe fe-plus mr-2" />
-                  Add
-                </button>
+                <Button
+                  label="Add"
+                  onClick={this.handleAddClick}
+                  className="btn-primary"
+                  icon="fe fe-plus mr-2"
+                />
               </div>
             </div>
           </div>

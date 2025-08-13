@@ -1,6 +1,7 @@
 import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';
 import Avatar from '../../../common/Avatar';
+import Button from '../../../common/formInputs/Button';
 
 const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userRole }) => {
     return (
@@ -53,27 +54,20 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
                             </td>
                             )}
                             <td>
-                                {/* <button
-                                    type="button"
-                                    className="btn btn-icon"
-                                    title="Edit"
-                                    data-toggle="modal"
-                                    data-target="#editNotificationModal"
-                                    onClick={() => onEditClick(notification)}
-                                >
-                                    <i className="fa fa-edit" />
-                                </button> */}
-                                <button
-                                    type="button"
-                                    className="btn btn-icon btn-sm js-sweetalert"
-                                    title="Delete"
-                                    data-type="confirm"
-                                    data-toggle="modal"
-                                    data-target="#deleteNotificationModal"
-                                    onClick={() => onDeleteClick(notification.id)}
-                                >
-                                    <i className="fa fa-trash-o text-danger" />
-                                </button>
+                                {/* <Button
+                                label=""
+                                onClick={() => onEditClick(notification)}
+                                title="Edit"
+                                className="btn-icon"
+                                icon="fa fa-edit"
+                                />*/}
+                            <Button
+                            label=""
+                            onClick={() => onDeleteClick(notification.id)}
+                            title="Delete"
+                            className="btn-icon btn-sm js-sweetalert"
+                            icon="fa fa-trash-o text-danger"
+                            />
                             </td>
                         </tr>
                     ))

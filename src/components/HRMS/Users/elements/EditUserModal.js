@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const EditUserModal = ({
 	selectedUser,
@@ -106,18 +107,23 @@ const EditUserModal = ({
 							)}
 						</div>
 						<div className="modal-footer">
-							<button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-							<button
-								type="button"
-								onClick={updateProfile}
-								className="btn btn-primary"
-								disabled={ButtonLoading}
-							>
-								{ButtonLoading && (
-									<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-								)}
-								Update Profile
-							</button>
+							<Button
+							label="Close"
+							className="btn-secondary"
+							dataDismiss="modal"
+							/>
+
+							<Button
+							label={ButtonLoading ? (
+								<>
+								<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+								Updating...
+								</>
+							) : "Update Profile"}
+							onClick={updateProfile}
+							disabled={ButtonLoading}
+							className="btn-primary"
+							/>
 						</div>
 					</form>
 				</div>

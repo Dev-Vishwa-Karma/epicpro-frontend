@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Button from "../../../common/formInputs/Button";
 
 const ClientCard = ({ 
   client, 
@@ -54,26 +55,22 @@ const ClientCard = ({
                   overflow: 'hidden'
                 }}
             >
-              <button
-                className="dropdown-item project-dropdown-item"
-                type="button"
-                title="Edit"
+              
+              <Button
+                label="Edit"
                 onClick={() => onEdit(client)}
-              >
-                Edit
-              </button>
-
-              <button
                 className="dropdown-item project-dropdown-item"
-                type="button"
-                title="Delete"
+                title="Edit"
+              />
+
+              <Button
+                label="Delete"
                 onClick={() => onDelete(client)}
-                style={{
-                  color: '#d9534f',
-                }}
-              >
-                Delete
-              </button>
+                className="dropdown-item project-dropdown-item"
+                title="Delete"
+                style={{ color: '#d9534f' }}
+              />
+
             </div>
           </div>
 
@@ -85,12 +82,11 @@ const ClientCard = ({
 
           {/* View Profile button */}
           <ul className="mt-3 list-unstyled d-flex justify-content-center" >
-            <button 
-              className="btn btn-default btn-sm"
-              onClick={() => onViewProfile(client)} 
-            >
-              View Profile
-            </button>
+          <Button
+            label="View Profile"
+            onClick={() => onViewProfile(client)}
+            className="btn btn-default btn-sm"
+          />
           </ul>
 
           {/* Stats section with fixed height */}

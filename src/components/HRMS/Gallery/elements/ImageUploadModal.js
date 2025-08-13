@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const ImageUploadModal = ({
   isOpen,
@@ -99,18 +100,23 @@ const ImageUploadModal = ({
             )}
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeModal}>Cancel</button>
-            <button
-              type="button"
-              className="btn btn-primary"
+            <Button
+              label="Cancel"
+              className="btn-secondary"
+              onClick={closeModal}
+            />
+
+            <Button
+              label={ButtonLoading ? (
+                <>
+                  Uploading...
+                </>
+              ) : 'Upload Images'}
+              className="btn-primary"
               onClick={submitImages}
               disabled={ButtonLoading}
-            >
-              {ButtonLoading && (
-                <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-              )}
-              Upload Images
-            </button>
+              loading={ButtonLoading}
+            />
           </div>
         </div>
       </div>

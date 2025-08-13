@@ -3,7 +3,8 @@ import NoDataRow from '../../../common/NoDataRow';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Pagination from '../../../common/Pagination';
 import ApplicantViewModal from './ApplicantViewModal';
-
+import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 class ApplicantTable extends Component {
   static getStatusColor(status) {
     switch (status) {
@@ -60,24 +61,16 @@ class ApplicantTable extends Component {
         <div className="card">
           <div className="card-header d-flex align-items-center justify-content-between">
             <h3 className="card-title mb-0">Applicants</h3>
-            <button
-              type="button"
-              className="btn btn-sm btn-primary"
+            <Button
+              label={syncing ? "Syncing..." : "Sync"}
               onClick={onSync}
               disabled={syncing}
+              className="btn-sm btn-primary"
               title="Sync third-party applicants"
-            >
-              {syncing ? (
-                <>
-                  <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                  Syncing...
-                </>
-              ) : (
-                <>
-                  <i className="fa fa-refresh mr-1" /> Sync
-                </>
-              )}
-            </button>
+              icon={syncing ? "" : "fa fa-refresh"}
+              iconStyle={{ marginRight: syncing ? '0' : '8px' }}
+              loading={syncing}
+            />
           </div>
           <div className="card-body">
             <div className="table-responsive">
@@ -121,8 +114,9 @@ class ApplicantTable extends Component {
                         <td>{applicant.phone}</td>
                         <td>{new Date(applicant.created_at).toLocaleDateString()}</td>
                         <td>
-                          <select
+                          <InputField
                             className="custom-select"
+                            type="select"
                             value={applicant.status}
                             style={{
                               ...ApplicantTable.getStatusColor(applicant.status),
@@ -131,29 +125,30 @@ class ApplicantTable extends Component {
                               appearance: 'menulist',
                             }}
                             onChange={e => onStatusChange(applicant.id, e.target.value)}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="reviewed">Reviewed</option>
-                            <option value="interviewed">Interviewed</option>
-                            <option value="hired">Hired</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
+                            options={[
+                              { value: "pending", label: "Pending" },
+                              { value: "reviewed", label: "Reviewed" },
+                              { value: "interviewed", label: "Interviewed" },
+                              { value: "hired", label: "Hired" },
+                              { value: "rejected", label: "Rejected" }
+                            ]}
+                          />
                         </td>
                         <td>
                           <div className="d-flex">
-                            <button
-                              className="btn"
-                              onClick={() => this.handleViewApplicant(applicant)}
-                              title="View Details"
-                            >
-                              <i className="fa fa-eye"></i>
-                            </button>
-                            {/* <button
+                          <Button
+                            label=""
+                            onClick={() => this.handleViewApplicant(applicant)}
+                            title="View Details"
                             className="btn"
+                            icon="fa fa-eye"
+                          />
+                          {/* <Button
+                            label=""
                             onClick={() => onDelete(applicant.id)}
-                          >
-                            <i className="fa fa-trash"></i>
-                          </button> */}
+                            className="btn"
+                            icon="fa fa-trash"
+                          /> */}
                             {applicant.resume_path && (
                               <a
                                 href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}

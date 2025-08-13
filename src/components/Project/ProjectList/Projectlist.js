@@ -13,6 +13,7 @@ import BlankState from '../../common/BlankState';
 import { validateFields } from '../../common/validations';
 import ProjectCardSkeleton from '../../common/skeletons/ProjectCardSkeleton';
 import { appendDataToFormData } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 class ProjectList extends Component {
     constructor(props) {
         super(props);
@@ -734,9 +735,8 @@ class ProjectList extends Component {
                                     />
                                 </div>
                                 {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-primary" 
+                                    <Button
+                                        label="Add"
                                         onClick={() => this.setState({ 
                                             showEditModal: true, 
                                             isEditing: false,
@@ -750,9 +750,9 @@ class ProjectList extends Component {
                                             errors: {},
                                             dropdownOpen: false
                                         })}
-                                    >
-                                        <i className="fe fe-plus mr-2" />Add
-                                    </button>
+                                        className="btn-primary"
+                                        icon="fe fe-plus mr-2"
+                                    />
                                 )}
                             </div>
                         </div>

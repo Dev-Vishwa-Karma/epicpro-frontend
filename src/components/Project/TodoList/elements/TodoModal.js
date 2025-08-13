@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 const TodoModal = ({
   isEdit = false,
@@ -100,13 +101,19 @@ const TodoModal = ({
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={onClose}>
-                  Close
-                </button>
-                <button type="button" onClick={onSubmit} className="btn btn-primary" disabled={loading}>
-                  {loading && <span className="spinner-border spinner-border-sm mr-2" />}
-                  Save changes
-                </button>
+                <Button
+                  label="Close"
+                  onClick={onClose}
+                  className="btn-secondary"
+                />
+
+                <Button
+                  label="Save changes"
+                  onClick={onSubmit}
+                  className="btn-primary"
+                  disabled={loading}
+                  loading={loading} 
+                />
               </div>
 
             </div>

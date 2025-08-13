@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from './formInputs/Button';
 
 const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId }) => {
     if (!show) return null;
@@ -35,28 +36,19 @@ const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId 
 
                     {/* Modal Footer */}
                     <div className="modal-footer">
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={onClose}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="button"
-                            onClick={onConfirm}
-                            className="btn btn-danger"
-                            disabled={isLoading}
-                        >
-                            {isLoading && (
-                                <span
-                                    className="spinner-border spinner-border-sm mr-2"
-                                    role="status"
-                                    aria-hidden="true"
-                                ></span>
-                            )}
-                            Delete
-                        </button>
+                        <Button
+                        label="Cancel"
+                        onClick={onClose}
+                        className="btn-secondary"
+                        />
+
+                        <Button
+                        label="Delete"
+                        onClick={onConfirm}
+                        className="btn-danger"
+                        disabled={isLoading}
+                        loading={isLoading}
+                        />
                     </div>
                 </div>
             </div>

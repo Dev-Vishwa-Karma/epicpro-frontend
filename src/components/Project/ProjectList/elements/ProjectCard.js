@@ -1,5 +1,6 @@
 import React from "react";
 import Avatar from "../../../common/Avatar";
+import Button from "../../../common/formInputs/Button";
 
 const ProjectCard = ({ 
   project, 
@@ -52,26 +53,21 @@ const ProjectCard = ({
                       overflow: 'hidden'
                     }}
                   >
-                    <button
-                      className="dropdown-item project-dropdown-item"
-                      type="button"
-                      title="Edit"
-                      onClick={() => onEdit(project)}
-                    >
-                      Edit
-                    </button>
-                                    
-                    <button
-                      className="dropdown-item project-dropdown-item"
-                      type="button"
-                      title="Delete"
-                      onClick={() => onDelete(project.project_id, project.project_name)}
-                      style={{
-                        color: '#d9534f'
-                      }}
-                    >
-                      Delete
-                    </button>
+                  <Button
+                    label="Edit"
+                    onClick={() => onEdit(project)}
+                    className="dropdown-item project-dropdown-item"
+                    title="Edit"
+                  />
+
+                  <Button
+                    label="Delete"
+                    onClick={() => onDelete(project.project_id, project.project_name)}
+                    className="dropdown-item project-dropdown-item"
+                    title="Delete"
+                    style={{ color: '#d9534f' }}
+                  />
+
                   </div>
                 </div>
             )}

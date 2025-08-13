@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import InputField from '../../../common/formInputs/InputField';
+import Button from '../../../common/formInputs/Button';
 
 class AddEventModal extends Component {
   render() {
@@ -46,19 +47,18 @@ class AddEventModal extends Component {
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={closeAddEventModal}>
-                    Close
-                  </button>
-                  <button
+                  <Button
+                    label="Close"
+                    onClick={closeAddEventModal}
+                    className="btn-secondary"
+                  />
+                  <Button
+                    label="Add Event"
                     type="submit"
-                    className="btn btn-primary"
+                    loading={ButtonLoading}
                     disabled={ButtonLoading}
-                  >
-                    {ButtonLoading ? (
-                      <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                    ) : null}
-                    Add Event
-                  </button>
+                    className="btn-primary"
+                  />
                 </div>
               </form>
             </div>

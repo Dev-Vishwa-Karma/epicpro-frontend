@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactCropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
+import Button from '../../../common/formInputs/Button';
 
 const CropperModal = ({
   open,
@@ -49,8 +50,16 @@ const CropperModal = ({
             />
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onCancel}>{cancelButtonText}</button>
-            <button type="button" className="btn btn-primary" onClick={handleCrop}>{cropButtonText}</button>
+            <Button
+              label={cancelButtonText}
+              onClick={onCancel}
+              className="btn-secondary"
+            />
+            <Button
+              label={cropButtonText}
+              onClick={handleCrop}
+              className="btn-primary"
+            />
           </div>
         </div>
       </div>

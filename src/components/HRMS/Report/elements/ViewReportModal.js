@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatDateTimeAMPM } from '../../../../utils';
+import Button from '../../../common/formInputs/Button';
 
 const ViewReportModal = ({ 
     selectedModalReport,
@@ -50,7 +51,12 @@ const ViewReportModal = ({
                         )}
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={closeReportModal}>Close</button>
+                        <Button
+                        label="Close"
+                        onClick={closeReportModal}
+                        className="btn-secondary"
+                        dataDismiss="modal"
+                        />
                     </div>
                 </div>
             </div>

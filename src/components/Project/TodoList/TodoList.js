@@ -8,6 +8,7 @@ import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import TodoTable from './TodoTable';
 import { appendDataToFormData } from '../../../utils';
+import Button from '../../common/formInputs/Button';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -628,13 +629,12 @@ class TodoList extends Component {
                                                 </div>
                                                 <div className="col-lg-8 col-md-12 col-sm-12 text-right">
                                                     {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
-                                                        <button 
-                                                            type="button" 
-                                                            className="btn btn-primary btn-sm" 
-                                                            onClick={() => this.setState({ showAddTodoModal: true })}
-                                                        ><i className="fe fe-plus mr-2" />
-                                                            Add New
-                                                        </button>
+                                                    <Button
+                                                    label="Add New"
+                                                    onClick={() => this.setState({ showAddTodoModal: true })}
+                                                    className="btn-primary btn-sm"
+                                                    icon="fe fe-plus mr-2"
+                                                    />
                                                     )}
                                                 </div>
                                             </div>
@@ -721,12 +721,17 @@ class TodoList extends Component {
                                     </div>
                                 </div>
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={this.closeModal}>
-                                        Cancel
-                                    </button>
-                                    <button type="button" className="btn btn-danger" onClick={this.handleUpdateTodo}>
-                                        Confirm
-                                    </button>
+                                    <Button
+                                    label="Cancel"
+                                    onClick={this.closeModal}
+                                    className="btn-secondary"
+                                    />
+
+                                    <Button
+                                    label="Confirm"
+                                    onClick={this.handleUpdateTodo}
+                                    className="btn-danger"
+                                    />
                                 </div>
                             </div>
                         </div>
