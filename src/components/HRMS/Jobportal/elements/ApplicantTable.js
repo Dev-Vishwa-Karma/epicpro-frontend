@@ -169,7 +169,7 @@ class ApplicantTable extends Component {
                             style={{
                                 ...ApplicantTable.getStatusColor(applicant.status),
                             }}
-                            onChange={e => onStatusChange(applicant.id, e.target.value)}
+                            onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
                             options={[
                               { value: "pending", label: "Pending" },
                               { value: "reviewed", label: "Reviewed" },
@@ -177,6 +177,7 @@ class ApplicantTable extends Component {
                               { value: "hired", label: "Hired" },
                               { value: "rejected", label: "Rejected" }
                             ]}
+                            firstOption={false}
                           />
                         </td>
                         <td>

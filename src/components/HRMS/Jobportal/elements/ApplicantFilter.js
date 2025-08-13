@@ -35,6 +35,7 @@ class ApplicantFilter extends Component {
                     { value: "hired", label: "Hired" },
                     { value: "rejected", label: "Rejected" }
                   ]}
+                  firstOption = {false}
                 />
               </div>
             </div>
@@ -51,6 +52,7 @@ class ApplicantFilter extends Component {
                     { value: "newest", label: "Newest" },
                     { value: "oldest", label: "Oldest" }
                   ]}
+                  firstOption = {false}
                 />
               </div>
             </div>

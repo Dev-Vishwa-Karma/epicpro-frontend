@@ -19,7 +19,8 @@ const InputField = ({
   accept = '',
   multiple = false,
   style = {},
-  autoComplete='off'
+  autoComplete = 'off',
+  firstOption= true
 }) => {
   return (
     <div className={type !== 'file' && type !== 'checkbox' ? 'form-group' : ''}>
@@ -49,10 +50,10 @@ const InputField = ({
           ref={refInput}
           disabled={disabled}
           style={style}
-        >
-          <option value="">
+          >
+          {firstOption &&  <option value="">
             {label && label.toLowerCase().startsWith('select') ? label : `Select ${label || 'Option'}`}
-          </option>
+          </option>}
           {options.map(option => (
             <option key={option.value} value={option.value}>
               {option.label}
