@@ -124,5 +124,14 @@ export function getToday(){
     const todayStr = `${yyyy}-${mm}-${dd}`;
     return todayStr;
 }
+
+// Date in format DD-MM-YYYY (13 Aug, 2025)
+export function shortformatDate(dateString) {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day} ${month}, ${year}`;
+  }
    
 
