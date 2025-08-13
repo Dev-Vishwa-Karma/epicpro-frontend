@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getService } from '../../../services/getService';
-import ApplicantTable from './ApplicantTable';
-import DeleteModal from '../../common/DeleteModal';
-import ApplicantFilter from './ApplicantFilter';
-import { appendDataToFormData } from '../../../utils';
 import AlertMessages from '../../common/AlertMessages';
+import DeleteModal from '../../common/DeleteModal';
+import ApplicantTable from './elements/ApplicantTable';
+import ApplicantFilter from './elements/ApplicantFilter';
+import { appendDataToFormData } from '../../../utils';
+
 
 class Applicant extends Component {
   state = {

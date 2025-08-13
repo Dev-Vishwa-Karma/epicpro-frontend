@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import NoDataRow from '../../common/NoDataRow';
-import TableSkeleton from '../../common/skeletons/TableSkeleton';
-import Pagination from '../../common/Pagination';
+import NoDataRow from '../../../common/NoDataRow';
+import TableSkeleton from '../../../common/skeletons/TableSkeleton';
+import Pagination from '../../../common/Pagination';
 import ApplicantViewModal from './ApplicantViewModal';
 
 class ApplicantTable extends Component {

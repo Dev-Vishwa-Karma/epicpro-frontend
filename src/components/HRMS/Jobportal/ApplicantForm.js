@@ -8,7 +8,7 @@ import { getColor } from '../../../utils';
 import { appendDataToFormData } from '../../../utils';
 
 
-const SKILLS = [
+const skillOptions = [
   'HTML',
   'CSS',
   'JavaScript',
@@ -265,7 +265,7 @@ class ApplicantForm extends Component {
                     <div className="col-md-12">
                       <CheckboxGroup
                         label="Technical Skills"
-                        options={SKILLS} 
+                        options={skillOptions} 
                         selected={skills}
                         onChange={this.handleSkillsChange}
                         getColor={getColor}
