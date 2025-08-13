@@ -64,8 +64,9 @@ class ActivitiesTime extends Component {
                         displayDate = dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
                       }
                     }
+                    const key = activity.id || index;
                     return (
-                        <>
+                        <React.Fragment key={key}>
                         {showSeparator && displayDate && (
                             <div style={{
                             display: 'flex',
@@ -225,7 +226,8 @@ class ActivitiesTime extends Component {
                             </div>
                             </div>
                         )}
-                        </>
+
+                        </React.Fragment>
                     );
                     })
                 ) : (

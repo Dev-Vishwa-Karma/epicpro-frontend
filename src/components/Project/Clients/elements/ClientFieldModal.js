@@ -116,12 +116,12 @@ class ClientFieldModal extends Component {
                         id="profilePicInput"
                         type="file"
                         name="profilePic"
-                        accept="image/*"
+                        accept="image/jpeg, image/jpg, image/png, image/webp"
                         style={{ display: 'none' }}
                         onChange={onChange}
                         refInput={this.fileInputRef}
                       />
-                    </div>
+                                          </div>
                   </div>
                   {errors.profilePic && (
                     <div className="col-md-12"><small className="invalid-feedback d-block text-center">{errors.profilePic}</small></div>

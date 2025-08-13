@@ -114,7 +114,7 @@ const ProjectCard = ({
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {project.team_members.map((member, idx) => (
                 <Avatar
-                    id = {idx}
+                    key={member.id || idx}  // Use member.id if available, otherwise fall back to idx
                     profile={member.profile}
                     first_name={member.first_name}
                     last_name={member.last_name}
@@ -124,7 +124,7 @@ const ProjectCard = ({
                     className="avatar-img"
                     style={{ marginLeft: idx === 0 ? 0 : -14 }}
                     onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
-                  />
+            />
                 ))}
               </div>
             </div>

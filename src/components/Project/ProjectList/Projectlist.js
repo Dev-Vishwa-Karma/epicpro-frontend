@@ -78,6 +78,7 @@ class ProjectList extends Component {
     }
 
     componentDidMount() {
+        this.setState({ loading: true }); 
         const {role} = window.user;
         if (window.user?.id) {
             this.setState({

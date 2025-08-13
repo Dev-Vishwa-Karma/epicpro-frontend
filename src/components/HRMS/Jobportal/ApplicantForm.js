@@ -30,7 +30,7 @@ const initialState = {
   fullname: '', 
   email: '', 
   phone: '', 
-  streetaddress: '', 
+  address: '', 
   experience: '', 
   skills: [], 
   resume: null,
@@ -56,7 +56,7 @@ class ApplicantForm extends Component {
       fullname,
       email,
       phone,
-      streetaddress,
+      address,
       experience,
       skills,
       resume,
@@ -68,7 +68,7 @@ class ApplicantForm extends Component {
       fullname: fullname,
       email: email,
       phone: phone,
-      streetaddress: streetaddress,
+      address: address,
       experience: experience,
       skills: JSON.stringify(skills),
       resume:resume
@@ -151,7 +151,7 @@ class ApplicantForm extends Component {
       fullname,
       email,
       phone,
-      streetaddress,
+      address,
       experience,
       skills,
       resume,
@@ -161,7 +161,7 @@ class ApplicantForm extends Component {
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
       { name: 'phone', value: phone, type: 'mobile', required: true, messageName: 'Phone' },
-      { name: 'streetaddress', value: streetaddress, type: 'text', required: true, messageName: 'Address ' },
+      { name: 'address', value: address, type: 'text', required: true, messageName: 'Address ' },
       { name: 'experience', value: experience, type: 'text', required: true, messageName: 'experience ' },
       { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: true, messageName: 'Skills' },
       { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: true, messageName: 'Resume' },
@@ -178,7 +178,7 @@ class ApplicantForm extends Component {
       fullname, 
       email, 
       phone, 
-      streetaddress, 
+      address, 
       skills, 
       experience, 
       resume, 
@@ -252,11 +252,11 @@ class ApplicantForm extends Component {
                     <div className="col-md-12">
                       <InputField
                         label="Street Address"
-                        name="streetaddress"
-                        value={streetaddress}
+                        name="address"
+                        value={address}
                         onChange={this.handleChange}
                         placeholder="Street address"
-                        error={errors.streetaddress}
+                        error={errors.address}
                       />
                     </div>
                   </div>

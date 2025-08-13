@@ -132,6 +132,29 @@ class Clients extends Component {
 
   handleClientFieldChange = (e) => {
     const { name, value, type, files } = e.target;
+    
+    if (type === 'file' && files && files.length > 0) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const file = files[0];
+      
+      if (!allowedTypes.includes(file.type)) {
+        this.setState((prevState) => ({
+          clientFieldErrors: {
+            ...prevState.clientFieldErrors,
+            profilePic: 'Only JPG, JPEG, PNG, and WEBP images are allowed'
+          }
+        }));
+        return;
+      }
+      
+      this.setState((prevState) => ({
+        clientFieldErrors: {
+          ...prevState.clientFieldErrors,
+          profilePic: undefined
+        }
+      }));
+    }
+    
     this.setState((prevState) => ({
       clientFieldFormData: {
         ...prevState.clientFieldFormData,
