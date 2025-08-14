@@ -72,6 +72,44 @@ class ApplicantViewModal extends Component {
                     </div>
                     <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
                       <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Alternate Mobile:</label>
+                        <p className="form-control-plaintext  pb-2 mb-0">
+                          {applicant.alternate_phone || 'Not provided'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Date of Birth:</label>
+                        <p className="form-control-plaintext  pb-2 mb-0">
+                          {applicant.dob ? new Date(applicant.dob).toLocaleDateString() : 'Not provided'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Marital Status:</label>
+                        <p className="form-control-plaintext  pb-2 mb-0">
+                          {applicant.merital_status ? applicant.merital_status.charAt(0).toUpperCase() + applicant.merital_status.slice(1) : 'Not provided'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Experience:</label>
+                        <p className="form-control-plaintext  pb-2 mb-0">
+                          {applicant.experience ? `${applicant.experience} years` : 'Not specified'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
                         <label className="font-weight-bold text-muted small">Applied On:</label>
                         <p className="form-control-plaintext  pb-2 mb-0">
                           {applicant.created_at ? new Date(applicant.created_at).toLocaleDateString() : ''}
@@ -79,6 +117,41 @@ class ApplicantViewModal extends Component {
                       </div>
                     </div>
                   </div>
+
+                  <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 mb-3">
+                      <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Address:</label>
+                        <p className="form-control-plaintext  pb-2 mb-0">
+                          {applicant.address || 'Not provided'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {applicant.skills && (
+                    <div className="row">
+                      <div className="col-lg-12 col-md-12 col-sm-12 mb-3">
+                        <div className="form-group">
+                          <label className="font-weight-bold text-muted small">Skills:</label>
+                          <div className="mt-2">
+                            {(() => {
+                              try {
+                                const skills = JSON.parse(applicant.skills);
+                                return Array.isArray(skills) ? skills.map((skill, index) => (
+                                  <span key={index} className="badge badge-primary mr-1 mb-1">
+                                    {skill}
+                                  </span>
+                                )) : 'No skills specified';
+                              } catch (e) {
+                                return 'No skills specified';
+                              }
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="row">
                     <div className="col-lg-6 col-md-6 col-sm-12 mb-3">

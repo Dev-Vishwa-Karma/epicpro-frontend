@@ -31,6 +31,9 @@ const initialState = {
   fullname: '', 
   email: '', 
   phone: '', 
+  alternate_phone: '',
+  dob: '',
+  merital_status: '',
   address: '', 
   experience: '', 
   skills: [], 
@@ -57,6 +60,9 @@ class ApplicantForm extends Component {
       fullname,
       email,
       phone,
+      alternate_phone,
+      dob,
+      merital_status,
       address,
       experience,
       skills,
@@ -69,6 +75,9 @@ class ApplicantForm extends Component {
       fullname: fullname,
       email: email,
       phone: phone,
+      alternate_phone: alternate_phone,
+      dob: dob,
+      merital_status: merital_status,
       address: address,
       experience: experience,
       skills: JSON.stringify(skills),
@@ -152,6 +161,9 @@ class ApplicantForm extends Component {
       fullname,
       email,
       phone,
+      alternate_phone,
+      dob,
+      merital_status,
       address,
       experience,
       skills,
@@ -162,6 +174,9 @@ class ApplicantForm extends Component {
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
       { name: 'phone', value: phone, type: 'mobile', required: true, messageName: 'Phone' },
+      { name: 'alternate_phone', value: alternate_phone, type: 'mobile', required: false, messageName: 'Alternate Phone' },
+      { name: 'dob', value: dob, type: 'date', required: false, messageName: 'Date of Birth' },
+      { name: 'merital_status', value: merital_status, type: 'text', required: false, messageName: 'Marital Status' },
       { name: 'address', value: address, type: 'text', required: true, messageName: 'Address ' },
       { name: 'experience', value: experience, type: 'text', required: true, messageName: 'experience ' },
       { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: true, messageName: 'Skills' },
@@ -179,6 +194,9 @@ class ApplicantForm extends Component {
       fullname, 
       email, 
       phone, 
+      alternate_phone,
+      dob,
+      merital_status,
       address, 
       skills, 
       experience, 
@@ -249,6 +267,50 @@ class ApplicantForm extends Component {
                   </div>
 
                   <div className="row">
+                    <div className="col-md-6">
+                      <InputField
+                        label="Alternate Phone"
+                        name="alternate_phone"
+                        type="tel"
+                        value={alternate_phone}
+                        onChange={this.handleChange}
+                        placeholder="Enter alternate phone number"
+                        error={errors.alternate_phone}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <InputField
+                        label="Date of Birth"
+                        name="dob"
+                        type="date"
+                        value={dob}
+                        onChange={this.handleChange}
+                        error={errors.dob}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <InputField
+                        label="Marital Status"
+                        name="merital_status"
+                        type="select"
+                        value={merital_status}
+                        onChange={this.handleChange}
+                        error={errors.merital_status}
+                        options={[
+                          { value: '', label: 'Select Marital Status' },
+                          { value: 'single', label: 'Single' },
+                          { value: 'married', label: 'Married' },
+                          { value: 'divorced', label: 'Divorced' },
+                          { value: 'widowed', label: 'Widowed' },
+                        ]}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row">
                     <div className="col-md-12">
                       <InputField
                         label="Street Address"
@@ -307,6 +369,7 @@ class ApplicantForm extends Component {
                           onChange={this.handleChange}
                           error={errors.experience}
                           options={[
+                            { value: '', label: 'Select Experience' },
                             { value: '0-1', label: '0-1 years' },
                             { value: '1-2', label: '1-2 years' },
                             { value: '2-4', label: '2-4 years' },

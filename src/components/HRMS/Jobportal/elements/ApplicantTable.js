@@ -27,6 +27,7 @@ class ApplicantTable extends Component {
       showConfirmModal: false,
       pendingStatusChange: null,
       isUpdatingStatus: false,
+      showSyncConfirmModal: false,
     };
   }
 
@@ -82,6 +83,20 @@ class ApplicantTable extends Component {
     });
   };
 
+  handleSyncClick = () => {
+    this.setState({ showSyncConfirmModal: true });
+  };
+
+  handleConfirmSync = () => {
+    const { onSync } = this.props;
+    this.setState({ showSyncConfirmModal: false });
+    if (onSync) onSync();
+  };
+
+  handleCancelSync = () => {
+    this.setState({ showSyncConfirmModal: false });
+  };
+
   render() {
     const {
       applicants,
@@ -105,7 +120,7 @@ class ApplicantTable extends Component {
             <h3 className="card-title mb-0">Applicants</h3>
             <Button
               label={syncing ? "Syncing..." : "Sync"}
-              onClick={onSync}
+              onClick={this.handleSyncClick}
               disabled={syncing}
               className="btn-sm btn-primary"
               title="Sync third-party applicants"
@@ -240,6 +255,19 @@ class ApplicantTable extends Component {
           onConfirm={this.handleConfirmStatusChange}
           onCancel={this.handleCancelStatusChange}
           isLoading={isUpdatingStatus}
+        />
+
+        {/* Sync Confirmation Modal */}
+        <ConfirmModal
+          show={this.state.showSyncConfirmModal}
+          title="Confirm Sync"
+          message="Are you sure you want to sync third-party applicants?"
+          confirmText="Sync"
+          cancelText="Cancel"
+          confirmButtonClass="btn-primary"
+          onConfirm={this.handleConfirmSync}
+          onCancel={this.handleCancelSync}
+          isLoading={syncing}
         />
       </div>
     );

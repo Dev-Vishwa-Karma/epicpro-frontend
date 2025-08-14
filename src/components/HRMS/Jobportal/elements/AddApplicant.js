@@ -32,6 +32,9 @@ class AddApplicant extends Component {
       fullname: '',
       email: '',
       phone: '',
+      alternate_phone: '',
+      dob: '',
+      merital_status: '',
       address: '',
       experience: '',
       skills: [],
@@ -48,6 +51,9 @@ class AddApplicant extends Component {
       fullname: React.createRef(),
       email: React.createRef(),
       phone: React.createRef(),
+      alternate_phone: React.createRef(),
+      dob: React.createRef(),
+      merital_status: React.createRef(),
       address: React.createRef(),
       experience: React.createRef(),
       skills: React.createRef(),
@@ -120,6 +126,9 @@ class AddApplicant extends Component {
       fullname,
       email,
       phone,
+      alternate_phone,
+      dob,
+      merital_status,
       address,
       experience,
       skills,
@@ -129,11 +138,14 @@ class AddApplicant extends Component {
     const validationSchema = [
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
-      { name: 'phone', value: phone, type: 'mobile', required: true, messageName: 'Phone' },
-      { name: 'address', value: address, type: 'text', required: true, messageName: 'Address' },
-      { name: 'experience', value: experience, type: 'text', required: true, messageName: 'Experience' },
-      { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: true, messageName: 'Skills' },
-      { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: true, messageName: 'Resume' },
+      { name: 'phone', value: phone, type: 'mobile', required: false, messageName: 'Phone' },
+      { name: 'alternate_phone', value: alternate_phone, type: 'mobile', required: false, messageName: 'Alternate Phone' },
+      { name: 'dob', value: dob, type: 'date', required: false, messageName: 'Date of Birth' },
+      { name: 'merital_status', value: merital_status, type: 'text', required: false, messageName: 'Marital Status' },
+      { name: 'address', value: address, type: 'text', required: false, messageName: 'Address' },
+      { name: 'experience', value: experience, type: 'text', required: false, messageName: 'Experience' },
+      { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: false, messageName: 'Skills' },
+      { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: false, messageName: 'Resume' },
     ];
 
     const errors = validateFields(validationSchema);
@@ -146,6 +158,9 @@ class AddApplicant extends Component {
         fullname: fullname,
         email: email,
         phone: phone,
+        alternate_phone: alternate_phone,
+        dob: dob,
+        merital_status: merital_status,
         address: address,
         experience: experience,
         skills: JSON.stringify(skills),
@@ -164,6 +179,9 @@ class AddApplicant extends Component {
               fullname: '',
               email: '',
               phone: '',
+              alternate_phone: '',
+              dob: '',
+              merital_status: '',
               address: '',
               experience: '',
               skills: [],
@@ -199,6 +217,9 @@ class AddApplicant extends Component {
       fullname,
       email,
       phone,
+      alternate_phone,
+      dob,
+      merital_status,
       address,
       experience,
       skills,
@@ -266,6 +287,51 @@ class AddApplicant extends Component {
                         </div>
                         <div className="col-sm-6 col-md-6">
                           <InputField
+                            label="Alternate Phone Number"
+                            name="alternate_phone"
+                            type="tel"
+                            value={alternate_phone}
+                            onChange={this.handleChange}
+                            placeholder="Enter Alternate Phone Number"
+                            error={this.state.errors.alternate_phone}
+                            refInput={this.fieldRefs.alternate_phone}
+                            maxLength="10"
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(/\D/g, '');
+                            }}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Date of Birth"
+                            name="dob"
+                            type="date"
+                            value={dob}
+                            onChange={this.handleChange}
+                            error={this.state.errors.dob}
+                            refInput={this.fieldRefs.dob}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Marital Status"
+                            name="merital_status"
+                            type="select"
+                            value={merital_status}
+                            onChange={this.handleChange}
+                            error={this.state.errors.merital_status}
+                            refInput={this.fieldRefs.merital_status}
+                            options={[
+                              { value: '', label: 'Select Marital Status' },
+                              { value: 'single', label: 'Single' },
+                              { value: 'married', label: 'Married' },
+                              { value: 'divorced', label: 'Divorced' },
+                              { value: 'widowed', label: 'Widowed' },
+                            ]}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
                             label="Years of Experience"
                             name="experience"
                             type="select"
@@ -274,6 +340,7 @@ class AddApplicant extends Component {
                             error={this.state.errors.experience}
                             refInput={this.fieldRefs.experience}
                             options={[
+                              { value: '', label: 'Select Experience' },
                               { value: '0-1', label: '0-1 years' },
                               { value: '1-2', label: '1-2 years' },
                               { value: '2-4', label: '2-4 years' },
