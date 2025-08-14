@@ -180,7 +180,7 @@ class ApplicantTable extends Component {
                       <tr key={applicant.id}>
                         <td>
                           <span className="avatar avatar-pink" data-toggle="tooltip" data-placement="top" data-original-title={applicant.fullname}>
-                            {applicant.fullname ? applicant.fullname.split(' ').map(word => word[0]).join('').toUpperCase() : '?'}
+                          {applicant.fullname ? applicant.fullname .split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase(): '?'}
                           </span>
                         </td>
                         <td>
@@ -204,14 +204,6 @@ class ApplicantTable extends Component {
                                   title="Added by admin"
                                 ></i>
                               )}
-                              {/* {applicant.source === 'public' && (
-                                <i
-                                  className="fa fa-globe text-primary"
-                                  data-toggle="tooltip"
-                                  data-placement="top"
-                                  title="Submitted via public form (ApplicantForm)"
-                                ></i>
-                              )} */}
                                    </span>
                               </div>
                               <span className="text-muted">{applicant.email}</span>
@@ -220,15 +212,23 @@ class ApplicantTable extends Component {
                         </td>
                         <td>{applicant.phone}</td>
                         <td>{shortformatDate(applicant.created_at)}</td>
-                        <td>{applicant.experience} Years</td>
+                        <td>{applicant.experience_display || applicant.experience || "N/A"}</td>
                         <td>
-                          <div className="d-flex align-items-center gap-2">
+                          <div >
+                          <span>
+                           {applicant.status === 'rejected' && applicant.reject_reason && (
+                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top">
+                                <p style={{color:'red', fontSize:'10px'}}>Reject reason</p>
+                              </span>
+                            )}
+                           </span>
                             <InputField
                               className="custom-select"
                               type="select"
                               value={applicant.status}
                               style={{                                                                    
                                   ...ApplicantTable.getStatusColor(applicant.status),
+                                  ...(applicant.status === 'rejected' ? { marginTop: '-10px' } : {})
                               }}
                               onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
                               options={[                                                    
@@ -240,13 +240,6 @@ class ApplicantTable extends Component {
                               ]}
                               firstOption={false}
                             />
-                           <span style={{margin:'0 0 8px 5px'}}>
-                           {applicant.status === 'rejected' && applicant.reject_reason && (
-                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top">
-                                <i className="fa fa-ban" style={{color:'red'}} aria-hidden="true"></i>
-                              </span>
-                            )}
-                           </span>
                           </div>
                         </td>
                         <td>

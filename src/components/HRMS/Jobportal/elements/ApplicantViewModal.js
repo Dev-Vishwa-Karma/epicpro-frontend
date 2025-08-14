@@ -104,7 +104,7 @@ class ApplicantViewModal extends Component {
                       <div className="form-group">
                         <label className="font-weight-bold text-muted small">Experience:</label>
                         <p className="form-control-plaintext  pb-2 mb-0">
-                          {applicant.experience ? `${applicant.experience} years` : 'Not specified'}
+                          {applicant.experience_display || (applicant.experience ? `${applicant.experience} years` : 'Not specified')}
                         </p>
                       </div>
                     </div>

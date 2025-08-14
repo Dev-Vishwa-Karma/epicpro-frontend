@@ -380,12 +380,26 @@ class AddApplicant extends Component {
                             error={this.state.errors.experience}
                             refInput={this.fieldRefs.experience}
                             options={[
-                              { value: '0-1', label: '0-1 years' },
-                              { value: '1-2', label: '1-2 years' },
-                              { value: '2-4', label: '2-4 years' },
-                              { value: '4-6', label: '4-6 years' },
-                              { value: '6-8', label: '6-8 years' },
-                              { value: '8+', label: '8+ years' },
+                              { value: '0.6', label: '0.6' },
+                              { value: '1', label: '1' },
+                              { value: '1.6', label: '1.6' },
+                              { value: '2', label: '2' },
+                              { value: '2.6', label: '2.6' },
+                              { value: '3', label: '3' },
+                              { value: '3.6', label: '3.6' },
+                              { value: '4', label: '4' },
+                              { value: '4.6', label: '4.6' },
+                              { value: '5', label: '5' },
+                              { value: '5.6', label: '5.6' },
+                              { value: '6', label: '6' },
+                              { value: '6.6', label: '6.6' },
+                              { value: '7', label: '7' },
+                              { value: '7.6', label: '7.6' },
+                              { value: '8', label: '8' },
+                              { value: '8.6', label: '8.6' },
+                              { value: '9', label: '9' },
+                              { value: '9.6', label: '9.6' },
+                              { value: '10', label: '10' },
                             ]}
                           />
                         </div>
@@ -483,10 +497,9 @@ class AddApplicant extends Component {
 
                       {/* Technical Skills */}
                       <div className="row mb-4">
-                        <h5 className="w-100">Technical Skills</h5>
                         <div className="col-md-12">
                           <CheckboxGroup
-                            label=""
+                            label="Technical Skills"
                             options={skillOptions}
                             selected={skills}
                             onChange={this.handleSkillsChange}
@@ -500,7 +513,6 @@ class AddApplicant extends Component {
 
                       {/* Resume Upload */}
                       <div className="row mb-4">
-                        <h5 className="w-100">Documents</h5>
                         <div className="col-md-12">
                           <div className="form-group">
                             <label className="form-label">

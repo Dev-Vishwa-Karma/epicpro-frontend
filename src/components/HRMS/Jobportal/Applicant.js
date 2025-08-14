@@ -106,17 +106,37 @@ class Applicant extends Component {
     this.setState({ isSyncing: true });
     
     getService.addCall('applicants.php', 'sync_applicant')
-      .then(data => {
-        if (data.status === 'success') {
-          this.setState({ syncSuccess: `Synced ${data.data.inserted} new applicants successfully!`, showSuccess: true });
+      .then(response => {        
+        // Check if response exists and has the expected structure
+        if (!response) {
+          throw new Error('No response received from server');
+        }
+        if (response.status === 'success') {
+          const insertedCount = response.data && response.data.inserted ? response.data.inserted : 0;
+          
+          this.setState({ 
+            syncSuccess: `Synced ${insertedCount} new applicants successfully!`, 
+            showSuccess: true 
+          });
           setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
           this.fetchApplicants();
         } else {
-          alert(data.data.message || 'Sync failed');
+          const errorMsg = response.data && response.data.message ? response.data.message : 'Sync failed';
+          throw new Error(errorMsg);
         }
       })
       .catch(err => {
-        alert(err?.message || 'Sync failed');
+        console.error('Sync error details:', err);
+        console.error('Error type:', typeof err);
+        console.error('Error keys:', Object.keys(err || {}));
+        let errorMsg = 'Sync failed';
+        if (err && err.response && err.response.data) {
+          errorMsg = err.response.data.message || 'Network error';
+        } else if (err && err.message) {
+          errorMsg = err.message;
+        }
+        
+        alert(errorMsg);
       })
       .finally(() => {
         this.setState({ isSyncing: false });
