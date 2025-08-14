@@ -7,6 +7,8 @@ import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
 import { appendDataToFormData, getColor } from '../../../../utils';
 
+import moment from "moment";
+
 const skillOptions = [
   'HTML',
   'CSS',
@@ -39,6 +41,11 @@ class AddApplicant extends Component {
       experience: '',
       skills: [],
       resume: null,
+      joining_timeframe: '',
+      custom_joining_time: '',
+      bond_agreement: '',
+      branch: '',
+      graduate_year: "",
       successMessage: "",
       showSuccess: false,
       errorMessage: "",
@@ -58,6 +65,11 @@ class AddApplicant extends Component {
       experience: React.createRef(),
       skills: React.createRef(),
       resume: React.createRef(),
+      joining_timeframe: React.createRef(),
+      custom_joining_time: React.createRef(),
+      bond_agreement: React.createRef(),
+      branch: React.createRef(),
+      graduate_year: React.createRef(),
     };
   }
 
@@ -70,6 +82,10 @@ class AddApplicant extends Component {
     });
   };
 
+    handleYearChange = (e) => {
+    this.setState({ graduate_year: e.target.value });
+    };
+  
   handleChange = (e) => {
     const { name, value } = e.target;
     this.setState({ 
@@ -133,19 +149,16 @@ class AddApplicant extends Component {
       experience,
       skills,
       resume,
+      joining_timeframe,
+      custom_joining_time,
+      bond_agreement,
+      branch,
+      graduate_year,
     } = this.state;
 
     const validationSchema = [
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
-      { name: 'phone', value: phone, type: 'mobile', required: false, messageName: 'Phone' },
-      { name: 'alternate_phone', value: alternate_phone, type: 'mobile', required: false, messageName: 'Alternate Phone' },
-      { name: 'dob', value: dob, type: 'date', required: false, messageName: 'Date of Birth' },
-      { name: 'merital_status', value: merital_status, type: 'text', required: false, messageName: 'Marital Status' },
-      { name: 'address', value: address, type: 'text', required: false, messageName: 'Address' },
-      { name: 'experience', value: experience, type: 'text', required: false, messageName: 'Experience' },
-      { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: false, messageName: 'Skills' },
-      { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: false, messageName: 'Resume' },
     ];
 
     const errors = validateFields(validationSchema);
@@ -164,9 +177,14 @@ class AddApplicant extends Component {
         address: address,
         experience: experience,
         skills: JSON.stringify(skills),
-        resume: resume
+        resume: resume,
+        joining_timeframe: joining_timeframe === 'custom' ? custom_joining_time : joining_timeframe,
+        bond_agreement: bond_agreement,
+        branch: branch,
+        graduate_year: graduate_year ? parseInt(graduate_year) : null
       };
-      
+      console.log('data',data)
+      data.source = 'admin';
       appendDataToFormData(formData, data);
 
       getService.addCall('applicants.php', 'add', formData)
@@ -186,6 +204,11 @@ class AddApplicant extends Component {
               experience: '',
               skills: [],
               resume: null,
+              joining_timeframe: '',
+              custom_joining_time: '',
+              bond_agreement: '',
+              branch: '',
+              graduate_year: new Date().getFullYear(),
               errors: {},
             });
             setTimeout(this.dismissMessages, 3000);
@@ -208,10 +231,22 @@ class AddApplicant extends Component {
   };
 
   handleBack = () => {
-    this.props.history.goBack();
+    // Navigate back to the list tab
+    if (this.props.onTabChange) {
+      this.props.onTabChange('list');
+    } else {
+      this.props.history.goBack();
+    }
   };
 
   render() {
+    const currentYear = moment().year();
+    const startYear = 1990;
+    const years = [];
+    for (let year = startYear; year <= currentYear; year++) {
+      years.push(year);
+    }
+
     const { fixNavbar } = this.props;
     const {
       fullname,
@@ -224,6 +259,11 @@ class AddApplicant extends Component {
       experience,
       skills,
       resume,
+      joining_timeframe,
+      custom_joining_time,
+      bond_agreement,
+      branch,
+      graduate_year,
       showSuccess,
       successMessage,
       showError,
@@ -242,7 +282,7 @@ class AddApplicant extends Component {
         />
         <form className="card" noValidate onSubmit={this.addApplicant}>
                     <div className="card-body">
-                      <h3 className="card-title">Add Applicant</h3>
+                      {/* <h3 className="card-title">Add Applicant</h3> */}
                       <div className="row">
                         <div className="col-sm-6 col-md-6">
                           <InputField
@@ -322,7 +362,7 @@ class AddApplicant extends Component {
                             error={this.state.errors.merital_status}
                             refInput={this.fieldRefs.merital_status}
                             options={[
-                              { value: '', label: 'Select Marital Status' },
+                              // { value: '', label: 'Select Marital Status' },
                               { value: 'single', label: 'Single' },
                               { value: 'married', label: 'Married' },
                               { value: 'divorced', label: 'Divorced' },
@@ -340,7 +380,6 @@ class AddApplicant extends Component {
                             error={this.state.errors.experience}
                             refInput={this.fieldRefs.experience}
                             options={[
-                              { value: '', label: 'Select Experience' },
                               { value: '0-1', label: '0-1 years' },
                               { value: '1-2', label: '1-2 years' },
                               { value: '2-4', label: '2-4 years' },
@@ -360,6 +399,84 @@ class AddApplicant extends Component {
                             placeholder="Enter Complete Address"
                             error={this.state.errors.address}
                             refInput={this.fieldRefs.address}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="How Soon Can You Join?"
+                            name="joining_timeframe"
+                            type="select"
+                            value={joining_timeframe}
+                            onChange={this.handleChange}
+                            error={this.state.errors.joining_timeframe}
+                            refInput={this.fieldRefs.joining_timeframe}
+                            options={[
+                              { value: 'Same Week', label: 'Same Week' },
+                              { value: 'Next Week', label: 'Next Week' },
+                              { value: 'After 15 Days', label: 'After 15 Days' },
+                              { value: 'custom', label: 'Mention How Much' },
+                            ]}
+                          />
+                        </div>
+                        {joining_timeframe === 'custom' && (
+                          <div className="col-sm-6 col-md-6">
+                            <InputField
+                              label="Custom Joining Time"
+                              name="custom_joining_time"
+                              type="text"
+                              value={custom_joining_time}
+                              onChange={this.handleChange}
+                              placeholder="e.g., 1 month, 45 days"
+                              error={this.state.errors.custom_joining_time}
+                              refInput={this.fieldRefs.custom_joining_time}
+                            />
+                          </div>
+                        )}
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Are You Willing to Sign 18 Month Bond?"
+                            name="bond_agreement"
+                            type="select"
+                            value={bond_agreement}
+                            onChange={this.handleChange}
+                            firstOption={false}
+                            options={[
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                            ]}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Branch"
+                            name="branch"
+                            type="text"
+                            value={branch}
+                            onChange={this.handleChange}
+                            placeholder="Enter Branch"
+                            error={this.state.errors.branch}
+                            refInput={this.fieldRefs.branch}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Graduate Year"
+                            name="graduate_year"
+                            type="select"
+                            value={graduate_year}
+                            onChange={this.handleChange}
+                            error={this.state.errors.graduate_year}
+                            refInput={this.fieldRefs.graduate_year}
+                            options={years.map(year => ({
+                              value: year,
+                              label: year.toString()
+                            }))}
                           />
                         </div>
                       </div>

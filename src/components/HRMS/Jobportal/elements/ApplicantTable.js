@@ -28,6 +28,9 @@ class ApplicantTable extends Component {
       pendingStatusChange: null,
       isUpdatingStatus: false,
       showSyncConfirmModal: false,
+      showRejectModal: false,
+      rejectReason: '',
+      rejectingForApplicant: null,
     };
   }
 
@@ -46,6 +49,13 @@ class ApplicantTable extends Component {
   };
 
   handleStatusChange = (applicantId, newStatus, applicantName) => {
+    console.log('handleStatusChange called:', { applicantId, newStatus, applicantName });
+    if (newStatus === 'rejected') {
+      console.log('Opening rejection modal');
+      this.setState({ showRejectModal: true, rejectReason: '', rejectingForApplicant: { id: applicantId, name: applicantName } });
+      return;
+    }
+    console.log('Opening confirmation modal');
     this.setState({
       showConfirmModal: true,
       pendingStatusChange: {
@@ -62,11 +72,7 @@ class ApplicantTable extends Component {
     
     if (pendingStatusChange) {
       this.setState({ isUpdatingStatus: true });
-      
-      // Call the parent's onStatusChange function
       onStatusChange(pendingStatusChange.applicantId, pendingStatusChange.newStatus);
-      
-      // Close the modal and reset state
       this.setState({
         showConfirmModal: false,
         pendingStatusChange: null,
@@ -97,6 +103,19 @@ class ApplicantTable extends Component {
     this.setState({ showSyncConfirmModal: false });
   };
 
+  handleRejectConfirm = () => {
+    const { rejectingForApplicant, rejectReason } = this.state;
+    const { onStatusChange } = this.props;
+    if (!rejectingForApplicant) return;
+    this.setState({ isUpdatingStatus: true });
+    onStatusChange(rejectingForApplicant.id, 'rejected', rejectReason);
+    this.setState({ showRejectModal: false, rejectingForApplicant: null, rejectReason: '', isUpdatingStatus: false });
+  };
+
+  handleRejectCancel = () => {
+    this.setState({ showRejectModal: false, rejectingForApplicant: null, rejectReason: '' });
+  };
+
   render() {
     const {
       applicants,
@@ -111,7 +130,7 @@ class ApplicantTable extends Component {
       syncing,
     } = this.props;
 
-    const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus } = this.state;
+    const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus, showRejectModal, rejectReason, rejectingForApplicant } = this.state;
 
     return (
       <div className="col-lg-12 col-md-12 col-sm-12">
@@ -134,7 +153,7 @@ class ApplicantTable extends Component {
               <table className="table table-vcenter table_custom spacing5 border-style mb-0">
                 <thead>
                   <tr>
-                    <th className="w40">#</th>
+                    <th className="w40"><i className="fa fa-user"></i></th>
                     <th>Name</th>
                     <th>Mobile</th>
                     <th>Applied On</th>
@@ -157,7 +176,7 @@ class ApplicantTable extends Component {
                   ) : applicants.length === 0 ? (
                     <NoDataRow colSpan={8} message="No applicants found." />
                   ) : (
-                    applicants.map((applicant, index) => (
+                    applicants.map((applicant) => (
                       <tr key={applicant.id}>
                         <td>
                           <span className="avatar avatar-pink" data-toggle="tooltip" data-placement="top" data-original-title={applicant.fullname}>
@@ -165,32 +184,70 @@ class ApplicantTable extends Component {
                           </span>
                         </td>
                         <td>
-                          <div className="font-15">{applicant.fullname}</div>
-                          <span className="text-muted">{applicant.email}</span>
+                          <div className="">
+                            <div>
+                              <div className="font-15">{applicant.fullname} 
+                                   <span className='ml-2'>
+                                   {applicant.source === 'sync' && (
+                                <i
+                                  className="fa fa-refresh text-info"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  title="Synced"
+                                ></i>
+                              )}
+                              {applicant.source === 'admin' && (
+                                <i
+                                  className="fa fa-user text-success"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  title="Added by admin"
+                                ></i>
+                              )}
+                              {/* {applicant.source === 'public' && (
+                                <i
+                                  className="fa fa-globe text-primary"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  title="Submitted via public form (ApplicantForm)"
+                                ></i>
+                              )} */}
+                                   </span>
+                              </div>
+                              <span className="text-muted">{applicant.email}</span>
+                            </div>
+                          </div>
                         </td>
                         <td>{applicant.phone}</td>
-                        <td>
-                            {shortformatDate(applicant.created_at)}
-                        </td>
+                        <td>{shortformatDate(applicant.created_at)}</td>
                         <td>{applicant.experience} Years</td>
                         <td>
-                          <InputField
-                            className="custom-select"
-                            type="select"
-                            value={applicant.status}
-                            style={{
-                                ...ApplicantTable.getStatusColor(applicant.status),
-                            }}
-                            onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
-                            options={[
-                              { value: "pending", label: "Pending" },
-                              { value: "reviewed", label: "Reviewed" },
-                              { value: "interviewed", label: "Interviewed" },
-                              { value: "hired", label: "Hired" },
-                              { value: "rejected", label: "Rejected" }
-                            ]}
-                            firstOption={false}
-                          />
+                          <div className="d-flex align-items-center gap-2">
+                            <InputField
+                              className="custom-select"
+                              type="select"
+                              value={applicant.status}
+                              style={{                                                                    
+                                  ...ApplicantTable.getStatusColor(applicant.status),
+                              }}
+                              onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
+                              options={[                                                    
+                                { value: "pending", label: "Pending" },
+                                { value: "reviewed", label: "Reviewed" },
+                                { value: "interviewed", label: "Interviewed" },
+                                { value: "hired", label: "Hired" },
+                                { value: "rejected", label: "Rejected" }
+                              ]}
+                              firstOption={false}
+                            />
+                           <span style={{margin:'0 0 8px 5px'}}>
+                           {applicant.status === 'rejected' && applicant.reject_reason && (
+                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top">
+                                <i className="fa fa-ban" style={{color:'red'}} aria-hidden="true"></i>
+                              </span>
+                            )}
+                           </span>
+                          </div>
                         </td>
                         <td>
                           <div className="item-action dropdown">
@@ -256,6 +313,46 @@ class ApplicantTable extends Component {
           onCancel={this.handleCancelStatusChange}
           isLoading={isUpdatingStatus}
         />
+
+        {/* Rejection Reason Modal */}
+        {showRejectModal && (
+          <div className="modal fade show" style={{ display: 'block' }} tabIndex={-1} role="dialog" aria-modal="true">
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Rejection Reason</h5>
+                  <button type="button" className="close" aria-label="Close" onClick={this.handleRejectCancel}>
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label>Please provide a reason for rejection</label>
+                    <textarea 
+                      className="form-control" 
+                      rows={3} 
+                      value={rejectReason} 
+                      onChange={(e) => this.setState({ rejectReason: e.target.value })} 
+                      placeholder="Enter reason"
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={this.handleRejectCancel} disabled={isUpdatingStatus}>
+                    Cancel
+                  </button>
+                  <button type="button" className="btn btn-danger" onClick={this.handleRejectConfirm} disabled={isUpdatingStatus || !rejectReason.trim()}>
+                    {isUpdatingStatus && (
+                      <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                    )}
+                    Reject
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {showRejectModal && <div className="modal-backdrop fade show" />}
 
         {/* Sync Confirmation Modal */}
         <ConfirmModal

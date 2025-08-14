@@ -73,21 +73,24 @@ class Applicant extends Component {
     this.setState({ currentPage: pageNum }, this.fetchApplicants);
   };
 
-  handleStatusChange = (id, status) => {
+    handleStatusChange = (id, status, rejectReason = null) => {
     const formData = new FormData();
- 
+
     const data = {
       id: id,
-      status:status
+      status: status
+    };
+    if (status === 'rejected' && rejectReason) {
+      data.reject_reason = rejectReason;
     }
-    appendDataToFormData(formData, data)
+    appendDataToFormData(formData, data);
 
     getService.addCall('applicants.php', 'update', formData)
       .then(data => {
         if (data.status === 'success') {
           this.setState(prev => ({
             applicants: prev.applicants.map(app =>
-              app.id === id ? { ...app, status } : app
+              app.id === id ? { ...app, status, reject_reason: status === 'rejected' ? rejectReason : app.reject_reason } : app
             ),
           }));
         } else {
@@ -95,6 +98,7 @@ class Applicant extends Component {
         }
       });
   };
+
 
   // New: trigger backend sync and refresh list
   handleSync = () => {
@@ -228,7 +232,7 @@ class Applicant extends Component {
                 </div>
               </div>
               <div className={`tab-pane fade ${activeTab === 'add' ? 'show active' : ''}`} id="applicant-add" role="tabpanel">
-                <AddApplicant />
+                <AddApplicant onTabChange={this.handleTabChange} />
               </div>
             </div>
           </div>

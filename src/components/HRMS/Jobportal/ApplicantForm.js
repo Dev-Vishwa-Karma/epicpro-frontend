@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import InputField from '../../common/formInputs/InputField';
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
+import YearSelector from '../../common/YearSelector';
 import { validateFields } from '../../common/validations';
 import { getService } from '../../../services/getService';
 import AlertMessages from '../../common/AlertMessages';
@@ -38,6 +39,11 @@ const initialState = {
   experience: '', 
   skills: [], 
   resume: null,
+  joining_timeframe: '',
+  custom_joining_time: '',
+  bond_agreement: '',
+  branch: '',
+  graduate_year: new Date().getFullYear(),
 };
 
 class ApplicantForm extends Component {
@@ -67,6 +73,11 @@ class ApplicantForm extends Component {
       experience,
       skills,
       resume,
+      joining_timeframe,
+      custom_joining_time,
+      bond_agreement,
+      branch,
+      graduate_year,
     } = this.state;
 
     const formData = new FormData();
@@ -81,8 +92,13 @@ class ApplicantForm extends Component {
       address: address,
       experience: experience,
       skills: JSON.stringify(skills),
-      resume:resume
+      resume: resume,
+      joining_timeframe: joining_timeframe === 'custom' ? custom_joining_time : joining_timeframe,
+      bond_agreement: bond_agreement,
+      branch: branch,
+      graduate_year: graduate_year
     }
+    data.source = 'public';
     appendDataToFormData(formData, data)
 
     getService.addCall('applicants.php', 'add', formData)
@@ -113,6 +129,10 @@ class ApplicantForm extends Component {
   handleChange = (e) => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
+  };
+
+  handleYearChange = (e) => {
+    this.setState({ graduate_year: parseInt(e.target.value) });
   };
 
   handleSkillsChange = (e) => {
@@ -159,28 +179,12 @@ class ApplicantForm extends Component {
 
     const {
       fullname,
-      email,
-      phone,
-      alternate_phone,
-      dob,
-      merital_status,
-      address,
-      experience,
-      skills,
-      resume,
+      email,    
     } = this.state
 
     const validationSchema = [
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
-      { name: 'phone', value: phone, type: 'mobile', required: true, messageName: 'Phone' },
-      { name: 'alternate_phone', value: alternate_phone, type: 'mobile', required: false, messageName: 'Alternate Phone' },
-      { name: 'dob', value: dob, type: 'date', required: false, messageName: 'Date of Birth' },
-      { name: 'merital_status', value: merital_status, type: 'text', required: false, messageName: 'Marital Status' },
-      { name: 'address', value: address, type: 'text', required: true, messageName: 'Address ' },
-      { name: 'experience', value: experience, type: 'text', required: true, messageName: 'experience ' },
-      { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: true, messageName: 'Skills' },
-      { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: true, messageName: 'Resume' },
     ];
     const errors = validateFields(validationSchema);
     this.setState({ errors });
@@ -190,29 +194,34 @@ class ApplicantForm extends Component {
   };
 
   render() {
-    const { 
-      fullname, 
+    const {                                                                                                                                                                 
+      fullname,                                                     
       email, 
       phone, 
       alternate_phone,
       dob,
-      merital_status,
+      merital_status,                                         
       address, 
       skills, 
-      experience, 
+      experience,                         
       resume, 
+      joining_timeframe,                      
+      custom_joining_time,
+      bond_agreement,               
+      branch,
+      graduate_year,              
       errors,
-      submitError, 
+      submitError,            
       isSubmitting,
-      showSuccess,
+      showSuccess,              
     } = this.state;
 
     return (
-      <>
+      <>            
         <AlertMessages
-          showSuccess={showSuccess}
+          showSuccess={showSuccess}           
           successMessage="Thank you for applying!"
-          showError={!!submitError}
+          showError={!!submitError} 
           errorMessage={submitError}
           setShowSuccess={val => this.setState({ showSuccess: val })}
           setShowError={val => this.setState({ submitError: val ? submitError : null })}
@@ -307,6 +316,84 @@ class ApplicantForm extends Component {
                           { value: 'widowed', label: 'Widowed' },
                         ]}
                       />
+                    </div>
+                    <div className="col-md-6">
+                      <InputField
+                        label="How Soon Can You Join?"
+                        name="joining_timeframe"
+                        type="select"
+                        value={joining_timeframe}
+                        onChange={this.handleChange}
+                        error={errors.joining_timeframe}
+                        options={[
+                          { value: '', label: 'Select Joining Time' },
+                          { value: 'Same Week', label: 'Same Week' },
+                          { value: 'Next Week', label: 'Next Week' },
+                          { value: 'After 15 Days', label: 'After 15 Days' },
+                          { value: 'custom', label: 'Mention How Much' },
+                        ]}
+                      />
+                    </div>
+                  </div>
+
+                  {joining_timeframe === 'custom' && (
+                    <div className="row">
+                      <div className="col-md-6">
+                        <InputField
+                          label="Custom Joining Time"
+                          name="custom_joining_time"
+                          type="text"
+                          value={custom_joining_time}
+                          onChange={this.handleChange}
+                          placeholder="e.g., 1 month, 45 days"
+                          error={errors.custom_joining_time}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <InputField
+                        label="Are You Willing to Sign 18 Month Bond?"
+                        name="bond_agreement"
+                        type="select"
+                        value={bond_agreement}
+                        onChange={this.handleChange}
+                        error={errors.bond_agreement}
+                        options={[
+                          { value: 'yes', label: 'Yes' },
+                          { value: 'no', label: 'No' },
+                        ]}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <InputField
+                        label="Branch"
+                        name="branch"
+                        type="text"
+                        value={branch}
+                        onChange={this.handleChange}
+                        placeholder="Enter Branch"
+                        error={errors.branch}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label className="form-label">Graduate Year</label>
+                        <YearSelector
+                          selectedYear={graduate_year}
+                          handleYearChange={this.handleYearChange}
+                          labelClass="form-label"
+                          selectClass="form-control"
+                        />
+                        {errors.graduate_year && (
+                          <div className="invalid-feedback d-block">{errors.graduate_year}</div>
+                        )}
+                      </div>
                     </div>
                   </div>
 

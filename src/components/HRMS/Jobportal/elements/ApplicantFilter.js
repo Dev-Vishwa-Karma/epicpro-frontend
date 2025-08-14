@@ -56,11 +56,12 @@ class ApplicantFilter extends Component {
                 />
               </div>
             </div>
-            <div className="col-lg-2 col-md-4 col-sm-6 " style={{marginTop: '35px'}}>
+            <div className="col-lg-2 col-md-4 col-sm-6 " style={{marginTop: '32px'}}>
               <Button
                 label="Filter"
                 type="submit"
                 className="btn-sm btn-primary btn-block"
+                style={{ paddingTop: '5px', paddingBottom: '5px' }}
               />
             </div>
           </form>

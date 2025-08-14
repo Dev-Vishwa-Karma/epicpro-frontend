@@ -156,6 +156,44 @@ class ApplicantViewModal extends Component {
                   <div className="row">
                     <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
                       <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Joining Timeframe:</label>
+                        <p className="form-control-plaintext pb-2 mb-0">
+                          {applicant.joining_timeframe || 'Not specified'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Bond Agreement:</label>
+                        <p className="form-control-plaintext pb-2 mb-0">
+                          {applicant.bond_agreement ? applicant.bond_agreement.charAt(0).toUpperCase() + applicant.bond_agreement.slice(1) : 'Not specified'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Branch:</label>
+                        <p className="form-control-plaintext pb-2 mb-0">
+                          {applicant.branch || 'Not specified'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
+                        <label className="font-weight-bold text-muted small">Graduate Year:</label>
+                        <p className="form-control-plaintext pb-2 mb-0">
+                          {applicant.graduate_year || 'Not specified'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
+                      <div className="form-group">
                         <label className="font-weight-bold text-muted small">Status:</label>
                         <div className="mt-2">
                           <span

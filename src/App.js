@@ -5,6 +5,7 @@ import Layout from './components/Shared/Layout';
 import Login from './components/Authentication/login';
 import authService from "./components/Authentication/authService";
 // import ApllicantForm from './components/HRMS/Jobportal/AplliacntForm';
+import ApplicantForm from './components/HRMS/Jobportal/ApplicantForm';
 
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 
@@ -43,9 +44,9 @@ class App extends Component {
 						<Route path="/login">
 							{user ? <Redirect to="/" /> : <Login onLogin={this.handleLogin} />}
 						</Route>
-						{/* <Route path="/job-application">
-							<ApllicantForm />
-						</Route> */}
+						<Route path="/job-application">
+							<ApplicantForm />
+						</Route>
 						<Route path="/">
 							{user ? <Route component={Layout} /> : <Redirect to="/login" />}
 						</Route>
