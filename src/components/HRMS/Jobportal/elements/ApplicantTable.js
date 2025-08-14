@@ -4,6 +4,7 @@ import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Pagination from '../../../common/Pagination';
 import ApplicantViewModal from './ApplicantViewModal';
 import ConfirmModal from '../../../common/ConfirmModal';
+import RejectModal from './RejectModal';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
 import { shortformatDate } from '../../../../utils';
@@ -308,44 +309,14 @@ class ApplicantTable extends Component {
         />
 
         {/* Rejection Reason Modal */}
-        {showRejectModal && (
-          <div className="modal fade show" style={{ display: 'block' }} tabIndex={-1} role="dialog" aria-modal="true">
-            <div className="modal-dialog" role="document">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Rejection Reason</h5>
-                  <button type="button" className="close" aria-label="Close" onClick={this.handleRejectCancel}>
-                    <span aria-hidden="true">×</span>
-                  </button>
-                </div>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label>Please provide a reason for rejection</label>
-                    <textarea 
-                      className="form-control" 
-                      rows={3} 
-                      value={rejectReason} 
-                      onChange={(e) => this.setState({ rejectReason: e.target.value })} 
-                      placeholder="Enter reason"
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={this.handleRejectCancel} disabled={isUpdatingStatus}>
-                    Cancel
-                  </button>
-                  <button type="button" className="btn btn-danger" onClick={this.handleRejectConfirm} disabled={isUpdatingStatus || !rejectReason.trim()}>
-                    {isUpdatingStatus && (
-                      <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                    )}
-                    Reject
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {showRejectModal && <div className="modal-backdrop fade show" />}
+        <RejectModal
+          show={showRejectModal}
+          rejectReason={rejectReason}
+          onReasonChange={(e) => this.setState({ rejectReason: e.target.value })}
+          onConfirm={this.handleRejectConfirm}
+          onCancel={this.handleRejectCancel}
+          isUpdating={isUpdatingStatus}
+        />
 
         {/* Sync Confirmation Modal */}
         <ConfirmModal

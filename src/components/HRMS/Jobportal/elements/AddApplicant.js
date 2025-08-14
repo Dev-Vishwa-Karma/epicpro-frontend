@@ -5,6 +5,7 @@ import { getService } from '../../../../services/getService';
 import { validateFields } from '../../../common/validations';
 import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
+import Button from '../../../common/formInputs/Button';
 import { appendDataToFormData, getColor } from '../../../../utils';
 
 import moment from "moment";
@@ -57,19 +58,6 @@ class AddApplicant extends Component {
     this.fieldRefs = {
       fullname: React.createRef(),
       email: React.createRef(),
-      phone: React.createRef(),
-      alternate_phone: React.createRef(),
-      dob: React.createRef(),
-      merital_status: React.createRef(),
-      address: React.createRef(),
-      experience: React.createRef(),
-      skills: React.createRef(),
-      resume: React.createRef(),
-      joining_timeframe: React.createRef(),
-      custom_joining_time: React.createRef(),
-      bond_agreement: React.createRef(),
-      branch: React.createRef(),
-      graduate_year: React.createRef(),
     };
   }
 
@@ -318,7 +306,6 @@ class AddApplicant extends Component {
                             onChange={this.handleChange}
                             placeholder="Enter Phone Number"
                             error={this.state.errors.phone}
-                            refInput={this.fieldRefs.phone}
                             maxLength="10"
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
@@ -334,7 +321,6 @@ class AddApplicant extends Component {
                             onChange={this.handleChange}
                             placeholder="Enter Alternate Phone Number"
                             error={this.state.errors.alternate_phone}
-                            refInput={this.fieldRefs.alternate_phone}
                             maxLength="10"
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
@@ -349,7 +335,6 @@ class AddApplicant extends Component {
                             value={dob}
                             onChange={this.handleChange}
                             error={this.state.errors.dob}
-                            refInput={this.fieldRefs.dob}
                           />
                         </div>
                         <div className="col-sm-6 col-md-6">
@@ -360,7 +345,6 @@ class AddApplicant extends Component {
                             value={merital_status}
                             onChange={this.handleChange}
                             error={this.state.errors.merital_status}
-                            refInput={this.fieldRefs.merital_status}
                             options={[
                               // { value: '', label: 'Select Marital Status' },
                               { value: 'single', label: 'Single' },
@@ -378,29 +362,20 @@ class AddApplicant extends Component {
                             value={experience}
                             onChange={this.handleChange}
                             error={this.state.errors.experience}
-                            refInput={this.fieldRefs.experience}
-                            options={[
-                              { value: '0.6', label: '0.6' },
-                              { value: '1', label: '1' },
-                              { value: '1.6', label: '1.6' },
-                              { value: '2', label: '2' },
-                              { value: '2.6', label: '2.6' },
-                              { value: '3', label: '3' },
-                              { value: '3.6', label: '3.6' },
-                              { value: '4', label: '4' },
-                              { value: '4.6', label: '4.6' },
-                              { value: '5', label: '5' },
-                              { value: '5.6', label: '5.6' },
-                              { value: '6', label: '6' },
-                              { value: '6.6', label: '6.6' },
-                              { value: '7', label: '7' },
-                              { value: '7.6', label: '7.6' },
-                              { value: '8', label: '8' },
-                              { value: '8.6', label: '8.6' },
-                              { value: '9', label: '9' },
-                              { value: '9.6', label: '9.6' },
-                              { value: '10', label: '10' },
-                            ]}
+                            options={(() => {
+                              const options = [];
+                              for (let i = 0; i <= 10; i++) {
+                                if (i === 0) {
+                                  options.push({ value: '0.6', label: '0.6' });
+                                } else {
+                                  options.push({ value: i.toString(), label: i.toString() });
+                                  if (i < 10) {
+                                    options.push({ value: (i + 0.6).toString(), label: (i + 0.6).toString() });
+                                  }
+                                }
+                              }
+                              return options;
+                            })()}
                           />
                         </div>
                         <div className="col-md-12">
@@ -412,7 +387,6 @@ class AddApplicant extends Component {
                             onChange={this.handleChange}
                             placeholder="Enter Complete Address"
                             error={this.state.errors.address}
-                            refInput={this.fieldRefs.address}
                           />
                         </div>
                       </div>
@@ -426,7 +400,6 @@ class AddApplicant extends Component {
                             value={joining_timeframe}
                             onChange={this.handleChange}
                             error={this.state.errors.joining_timeframe}
-                            refInput={this.fieldRefs.joining_timeframe}
                             options={[
                               { value: 'Same Week', label: 'Same Week' },
                               { value: 'Next Week', label: 'Next Week' },
@@ -445,7 +418,6 @@ class AddApplicant extends Component {
                               onChange={this.handleChange}
                               placeholder="e.g., 1 month, 45 days"
                               error={this.state.errors.custom_joining_time}
-                              refInput={this.fieldRefs.custom_joining_time}
                             />
                           </div>
                         )}
@@ -458,6 +430,7 @@ class AddApplicant extends Component {
                             onChange={this.handleChange}
                             firstOption={false}
                             options={[
+                              { value: '', label: 'Select Option' },
                               { value: 'yes', label: 'Yes' },
                               { value: 'no', label: 'No' },
                             ]}
@@ -475,7 +448,6 @@ class AddApplicant extends Component {
                             onChange={this.handleChange}
                             placeholder="Enter Branch"
                             error={this.state.errors.branch}
-                            refInput={this.fieldRefs.branch}
                           />
                         </div>
                         <div className="col-sm-6 col-md-6">
@@ -486,7 +458,6 @@ class AddApplicant extends Component {
                             value={graduate_year}
                             onChange={this.handleChange}
                             error={this.state.errors.graduate_year}
-                            refInput={this.fieldRefs.graduate_year}
                             options={years.map(year => ({
                               value: year,
                               label: year.toString()
@@ -523,7 +494,6 @@ class AddApplicant extends Component {
                               name="resume"
                               placeholder="Select your resume"
                               onChange={this.handleFileChange}
-                              refInput={this.fieldRefs.resume}
                               accept=".pdf,.doc,.docx,.txt,.rtf"
                             />
                             {this.state.errors.resume && (
@@ -542,19 +512,17 @@ class AddApplicant extends Component {
                         gap: "10px",
                       }}
                     >
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
+                      <Button
+                        label="Back"
                         onClick={this.handleBack}
-                      >
-                        Back
-                      </button>
-                      <button type="submit" className="btn btn-primary" disabled={this.state.ButtonLoading}>
-                        {this.state.ButtonLoading ? (
-                          <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                        ) : null}
-                        Add Applicant
-                      </button>
+                        className="btn-secondary"
+                      />
+                      <Button
+                        label="Add Applicant"
+                        type="submit"
+                        className="btn-primary"
+                        loading={this.state.ButtonLoading}
+                      />
                     </div>
                   </form>
       </>

@@ -27,6 +27,7 @@ class Applicant extends Component {
     isSyncing: false,
     syncSuccess: '',
     showSuccess: false,
+    showError: false,
     activeTab: 'list',
   };
 
@@ -107,12 +108,11 @@ class Applicant extends Component {
     
     getService.addCall('applicants.php', 'sync_applicant')
       .then(response => {        
-        // Check if response exists and has the expected structure
         if (!response) {
           throw new Error('No response received from server');
         }
         if (response.status === 'success') {
-          const insertedCount = response.data && response.data.inserted ? response.data.inserted : 0;
+          const insertedCount = response.data?.inserted || 0;
           
           this.setState({ 
             syncSuccess: `Synced ${insertedCount} new applicants successfully!`, 
@@ -121,22 +121,17 @@ class Applicant extends Component {
           setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
           this.fetchApplicants();
         } else {
-          const errorMsg = response.data && response.data.message ? response.data.message : 'Sync failed';
+          const errorMsg = response.data?.message || 'Sync failed';
           throw new Error(errorMsg);
         }
       })
       .catch(err => {
-        console.error('Sync error details:', err);
-        console.error('Error type:', typeof err);
-        console.error('Error keys:', Object.keys(err || {}));
-        let errorMsg = 'Sync failed';
-        if (err && err.response && err.response.data) {
-          errorMsg = err.response.data.message || 'Network error';
-        } else if (err && err.message) {
-          errorMsg = err.message;
-        }
-        
-        alert(errorMsg);
+        const error = err?.response?.data?.message || err?.message || 'Sync failed';
+        this.setState({ 
+          error: error,
+          showError: true 
+        });
+        setTimeout(() => this.setState({ error: '', showError: false }), 3000);
       })
       .finally(() => {
         this.setState({ isSyncing: false });
@@ -182,16 +177,16 @@ class Applicant extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess, activeTab } = this.state;
+    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess, showError, activeTab } = this.state;
     return (
       <>
         <AlertMessages
           showSuccess={showSuccess}
           successMessage={syncSuccess}
-          showError={false}
-          errorMessage={''}
+          showError={showError}
+          errorMessage={error}
           setShowSuccess={val => this.setState({ showSuccess: val })}
-          setShowError={() => {}}
+          setShowError={val => this.setState({ showError: val })}
         />
         <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
           <div className="container-fluid">
