@@ -499,7 +499,7 @@ class Notifications extends Component {
                                         {loading ? (
                                             <div className="card-body">
                                                 <div className="dimmer active">
-                                                     <TableSkeleton columns={6} rows={5} />
+                                                     <TableSkeleton columns={6} rows={currentNotifications.length} />
                                                 </div>
                                             </div>
                                         ) : (

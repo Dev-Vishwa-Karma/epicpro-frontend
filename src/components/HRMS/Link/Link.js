@@ -553,7 +553,7 @@ class Link extends Component {
                 <div className="card-body">
                   {loading ? (
                     <div className="dimmer active">
-                      <TableSkeleton columns={3} rows={5} />
+                      <TableSkeleton columns={3} rows={currentGitLinks.length} />
                     </div>
                   ) : (
                     <>
@@ -586,7 +586,7 @@ class Link extends Component {
                 <div className="card-body">
                   {loading ? (
                     <div className="dimmer active">
-                      <TableSkeleton columns={3} rows={5} />
+                      <TableSkeleton columns={3} rows={currentExcelLinks.length} />
                     </div>
                   ) : (
                     <>
@@ -620,7 +620,7 @@ class Link extends Component {
                 <div className="card-body">
                   {loading ? (
                     <div className="dimmer active">
-                      <TableSkeleton columns={3} rows={5} />
+                      <TableSkeleton columns={3} rows={currentCodebaseLinks.length} />
                     </div>
                   ) : (
                     <>

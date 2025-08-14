@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { getService } from '../../../../services/getService';
 import EmployeeSelector from '../../../common/EmployeeSelector';
+import ListSkeleton from '../../../common/skeletons/ListSkeleton';
 
 class TodoList extends Component {
   constructor(props) {
@@ -74,9 +75,7 @@ class TodoList extends Component {
         )}
 
         {loading ? (
-          <div className="dimmer active mb-4 p-3 px-3">
-            <div className="loader" />
-          </div>
+          <ListSkeleton rows={todos.length} />
         ) : (
           Array.isArray(todos) && (
             <div className="todo-container mt-3" style={{ maxHeight: '250px', overflowY: 'auto' }}>

@@ -10,7 +10,7 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
             {loading ? (
                 <div className="card-body">
                     <div className="dimmer active">
-                       <TableSkeleton columns={7} rows={5} />
+                       <TableSkeleton columns={7} rows={employeeList.length} />
                     </div>
                 </div>
             ) : (

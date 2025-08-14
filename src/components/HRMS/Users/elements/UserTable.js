@@ -11,7 +11,7 @@ const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) 
       {loading ? (
         <div className="card-body">
           <div className="dimmer active">
-            <TableSkeleton columns={4} rows={5} />
+            <TableSkeleton columns={4} rows={currentUsers.length} />
           </div>
         </div>
       ) : (

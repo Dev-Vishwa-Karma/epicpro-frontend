@@ -9,7 +9,7 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
     <div className="card-body">
       {loading ? (
         <div className="dimmer active">
-          <TableSkeleton columns={7} rows={5} />
+          <TableSkeleton columns={7} rows={currentEmployeeLeaves.length} />
         </div>
       ) : (
         <div className="table-responsive">

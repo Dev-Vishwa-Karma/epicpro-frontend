@@ -132,7 +132,7 @@ class ApplicantTable extends Component {
                   {loading ? (
                     <tr>
                       <td colSpan="8" style={{ padding: 0 }}>
-                        <TableSkeleton columns={8} rows={5} />
+                        <TableSkeleton columns={8} rows={applicants.length} />
                       </td>
                     </tr>
                   ) : error ? (

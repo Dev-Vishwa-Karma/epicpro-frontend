@@ -6,7 +6,7 @@ import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
-import TodoTable from './TodoTable';
+import TodoTable from './elements/TodoTable';
 import { appendDataToFormData } from '../../../utils';
 import Button from '../../common/formInputs/Button';
 class TodoList extends Component {

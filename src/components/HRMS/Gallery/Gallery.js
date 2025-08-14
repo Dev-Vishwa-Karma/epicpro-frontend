@@ -571,7 +571,7 @@ class Gallery extends Component {
                         <div className="container-fluid px-0">
                             <div className="masonry">
                                 {loading ? (
-                                <GallerySkeleton rows={3} columns={4} />
+                                <GallerySkeleton rows={currentImages.length} columns={4} />
                                 ) : filteredImages.length > 0 ? (
                                 currentImages.map((image, index) => (
                                     <div className="masonry-item" key={image.id || index}>

@@ -377,7 +377,7 @@ class departments extends Component {
                     {loading ? (
                       <div className="card-body">
                         <div className="dimmer active">
-                          <TableSkeleton columns={5} rows={5} />
+                          <TableSkeleton columns={5} rows={departmentData.length} />
                         </div>
                       </div>
                     ) : (
@@ -393,7 +393,7 @@ class departments extends Component {
               </div>
               <div className="tab-pane fade" id="Departments-grid" role="tabpanel">
                 {loading ? (
-                  <GridSkeleton count={4} />
+                  <GridSkeleton count={departmentData.length} />
                 ) : (
                   <DepartmentGrid
                     departmentData={departmentData}

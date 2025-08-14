@@ -705,6 +705,7 @@ class ProjectList extends Component {
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
             ? projects
             : projects.filter(project => Number(project.project_is_active) === 1);
+        const skeletonCount = visibleProjects.length === 0 ? 6 : visibleProjects.length;
 
         return (
             <>
@@ -764,7 +765,7 @@ class ProjectList extends Component {
                             <div className="tab-pane fade show active" id="Project-OnGoing" role="tabpanel">
                             <div className="row">
                                 {this.state.loading ? (
-                                    Array.from({ length: 6 }).map((_, index) => (
+                                    Array.from({ length: skeletonCount }).map((_, index) => (
                                         <ProjectCardSkeleton key={index} />
                                     ))
                                     ) : visibleProjects && visibleProjects.length > 0 ? (

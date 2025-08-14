@@ -8,7 +8,7 @@ const DashboardTable = ({ projects, loading }) => {
     <div className="card-body">
       {loading ? (
         <div className="dimmer active p-3">
-          <TableSkeleton columns={5} rows={5} />
+          <TableSkeleton columns={5} rows={projects.length} />
         </div>
       ) : (
         <div className="table-responsive">

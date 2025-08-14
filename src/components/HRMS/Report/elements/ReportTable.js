@@ -13,7 +13,7 @@ const ReportTable = ({
         <div className="card-body">
             {loading ? (
                 <div className="dimmer active p-3">
-                    <TableSkeleton columns={8} rows={5} />
+                    <TableSkeleton columns={8} rows={currentReports.length} />
                 </div>
             ) : (
                 <div className="table-responsive">

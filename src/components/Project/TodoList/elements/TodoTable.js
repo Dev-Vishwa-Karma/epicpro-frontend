@@ -1,8 +1,8 @@
 import React from 'react';
-import TableSkeleton from '../../common/skeletons/TableSkeleton';
-import NoDataRow from '../../common/NoDataRow';
-import Avatar from '../../common/Avatar';
-import Button from '../../common/formInputs/Button';
+import TableSkeleton from '../../../common/skeletons/TableSkeleton';
+import NoDataRow from '../../../common/NoDataRow';
+import Avatar from '../../../common/Avatar';
+import Button from '../../../common/formInputs/Button';
 
 const TodoTable = ({
     todos,
@@ -34,7 +34,7 @@ const TodoTable = ({
                         <tr>
                             <td colSpan="5">
                                 <div className="d-flex justify-content-center align-items-center" style={{ height: "150px" }}>
-                                    <TableSkeleton columns={4} rows={5} />
+                                    <TableSkeleton columns={4} rows={currentTodos.length} />
                                 </div>
                             </td>
                         </tr>

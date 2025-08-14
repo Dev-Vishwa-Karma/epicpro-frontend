@@ -8,7 +8,7 @@ const EventList = ({ loading, uniqueFilteredEvents2, logged_in_employee_role, op
     <div>
       {loading ? (
         <div className="dimmer active mb-4 p-3 px-3">
-          <ListSkeleton rows={5} />
+          <ListSkeleton rows={uniqueFilteredEvents2.length} />
         </div>
       ) : (
         <div

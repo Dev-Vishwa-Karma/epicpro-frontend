@@ -16,7 +16,7 @@ const HolidaysTable = ({
     <div className="card-body">
       {loading ? (
         <div className="dimmer active mb-4">
-          <TableSkeleton columns={5} rows={5} />
+          <TableSkeleton columns={5} rows={holidays.length} />
         </div>
       ) : holidays.length === 0 && !message ? (
         <div className="text-center">
