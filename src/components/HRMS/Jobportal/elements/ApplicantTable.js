@@ -8,6 +8,7 @@ import RejectModal from './RejectModal';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
 import { shortformatDate } from '../../../../utils';
+import styles from './applicant.module.css';
 class ApplicantTable extends Component {
   static getStatusColor(status) {
     switch (status) {
@@ -188,48 +189,55 @@ class ApplicantTable extends Component {
                           <div className="">
                             <div>
                               <div className="font-15">{applicant.fullname} 
-                                   <span className='ml-2'>
-                                   {applicant.source === 'sync' && (
-                                <i
-                                  className="fa fa-refresh text-info"
-                                  data-toggle="tooltip"
-                                  data-placement="top"
-                                  title="Synced"
-                                ></i>
-                              )}
-                              {applicant.source === 'admin' && (
-                                <i
-                                  className="fa fa-user text-success"
-                                  data-toggle="tooltip"
-                                  data-placement="top"
-                                  title="Added by admin"
-                                ></i>
-                              )}
-                                   </span>
+                                <span className='ml-2'>
+                                  {applicant.source === 'sync' && (
+                                    <i
+                                      className={`fa fa-refresh text-info ${styles.syncIcon}`}
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      title="Synced"
+                                    ></i>
+                                  )}
+                                  {applicant.source === 'admin' && (
+                                    <i
+                                      className={`fa fa-user text-success ${styles.adminIcon}`}
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      title="Added by admin"
+                                    ></i>
+                                  )}
+                                  {applicant.source === 'referral' && (
+                                    <i
+                                      className={`fa fa-globe text-warning ${styles.referralIcon}`}
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      title="referral form"
+                                    ></i>
+                                  )}
+                                </span>
                               </div>
                               <span className="text-muted">{applicant.email}</span>
                             </div>
                           </div>
                         </td>
-                        <td>{applicant.phone}</td>
+                        <td className={styles.tableCellCenter}>{applicant.phone || "--"}</td>
                         <td>{shortformatDate(applicant.created_at)}</td>
-                        <td>{applicant.experience_display || applicant.experience || "N/A"}</td>
+                        <td className={styles.tableCellCenter}>{applicant.experience_display || applicant.experience || "--"}</td>
                         <td>
                           <div >
                           <span>
                            {applicant.status === 'rejected' && applicant.reject_reason && (
-                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top">
-                                <p style={{color:'red', fontSize:'10px'}}>Reject reason</p>
+                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer' }}>
+                                <p className={styles.rejectReasonText}>Reject reason</p>
                               </span>
                             )}
                            </span>
                             <InputField
-                              className="custom-select"
+                              className={`custom-select ${applicant.status === 'rejected' ? styles.statusSelectRejected : styles.statusSelect}`}
                               type="select"
                               value={applicant.status}
                               style={{                                                                    
-                                  ...ApplicantTable.getStatusColor(applicant.status),
-                                  ...(applicant.status === 'rejected' ? { marginTop: '-10px' } : {})
+                                  ...ApplicantTable.getStatusColor(applicant.status)
                               }}
                               onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
                               options={[                                                    
@@ -248,7 +256,7 @@ class ApplicantTable extends Component {
                             <a href="fake_url" data-toggle="dropdown" aria-expanded="false">
                               <i className="fa fa-ellipsis-h" />
                             </a>
-                            <div className="dropdown-menu dropdown-menu-right"  style={{ position: 'absolute', willChange: 'transform', top: 0, left: 0, transform: 'translate3d(18px, 25px, 0px)' }}>
+                            <div className={`dropdown-menu dropdown-menu-right ${styles.dropdownMenu}`}>
                               <a href="fake_url" className="dropdown-item" onClick={(e) => { e.preventDefault(); this.handleViewApplicant(applicant); }}>
                                 <i className="dropdown-icon fa fa-eye" /> View Details
                               </a>

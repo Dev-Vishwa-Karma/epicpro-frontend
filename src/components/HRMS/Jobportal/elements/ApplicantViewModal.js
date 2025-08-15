@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Button from '../../../common/formInputs/Button';
+import styles from './applicant.module.css';
 
 class ApplicantViewModal extends Component {
   render() {
@@ -12,17 +13,27 @@ class ApplicantViewModal extends Component {
     
     if (!show || !applicant) return null;
 
-    // Generate avatar background color based on name
     const getAvatarColor = (name) => {
       if (!name) return 'bg-secondary';
       const colors = [
-        'bg-primary', 'bg-success', 'bg-info', 
-        'bg-warning', 'bg-danger', 'bg-purple',
-        'bg-pink', 'bg-indigo', 'bg-teal'
+        'bg-pink'
       ];
       const hash = name.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
       return colors[hash % colors.length];
     };
+
+    // Parse skills for sidebar
+    const getSkills = () => {
+      if (!applicant.skills) return [];
+      try {
+        const skills = JSON.parse(applicant.skills);
+        return Array.isArray(skills) ? skills : [];
+      } catch (e) {
+        return [];
+      }
+    };
+
+    const skills = getSkills();
 
     return (
       <div
@@ -36,248 +47,279 @@ class ApplicantViewModal extends Component {
         role="dialog"
         aria-modal="true"
       >
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
-          <div className="modal-content border-0 shadow-lg">
-            <div className="modal-header bg-gradient-primary text-white">
-              <h5 className="modal-title font-weight-bold">Applicant Profile</h5>
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+          <div className="modal-content border-0 shadow-lg" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                        <div className="modal-header bg-transparent border-0 p-0 position-relative">
               <Button
-                label=""
+                label="x"
                 onClick={onClose}
-                className="close text-white"
-                icon="fas fa-times"
-                iconStyle={{ fontSize: '1.5rem' }}
+                className={`position-absolute ${styles.topdata}`}
               />
             </div>
-            <div className="modal-body p-4">
-              <div className="row">
-                <div className="col-12">
-                  {/* Profile Header */}
-                  <div className="text-center mb-4">
-                    <div className={`avatar avatar-xl rounded-circle ${getAvatarColor(applicant.fullname)} d-inline-flex align-items-center justify-content-center text-white`}>
-                      {applicant.fullname ? 
-                        applicant.fullname.split(' ').map(word => word[0]).join('').toUpperCase() : 
-                        '?'
-                      }
+            <div className="modal-body p-0">
+                <div className={`row no-gutters ${styles.guttopdata}`}>
+                {/* Left Main Content - Light Background */}
+                <div className="col-md-8" style={{ 
+                  backgroundColor: 'white', 
+                  color: '#2C3E50',
+                  padding: '30px 35px'
+                }}>   
+                  {/* Name*/}
+                  <h1 style={{ 
+                      fontSize: '2.5rem', 
+                      fontWeight: 'bold', 
+                      color: '#7B7493',
+                      marginBottom: '5px',
+                      textTransform: 'uppercase',
+                      marginBottom: '15px',
+                    }}>
+                      {applicant.fullname || 'Applicant'}
+                    </h1>
+
+                  {/* Contact Section */}
+                  <div className="mb-4">
+                    <h6 style={{ 
+                      fontWeight: 'bold', 
+                      borderBottom: '2px solid #2C3E50', 
+                      paddingBottom: '5px',
+                      marginBottom: '15px',
+                      fontSize: '14px',
+                      textTransform: 'uppercase',
+                      color: '#2C3E50'
+                    }}>
+                      Contact
+                    </h6>
+                    <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                      {applicant.email && (
+                        <div className="mb-2">
+                          <i className="fa fa-envelope mr-2"></i>
+                          {applicant.email}
+                        </div>
+                      )}
+                      {applicant.address && (
+                        <div className="mb-2">
+                          <i className="fa fa-map-marker mr-2"></i>
+                          {applicant.address}
+                        </div>
+                      )}
+                      <div className='d-flex gap-4'>
+                        {applicant.phone && (
+                          <div className="mb-2">
+                            <i className="fa fa-phone mr-2"></i>
+                            {applicant.phone}
+                          </div>
+                        )} &nbsp;&nbsp;
+                        {applicant.alternate_phone && (
+                          <div className="mb-2">
+                            <i className="fa fa-phone mr-2"></i>
+                            {applicant.alternate_phone}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <h4 className="mt-3 mb-1 font-weight-bold">{applicant.fullname || 'Applicant'}</h4>
-                    <div className="d-flex justify-content-center align-items-center">
+                  </div>
+
+                  {/* Skills Section */}
+                  {skills.length > 0 && (
+                    <div className="mb-4">
+                      <h6 style={{ 
+                        fontWeight: 'bold', 
+                        borderBottom: '2px solid #2C3E50', 
+                        paddingBottom: '5px',
+                        marginBottom: '15px',
+                        fontSize: '14px',
+                        textTransform: 'uppercase',
+                        color: '#2C3E50'
+                      }}>
+                        Skills
+                      </h6>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                        {skills.map((skill, index) => (
+                          <div key={index} style={{
+                            backgroundColor: '#f0f0f0',
+                            padding: '5px 12px',
+                            borderRadius: '20px',
+                            fontSize: '13px',
+                            fontWeight: '500',
+                            color: '#2C3E50',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                          
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Info Section */}
+                  <div className="mb-4">
+                    <h6 style={{ 
+                      fontWeight: 'bold', 
+                      borderBottom: '2px solid #2C3E50', 
+                      paddingBottom: '5px',
+                      marginBottom: '15px',
+                      fontSize: '14px',
+                      textTransform: 'uppercase',
+                      color: '#2C3E50'
+                    }}>
+                      Additional Info
+                    </h6>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', fontSize: '14px', lineHeight: '1.6' }}>
+                      <div style={{ width: '50%', marginBottom: '8px' }}>
+                        {applicant.dob && (
+                          <div className="mb-2">
+                            <i className="fas fa-birthday-cake mr-2"></i>
+                            <strong>DOB:</strong> {new Date(applicant.dob).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ width: '50%', marginBottom: '8px' }}>
+                        {applicant.merital_status && (
+                          <div className="mb-2">
+                            <i className="fas fa-heart mr-2"></i>
+                            <strong>Status:</strong> {applicant.merital_status}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ width: '50%', marginBottom: '8px' }}>
+                        {applicant.graduate_year && (
+                          <div className="mb-2">
+                            <i className="fas fa-graduation-cap mr-2"></i>
+                            <strong>Graduated:</strong> {applicant.graduate_year}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ width: '50%', marginBottom: '8px' }}>
+                        {applicant.bond_agreement && (
+                          <div className="mb-2">
+                            <i className="fas fa-file-contract mr-2"></i>
+                            <strong>Bond:</strong> {applicant.bond_agreement.charAt(0).toUpperCase() + applicant.bond_agreement.slice(1)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Sidebar - Dark Background */}
+                <div className="col-md-4" style={{ 
+                  backgroundColor: '#5A5278', 
+                  color: 'white',
+                  padding: '30px 25px'
+                }}>
+                  {/* Name and Title */}
+                  <div className="mb-4">
+                    <div className="text-center mb-4">
+                      <div className={`avatar avatar-xxl rounded-circle ${getAvatarColor(applicant.fullname)} d-inline-flex align-items-center justify-content-center text-white`}
+                        style={{ width: '120px', height: '120px', fontSize: '2.5rem' }}>
+                        {applicant.fullname ? applicant.fullname .split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase(): '?'}
+                      </div>
+                    </div>
                       <span
-                        className="badge badge-pill mr-2"
-                        style={{
-                          ...getStatusColor(applicant.status),
-                          padding: '6px 12px',
-                          fontSize: '12px',
-                          textTransform: 'capitalize',
-                          fontWeight: 500
+                      className="badge badge-pill"
+                      style={{
+                        ...getStatusColor(applicant.status),
+                        padding: '8px 16px',
+                        fontSize: '12px',
+                        textTransform: 'capitalize',
+                        fontWeight: 500
+                      }}
+                    >
+                      {applicant.status || 'No Status'}
+                    </span>
+                  </div>
+
+                  {/* Professional Details Section */}
+                  <div className="mb-4">
+                    <h6 style={{ 
+                      fontWeight: 'bold', 
+                      borderBottom: '2px solid white', 
+                      paddingBottom: '5px',
+                      marginBottom: '15px',
+                      fontSize: '14px',
+                      textTransform: 'uppercase'
+                    }}>
+                      Professional Details
+                    </h6>
+                    <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                      {(applicant.experience_display || applicant.experience) && (
+                        <div className="mb-2">
+                          <strong>Experience:</strong> {applicant.experience_display || `${applicant.experience} years`}
+                        </div>
+                      )}
+                      {applicant.branch && (
+                        <div className="mb-2">
+                          <strong>Branch:</strong> {applicant.branch}
+                        </div>
+                      )}
+                      {applicant.graduate_year && (
+                        <div className="mb-2">
+                          <strong>Graduate Year:</strong> {applicant.graduate_year}
+                        </div>
+                      )}
+                      {applicant.joining_timeframe && (
+                        <div className="mb-2">
+                          <strong>Joining Timeframe:</strong> {applicant.joining_timeframe}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Application Details Section */}
+                  <div className="mb-4">
+                    <h6 style={{ 
+                      fontWeight: 'bold', 
+                      borderBottom: '2px solid white', 
+                      paddingBottom: '5px',
+                      marginBottom: '15px',
+                      fontSize: '14px',
+                      textTransform: 'uppercase'
+                    }}>
+                      Application Details
+                    </h6>
+                    <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                      <div className="mb-2">
+                        <strong>Applied on:</strong> {applicant.created_at ? new Date(applicant.created_at).toLocaleDateString() : 'N/A'}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Source:</strong> {applicant.source ? 
+                          (applicant.source === 'sync' ? 'Synced from External Source' : 
+                           applicant.source === 'admin' ? 'Added by Admin' : 
+                           applicant.source === 'referral' ? 'referral Application Form' : 'Unknown') : 
+                          'N/A'
+                        }
+                      </div>
+                      {applicant.reject_reason && applicant.status && applicant.status !== 'pending' && applicant.status !== 'reviewed' && applicant.status !== 'interviewed' && applicant.status !== 'hired' && (
+                        <div className="mb-2">
+                          <strong>Rejection Reason:</strong> {applicant.reject_reason}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {applicant.resume_path && (
+                    <div className="text-center">
+                      <a
+                        href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary"
+                        style={{ 
+                          backgroundColor: 'white', 
+                          borderColor: 'white',
+                          color: '#2C3E50',
+                          padding: '10px 25px',
+                          fontWeight: '500'
                         }}
                       >
-                        {applicant.status || 'No Status'}
-                      </span>
-                      <span className="text-muted small">
-                        Applied on: {applicant.created_at ? new Date(applicant.created_at).toLocaleDateString() : 'N/A'}
-                      </span>
+                        <i className="fas fa-download mr-2"></i>
+                        Download Original Resume
+                      </a>
                     </div>
-                  </div>
-                  
-                  {/* Main Content */}
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-body">
-                      <h6 className="card-title text-uppercase text-muted mb-3 font-weight-bold">Personal Information</h6>
-                      <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Email Address</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0" style={{ wordBreak: 'break-all' }}>
-                              {applicant.email || 'N/A'}
-                              {applicant.email && (
-                                <a href={`mailto:${applicant.email}`} className="ml-2 text-primary">
-                                  <i className="fas fa-envelope"></i>
-                                </a>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Phone Number</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.phone || 'N/A'}
-                              {applicant.phone && (
-                                <a href={`tel:${applicant.phone}`} className="ml-2 text-primary">
-                                  <i className="fas fa-phone"></i>
-                                </a>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Alternate Phone</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.alternate_phone || 'N/A'}
-                              {applicant.alternate_phone && (
-                                <a href={`tel:${applicant.alternate_phone}`} className="ml-2 text-primary">
-                                  <i className="fas fa-phone"></i>
-                                </a>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Date of Birth</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.dob ? new Date(applicant.dob).toLocaleDateString() : 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Marital Status</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.merital_status ? 
-                                applicant.merital_status.charAt(0).toUpperCase() + applicant.merital_status.slice(1) : 
-                                'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Address</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.address || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Professional Information */}
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-body">
-                      <h6 className="card-title text-uppercase text-muted mb-3 font-weight-bold">Professional Details</h6>
-                      <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Experience</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.experience_display || 
-                                (applicant.experience ? `${applicant.experience} years` : 'N/A')}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Branch</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.branch || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Graduate Year</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.graduate_year || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Joining Timeframe</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.joining_timeframe || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Bond Agreement</label>
-                            <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.bond_agreement ? 
-                                applicant.bond_agreement.charAt(0).toUpperCase() + applicant.bond_agreement.slice(1) : 
-                                'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <div className="form-group mb-0">
-                            <label className="font-weight-bold text-muted small">Resume</label>
-                            <div className="mt-2">
-                              {applicant.resume_path ? (
-                                <a
-                                  href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="btn btn-sm btn-outline-primary"
-                                >
-                                  <i className="fas fa-download mr-2"></i>
-                                  Download Resume
-                                </a>
-                              ) : (
-                                <span className="text-muted">No resume uploaded</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Skills Section */}
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-body">
-                      <h6 className="card-title text-uppercase text-muted mb-3 font-weight-bold">Skills</h6>
-                      <div className="mt-2">
-                        {(() => {
-                          if (!applicant.skills) {
-                            return <p className="text-muted mb-0">N/A</p>;
-                          }
-                          
-                          try {
-                            const skills = JSON.parse(applicant.skills);
-                            if (Array.isArray(skills) && skills.length > 0) {
-                              return (
-                                <div className="d-flex flex-wrap">
-                                  {skills.map((skill, index) => (
-                                    <span 
-                                      key={index} 
-                                      className="badge badge-primary mr-2 mb-2 px-3 py-2"
-                                      style={{
-                                        backgroundColor: '#e3f2fd',
-                                        color: '#1976d2',
-                                        borderRadius: '12px',
-                                        fontWeight: 500
-                                      }}
-                                    >
-                                      {skill}
-                                    </span>
-                                  ))}
-                                </div>
-                              );
-                            } else {
-                              return <p className="text-muted mb-0">N/A</p>;
-                            }
-                          } catch (e) {
-                            return <p className="text-muted mb-0">N/A</p>;
-                          }
-                        })()}
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -285,18 +327,9 @@ class ApplicantViewModal extends Component {
               <Button
                 label="Close"
                 onClick={onClose}
-                className="btn-light border"
+                className="btn btn-primary"
                 icon="times"
               />
-              {applicant.email && (
-                <a 
-                  href={`tel:${applicant.phone}`}
-                  className="btn btn-primary ml-2"
-                >
-                  <i className="fas fa-envelope mr-2"></i>
-                  Contact
-                </a>
-              )}
             </div>
           </div>
         </div>

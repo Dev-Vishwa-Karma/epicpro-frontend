@@ -98,7 +98,7 @@ class ApplicantForm extends Component {
       branch: branch,
       graduate_year: graduate_year
     }
-    data.source = 'public';
+    data.source = 'referral';
     appendDataToFormData(formData, data)
 
     getService.addCall('applicants.php', 'add', formData)

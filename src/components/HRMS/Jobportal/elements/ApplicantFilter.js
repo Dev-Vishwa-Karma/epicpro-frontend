@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
+import styles from './applicant.module.css';
 class ApplicantFilter extends Component {
   render() {
     const { search, status, order, onInputChange, onFilter } = this.props;
@@ -56,12 +57,11 @@ class ApplicantFilter extends Component {
                 />
               </div>
             </div>
-            <div className="col-lg-2 col-md-4 col-sm-6 " style={{marginTop: '32px'}}>
+            <div className={`col-lg-2 col-md-4 col-sm-6 ${styles.filterButtonContainer}`}>
               <Button
                 label="Filter"
                 type="submit"
-                className="btn-sm btn-primary btn-block"
-                style={{ paddingTop: '5px', paddingBottom: '5px' }}
+                className={`btn-sm btn-primary btn-block ${styles.filterButton}`}
               />
             </div>
           </form>

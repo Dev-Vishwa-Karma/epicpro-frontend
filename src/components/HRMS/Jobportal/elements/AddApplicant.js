@@ -7,6 +7,7 @@ import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
 import Button from '../../../common/formInputs/Button';
 import { appendDataToFormData, getColor } from '../../../../utils';
+import styles from './applicant.module.css';
 
 import moment from "moment";
 
@@ -513,12 +514,7 @@ class AddApplicant extends Component {
                       </div>
                     </div>
                     <div
-                      className="card-footer text-right"
-                      style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        gap: "10px",
-                      }}
+                      className={`card-footer text-right add-resume ${styles.cardFooter}`}
                     >
                       <Button
                         label="Back"
