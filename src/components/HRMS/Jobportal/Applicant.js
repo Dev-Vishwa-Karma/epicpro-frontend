@@ -27,6 +27,7 @@ class Applicant extends Component {
     isSyncing: false,
     syncSuccess: '',
     showSuccess: false,
+    showError: false,
     activeTab: 'list',
   };
 
@@ -73,21 +74,24 @@ class Applicant extends Component {
     this.setState({ currentPage: pageNum }, this.fetchApplicants);
   };
 
-  handleStatusChange = (id, status) => {
+    handleStatusChange = (id, status, rejectReason = null) => {
     const formData = new FormData();
- 
+
     const data = {
       id: id,
-      status:status
+      status: status
+    };
+    if (status === 'rejected' && rejectReason) {
+      data.reject_reason = rejectReason;
     }
-    appendDataToFormData(formData, data)
+    appendDataToFormData(formData, data);
 
     getService.addCall('applicants.php', 'update', formData)
       .then(data => {
         if (data.status === 'success') {
           this.setState(prev => ({
             applicants: prev.applicants.map(app =>
-              app.id === id ? { ...app, status } : app
+              app.id === id ? { ...app, status, reject_reason: status === 'rejected' ? rejectReason : app.reject_reason } : app
             ),
           }));
         } else {
@@ -96,23 +100,38 @@ class Applicant extends Component {
       });
   };
 
+
   // New: trigger backend sync and refresh list
   handleSync = () => {
     if (this.state.isSyncing) return;
     this.setState({ isSyncing: true });
     
     getService.addCall('applicants.php', 'sync_applicant')
-      .then(data => {
-        if (data.status === 'success') {
-          this.setState({ syncSuccess: `Synced ${data.data.inserted} new applicants successfully!`, showSuccess: true });
+      .then(response => {        
+        if (!response) {
+          throw new Error('No response received from server');
+        }
+        if (response.status === 'success') {
+          const insertedCount = response.data?.inserted || 0;
+          
+          this.setState({ 
+            syncSuccess: `Synced ${insertedCount} new applicants successfully!`, 
+            showSuccess: true 
+          });
           setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
           this.fetchApplicants();
         } else {
-          alert(data.data.message || 'Sync failed');
+          const errorMsg = response.data?.message || 'Sync failed';
+          throw new Error(errorMsg);
         }
       })
       .catch(err => {
-        alert(err?.message || 'Sync failed');
+        const error = err?.response?.data?.message || err?.message || 'Sync failed';
+        this.setState({ 
+          error: error,
+          showError: true 
+        });
+        setTimeout(() => this.setState({ error: '', showError: false }), 3000);
       })
       .finally(() => {
         this.setState({ isSyncing: false });
@@ -158,16 +177,16 @@ class Applicant extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess, activeTab } = this.state;
+    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess, showError, activeTab } = this.state;
     return (
       <>
         <AlertMessages
           showSuccess={showSuccess}
           successMessage={syncSuccess}
-          showError={false}
-          errorMessage={''}
+          showError={showError}
+          errorMessage={error}
           setShowSuccess={val => this.setState({ showSuccess: val })}
-          setShowError={() => {}}
+          setShowError={val => this.setState({ showError: val })}
         />
         <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
           <div className="container-fluid">
@@ -228,7 +247,7 @@ class Applicant extends Component {
                 </div>
               </div>
               <div className={`tab-pane fade ${activeTab === 'add' ? 'show active' : ''}`} id="applicant-add" role="tabpanel">
-                <AddApplicant />
+                <AddApplicant onTabChange={this.handleTabChange} />
               </div>
             </div>
           </div>

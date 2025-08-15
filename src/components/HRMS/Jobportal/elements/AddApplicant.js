@@ -5,7 +5,10 @@ import { getService } from '../../../../services/getService';
 import { validateFields } from '../../../common/validations';
 import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
+import Button from '../../../common/formInputs/Button';
 import { appendDataToFormData, getColor } from '../../../../utils';
+
+import moment from "moment";
 
 const skillOptions = [
   'HTML',
@@ -32,10 +35,18 @@ class AddApplicant extends Component {
       fullname: '',
       email: '',
       phone: '',
+      alternate_phone: '',
+      dob: '',
+      merital_status: '',
       address: '',
       experience: '',
       skills: [],
       resume: null,
+      joining_timeframe: '',
+      custom_joining_time: '',
+      bond_agreement: '',
+      branch: '',
+      graduate_year: "",
       successMessage: "",
       showSuccess: false,
       errorMessage: "",
@@ -47,11 +58,6 @@ class AddApplicant extends Component {
     this.fieldRefs = {
       fullname: React.createRef(),
       email: React.createRef(),
-      phone: React.createRef(),
-      address: React.createRef(),
-      experience: React.createRef(),
-      skills: React.createRef(),
-      resume: React.createRef(),
     };
   }
 
@@ -64,6 +70,31 @@ class AddApplicant extends Component {
     });
   };
 
+    handleYearChange = (e) => {
+    this.setState({ graduate_year: e.target.value });
+    };
+
+  experienceOptions = () => {
+    let opts = [];
+    for (let i = 0; i <= 8; i++) {
+      let label = '';
+      if (i === 0) {
+        label = 'Fresher';
+      } else if (i === 8) {
+        label = '8+ years';
+      } else {
+        label = `${i} year${i > 1 ? 's' : ''}`;
+      }
+      opts.push({
+        label: label,
+        value: i.toString()
+      });
+    }
+    console.log('opts',opts)
+    return opts;
+    
+  };
+  
   handleChange = (e) => {
     const { name, value } = e.target;
     this.setState({ 
@@ -120,20 +151,23 @@ class AddApplicant extends Component {
       fullname,
       email,
       phone,
+      alternate_phone,
+      dob,
+      merital_status,
       address,
       experience,
       skills,
       resume,
+      joining_timeframe,
+      custom_joining_time,
+      bond_agreement,
+      branch,
+      graduate_year,
     } = this.state;
 
     const validationSchema = [
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
-      { name: 'phone', value: phone, type: 'mobile', required: true, messageName: 'Phone' },
-      { name: 'address', value: address, type: 'text', required: true, messageName: 'Address' },
-      { name: 'experience', value: experience, type: 'text', required: true, messageName: 'Experience' },
-      { name: 'skills', value: skills.length > 0 ? 'selected' : '', type: 'text', required: true, messageName: 'Skills' },
-      { name: 'resume', value: resume ? 'uploaded' : '', type: 'file', required: true, messageName: 'Resume' },
     ];
 
     const errors = validateFields(validationSchema);
@@ -146,12 +180,20 @@ class AddApplicant extends Component {
         fullname: fullname,
         email: email,
         phone: phone,
+        alternate_phone: alternate_phone,
+        dob: dob,
+        merital_status: merital_status,
         address: address,
         experience: experience,
         skills: JSON.stringify(skills),
-        resume: resume
+        resume: resume,
+        joining_timeframe: joining_timeframe === 'custom' ? custom_joining_time : joining_timeframe,
+        bond_agreement: bond_agreement,
+        branch: branch,
+        graduate_year: graduate_year ? parseInt(graduate_year) : null
       };
-      
+      console.log('data',data)
+      data.source = 'admin';
       appendDataToFormData(formData, data);
 
       getService.addCall('applicants.php', 'add', formData)
@@ -164,10 +206,18 @@ class AddApplicant extends Component {
               fullname: '',
               email: '',
               phone: '',
+              alternate_phone: '',
+              dob: '',
+              merital_status: '',
               address: '',
               experience: '',
               skills: [],
               resume: null,
+              joining_timeframe: '',
+              custom_joining_time: '',
+              bond_agreement: '',
+              branch: '',
+              graduate_year: new Date().getFullYear(),
               errors: {},
             });
             setTimeout(this.dismissMessages, 3000);
@@ -190,19 +240,39 @@ class AddApplicant extends Component {
   };
 
   handleBack = () => {
-    this.props.history.goBack();
+    // Navigate back to the list tab
+    if (this.props.onTabChange) {
+      this.props.onTabChange('list');
+    } else {
+      this.props.history.goBack();
+    }
   };
 
   render() {
+    const currentYear = moment().year();
+    const startYear = 1990;
+    const years = [];
+    for (let year = startYear; year <= currentYear; year++) {
+      years.push(year);
+    }
+
     const { fixNavbar } = this.props;
     const {
       fullname,
       email,
       phone,
+      alternate_phone,
+      dob,
+      merital_status,
       address,
       experience,
       skills,
       resume,
+      joining_timeframe,
+      custom_joining_time,
+      bond_agreement,
+      branch,
+      graduate_year,
       showSuccess,
       successMessage,
       showError,
@@ -221,7 +291,7 @@ class AddApplicant extends Component {
         />
         <form className="card" noValidate onSubmit={this.addApplicant}>
                     <div className="card-body">
-                      <h3 className="card-title">Add Applicant</h3>
+                      {/* <h3 className="card-title">Add Applicant</h3> */}
                       <div className="row">
                         <div className="col-sm-6 col-md-6">
                           <InputField
@@ -257,11 +327,52 @@ class AddApplicant extends Component {
                             onChange={this.handleChange}
                             placeholder="Enter Phone Number"
                             error={this.state.errors.phone}
-                            refInput={this.fieldRefs.phone}
                             maxLength="10"
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(/\D/g, '');
                             }}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Alternate Phone Number"
+                            name="alternate_phone"
+                            type="tel"
+                            value={alternate_phone}
+                            onChange={this.handleChange}
+                            placeholder="Enter Alternate Phone Number"
+                            error={this.state.errors.alternate_phone}
+                            maxLength="10"
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(/\D/g, '');
+                            }}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Date of Birth"
+                            name="dob"
+                            type="date"
+                            value={dob}
+                            onChange={this.handleChange}
+                            error={this.state.errors.dob}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Marital Status"
+                            name="merital_status"
+                            type="select"
+                            value={merital_status}
+                            onChange={this.handleChange}
+                            error={this.state.errors.merital_status}
+                            options={[
+                              // { value: '', label: 'Select Marital Status' },
+                              { value: 'single', label: 'Single' },
+                              { value: 'married', label: 'Married' },
+                              { value: 'divorced', label: 'Divorced' },
+                              { value: 'widowed', label: 'Widowed' },
+                            ]}
                           />
                         </div>
                         <div className="col-sm-6 col-md-6">
@@ -272,15 +383,7 @@ class AddApplicant extends Component {
                             value={experience}
                             onChange={this.handleChange}
                             error={this.state.errors.experience}
-                            refInput={this.fieldRefs.experience}
-                            options={[
-                              { value: '0-1', label: '0-1 years' },
-                              { value: '1-2', label: '1-2 years' },
-                              { value: '2-4', label: '2-4 years' },
-                              { value: '4-6', label: '4-6 years' },
-                              { value: '6-8', label: '6-8 years' },
-                              { value: '8+', label: '8+ years' },
-                            ]}
+                            options={this.experienceOptions()}
                           />
                         </div>
                         <div className="col-md-12">
@@ -292,17 +395,90 @@ class AddApplicant extends Component {
                             onChange={this.handleChange}
                             placeholder="Enter Complete Address"
                             error={this.state.errors.address}
-                            refInput={this.fieldRefs.address}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="How Soon Can You Join?"
+                            name="joining_timeframe"
+                            type="select"
+                            value={joining_timeframe}
+                            onChange={this.handleChange}
+                            error={this.state.errors.joining_timeframe}
+                            options={[
+                              { value: 'Same Week', label: 'Same Week' },
+                              { value: 'Next Week', label: 'Next Week' },
+                              { value: 'After 15 Days', label: 'After 15 Days' },
+                              { value: 'custom', label: 'Mention How Much' },
+                            ]}
+                          />
+                        </div>
+                        {joining_timeframe === 'custom' && (
+                          <div className="col-sm-6 col-md-6">
+                            <InputField
+                              label="Custom Joining Time"
+                              name="custom_joining_time"
+                              type="text"
+                              value={custom_joining_time}
+                              onChange={this.handleChange}
+                              placeholder="e.g., 1 month, 45 days"
+                              error={this.state.errors.custom_joining_time}
+                            />
+                          </div>
+                        )}
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Are You Willing to Sign 18 Month Bond?"
+                            name="bond_agreement"
+                            type="select"
+                            value={bond_agreement}
+                            onChange={this.handleChange}
+                            firstOption={false}
+                            options={[
+                              { value: '', label: 'Select Option' },
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                            ]}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Branch"
+                            name="branch"
+                            type="text"
+                            value={branch}
+                            onChange={this.handleChange}
+                            placeholder="Enter Branch"
+                            error={this.state.errors.branch}
+                          />
+                        </div>
+                        <div className="col-sm-6 col-md-6">
+                          <InputField
+                            label="Graduate Year"
+                            name="graduate_year"
+                            type="select"
+                            value={graduate_year}
+                            onChange={this.handleChange}
+                            error={this.state.errors.graduate_year}
+                            options={years.map(year => ({
+                              value: year,
+                              label: year.toString()
+                            }))}
                           />
                         </div>
                       </div>
 
                       {/* Technical Skills */}
                       <div className="row mb-4">
-                        <h5 className="w-100">Technical Skills</h5>
                         <div className="col-md-12">
                           <CheckboxGroup
-                            label=""
+                            label="Technical Skills"
                             options={skillOptions}
                             selected={skills}
                             onChange={this.handleSkillsChange}
@@ -316,7 +492,6 @@ class AddApplicant extends Component {
 
                       {/* Resume Upload */}
                       <div className="row mb-4">
-                        <h5 className="w-100">Documents</h5>
                         <div className="col-md-12">
                           <div className="form-group">
                             <label className="form-label">
@@ -327,7 +502,6 @@ class AddApplicant extends Component {
                               name="resume"
                               placeholder="Select your resume"
                               onChange={this.handleFileChange}
-                              refInput={this.fieldRefs.resume}
                               accept=".pdf,.doc,.docx,.txt,.rtf"
                             />
                             {this.state.errors.resume && (
@@ -346,19 +520,17 @@ class AddApplicant extends Component {
                         gap: "10px",
                       }}
                     >
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
+                      <Button
+                        label="Back"
                         onClick={this.handleBack}
-                      >
-                        Back
-                      </button>
-                      <button type="submit" className="btn btn-primary" disabled={this.state.ButtonLoading}>
-                        {this.state.ButtonLoading ? (
-                          <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                        ) : null}
-                        Add Applicant
-                      </button>
+                        className="btn-secondary"
+                      />
+                      <Button
+                        label="Add Applicant"
+                        type="submit"
+                        className="btn-primary"
+                        loading={this.state.ButtonLoading}
+                      />
                     </div>
                   </form>
       </>
