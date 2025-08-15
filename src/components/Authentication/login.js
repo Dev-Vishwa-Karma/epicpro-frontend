@@ -126,7 +126,6 @@ export default class Login extends Component {
 							<div className="card-title">Login to your account</div>
 							{loading && <div className="loader"></div>}
 							<div className="dimmer-content">
-								<form autoComplete='off'>
 									<div className="form-group">
 									<input
 										type="email"
@@ -136,7 +135,6 @@ export default class Login extends Component {
 										placeholder="Enter email"
 										value={email}
 										onChange={this.handleEmailChange}
-										autoComplete='new-email'
 									/>
 									{emailError && <div className="invalid-feedback">{emailErrorMessage}</div>}
 								</div>
@@ -150,7 +148,6 @@ export default class Login extends Component {
 										placeholder="Password"
 										value={password}
 										onChange={this.handlePasswordChange}
-										autoComplete='new-password'
 									/>
 									{passwordError && <div className="invalid-feedback">{passwordErrorMessage}</div>}
 								</div>
@@ -159,7 +156,6 @@ export default class Login extends Component {
 										Click to login
 									</button>
 								</div>
-								</form>
 							</div>
 						</div>
 					</div>
