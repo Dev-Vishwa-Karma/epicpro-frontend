@@ -35,6 +35,17 @@ class ApplicantViewModal extends Component {
 
     const skills = getSkills();
 
+    // Check if section has data
+    const hasContactInfo = applicant.email || applicant.address || applicant.phone || applicant.alternate_phone;
+    
+
+    const hasAdditionalInfo = applicant.dob || applicant.merital_status || 
+                             applicant.graduate_year || applicant.bond_agreement;
+    
+    const hasProfessionalDetails = applicant.experience_display || applicant.experience || 
+                                  applicant.branch || applicant.graduate_year || 
+                                  applicant.joining_timeframe;
+
     return (
       <div
         className="modal fade show"
@@ -49,7 +60,7 @@ class ApplicantViewModal extends Component {
       >
         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
           <div className="modal-content border-0 shadow-lg" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                        <div className="modal-header bg-transparent border-0 p-0 position-relative">
+            <div className="modal-header bg-transparent border-0 p-0 position-relative">
               <Button
                 label="x"
                 onClick={onClose}
@@ -57,7 +68,7 @@ class ApplicantViewModal extends Component {
               />
             </div>
             <div className="modal-body p-0">
-                <div className={`row no-gutters ${styles.guttopdata}`}>
+              <div className={`row no-gutters ${styles.guttopdata}`}>
                 {/* Left Main Content - Light Background */}
                 <div className="col-md-8" style={{ 
                   backgroundColor: 'white', 
@@ -66,65 +77,67 @@ class ApplicantViewModal extends Component {
                 }}>   
                   {/* Name*/}
                   <h1 style={{ 
-                      fontSize: '2.5rem', 
-                      fontWeight: 'bold', 
-                      color: '#7B7493',
-                      marginBottom: '5px',
-                      textTransform: 'uppercase',
-                      marginBottom: '15px',
-                    }}>
-                      {applicant.fullname || 'Applicant'}
-                    </h1>
+                    fontSize: '1.5rem', 
+                    fontWeight: 'bold', 
+                    color: '#7B7493',
+                    marginBottom: '5px',
+                    textTransform: 'uppercase',
+                    marginBottom: '15px',
+                  }}>
+                    {applicant.fullname || 'Applicant'}
+                  </h1>
 
-                  {/* Contact Section */}
-                  <div className="mb-4">
-                    <h6 style={{ 
-                      fontWeight: 'bold', 
-                      borderBottom: '2px solid #2C3E50', 
-                      paddingBottom: '5px',
-                      marginBottom: '15px',
-                      fontSize: '14px',
-                      textTransform: 'uppercase',
-                      color: '#2C3E50'
-                    }}>
-                      Contact
-                    </h6>
-                    <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
-                      {applicant.email && (
-                        <div className="mb-2">
-                          <i className="fa fa-envelope mr-2"></i>
-                          {applicant.email}
-                        </div>
-                      )}
-                      {applicant.address && (
-                        <div className="mb-2">
-                          <i className="fa fa-map-marker mr-2"></i>
-                          {applicant.address}
-                        </div>
-                      )}
-                      <div className='d-flex gap-4'>
-                        {applicant.phone && (
+                  {/* Contact Section - only show if has data */}
+                  {hasContactInfo && (
+                    <div className="mb-4">
+                      <h6 style={{ 
+                        fontWeight: 'bold', 
+                        borderBottom: '1px solid rgb(171, 172, 173)', 
+                        paddingBottom: '5px',
+                        marginBottom: '15px',
+                        fontSize: '14px',
+                        textTransform: 'uppercase',
+                        color: '#2C3E50'
+                      }}>
+                        Contact
+                      </h6>
+                      <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                        {applicant.email && (
                           <div className="mb-2">
-                            <i className="fa fa-phone mr-2"></i>
-                            {applicant.phone}
-                          </div>
-                        )} &nbsp;&nbsp;
-                        {applicant.alternate_phone && (
-                          <div className="mb-2">
-                            <i className="fa fa-phone mr-2"></i>
-                            {applicant.alternate_phone}
+                            <i className="fa fa-envelope mr-2"></i>
+                            {applicant.email}
                           </div>
                         )}
+                        {applicant.address && (
+                          <div className="mb-2">
+                            <i className="fa fa-map-marker mr-2"></i>
+                            {applicant.address}
+                          </div>
+                        )}
+                        <div className='d-flex gap-4'>
+                          {applicant.phone && (
+                            <div className="mb-2">
+                              <i className="fa fa-phone mr-2"></i>
+                              {applicant.phone}
+                            </div>
+                          )} &nbsp;&nbsp;
+                          {applicant.alternate_phone && (
+                            <div className="mb-2">
+                              <i className="fa fa-phone mr-2"></i>
+                              {applicant.alternate_phone}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Skills Section */}
+                  {/* Skills Section - only show if has skills */}
                   {skills.length > 0 && (
                     <div className="mb-4">
                       <h6 style={{ 
                         fontWeight: 'bold', 
-                        borderBottom: '2px solid #2C3E50', 
+                        borderBottom: '1px solid rgb(171, 172, 173)', 
                         paddingBottom: '5px',
                         marginBottom: '15px',
                         fontSize: '14px',
@@ -146,7 +159,6 @@ class ApplicantViewModal extends Component {
                             display: 'flex',
                             alignItems: 'center'
                           }}>
-                          
                             {skill}
                           </div>
                         ))}
@@ -154,54 +166,56 @@ class ApplicantViewModal extends Component {
                     </div>
                   )}
 
-                  {/* Additional Info Section */}
-                  <div className="mb-4">
-                    <h6 style={{ 
-                      fontWeight: 'bold', 
-                      borderBottom: '2px solid #2C3E50', 
-                      paddingBottom: '5px',
-                      marginBottom: '15px',
-                      fontSize: '14px',
-                      textTransform: 'uppercase',
-                      color: '#2C3E50'
-                    }}>
-                      Additional Info
-                    </h6>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', fontSize: '14px', lineHeight: '1.6' }}>
-                      <div style={{ width: '50%', marginBottom: '8px' }}>
+                  {/* Additional Info Section - only show if has data */}
+                  {hasAdditionalInfo && (
+                    <div className="mb-4">
+                      <h6 style={{ 
+                        fontWeight: 'bold', 
+                        borderBottom: '1px solid rgb(171, 172, 173)', 
+                        paddingBottom: '5px',
+                        marginBottom: '15px',
+                        fontSize: '14px',
+                        textTransform: 'uppercase',
+                        color: '#2C3E50'
+                      }}>
+                        Additional Info
+                      </h6>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', fontSize: '14px', lineHeight: '1.6' }}>
                         {applicant.dob && (
-                          <div className="mb-2">
-                            <i className="fas fa-birthday-cake mr-2"></i>
-                            <strong>DOB:</strong> {new Date(applicant.dob).toLocaleDateString()}
+                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                            <div className="mb-2">
+                              <i className="fas fa-birthday-cake mr-2"></i>
+                              <strong>DOB:</strong> {new Date(applicant.dob).toLocaleDateString()}
+                            </div>
                           </div>
                         )}
-                      </div>
-                      <div style={{ width: '50%', marginBottom: '8px' }}>
                         {applicant.merital_status && (
-                          <div className="mb-2">
-                            <i className="fas fa-heart mr-2"></i>
-                            <strong>Status:</strong> {applicant.merital_status}
+                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                            <div className="mb-2">
+                              <i className="fas fa-heart mr-2"></i>
+                              <strong>Status:</strong> {applicant.merital_status}
+                            </div>
                           </div>
                         )}
-                      </div>
-                      <div style={{ width: '50%', marginBottom: '8px' }}>
                         {applicant.graduate_year && (
-                          <div className="mb-2">
-                            <i className="fas fa-graduation-cap mr-2"></i>
-                            <strong>Graduated:</strong> {applicant.graduate_year}
+                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                            <div className="mb-2">
+                              <i className="fas fa-graduation-cap mr-2"></i>
+                              <strong>Graduated:</strong> {applicant.graduate_year}
+                            </div>
                           </div>
                         )}
-                      </div>
-                      <div style={{ width: '50%', marginBottom: '8px' }}>
                         {applicant.bond_agreement && (
-                          <div className="mb-2">
-                            <i className="fas fa-file-contract mr-2"></i>
-                            <strong>Bond:</strong> {applicant.bond_agreement.charAt(0).toUpperCase() + applicant.bond_agreement.slice(1)}
+                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                            <div className="mb-2">
+                              <i className="fas fa-file-contract mr-2"></i>
+                              <strong>Bond:</strong> {applicant.bond_agreement.charAt(0).toUpperCase() + applicant.bond_agreement.slice(1)}
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Right Sidebar - Dark Background */}
@@ -215,10 +229,10 @@ class ApplicantViewModal extends Component {
                     <div className="text-center mb-4">
                       <div className={`avatar avatar-xxl rounded-circle ${getAvatarColor(applicant.fullname)} d-inline-flex align-items-center justify-content-center text-white`}
                         style={{ width: '120px', height: '120px', fontSize: '2.5rem' }}>
-                        {applicant.fullname ? applicant.fullname .split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase(): '?'}
+                        {applicant.fullname ? applicant.fullname.split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase(): '?'}
                       </div>
                     </div>
-                      <span
+                    <span
                       className="badge badge-pill"
                       style={{
                         ...getStatusColor(applicant.status),
@@ -232,47 +246,49 @@ class ApplicantViewModal extends Component {
                     </span>
                   </div>
 
-                  {/* Professional Details Section */}
-                  <div className="mb-4">
-                    <h6 style={{ 
-                      fontWeight: 'bold', 
-                      borderBottom: '2px solid white', 
-                      paddingBottom: '5px',
-                      marginBottom: '15px',
-                      fontSize: '14px',
-                      textTransform: 'uppercase'
-                    }}>
-                      Professional Details
-                    </h6>
-                    <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
-                      {(applicant.experience_display || applicant.experience) && (
-                        <div className="mb-2">
-                          <strong>Experience:</strong> {applicant.experience_display || `${applicant.experience} years`}
-                        </div>
-                      )}
-                      {applicant.branch && (
-                        <div className="mb-2">
-                          <strong>Branch:</strong> {applicant.branch}
-                        </div>
-                      )}
-                      {applicant.graduate_year && (
-                        <div className="mb-2">
-                          <strong>Graduate Year:</strong> {applicant.graduate_year}
-                        </div>
-                      )}
-                      {applicant.joining_timeframe && (
-                        <div className="mb-2">
-                          <strong>Joining Timeframe:</strong> {applicant.joining_timeframe}
-                        </div>
-                      )}
+                  {/* Professional Details Section - only show if has data */}
+                  {hasProfessionalDetails && (
+                    <div className="mb-4">
+                      <h6 style={{ 
+                        fontWeight: 'bold', 
+                        borderBottom: '1px solid white', 
+                        paddingBottom: '5px',
+                        marginBottom: '15px',
+                        fontSize: '14px',
+                        textTransform: 'uppercase'
+                      }}>
+                        Professional Details
+                      </h6>
+                      <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                        {(applicant.experience_display || applicant.experience) && (
+                          <div className="mb-2">
+                            <strong>Experience:</strong> {applicant.experience_display || `${applicant.experience} years`}
+                          </div>
+                        )}
+                        {applicant.branch && (
+                          <div className="mb-2">
+                            <strong>Branch:</strong> {applicant.branch}
+                          </div>
+                        )}
+                        {applicant.graduate_year && (
+                          <div className="mb-2">
+                            <strong>Graduate Year:</strong> {applicant.graduate_year}
+                          </div>
+                        )}
+                        {applicant.joining_timeframe && (
+                          <div className="mb-2">
+                            <strong>Joining Timeframe:</strong> {applicant.joining_timeframe}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Application Details Section */}
                   <div className="mb-4">
                     <h6 style={{ 
                       fontWeight: 'bold', 
-                      borderBottom: '2px solid white', 
+                      borderBottom: '1px solid white', 
                       paddingBottom: '5px',
                       marginBottom: '15px',
                       fontSize: '14px',
