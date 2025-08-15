@@ -141,8 +141,8 @@ class ApplicantViewModal extends Component {
                           <div className="form-group mb-0">
                             <label className="font-weight-bold text-muted small">Marital Status</label>
                             <p className="form-control-plaintext text-dark pb-2 mb-0">
-                              {applicant.merital_status ? 
-                                applicant.merital_status.charAt(0).toUpperCase() + applicant.merital_status.slice(1) : 
+                              {applicant.marital_status ? 
+                                applicant.marital_status.charAt(0).toUpperCase() + applicant.marital_status.slice(1) : 
                                 'N/A'}
                             </p>
                           </div>

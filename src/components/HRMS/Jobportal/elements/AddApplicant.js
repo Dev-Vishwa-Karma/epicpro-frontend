@@ -37,7 +37,7 @@ class AddApplicant extends Component {
       phone: '',
       alternate_phone: '',
       dob: '',
-      merital_status: '',
+      marital_status: '',
       address: '',
       experience: '',
       skills: [],
@@ -153,7 +153,7 @@ class AddApplicant extends Component {
       phone,
       alternate_phone,
       dob,
-      merital_status,
+      marital_status,
       address,
       experience,
       skills,
@@ -182,7 +182,7 @@ class AddApplicant extends Component {
         phone: phone,
         alternate_phone: alternate_phone,
         dob: dob,
-        merital_status: merital_status,
+        marital_status: marital_status,
         address: address,
         experience: experience,
         skills: JSON.stringify(skills),
@@ -208,7 +208,7 @@ class AddApplicant extends Component {
               phone: '',
               alternate_phone: '',
               dob: '',
-              merital_status: '',
+              marital_status: '',
               address: '',
               experience: '',
               skills: [],
@@ -263,7 +263,7 @@ class AddApplicant extends Component {
       phone,
       alternate_phone,
       dob,
-      merital_status,
+      marital_status,
       address,
       experience,
       skills,
@@ -361,11 +361,11 @@ class AddApplicant extends Component {
                         <div className="col-sm-6 col-md-6">
                           <InputField
                             label="Marital Status"
-                            name="merital_status"
+                            name="marital_status"
                             type="select"
-                            value={merital_status}
+                            value={marital_status}
                             onChange={this.handleChange}
-                            error={this.state.errors.merital_status}
+                            error={this.state.errors.marital_status}
                             options={[
                               // { value: '', label: 'Select Marital Status' },
                               { value: 'single', label: 'Single' },
