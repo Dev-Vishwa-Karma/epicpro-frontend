@@ -222,7 +222,11 @@ class AddApplicant extends Component {
             });
             setTimeout(this.dismissMessages, 3000);
           } else {
-            throw new Error(data.data?.message || 'Failed to add applicant');
+            this.setState({
+              ButtonLoading: false,
+              showError: true,
+              errorMessage: data.message || 'An error occurred while adding the applicant'
+            });
           }
         })
         .catch(error => {
