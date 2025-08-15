@@ -188,37 +188,48 @@ class ApplicantTable extends Component {
                           <div className="">
                             <div>
                               <div className="font-15">{applicant.fullname} 
-                                   <span className='ml-2'>
-                                   {applicant.source === 'sync' && (
-                                <i
-                                  className="fa fa-refresh text-info"
-                                  data-toggle="tooltip"
-                                  data-placement="top"
-                                  title="Synced"
-                                ></i>
-                              )}
-                              {applicant.source === 'admin' && (
-                                <i
-                                  className="fa fa-user text-success"
-                                  data-toggle="tooltip"
-                                  data-placement="top"
-                                  title="Added by admin"
-                                ></i>
-                              )}
-                                   </span>
+                                <span className='ml-2'>
+                                  {applicant.source === 'sync' && (
+                                    <i
+                                      className="fa fa-refresh text-info"
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      title="Synced"
+                                      style={{ cursor: 'pointer' }}
+                                    ></i>
+                                  )}
+                                  {applicant.source === 'admin' && (
+                                    <i
+                                      className="fa fa-user text-success"
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      title="Added by admin"
+                                      style={{ cursor: 'pointer' }}
+                                    ></i>
+                                  )}
+                                  {applicant.source === 'referral' && (
+                                    <i
+                                      className="fa fa-globe text-warning"
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      title="referral form"
+                                      style={{ cursor: 'pointer' }}
+                                    ></i>
+                                  )}
+                                </span>
                               </div>
                               <span className="text-muted">{applicant.email}</span>
                             </div>
                           </div>
                         </td>
-                        <td>{applicant.phone}</td>
+                        <td style={{textAlign:'center'}}>{applicant.phone || "--"}</td>
                         <td>{shortformatDate(applicant.created_at)}</td>
-                        <td>{applicant.experience_display || applicant.experience || "N/A"}</td>
+                        <td style={{textAlign:'center'}}>{applicant.experience_display || applicant.experience || "--"}</td>
                         <td>
                           <div >
                           <span>
                            {applicant.status === 'rejected' && applicant.reject_reason && (
-                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top">
+                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer' }}>
                                 <p style={{color:'red', fontSize:'10px'}}>Reject reason</p>
                               </span>
                             )}
@@ -229,7 +240,8 @@ class ApplicantTable extends Component {
                               value={applicant.status}
                               style={{                                                                    
                                   ...ApplicantTable.getStatusColor(applicant.status),
-                                  ...(applicant.status === 'rejected' ? { marginTop: '-10px' } : {})
+                                  ...(applicant.status === 'rejected' ? { marginTop: '-10px' } : {}),
+                                  cursor: 'pointer'
                               }}
                               onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
                               options={[                                                    

@@ -37,7 +37,7 @@ class AddApplicant extends Component {
       phone: '',
       alternate_phone: '',
       dob: '',
-      marital_status: '',
+      merital_status: '',
       address: '',
       experience: '',
       skills: [],
@@ -153,7 +153,7 @@ class AddApplicant extends Component {
       phone,
       alternate_phone,
       dob,
-      marital_status,
+      merital_status,
       address,
       experience,
       skills,
@@ -182,7 +182,7 @@ class AddApplicant extends Component {
         phone: phone,
         alternate_phone: alternate_phone,
         dob: dob,
-        marital_status: marital_status,
+        merital_status: merital_status,
         address: address,
         experience: experience,
         skills: JSON.stringify(skills),
@@ -208,7 +208,7 @@ class AddApplicant extends Component {
               phone: '',
               alternate_phone: '',
               dob: '',
-              marital_status: '',
+              merital_status: '',
               address: '',
               experience: '',
               skills: [],
@@ -222,11 +222,7 @@ class AddApplicant extends Component {
             });
             setTimeout(this.dismissMessages, 3000);
           } else {
-            this.setState({
-              ButtonLoading: false,
-              showError: true,
-              errorMessage: data.message || 'An error occurred while adding the applicant'
-            });
+            throw new Error(data.data?.message || 'Failed to add applicant');
           }
         })
         .catch(error => {
@@ -267,7 +263,7 @@ class AddApplicant extends Component {
       phone,
       alternate_phone,
       dob,
-      marital_status,
+      merital_status,
       address,
       experience,
       skills,
@@ -365,11 +361,11 @@ class AddApplicant extends Component {
                         <div className="col-sm-6 col-md-6">
                           <InputField
                             label="Marital Status"
-                            name="marital_status"
+                            name="merital_status"
                             type="select"
-                            value={marital_status}
+                            value={merital_status}
                             onChange={this.handleChange}
-                            error={this.state.errors.marital_status}
+                            error={this.state.errors.merital_status}
                             options={[
                               // { value: '', label: 'Select Marital Status' },
                               { value: 'single', label: 'Single' },

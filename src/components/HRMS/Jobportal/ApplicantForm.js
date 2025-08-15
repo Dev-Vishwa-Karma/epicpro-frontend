@@ -34,7 +34,7 @@ const initialState = {
   phone: '', 
   alternate_phone: '',
   dob: '',
-  marital_status: '',
+  merital_status: '',
   address: '', 
   experience: '', 
   skills: [], 
@@ -68,7 +68,7 @@ class ApplicantForm extends Component {
       phone,
       alternate_phone,
       dob,
-      marital_status,
+      merital_status,
       address,
       experience,
       skills,
@@ -88,7 +88,7 @@ class ApplicantForm extends Component {
       phone: phone,
       alternate_phone: alternate_phone,
       dob: dob,
-      marital_status: marital_status,
+      merital_status: merital_status,
       address: address,
       experience: experience,
       skills: JSON.stringify(skills),
@@ -98,7 +98,7 @@ class ApplicantForm extends Component {
       branch: branch,
       graduate_year: graduate_year
     }
-    data.source = 'public';
+    data.source = 'referral';
     appendDataToFormData(formData, data)
 
     getService.addCall('applicants.php', 'add', formData)
@@ -221,7 +221,7 @@ class ApplicantForm extends Component {
       phone, 
       alternate_phone,
       dob,
-      marital_status,                                         
+      merital_status,                                         
       address, 
       skills, 
       experience,                         
@@ -324,11 +324,11 @@ class ApplicantForm extends Component {
                     <div className="col-md-6">
                       <InputField
                         label="Marital Status"
-                        name="marital_status"
+                        name="merital_status"
                         type="select"
-                        value={marital_status}
+                        value={merital_status}
                         onChange={this.handleChange}
-                        error={errors.marital_status}
+                        error={errors.merital_status}
                         options={[
                           { value: '', label: 'Select Marital Status' },
                           { value: 'single', label: 'Single' },
