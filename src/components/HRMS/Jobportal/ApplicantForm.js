@@ -135,6 +135,27 @@ class ApplicantForm extends Component {
     this.setState({ graduate_year: parseInt(e.target.value) });
   };
 
+  experienceOptions = () => {
+    let opts = [];
+    for (let i = 0; i <= 8; i++) {
+      let label = '';
+      if (i === 0) {
+        label = 'Fresher';
+      } else if (i === 8) {
+        label = '8+ years';
+      } else {
+        label = `${i} year${i > 1 ? 's' : ''}`;
+      }
+      opts.push({
+        label: label,
+        value: i.toString()
+      });
+    }
+    console.log('opts',opts)
+    return opts;
+    
+  };
+
   handleSkillsChange = (e) => {
     const { value, checked } = e.target;
     const { skills } = this.state;
@@ -455,20 +476,7 @@ class ApplicantForm extends Component {
                           value={experience}
                           onChange={this.handleChange}
                           error={errors.experience}
-                          options={(() => {
-                            const options = [{ value: '', label: 'Select Experience' }];
-                            for (let i = 0; i <= 10; i++) {
-                              if (i === 0) {
-                                options.push({ value: '0.6', label: '0.6' });
-                              } else {
-                                options.push({ value: i.toString(), label: i.toString() });
-                                if (i < 10) {
-                                  options.push({ value: (i + 0.6).toString(), label: (i + 0.6).toString() });
-                                }
-                              }
-                            }
-                            return options;
-                          })()}
+                          options={this.experienceOptions()}
                         />
                     </div>
                   </div>

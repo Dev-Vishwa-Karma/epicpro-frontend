@@ -73,6 +73,27 @@ class AddApplicant extends Component {
     handleYearChange = (e) => {
     this.setState({ graduate_year: e.target.value });
     };
+
+  experienceOptions = () => {
+    let opts = [];
+    for (let i = 0; i <= 8; i++) {
+      let label = '';
+      if (i === 0) {
+        label = 'Fresher';
+      } else if (i === 8) {
+        label = '8+ years';
+      } else {
+        label = `${i} year${i > 1 ? 's' : ''}`;
+      }
+      opts.push({
+        label: label,
+        value: i.toString()
+      });
+    }
+    console.log('opts',opts)
+    return opts;
+    
+  };
   
   handleChange = (e) => {
     const { name, value } = e.target;
@@ -362,20 +383,7 @@ class AddApplicant extends Component {
                             value={experience}
                             onChange={this.handleChange}
                             error={this.state.errors.experience}
-                            options={(() => {
-                              const options = [];
-                              for (let i = 0; i <= 10; i++) {
-                                if (i === 0) {
-                                  options.push({ value: '0.6', label: '0.6' });
-                                } else {
-                                  options.push({ value: i.toString(), label: i.toString() });
-                                  if (i < 10) {
-                                    options.push({ value: (i + 0.6).toString(), label: (i + 0.6).toString() });
-                                  }
-                                }
-                              }
-                              return options;
-                            })()}
+                            options={this.experienceOptions()}
                           />
                         </div>
                         <div className="col-md-12">
