@@ -36,21 +36,21 @@ const Avatar = ({
     <img
       src={`${process.env.REACT_APP_API_URL}/${profile}`}
       alt={alt || `${first_name} ${last_name}`}
-      title={alt || `${first_name} ${last_name}`}
+      title={alt || `${first_name} ${last_name}`}                                                                                 
       style={avatarStyle}
       className={className}
       onError={onError || (e => e.target.src = '/assets/images/sm/avatar2.jpg')}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-    />
+    />                                                                                                                                                                                                                                                                                                                                      
   ) : (
     <span
       className={className}
       style={{
         ...avatarStyle,
         display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: 'center',                                 
+        justifyContent: 'center',           
         backgroundColor: '#C5C4C8',
         color: '#fff',
         fontWeight: '600',
