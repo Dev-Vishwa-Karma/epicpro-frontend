@@ -118,7 +118,7 @@ class Activities extends Component {
   };
 
 
-  openbreakReasonModal = () => {
+  openBreakReasonModal = () => {
     if (!this.props.punchIn) {
       this.setState({
         errorMessage: "You need to Punch In first",
