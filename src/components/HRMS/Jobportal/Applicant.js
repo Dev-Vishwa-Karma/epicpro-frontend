@@ -39,7 +39,7 @@ class Applicant extends Component {
     this.setState({ loading: true });
     const {search, status, order, currentPage, pageSize} = this.state;
     getService.getCall('applicants.php', {
-      action: 'get',
+      action: 'view',
       search: search,
       status: status,
       order: order,
