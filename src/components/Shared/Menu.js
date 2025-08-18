@@ -228,6 +228,11 @@ class Menu extends Component {
 						"id": 41,
 						"label": "Notifications",
 						"to": "/notifications"
+					},
+					{
+						"id": 44,
+						"label": "Referral",
+						"to": "/job-application"
 					}
 				]
 			},

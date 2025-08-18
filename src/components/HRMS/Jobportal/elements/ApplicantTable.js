@@ -53,11 +53,9 @@ class ApplicantTable extends Component {
   handleStatusChange = (applicantId, newStatus, applicantName) => {
     console.log('handleStatusChange called:', { applicantId, newStatus, applicantName });
     if (newStatus === 'rejected') {
-      console.log('Opening rejection modal');
       this.setState({ showRejectModal: true, rejectReason: '', rejectingForApplicant: { id: applicantId, name: applicantName } });
       return;
     }
-    console.log('Opening confirmation modal');
     this.setState({
       showConfirmModal: true,
       pendingStatusChange: {
@@ -208,7 +206,7 @@ class ApplicantTable extends Component {
                                   )}
                                   {applicant.source === 'referral' && (
                                     <i
-                                      className={`fa fa-globe text-warning ${styles.referralIcon}`}
+                                      className={`fa fa-user-plus text-warning ${styles.referralIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
                                       title="referral form"
