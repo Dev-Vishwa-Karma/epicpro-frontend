@@ -9,6 +9,7 @@ import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
 import { shortformatDate } from '../../../../utils';
 import styles from './applicant.module.css';
+import Avatar from '../../../common/Avatar';
 class ApplicantTable extends Component {
   static getStatusColor(status) {
     switch (status) {
@@ -179,9 +180,16 @@ class ApplicantTable extends Component {
                     applicants.map((applicant) => (
                       <tr key={applicant.id}>
                         <td>
-                          <span className="avatar avatar-pink" data-toggle="tooltip" data-placement="top" data-original-title={applicant.fullname}>
-                          {applicant.fullname ? applicant.fullname .split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase(): '?'}
-                          </span>
+                          <Avatar
+                            first_name={applicant.fullname ? applicant.fullname.split(' ')[0] : ''}
+                            last_name={applicant.fullname ? applicant.fullname.split(' ')[1] : ''}
+                            size={40}
+                            className="avatar avatar-blue add-space"
+                            style={{ objectFit: 'cover' }}
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title={`${applicant.fullname ? applicant.fullname.split(' ')[0] : ''} ${applicant.fullname ? applicant.fullname.split(' ')[1] : ''}`}
+                          />
                         </td>
                         <td>
                           <div className="">

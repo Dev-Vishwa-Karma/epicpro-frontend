@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Button from '../../../common/formInputs/Button';
 import styles from './applicant.module.css';
 import {getService} from '../../../../services/getService';
+import Avatar from '../../../common/Avatar';
 
 class ApplicantViewModal extends Component {
   state = {
@@ -303,26 +304,17 @@ class ApplicantViewModal extends Component {
                   {/* Name and Title */}
                   <div className="mb-4">
                     <div className="text-center mb-4">
-                      <div
-                        className={`avatar avatar-xxl rounded-circle ${getAvatarColor(
-                          applicant.fullname
-                        )} d-inline-flex align-items-center justify-content-center text-white`}
-                        style={{
-                          width: "120px",
-                          height: "120px",
-                          fontSize: "2.5rem",
-                        }}
-                      >
-                        {applicant.fullname
-                          ? applicant.fullname
-                              .split(" ")
-                              .filter(Boolean)
-                              .slice(0, 2)
-                              .map((word) => word[0])
-                              .join("")
-                              .toUpperCase()
-                          : "?"}
-                      </div>
+                      <Avatar
+                          first_name={applicant.fullname ? applicant.fullname.split(" ")[0] : ""}
+                          last_name={applicant.fullname ? applicant.fullname.split(" ")[1] : ""}
+                          size={120}
+                          style={{
+                            ...getStatusColor(applicant.status),
+                            fontSize: "2.5rem",
+                            objectFit: "cover",
+                          }}
+                          title={`${applicant.fullname || ''}`}
+                      />
                     </div>
                     <span
                       className="badge badge-pill"

@@ -3,18 +3,21 @@ import React from 'react';
 const Avatar = ({ 
   profile, 
   first_name, 
-  last_name, 
+  last_name = '', 
   alt = '', 
   size = 35, 
   borderColor = '#fff', 
   borderRadius = '50%', 
   objectFit = 'cover', 
+  backgroundColor= '#C5C4C8',
+  color= '#fff',
   onError, 
   onMouseEnter, 
   onMouseLeave, 
   style, 
   className 
 }) => {
+  console.log(first_name,last_name)
   // Fallback to initials if no profile image is available
   const getInitials = (firstName, lastName) => {
     return `${firstName?.charAt(0).toUpperCase() || ''}${lastName?.charAt(0).toUpperCase() || ''}`;
@@ -24,6 +27,8 @@ const Avatar = ({
     width: size,
     height: size,
     borderRadius,
+    backgroundColor,
+    color,
     objectFit,
     border: `2px solid ${borderColor}`,
     transition: 'z-index 0.2s, transform 0.25s cubic-bezier(0.4,0,0.2,1)',
@@ -51,8 +56,6 @@ const Avatar = ({
         display: 'inline-flex',
         alignItems: 'center',                                 
         justifyContent: 'center',           
-        backgroundColor: '#C5C4C8',
-        color: '#fff',
         fontWeight: '600',
         textTransform: 'uppercase',
       }}
