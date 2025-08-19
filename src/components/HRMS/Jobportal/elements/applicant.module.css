@@ -41,6 +41,7 @@
 
 .syncIcon {
   cursor: pointer;
+  color: rgba(41,43,48,0.5) !important;
 }
 
 .adminIcon {
@@ -139,7 +140,6 @@
     justify-content: center !important;
     background-color: white;
     padding: 4px;
-    color: black !important;
     border-radius: 100%;
 }
 

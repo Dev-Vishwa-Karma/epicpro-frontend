@@ -104,7 +104,7 @@ class ApplicantViewModal extends Component {
               <Button
                 label="x"
                 onClick={onClose}
-                className={`position-absolute ${styles.topdata}`}
+                className={`position-absolute text-primary ${styles.topdata}`}
               />
             </div>
             <div className="modal-body p-0">
@@ -260,7 +260,7 @@ class ApplicantViewModal extends Component {
                         {applicant.marital_status && (
                           <div style={{ width: "50%", marginBottom: "8px" }}>
                             <div className="mb-2">
-                              <strong>MaritalS tatus:</strong>{" "}
+                              <strong>MaritalS Status:</strong>{" "}
                               {applicant.marital_status}
                             </div>
                           </div>

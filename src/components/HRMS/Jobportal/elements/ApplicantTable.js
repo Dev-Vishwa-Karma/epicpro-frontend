@@ -6,7 +6,6 @@ import ApplicantViewModal from './ApplicantViewModal';
 import ConfirmModal from '../../../common/ConfirmModal';
 import RejectModal from './RejectModal';
 import InputField from '../../../common/formInputs/InputField';
-import Button from '../../../common/formInputs/Button';
 import { shortformatDate } from '../../../../utils';
 import styles from './applicant.module.css';
 import Avatar from '../../../common/Avatar';
@@ -35,62 +34,7 @@ class ApplicantTable extends Component {
       rejectReason: '',
       rejectingForApplicant: null,
     };
-    this.tableContainerRef = React.createRef();
   }
-
-  componentDidMount() {
-    this.initTooltips();
-  }
-
-  componentDidUpdate() {
-    this.initTooltips();
-  }
-
-  initTooltips = () => {
-    const $ = window.$ || window.jQuery;
-    if ($ && typeof $.fn.tooltip === 'function') {
-      const $container = this.tableContainerRef.current ? $(this.tableContainerRef.current) : $(document.body);
-      const $tooltipped = $container.find('[data-toggle="tooltip"]');
-      $tooltipped.tooltip('dispose');
-      $tooltipped.tooltip({ html: true, container: 'body' });
-    }
-  };
-
-  getSourceTooltip = (applicant) => {
-    const createdAt = applicant.created_at ? shortformatDate(applicant.created_at) : null;
-    const updatedAt = applicant.updated_at ? shortformatDate(applicant.updated_at) : null;
-
-    if (applicant.source === 'sync') {
-      return (
-        `<div>` +
-          `<div><strong>Synced applicant</strong></div>` +
-          (updatedAt ? `<div>Last update: ${updatedAt}</div>` : (createdAt ? `<div>Synced on: ${createdAt}</div>` : '')) +
-        `</div>`
-      );
-    }
-
-    if (applicant.source === 'admin') {
-      return (
-        `<div>` +
-          `<div><strong>Added by admin</strong></div>` +
-          (createdAt ? `<div>On: ${createdAt}</div>` : '') +
-        `</div>`
-      );
-    }
-
-    if (applicant.source === 'referral') {
-      const refBy = applicant.employee_name ? applicant.employee_name : 'Employee';
-      const refId = applicant.employee_id ? ` (ID: ${applicant.employee_id})` : '';
-      return (
-        `<div>` +
-          `<div>Referred by: ${refBy}${refId}</div>` +
-          (createdAt ? `<div>On: ${createdAt}</div>` : '') +
-        `</div>`
-      );
-    }
-
-    return `<div><strong>Applicant</strong></div>`;
-  };
 
   handleViewApplicant = (applicant) => {
     this.setState({
@@ -189,7 +133,7 @@ class ApplicantTable extends Component {
     const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus, showRejectModal, rejectReason, rejectingForApplicant } = this.state;
 
     return (
-      <div className="col-lg-12 col-md-12 col-sm-12" ref={this.tableContainerRef}>
+      <div className="col-lg-12 col-md-12 col-sm-12">
         <div className="card">
           <div className="card-header d-flex align-items-center justify-content-between">
           </div>
@@ -242,11 +186,10 @@ class ApplicantTable extends Component {
                                 <span className='ml-2'>
                                   {applicant.source === 'sync' && (
                                     <i
-                                      className={`fa fa-refresh text-secondary ${styles.syncIcon}`}
+                                      className={`fa fa-refresh ${styles.syncIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
-                                      data-html="true"
-                                      title={this.getSourceTooltip(applicant)}
+                                      title="Synced"
                                     ></i>
                                   )}
                                   {applicant.source === 'admin' && (
@@ -254,8 +197,7 @@ class ApplicantTable extends Component {
                                       className={`fa fa-user text-success ${styles.adminIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
-                                      data-html="true"
-                                      title={this.getSourceTooltip(applicant)}
+                                      title="Added by admin"
                                     ></i>
                                   )}
                                   {applicant.source === 'referral' && (
@@ -263,8 +205,7 @@ class ApplicantTable extends Component {
                                       className={`fa fa-user-plus text-warning ${styles.referralIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
-                                      data-html="true"
-                                      title={this.getSourceTooltip(applicant)}
+                                      title="referral form"
                                     ></i>
                                   )}
                                 </span>
@@ -297,7 +238,7 @@ class ApplicantTable extends Component {
                             />
                             <span>
                            {applicant.status === 'rejected' && applicant.reject_reason && (
-                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer' }}>
+                              <span  title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer'}}>
                                 <p className={styles.rejectReasonText}>Reject reason</p>
                               </span>
                             )}

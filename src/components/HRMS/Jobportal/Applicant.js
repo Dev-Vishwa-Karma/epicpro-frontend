@@ -9,7 +9,7 @@ import AddApplicant from './elements/AddApplicant'
 import { appendDataToFormData } from '../../../utils';
 import DuplicateDecisionModal from './elements/DuplicateDecisionModal';
 import Button from '../../common/formInputs/Button';
-
+import { shortformatDate } from '../../../utils';
 
 class Applicant extends Component {
   state = {
@@ -39,6 +39,7 @@ class Applicant extends Component {
   componentDidMount() {
     this.fetchApplicants();
   }
+
 
   fetchApplicants = () => {
     this.setState({ loading: true });
@@ -280,16 +281,18 @@ class Applicant extends Component {
                   </a>
                 </li>
               </ul>
-              <Button
-                label={isSyncing ? "Syncing..." : "Sync"}
-                onClick={this.handleSync}
-                disabled={isSyncing}
-                className="btn-sm btn-primary"
-                title="Sync third-party applicants"
-                icon={isSyncing ? "" : "fa fa-refresh"}
-                iconStyle={{ marginRight: isSyncing ? '0' : '8px' }}
-                loading={isSyncing}
-              />
+              <div className="d-flex flex-column align-items-end">
+                
+                <Button
+                  label={isSyncing ? "Syncing..." : `Sync`}
+                  onClick={this.handleSync}
+                  disabled={isSyncing}
+                  className="btn-sm btn-primary"
+                  icon={isSyncing ? "" : "fa fa-refresh"}
+                  iconStyle={{ marginRight: isSyncing ? '0' : '8px' }}
+                  loading={isSyncing}
+                />
+              </div>
             </div>
           </div>
         </div>
