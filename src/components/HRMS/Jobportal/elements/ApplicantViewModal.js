@@ -115,18 +115,12 @@ class ApplicantViewModal extends Component {
                           </div>
                         )}
                         <div className='d-flex gap-4'>
-                          {applicant.phone && (
-                            <div className="mb-2">
-                              <i className="fa fa-phone mr-2"></i>
-                              {applicant.phone}
-                            </div>
-                          )} &nbsp;&nbsp;
-                          {applicant.alternate_phone && (
-                            <div className="mb-2">
-                              <i className="fa fa-phone mr-2"></i>
-                              {applicant.alternate_phone}
-                            </div>
-                          )}
+                        {applicant.phone && (
+                          <div className="mb-2">
+                            <i className="fa fa-phone mr-2"></i>
+                            {applicant.phone}  {applicant.alternate_phone && `| ${applicant.alternate_phone}`}
+                          </div>
+                        )}
                         </div>
                       </div>
                     </div>
