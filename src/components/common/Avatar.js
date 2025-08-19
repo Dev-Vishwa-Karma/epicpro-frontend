@@ -17,7 +17,6 @@ const Avatar = ({
   style, 
   className 
 }) => {
-  console.log(first_name,last_name)
   // Fallback to initials if no profile image is available
   const getInitials = (firstName, lastName) => {
     return `${firstName?.charAt(0).toUpperCase() || ''}${lastName?.charAt(0).toUpperCase() || ''}`;
