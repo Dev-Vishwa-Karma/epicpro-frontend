@@ -3,6 +3,7 @@ import Button from '../../../common/formInputs/Button';
 import styles from './applicant.module.css';
 import {getService} from '../../../../services/getService';
 import Avatar from '../../../common/Avatar';
+import { shortformatDate } from '../../../../utils';
 
 class ApplicantViewModal extends Component {
   state = {
@@ -72,7 +73,7 @@ class ApplicantViewModal extends Component {
     const hasContactInfo = applicant.email || applicant.address || applicant.phone || applicant.alternate_phone;
     
 
-    const hasAdditionalInfo = applicant.dob || applicant.merital_status || 
+    const hasAdditionalInfo = applicant.dob || applicant.marital_status || 
                              applicant.graduate_year || applicant.bond_agreement;
     
     const hasProfessionalDetails = applicant.experience_display || applicant.experience || 
@@ -137,7 +138,6 @@ class ApplicantViewModal extends Component {
                       <h6
                         style={{
                           fontWeight: "bold",
-                          display: "inline-block",
                           borderBottom: "1px solid rgb(171, 172, 173)",
                           paddingBottom: "5px",
                           marginBottom: "15px",
@@ -171,7 +171,7 @@ class ApplicantViewModal extends Component {
                           &nbsp;&nbsp;
                           {applicant.alternate_phone && (
                             <div className="mb-2">
-                              <i className="fa fa-phone mr-2"></i>
+                              <span className="mr-2">|</span>
                               {applicant.alternate_phone}
                             </div>
                           )}
@@ -186,7 +186,6 @@ class ApplicantViewModal extends Component {
                       <h6
                         style={{
                           fontWeight: "bold",
-                          display: "inline-block",
                           borderBottom: "1px solid rgb(171, 172, 173)",
                           paddingBottom: "5px",
                           marginBottom: "15px",
@@ -232,7 +231,6 @@ class ApplicantViewModal extends Component {
                       <h6
                         style={{
                           fontWeight: "bold",
-                          display: "inline-block",
                           borderBottom: "1px solid rgb(171, 172, 173)",
                           paddingBottom: "5px",
                           marginBottom: "15px",
@@ -255,7 +253,7 @@ class ApplicantViewModal extends Component {
                           <div style={{ width: "50%", marginBottom: "8px" }}>
                             <div className="mb-2">
                               <strong>DOB:</strong>{" "}
-                              {new Date(applicant.dob).toLocaleDateString()}
+                              {shortformatDate(applicant.dob)}
                             </div>
                           </div>
                         )}
@@ -316,7 +314,9 @@ class ApplicantViewModal extends Component {
                           title={`${applicant.fullname || ''}`}
                       />
                     </div>
-                    <span
+                  </div>                                                                                  
+                  <div className='text-center mb-4                                                                  '>
+                     <span
                       className="badge badge-pill"
                       style={{
                         ...getStatusColor(applicant.status),
@@ -336,7 +336,6 @@ class ApplicantViewModal extends Component {
                       <h6
                         style={{
                           fontWeight: "bold",
-                          display: "inline-block",
                           borderBottom: "1px solid white",
                           paddingBottom: "5px",
                           marginBottom: "15px",
@@ -381,7 +380,6 @@ class ApplicantViewModal extends Component {
                     <h6
                       style={{
                         fontWeight: "bold",
-                        display: "inline-block",
                         borderBottom: "1px solid white",
                         paddingBottom: "5px",
                         marginBottom: "15px",
@@ -394,9 +392,7 @@ class ApplicantViewModal extends Component {
                     <div style={{ fontSize: "13px", lineHeight: "1.6" }}>
                       <div className="mb-2">
                         <strong>Applied on:</strong>{" "}
-                        {applicant.created_at
-                          ? new Date(applicant.created_at).toLocaleDateString()
-                          : "N/A"}
+                        {shortformatDate(applicant.created_at|| "")}
                       </div>
                       <div className="mb-2">
                         <strong>Source:</strong>{" "}

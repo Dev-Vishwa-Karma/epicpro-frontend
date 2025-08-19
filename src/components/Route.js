@@ -206,7 +206,7 @@ const Routes = [
         path: "/applicant",
         name: 'ApplicantTabble',
         exact: true,
-        pageTitle: "Applicant",
+        pageTitle: "Applicants",
         adminAccess: true,
         roles: ['admin', 'super_admin'],
         component: Applicant

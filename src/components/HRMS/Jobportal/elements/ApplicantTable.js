@@ -35,7 +35,62 @@ class ApplicantTable extends Component {
       rejectReason: '',
       rejectingForApplicant: null,
     };
+    this.tableContainerRef = React.createRef();
   }
+
+  componentDidMount() {
+    this.initTooltips();
+  }
+
+  componentDidUpdate() {
+    this.initTooltips();
+  }
+
+  initTooltips = () => {
+    const $ = window.$ || window.jQuery;
+    if ($ && typeof $.fn.tooltip === 'function') {
+      const $container = this.tableContainerRef.current ? $(this.tableContainerRef.current) : $(document.body);
+      const $tooltipped = $container.find('[data-toggle="tooltip"]');
+      $tooltipped.tooltip('dispose');
+      $tooltipped.tooltip({ html: true, container: 'body' });
+    }
+  };
+
+  getSourceTooltip = (applicant) => {
+    const createdAt = applicant.created_at ? shortformatDate(applicant.created_at) : null;
+    const updatedAt = applicant.updated_at ? shortformatDate(applicant.updated_at) : null;
+
+    if (applicant.source === 'sync') {
+      return (
+        `<div>` +
+          `<div><strong>Synced applicant</strong></div>` +
+          (updatedAt ? `<div>Last update: ${updatedAt}</div>` : (createdAt ? `<div>Synced on: ${createdAt}</div>` : '')) +
+        `</div>`
+      );
+    }
+
+    if (applicant.source === 'admin') {
+      return (
+        `<div>` +
+          `<div><strong>Added by admin</strong></div>` +
+          (createdAt ? `<div>On: ${createdAt}</div>` : '') +
+        `</div>`
+      );
+    }
+
+    if (applicant.source === 'referral') {
+      const refBy = applicant.employee_name ? applicant.employee_name : 'Employee';
+      const refId = applicant.employee_id ? ` (ID: ${applicant.employee_id})` : '';
+      return (
+        `<div>` +
+          `<div>Referred by: ${refBy}${refId}</div>` +
+          (createdAt ? `<div>On: ${createdAt}</div>` : '') +
+        `</div>`
+      );
+    }
+
+    return `<div><strong>Applicant</strong></div>`;
+  };
 
   handleViewApplicant = (applicant) => {
     this.setState({
@@ -134,20 +189,9 @@ class ApplicantTable extends Component {
     const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus, showRejectModal, rejectReason, rejectingForApplicant } = this.state;
 
     return (
-      <div className="col-lg-12 col-md-12 col-sm-12">
+      <div className="col-lg-12 col-md-12 col-sm-12" ref={this.tableContainerRef}>
         <div className="card">
           <div className="card-header d-flex align-items-center justify-content-between">
-            <h3 className="card-title mb-0">Applicants</h3>
-            <Button
-              label={syncing ? "Syncing..." : "Sync"}
-              onClick={this.handleSyncClick}
-              disabled={syncing}
-              className="btn-sm btn-primary"
-              title="Sync third-party applicants"
-              icon={syncing ? "" : "fa fa-refresh"}
-              iconStyle={{ marginRight: syncing ? '0' : '8px' }}
-              loading={syncing}
-            />
           </div>
           <div className="card-body">
             <div className="table-responsive">
@@ -198,10 +242,11 @@ class ApplicantTable extends Component {
                                 <span className='ml-2'>
                                   {applicant.source === 'sync' && (
                                     <i
-                                      className={`fa fa-refresh text-info ${styles.syncIcon}`}
+                                      className={`fa fa-refresh text-secondary ${styles.syncIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
-                                      title="Synced"
+                                      data-html="true"
+                                      title={this.getSourceTooltip(applicant)}
                                     ></i>
                                   )}
                                   {applicant.source === 'admin' && (
@@ -209,7 +254,8 @@ class ApplicantTable extends Component {
                                       className={`fa fa-user text-success ${styles.adminIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
-                                      title="Added by admin"
+                                      data-html="true"
+                                      title={this.getSourceTooltip(applicant)}
                                     ></i>
                                   )}
                                   {applicant.source === 'referral' && (
@@ -217,7 +263,8 @@ class ApplicantTable extends Component {
                                       className={`fa fa-user-plus text-warning ${styles.referralIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
-                                      title="referral form"
+                                      data-html="true"
+                                      title={this.getSourceTooltip(applicant)}
                                     ></i>
                                   )}
                                 </span>
@@ -231,13 +278,6 @@ class ApplicantTable extends Component {
                         <td className={styles.tableCellCenter}>{applicant.experience_display || applicant.experience || "--"}</td>
                         <td>
                           <div >
-                          <span>
-                           {applicant.status === 'rejected' && applicant.reject_reason && (
-                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer' }}>
-                                <p className={styles.rejectReasonText}>Reject reason</p>
-                              </span>
-                            )}
-                           </span>
                             <InputField
                               className={`custom-select ${applicant.status === 'rejected' ? styles.statusSelectRejected : styles.statusSelect}`}
                               type="select"
@@ -255,6 +295,13 @@ class ApplicantTable extends Component {
                               ]}
                               firstOption={false}
                             />
+                            <span>
+                           {applicant.status === 'rejected' && applicant.reject_reason && (
+                              <span title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer' }}>
+                                <p className={styles.rejectReasonText}>Reject reason</p>
+                              </span>
+                            )}
+                           </span>
                           </div>
                         </td>
                         <td>
