@@ -424,20 +424,24 @@ class ApplicantViewModal extends Component {
                           {applicant.employee_name ? (
                             <span>
                               {" "}
-                              {applicant.employee_name} (ID:{" "}
-                              {applicant.employee_id})
+                              {applicant.employee_name} 
+                              {/* (ID:{" "}
+                              {applicant.employee_id}) */}
                             </span>
                           ) : this.state.employeeDetails ? (
                             <span>
                               {" "}
                               {this.state.employeeDetails.first_name}{" "}
-                              {this.state.employeeDetails.last_name} (ID:{" "}
-                              {applicant.employee_id})
+                              {this.state.employeeDetails.last_name} 
+                              {/* (ID:{" "}
+                              {applicant.employee_id}) */}
                             </span>
                           ) : this.state.loadingEmployee ? (
                             <span>Loading...</span>
                           ) : (
-                            <span> Employee ID: {applicant.employee_id}</span>
+                            <span> Employee ID:
+                               {/* {applicant.employee_id} */}
+                            </span>
                           )}
                         </div>
                       )}

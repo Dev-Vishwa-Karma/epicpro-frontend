@@ -7,6 +7,7 @@ import ApplicantTable from './elements/ApplicantTable';
 import ApplicantFilter from './elements/ApplicantFilter';
 import AddApplicant from './elements/AddApplicant'
 import { appendDataToFormData } from '../../../utils';
+import DuplicateDecisionModal from './elements/DuplicateDecisionModal';
 
 
 class Applicant extends Component {
@@ -29,6 +30,9 @@ class Applicant extends Component {
     showSuccess: false,
     showError: false,
     activeTab: 'list',
+    showDuplicateDecision: false,
+    duplicates: [],
+    selectedDuplicates: {},
   };
 
   componentDidMount() {
@@ -113,13 +117,42 @@ class Applicant extends Component {
         }
         if (response.status === 'success') {
           const insertedCount = response.data?.inserted || 0;
+          const updatedCount = response.data?.updated || 0;
+          const dupDetails = response.data?.duplicate_details || response.data?.duplicates || [];
+
+          const successMsg = [
+            insertedCount > 0 ? `Added ${insertedCount} new applicants` : '',
+            updatedCount > 0 ? `Updated ${updatedCount} existing applicants` : ''
+          ].filter(Boolean).join(' and ') || 'No new updates found';
+
+          this.setState({ 
+            syncSuccess: successMsg, 
+            showSuccess: true 
+          });
+
           
+          const selectedMap = {};
+          if (Array.isArray(dupDetails)) {
+            dupDetails.forEach(d => { selectedMap[d.email] = true; });
+          }
+
+          if (Array.isArray(dupDetails) && dupDetails.length > 0 && dupDetails[0]?.email) {
+            this.setState({ showDuplicateDecision: true, duplicates: dupDetails, selectedDuplicates: selectedMap });
+          }
+
           this.setState({ 
             syncSuccess: `Synced ${insertedCount} new applicants successfully!`, 
             showSuccess: true 
           });
           setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
           this.fetchApplicants();
+        } else if (response.status === 'duplicates') {
+          const dupDetails = response.data?.duplicates || [];
+          const selectedMap = {};
+          dupDetails.forEach(d => { selectedMap[d.email] = true; });
+          if (Array.isArray(dupDetails) && dupDetails.length > 0) {
+            this.setState({ showDuplicateDecision: true, duplicates: dupDetails, selectedDuplicates: selectedMap });
+          }
         } else {
           const errorMsg = response.data?.message || 'Sync failed';
           throw new Error(errorMsg);
@@ -136,6 +169,37 @@ class Applicant extends Component {
       .finally(() => {
         this.setState({ isSyncing: false });
       });
+  };
+
+  handleToggleDuplicate = (dup, checked) => {
+    this.setState(prev => ({
+      selectedDuplicates: { ...prev.selectedDuplicates, [dup.email]: checked }
+    }));
+  };
+
+  handleToggleAllDuplicates = (checked) => {
+    this.setState(prev => {
+      const map = {};
+      prev.duplicates.forEach(d => { map[d.email] = checked; });
+      return { selectedDuplicates: map };
+    });
+  };
+
+  handleUpdateSelectedDuplicates = async () => {
+    const { duplicates, selectedDuplicates } = this.state;
+    const toUpdate = duplicates.filter(d => selectedDuplicates[d.email]);
+    for (const dup of toUpdate) {
+      const payload = new FormData();
+      // Use backend email fallback for update if id is not used
+      if (dup.email) payload.append('email', dup.email);
+      const newData = dup.new_data || {};
+      Object.entries(newData).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') payload.append(k, v);
+      });
+      await getService.addCall('applicants.php', 'update', payload);
+    }
+    this.setState({ showDuplicateDecision: false, duplicates: [], selectedDuplicates: {} });
+    this.fetchApplicants();
   };
 
   handleTabChange = (tabId) => {
@@ -177,7 +241,7 @@ class Applicant extends Component {
 
   render() {
     const { fixNavbar } = this.props;
-    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess, showError, activeTab } = this.state;
+    const { applicants, loading, error, search, status, order, currentPage, totalPages, showDeleteModal, isDeleting, isSyncing, syncSuccess, showSuccess, showError, activeTab, showDuplicateDecision, duplicates, selectedDuplicates } = this.state;
     return (
       <>
         <AlertMessages
@@ -250,9 +314,20 @@ class Applicant extends Component {
                 <AddApplicant onTabChange={this.handleTabChange} />
               </div>
             </div>
-          </div>
+                    </div>
         </div>
 
+        {/* Duplicate Decision Modal */}
+        <DuplicateDecisionModal
+          show={showDuplicateDecision}
+          duplicates={duplicates}
+          selected={selectedDuplicates}
+          onToggleOne={this.handleToggleDuplicate}
+          onToggleAll={this.handleToggleAllDuplicates}
+          onUpdateSelected={this.handleUpdateSelectedDuplicates}
+          onClose={() => this.setState({ showDuplicateDecision: false })}
+        />
+ 
         {/* Delete Modal */}
         <DeleteModal
           show={showDeleteModal}
@@ -269,5 +344,6 @@ const mapStateToProps = state => ({
   fixNavbar: state.settings.isFixNavbar,
 });
 
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = dispatch => ({
+});
 export default connect(mapStateToProps, mapDispatchToProps)(Applicant);
