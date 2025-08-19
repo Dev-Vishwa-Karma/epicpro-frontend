@@ -1,8 +1,40 @@
 import React, { Component } from 'react';
 import Button from '../../../common/formInputs/Button';
 import styles from './applicant.module.css';
+import {getService} from '../../../../services/getService';
 
 class ApplicantViewModal extends Component {
+  state = {
+    employeeDetails: null,
+    loadingEmployee: false
+  };
+
+  componentDidMount() {
+    this.fetchEmployeeDetails();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.applicant?.employee_id !== prevProps.applicant?.employee_id) {
+      this.fetchEmployeeDetails();
+    }
+  }
+
+  fetchEmployeeDetails = () => {
+    const { applicant } = this.props;
+    if (applicant?.employee_id && !applicant.employee_name) {
+      this.setState({ loadingEmployee: true });
+      getService.getCall('get_employees.php', { action: 'view', user_id: applicant.employee_id })
+        .then(response => {
+          if (response.status === 'success' && response.data) {
+            this.setState({
+              employeeDetails: response.data,
+              loadingEmployee: false
+            });
+          }
+        })
+        .catch(() => this.setState({ loadingEmployee: false }));
+    }
+  };
   render() {
     const { 
       show, 
@@ -49,17 +81,23 @@ class ApplicantViewModal extends Component {
     return (
       <div
         className="modal fade show"
-        style={{ 
-          display: 'block', 
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(3px)'
+        style={{
+          display: "block",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          backdropFilter: "blur(3px)",
         }}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
       >
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
-          <div className="modal-content border-0 shadow-lg" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div
+          className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl"
+          role="document"
+        >
+          <div
+            className="modal-content border-0 shadow-lg"
+            style={{ maxWidth: "1000px", margin: "0 auto" }}
+          >
             <div className="modal-header bg-transparent border-0 p-0 position-relative">
               <Button
                 label="x"
@@ -70,38 +108,46 @@ class ApplicantViewModal extends Component {
             <div className="modal-body p-0">
               <div className={`row no-gutters ${styles.guttopdata}`}>
                 {/* Left Main Content - Light Background */}
-                <div className="col-md-8" style={{ 
-                  backgroundColor: 'white', 
-                  color: '#2C3E50',
-                  padding: '30px 35px'
-                }}>   
+                <div
+                  className="col-md-8"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2C3E50",
+                    padding: "30px 35px",
+                  }}
+                >
                   {/* Name*/}
-                  <h1 style={{ 
-                    fontSize: '1.5rem', 
-                    fontWeight: 'bold', 
-                    color: '#7B7493',
-                    marginBottom: '5px',
-                    textTransform: 'uppercase',
-                    marginBottom: '15px',
-                  }}>
-                    {applicant.fullname || 'Applicant'}
+                  <h1
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: "bold",
+                      color: "#7B7493",
+                      marginBottom: "5px",
+                      textTransform: "uppercase",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    {applicant.fullname || "Applicant"}
                   </h1>
 
                   {/* Contact Section - only show if has data */}
                   {hasContactInfo && (
                     <div className="mb-4">
-                      <h6 style={{ 
-                        fontWeight: 'bold', 
-                        borderBottom: '1px solid rgb(171, 172, 173)', 
-                        paddingBottom: '5px',
-                        marginBottom: '15px',
-                        fontSize: '14px',
-                        textTransform: 'uppercase',
-                        color: '#2C3E50'
-                      }}>
+                      <h6
+                        style={{
+                          fontWeight: "bold",
+                          display: "inline-block",
+                          borderBottom: "1px solid rgb(171, 172, 173)",
+                          paddingBottom: "5px",
+                          marginBottom: "15px",
+                          fontSize: "14px",
+                          textTransform: "uppercase",
+                          color: "#2C3E50",
+                        }}
+                      >
                         Contact
                       </h6>
-                      <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                      <div style={{ fontSize: "14px", lineHeight: "1.6" }}>
                         {applicant.email && (
                           <div className="mb-2">
                             <i className="fa fa-envelope mr-2"></i>
@@ -114,13 +160,14 @@ class ApplicantViewModal extends Component {
                             {applicant.address}
                           </div>
                         )}
-                        <div className='d-flex gap-4'>
+                        <div className="d-flex gap-4">
                           {applicant.phone && (
                             <div className="mb-2">
                               <i className="fa fa-phone mr-2"></i>
                               {applicant.phone}
                             </div>
-                          )} &nbsp;&nbsp;
+                          )}{" "}
+                          &nbsp;&nbsp;
                           {applicant.alternate_phone && (
                             <div className="mb-2">
                               <i className="fa fa-phone mr-2"></i>
@@ -135,30 +182,42 @@ class ApplicantViewModal extends Component {
                   {/* Skills Section - only show if has skills */}
                   {skills.length > 0 && (
                     <div className="mb-4">
-                      <h6 style={{ 
-                        fontWeight: 'bold', 
-                        borderBottom: '1px solid rgb(171, 172, 173)', 
-                        paddingBottom: '5px',
-                        marginBottom: '15px',
-                        fontSize: '14px',
-                        textTransform: 'uppercase',
-                        color: '#2C3E50'
-                      }}>
+                      <h6
+                        style={{
+                          fontWeight: "bold",
+                          display: "inline-block",
+                          borderBottom: "1px solid rgb(171, 172, 173)",
+                          paddingBottom: "5px",
+                          marginBottom: "15px",
+                          fontSize: "14px",
+                          textTransform: "uppercase",
+                          color: "#2C3E50",
+                        }}
+                      >
                         Skills
                       </h6>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "10px",
+                        }}
+                      >
                         {skills.map((skill, index) => (
-                          <div key={index} style={{
-                            backgroundColor: '#f0f0f0',
-                            padding: '5px 12px',
-                            borderRadius: '20px',
-                            fontSize: '13px',
-                            fontWeight: '500',
-                            color: '#2C3E50',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
+                          <div
+                            key={index}
+                            style={{
+                              backgroundColor: "#f0f0f0",
+                              padding: "5px 12px",
+                              borderRadius: "20px",
+                              fontSize: "13px",
+                              fontWeight: "500",
+                              color: "#2C3E50",
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
                             {skill}
                           </div>
                         ))}
@@ -169,47 +228,61 @@ class ApplicantViewModal extends Component {
                   {/* Additional Info Section - only show if has data */}
                   {hasAdditionalInfo && (
                     <div className="mb-4">
-                      <h6 style={{ 
-                        fontWeight: 'bold', 
-                        borderBottom: '1px solid rgb(171, 172, 173)', 
-                        paddingBottom: '5px',
-                        marginBottom: '15px',
-                        fontSize: '14px',
-                        textTransform: 'uppercase',
-                        color: '#2C3E50'
-                      }}>
+                      <h6
+                        style={{
+                          fontWeight: "bold",
+                          display: "inline-block",
+                          borderBottom: "1px solid rgb(171, 172, 173)",
+                          paddingBottom: "5px",
+                          marginBottom: "15px",
+                          fontSize: "14px",
+                          textTransform: "uppercase",
+                          color: "#2C3E50",
+                        }}
+                      >
                         Additional Info
                       </h6>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', fontSize: '14px', lineHeight: '1.6' }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          fontSize: "14px",
+                          lineHeight: "1.6",
+                        }}
+                      >
                         {applicant.dob && (
-                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                          <div style={{ width: "50%", marginBottom: "8px" }}>
                             <div className="mb-2">
-                              <i className="fas fa-birthday-cake mr-2"></i>
-                              <strong>DOB:</strong> {new Date(applicant.dob).toLocaleDateString()}
+                              <strong>DOB:</strong>{" "}
+                              {new Date(applicant.dob).toLocaleDateString()}
                             </div>
                           </div>
                         )}
-                        {applicant.merital_status && (
-                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                        {applicant.marital_status && (
+                          <div style={{ width: "50%", marginBottom: "8px" }}>
                             <div className="mb-2">
-                              <i className="fas fa-heart mr-2"></i>
-                              <strong>Status:</strong> {applicant.merital_status}
+                              <strong>MaritalS tatus:</strong>{" "}
+                              {applicant.marital_status}
                             </div>
                           </div>
                         )}
                         {applicant.graduate_year && (
-                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                          <div style={{ width: "50%", marginBottom: "8px" }}>
                             <div className="mb-2">
-                              <i className="fas fa-graduation-cap mr-2"></i>
-                              <strong>Graduated:</strong> {applicant.graduate_year}
+                              <strong>Graduated:</strong>{" "}
+                              {applicant.graduate_year}
                             </div>
                           </div>
                         )}
                         {applicant.bond_agreement && (
-                          <div style={{ width: '50%', marginBottom: '8px' }}>
+                          <div style={{ width: "50%", marginBottom: "8px" }}>
                             <div className="mb-2">
                               <i className="fas fa-file-contract mr-2"></i>
-                              <strong>Bond:</strong> {applicant.bond_agreement.charAt(0).toUpperCase() + applicant.bond_agreement.slice(1)}
+                              <strong>Bond:</strong>{" "}
+                              {applicant.bond_agreement
+                                .charAt(0)
+                                .toUpperCase() +
+                                applicant.bond_agreement.slice(1)}
                             </div>
                           </div>
                         )}
@@ -219,50 +292,75 @@ class ApplicantViewModal extends Component {
                 </div>
 
                 {/* Right Sidebar - Dark Background */}
-                <div className="col-md-4" style={{ 
-                  backgroundColor: '#5A5278', 
-                  color: 'white',
-                  padding: '30px 25px'
-                }}>
+                <div
+                  className="col-md-4"
+                  style={{
+                    backgroundColor: "#5A5278",
+                    color: "white",
+                    padding: "30px 25px",
+                  }}
+                >
                   {/* Name and Title */}
                   <div className="mb-4">
                     <div className="text-center mb-4">
-                      <div className={`avatar avatar-xxl rounded-circle ${getAvatarColor(applicant.fullname)} d-inline-flex align-items-center justify-content-center text-white`}
-                        style={{ width: '120px', height: '120px', fontSize: '2.5rem' }}>
-                        {applicant.fullname ? applicant.fullname.split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase(): '?'}
+                      <div
+                        className={`avatar avatar-xxl rounded-circle ${getAvatarColor(
+                          applicant.fullname
+                        )} d-inline-flex align-items-center justify-content-center text-white`}
+                        style={{
+                          width: "120px",
+                          height: "120px",
+                          fontSize: "2.5rem",
+                        }}
+                      >
+                        {applicant.fullname
+                          ? applicant.fullname
+                              .split(" ")
+                              .filter(Boolean)
+                              .slice(0, 2)
+                              .map((word) => word[0])
+                              .join("")
+                              .toUpperCase()
+                          : "?"}
                       </div>
                     </div>
                     <span
                       className="badge badge-pill"
                       style={{
                         ...getStatusColor(applicant.status),
-                        padding: '8px 16px',
-                        fontSize: '12px',
-                        textTransform: 'capitalize',
-                        fontWeight: 500
+                        padding: "8px 16px",
+                        fontSize: "12px",
+                        textTransform: "capitalize",
+                        fontWeight: 500,
                       }}
                     >
-                      {applicant.status || 'No Status'}
+                      {applicant.status || "No Status"}
                     </span>
                   </div>
 
                   {/* Professional Details Section - only show if has data */}
                   {hasProfessionalDetails && (
                     <div className="mb-4">
-                      <h6 style={{ 
-                        fontWeight: 'bold', 
-                        borderBottom: '1px solid white', 
-                        paddingBottom: '5px',
-                        marginBottom: '15px',
-                        fontSize: '14px',
-                        textTransform: 'uppercase'
-                      }}>
+                      <h6
+                        style={{
+                          fontWeight: "bold",
+                          display: "inline-block",
+                          borderBottom: "1px solid white",
+                          paddingBottom: "5px",
+                          marginBottom: "15px",
+                          fontSize: "14px",
+                          textTransform: "uppercase",
+                        }}
+                      >
                         Professional Details
                       </h6>
-                      <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
-                        {(applicant.experience_display || applicant.experience) && (
+                      <div style={{ fontSize: "13px", lineHeight: "1.6" }}>
+                        {(applicant.experience_display ||
+                          applicant.experience) && (
                           <div className="mb-2">
-                            <strong>Experience:</strong> {applicant.experience_display || `${applicant.experience} years`}
+                            <strong>Experience:</strong>{" "}
+                            {applicant.experience_display ||
+                              `${applicant.experience} years`}
                           </div>
                         )}
                         {applicant.branch && (
@@ -272,12 +370,14 @@ class ApplicantViewModal extends Component {
                         )}
                         {applicant.graduate_year && (
                           <div className="mb-2">
-                            <strong>Graduate Year:</strong> {applicant.graduate_year}
+                            <strong>Graduate Year:</strong>{" "}
+                            {applicant.graduate_year}
                           </div>
                         )}
                         {applicant.joining_timeframe && (
                           <div className="mb-2">
-                            <strong>Joining Timeframe:</strong> {applicant.joining_timeframe}
+                            <strong>Joining Timeframe:</strong>{" "}
+                            {applicant.joining_timeframe}
                           </div>
                         )}
                       </div>
@@ -286,33 +386,76 @@ class ApplicantViewModal extends Component {
 
                   {/* Application Details Section */}
                   <div className="mb-4">
-                    <h6 style={{ 
-                      fontWeight: 'bold', 
-                      borderBottom: '1px solid white', 
-                      paddingBottom: '5px',
-                      marginBottom: '15px',
-                      fontSize: '14px',
-                      textTransform: 'uppercase'
-                    }}>
+                    <h6
+                      style={{
+                        fontWeight: "bold",
+                        display: "inline-block",
+                        borderBottom: "1px solid white",
+                        paddingBottom: "5px",
+                        marginBottom: "15px",
+                        fontSize: "14px",
+                        textTransform: "uppercase",
+                      }}
+                    >
                       Application Details
                     </h6>
-                    <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                    <div style={{ fontSize: "13px", lineHeight: "1.6" }}>
                       <div className="mb-2">
-                        <strong>Applied on:</strong> {applicant.created_at ? new Date(applicant.created_at).toLocaleDateString() : 'N/A'}
+                        <strong>Applied on:</strong>{" "}
+                        {applicant.created_at
+                          ? new Date(applicant.created_at).toLocaleDateString()
+                          : "N/A"}
                       </div>
                       <div className="mb-2">
-                        <strong>Source:</strong> {applicant.source ? 
-                          (applicant.source === 'sync' ? 'Synced from External Source' : 
-                           applicant.source === 'admin' ? 'Added by Admin' : 
-                           applicant.source === 'referral' ? 'referral Application Form' : 'Unknown') : 
-                          'N/A'
-                        }
+                        <strong>Source:</strong>{" "}
+                        {applicant.source
+                          ? applicant.source === "sync"
+                            ? "Synced from External Source"
+                            : applicant.source === "admin"
+                            ? "Added by Admin"
+                            : applicant.source === "referral"
+                            ? "referral Application Form"
+                            : "Unknown"
+                          : "N/A"}
                       </div>
-                      {applicant.reject_reason && applicant.status && applicant.status !== 'pending' && applicant.status !== 'reviewed' && applicant.status !== 'interviewed' && applicant.status !== 'hired' && (
+                      {applicant.employee_id && (
                         <div className="mb-2">
-                          <strong>Rejection Reason:</strong> {applicant.reject_reason}
+                          <strong>Referred By:</strong>
+                          {applicant.employee_name ? (
+                            <span>
+                              {" "}
+                              {applicant.employee_name} 
+                              {/* (ID:{" "}
+                              {applicant.employee_id}) */}
+                            </span>
+                          ) : this.state.employeeDetails ? (
+                            <span>
+                              {" "}
+                              {this.state.employeeDetails.first_name}{" "}
+                              {this.state.employeeDetails.last_name} 
+                              {/* (ID:{" "}
+                              {applicant.employee_id}) */}
+                            </span>
+                          ) : this.state.loadingEmployee ? (
+                            <span>Loading...</span>
+                          ) : (
+                            <span> Employee ID:
+                               {/* {applicant.employee_id} */}
+                            </span>
+                          )}
                         </div>
                       )}
+                      {applicant.reject_reason &&
+                        applicant.status &&
+                        applicant.status !== "pending" &&
+                        applicant.status !== "reviewed" &&
+                        applicant.status !== "interviewed" &&
+                        applicant.status !== "hired" && (
+                          <div className="mb-2">
+                            <strong>Rejection Reason:</strong>{" "}
+                            {applicant.reject_reason}
+                          </div>
+                        )}
                     </div>
                   </div>
 
@@ -323,16 +466,16 @@ class ApplicantViewModal extends Component {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-primary"
-                        style={{ 
-                          backgroundColor: 'white', 
-                          borderColor: 'white',
-                          color: '#2C3E50',
-                          padding: '10px 25px',
-                          fontWeight: '500'
+                        style={{
+                          backgroundColor: "white",
+                          borderColor: "white",
+                          color: "#2C3E50",
+                          padding: "10px 25px",
+                          fontWeight: "500",
                         }}
                       >
-                        <i className="fas fa-download mr-2"></i>
-                        Download Original Resume
+                        <i className="fa fa-download mr-2"></i>
+                        Download Applicant Resume
                       </a>
                     </div>
                   )}

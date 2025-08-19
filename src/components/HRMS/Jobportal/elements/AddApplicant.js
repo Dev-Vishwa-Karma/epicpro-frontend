@@ -91,7 +91,6 @@ class AddApplicant extends Component {
         value: i.toString()
       });
     }
-    console.log('opts',opts)
     return opts;
     
   };
@@ -193,7 +192,6 @@ class AddApplicant extends Component {
         branch: branch,
         graduate_year: graduate_year ? parseInt(graduate_year) : null
       };
-      console.log('data',data)
       data.source = 'admin';
       appendDataToFormData(formData, data);
 

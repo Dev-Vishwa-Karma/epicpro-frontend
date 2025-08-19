@@ -13,6 +13,7 @@ import SaturdaySettings from './HRMS/SaturdaySettings/SaturdaySettings';
 import Statistics from './HRMS/Statistics/Statistics';
 import ProjectList from './Project/ProjectList/Projectlist';
 import Clients from './Project/Clients/Clients';
+
 import TodoList from './Project/TodoList/TodoList';
 import JobPortalDashboard from './JobPortal/Dashboard/Dashboard';
 import Applicants from './JobPortal/Applicants/Applicants';
@@ -257,7 +258,7 @@ const Routes = [
         path: "/job-application",
         name: 'job-application',
         exact: true,
-        pageTitle: "Job Application",
+        pageTitle: "Referral",
         component: ApplicantForm
     },
 ];
