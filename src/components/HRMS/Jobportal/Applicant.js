@@ -8,6 +8,7 @@ import ApplicantFilter from './elements/ApplicantFilter';
 import AddApplicant from './elements/AddApplicant'
 import { appendDataToFormData } from '../../../utils';
 import DuplicateDecisionModal from './elements/DuplicateDecisionModal';
+import Button from '../../common/formInputs/Button';
 
 
 class Applicant extends Component {
@@ -279,6 +280,16 @@ class Applicant extends Component {
                   </a>
                 </li>
               </ul>
+              <Button
+                label={isSyncing ? "Syncing..." : "Sync"}
+                onClick={this.handleSync}
+                disabled={isSyncing}
+                className="btn-sm btn-primary"
+                title="Sync third-party applicants"
+                icon={isSyncing ? "" : "fa fa-refresh"}
+                iconStyle={{ marginRight: isSyncing ? '0' : '8px' }}
+                loading={isSyncing}
+              />
             </div>
           </div>
         </div>

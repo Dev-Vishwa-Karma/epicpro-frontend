@@ -13,13 +13,13 @@
   padding-bottom: 5px;
 }
 
-.tableCellCenter {
+/* .tableCellCenter {
   text-align: center;
-}
+} */
 
 .rejectReasonText {
   color: red;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .statusSelect {
@@ -137,7 +137,10 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: white !important;
+    background-color: white;
+    padding: 4px;
+    color: black !important;
+    border-radius: 100%;
 }
 
 .guttopdata{
@@ -236,3 +239,6 @@
     padding: 10px 25px;
     font-weight: 500;
 }
+
+
+
