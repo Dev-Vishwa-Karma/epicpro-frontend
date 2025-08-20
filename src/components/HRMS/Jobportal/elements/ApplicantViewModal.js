@@ -447,25 +447,38 @@ class ApplicantViewModal extends Component {
                     </div>
                   </div>
 
-                  {applicant.resume_path && (
-                    <div className="text-center">
-                      <a
-                        href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-primary"
-                        style={{
-                          backgroundColor: "white",
-                          borderColor: "white",
-                          color: "#2C3E50",
-                          padding: "10px 25px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        <i className="fa fa-download mr-2"></i>
-                        Download Applicant Resume
-                      </a>
-                    </div>
+                  {applicant.resume_path ? (
+                    <a
+                      href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{
+                        backgroundColor: "white",
+                        borderColor: "white",
+                        color: "#2C3E50",
+                        padding: "10px 25px",
+                        fontWeight: "500",
+                      }}
+                    >
+                      <i className="fa fa-download mr-2"></i>
+                      Download Applicant Resume
+                    </a>
+                  ) : (
+                    <button
+                      className="btn btn-secondary"
+                      disabled
+                      style={{
+                        backgroundColor: "#ccc",
+                        borderColor: "#ccc",
+                        color: "#666",
+                        padding: "10px 25px",
+                        fontWeight: "500",
+                      }}
+                    >
+                      <i className="fa fa-ban mr-2"></i>
+                      Resume Not Available
+                    </button>
                   )}
                 </div>
               </div>

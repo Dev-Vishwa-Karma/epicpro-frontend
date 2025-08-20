@@ -248,6 +248,11 @@ class Menu extends Component {
 			return;
 		} else {
 			window.user = user; // Attach user to the global window object
+			// Show "Referral" menu only for employees
+			const hrmsSection = content.find(item => item.id === 1);
+			if (hrmsSection && window.user.role !== 'employee') {
+				hrmsSection.content = hrmsSection.content.filter(item => item.id !== 44);
+			}
 			if (window.user.role === 'super_admin' || window.user.role === 'admin') {
 				// Find the HRMS section
 				const hrmsSection = content.find(item => item.id === 1);

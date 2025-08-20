@@ -11,7 +11,9 @@ import DuplicateDecisionModal from './elements/DuplicateDecisionModal';
 import Button from '../../common/formInputs/Button';
 import { shortformatDate } from '../../../utils';
 
+
 class Applicant extends Component {
+
   state = {
     applicants: [],
     loading: true,
@@ -34,6 +36,8 @@ class Applicant extends Component {
     showDuplicateDecision: false,
     duplicates: [],
     selectedDuplicates: {},
+    tabKey: 0,
+    lastSyncTime: null,
   };
 
   componentDidMount() {
@@ -53,17 +57,18 @@ class Applicant extends Component {
       limit: pageSize,
     })
       .then(data => {
-        if (data.status === 'success') {
-          this.setState({
-            applicants: data.data.applicants,
-            loading: false,
-            totalPages: data.data.totalPages,
-            total: data.data.total,
-          });
-        } else {
-          this.setState({ error: data.data.message, loading: false });
-        }
-      })
+      if (data.status === 'success') {
+        this.setState({
+          applicants: data.data.applicants,
+          loading: false,
+          totalPages: data.data.totalPages,
+          total: data.data.total,
+          lastSyncTime: data.data.last_sync || this.state.lastSyncTime,
+        });
+      } else {
+        this.setState({ error: data.data.message, loading: false });
+      }
+    })
       .catch(err => this.setState({ error: err.message, loading: false }));
   };
 
@@ -121,16 +126,31 @@ class Applicant extends Component {
           const insertedCount = response.data?.inserted || 0;
           const updatedCount = response.data?.updated || 0;
           const dupDetails = response.data?.duplicate_details || response.data?.duplicates || [];
+          const lastSync = response.data?.last_sync || null;
 
-          const successMsg = [
-            insertedCount > 0 ? `Added ${insertedCount} new applicants` : '',
-            updatedCount > 0 ? `Updated ${updatedCount} existing applicants` : ''
-          ].filter(Boolean).join(' and ') || 'No new updates found';
+          // Store the last sync time
+          if (lastSync) {
+            this.setState({ lastSyncTime: lastSync });
+          }
 
-          this.setState({ 
-            syncSuccess: successMsg, 
-            showSuccess: true 
-          });
+          // Check if no data was received or counts are 0
+          if ((insertedCount === 0 || insertedCount === undefined) && 
+              (updatedCount === 0 || updatedCount === undefined)) {
+            this.setState({ 
+              syncSuccess: 'Sync data not available', 
+              showSuccess: true 
+            });
+          } else {
+            const successMsg = [
+              insertedCount > 0 ? `Sync ${insertedCount} new applicants` : '',
+              updatedCount > 0 ? `Updated ${updatedCount} existing applicants` : ''
+            ].filter(Boolean).join(' and ') || 'No new updates found';
+
+            this.setState({ 
+              syncSuccess: successMsg, 
+              showSuccess: true 
+            });
+          }
 
           
           const selectedMap = {};
@@ -142,10 +162,6 @@ class Applicant extends Component {
             this.setState({ showDuplicateDecision: true, duplicates: dupDetails, selectedDuplicates: selectedMap });
           }
 
-          this.setState({ 
-            syncSuccess: `Synced ${insertedCount} new applicants successfully!`, 
-            showSuccess: true 
-          });
           setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
           this.fetchApplicants();
         } else if (response.status === 'duplicates') {
@@ -205,7 +221,15 @@ class Applicant extends Component {
   };
 
   handleTabChange = (tabId) => {
-    this.setState({ activeTab: tabId });
+    // for clear form
+    if (tabId === 'add') {
+      this.setState(prevState => ({ 
+        activeTab: tabId, 
+        tabKey: prevState.tabKey + 1 
+      }));
+    } else {
+      this.setState({ activeTab: tabId });
+    }
   };
 
   openDeleteModal = (id) => {
@@ -272,27 +296,34 @@ class Applicant extends Component {
                 <li className="nav-item">
                   <a 
                     className={`nav-link ${activeTab === 'add' ? 'active' : ''}`}
-                    id="applicant-tab" 
+                    id="applicant-tab"                                            
                     data-toggle="tab" 
                     href="#applicant-add" 
                     onClick={() => this.handleTabChange('add')}
                   >
-                    Add New
+                    Add New                                                                                                                                                                                             
                   </a>
-                </li>
+                </li>                                                         
               </ul>
-              <div className="d-flex flex-column align-items-end">
-                
-                <Button
-                  label={isSyncing ? "Syncing..." : `Sync`}
-                  onClick={this.handleSync}
-                  disabled={isSyncing}
-                  className="btn-sm btn-primary"
-                  icon={isSyncing ? "" : "fa fa-refresh"}
-                  iconStyle={{ marginRight: isSyncing ? '0' : '8px' }}
-                  loading={isSyncing}
-                />
+              <div className={`tab-pane fade ${activeTab === 'list' ? 'show active' : ''}`} id="applicant-list" role="tabpanel">
+                <div className="d-flex flex-column align-items-end">
+                  <Button
+                    label={isSyncing ? "Syncing..." : `Sync`}
+                    onClick={this.handleSync}
+                    disabled={isSyncing}
+                    className="btn-sm btn-primary"
+                    icon={isSyncing ? "" : "fa fa-refresh"}
+                    iconStyle={{ marginRight: isSyncing ? '0' : '8px' }}
+                    loading={isSyncing}
+                  />
+                  {this.state.lastSyncTime && (
+                    <div className="text-muted small mb-2">
+                      Last sync: {shortformatDate(this.state.lastSyncTime)}
+                    </div>
+                  )}      
+                </div>
               </div>
+              
             </div>
           </div>
         </div>
@@ -325,7 +356,7 @@ class Applicant extends Component {
                 </div>
               </div>
               <div className={`tab-pane fade ${activeTab === 'add' ? 'show active' : ''}`} id="applicant-add" role="tabpanel">
-                <AddApplicant onTabChange={this.handleTabChange} />
+                <AddApplicant key={this.state.tabKey} onTabChange={this.handleTabChange} />
               </div>
             </div>
                     </div>

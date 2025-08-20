@@ -41,7 +41,7 @@ class ApplicantFilter extends Component {
               </div>
             </div>
             <div className="col-lg-3 col-md-4 col-sm-6">
-              <label>Order</label>
+              <label>Sort</label>
               <div className="form-group">
                 <InputField
                   className="custom-select"

@@ -219,12 +219,20 @@ class ApplicantTable extends Component {
                         <td className={styles.tableCellCenter}>{applicant.experience_display || applicant.experience || "--"}</td>
                         <td>
                           <div >
+                            <span>
+                           {applicant.status === 'rejected' && applicant.reject_reason && (
+                              <span  title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer'}}>
+                                <p className={styles.rejectReasonText}>Reject reason</p>
+                              </span>
+                            )}
+                           </span>
                             <InputField
                               className={`custom-select ${applicant.status === 'rejected' ? styles.statusSelectRejected : styles.statusSelect}`}
                               type="select"
                               value={applicant.status}
                               style={{                                                                    
-                                  ...ApplicantTable.getStatusColor(applicant.status)
+                                ...ApplicantTable.getStatusColor(applicant.status),
+                                ...(applicant.status === 'rejected' ? { marginTop: '-10px', marginBottom:'-13px' } : {})
                               }}
                               onChange={e => this.handleStatusChange(applicant.id, e.target.value, applicant.fullname)}
                               options={[                                                    
@@ -236,13 +244,7 @@ class ApplicantTable extends Component {
                               ]}
                               firstOption={false}
                             />
-                            <span>
-                           {applicant.status === 'rejected' && applicant.reject_reason && (
-                              <span  title={applicant.reject_reason} data-toggle="tooltip" data-placement="top" style={{ cursor: 'pointer'}}>
-                                <p className={styles.rejectReasonText}>Reject reason</p>
-                              </span>
-                            )}
-                           </span>
+                            
                           </div>
                         </td>
                         <td>
