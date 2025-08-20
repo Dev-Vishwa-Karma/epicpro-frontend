@@ -11,14 +11,9 @@ import Report from './HRMS/Report/Report';
 import Gallery from './HRMS/Gallery/Gallery';
 import SaturdaySettings from './HRMS/SaturdaySettings/SaturdaySettings';
 import Statistics from './HRMS/Statistics/Statistics';
-import ProjectList from './Project/ProjectList/Projectlist';
-import Clients from './Project/Clients/Clients';
-
-import TodoList from './Project/TodoList/TodoList';
-import JobPortalDashboard from './JobPortal/Dashboard/Dashboard';
-import Applicants from './JobPortal/Applicants/Applicants';
-import Positions from './JobPortal/Positions/Positions';
-import Resumes from './JobPortal/Resumes/Resumes';
+import ProjectList from './HRMS/Projects/Projectlist';
+import Clients from './HRMS/Clients/Clients';
+import TodoList from './HRMS/Todos/TodoList';
 import Login from './Authentication/login';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
 import Link from './HRMS/Link/Link';
@@ -210,42 +205,6 @@ const Routes = [
         adminAccess: true,
         roles: ['admin', 'super_admin'],
         component: Applicant
-    },
-    {
-        path: "/jobportal-dashboard",
-        name: 'jobportalDashboard',
-        exact: true,
-        pageTitle: "Job Dashboard",
-        adminAccess: true,
-        roles: ['admin', 'super_admin'],
-        component: JobPortalDashboard
-    },
-    {
-        path: "/jobportal-positions",
-        name: 'jobportalPositions',
-        exact: true,
-        pageTitle: "Job Positions",
-        adminAccess: true,
-        roles: ['admin', 'super_admin'],
-        component: Positions
-    },
-    {
-        path: "/jobportal-applicants",
-        name: 'jobportalpplicants',
-        exact: true,
-        pageTitle: "Job Applicants",
-        adminAccess: true,
-        roles: ['admin', 'super_admin'],
-        component: Applicants
-    },
-    {
-        path: "/jobportal-resumes",
-        name: 'jobportalResumes',
-        exact: true,
-        pageTitle: "Job Resumes",
-        adminAccess: true,
-        roles: ['admin', 'super_admin'],
-        component: Resumes
     },
     {
         path: "/login",
