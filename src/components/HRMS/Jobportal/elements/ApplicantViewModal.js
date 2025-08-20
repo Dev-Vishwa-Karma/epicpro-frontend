@@ -47,14 +47,6 @@ class ApplicantViewModal extends Component {
     
     if (!show || !applicant) return null;
 
-    const getAvatarColor = (name) => {
-      if (!name) return 'bg-secondary';
-      const colors = [
-        'bg-pink'
-      ];
-      const hash = name.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
-      return colors[hash % colors.length];
-    };
 
     // Parse skills for sidebar
     const getSkills = () => {
@@ -124,7 +116,6 @@ class ApplicantViewModal extends Component {
                       fontSize: "1.5rem",
                       fontWeight: "bold",
                       color: "#7B7493",
-                      marginBottom: "5px",
                       textTransform: "uppercase",
                       marginBottom: "15px",
                     }}
@@ -146,7 +137,7 @@ class ApplicantViewModal extends Component {
                           color: "#2C3E50",
                         }}
                       >
-                        Contact
+                        Contact Details
                       </h6>
                       <div style={{ fontSize: "14px", lineHeight: "1.6" }}>
                         {applicant.email && (
@@ -239,7 +230,7 @@ class ApplicantViewModal extends Component {
                           color: "#2C3E50",
                         }}
                       >
-                        Additional Info
+                        Additional Details
                       </h6>
                       <div
                         style={{

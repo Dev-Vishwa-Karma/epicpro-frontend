@@ -135,31 +135,9 @@ class ApplicantForm extends Component {
 
     const {
       fullname,
-      email,
-      phone,
-      resume,
+      email
     } = this.state;
 
-    const urlValidator = (label) => (val) => {
-      if (!val) return '';
-      try {
-        // Allow only http/https URLs
-        const u = new URL(val);
-        if (!/^https?:$/.test(u.protocol)) return `${label} must start with http or https.`;
-      } catch {
-        return `${label} is not a valid URL.`;
-      }
-      return '';
-    };
-
-    const moneyValidator = (label) => (val) => {
-      if (!val) return '';
-      // accept numbers with optional decimals and abbreviations like LPA, CTC etc handled as plain numbers
-      if (!/^\d+(\.\d{1,2})?$/.test(String(val).trim())) {
-        return `${label} must be a valid number.`;
-      }
-      return '';
-    };
 
     const validationSchema = [
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },

@@ -278,8 +278,7 @@ class AddApplicant extends Component {
     for (let year = startYear; year <= currentYear; year++) {
       years.push(year);
     }
-
-    const { fixNavbar } = this.props;
+    
     const {
       fullname,
       email,
@@ -290,7 +289,6 @@ class AddApplicant extends Component {
       address,
       experience,
       skills,
-      resume,
       joining_timeframe,
       custom_joining_time,
       bond_agreement,
