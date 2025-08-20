@@ -260,7 +260,7 @@ class ApplicantViewModal extends Component {
                         {applicant.marital_status && (
                           <div style={{ width: "50%", marginBottom: "8px" }}>
                             <div className="mb-2">
-                              <strong>MaritalS Status:</strong>{" "}
+                              <strong>Marital Status:</strong>{" "}
                               {applicant.marital_status}
                             </div>
                           </div>

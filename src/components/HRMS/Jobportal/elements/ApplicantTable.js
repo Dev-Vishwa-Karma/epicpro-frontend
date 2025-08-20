@@ -154,13 +154,13 @@ class ApplicantTable extends Component {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="8" style={{ padding: 0 }}>
-                        <TableSkeleton columns={8} rows={applicants.length} />
+                      <td colSpan="7" style={{ padding: 0 }}>
+                        <TableSkeleton columns={7} rows={applicants.length} />
                       </td>
                     </tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan="8" className="text-danger">{error}</td>
+                      <td colSpan="7" className="text-danger">{error}</td>
                     </tr>
                   ) : applicants.length === 0 ? (
                     <NoDataRow colSpan={8} message="No applicants found." />
@@ -205,7 +205,7 @@ class ApplicantTable extends Component {
                                       className={`fa fa-user-plus text-warning ${styles.referralIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
-                                      title="referral form"
+                                      title={applicant.employee_name ? `Referral by ${applicant.employee_name}` : 'referral form'}
                                     ></i>
                                   )}
                                 </span>

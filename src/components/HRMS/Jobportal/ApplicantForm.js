@@ -154,7 +154,7 @@ class ApplicantForm extends Component {
       <>            
         <AlertMessages
           showSuccess={showSuccess}           
-          successMessage="Thank you for applying!"
+          successMessage="Thanks! We’ve received your referral"
           showError={!!submitError} 
           errorMessage={submitError}
           setShowSuccess={val => this.setState({ showSuccess: val })}

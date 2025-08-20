@@ -11,7 +11,6 @@ import DuplicateDecisionModal from './elements/DuplicateDecisionModal';
 import Button from '../../common/formInputs/Button';
 import { shortformatDate } from '../../../utils';
 
-
 class Applicant extends Component {
 
   state = {
@@ -43,7 +42,6 @@ class Applicant extends Component {
   componentDidMount() {
     this.fetchApplicants();
   }
-
 
   fetchApplicants = () => {
     this.setState({ loading: true });
@@ -111,7 +109,6 @@ class Applicant extends Component {
       });
   };
 
-
   // New: trigger backend sync and refresh list
   handleSync = () => {
     if (this.state.isSyncing) return;
@@ -132,7 +129,6 @@ class Applicant extends Component {
           if (lastSync) {
             this.setState({ lastSyncTime: lastSync });
           }
-
           // Check if no data was received or counts are 0
           if ((insertedCount === 0 || insertedCount === undefined) && 
               (updatedCount === 0 || updatedCount === undefined)) {
@@ -152,7 +148,6 @@ class Applicant extends Component {
             });
           }
 
-          
           const selectedMap = {};
           if (Array.isArray(dupDetails)) {
             dupDetails.forEach(d => { selectedMap[d.email] = true; });
@@ -164,13 +159,6 @@ class Applicant extends Component {
 
           setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
           this.fetchApplicants();
-        } else if (response.status === 'duplicates') {
-          const dupDetails = response.data?.duplicates || [];
-          const selectedMap = {};
-          dupDetails.forEach(d => { selectedMap[d.email] = true; });
-          if (Array.isArray(dupDetails) && dupDetails.length > 0) {
-            this.setState({ showDuplicateDecision: true, duplicates: dupDetails, selectedDuplicates: selectedMap });
-          }
         } else {
           const errorMsg = response.data?.message || 'Sync failed';
           throw new Error(errorMsg);
@@ -317,13 +305,12 @@ class Applicant extends Component {
                     loading={isSyncing}
                   />
                   {this.state.lastSyncTime && (
-                    <div className="text-muted small mb-2">
+                    <div className="text-muted small mt-2">
                       Last sync: {shortformatDate(this.state.lastSyncTime)}
                     </div>
                   )}      
                 </div>
               </div>
-              
             </div>
           </div>
         </div>
