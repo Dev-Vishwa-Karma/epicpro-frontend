@@ -18,8 +18,8 @@ import Login from './Authentication/login';
 import ViewEmployee from './HRMS/Employee/ViewEmployee';
 import Link from './HRMS/Link/Link';
 import Notifications from './HRMS/notifications/Notifications';
-import Applicant from './HRMS/Jobportal/Applicant';
-import ApplicantForm from './HRMS/Jobportal/ApplicantForm';
+import Applicant from './HRMS/Applicants/Applicant';
+import ApplicantForm from './HRMS/Applicants/ApplicantForm';
 
 const Routes = [
     {
