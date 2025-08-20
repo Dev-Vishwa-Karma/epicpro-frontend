@@ -188,7 +188,7 @@ const AddUserForm = ({
 					className="btn btn-secondary"
 					data-dismiss="modal"
 				>
-					CLOSE
+					BACK
 				</button>
 			</div>
 		</div>

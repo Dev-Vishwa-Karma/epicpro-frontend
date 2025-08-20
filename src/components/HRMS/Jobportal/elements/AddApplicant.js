@@ -525,7 +525,7 @@ class AddApplicant extends Component {
               <div className="col-md-12">
                 <div className="form-group">
                   <label className="form-label">
-                    Resume/CV{" "}
+                    Resume{" "}
                     <small className="text-muted">
                       (PDF, DOC, DOCX, TXT, RTF)
                     </small>
