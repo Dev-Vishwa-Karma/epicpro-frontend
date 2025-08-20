@@ -7,6 +7,7 @@ const AddUserForm = ({
 	handleInputChangeForAddUser,
 	handleSelectChange,
 	addUser,
+	onTabChange,
 }) => {
 	return (
 		<div className="row clearfix">
@@ -183,13 +184,11 @@ const AddUserForm = ({
 					className="btn-primary mr-2"
 				/>
 
-				<button
-					type="button"
-					className="btn btn-secondary"
-					data-dismiss="modal"
-				>
-					BACK
-				</button>
+				<Button
+					label="Back"
+					onClick={() => onTabChange && onTabChange('list')}
+					className="btn-secondary"
+				/>
 			</div>
 		</div>
 	);

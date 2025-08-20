@@ -39,7 +39,9 @@ class Users extends Component {
             dataPerPage: 10,
 			loading: true,
 			errors: {},
-			ButtonLoading: false
+			ButtonLoading: false,
+			activeTab: 'list',
+			tabKey: 0
 		};
 	}
 
@@ -439,16 +441,19 @@ class Users extends Component {
 			}, 500);
 	};
 
-	handleTabChange = () => {
+	handleTabChange = (tabId) => {
 		// Clear errors when switching tabs
-		this.setState({ errors: {} });
+		if (tabId === 'add') {
+			this.setState((prevState) => ({ activeTab: tabId, errors: {}, tabKey: prevState.tabKey + 1 }));
+		} else {
+			this.setState({ activeTab: tabId, errors: {} });
+		}
 	};
 
 	render() {
 
 		const { fixNavbar } = this.props;
-		const { users, currentPage, dataPerPage, loading, showSuccess, successMessage, showError, errorMessage } = this.state;
-
+		const { users, currentPage, dataPerPage, loading, showSuccess, successMessage, showError, errorMessage, activeTab } = this.state;
 		// Pagination Logic
         const indexOfLastUser = currentPage * dataPerPage;
         const indexOfFirstUser = indexOfLastUser - dataPerPage;
@@ -471,17 +476,17 @@ class Users extends Component {
 								<ul className="nav nav-tabs page-header-tab">
 									<li className="nav-item">
 										<a
-											className="nav-link active"
+											className={`nav-link ${activeTab === 'list' ? 'active' : ''}`}
 											id="user-tab"
 											data-toggle="tab"
 											href="#user-list"
-											onClick={this.handleTabChange}
+											onClick={() => this.handleTabChange('list')}
 										>
 											List
 										</a>
 									</li>
 									<li className="nav-item">
-										<a className="nav-link" id="user-tab" data-toggle="tab" href="#user-add" onClick={this.handleTabChange}>
+										<a className={`nav-link ${activeTab === 'add' ? 'active' : ''}`} id="user-tab" data-toggle="tab" href="#user-add" onClick={() => this.handleTabChange('add')}>
 											Add New
 										</a>
 									</li>
@@ -492,7 +497,7 @@ class Users extends Component {
 					<div className="section-body mt-3">
 						<div className="container-fluid">
 							<div className="tab-content mt-3">
-								<div className="tab-pane fade show active" id="user-list" role="tabpanel">
+								<div className={`tab-pane fade ${activeTab === 'list' ? 'show active' : ''}`} id="user-list" role="tabpanel">
 									<div className="card">
 										<div className="card-header">
 											<h3 className="card-title">User List</h3>
@@ -534,14 +539,16 @@ class Users extends Component {
 										/>
 									)}
 								</div>
-								<div className="tab-pane fade" id="user-add" role="tabpanel">
+								<div className={`tab-pane fade ${activeTab === 'add' ? 'show active' : ''}`} id="user-add" role="tabpanel">
 									<div className="card">
 										<div className="card-body">
 										<AddUserForm
+											key={this.state.tabKey}
 											state={this.state}
 											handleInputChangeForAddUser={this.handleInputChangeForAddUser}
 											handleSelectChange={this.handleSelectChange}
 											addUser={this.addUser}
+											onTabChange={this.handleTabChange}
 										/>
 										</div>
 									</div>
