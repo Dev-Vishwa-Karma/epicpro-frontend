@@ -9,6 +9,7 @@ import InputField from '../../../common/formInputs/InputField';
 import { shortformatDate } from '../../../../utils';
 import styles from './applicant.module.css';
 import Avatar from '../../../common/Avatar';
+import SyncedApplicantViewModal from './SyncedApplicantViewModal';
 class ApplicantTable extends Component {
   static getStatusColor(status) {
     switch (status) {
@@ -33,6 +34,8 @@ class ApplicantTable extends Component {
       showRejectModal: false,
       rejectReason: '',
       rejectingForApplicant: null,
+      showSyncedModal: false,
+      selectedSynced: null
     };
   }
 
@@ -48,6 +51,16 @@ class ApplicantTable extends Component {
       showViewModal: false,
       selectedApplicant: null,
     });
+  };
+
+  handleViewSynced = (syncId) => {
+    const { syncedData } = this.props;
+    const found = Array.isArray(syncedData) ? syncedData.find(d => d.id === syncId) : null;
+    this.setState({ showSyncedModal: true, selectedSynced: found || null });
+  };
+
+  handleCloseSynced = () => {
+    this.setState({ showSyncedModal: false, selectedSynced: null });
   };
 
   handleStatusChange = (applicantId, newStatus, applicantName) => {
@@ -125,9 +138,10 @@ class ApplicantTable extends Component {
       totalPages,
       onPageChange,
       syncing,
+      syncedData,
     } = this.props;
 
-    const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus, showRejectModal, rejectReason } = this.state;
+    const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus, showRejectModal, rejectReason, showSyncedModal, selectedSynced } = this.state;
 
     return (
       <div className="col-lg-12 col-md-12 col-sm-12">
@@ -240,6 +254,7 @@ class ApplicantTable extends Component {
                                 { value: "rejected", label: "Rejected" }
                               ]}
                               firstOption={false}
+                              disabled={applicant.source === 'sync'}
                             />
                             
                           </div>
@@ -253,6 +268,11 @@ class ApplicantTable extends Component {
                               <a href="fake_url" className="dropdown-item" onClick={(e) => { e.preventDefault(); this.handleViewApplicant(applicant); }}>
                                 <i className="dropdown-icon fa fa-eye" /> View Details
                               </a>
+                              {applicant.source === 'sync' && applicant.sync_id && (
+                                <a href="fake_url" className="dropdown-item" onClick={(e) => { e.preventDefault(); this.handleViewSynced(applicant.sync_id); }}>
+                                  <i className="dropdown-icon fa fa-external-link" /> View Synced Data
+                                </a>
+                              )}
                               {applicant.resume_path && (
                                 <a
                                   href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
@@ -330,6 +350,12 @@ class ApplicantTable extends Component {
           onConfirm={this.handleConfirmSync}
           onCancel={this.handleCancelSync}
           isLoading={syncing}
+        />
+
+        <SyncedApplicantViewModal
+          show={this.state.showSyncedModal}
+          data={this.state.selectedSynced}
+          onClose={this.handleCloseSynced}
         />
       </div>
     );

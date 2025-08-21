@@ -37,6 +37,7 @@ class Applicant extends Component {
     selectedDuplicates: {},
     tabKey: 0,
     lastSyncTime: null,
+    syncedDataRaw: []
   };
 
   componentDidMount() {
@@ -110,6 +111,74 @@ class Applicant extends Component {
   };
 
   // New: trigger backend sync and refresh list
+  // handleSync = () => {
+  //   if (this.state.isSyncing) return;
+  //   this.setState({ isSyncing: true });
+    
+  //   getService.addCall('applicants.php', 'sync_applicant')
+  //     .then(response => {        
+  //       if (!response) {
+  //         throw new Error('No response received from server');
+  //       }
+  //       if (response.status === 'success') {
+  //         const insertedCount = response.data?.inserted || 0;
+  //         const updatedCount = response.data?.updated || 0;
+  //         const dupDetails = response.data?.duplicate_details || response.data?.duplicates || [];
+  //         const lastSync = response.data?.last_sync || null;
+
+  //         // Store the last sync time
+  //         if (lastSync) {
+  //           this.setState({ lastSyncTime: lastSync });
+  //         }
+  //         // Check if no data was received or counts are 0
+  //         if ((insertedCount === 0 || insertedCount === undefined) && 
+  //             (updatedCount === 0 || updatedCount === undefined)) {
+  //           this.setState({ 
+  //             syncSuccess: 'Sync data not available', 
+  //             showSuccess: true 
+  //           });
+  //         } else {
+  //           const successMsg = [
+  //             insertedCount > 0 ? `Sync ${insertedCount} new applicants` : '',
+  //             updatedCount > 0 ? `Updated ${updatedCount} existing applicants` : ''
+  //           ].filter(Boolean).join(' and ') || 'No new updates found';
+
+  //           this.setState({ 
+  //             syncSuccess: successMsg, 
+  //             showSuccess: true 
+  //           });
+  //         }
+
+  //         const selectedMap = {};
+  //         if (Array.isArray(dupDetails)) {
+  //           dupDetails.forEach(d => { selectedMap[d.email] = true; });
+  //         }
+
+  //         if (Array.isArray(dupDetails) && dupDetails.length > 0 && dupDetails[0]?.email) {
+  //           this.setState({ showDuplicateDecision: true, duplicates: dupDetails, selectedDuplicates: selectedMap });
+  //         }
+
+  //         setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 3000);
+  //         this.fetchApplicants();
+  //       } else {
+  //         const errorMsg = response.data?.message || 'Sync failed';
+  //         throw new Error(errorMsg);
+  //       }
+  //     })
+  //     .catch(err => {
+  //       const error = err?.response?.data?.message || err?.message || 'Sync failed';
+  //       this.setState({ 
+  //         error: error,
+  //         showError: true 
+  //       });
+  //       setTimeout(() => this.setState({ error: '', showError: false }), 3000);
+  //     })
+  //     .finally(() => {
+  //       this.setState({ isSyncing: false });
+  //     });
+  // };
+
+
   handleSync = () => {
     if (this.state.isSyncing) return;
     this.setState({ isSyncing: true });
@@ -119,34 +188,55 @@ class Applicant extends Component {
         if (!response) {
           throw new Error('No response received from server');
         }
+        // If backend returns mock array directly
+        if (response.status === 'success' && Array.isArray(response.data)) {
+          const nowIso = new Date().toISOString();
+          const existing = this.state.applicants;
+          const existingSyncIds = new Set(existing.filter(a => a.sync_id != null).map(a => a.sync_id));
+          const mapped = response.data
+            .filter(item => !existingSyncIds.has(item.id))
+            .map(item => ({
+              id: `sync_${item.id}`,
+              sync_id: item.id,
+              fullname: item.name,
+              email: item.email,
+              phone: item.phone,
+              address: [item.street, item.city, item.state, item.zip].filter(Boolean).join(', '),
+              created_at: item.created_at || nowIso,
+              experience: null,
+              experience_display: null,
+              status: 'pending',
+              source: 'sync',
+            }));
+
+          this.setState(prev => ({
+            applicants: [...mapped, ...prev.applicants],
+            isSyncing: false,
+            lastSyncTime: nowIso,
+            syncSuccess: mapped.length > 0 ? `Synced ${mapped.length} applicants` : 'Sync data not available',
+            showSuccess: true,
+            // store raw for viewing in modal via table prop
+            syncedDataRaw: response.data,
+          }));
+          setTimeout(() => this.setState({ syncSuccess: '', showSuccess: false }), 2500);
+          return;
+        }
+
+        // Fallback: previous inserted/updated flow
         if (response.status === 'success') {
           const insertedCount = response.data?.inserted || 0;
           const updatedCount = response.data?.updated || 0;
           const dupDetails = response.data?.duplicate_details || response.data?.duplicates || [];
           const lastSync = response.data?.last_sync || null;
 
-          // Store the last sync time
-          if (lastSync) {
-            this.setState({ lastSyncTime: lastSync });
-          }
-          // Check if no data was received or counts are 0
-          if ((insertedCount === 0 || insertedCount === undefined) && 
-              (updatedCount === 0 || updatedCount === undefined)) {
-            this.setState({ 
-              syncSuccess: 'Sync data not available', 
-              showSuccess: true 
-            });
-          } else {
-            const successMsg = [
-              insertedCount > 0 ? `Sync ${insertedCount} new applicants` : '',
-              updatedCount > 0 ? `Updated ${updatedCount} existing applicants` : ''
-            ].filter(Boolean).join(' and ') || 'No new updates found';
+          if (lastSync) this.setState({ lastSyncTime: lastSync });
 
-            this.setState({ 
-              syncSuccess: successMsg, 
-              showSuccess: true 
-            });
-          }
+          const successMsg = [
+            insertedCount > 0 ? `Sync ${insertedCount} new applicants` : '',
+            updatedCount > 0 ? `Updated ${updatedCount} existing applicants` : ''
+          ].filter(Boolean).join(' and ') || 'No new updates found';
+
+          this.setState({ syncSuccess: successMsg, showSuccess: true });
 
           const selectedMap = {};
           if (Array.isArray(dupDetails)) {
@@ -349,6 +439,7 @@ class Applicant extends Component {
                     onDelete={this.openDeleteModal}
                     onSync={this.handleSync}
                     syncing={isSyncing}
+                    syncedData={this.state.syncedDataRaw}
                   />
                 </div>
               </div>
