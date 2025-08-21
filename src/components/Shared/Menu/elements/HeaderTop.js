@@ -24,7 +24,6 @@ const HeaderTop = ({
         </div>
         <div className="hright">
           <div className="dropdown">
-            {(user.role === 'admin' || user.role === 'super_admin') && (
               <div>
                 <span className="nav-link icon settingbar" onClick={toggleRightSidebar}>
                   <i
@@ -35,7 +34,6 @@ const HeaderTop = ({
                   />
                 </span>
               </div>
-            )}
             <p className="nav-link icon menu_toggle" onClick={() => toggleLeftMenu(!istoggleLeftMenu)}>
               <i className="fa fa-align-left" />
             </p>
