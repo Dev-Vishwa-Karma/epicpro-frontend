@@ -288,7 +288,7 @@ class ApplicantForm extends Component {
                     <Button
                       label="Reset"
                       type="button"
-                      className="btn-light mr-2"
+                      className="btn-secondary mr-2"
                       onClick={this.handleReset}
                       disabled={isSubmitting}
                       icon="fa fa-undo"
@@ -299,7 +299,6 @@ class ApplicantForm extends Component {
                       type="submit"
                       disabled={isSubmitting}
                       className="btn-primary px-4"
-                      style={{ fontWeight: 600 }}
                       iconStyle={{ marginRight: '8px' }}
                       loading={isSubmitting}
                     />
