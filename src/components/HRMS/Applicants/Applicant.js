@@ -299,11 +299,21 @@ class Applicant extends Component {
                     label={isSyncing ? "Syncing..." : `Sync`}
                     onClick={this.handleSync}
                     disabled={isSyncing}
-                    className="btn-sm btn-primary"
-                    icon={isSyncing ? "" : "fa fa-refresh"}
-                    iconStyle={{ marginRight: isSyncing ? '0' : '8px' }}
-                    loading={isSyncing}
+                    className="btn-sm btn-primary mt-2"
+                    icon={isSyncing ? "fa fa-refresh" : "fa fa-refresh"}
+                    iconStyle={{
+                      marginRight: isSyncing ? '2' : '8px',
+                      animation: isSyncing ? 'spin 1s linear infinite' : 'none'
+                    }}
                   />
+                  <style>
+                    {`
+                      @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                      }
+                    `}
+                  </style>
                   {this.state.lastSyncTime && (
                     <div className="text-muted small mt-2">
                       Last sync: {shortformatDate(this.state.lastSyncTime)}

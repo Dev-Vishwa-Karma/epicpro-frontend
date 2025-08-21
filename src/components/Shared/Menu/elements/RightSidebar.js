@@ -16,8 +16,15 @@ class RightSidebar extends Component {
       this.getTodayActivity()
   }
 
+  componentDidUpdate(prevProps) {
+      if (!prevProps.isOpenRightSidebar && this.props.isOpenRightSidebar) {
+          this.getTodayActivity();
+      }
+  }
+
   getTodayActivity = () => {
    if (window.user.role === 'employee'){
+      this.setState({ loading: true });
       getService.getCall('activities.php', {
         action: 'view',
         user_id: window.user.id,
@@ -34,6 +41,7 @@ class RightSidebar extends Component {
         })
         .catch((err) => {
           console.error(err);
+          this.setState({ loading: false, error: err && err.message ? err.message : 'Failed to fetch activities' });
         });
      }
   };
@@ -56,7 +64,7 @@ class RightSidebar extends Component {
 
     return (
       <div id="rightsidebar" className={`right_sidebar ${isOpenRightSidebar ? 'open' : ''}`}>
-        <span className="p-3 settingbar float-right" onClick={toggleRightSidebar}>
+        <span className="p-3 settingbar float-right" onClick={() => { toggleRightSidebar(); this.getTodayActivity(); }}>
           <i className="fa fa-close" />
         </span>
         <ul className="nav nav-tabs" role="tablist">
@@ -70,7 +78,7 @@ class RightSidebar extends Component {
           {(window.user.role === 'employee') && (
           <li className="nav-item">
             <a className="nav-link active" data-toggle="tab" href="#activity" aria-expanded="false">
-              Activity
+              Today Activity
             </a>
           </li>
           )}
@@ -161,14 +169,14 @@ class RightSidebar extends Component {
           {(window.user.role === 'employee' ) && (
           <div role="tabpanel" className="tab-pane vivify fadeIn active" id="activity" aria-expanded="false">
               <ul className="new_timeline mt-3">
-                  {this.state.activitiesLoading && (
+                  {this.state.loading && (
                       <li>
                           <div className="desc">
                               <h4>Loading...</h4>
                           </div>
                       </li>
                   )}
-                  {!this.state.activitiesLoading && this.state.activities.length === 0 && (
+                  {!this.state.loading && this.state.activities.length === 0 && (
                       <li>
                           <div className="desc">
                               <BlankState message="No activities found" />

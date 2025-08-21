@@ -78,6 +78,27 @@ class Menu extends Component {
 		} else {
 			this.handler('hr', 'dashboard');
 		}
+		// Add global click handler for closing sidebar on small screens
+		document.addEventListener('mousedown', this.handleGlobalClick, true);
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('mousedown', this.handleGlobalClick, true);
+	}
+
+	handleGlobalClick = (event) => {
+		if (this.props.istoggleLeftMenu && window.innerWidth <= 991) {
+			const sidebar = document.getElementById('left-sidebar');
+			const menuBtn = document.querySelector('.menu_toggle');
+			if (
+				sidebar &&
+				!sidebar.contains(event.target) &&
+				menuBtn &&
+				!menuBtn.contains(event.target)
+			) {
+				this.toggleLeftMenu(false);
+			}
+		}
 	}
 
 	componentDidUpdate(prevprops, prevstate) {

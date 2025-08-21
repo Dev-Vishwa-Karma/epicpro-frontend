@@ -300,7 +300,6 @@ class ApplicantForm extends Component {
                       disabled={isSubmitting}
                       className="btn-primary px-4"
                       style={{ fontWeight: 600 }}
-                      icon={isSubmitting ? '' : 'fa fa-paper-plane'}
                       iconStyle={{ marginRight: '8px' }}
                       loading={isSubmitting}
                     />
