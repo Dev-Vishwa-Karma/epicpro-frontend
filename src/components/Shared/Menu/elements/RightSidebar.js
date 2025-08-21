@@ -28,7 +28,6 @@ class RightSidebar extends Component {
         .then((data) => {
           if (data.status === "success") {
             this.setState({ activities: data.data, loading: false });
-            console.log('act ', this.state.activities)
           } else {
             this.setState({ activities: [], loading: false, error: data.message });
           }
@@ -50,10 +49,8 @@ class RightSidebar extends Component {
       handleFixNavbar, 
       handleDarkHeader, 
       handleMinSidebar, 
-      handleSidebar, 
-      handleIconColor, 
-      handleGradientColor, 
-      handleRtl 
+      handleSidebar,  
+      handleGradientColor,  
     } = this.props;
     const { activities,loading} = this.state;
 
@@ -63,18 +60,23 @@ class RightSidebar extends Component {
           <i className="fa fa-close" />
         </span>
         <ul className="nav nav-tabs" role="tablist">
+          {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
           <li className="nav-item">
             <a className="nav-link active" data-toggle="tab" href="#Settings" aria-expanded="true">
               Settings
             </a>
           </li>
+          )}
+          {(window.user.role === 'employee') && (
           <li className="nav-item">
-            <a className="nav-link" data-toggle="tab" href="#activity" aria-expanded="false">
+            <a className="nav-link active" data-toggle="tab" href="#activity" aria-expanded="false">
               Activity
             </a>
           </li>
+          )}
         </ul>
         <div className="tab-content">
+          {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
           <div role="tabpanel" className="tab-pane vivify fadeIn active" id="Settings" aria-expanded="true">
             <div className="mb-4">
               <h6 className="font-14 font-weight-bold text-muted">Font Style</h6>
@@ -155,8 +157,9 @@ class RightSidebar extends Component {
               </ul>
             </div>
           </div>
-
-          <div role="tabpanel" className="tab-pane vivify fadeIn" id="activity" aria-expanded="false">
+          )}
+          {(window.user.role === 'employee' ) && (
+          <div role="tabpanel" className="tab-pane vivify fadeIn active" id="activity" aria-expanded="false">
               <ul className="new_timeline mt-3">
                   {this.state.activitiesLoading && (
                       <li>
@@ -189,8 +192,7 @@ class RightSidebar extends Component {
                   })}
               </ul>
           </div>
-
-
+          )}
           </div>
         </div>
       
