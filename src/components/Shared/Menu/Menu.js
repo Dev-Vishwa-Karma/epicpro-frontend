@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import MetisMenu from 'react-metismenu';
 import { Switch, Route } from 'react-router-dom';
-import Header from '../Header';
+import Header from '../Header/Header';
 import Footer from '../Footer';
 import DefaultLink from '../DefaultLink';
 import {
@@ -203,213 +203,97 @@ class Menu extends Component {
 
 	render() {
 		const content = [
-			{
-				"id": 'Directories',
-				"label": "Directories"
-			},
-			{
-				"id": 1,
-				"icon": "icon-rocket",
-				"label": "HRMS",
-				"to": "#!",
-				content: [
-					{
-						"id": 3,
-						"label": "Dashboard",
-						"to": "/"
-					},
-					{
-						"id": 7,
-						"label": "Activities",
-						"to": "/hr-activities"
-					},
-					{
-						"id": 8,
-						"label": "Holidays",
-						"to": "/hr-holidays"
-					},
-					{
-						"id": 9,
-						"label": "Events",
-						"to": "/hr-events"
-					},
-				
-					{
-						"id": 12,
-						"label": "Reports",
-						"to": "/hr-report"
-					},
-					{
-						"id": 39,
-						"label": "Gallery",
-						"to": "/gallery",
-					},
-					{
-						"id": 20,
-						"label": "Todo List",
-						"to": "/project-todo"
-					},
-					{
-						"id": 41,
-						"label": "Notifications",
-						"to": "/notifications"
-					},
-					{
-						"id": 44,
-						"label": "Referral",
-						"to": "/job-application"
-					}
-				]
-			},
-			
-		];
+				{
+					"id": 1,
+					"icon": "icon-rocket",
+					"label": "HRMS",
+					"to": "#!",
+					"content": [
+					{ "id": 2, "label": "Dashboard", "to": "/" },
+					{ "id": 3, "label": "Activities", "to": "/hr-activities" },
+					{ "id": 4, "label": "Holidays", "to": "/hr-holidays" },
+					{ "id": 5, "label": "Events", "to": "/hr-events" },
+					{ "id": 6, "label": "Reports", "to": "/hr-report" },
+					{ "id": 7, "label": "Gallery", "to": "/gallery" },
+					{ "id": 8, "label": "Todo List", "to": "/project-todo" },
+					{ "id": 9, "label": "Notifications", "to": "/notifications" },
+					{ "id": 10, "label": "Referral", "to": "/job-application" }
+					]
+				}
+			];
 
-		// Only super admin or admin can see report
-		// Check if user exists in localStorage
-		const user = JSON.parse(localStorage.getItem('user'));
-		if (!user) {
-			// If no user is found, redirect to the login page
-			window.location.href = '/login';
+			// Check logged-in user
+			const user = JSON.parse(localStorage.getItem("user"));
+			if (!user) {
+			window.location.href = "/login";
 			return;
-		} else {
-			window.user = user; // Attach user to the global window object
-			// Show "Referral" menu only for employees
+			} else {
+			window.user = user;
+
+			// Remove "Referral" if not employee
 			const hrmsSection = content.find(item => item.id === 1);
-			if (hrmsSection && window.user.role !== 'employee') {
-				hrmsSection.content = hrmsSection.content.filter(item => item.id !== 44);
+			if (hrmsSection && window.user.role !== "employee") {
+				hrmsSection.content = hrmsSection.content.filter(item => item.id !== 10);
 			}
-			if (window.user.role === 'super_admin' || window.user.role === 'admin') {
-				// Find the HRMS section
-				const hrmsSection = content.find(item => item.id === 1);
-				if (hrmsSection) {
-					// Add the "Users" item to the HRMS section after the dashboard item
-					const usersItem = {
-						"id": 4,
-						"label": "Users",
-						"to": "/hr-users"
-					};
 
-					// Find the index of "Dashboard" (id: 3)
-					const dashboardIndex = hrmsSection.content.findIndex(item => item.id === 3);
+			if (["super_admin", "admin"].includes(window.user.role)) {
+				const hrms = content.find(item => item.id === 1);
 
-					if (dashboardIndex !== -1) {
-						// Insert "Users" right after "Dashboard"
-						hrmsSection.content.splice(dashboardIndex + 1, 0, usersItem);
-					}
+				if (hrms) {
+				// Insert "Users" after Dashboard
+				const usersItem = { id: 11, label: "Users", to: "/hr-users" };
+				const dashboardIndex = hrms.content.findIndex(item => item.id === 2);
+				if (dashboardIndex !== -1) hrms.content.splice(dashboardIndex + 1, 0, usersItem);
 
-					// Add the "Department" item to the HRMS section after the users item
-					const departmentItem = {
-						"id": 5,
-						"label": "Department",
-						"to": "/hr-department"
-					};
+				// Insert "Department" after Users
+				const deptItem = { id: 12, label: "Department", to: "/hr-department" };
+				const usersIndex = hrms.content.findIndex(item => item.id === 11);
+				if (usersIndex !== -1) hrms.content.splice(usersIndex + 1, 0, deptItem);
 
-					// Find the index of "Users" (id: 4)
-					const usersIndex = hrmsSection.content.findIndex(item => item.id === 4);
+				// Insert "Employee" after Department
+				const empItem = { id: 13, label: "Employee", to: "/hr-employee" };
+				const deptIndex = hrms.content.findIndex(item => item.id === 12);
+				if (deptIndex !== -1) hrms.content.splice(deptIndex + 1, 0, empItem);
 
-					if (usersIndex !== -1) {
-						// Insert "Users" right after "Dashboard"
-						hrmsSection.content.splice(usersIndex + 1, 0, departmentItem);
-					}
+				// Insert "Statistics" after Employee
+				const statItem = { id: 14, label: "Statistics", to: "/statistics" };
+				const empIndex = hrms.content.findIndex(item => item.id === 13);
+				if (empIndex !== -1) hrms.content.splice(empIndex + 1, 0, statItem);
 
-					// Add the "Employee" item to the HRMS section after the department item
-					const activities = {
-						"id": 6,
-						"label": "Employee",
-						"to": "/hr-employee"
-					};
-
-					// Find the index of "Department" (id: 5)
-					const activitiesIndex = hrmsSection.content.findIndex(item => item.id === 5);
-
-					if (activitiesIndex !== -1) {
-						// Insert "Employee" before "Activities"
-						hrmsSection.content.splice(activitiesIndex + 1, 0, activities);
-					}
-
-					const statistics = {
-						"id": 31,
-						"label": "Statistics",
-						"to": "/statistics"
-					};
-
-					// Find the index of "Department" (id: 5)
-					const statisticsIndex = hrmsSection.content.findIndex(item => item.id === 6);
-
-					if (statisticsIndex !== -1) {
-						// Insert "Employee" before "Activities"
-						hrmsSection.content.splice(statisticsIndex + 1, 0, statistics);
-					}
-
-					// Add the "Link" item to the HRMS section after the Todo List item (id: 20)
-					const linkItem = {
-						"id": 40,
-						"label": "Link",
-						"to": "/Link"
-					};
-					// Find the index of "Todo List" (id: 20)
-					const todoListIndex = hrmsSection.content.findIndex(item => item.id === 20);
-					if (todoListIndex !== -1) {
-						hrmsSection.content.splice(todoListIndex + 1, 0, linkItem);
-					} else {
-						// If Todo List is not found, add Link at the end
-						hrmsSection.content.push(linkItem);
-					}
-
+				// Insert "Link" after Todo
+				const linkItem = { id: 15, label: "Link", to: "/link" };
+				const todoIndex = hrms.content.findIndex(item => item.id === 8);
+				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
+				else hrms.content.push(linkItem);
 				}
 
-				// Find the index of "Projects section"
-				const projectSection = content.find(item => item.id === 13)
-
-				if (!projectSection) {
-					content.push(
-						{
-							"id": 13,
-							"icon": "icon-cup",
-							"label": "Project",
-							content: [
-								{
-									"id": 15,
-									"label": "Project List",
-									"to": "/project-list"
-								},
-								{
-									"id": 19,
-									"label": "Clients",
-									"to": "/project-clients"
-								},
-							]
-						},
-					);
+				// Add Project section if not exists
+				if (!content.find(item => item.id === 16)) {
+					content.push({
+						id: 16,
+						icon: "icon-cup",
+						label: "Project",
+						content: [
+						{ id: 17, label: "Project List", to: "/project-list" },
+						{ id: 18, label: "Clients", to: "/project-clients" }
+						]
+					});
 				}
 
-
-				const jobPortalSection = content.find(item => item.id === 42)
-
-				if (!jobPortalSection) {
-					content.push(
-						{
-							"id": 42,
-							"icon": "icon-briefcase",
-							"label": "Job Board",
-							content: [
-								{
-									"id": 43,
-									"label": "Applicants",
-									"to": "/applicant"
-								},
-								// {
-								// 	"id": 44,
-								// 	"label": "Job Application",
-								// 	"to": "/job-application"
-								// }
-							]
-						},
-					);
+				// Add Job Board section if not exists
+				if (!content.find(item => item.id === 19)) {
+					content.push({
+						id: 19,
+						icon: "icon-briefcase",
+						label: "Job Board",
+						content: [
+						{ id: 20, label: "Applicants", to: "/applicant" }
+						]
+					});
 				}
-				
 			}
 		}
+
 
 		const { isOpenRightSidebar } = this.state
 		const { darkMinSidebar, istoggleLeftMenu} = this.props

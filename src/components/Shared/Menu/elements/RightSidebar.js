@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { getToday,shortformatDate } from '../../../../utils';
+import { getToday } from '../../../../utils';
 import { getService } from '../../../../services/getService';
 import BlankState from '../../../common/BlankState';
 

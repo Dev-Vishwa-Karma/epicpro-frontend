@@ -180,7 +180,7 @@ const Routes = [
 
     //Git-Excel-Codebase
     {
-        path: "/Link",
+        path: "/link",
         name: 'Link-Work',
         exact: true,
         pageTitle: "Link",
