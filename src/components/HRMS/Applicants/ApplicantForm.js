@@ -129,8 +129,7 @@ class ApplicantForm extends Component {
     }));
   };
 
-  handleSubmit = (e) => {
-    e.preventDefault();
+  handleSubmit = () => {
     this.setState({ submitError: null });
 
     const {
@@ -196,7 +195,7 @@ class ApplicantForm extends Component {
           
           <div className="row">
             <div className="col-lg-8 mb-4">
-              <form className="card shadow-sm" onSubmit={this.handleSubmit} noValidate autoComplete="off">
+              <div className="card shadow-sm">
                 <div
                   className="card-header d-flex align-items-center"
                   style={{
@@ -296,15 +295,16 @@ class ApplicantForm extends Component {
                     />
                     <Button
                       label={isSubmitting ? 'Submitting...' : 'Submit Referral'}
-                      type="submit"
+                      type="button"
                       disabled={isSubmitting}
                       className="btn-primary px-4"
                       iconStyle={{ marginRight: '8px' }}
                       loading={isSubmitting}
+                      onClick={this.handleSubmit}
                     />
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
 
             <div className="col-lg-4">

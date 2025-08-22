@@ -146,8 +146,7 @@ class AddApplicant extends Component {
     }));
   };
 
-  addApplicant = (e) => {
-    e.preventDefault();
+  addApplicant = () => {
     this.setState({
       ButtonLoading: true,
       showError: false,
@@ -310,7 +309,7 @@ class AddApplicant extends Component {
           setShowSuccess={(val) => this.setState({ showSuccess: val })}
           setShowError={(val) => this.setState({ showError: val })}
         />
-        <form className="card" noValidate onSubmit={this.addApplicant}>
+        <div className="card" noValidate>
           <div className="card-body">
             {/* <h3 className="card-title">Add Applicant</h3> */}
             <div className="row">
@@ -557,12 +556,13 @@ class AddApplicant extends Component {
             />
             <Button
               label="Add Applicant"
-              type="submit"
+              type="button"
               className="btn-primary"
               loading={this.state.ButtonLoading}
+              onClick={this.addApplicant}
             />
           </div>
-        </form>
+        </div>
       </>
     );
   }

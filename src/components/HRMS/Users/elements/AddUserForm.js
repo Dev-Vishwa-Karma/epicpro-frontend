@@ -171,7 +171,7 @@ const AddUserForm = ({
 						</tbody>
 					</table>
 				</div>
-
+					<div className='d-flex justify-content-end'>
 				<Button
 					label={state.ButtonLoading ? (
 						<>
@@ -189,6 +189,7 @@ const AddUserForm = ({
 					onClick={() => onTabChange && onTabChange('list')}
 					className="btn-secondary"
 				/>
+				</div>
 			</div>
 		</div>
 	);
