@@ -44,7 +44,7 @@ class CalendarWithTabs extends Component {
             showSuccess: false,
             errorMessage: "",
             showError: false,
-            activeTab: "calendar",
+            activeTab: this.props.activeTab || "calendar",
             activities: [],
             reports: [],
             leaves: [],
@@ -83,15 +83,11 @@ class CalendarWithTabs extends Component {
         };
     }
 
-    // Function to dismiss messages
-    dismissMessages = () => {
-        this.setState({
-            showSuccess: false,
-            successMessage: "",
-            showError: false,
-            errorMessage: "",
-        });
-    };
+    componentDidMount() {
+        if (this.props.activeTab && this.props.activeTab !== this.state.activeTab) {
+            this.setState({ activeTab: this.props.activeTab });
+        }
+    }
 
     componentDidUpdate(prevProps) {
         if (prevProps.employeeId !== this.props.employeeId) {
@@ -105,7 +101,21 @@ class CalendarWithTabs extends Component {
                 this.handleApplyFilter();
             }
         }
+        // Sync when only tab changes
+        if (prevProps.activeTab !== this.props.activeTab && this.props.activeTab !== this.state.activeTab) {
+            this.setState({ activeTab: this.props.activeTab || 'calendar' });
+        }
     }
+
+    // Function to dismiss messages
+    dismissMessages = () => {
+        this.setState({
+            showSuccess: false,
+            successMessage: "",
+            showError: false,
+            errorMessage: "",
+        });
+    };
 
     getDepartments = () => {
         // Get department data from departments table
@@ -790,7 +800,7 @@ class CalendarWithTabs extends Component {
                                                 </div>
                                             </div>
                                                             
-                                        <ActivitiesTime activities = { activities } />
+                                        <ActivitiesTime activities = { activities } employeeId={this.state.employeeId || this.props.employeeId} fromDate={this.state.filterFromDate} toDate={this.state.filterToDate} />
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "profile" ? "show active" : ""}`} id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
                                         <div className="card">

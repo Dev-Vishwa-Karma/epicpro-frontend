@@ -6,3 +6,9 @@
 .margintopadd{
     margin-top: 10%!important;
 }
+
+  .dropdown-item.active,
+  .dropdown-item:active {
+    background-color: transparent !important;
+    color: inherit !important;
+  }

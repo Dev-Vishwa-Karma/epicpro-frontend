@@ -79,7 +79,6 @@ const EditReportModal = ({
                                             value={break_duration_in_minutes || 0}
                                             onChange={(e) => handleChange('break_duration_in_minutes', e.target.value)}
                                             error={error?.break_duration_in_minutes}
-                                            disabled={true}
                                         />
                                     </div>
 

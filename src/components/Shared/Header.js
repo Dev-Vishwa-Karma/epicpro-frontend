@@ -866,7 +866,7 @@ class Header extends Component {
                   <div className="dropdown d-flex">
                     <a
                       href="/#"
-                      className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1"
+                      className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1 user-icon"
                       data-toggle="dropdown"
                     >
                       <i className="fa fa-user" />
@@ -943,9 +943,8 @@ class Header extends Component {
                               tab: "saturday-settings",
                             },
                           }}
-                          className={`dropdown-item ${
-                            currentTab === "saturday-settings" ? "active" : ""
-                          }`}
+                          className="dropdown-item"
+                          activeClassName="no-active-bg"
                           isActive={(match, location) =>
                             location?.state?.tab === "saturday-settings"
                           }
