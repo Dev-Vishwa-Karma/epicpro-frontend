@@ -6,6 +6,11 @@ import AlertMessages from '../../common/AlertMessages';
 import { appendDataToFormData } from '../../../utils';
 import Button from '../../common/formInputs/Button';
 
+// Provide minimal process shim for browser builds if needed
+if (typeof window !== 'undefined' && typeof window.process === 'undefined') {
+  window.process = { env: {} };
+}
+
 const initialState = {
   fullname: '',
   email: '',
@@ -16,6 +21,7 @@ const initialState = {
   isSubmitting: false,
   submitError: null,
   showSuccess: false,
+  isParsingResume: false,
 };
 
 class ApplicantForm extends Component {
@@ -127,6 +133,133 @@ class ApplicantForm extends Component {
       resume: file || null,
       errors: { ...prev.errors, resume: '' },
     }));
+
+    if (file) {
+      this.parseResume(file);
+    }
+  };
+
+  parseResume = async (file) => {
+    this.setState({ isParsingResume: true });
+    try {
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      if (ext === 'pdf') {
+        const text = await this.extractTextFromPdf(file);
+        this.extractResumeData(text);
+      } else if (ext === 'docx') {
+        const text = await this.extractTextFromDocx(file);
+        this.extractResumeData(text);
+      } else if (ext === 'txt' || ext === 'rtf' || file.type === 'text/plain') {
+        const text = await this.readFileAsText(file);
+        this.extractResumeData(text);
+      } else {
+        const text = await this.readFileAsText(file);
+        this.extractResumeData(text);
+      }
+    } catch (err) {
+      console.error('Resume parse error:', err);
+    } finally {
+      this.setState({ isParsingResume: false });
+    }
+  };
+
+  ensureScript = (src, globalVar) =>
+    new Promise((resolve, reject) => {
+      if (globalVar && window[globalVar]) return resolve(window[globalVar]);
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) {
+        existing.addEventListener('load', () => resolve(window[globalVar]));
+        existing.addEventListener('error', reject);
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = () => resolve(window[globalVar]);
+      s.onerror = reject;
+      document.body.appendChild(s);
+    });
+
+  readFileAsText = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve(ev.target.result || '');
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+
+  extractTextFromPdf = async (file) => {
+    await this.ensureScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'pdfjsLib');
+    const pdfjsLib = window.pdfjsLib;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let textContent = '';
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      const strings = content.items.map((item) => item.str);
+      textContent += strings.join(' ') + '\n';
+    }
+    return textContent;
+  };
+
+  extractTextFromDocx = async (file) => {
+    await this.ensureScript('https://unpkg.com/mammoth/mammoth.browser.min.js', 'mammoth');
+    const mammoth = window.mammoth;
+    const arrayBuffer = await file.arrayBuffer();
+    const { value } = await mammoth.extractRawText({ arrayBuffer });
+    return value || '';
+  };
+
+  extractResumeData = (rawContent) => {
+    const text = rawContent || '';
+    const lower = text.toLowerCase();
+    const extracted = {};
+
+    // Email
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/;
+    const emailMatch = text.match(emailRegex);
+    if (emailMatch) extracted.email = emailMatch[0];
+
+    // Phones
+    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+    const phoneMatches = text.match(phoneRegex);
+    if (phoneMatches && phoneMatches.length > 0) {
+      const cleaned = phoneMatches
+        .map((p) => (p || '').replace(/[^\d]/g, ''))
+        .filter((p) => p.length >= 10)
+        .map((p) => p.slice(-10));
+      if (cleaned[0]) extracted.phone = cleaned[0];
+    }
+
+    // Full name heuristic
+    const nameLabelRegex = /(name|full\s*name)[:\s]*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/i;
+    const nameLabelMatch = text.match(nameLabelRegex);
+    if (nameLabelMatch && nameLabelMatch[2]) {
+      extracted.fullname = nameLabelMatch[2].trim();
+    } else {
+      const firstLine = (text.split(/\n|\r/).find((l) => /([A-Z][a-z]+\s+){1,}[A-Z][a-z]+/.test(l)) || '').trim();
+      if (firstLine) {
+        const m = firstLine.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/);
+        if (m && m[1]) extracted.fullname = m[1];
+      }
+    }
+
+    this.applyExtractedData(extracted);
+  };
+
+  applyExtractedData = (data) => {
+    const updates = {};
+    if (data.fullname && !this.state.fullname) updates.fullname = data.fullname;
+    if (data.email && !this.state.email) updates.email = data.email;
+    if (data.phone && !this.state.phone) updates.phone = data.phone;
+
+    if (Object.keys(updates).length) {
+      this.setState({ ...updates, showSuccess: true });
+      setTimeout(() => this.setState({ showSuccess: false }), 2500);
+    }
   };
 
   handleSubmit = () => {
@@ -165,6 +298,7 @@ class ApplicantForm extends Component {
       submitError,
       isSubmitting,
       showSuccess,
+      isParsingResume,
     } = this.state;
 
     return (
@@ -256,7 +390,7 @@ class ApplicantForm extends Component {
 
                     <div className="col-md-6">
                       <label htmlFor="resume" style={{ fontWeight: 500 }}>
-                        Resume <small className="text-muted">(PDF, DOC, DOCX, TXT, RTF)</small>
+                        Resume <small className="text-muted">(PDF, DOCX, DOC, TXT, RTF)</small>
                       </label>
                       <div className="custom-file">
                         <InputField
@@ -264,13 +398,19 @@ class ApplicantForm extends Component {
                           id="resume"
                           name="resume"
                           onChange={this.handleFileChange}
-                          accept=".pdf,.doc,.docx,.txt,.rtf"
-                          disabled={isSubmitting}
+                          accept=".pdf,.docx,.doc,.txt,.rtf"
+                          disabled={isSubmitting || isParsingResume}
                         />
                         <label className="custom-file-label" htmlFor="resume">
                           {resume ? resume.name : 'Choose file...'}
                         </label>
                         {errors.resume && <div className="invalid-feedback d-block">{errors.resume}</div>}
+                        {isParsingResume && (
+                          <div className="text-muted small mt-1">
+                            <i className="fa fa-spinner fa-spin mr-1"></i>
+                            Parsing resume...
+                          </div>
+                        )}
                       </div>
                       <small className="form-text text-muted">
                         Max file size: 2MB.
