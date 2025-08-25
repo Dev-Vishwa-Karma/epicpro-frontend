@@ -34,7 +34,7 @@ class RightSidebar extends Component {
       })
         .then((data) => {
           if (data.status === "success") {
-            this.setState({ activities: data.data, loading: false });
+            this.setState({ activities: Array.isArray(data.data.activities) ? data.data.activities : [], loading: false });
           } else {
             this.setState({ activities: [], loading: false, error: data.message });
           }

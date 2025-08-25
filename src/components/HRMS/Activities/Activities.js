@@ -10,6 +10,8 @@ import AddBreakModal from './elements/AddBreakModal';
 import BreakReasonModal from './elements/BreakReasonModal';
 import { appendDataToFormData, getToday, formatDate } from '../../../utils';
 import Button from '../../common/formInputs/Button';
+import InfiniteScroll from 'react-infinite-scroll-component';
+
 class Activities extends Component {
   constructor(props) {
     super(props);
@@ -35,7 +37,11 @@ class Activities extends Component {
       colbutton: (window.user.role === "admin" || window.user.role === "super_admin") ? 4 : 6,
       col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
       errors: {},
-      breakReasonErrors: {}
+      breakReasonErrors: {},
+      page: 1,
+      hasMore: true,
+      totalPages: 1,
+      limit: 10,
     };
   }
 
@@ -368,8 +374,8 @@ class Activities extends Component {
   };
 
   handleApplyFilter = async () => {
-    this.setState({ loading: true });
-    const { filterFromDate, filterToDate, filterEmployeeId } = this.state;
+    this.setState({ loading: true, page: 1, activities: [], hasMore: true });
+    const { filterFromDate, filterToDate, filterEmployeeId, limit } = this.state;
     let user_id = '';
     if (this.props.selectedEmployeeId) {
       user_id = this.props.selectedEmployeeId;
@@ -386,19 +392,75 @@ class Activities extends Component {
       user_id: user_id,
       from_date: filterFromDate,
       to_date: filterToDate,
-      is_timeline: true
+      is_timeline: true,
+      page: 1,
+      limit,
     })
       .then((data) => {
         if (data.status === "success") {
-          this.setState({ activities: data.data, loading: false });
+          this.setState({
+            activities: data.data.activities || data.data, // fallback for old API
+            loading: false,
+            page: 1,
+            totalPages: data.data.totalPages || 1,
+            hasMore: (data.data.page || 1) < (data.data.totalPages || 1),
+          });
         } else {
-          this.setState({ activities: [], loading: false, error: data.message });
+          this.setState({ activities: [], loading: false, error: data.message, hasMore: false });
         }
       })
       .catch((err) => {
+        this.setState({ loading: false, hasMore: false });
         console.error(err);
       });
 
+  };
+
+  fetchMoreActivities = () => {
+    const { filterFromDate, filterToDate, filterEmployeeId, page, activities, totalPages, limit } = this.state;
+    let user_id = '';
+    if (this.props.selectedEmployeeId) {
+      user_id = this.props.selectedEmployeeId;
+    } else if (window.user.role === 'employee') {
+      user_id = window.user.id;
+    } else {
+      if (filterEmployeeId) {
+        user_id = filterEmployeeId;
+      }
+    }
+    const nextPage = page + 1;
+    if (nextPage > totalPages) {
+      this.setState({ hasMore: false });
+      return;
+    }
+    this.setState({ loading: true });
+    getService.getCall('activities.php', {
+      action: 'view',
+      user_id: user_id,
+      from_date: filterFromDate,
+      to_date: filterToDate,
+      is_timeline: true,
+      page: nextPage,
+      limit,
+    })
+      .then((data) => {
+        if (data.status === "success") {
+          const newActivities = data.data.activities || data.data;
+          this.setState({
+            activities: [...activities, ...newActivities],
+            loading: false,
+            page: nextPage,
+            totalPages: data.data.totalPages || totalPages,
+            hasMore: nextPage < (data.data.totalPages || totalPages),
+          });
+        } else {
+          this.setState({ loading: false, hasMore: false });
+        }
+      })
+      .catch((err) => {
+        this.setState({ loading: false, hasMore: false });
+        console.error(err);
+      });
   };
 
   render() {
@@ -457,9 +519,15 @@ class Activities extends Component {
               <div className="card mx-4">
                 <div className="card-body">
                   <div className="row">
-                    <ActivitiesTime
-                      activities={activities}
-                    />
+                    {/* <InfiniteScroll
+                      dataLength={activities.length}
+                      next={this.fetchMoreActivities}
+                      hasMore={this.state.hasMore}
+                      loader={<div className="text-center my-3"><span>Loading more activities...</span></div>}
+                      scrollableTarget={null}
+                    > */}
+                      <ActivitiesTime activities={activities} />
+                    {/* </InfiniteScroll> */}
                   </div>
                 </div>
               </div>
