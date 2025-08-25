@@ -375,3 +375,7 @@ border-left: 6px solid #e6140d !important;
   outline: none !important;
   box-shadow: none !important;
 }
+
+.fc-event {
+  cursor: pointer !important;
+}
