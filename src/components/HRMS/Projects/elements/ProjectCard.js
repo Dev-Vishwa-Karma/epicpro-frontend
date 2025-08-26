@@ -12,6 +12,13 @@ const ProjectCard = ({
   collapsedCards
 }) => {
     
+  const technologies = Array.isArray(project.project_technology)
+    ? project.project_technology
+    : String(project.project_technology || '')
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean);
+
   return (
     <div className="col-lg-4 col-md-6 mb-4" key={index}>
       <div
@@ -75,7 +82,17 @@ const ProjectCard = ({
         </div>
 
         <div className="card-body flex-grow-1">
-          <span className="tag tag-blue mb-3">{project.project_technology}</span>
+          <div className="mb-3" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {technologies.length > 0 ? (
+              technologies.map((tech, i) => (
+                <span key={`${project.project_id}-tech-${i}`} className="tag btn-primary">
+                  {tech}
+                </span>
+              ))
+            ) : (
+              <span className="tag tag-blue">No tech specified</span>
+            )}
+          </div>
           <p
             style={{
               display: '-webkit-box',

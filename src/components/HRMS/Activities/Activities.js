@@ -519,15 +519,15 @@ class Activities extends Component {
               <div className="card mx-4">
                 <div className="card-body">
                   <div className="row">
-                    {/* <InfiniteScroll
+                    <InfiniteScroll
                       dataLength={activities.length}
                       next={this.fetchMoreActivities}
                       hasMore={this.state.hasMore}
                       loader={<div className="text-center my-3"><span>Loading more activities...</span></div>}
                       scrollableTarget={null}
-                    > */}
+                    >
                       <ActivitiesTime activities={activities} />
-                    {/* </InfiniteScroll> */}
+                    </InfiniteScroll>
                   </div>
                 </div>
               </div>

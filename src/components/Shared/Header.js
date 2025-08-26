@@ -772,12 +772,12 @@ class Header extends Component {
                   />
 
                 )}
-                <div className="notification d-flex">
+                <div className={`notification d-flex ${this.props.leftMenuOpen ? 'hide-on-menu-open' : ''}`}>
                   <div className="dropdown d-flex">
 										<a
 											href="/#"
-											className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1"
-											data-toggle="dropdown"
+											className="nav-link icon btn btn-default btn-icon ml-1"
+										  data-toggle="dropdown"
 										>
 											<i className="fa fa-bell" />
                       {notifications.filter(notification => notification.read == 0).length > 0 && (
@@ -842,9 +842,6 @@ class Header extends Component {
                           )}
                       </ul>
                   </InfiniteScroll>
-
-
-
                     </div>
                       {notifications.length > 0 && (
                         <>
@@ -866,8 +863,8 @@ class Header extends Component {
                   <div className="dropdown d-flex">
                     <a
                       href="/#"
-                      className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1 user-icon"
-                      data-toggle="dropdown"
+                      className="nav-link icon btn btn-default btn-icon ml-1 user-icon"
+								      data-toggle="dropdown"
                     >
                       <i className="fa fa-user" />
                     </a>
@@ -965,6 +962,13 @@ class Header extends Component {
                     </div>
                   </div>
                 </div>
+                {this.props.leftMenuOpen && (
+                  <style>{`
+                    @media (max-width: 991px) {
+                      .hide-on-menu-open { display: none !important; }
+                    }
+                  `}</style>
+                )}
               </div>
             </div>
           </div>

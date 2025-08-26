@@ -471,7 +471,7 @@ class Menu extends Component {
 					</div>
 
 					<div className="page">
-						<Header dataFromParent={this.props.dataFromParent} dataFromSubParent={pageHeading[0].pageTitle} />
+						<Header dataFromParent={this.props.dataFromParent} dataFromSubParent={pageHeading[0].pageTitle} leftMenuOpen={istoggleLeftMenu} />
 						<Switch>
 							{Routes.map((layout, i) => {
 							// Use ProtectedRoute if roles are defined, otherwise use Route
