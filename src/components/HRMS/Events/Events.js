@@ -806,6 +806,25 @@ class Events extends Component {
 
     const uniqueFilteredEvents = Array.from(uniqueEventsMap.values());
 
+    // Build a map of holiday titles by date (YYYY-MM-DD)
+    const holidayTitleByDate = uniqueFilteredEvents
+      .filter((ev) => ev.event_type === "holiday")
+      .reduce((acc, ev) => {
+        acc[ev.event_date] = ev.event_name;
+        return acc;
+      }, {});
+
+    // Build a set of alternate Saturday dates (YYYY-MM-DD)
+    const altSatSet = new Set(
+      (this.state.alternateSatudays || [])
+        .map((v) => {
+          if (!v) return null;
+          if (typeof v === "string") return v;
+          return v.date || v.saturday_date || v.day || null;
+        })
+        .filter(Boolean)
+    );
+
     // Format filtered events, ensuring 'event' type events show up for all years
     const formattedEvents = uniqueFilteredEvents
       .map((event) => {
@@ -890,11 +909,39 @@ class Events extends Component {
       else if (hours >= 4 && hours < 8) className = "half-day-leave-event";
 
       // else if (hours < 8) backgroundColor = "#87ceeb";
+      // Determine if this report day is a holiday and set title accordingly
+      const dateStr = report.created_at?.split(" ")[0];
+      const holidayTitle = holidayTitleByDate[dateStr];
+      const isAltSaturday = altSatSet.has(dateStr);
+
+      // Holiday Report
+      if (holidayTitle) {
+        return {
+          id: report.id,
+          title: `${holidayTitle} \n ${hoursStr}`,
+          start: dateStr,
+          allDay: true,
+          display: "background",
+          className: className,
+        };
+      }
+
+      // Saturday reports
+      if (isAltSaturday) {
+        return {
+          id: report.id,
+          title: `Alternate Saturday \n ${hoursStr}`,
+          start: dateStr,
+          allDay: true,
+          display: "background",
+          className: className,
+        };
+      }
 
       const event = {
         id: report.id,
         title: `${hoursStr}`,
-        start: report.created_at?.split(" ")[0],
+        start: dateStr,
         display: "background",
         allDay: true,
         className: className,
@@ -949,14 +996,14 @@ class Events extends Component {
                   <div className="card">
                     <div className="card-body">
                       <div className="row">
-						<div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-							<YearSelector
-								selectedYear={selectedYear}
-								handleYearChange={this.handleYearChange}
-								labelClass='d-flex card-title mr-3'
-								selectClass='w-70 custom-select'
-							/>
-						</div>
+                        <div className="col-lg-4 col-md-12 col-sm-12" style={{ backgroundColor: "transparent" }}>
+                          <YearSelector
+                            selectedYear={selectedYear}
+                            handleYearChange={this.handleYearChange}
+                            labelClass='d-flex card-title mr-3'
+                            selectClass='w-70 custom-select'
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
