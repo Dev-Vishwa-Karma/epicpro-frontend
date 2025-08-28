@@ -57,17 +57,12 @@ class Holidays extends Component {
 				const today = new Date();
 				today.setHours(0, 0, 0, 0);
 				
-				const upcomingHolidays = holidaysData
-				.filter(holiday => {
-					if (holiday.event_type !== 'holiday') return false;
-					const eventDate = new Date(holiday.event_date);
-					eventDate.setHours(0, 0, 0, 0);
-					return eventDate >= today;
-				})
-				.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));// Sort by ASC order
+				const allHolidays = holidaysData
+				.filter(holiday => holiday.event_type === 'holiday')
+				.sort((a, b) => new Date(a.event_date) - new Date(b.event_date)); // Sort by ASC order
 				
 				this.setState(
-					{ holidays: upcomingHolidays, loading: false}
+					{ holidays: allHolidays, loading: false}
 				);
 			} else {
 				this.setState({ message: data.message, loading: false });

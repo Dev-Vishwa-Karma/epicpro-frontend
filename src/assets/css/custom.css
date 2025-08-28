@@ -163,8 +163,8 @@ border-left: 6px solid #e6140d !important;
 }
 
 .leave-event {
-    background-color: rgba(214, 1, 1, 0.2) !important;
-    border-color: rgba(214, 1, 1, 0.2) !important;
+    background-color: #f32821 !important;
+    border-color: #f32821 !important;
     opacity: 0.8 !important;
     border: none !important
 }

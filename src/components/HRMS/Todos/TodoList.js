@@ -322,7 +322,8 @@ class TodoList extends Component {
             logged_in_employee_role: logged_in_employee_role,
             to_do_created_by: selectedTodo.created_by,
             to_do_created_for: selectedTodo.employee_id,
-            logged_in_employee_name: selectedTodo.first_name
+            logged_in_employee_name: selectedTodo.first_name,
+            task_title: selectedTodo.title
         }
         appendDataToFormData(formData, data)
         getService.addCall('project_todo.php', 'update_status', formData)

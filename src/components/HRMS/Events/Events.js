@@ -498,6 +498,18 @@ class Events extends Component {
     const events = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    // Build a set of alternate Saturday date strings (YYYY-MM-DD)
+    const altSatSet = new Set(
+      (this.state.alternateSatudays || [])
+        .map((v) => {
+          if (!v) return null;
+          if (typeof v === "string") return v;
+          return v.date || v.saturday_date || v.day || null;
+        })
+        .filter(Boolean)
+    );
+
     leaveData.forEach((leave) => {
       const start = new Date(leave.from_date);
       const end = new Date(leave.to_date);
@@ -509,20 +521,29 @@ class Events extends Component {
           d.setDate(d.getDate() + 1)
         ) {
           if (d >= today) {
+            const dateStr = formatDate(d);
+            const day = d.getDay(); 
+            const isSunday = day === 0;
+            const isAltSaturday = altSatSet.has(dateStr);
+            const isWeekendOrAltSat = isSunday || isAltSaturday;
+
             if (leave.is_half_day === "1") {
               events.push({
                 title: "",
-                start: formatDate(d),
+                start: dateStr,
                 className: "half-day-leave-event",
                 allDay: true,
-                // color: "#FFA500"
+                display: "background",
+                rendering: "background",
               });
             } else {
               events.push({
                 title: "",
-                start: formatDate(d),
+                start: dateStr,
                 className: "leave-event",
                 allDay: true,
+                display: "background",
+                rendering: "background",
               });
             }
           }

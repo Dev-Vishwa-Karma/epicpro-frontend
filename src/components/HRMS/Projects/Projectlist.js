@@ -485,20 +485,38 @@ class ProjectList extends Component {
             const data = await response.json();
     
             if (data.status === 'success') {
-                this.setState(prevState => ({
-                    projects: prevState.projects.map(p =>
+                this.setState(prevState => {
+                    // Update the project status
+                    const updatedProjects = prevState.projects.map(p =>
                         p.project_id === projectId
                             ? { ...p, project_is_active: newStatus }
                             : p
-                    ),
-                    allProjects: prevState.allProjects.map(p =>
+                    );
+                    const updatedAllProjects = prevState.allProjects.map(p =>
                         p.project_id === projectId
                             ? { ...p, project_is_active: newStatus }
                             : p
-                    ),
-                    showSuccess: true,
-                    successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
-                }));
+                    );
+    
+                    // Sort projects: active first (1), then inactive (0)
+                    const sortProjects = (projectsArray) => {
+                        return [...projectsArray].sort((a, b) => {
+                            // First sort by active status (1 comes before 0)
+                            if (Number(b.project_is_active) !== Number(a.project_is_active)) {
+                                return Number(b.project_is_active) - Number(a.project_is_active);
+                            }
+                            // Then sort by creation date (newest first)
+                            return new Date(b.created_at) - new Date(a.created_at);
+                        });
+                    };
+    
+                    return {
+                        projects: sortProjects(updatedProjects),
+                        allProjects: sortProjects(updatedAllProjects),
+                        showSuccess: true,
+                        successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
+                    };
+                });
                 
                 // Auto-dismiss success message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);
@@ -525,6 +543,7 @@ class ProjectList extends Component {
     // Add searching functionality for project search (API-based, name and technology, debounced)
     handleSearch = (event) => {
         const query = event.target.value;
+        console.log('Search query:', query); 
         this.setState({ searchQuery: query });
 
         // Clear previous timeout
@@ -533,6 +552,7 @@ class ProjectList extends Component {
         this.searchTimeout = setTimeout(() => {
             const { searchQuery } = this.state;
             const searchParam = searchQuery.trim();
+            console.log('API call with search:', searchParam);
 
             // Build the API URL with the search query for both name and technology
              const apiCall = searchParam !== ""

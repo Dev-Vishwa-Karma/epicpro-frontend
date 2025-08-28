@@ -17,6 +17,28 @@ const DateFilterForm = ({
     maxDate,
     col
 }) => {
+    // validation function
+    const validateAndApply = () => {
+        if (fromDate && toDate) {
+            const from = new Date(fromDate);
+            const to = new Date(toDate);
+            if (to < from) {
+                const errorDiv = document.getElementById('dateError');
+                if (errorDiv) {
+                    errorDiv.textContent = 'To Date cannot be less than From Date';
+                    errorDiv.style.display = 'block';
+                }
+                return;
+            }
+        }
+        // Clear error and apply filters
+        const errorDiv = document.getElementById('dateError');
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
+        handleApplyFilters();
+    };
+
     return (
         <>
             <div className={`col-md-${col}`}>
@@ -24,7 +46,7 @@ const DateFilterForm = ({
                     <label className="form-label">From Date</label>
                     <DatePicker
                         selected={fromDate ? new Date(fromDate) : null}
-                        onChange={(date) => handleDateChange(date, 'fromDate')}
+                        onChange={(date) => { handleDateChange(date, 'fromDate'); }}
                         className="form-control"
                         dateFormat="yyyy-MM-dd"
                         placeholderText="From Date"
@@ -39,14 +61,15 @@ const DateFilterForm = ({
                     <label className="form-label">To Date</label>
                     <DatePicker
                         selected={toDate ? new Date(toDate) : null}
-                        onChange={(date) => handleDateChange(date, 'toDate')}
+                        onChange={(date) => { handleDateChange(date, 'toDate'); }}
                         className="form-control"
                         dateFormat="yyyy-MM-dd"
                         placeholderText="To Date"
-                        minDate={minDate}
+                        minDate={fromDate ? new Date(fromDate) : minDate}
                         maxDate={maxDate}
                         wrapperClassName=""
                     />
+                    <div id="dateError" className="invalid-feedback d-block" style={{display: 'none'}}></div>
                 </div>
             </div>
 
@@ -66,7 +89,7 @@ const DateFilterForm = ({
                     <label className="form-label">&nbsp;</label>
                     <Button
                     label="Apply"
-                    onClick={handleApplyFilters}
+                    onClick={validateAndApply}
                     className="btn-primary btn-block"
                     disabled={ButtonLoading}
                     loading={ButtonLoading}

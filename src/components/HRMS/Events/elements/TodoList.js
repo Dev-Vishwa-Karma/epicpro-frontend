@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { getService } from '../../../../services/getService';
 import EmployeeSelector from '../../../common/EmployeeSelector';
 import ListSkeleton from '../../../common/skeletons/ListSkeleton';
+import { shortformatDate } from '../../../../utils';
 
 class TodoList extends Component {
   constructor(props) {
@@ -85,7 +86,10 @@ class TodoList extends Component {
                 ) : todos.length > 0 ? (
                   todos.map((todo) => (
                     <li key={todo.id}>
-                      <span className="custom-control-label">{todo.title}</span>
+                      <span className="custom-control-label" style={{fontSize:'15px'}}>{todo.title}</span>
+                      <div style={{fontSize:'11px'}}>
+                        {shortformatDate(todo.due_date)}
+                      </div>
                     </li>
                   ))
                 ) : (

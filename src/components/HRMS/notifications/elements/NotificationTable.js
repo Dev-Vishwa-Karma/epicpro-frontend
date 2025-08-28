@@ -4,6 +4,21 @@ import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
 
 const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userRole }) => {
+    const formatType = (type) => {
+        if (!type) return '';
+        const normalized = String(type).toLowerCase();
+        const mapping = {
+            'task_completed': 'Task Completed',
+            'task_added': 'Task Added',
+            'task_due': 'Task Due',
+            'event_added': 'Event Added',
+        };
+        if (mapping[normalized]) return mapping[normalized];
+        return String(type)
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+    };
+
     return (
         <div className="table-responsive">
             <table className="table table-striped table-vcenter table-hover mb-0">
@@ -13,7 +28,6 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
                         <th>Title</th>
                         <th>Body</th>
                         <th>Type</th>
-                        <th>Status</th>
                         {(userRole === "admin" || userRole === "super_admin") && (
                             <th><i className="icon-user" /></th>
                         )}
@@ -27,15 +41,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
                             <td>{index + 1}</td>
                             <td>{notification.title}</td>
                             <td>{notification.body}</td>
-                            <td>{notification.type}</td>
-                            <td>
-                                <span className={`tag ${
-                                    notification.read == '1' ? 'tag-blue' :
-                                    notification.read == '0' ? 'tag-red' : ''
-                                }`}>
-                                    {notification.read == '1' ? 'Read' : 'Unread'}
-                                </span>
-                            </td>
+                            <td>{formatType(notification.type)}</td>
                             {(userRole === "admin" || userRole === "super_admin") && (
                                 <td className="d-flex">
                                     <Avatar
