@@ -261,6 +261,8 @@ class Events extends Component {
     this.fetchWorkingHoursReports();
     this.getMissingReportEvents();
     this.fetchLeaveData(localStorage.getItem("empId"), newDate, newEndDate);
+    // Also fetch alternate Saturdays for the new year
+    this.getAlternateSaturday(year);
   };
 
   handleClose = (messageType) => {
@@ -342,16 +344,17 @@ class Events extends Component {
     return isValid;
   };
 
-  getAlternateSaturday = async () => {
-    const now = localStorage.getItem("startDate")
-      ? new Date(localStorage.getItem("startDate"))
-      : new Date();
+  getAlternateSaturday = async (year = null) => {
+    const targetYear = year || (localStorage.getItem("startDate")
+      ? new Date(localStorage.getItem("startDate")).getFullYear()
+      : new Date().getFullYear());
     try {
       const data = await getService.getCall("alternate_saturdays.php", {
         action: "view",
-        year: now.getFullYear(),
+        year: targetYear,
       });
 
+      console.log('Alternate Saturdays data:', data?.data);
       this.setState({
         alternateSatudays: data?.data,
       });
@@ -824,6 +827,10 @@ class Events extends Component {
         })
         .filter(Boolean)
     );
+    
+    console.log('Alternate Saturday dates set:', Array.from(altSatSet));
+    console.log('Raw alternate Saturdays data:', this.state.alternateSatudays);
+    
 
     // Format filtered events, ensuring 'event' type events show up for all years
     const formattedEvents = uniqueFilteredEvents
@@ -913,6 +920,11 @@ class Events extends Component {
       const dateStr = report.created_at?.split(" ")[0];
       const holidayTitle = holidayTitleByDate[dateStr];
       const isAltSaturday = altSatSet.has(dateStr);
+      
+      // Debug logging for alternate Saturday detection
+      if (isAltSaturday) {
+        console.log('Found alternate Saturday report:', dateStr, 'Report ID:', report.id);
+      }
 
       // Holiday Report
       if (holidayTitle) {
@@ -934,7 +946,7 @@ class Events extends Component {
           start: dateStr,
           allDay: true,
           display: "background",
-          className: className,
+          className: "alternate-saturday-report",
         };
       }
 

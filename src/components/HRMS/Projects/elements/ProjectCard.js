@@ -85,12 +85,12 @@ const ProjectCard = ({
           <div className="mb-3" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {technologies.length > 0 ? (
               technologies.map((tech, i) => (
-                <span key={`${project.project_id}-tech-${i}`} className="tag btn-primary">
+                <span key={`${project.project_id}-tech-${i}`} className="tag project-tech">
                   {tech}
                 </span>
               ))
             ) : (
-              <span className="tag tag-blue">No tech specified</span>
+              <span className="tag project-tech">No tech specified</span>
             )}
           </div>
           <p

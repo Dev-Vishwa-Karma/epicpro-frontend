@@ -86,28 +86,45 @@ class Fullcalender extends Component {
                                 ) {
                                     cell.css('background-color', '#87ceeb');
                                     cell.css('color', 'white');
+                                } else if (
+                                    event.className === 'alternate-saturday-report' &&
+                                    event.start === dateStr &&
+                                    formatDate(dateStr) >= startDate &&
+                                    formatDate(dateStr) <= endDate
+                                ) {
+                                    cell.css('background-color', '#FFD700'); // Gold color for alternate Saturday reports
+                                    cell.css('color', 'black');
                                 }
 
+                                // Check if current date is an alternate Saturday
                                 if (cell.hasClass && cell.hasClass('fc-sat')) {
                                     if (alternateSatudays && alternateSatudays.length > 0) {
-                                        alternateSatudays.forEach((alternateSatuday) => {
-                                            try {
-                                                const saturday = JSON.parse(alternateSatuday.date);
-                                                saturday.forEach((element) => {
-                                                    if (
-                                                        formatDate(date) === formatDate(element) &&
-                                                       ( event.className === 'missing-report-day' || 
-                                                        event.className === 'leave-event')
-                                                    ) {
-                                                       
-                                                        
-                                                        cell.css('background-color', 'white');
-                                                    }
-                                                });
-                                            } catch (e) {
-                                                console.error('Error parsing alternateSatuday.date:', e);
+                                        const currentDateStr = formatDate(date);
+                                        const isAlternateSaturday = alternateSatudays.some((altSat) => {
+                                            if (!altSat) return false;
+                                            let altSatDate;
+                                            if (typeof altSat === 'string') {
+                                                altSatDate = altSat;
+                                            } else {
+                                                altSatDate = altSat.date || altSat.saturday_date || altSat.day;
                                             }
+                                            return altSatDate === currentDateStr;
                                         });
+                                        
+                                        // If it's an alternate Saturday, apply special styling
+                                        if (isAlternateSaturday) {
+                                            // Give same classname for reports on alternate saturday
+                                            const hasReport = events.some(event => 
+                                                event.start === currentDateStr && 
+                                                (event.className === 'daily-report' || 
+                                                 event.className === 'red-event' || 
+                                                 event.className === 'half-day-leave-event')
+                                            );
+                                            
+                                            if (hasReport) {
+                                                cell.css('color', 'black');
+                                            }
+                                        }
                                     }
                                 }
 
