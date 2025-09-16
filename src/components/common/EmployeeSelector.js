@@ -1,6 +1,9 @@
 import React from 'react';
+import {getSortedEmployees} from '../../utils'
 
 const EmployeeSelector = ({ allEmployeesData, selectedEmployee, handleEmployeeChange, showAllInOption }) => {
+
+const sortedEmployees = getSortedEmployees(allEmployeesData);
     return (
         <div className="form-group">
             <label className="form-label">Select Employee</label>
@@ -13,7 +16,7 @@ const EmployeeSelector = ({ allEmployeesData, selectedEmployee, handleEmployeeCh
                     ? <option value="">All Employees</option> 
                     : <option value="">Select an Employee</option>
                 }
-                {allEmployeesData
+                {sortedEmployees
                     .filter(employee => {
                         const role = (employee.role || '').toLowerCase();
                         return role !== 'admin' && role !== 'super_admin';

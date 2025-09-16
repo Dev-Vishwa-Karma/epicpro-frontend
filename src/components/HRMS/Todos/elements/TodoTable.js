@@ -3,6 +3,7 @@ import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import NoDataRow from '../../../common/NoDataRow';
 import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
+import { formatDueLabel } from '../../../../utils';
 
 const TodoTable = ({
     todos,
@@ -60,11 +61,7 @@ const TodoTable = ({
                                         </label>
                                     </td>
                                     <td className="text-right">
-                                        {new Date(todo.due_date).toLocaleDateString("en-US", {
-                                            day: "2-digit",
-                                            month: "short",
-                                            year: "numeric"
-                                        })}
+                                        {formatDueLabel(todo.due_date)}
                                     </td>
                                     <td>
                                         <span className={`tag ml-0 mr-0 ${

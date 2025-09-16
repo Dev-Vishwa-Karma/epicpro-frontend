@@ -7,8 +7,9 @@ import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import TodoTable from './elements/TodoTable';
-import { appendDataToFormData } from '../../../utils';
+import { appendDataToFormData, getSortedEmployees } from '../../../utils';
 import Button from '../../common/formInputs/Button';
+import BlankState from '../../common/BlankState';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -42,6 +43,8 @@ class TodoList extends Component {
             ButtonLoading: false,
             currentPageTodos: 1, //pagination
             dataPerPage: 10,
+            employeeFilter: '',
+            allTodos: [],
 		}
 	}
 
@@ -64,6 +67,7 @@ class TodoList extends Component {
 				const todoData = data.data.map(t => ({ ...t, imageError: false }));
 				this.setState({
 					todos: todoData,
+					allTodos: todoData,
 					loading: false
 				});
 			} else {
@@ -115,7 +119,7 @@ class TodoList extends Component {
 		
 		// Apply Validation component
 		const validationSchema = [
-			{ name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
+			// { name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
 			{ name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
 				customValidator: (val) => {
 					const today = new Date().toISOString().split("T")[0];
@@ -574,6 +578,24 @@ class TodoList extends Component {
 		});
     };
 
+    handleEmployeeFilterChange = (e) => {
+        const employeeId = e.target.value;
+        this.setState({
+            employeeFilter: employeeId,
+            currentPageTodos: 1
+        });
+
+        // Client-side filter from allTodos for responsiveness
+        const { allTodos, statusFilter } = this.state;
+        const filtered = allTodos.filter(t => {
+            const matchEmployee = employeeId ? String(t.employee_id) === String(employeeId) : true;
+            const matchStatus = statusFilter ? String(t.status) === String(statusFilter) : true;
+            return matchEmployee && matchStatus;
+        });
+
+        this.setState({ todos: filtered });
+    };
+
     handlePageChange = (newPage) => {
         const totalPages = Math.ceil(this.state.todos.length / this.state.dataPerPage);
         if (newPage >= 1 && newPage <= totalPages) {
@@ -612,7 +634,7 @@ class TodoList extends Component {
                                     <div className="card">
                                         <div className="card-body">
                                             <div className="row align-items-center">
-                                                <div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
                                                     <label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
                                                         Status:
                                                     </label>
@@ -627,7 +649,25 @@ class TodoList extends Component {
                                                         {/* Add more statuses if needed */}
                                                     </select>
                                                 </div>
-                                                <div className="col-lg-8 col-md-12 col-sm-12 text-right">
+                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+                                                    <label className='d-flex card-title mr-3 align-items-center'>
+                                                        Employee:
+                                                    </label>
+                                                    <select
+                                                        id="employeeFilter"
+                                                        className="form-control"
+                                                        value={this.state.employeeFilter}
+                                                        onChange={this.handleEmployeeFilterChange}
+                                                    >
+                                                        <option value="">All Employees</option>
+                                                        {getSortedEmployees(this.state.employees).map(emp => (
+                                                            <option key={emp.id} value={emp.id}>
+                                                                {emp.first_name} {emp.last_name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="col-lg-6 col-md-12 col-sm-12 text-right">
                                                     {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                     <Button
                                                     label="Add New"
@@ -647,6 +687,10 @@ class TodoList extends Component {
                                 <div className="card">
                                     <div className="card-body">
                                         {/* Add Seperate Todo Table Component */}
+                                        {currentTodos.length === 0 ? (
+                                            // <div className="text-center text-muted py-5">No todos available for this employee</div>
+                                            <BlankState message="No todos available for this employee" />
+                                        ) : (
                                         <TodoTable
                                             todos={todos}
                                             loading={loading}
@@ -665,6 +709,7 @@ class TodoList extends Component {
                                                 });
                                             }}
                                         />
+                                        )}
 
                                         <div className="mt-3">
                                        {totalPagesTodos > 1 && (

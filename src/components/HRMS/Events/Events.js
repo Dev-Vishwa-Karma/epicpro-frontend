@@ -12,6 +12,7 @@ import EventList from "./elements/EventList";
 import AddEventModal from "./elements/AddEventModal";
 import { appendDataToFormData, formatDate } from "../../../utils";
 import Button from "../../common/formInputs/Button";
+import {getSortedEmployees} from '../../../utils'
 class Events extends Component {
   constructor(props) {
     super(props);
@@ -1040,17 +1041,11 @@ class Events extends Component {
                               }}
                             >
                               <option value="">All Events</option>
-                              {employees
-                                .filter(
-                                  (emp) =>
-                                    emp.role !== "admin" &&
-                                    emp.role !== "super_admin"
-                                ) // Filter out admins
-                                .map((emp) => (
-                                  <option key={emp.id} value={emp.id}>
-                                    {emp.first_name} {emp.last_name}
-                                  </option>
-                                ))}
+                              {getSortedEmployees(employees).map((emp) => (
+                                <option key={emp.id} value={emp.id}>
+                                  {emp.first_name} {emp.last_name}
+                                </option>
+                              ))}
                             </select>
                           </>
                         )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../../utils';
 
 const EditLeaveRequestModal = ({
   showModal,
@@ -57,7 +58,7 @@ const EditLeaveRequestModal = ({
                           error={addLeaveErrors && addLeaveErrors.employee_id}
                           options={[
                             { value: "", label: "Select Employee" },
-                            ...employeeData.map((emp) => ({
+                            ...getSortedEmployees(employeeData).map((emp) => ({
                               value: emp.id,
                               label: `${emp.first_name} ${emp.last_name}`
                             }))

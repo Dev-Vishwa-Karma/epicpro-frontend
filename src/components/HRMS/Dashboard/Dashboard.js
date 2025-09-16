@@ -101,11 +101,11 @@ class Dashboard extends Component {
 		if (!(user.role === 'admin' || user.role === 'super_admin')) return null;
 
 		const items = [
+			{ label: 'Todos', class_color: null, count: null, icon: 'users', link: '/project-todo' },
 			{ label: 'Users', class_color: 'green', count: this.state.totalUsers, icon: 'users', link: '/hr-users' },
 			{ label: 'Employees', class_color: 'pink', count: this.state.totalEmployees, icon: 'users', link: '/hr-employee' },
 			{ label: 'Holidays', class_color: 'info', count: this.state.totalHolidays, icon: 'like', link: '/hr-holidays' },
 			{ label: 'Events', class_color: 'orange', count: this.state.totalEvents, icon: 'calendar', link: '/hr-events' },
-			{ label: 'Report', class_color: null, count: null, icon: 'pie-chart', link: '/hr-report' },
 		];
 
 		return (
