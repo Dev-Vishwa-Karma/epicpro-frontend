@@ -101,7 +101,7 @@ class Dashboard extends Component {
 		if (!(user.role === 'admin' || user.role === 'super_admin')) return null;
 
 		const items = [
-			{ label: 'Todos', class_color: null, count: null, icon: 'users', link: '/project-todo' },
+			{ label: 'Todos', class_color: null, count: null, icon: 'fa-tasks', link: '/project-todo', isFa: true },
 			{ label: 'Users', class_color: 'green', count: this.state.totalUsers, icon: 'users', link: '/hr-users' },
 			{ label: 'Employees', class_color: 'pink', count: this.state.totalEmployees, icon: 'users', link: '/hr-employee' },
 			{ label: 'Holidays', class_color: 'info', count: this.state.totalHolidays, icon: 'like', link: '/hr-holidays' },
@@ -110,13 +110,17 @@ class Dashboard extends Component {
 
 		return (
 			<div className="row clearfix justify-content-start">
-				{items.map(({ label, class_color, count, icon, link }) => (
+				{items.map(({ label, class_color, count, icon, link, isFa }) => (
 					<div className="col-6 col-md-4 col-xl-1_7" key={label}>
 						<div className="card">
 							<div className="card-body ribbon">
 							{count !== null && <div className={`ribbon-box ${class_color}`}>{count}</div>}
 							<Link to={link} className="my_sort_cut text-muted">
-								<i className={`icon-${icon}`} />
+								{isFa ? (
+									<i className={`fa ${icon}`} />
+								) : (
+									<i className={`icon-${icon}`} />
+								)}
 								<span>{label}</span>
 							</Link>
 							</div>

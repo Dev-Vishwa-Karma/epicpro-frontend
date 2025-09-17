@@ -45,6 +45,8 @@ class TodoList extends Component {
             dataPerPage: 10,
             employeeFilter: '',
             allTodos: [],
+            baseTodos: [],
+            dayFilter: '' // '', 'date:YYYY-MM-DD', 'this_week'
 		}
 	}
 
@@ -66,7 +68,8 @@ class TodoList extends Component {
 			if (data.status === 'success') {
 				const todoData = data.data.map(t => ({ ...t, imageError: false }));
 				this.setState({
-					todos: todoData,
+					todos: this.applyDayFilter(todoData, this.state.dayFilter),
+					baseTodos: todoData,
 					allTodos: todoData,
 					loading: false
 				});
@@ -548,34 +551,56 @@ class TodoList extends Component {
     });
 };
 
-    // Add handler for status filter
-    handleStatusFilterChange = (e) => {
-        this.setState({
-            statusFilter: e.target.value,
-            currentPageTodos: 1
-        });
-        // Make the GET API call when the component is mounted
-		getService.getCall('project_todo.php', {
+    // Unified filter handler for employee and status
+    fetchFilteredTodos = (employeeId, status) => {
+        const params = {
             action: 'view',
             logged_in_employee_id: window.user.id,
-            role: window.user.role,
-            status: e.target.value
-        })
-		.then(data => {
-			if (data.status === 'success') {
-				const todoData = data.data;
-				this.setState({
-					todos: todoData,
-					loading: false
-				});
-			} else {
-			  	this.setState({ message: data.message, loading: false });
-			}
-		})
-		.catch(err => {
-			this.setState({ message: 'Failed to fetch data', loading: false });
-			console.error(err);
-		});
+            role: window.user.role
+        };
+        if (employeeId) {
+            params.employee_id = employeeId;
+        }
+        if (status) {
+            params.status = status;
+        }
+        this.setState({ loading: true });
+        getService.getCall('project_todo.php', params)
+            .then(data => {
+                if (data.status === 'success') {
+                    const baseTodos = data.data;
+                    this.setState({
+                        baseTodos: baseTodos,
+                        todos: this.applyDayFilter(baseTodos, this.state.dayFilter),
+                        loading: false
+                    });
+                } else {
+                    this.setState({
+                        todos: [],
+                        baseTodos: [],
+                        loading: false,
+                        message: 'No task available for this employee'
+                    });
+                }
+            })
+            .catch(err => {
+                this.setState({
+                    todos: [],
+                    baseTodos: [],
+                    loading: false,
+                    message: 'No task available for this employee'
+                });
+                console.error(err);
+            });
+    };
+
+    handleStatusFilterChange = (e) => {
+        const value = e.target.value;
+        this.setState({
+            statusFilter: value,
+            currentPageTodos: 1
+        });
+        this.fetchFilteredTodos(this.state.employeeFilter, value);
     };
 
     handleEmployeeFilterChange = (e) => {
@@ -584,16 +609,85 @@ class TodoList extends Component {
             employeeFilter: employeeId,
             currentPageTodos: 1
         });
+        this.fetchFilteredTodos(employeeId, this.state.statusFilter);
+    };
 
-        // Client-side filter from allTodos for responsiveness
-        const { allTodos, statusFilter } = this.state;
-        const filtered = allTodos.filter(t => {
-            const matchEmployee = employeeId ? String(t.employee_id) === String(employeeId) : true;
-            const matchStatus = statusFilter ? String(t.status) === String(statusFilter) : true;
-            return matchEmployee && matchStatus;
-        });
+    // Day filter helpers and handler
+    getStartOfWeek = (date) => {
+        const d = new Date(date);
+        const day = d.getDay(); // 0=Sun ... 6=Sat
+        const diffToMonday = (day === 0 ? -6 : 1) - day; // Monday as start
+        d.setDate(d.getDate() + diffToMonday);
+        d.setHours(0,0,0,0);
+        return d;
+    };
 
-        this.setState({ todos: filtered });
+    getEndOfWeek = (date) => {
+        const start = this.getStartOfWeek(date);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23,59,59,999);
+        return end;
+    };
+
+    toYmd = (date) => {
+        const d = new Date(date);
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+    };
+
+    applyDayFilter = (todos, dayFilter) => {
+        if (!dayFilter) return todos;
+        const today = new Date();
+        if (dayFilter === 'this_week') {
+            const start = this.getStartOfWeek(today);
+            const end = this.getEndOfWeek(today);
+            return (todos || []).filter(t => {
+                const due = new Date(t.due_date);
+                return due >= start && due <= end;
+            });
+        }
+        if (dayFilter.startsWith('date:')) {
+            const target = dayFilter.replace('date:','');
+            return (todos || []).filter(t => String(t.due_date).slice(0,10) === target);
+        }
+        return todos;
+    };
+
+    getDayOptions = () => {
+        const options = [];
+        const now = new Date();
+        const todayStr = this.toYmd(now);
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        const tomorrowStr = this.toYmd(tomorrow);
+
+        const weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const todayIdx = now.getDay();
+
+        options.push({ value: '', label: 'All Days' });
+        options.push({ value: `date:${todayStr}`, label: `Today (${weekdays[todayIdx]})` });
+        options.push({ value: `date:${tomorrowStr}`, label: `Tomorrow (${weekdays[(todayIdx+1)%7]})` });
+
+        // Remaining days of this week after tomorrow, up to Sunday
+        let cursor = new Date(tomorrow);
+        for (let i = 0; i < 5; i++) { // max remaining days
+            cursor.setDate(cursor.getDate() + 1);
+            const startOfWeek = this.getStartOfWeek(now);
+            const endOfWeek = this.getEndOfWeek(now);
+            if (cursor > endOfWeek) break;
+            options.push({ value: `date:${this.toYmd(cursor)}`, label: weekdays[cursor.getDay()] });
+        }
+
+        options.push({ value: 'this_week', label: 'This Week' });
+        return options;
+    };
+
+    handleDayFilterChange = (e) => {
+        const value = e.target.value;
+        this.setState({ dayFilter: value, currentPageTodos: 1, todos: this.applyDayFilter(this.state.baseTodos, value) });
     };
 
     handlePageChange = (newPage) => {
@@ -644,6 +738,7 @@ class TodoList extends Component {
                                                         value={statusFilter}
                                                         onChange={this.handleStatusFilterChange}
                                                     >
+                                                        <option value="">All</option>
                                                         <option value="pending">Pending</option>
                                                         <option value="completed">Completed</option>
                                                         {/* Add more statuses if needed */}
@@ -667,7 +762,22 @@ class TodoList extends Component {
                                                         ))}
                                                     </select>
                                                 </div>
-                                                <div className="col-lg-6 col-md-12 col-sm-12 text-right">
+                                                    <div className="col-lg-3 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+                                                     <label className='d-flex card-title mr-3 align-items-center'>
+                                                        Day:
+                                                    </label>
+                                                    <select
+                                                        id="dayFilter"
+                                                        className="form-control"
+                                                        value={this.state.dayFilter}
+                                                        onChange={this.handleDayFilterChange}
+                                                    >
+                                                        {this.getDayOptions().map(opt => (
+                                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="col-lg-5 col-md-12 col-sm-12 text-right">
                                                     {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                     <Button
                                                     label="Add New"
