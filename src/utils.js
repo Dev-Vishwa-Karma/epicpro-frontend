@@ -192,7 +192,6 @@ export function formatDueLabel(dateInput) {
     if (diffDays === 0) return 'Today';
     if (diffDays === -1) return 'Yesterday';
     if (diffDays === 1) return 'Tomorrow';
-    if (diffDays === 2) return 'Day after tomorrow';
 
     // Weekday within current week window (Mon-Sun)
     const dayOfWeekToday = (today.getDay() + 6) % 7; // 0=Mon ... 6=Sun

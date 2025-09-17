@@ -5,6 +5,8 @@ import authService from "../../Authentication/authService";
 import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
 import { getService } from '../../../services/getService';
 import DashboardTable from './elements/DashboardTable';
+import DashboardTodo from './elements/DashboardTodo';
+import DashboardAdminTodo from './elements/DashboardAdminTodo';
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -161,6 +163,16 @@ class Dashboard extends Component {
 										<DashboardTable projects={projects} loading={loading}/>
 									</div>
 								</div>
+								{user.role === 'employee' && (
+									<div className="col-12 col-sm-12">
+										<DashboardTodo />
+									</div>
+								)}
+								{(user.role === 'admin' || user.role === 'super_admin') && (
+									<div className="col-12 col-sm-12">
+										<DashboardAdminTodo />
+									</div>
+								)}
 							</div>
 						</div>
 					</div>

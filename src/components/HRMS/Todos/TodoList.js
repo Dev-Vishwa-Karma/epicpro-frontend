@@ -28,7 +28,7 @@ class TodoList extends Component {
 			due_date: "",
             priority: "",
             todoStatus: "",
-            statusFilter: '',
+            statusFilter: 'pending',
 			errors: {
 				title: '',
         		due_date: '',
@@ -46,7 +46,7 @@ class TodoList extends Component {
             employeeFilter: '',
             allTodos: [],
             baseTodos: [],
-            dayFilter: '' // '', 'date:YYYY-MM-DD', 'this_week'
+            dayFilter: '' // will be set to `date:YYYY-MM-DD` for Today on mount
 		}
 	}
 
@@ -58,28 +58,14 @@ class TodoList extends Component {
             logged_in_employee_role: window.user.role
 		});
 
-		// Fetch todos using getService
-		getService.getCall('project_todo.php', {
-			action: 'view',
-			logged_in_employee_id: window.user.id,
-			role: window.user.role
-		})
-		.then(data => {
-			if (data.status === 'success') {
-				const todoData = data.data.map(t => ({ ...t, imageError: false }));
-				this.setState({
-					todos: this.applyDayFilter(todoData, this.state.dayFilter),
-					baseTodos: todoData,
-					allTodos: todoData,
-					loading: false
-				});
-			} else {
-			  	this.setState({ message: data.message, loading: false });
-			}
-		})
-		.catch(err => {
-			this.setState({ message: 'Failed to fetch data', loading: false });
-			console.error(err);
+		// Set default day filter to Today and fetch with default status 'pending'
+		const today = new Date();
+		const y = today.getFullYear();
+		const m = String(today.getMonth()+1).padStart(2,'0');
+		const d = String(today.getDate()).padStart(2,'0');
+		const dayFilterDefault = `date:${y}-${m}-${d}`;
+		this.setState({ dayFilter: dayFilterDefault }, () => {
+			this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
 		});
 
 
@@ -446,25 +432,50 @@ class TodoList extends Component {
 
         // API call to update todo using getService
         getService.addCall('project_todo.php', 'edit', updateTodoFormData)
-        .then((data) => {
-            if (data.status === 'success') {
-                // Update the todo list
-                this.setState((prevState) => ({
-                    todos: prevState.todos.map(todo =>
-                        todo.id === selectedTodo.id
-                            ? { ...todo, title, due_date, priority,  employee_id }
-                            : todo
-                    ),
-                    title: "",
-                    due_date: "",
-                    priority: "",
-                    selectedEmployeeId: "",
-                    errors:{},
-                    successMessage: "Todo updated successfully!",
-                    showSuccess: true,
-                    showEditModal: false,
-                    selectedTodo: null
-                }));
+        .then((resp) => {
+            if (resp.status === 'success') {
+                // Update the todo list and base list, then re-apply day filter
+                const server = resp.data || {};
+                const updatedItem = {
+                    id: server.id || selectedTodo.id,
+                    title: server.title !== undefined ? server.title : title,
+                    due_date: server.due_date !== undefined ? server.due_date : due_date,
+                    priority: server.priority !== undefined ? server.priority : priority,
+                    employee_id: server.employee_id !== undefined ? server.employee_id : employee_id,
+                    first_name: server.first_name,
+                    last_name: server.last_name,
+                    profile: server.profile
+                };
+                this.setState((prevState) => {
+                    // Update baseTodos first
+                    let nextBase = prevState.baseTodos.map(t => t.id === updatedItem.id ? { ...t, ...updatedItem } : t);
+
+                    // If employee filter is active and item no longer matches, remove it from base
+                    if (prevState.employeeFilter) {
+                        const filterId = String(prevState.employeeFilter);
+                        nextBase = nextBase.filter(t => String(t.employee_id) === filterId);
+                    }
+                    // If status filter is active, keep consistent (edit does not change status, but keep safe)
+                    if (prevState.statusFilter) {
+                        nextBase = nextBase.filter(t => t.todoStatus ? String(t.todoStatus) === String(prevState.statusFilter) : true);
+                    }
+
+                    const nextVisible = this.applyDayFilter(nextBase, prevState.dayFilter);
+
+                    return {
+                        baseTodos: nextBase,
+                        todos: nextVisible,
+                        title: "",
+                        due_date: "",
+                        priority: "",
+                        selectedEmployeeId: "",
+                        errors:{},
+                        successMessage: "Todo updated successfully!",
+                        showSuccess: true,
+                        showEditModal: false,
+                        selectedTodo: null
+                    };
+                });
 
                 // Auto-hide success message after 3 seconds
                 setTimeout(() => {
@@ -664,12 +675,12 @@ class TodoList extends Component {
         tomorrow.setDate(now.getDate() + 1);
         const tomorrowStr = this.toYmd(tomorrow);
 
-        const weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        const todayIdx = now.getDay();
+        // const weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        // const todayIdx = now.getDay();
 
         options.push({ value: '', label: 'All Days' });
-        options.push({ value: `date:${todayStr}`, label: `Today (${weekdays[todayIdx]})` });
-        options.push({ value: `date:${tomorrowStr}`, label: `Tomorrow (${weekdays[(todayIdx+1)%7]})` });
+        options.push({ value: `date:${todayStr}`, label: `Today` });
+        options.push({ value: `date:${tomorrowStr}`, label: `Tomorrow` });
 
         // Remaining days of this week after tomorrow, up to Sunday
         let cursor = new Date(tomorrow);
@@ -678,7 +689,7 @@ class TodoList extends Component {
             const startOfWeek = this.getStartOfWeek(now);
             const endOfWeek = this.getEndOfWeek(now);
             if (cursor > endOfWeek) break;
-            options.push({ value: `date:${this.toYmd(cursor)}`, label: weekdays[cursor.getDay()] });
+            // options.push({ value: `date:${this.toYmd(cursor)}`, label: weekdays[cursor.getDay()] });
         }
 
         options.push({ value: 'this_week', label: 'This Week' });
@@ -729,25 +740,6 @@ class TodoList extends Component {
                                         <div className="card-body">
                                             <div className="row align-items-center">
                                                 <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-                                                    <label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
-                                                        Status:
-                                                    </label>
-                                                    <select
-                                                        id="statusFilter"
-                                                        className="form-control"
-                                                        value={statusFilter}
-                                                        onChange={this.handleStatusFilterChange}
-                                                    >
-                                                        <option value="">All</option>
-                                                        <option value="pending">Pending</option>
-                                                        <option value="completed">Completed</option>
-                                                        {/* Add more statuses if needed */}
-                                                    </select>
-                                                </div>
-                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-                                                    <label className='d-flex card-title mr-3 align-items-center'>
-                                                        Employee:
-                                                    </label>
                                                     <select
                                                         id="employeeFilter"
                                                         className="form-control"
@@ -762,10 +754,20 @@ class TodoList extends Component {
                                                         ))}
                                                     </select>
                                                 </div>
-                                                    <div className="col-lg-3 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-                                                     <label className='d-flex card-title mr-3 align-items-center'>
-                                                        Day:
-                                                    </label>
+                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+                                                    <select
+                                                        id="statusFilter"
+                                                        className="form-control"
+                                                        value={statusFilter}
+                                                        onChange={this.handleStatusFilterChange}
+                                                    >
+                                                        <option value="">All</option>
+                                                        <option value="pending">Pending</option>
+                                                        <option value="completed">Completed</option>
+                                                        {/* Add more statuses if needed */}
+                                                    </select>
+                                                </div>
+                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
                                                     <select
                                                         id="dayFilter"
                                                         className="form-control"
@@ -798,8 +800,7 @@ class TodoList extends Component {
                                     <div className="card-body">
                                         {/* Add Seperate Todo Table Component */}
                                         {currentTodos.length === 0 ? (
-                                            // <div className="text-center text-muted py-5">No todos available for this employee</div>
-                                            <BlankState message="No todos available for this employee" />
+                                            <BlankState message="No todos available" />
                                         ) : (
                                         <TodoTable
                                             todos={todos}
