@@ -56,6 +56,7 @@ class Events extends Component {
       eventIdToDelete: null,
       alternateSatudays: [],
       ButtonLoading: false,
+      holidaysData:[],
     };
     localStorage.removeItem("empId");
     localStorage.removeItem("startDate");
@@ -89,6 +90,7 @@ class Events extends Component {
     const end_date = `${this.state.selectedYear}-12-31`;
     this.fetchLeaveData(id, start_date, end_date);
     this.getAlternateSaturday();
+    this.getHolidays();
   }
 
   fetchWorkingHoursReports = () => {
@@ -629,6 +631,40 @@ class Events extends Component {
       });
   };
 
+  
+  getHolidays = () => {
+      let startDate = localStorage.getItem("eventStartDate");
+      let endDate = localStorage.getItem("eventEndDate");
+    if (!startDate || !endDate) {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), 1, 1);
+      const lastDay = new Date(now.getFullYear(), 11, 32); // December 31st of the current year
+      const tformatDate = (date) => date.toISOString().split("T")[0];
+      startDate = tformatDate(firstDay);
+      endDate = tformatDate(lastDay);
+    }
+
+      this.setState({ isLoading: true })
+      getService.getCall('events.php', {
+        action: 'view',
+        event_type: 'holiday',
+        from_date: startDate,
+        to_date: endDate,
+      })
+        .then(data => {
+          if (data.status === 'success') {
+            const holidayDates = data.data.map(item => item.event_date);
+            this.setState({ holidaysData: holidayDates, isLoading: false });
+          } else {
+            this.setState({ error: data.message, isLoading: false });
+          }
+        })
+        .catch(err => {
+          this.setState({ error: 'Failed to fetch holidays data', isLoading: false });
+          console.error(err);
+        });
+  };
+
   // Add function to handle report click
   handleReportClick = (report) => {
     if (!report || typeof report !== "object") {
@@ -1060,9 +1096,11 @@ class Events extends Component {
                     <div className="card-body">
                       {/* Pass the formatted events to the FullCalendar component */}
                       <Fullcalender
+                        activeTab={calendarView}
                         events={this.state.allEvents}
                         defaultDate={this.state.defaultDate}
                         alternateSatudays={this.state.alternateSatudays}
+                        holidays={this.state.holidaysData}
                         defaultView={defaultView}
                         onAction={this.fetchWorkingHoursReports}
                         callEventAPI={this.fetchEvents}

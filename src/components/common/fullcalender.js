@@ -17,7 +17,7 @@ class Fullcalender extends Component {
     }
 
     render() {
-        const { events, defaultDate, defaultView = 'month', alternateSatudays } = this.props;
+        const {activeTab, events, defaultDate, defaultView = 'month', alternateSatudays , holidays} = this.props;
         return (
             <div id="example-component">
                 <FullCalendar
@@ -99,8 +99,6 @@ class Fullcalender extends Component {
                                                        ( event.className === 'missing-report-day' || 
                                                         event.className === 'leave-event')
                                                     ) {
-                                                       
-                                                        
                                                         cell.css('background-color', 'white');
                                                     }
                                                 });
@@ -109,6 +107,18 @@ class Fullcalender extends Component {
                                             }
                                         });
                                     }
+
+                                    if(activeTab === 'employeeSelected'){
+                                        if ( holidays && holidays.length > 0) {
+                                            holidays.forEach((holidayDate) => {
+                                                if (formatDate(date) === formatDate(holidayDate)) {
+                                                    cell.css('background-color', 'white');
+                                                    cell.css('color', 'white');
+                                                }
+                                            });
+                                        }
+                                    }
+                                    
                                 }
 
                                 if (
