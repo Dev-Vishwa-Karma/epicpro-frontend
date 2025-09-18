@@ -10,6 +10,7 @@ import TodoTable from './elements/TodoTable';
 import { appendDataToFormData, getSortedEmployees } from '../../../utils';
 import Button from '../../common/formInputs/Button';
 import BlankState from '../../common/BlankState';
+import { withRouter } from 'react-router-dom';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -58,16 +59,33 @@ class TodoList extends Component {
             logged_in_employee_role: window.user.role
 		});
 
-		// Set default day filter to Today and fetch with default status 'pending'
-		const today = new Date();
-		const y = today.getFullYear();
-		const m = String(today.getMonth()+1).padStart(2,'0');
-		const d = String(today.getDate()).padStart(2,'0');
-		const dayFilterDefault = `date:${y}-${m}-${d}`;
-		this.setState({ dayFilter: dayFilterDefault }, () => {
-			this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
-		});
+        // Check for query params
+        const params = new URLSearchParams(this.props.location.search);
+        const employee_id = params.get('employee_id') || '';
+        const status = params.get('status') || '';
+        const date = params.get('date');
+        let dayFilter = '';
+        if (date) dayFilter = `date:${date}`;
 
+        if (employee_id || status || date) {
+            this.setState({
+                employeeFilter: employee_id,
+                statusFilter: status,
+                dayFilter: dayFilter
+            }, () => {
+                this.fetchFilteredTodos(employee_id, status);
+            });
+        } else {
+            // Set default day filter to Today and fetch with default status 'pending'
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const dayFilterDefault = `date:${y}-${m}-${d}`;
+            this.setState({ dayFilter: dayFilterDefault }, () => {
+                this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
+            });
+        }
 
         // Check if user is admin or superadmin
         if (role === 'admin' || role === 'super_admin') {
@@ -104,11 +122,18 @@ class TodoList extends Component {
 
     // Validate Add Department Form
 	validateAddTodoForm = (e) => {
-		const { title, due_date, priority } = this.state;
+		const { title, due_date, priority, logged_in_employee_role, selectedEmployeeId } = this.state;
 		
 		// Apply Validation component
 		const validationSchema = [
-			// { name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
+			{ name: 'title', value: title, required: true, messageName: 'Todo title',
+				customValidator: (val) => {
+					if (!String(val || '').trim()) {
+						return 'Todo title is required:';
+					}
+					return undefined;
+				}
+			},
 			{ name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
 				customValidator: (val) => {
 					const today = new Date().toISOString().split("T")[0];
@@ -120,6 +145,22 @@ class TodoList extends Component {
 			},
 			{ name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
 		];
+
+		// Employee selection required for admin/super_admin when adding
+		if (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') {
+			validationSchema.push({
+				name: 'selectedEmployeeId',
+				value: selectedEmployeeId,
+				required: true,
+				messageName: 'Employee',
+				customValidator: (val) => {
+					if (!String(val || '').trim()) {
+						return 'Employee is required:';
+					}
+					return undefined;
+				}
+			});
+		}
 		const errors = validateFields(validationSchema);
 		
 		this.setState({ errors });
@@ -161,38 +202,17 @@ class TodoList extends Component {
         getService.addCall('project_todo.php', 'add', addTodoFormData)
         .then((data) => {
             if (data.status === 'success') {
-                // Fetch the updated todo list
-                getService.getCall('project_todo.php', {
-                    action: 'view',
-                    logged_in_employee_id: window.user.id,
-                    role: window.user.role
-                })
-                .then(updatedData => {
-                    if (updatedData.status === 'success') {
-                        this.setState({
-                            todos: updatedData.data,
-                            title: "",
-                            due_date: "",
-                            priority: "",
-                            selectedEmployeeId: "",
-                            errors: {},
-                            successMessage: "Todo added successfully!",
-                            showSuccess: true,
-                            showAddTodoModal: false
-                        });
-                    } else {
-                        this.setState({
-                            errorMessage: "Todo added but failed to refresh the list.",
-                            showError: true,
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    this.setState({
-                        errorMessage: "Todo added but failed to refresh the list.",
-                        showError: true,
-                    });
+                // Fetch the updated todo list with current filters
+                this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+                this.setState({
+                    title: "",
+                    due_date: "",
+                    priority: "",
+                    selectedEmployeeId: "",
+                    errors: {},
+                    successMessage: "Todo added successfully!",
+                    showSuccess: true,
+                    showAddTodoModal: false
                 });
 
                 // Auto-hide success message after 5 seconds
@@ -321,18 +341,15 @@ class TodoList extends Component {
         getService.addCall('project_todo.php', 'update_status', formData)
         .then(data => {
             if (data.status === 'success') {
-                this.setState(prevState => ({
-                    todos: prevState.todos.map(todo =>
-                        todo.id === selectedTodo.id
-                            ? { ...todo, todoStatus: newStatus }
-                            : todo
-                    ),
+                // Re-fetch to respect active filters
+                this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+                this.setState({
                     showOverdueModal: false,
                     selectedTodo: null,
                     isUnchecking: false,
                     successMessage: successMessage,
                     showSuccess: true
-                }));
+                });
                 
                 setTimeout(() => {
                     this.setState({
@@ -434,47 +451,18 @@ class TodoList extends Component {
         getService.addCall('project_todo.php', 'edit', updateTodoFormData)
         .then((resp) => {
             if (resp.status === 'success') {
-                // Update the todo list and base list, then re-apply day filter
-                const server = resp.data || {};
-                const updatedItem = {
-                    id: server.id || selectedTodo.id,
-                    title: server.title !== undefined ? server.title : title,
-                    due_date: server.due_date !== undefined ? server.due_date : due_date,
-                    priority: server.priority !== undefined ? server.priority : priority,
-                    employee_id: server.employee_id !== undefined ? server.employee_id : employee_id,
-                    first_name: server.first_name,
-                    last_name: server.last_name,
-                    profile: server.profile
-                };
-                this.setState((prevState) => {
-                    // Update baseTodos first
-                    let nextBase = prevState.baseTodos.map(t => t.id === updatedItem.id ? { ...t, ...updatedItem } : t);
-
-                    // If employee filter is active and item no longer matches, remove it from base
-                    if (prevState.employeeFilter) {
-                        const filterId = String(prevState.employeeFilter);
-                        nextBase = nextBase.filter(t => String(t.employee_id) === filterId);
-                    }
-                    // If status filter is active, keep consistent (edit does not change status, but keep safe)
-                    if (prevState.statusFilter) {
-                        nextBase = nextBase.filter(t => t.todoStatus ? String(t.todoStatus) === String(prevState.statusFilter) : true);
-                    }
-
-                    const nextVisible = this.applyDayFilter(nextBase, prevState.dayFilter);
-
-                    return {
-                        baseTodos: nextBase,
-                        todos: nextVisible,
-                        title: "",
-                        due_date: "",
-                        priority: "",
-                        selectedEmployeeId: "",
-                        errors:{},
-                        successMessage: "Todo updated successfully!",
-                        showSuccess: true,
-                        showEditModal: false,
-                        selectedTodo: null
-                    };
+                // After edit, re-fetch with active filters
+                this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+                this.setState({
+                    title: "",
+                    due_date: "",
+                    priority: "",
+                    selectedEmployeeId: "",
+                    errors:{},
+                    successMessage: "Todo updated successfully!",
+                    showSuccess: true,
+                    showEditModal: false,
+                    selectedTodo: null
                 });
 
                 // Auto-hide success message after 3 seconds
@@ -525,14 +513,15 @@ class TodoList extends Component {
     getService.deleteCall('project_todo.php', 'delete', todoToDelete.id)
     .then(data => {
         if (data.status === 'success') {
-            this.setState(prevState => ({
-                todos: prevState.todos.filter(todo => todo.id !== todoToDelete.id),
+            // Re-fetch to respect filters
+            this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+            this.setState({
                 showDeleteModal: false,
                 todoToDelete: null,
                 ButtonLoading: false,
                 successMessage: "Todo deleted successfully!",
                 showSuccess: true
-            }));
+            });
             setTimeout(() => {
                 this.setState({
                     showSuccess: false,
@@ -575,14 +564,24 @@ class TodoList extends Component {
         if (status) {
             params.status = status;
         }
+        // Map dayFilter to backend params
+        const { dayFilter } = this.state;
+        if (dayFilter) {
+            if (dayFilter.startsWith('date:')) {
+                params.date = dayFilter.replace('date:','');
+            } else {
+                // day keywords like this_week, yesterday, tomorrow, weekdays
+                params.day = dayFilter;
+            }
+        }
         this.setState({ loading: true });
         getService.getCall('project_todo.php', params)
             .then(data => {
                 if (data.status === 'success') {
-                    const baseTodos = data.data;
+                    const list = data.data;
                     this.setState({
-                        baseTodos: baseTodos,
-                        todos: this.applyDayFilter(baseTodos, this.state.dayFilter),
+                        baseTodos: list,
+                        todos: list,
                         loading: false
                     });
                 } else {
@@ -649,6 +648,7 @@ class TodoList extends Component {
         return `${y}-${m}-${day}`;
     };
 
+    // Removed client-side applyDayFilter usage; now server returns filtered list
     applyDayFilter = (todos, dayFilter) => {
         if (!dayFilter) return todos;
         const today = new Date();
@@ -671,34 +671,31 @@ class TodoList extends Component {
         const options = [];
         const now = new Date();
         const todayStr = this.toYmd(now);
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        const yesterdayStr = this.toYmd(yesterday);
         const tomorrow = new Date(now);
         tomorrow.setDate(now.getDate() + 1);
         const tomorrowStr = this.toYmd(tomorrow);
-
-        // const weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        // const todayIdx = now.getDay();
+        const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
         options.push({ value: '', label: 'All Days' });
         options.push({ value: `date:${todayStr}`, label: `Today` });
+        options.push({ value: `date:${yesterdayStr}`, label: `Yesterday` });
         options.push({ value: `date:${tomorrowStr}`, label: `Tomorrow` });
-
-        // Remaining days of this week after tomorrow, up to Sunday
-        let cursor = new Date(tomorrow);
-        for (let i = 0; i < 5; i++) { // max remaining days
-            cursor.setDate(cursor.getDate() + 1);
-            const startOfWeek = this.getStartOfWeek(now);
-            const endOfWeek = this.getEndOfWeek(now);
-            if (cursor > endOfWeek) break;
-            // options.push({ value: `date:${this.toYmd(cursor)}`, label: weekdays[cursor.getDay()] });
-        }
-
+        // Also allow keyword week days for server-side
+        // weekdays.forEach(wd => {
+        //     options.push({ value: wd, label: wd.charAt(0).toUpperCase() + wd.slice(1) });
+        // });
         options.push({ value: 'this_week', label: 'This Week' });
         return options;
     };
 
     handleDayFilterChange = (e) => {
         const value = e.target.value;
-        this.setState({ dayFilter: value, currentPageTodos: 1, todos: this.applyDayFilter(this.state.baseTodos, value) });
+        this.setState({ dayFilter: value, currentPageTodos: 1 }, () => {
+            this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+        });
     };
 
     handlePageChange = (newPage) => {
@@ -934,4 +931,4 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({})
-export default connect(mapStateToProps, mapDispatchToProps)(TodoList);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TodoList));

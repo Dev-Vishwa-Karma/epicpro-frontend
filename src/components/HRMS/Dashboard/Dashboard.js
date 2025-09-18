@@ -163,16 +163,22 @@ class Dashboard extends Component {
 										<DashboardTable projects={projects} loading={loading}/>
 									</div>
 								</div>
+								{/* Admin see all task and Emloyee see their task */}
+								<div className='card'>
 								{user.role === 'employee' && (
 									<div className="col-12 col-sm-12">
 										<DashboardTodo />
 									</div>
 								)}
 								{(user.role === 'admin' || user.role === 'super_admin') && (
-									<div className="col-12 col-sm-12">
+										<div className="col-12 col-sm-12">
+											<div className="card-header">
+												<h3 className="card-title">Employee Todo Task</h3>
+											</div>
 										<DashboardAdminTodo />
 									</div>
 								)}
+								</div>
 							</div>
 						</div>
 					</div>

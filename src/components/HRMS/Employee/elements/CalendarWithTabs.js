@@ -11,7 +11,10 @@ import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
 import { getToday, formatDate } from '../../../../utils';
 import Button from '../../../common/formInputs/Button';
+import { withRouter } from 'react-router-dom'; 
 
+
+const PASSWORD_STRING = '********';
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
@@ -22,7 +25,7 @@ class CalendarWithTabs extends Component {
                 email: "",
                 mobile_no1: "",
                 mobile_no2: "",
-                password: "",
+                password: PASSWORD_STRING,
                 gender: "",
                 dob: "",
                 address_line1: "",
@@ -523,7 +526,7 @@ class CalendarWithTabs extends Component {
         appendField("joining_date", employee.joining_date);
         appendField("mobile_no1", employee.mobile_no1);
         appendField('mobile_no2', employee.mobile_no2);
-        if(employee.password !== "" && employee.password !== undefined){
+        if (typeof employee.password === 'string' && employee.password.trim() !== "" && employee.password !== PASSWORD_STRING) {
             appendField("password", employee.password);
         }
         appendField("dob", employee.dob);
@@ -567,6 +570,7 @@ class CalendarWithTabs extends Component {
                         showError: false
                     }));
 
+                    this.props.history.push('/');
                     // Auto-hide success message after 5 seconds
                     setTimeout(this.dismissMessages, 5000);
                 } else {
@@ -1061,4 +1065,4 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({})
-export default connect(mapStateToProps, mapDispatchToProps)(CalendarWithTabs);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(CalendarWithTabs));

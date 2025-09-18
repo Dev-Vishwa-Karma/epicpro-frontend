@@ -67,7 +67,7 @@ const TodoModal = ({
                       value={title}
                       onChange={onChange}
                       placeholder="Todo title"
-                      // error={errors.title}
+                      error={errors.title}
                     />
                   </div>
                   

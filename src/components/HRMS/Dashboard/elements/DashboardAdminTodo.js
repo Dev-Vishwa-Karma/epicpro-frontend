@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { getService } from '../../../../services/getService';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
+import { withRouter } from 'react-router-dom';
 
 class DashboardAdminTodo extends Component {
 	constructor(props) {
@@ -99,19 +100,27 @@ class DashboardAdminTodo extends Component {
 	renderCard = (card) => {
 		return (
 			<div className="col-md-3" key={card.employee.id}>
-				<div className="card">
-					<div className="card-status bg-green" />
+				<div className="card shadow-lg" style={{borderTop:"5px solid blue", height: "300px", display: "flex", flexDirection: "column" }}>
+					{/* <div className="card-status bg-primary" style={{ position: "sticky", top: 0, zIndex: 2, height: "4px" }} /> */}
 					<div className="card-header">
 						<h3 className="card-title">
 							{card.employee.first_name} {card.employee.last_name}
 						</h3>
 					</div>
-					<div className="card-body todo_list">
+					<div className="card-body todo_list" style={{ overflowY: "auto", flexGrow: 1 }}>
 						<ul className="list-unstyled mb-0">
 							{card.todos.sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => (
-								<li key={t.id} className="mb-2">
+								<li
+									key={t.id}
+									className="mb-2"
+									style={{ cursor: 'pointer' }}
+									onClick={() => {
+										const date = t.due_date.slice(0, 10);
+										this.props.history.push(`/project-todo?employee_id=${t.employee_id}&status=${t.todoStatus}&date=${date}`);
+									}}
+								>
 									<div className="d-flex align-items-center justify-content-between">
-										<span className="custom-control-label">{t.title}</span>
+										<span className="ml-2">{t.title}</span>
 										{/* <span className={`tag ml-2 ${String(t.priority).toLowerCase()==='high' ? 'tag-danger' : String(t.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(t.priority||'low').toUpperCase()}</span> */}
 									</div>
 									<small className="text-muted d-block">
@@ -145,4 +154,4 @@ class DashboardAdminTodo extends Component {
 	}
 }
 
-export default DashboardAdminTodo;
+export default withRouter(DashboardAdminTodo);

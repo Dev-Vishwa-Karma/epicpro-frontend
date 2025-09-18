@@ -8,6 +8,7 @@ import InputField from '../../common/formInputs/InputField';
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
 import CheckFileAvailability from './elements/CheckFileAvailability';
 import Button from '../../common/formInputs/Button';
+const PASSWORD_SENTINEL = '********';
 class EditEmployee extends Component {
     constructor(props) {
         super(props);
@@ -139,7 +140,7 @@ class EditEmployee extends Component {
                     joiningDate: employee.joining_date,
                     mobile1: employee.mobile_no1,
                     mobile2: employee.mobile_no2,
-                    password: employee.password,
+                    password: PASSWORD_SENTINEL,
                     address1: employee.address_line1,
                     address2: employee.address_line2,
                     emergencyContact1: employee.emergency_contact1,
@@ -483,7 +484,7 @@ class EditEmployee extends Component {
         updateEmployeeData.append('joining_date',joiningDate);
         updateEmployeeData.append('mobile_no1',mobile1);
         updateEmployeeData.append('mobile_no2',mobile2);
-        if (typeof password === 'string' && password.trim() !== "" && password !== this.state.password) {
+        if (typeof password === 'string' && password.trim() !== "" && password !== PASSWORD_SENTINEL) {
             updateEmployeeData.append('password', password);
         }
         updateEmployeeData.append('address_line1', address1);
