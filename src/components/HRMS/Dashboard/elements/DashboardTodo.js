@@ -61,7 +61,19 @@ class DashboardTodo extends Component {
 		if (dateNoTime.getTime() === tomorrowNoTime.getTime()) {
 			return 'Tomorrow';
 		}
-		return dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+		return dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+	};
+
+	isOverduePending = (todo) => {
+		const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
+		const dueStr = String(todo.due_date || '').slice(0, 10);
+		if (!dueStr) return false;
+		const today = new Date();
+		const y = today.getFullYear();
+		const m = String(today.getMonth() + 1).padStart(2, '0');
+		const d = String(today.getDate()).padStart(2, '0');
+		const todayStr = `${y}-${m}-${d}`;
+		return status === 'pending' && dueStr < todayStr;
 	};
 
 	renderTimeline = (todos) => {
@@ -86,9 +98,9 @@ class DashboardTodo extends Component {
 					return (
 						<React.Fragment key={item.id}>
 							{showSeparator && displayDate && (
-								<div style={{ display: 'flex', alignItems: 'center', margin: '16px 0', width: '100%' }}>
-									<div style={{ flex: 1, borderBottom: '1px solid #e5e7eb' }} />
-									<div style={{ margin: '0 12px', padding: '6px 12px', border: '1px solid #e5e7eb', borderRadius: '999px', background: '#fff', color: '#4b5563', fontSize: '0.9rem', fontWeight: 500 }}>
+								<div className='date-seperator'>
+									<div className='date-border'/>
+									<div className='date-show'>
 										<i className="fa fa-calendar-alt" style={{ marginRight: 6, color: '#9ca3af' }}></i>
 										{displayDate}
 									</div>
@@ -101,19 +113,27 @@ class DashboardTodo extends Component {
 									first_name={item.first_name}
 									last_name={item.last_name}
 									size={35}
-									className="avatar avatar-blue add-space tl_avatar"
-									style={{ width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #f5f5f5' }}
+									className="avatar avatar-blue add-space tl_avatar employee-task-avtar"
+									
 								/>
 								<span>
 									<a href="#" style={{fontWeight:"800"}}>{item.first_name} {item.last_name}</a>
 									<span className="mx-2">|</span>
-									<span className={`tag ml-0 mr-2 ${String(item.priority).toLowerCase()==='high' ? 'tag-danger' : String(item.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(item.priority || 'low').toUpperCase()}</span>
+									<span className={`ml-2 badge ${String(item.priority).toLowerCase()==='high' ? 'tag-danger' : String(item.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(item.priority || 'low').toUpperCase()}</span>
+									<span>
+										{this.isOverduePending(item) && (
+											<span className="ml-2 badge badge-danger text-uppercase">Overdue</span>
+										)}
+									</span>
 									<small className="float-right text-right">
 										{new Date(item.due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
 									</small> 
 								</span>
 								<h6 className="text-secondary" style={{marginTop: 4}}>
-									{item.title}
+									<span className='task-title-employee'
+									>
+										{item.title}
+									</span>
 								</h6>
 							</div>
 						</React.Fragment>

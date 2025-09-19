@@ -64,10 +64,12 @@ class TodoList extends Component {
         const employee_id = params.get('employee_id') || '';
         const status = params.get('status') || '';
         const date = params.get('date');
+        const day = params.get('day');
         let dayFilter = '';
         if (date) dayFilter = `date:${date}`;
+        else if (day) dayFilter = day;
 
-        if (employee_id || status || date) {
+        if (employee_id || status || date || day) {
             this.setState({
                 employeeFilter: employee_id,
                 statusFilter: status,
@@ -590,9 +592,10 @@ class TodoList extends Component {
             .then(data => {
                 if (data.status === 'success') {
                     const list = data.data;
+                    const sorted = this.sortTodosForDisplay(list);
                     this.setState({
-                        baseTodos: list,
-                        todos: list,
+                        baseTodos: sorted,
+                        todos: sorted,
                         loading: false
                     });
                 } else {
@@ -659,6 +662,31 @@ class TodoList extends Component {
         return `${y}-${m}-${day}`;
     };
 
+    // Determine if a todo is overdue and pending (due_date < today and status pending)
+    isOverduePending = (todo) => {
+        const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
+        const dueStr = String(todo.due_date || '').slice(0, 10);
+        const todayStr = this.toYmd(new Date());
+        return status === 'pending' && dueStr < todayStr;
+    };
+
+    // Sort so that overdue pending appear first, then by due_date ascending
+    sortTodosForDisplay = (list) => {
+        const safeList = Array.isArray(list) ? list.slice() : [];
+        return safeList.sort((a, b) => {
+            const aOver = this.isOverduePending(a);
+            const bOver = this.isOverduePending(b);
+            if (aOver !== bOver) return aOver ? -1 : 1;
+            const aDue = String(a.due_date || '').slice(0, 10);
+            const bDue = String(b.due_date || '').slice(0, 10);
+            if (aDue && bDue) {
+                if (aDue < bDue) return -1;
+                if (aDue > bDue) return 1;
+            }
+            return 0;
+        });
+    };
+
     // Removed client-side applyDayFilter usage; now server returns filtered list
     applyDayFilter = (todos, dayFilter) => {
         if (!dayFilter) return todos;
@@ -690,9 +718,9 @@ class TodoList extends Component {
         const tomorrowStr = this.toYmd(tomorrow);
         // const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
-        options.push({ value: '', label: 'All Days' });
+        options.push({ value: 'all', label: 'All Days' });
         options.push({ value: `date:${todayStr}`, label: `Today` });
-        options.push({ value: `date:${yesterdayStr}`, label: `Yesterday` });
+        // options.push({ value: `date:${yesterdayStr}`, label: `Yesterday` });
         options.push({ value: `date:${tomorrowStr}`, label: `Tomorrow` });
         // Also allow keyword week days for server-side
         // weekdays.forEach(wd => {

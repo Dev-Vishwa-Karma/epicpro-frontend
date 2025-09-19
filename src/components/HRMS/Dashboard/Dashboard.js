@@ -16,6 +16,7 @@ class Dashboard extends Component {
 			totalEmployees: 0,
 			totalEvents: 0,
 			totalHolidays: 0,
+			totalPendingTodos: 0,
 			user: authService.getUser(),
 			projects: [],
 			loading: true,
@@ -41,6 +42,7 @@ class Dashboard extends Component {
 				let totalEmployees = data.data[0].total_employees;
 				const totalHolidays = data.data[0].total_holidays;
 				const totalEvents = data.data[0].total_events;
+				const totalPendingTodos = data.data[0].total_pending_todos;
 
 				// Check user role
 				if (loggedInUser && loggedInUser.role === "employee") {
@@ -49,7 +51,7 @@ class Dashboard extends Component {
 				}
 
 				this.setState(
-					{ totalUsers: totalUsers, totalEmployees: totalEmployees, totalHolidays: totalHolidays, totalEvents: totalEvents}
+					{ totalUsers: totalUsers, totalEmployees: totalEmployees, totalHolidays: totalHolidays, totalEvents: totalEvents, totalPendingTodos: totalPendingTodos}
 				);
 			} else {
 				this.setState({ message: data.message });
@@ -103,7 +105,7 @@ class Dashboard extends Component {
 		if (!(user.role === 'admin' || user.role === 'super_admin')) return null;
 
 		const items = [
-			{ label: 'Todos', class_color: null, count: null, icon: 'fa-tasks', link: '/project-todo', isFa: true },
+			{ label: 'Todos', class_color: 'indigo', count: this.state.totalPendingTodos, icon: 'fa-tasks', link: '/project-todo', isFa: true },
 			{ label: 'Users', class_color: 'green', count: this.state.totalUsers, icon: 'users', link: '/hr-users' },
 			{ label: 'Employees', class_color: 'pink', count: this.state.totalEmployees, icon: 'users', link: '/hr-employee' },
 			{ label: 'Holidays', class_color: 'info', count: this.state.totalHolidays, icon: 'like', link: '/hr-holidays' },
@@ -155,6 +157,29 @@ class Dashboard extends Component {
 					<div className="section-body">
 						<div className="container-fluid">
 							<div className="row clearfix">
+								{/* Admin see all task and Emloyee see their task */}
+								<div>
+									<div className='card'>
+										{user.role === 'employee' && (
+											<div className="col-12 col-sm-12">
+												<DashboardTodo />
+											</div>
+										)}
+									</div>
+									
+									{(user.role === 'admin' || user.role === 'super_admin') && (
+										<>
+										<div className='card'>
+											<div className="card-header">
+												<h3 className="card-title mt-3 mb-3">Employee Todo Task</h3>
+											</div>
+										</div>
+										<div className="col-12 col-sm-12">
+											<DashboardAdminTodo />
+										</div>
+										</>
+									)}
+								</div>
 								<div className="col-12 col-sm-12">
 									<div className="card">
 										<div className="card-header">
@@ -162,19 +187,6 @@ class Dashboard extends Component {
 										</div>
 										<DashboardTable projects={projects} loading={loading}/>
 									</div>
-								</div>
-								{/* Admin see all task and Emloyee see their task */}
-								<div className='card'>
-								{user.role === 'employee' && (
-									<div className="col-12 col-sm-12">
-										<DashboardTodo />
-									</div>
-								)}
-								{(user.role === 'admin' || user.role === 'super_admin') && (
-										<div className="col-12 col-sm-12">
-										<DashboardAdminTodo />
-									</div>
-								)}
 								</div>
 							</div>
 						</div>

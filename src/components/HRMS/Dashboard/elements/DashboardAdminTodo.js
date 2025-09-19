@@ -96,14 +96,25 @@ class DashboardAdminTodo extends Component {
 		if (ds === t.getTime()) return 'Today';
 		if (ds === y.getTime()) return 'Yesterday';
 		if (ds === tm.getTime()) return 'Tomorrow';
-		return d.toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'short', year:'numeric' });
+		return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+	};
+
+	isOverduePending = (todo) => {
+		const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
+		const dueStr = String(todo.due_date || '').slice(0, 10);
+		if (!dueStr) return false;
+		const today = new Date();
+		const y = today.getFullYear();
+		const m = String(today.getMonth() + 1).padStart(2, '0');
+		const d = String(today.getDate()).padStart(2, '0');
+		const todayStr = `${y}-${m}-${d}`;
+		return status === 'pending' && dueStr < todayStr;
 	};
 
 	renderCard = (card) => {
 		return (
-			<div className="col-md-3" key={card.employee.id}>
-				<div className="card shadow-lg" style={{borderTop:"5px solid blue", height: "300px", display: "flex", flexDirection: "column" }}>
-					{/* <div className="card-status bg-primary" style={{ position: "sticky", top: 0, zIndex: 2, height: "4px" }} /> */}
+			<div className="col-md-4" key={card.employee.id}>
+				<div className="card admin-task-card" >
 					<div className="card-header d-flex align-items-center">
 						<Avatar
 							profile={card.employee.profile}
@@ -129,15 +140,34 @@ class DashboardAdminTodo extends Component {
 									}}
 								>
 									<div className="d-flex align-items-center justify-content-between">
-										<span className="ml-2">{t.title}</span>
+										<span
+											className="ml-2 task-title-admin"
+										>
+											{t.title}
+										</span>
 										{/* <span className={`tag ml-2 ${String(t.priority).toLowerCase()==='high' ? 'tag-danger' : String(t.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(t.priority||'low').toUpperCase()}</span> */}
 									</div>
 									<small className="text-muted d-block">
-										{this.formatFriendlyDate(t.due_date)}
+										{this.formatFriendlyDate(t.due_date)}{' '}
+										{this.isOverduePending(t) && (
+											<span className="badge badge-danger text-uppercase">Overdue</span>
+										)}
+										<span className={`ml-2 badge ${String(t.priority).toLowerCase()==='high' ? 'tag-danger' : String(t.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(t.priority||'low').toUpperCase()}</span>
 									</small>
 								</li>
 							))}
 						</ul>
+					</div>
+					<div className="mt-2 mb-2 mr-4 text-right">
+						<button
+							type="button"
+							className="btn p-0 view-all"
+							onClick={() => this.props.history.push(`/project-todo?employee_id=${card.employee.id}&status=pending&day=all`)}
+						>
+							View All
+							{/* <span className="arrow">&#8594;</span> */}
+							<span className="arrow"><i className='fa fa-arrow-right'></i></span>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -151,9 +181,6 @@ class DashboardAdminTodo extends Component {
 
 		return (
 			<div className='container mt-2 mb-2'>
-				<div className="card-header mb-4">
-					<h3 className="card-title">Employee Todo Task</h3>
-				</div>
 				{loading ? (
 					<div className='p-3'><TableSkeleton columns={3} rows={3} /></div>
 				) : (

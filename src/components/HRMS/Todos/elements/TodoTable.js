@@ -14,6 +14,20 @@ const TodoTable = ({
     handleEditTodo,
     handleDeleteClick
 }) => {
+    const isOverduePending = (todo) => {
+        const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
+        const dueStr = String(todo.due_date || '').slice(0, 10);
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${y}-${m}-${d}`;
+        return status === 'pending' && !!dueStr && dueStr < todayStr;
+    };
+
+    const isAdmin = (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin");
+    const columnCount = isAdmin ? 6 : 4; // Task, Due, Priority, Overdue, [User, Action]
+
     return (
         <div className="table-responsive todo_list">
             <table className="table table-hover table-striped table-vcenter mb-0">
@@ -22,7 +36,8 @@ const TodoTable = ({
                         <th><p className="w150">Task</p></th>
                         <th className="w150 text-right">Due</th>
                         <th className="w100">Priority</th>
-                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                        {/* <th className="w100">Overdue</th> */}
+                        {isAdmin && (
                             <>
                                 <th className="w80"><i className="icon-user" /></th>
                                 <th className="w150">Action</th>
@@ -33,9 +48,9 @@ const TodoTable = ({
                 {loading ? (
                     <tbody>
                         <tr>
-                            <td colSpan="5">
+                            <td colSpan={columnCount.toString()}>
                                 <div className="d-flex justify-content-center align-items-center" style={{ height: "150px" }}>
-                                    <TableSkeleton columns={4} rows={currentTodos.length} />
+                                    <TableSkeleton columns={columnCount} rows={currentTodos.length} />
                                 </div>
                             </td>
                         </tr>
@@ -63,7 +78,7 @@ const TodoTable = ({
                                     <td className="text-right">
                                         {formatDueLabel(todo.due_date)}
                                     </td>
-                                    <td>
+                                    <td className='d-flex'>
                                         <span className={`tag ml-0 mr-0 ${
                                             todo.priority === "high" ? "tag-danger"
                                             : todo.priority === "medium" ? "tag-warning"
@@ -71,8 +86,13 @@ const TodoTable = ({
                                         }`}>
                                             {todo.priority.toUpperCase()}
                                         </span>
+                                        <span className='ml-2'>
+                                            {isOverduePending(todo) && (
+                                                <span className="tag ml-0 mr-0 over-due">Overdue</span>
+                                            )}
+                                        </span>
                                     </td>
-                                    {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                    {isAdmin && (
                                         <>
                                             <td>
                                                 <Avatar
@@ -112,7 +132,7 @@ const TodoTable = ({
                                 </tr>
                             ))
                         ) : (
-                            <NoDataRow colSpan={7} message="Todo not available." />
+                            <NoDataRow colSpan={columnCount} message="Todo not available." />
                         )}
                     </tbody>
                 )}
