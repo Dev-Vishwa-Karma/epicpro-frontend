@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import { getService } from '../../../../services/getService';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { withRouter } from 'react-router-dom';
+import Avatar from '../../../common/Avatar';
 
 class DashboardAdminTodo extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			loading: true,
-			cards: [], // [{ employee: {id, first_name, last_name}, todos: [...] }]
+			cards: [], // [{ employee: {id, first_name, last_name, profile}, todos: [...] }]
 		};
 	}
 
@@ -27,8 +28,9 @@ class DashboardAdminTodo extends Component {
 		.then(res => {
 			if (res.status === 'success') {
 				const list = Array.isArray(res.data) ? res.data : [];
-				const filtered = this.filterYesterdayAndThisWeek(list);
-				const grouped = this.groupByEmployee(filtered);
+				// const filtered = this.filterYesterdayAndThisWeek(list); ( for filter task display )
+				// const grouped = this.groupByEmployee(filtered);
+				const grouped = this.groupByEmployee(list);
 				this.setState({ loading: false, cards: grouped });
 			} else {
 				this.setState({ loading: false, cards: [] });
@@ -39,34 +41,34 @@ class DashboardAdminTodo extends Component {
 
 	stripDate = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-	filterYesterdayAndThisWeek = (todos) => {
-		const today = new Date();
-		const yesterday = new Date();
-		yesterday.setDate(today.getDate() - 1);
-		const startOfWeek = (() => {
-			const d = new Date(today);
-			const day = d.getDay();
-			const diffToMonday = (day === 0 ? -6 : 1) - day;
-			d.setDate(d.getDate() + diffToMonday);
-			d.setHours(0,0,0,0);
-			return d;
-		})();
-		const endOfWeek = (() => {
-			const e = new Date(startOfWeek);
-			e.setDate(startOfWeek.getDate() + 6);
-			e.setHours(23,59,59,999);
-			return e;
-		})();
+	// filterYesterdayAndThisWeek = (todos) => {
+	// 	const today = new Date();
+	// 	const yesterday = new Date();
+	// 	yesterday.setDate(today.getDate() - 1);
+	// 	const startOfWeek = (() => {
+	// 		const d = new Date(today);
+	// 		const day = d.getDay();
+	// 		const diffToMonday = (day === 0 ? -6 : 1) - day;
+	// 		d.setDate(d.getDate() + diffToMonday);
+	// 		d.setHours(0,0,0,0);
+	// 		return d;
+	// 	})();
+	// 	const endOfWeek = (() => {
+	// 		const e = new Date(startOfWeek);
+	// 		e.setDate(startOfWeek.getDate() + 6);
+	// 		e.setHours(23,59,59,999);
+	// 		return e;
+	// 	})();
 
-		return (todos || []).filter(t => {
-			const due = new Date(t.due_date);
-			const dueDateOnly = this.stripDate(due).getTime();
-			const yOnly = this.stripDate(yesterday).getTime();
-			const isYesterday = dueDateOnly === yOnly;
-			const isThisWeek = due >= startOfWeek && due <= endOfWeek;
-			return isYesterday || isThisWeek;
-		});
-	};
+	// 	return (todos || []).filter(t => {
+	// 		const due = new Date(t.due_date);
+	// 		const dueDateOnly = this.stripDate(due).getTime();
+	// 		const yOnly = this.stripDate(yesterday).getTime();
+	// 		const isYesterday = dueDateOnly === yOnly;
+	// 		const isThisWeek = due >= startOfWeek && due <= endOfWeek;
+	// 		return isYesterday || isThisWeek;
+	// 	});
+	// };
 
 	groupByEmployee = (todos) => {
 		const map = new Map();
@@ -74,7 +76,7 @@ class DashboardAdminTodo extends Component {
 			const key = t.employee_id;
 			if (!map.has(key)) {
 				map.set(key, {
-					employee: { id: t.employee_id, first_name: t.first_name, last_name: t.last_name },
+					employee: { id: t.employee_id, first_name: t.first_name, last_name: t.last_name, profile: t.profile },
 					todos: []
 				});
 			}
@@ -102,8 +104,15 @@ class DashboardAdminTodo extends Component {
 			<div className="col-md-3" key={card.employee.id}>
 				<div className="card shadow-lg" style={{borderTop:"5px solid blue", height: "300px", display: "flex", flexDirection: "column" }}>
 					{/* <div className="card-status bg-primary" style={{ position: "sticky", top: 0, zIndex: 2, height: "4px" }} /> */}
-					<div className="card-header">
-						<h3 className="card-title">
+					<div className="card-header d-flex align-items-center">
+						<Avatar
+							profile={card.employee.profile}
+							first_name={card.employee.first_name}
+							last_name={card.employee.last_name}
+							size={32}
+							style={{ marginRight: 8 }}
+						/>
+						<h3 className="card-title mb-0">
 							{card.employee.first_name} {card.employee.last_name}
 						</h3>
 					</div>
@@ -142,6 +151,9 @@ class DashboardAdminTodo extends Component {
 
 		return (
 			<div className='container mt-2 mb-2'>
+				<div className="card-header mb-4">
+					<h3 className="card-title">Employee Todo Task</h3>
+				</div>
 				{loading ? (
 					<div className='p-3'><TableSkeleton columns={3} rows={3} /></div>
 				) : (

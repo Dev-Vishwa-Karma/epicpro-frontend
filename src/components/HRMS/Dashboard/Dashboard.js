@@ -172,9 +172,6 @@ class Dashboard extends Component {
 								)}
 								{(user.role === 'admin' || user.role === 'super_admin') && (
 										<div className="col-12 col-sm-12">
-											<div className="card-header">
-												<h3 className="card-title">Employee Todo Task</h3>
-											</div>
 										<DashboardAdminTodo />
 									</div>
 								)}

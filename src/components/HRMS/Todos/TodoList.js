@@ -76,15 +76,23 @@ class TodoList extends Component {
                 this.fetchFilteredTodos(employee_id, status);
             });
         } else {
-            // Set default day filter to Today and fetch with default status 'pending'
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            const dayFilterDefault = `date:${y}-${m}-${d}`;
-            this.setState({ dayFilter: dayFilterDefault }, () => {
-                this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
-            });
+            // Default behavior differs for employee vs admin
+            if (role === 'employee') {
+                // Employees: show ALL pending by default (no date filter)
+                this.setState({ dayFilter: '' }, () => {
+                    this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
+                });
+            } else {
+                // Admins: default to Today
+                const today = new Date();
+                const y = today.getFullYear();
+                const m = String(today.getMonth() + 1).padStart(2, '0');
+                const d = String(today.getDate()).padStart(2, '0');
+                const dayFilterDefault = `date:${y}-${m}-${d}`;
+                this.setState({ dayFilter: dayFilterDefault }, () => {
+                    this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
+                });
+            }
         }
 
         // Check if user is admin or superadmin
@@ -402,23 +410,26 @@ class TodoList extends Component {
         const { selectedTodo, logged_in_employee_id, logged_in_employee_role, title, due_date, priority, selectedEmployeeId } = this.state;
 
         // Apply Validation component for edit
-        const validationSchema = [
-            { name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
-            { name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
-                customValidator: (val) => {
-                    const today = new Date().toISOString().split("T")[0];
-                    if (val < today) {
-                        return "Due date not less than current date:";
-                    }
-                    return undefined;
-                }
-            },
-            { name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
-        ];
-        const errors = validateFields(validationSchema);
+        // const validationSchema = [
+        //     { name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
+        //     { name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
+        //         customValidator: (val) => {
+        //             const today = new Date().toISOString().split("T")[0];
+        //             if (val < today) {
+        //                 return "Due date not less than current date:";
+        //             }
+        //             return undefined;
+        //         }
+        //     },
+        //     { name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
+        // ];
+        // const errors = validateFields(validationSchema);
         
-        if (Object.keys(errors).length > 0) {
-            this.setState({ errors });
+        // if (Object.keys(errors).length > 0) {
+        //     this.setState({ errors });
+        //     return; // Stop execution if validation fails
+        // }
+        if (!this.validateAddTodoForm()) {
             return; // Stop execution if validation fails
         }
 
@@ -677,7 +688,7 @@ class TodoList extends Component {
         const tomorrow = new Date(now);
         tomorrow.setDate(now.getDate() + 1);
         const tomorrowStr = this.toYmd(tomorrow);
-        const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+        // const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
         options.push({ value: '', label: 'All Days' });
         options.push({ value: `date:${todayStr}`, label: `Today` });
