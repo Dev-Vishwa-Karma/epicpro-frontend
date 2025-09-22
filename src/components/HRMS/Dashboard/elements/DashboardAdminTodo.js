@@ -28,9 +28,8 @@ class DashboardAdminTodo extends Component {
 		.then(res => {
 			if (res.status === 'success') {
 				const list = Array.isArray(res.data) ? res.data : [];
-				// const filtered = this.filterYesterdayAndThisWeek(list); ( for filter task display )
-				// const grouped = this.groupByEmployee(filtered);
-				const grouped = this.groupByEmployee(list);
+				const filtered = this.filterUpToTomorrow(list);
+				const grouped = this.groupByEmployee(filtered);
 				this.setState({ loading: false, cards: grouped });
 			} else {
 				this.setState({ loading: false, cards: [] });
@@ -40,35 +39,6 @@ class DashboardAdminTodo extends Component {
 	}
 
 	stripDate = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-
-	// filterYesterdayAndThisWeek = (todos) => {
-	// 	const today = new Date();
-	// 	const yesterday = new Date();
-	// 	yesterday.setDate(today.getDate() - 1);
-	// 	const startOfWeek = (() => {
-	// 		const d = new Date(today);
-	// 		const day = d.getDay();
-	// 		const diffToMonday = (day === 0 ? -6 : 1) - day;
-	// 		d.setDate(d.getDate() + diffToMonday);
-	// 		d.setHours(0,0,0,0);
-	// 		return d;
-	// 	})();
-	// 	const endOfWeek = (() => {
-	// 		const e = new Date(startOfWeek);
-	// 		e.setDate(startOfWeek.getDate() + 6);
-	// 		e.setHours(23,59,59,999);
-	// 		return e;
-	// 	})();
-
-	// 	return (todos || []).filter(t => {
-	// 		const due = new Date(t.due_date);
-	// 		const dueDateOnly = this.stripDate(due).getTime();
-	// 		const yOnly = this.stripDate(yesterday).getTime();
-	// 		const isYesterday = dueDateOnly === yOnly;
-	// 		const isThisWeek = due >= startOfWeek && due <= endOfWeek;
-	// 		return isYesterday || isThisWeek;
-	// 	});
-	// };
 
 	groupByEmployee = (todos) => {
 		const map = new Map();
@@ -111,6 +81,20 @@ class DashboardAdminTodo extends Component {
 		return status === 'pending' && dueStr < todayStr;
 	};
 
+	filterUpToTomorrow = (todos) => {
+		const strip = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+		const today = strip(new Date());
+		const tomorrow = new Date(today);
+		tomorrow.setDate(today.getDate() + 1);
+		const tomorrowTime = strip(tomorrow).getTime();
+		return (todos || []).filter(t => {
+			const due = new Date(t.due_date);
+			if (isNaN(due)) return false;
+			const dueTime = strip(due).getTime();
+			return dueTime <= tomorrowTime;
+		});
+	};
+
 	renderCard = (card) => {
 		return (
 			<div className="col-md-4" key={card.employee.id}>
@@ -129,7 +113,7 @@ class DashboardAdminTodo extends Component {
 					</div>
 					<div className="card-body todo_list" style={{ overflowY: "auto", flexGrow: 1 }}>
 						<ul className="list-unstyled mb-0">
-							{card.todos.sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => (
+							{this.filterUpToTomorrow(card.todos).sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => (
 								<li
 									key={t.id}
 									className="mb-2"
@@ -181,6 +165,11 @@ class DashboardAdminTodo extends Component {
 
 		return (
 			<div className='container mt-2 mb-2'>
+				<div className='card'>
+					<div className="card-header">
+						<h3 className="card-title">Employees Todos</h3>
+					</div>
+				</div>
 				{loading ? (
 					<div className='p-3'><TableSkeleton columns={3} rows={3} /></div>
 				) : (

@@ -28,8 +28,10 @@ class DashboardTodo extends Component {
 		.then(res => {
 			if (res.status === 'success') {
 				const list = Array.isArray(res.data) ? res.data : [];
+				// Filter: only past dates, today and tomorrow
+				const filtered = this.filterUpToTomorrow(list);
 				// Sort todos by due date (oldest first)
-				const sortedTodos = list.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+				const sortedTodos = filtered.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
 				this.setState({ todos: sortedTodos, loading: false });
 			} else {
 				this.setState({ todos: [], loading: false });
@@ -76,6 +78,20 @@ class DashboardTodo extends Component {
 		return status === 'pending' && dueStr < todayStr;
 	};
 
+	filterUpToTomorrow = (todos) => {
+		const strip = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+		const today = strip(new Date());
+		const tomorrow = new Date(today);
+		tomorrow.setDate(today.getDate() + 1);
+		const tomorrowTime = strip(tomorrow).getTime();
+		return (todos || []).filter(t => {
+			const due = new Date(t.due_date);
+			if (isNaN(due)) return false;
+			const dueTime = strip(due).getTime();
+			return dueTime <= tomorrowTime;
+		});
+	};
+
 	renderTimeline = (todos) => {
 		return (
 			<div>
@@ -119,10 +135,10 @@ class DashboardTodo extends Component {
 								<span>
 									<a href="#" style={{fontWeight:"800"}}>{item.first_name} {item.last_name}</a>
 									<span className="mx-2">|</span>
-									<span className={`ml-2 badge ${String(item.priority).toLowerCase()==='high' ? 'tag-danger' : String(item.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(item.priority || 'low').toUpperCase()}</span>
+									<span className={`tag ml-0 mr-2 ${String(item.priority).toLowerCase()==='high' ? 'tag-danger' : String(item.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(item.priority || 'low').toUpperCase()}</span>
 									<span>
 										{this.isOverduePending(item) && (
-											<span className="ml-2 badge badge-danger text-uppercase">Overdue</span>
+											<span className="badge badge-danger ml-1">Overdue</span>
 										)}
 									</span>
 									<small className="float-right text-right">

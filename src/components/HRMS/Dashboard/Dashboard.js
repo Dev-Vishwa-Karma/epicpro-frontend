@@ -157,29 +157,17 @@ class Dashboard extends Component {
 					<div className="section-body">
 						<div className="container-fluid">
 							<div className="row clearfix">
-								{/* Admin see all task and Emloyee see their task */}
-								<div>
-									<div className='card'>
-										{user.role === 'employee' && (
-											<div className="col-12 col-sm-12">
-												<DashboardTodo />
-											</div>
-										)}
+								{/* Admin see all task and Employee see their task */}
+								{user.role === 'employee' && (
+									<div className="col-12 col-sm-12">
+										<DashboardTodo />
 									</div>
-									
-									{(user.role === 'admin' || user.role === 'super_admin') && (
-										<>
-										<div className='card'>
-											<div className="card-header">
-												<h3 className="card-title mt-3 mb-3">Employee Todo Task</h3>
-											</div>
-										</div>
-										<div className="col-12 col-sm-12">
-											<DashboardAdminTodo />
-										</div>
-										</>
-									)}
-								</div>
+								)}
+								{(user.role === 'admin' || user.role === 'super_admin') &&  (
+									<div className="col-12 col-sm-12">
+										<DashboardAdminTodo />
+									</div>
+								)}
 								<div className="col-12 col-sm-12">
 									<div className="card">
 										<div className="card-header">
