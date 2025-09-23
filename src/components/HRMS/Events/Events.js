@@ -926,17 +926,18 @@ class Events extends Component {
             <div className="container-fluid">
               <div className="row clearfix row-deck">
                 <div className="col-12">
-                  <div className="card">
-                    <div className="card-body">
-                      <div className="row">
-						<div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-							<YearSelector
-								selectedYear={selectedYear}
-								handleYearChange={this.handleYearChange}
-								labelClass='d-flex card-title mr-3'
-								selectClass='w-70 custom-select'
-							/>
-						</div>
+                  <div className="card" style={{ marginBottom: 8 }}>
+                    <div className="card-body py-2 px-3">
+                      
+                      <div className="row align-items-center">
+                        <div className="col-lg-4 col-md-12 col-sm-12 d-flex align-items-center" style={{backgroundColor:"transparent"}}>
+                          <YearSelector
+                            selectedYear={selectedYear}
+                            handleYearChange={this.handleYearChange}
+                            labelClass='d-flex align-items-center mb-0 mr-2'
+                            selectClass='custom-select'
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -988,7 +989,7 @@ class Events extends Component {
                           <select
                             className="form-control custom-select"
                             value={calendarView}
-                            onChange={(e) =>
+                            onChange={(e) =>  
                               this.setState({ calendarView: e.target.value })
                             }
                             style={{ width: "150px", marginRight: "10px" }}

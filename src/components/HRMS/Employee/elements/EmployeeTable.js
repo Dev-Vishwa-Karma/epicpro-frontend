@@ -5,6 +5,14 @@ import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
 
 const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, openDeleteModal, message }) => {
+    const sortedEmployees = Array.isArray(employeeList)
+        ? [...employeeList].sort((a, b) => {
+            const aName = `${(a.first_name || '').trim()} ${(a.last_name || '').trim()}`.toLowerCase();
+            const bName = `${(b.first_name || '').trim()} ${(b.last_name || '').trim()}`.toLowerCase();
+            return aName.localeCompare(bName);
+          })
+        : [];
+
     return (
         <div className="card-body">
             {loading ? (
@@ -28,8 +36,8 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                             </tr>
                         </thead>
                         <tbody>
-                            {employeeList.length > 0 ? (
-                                employeeList.map((employee, index) => (
+                            {sortedEmployees.length > 0 ? (
+                                sortedEmployees.map((employee, index) => (
                                     <tr key={employee.id}>
                                         <td className="w40">
                                             {(index + 1).toString().padStart(2, '0')}

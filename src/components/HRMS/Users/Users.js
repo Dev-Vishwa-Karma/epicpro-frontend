@@ -10,6 +10,8 @@ import AddUserForm from './elements/AddUserForm';
 import EditUserModal from './elements/EditUserModal';
 import { appendDataToFormData } from '../../../utils';
 
+const PASSWORD_SENTINEL = '********';
+
 class Users extends Component {
 	constructor(props) {
 		super(props);
@@ -240,7 +242,7 @@ class Users extends Component {
 
 	// Handle edit button click
     handleEditClick = (user) => {
-        this.setState({ selectedUser: user });
+        this.setState({ selectedUser: { ...user, password: PASSWORD_SENTINEL } });
     };
 
 	// Handle input change for editing fields
@@ -267,6 +269,7 @@ class Users extends Component {
 			{ name: 'lastName', value: selectedUser.last_name, type: 'name', required: false, messageName: 'Last Name' },
 			{ name: 'email', value: selectedUser.email, type: 'email', required: true, messageName: 'Email Address'},
             { name: 'dob', value: selectedUser.dob, type: 'date', required: false, messageName: 'Date of Birth'},
+			
         ];
         const errors = validateFields(validationSchema);
         if (Object.keys(errors).length > 0) {
@@ -290,6 +293,14 @@ class Users extends Component {
 		};
 
     	appendDataToFormData(updateProfileData, data);
+
+		// Only super_admin can reset password, and only if changed from sentinel
+		if (logged_in_employee_role === 'super_admin') {
+			const pwd = (selectedUser.password || '').trim();
+			if (pwd !== '' && pwd !== PASSWORD_SENTINEL) {
+				updateProfileData.append('password', pwd);
+			}
+		}
 
         // Example API call
 		getService.editCall('get_employees.php', 'edit', updateProfileData, null, selectedUser.id)
@@ -346,7 +357,7 @@ class Users extends Component {
 
 				// Calculate the total pages after deletion
 				const totalPages = Math.ceil(updatedUsers.length / dataPerPage);
-	
+		
 				// Adjust currentPage if necessary (if we're on a page that no longer has data)
 				let newPage = currentPage;
 				if (updatedUsers.length === 0) {
@@ -566,6 +577,7 @@ class Users extends Component {
 						handleSelectChange={this.handleSelectChange}
 						updateProfile={this.updateProfile}
 						ButtonLoading={this.state.ButtonLoading}
+						loggedInRole={(this.state.logged_in_employee_role || '').toLowerCase().replace(/\s+/g,'_')}
 					/>
 
 					{/* Delete User Model */}

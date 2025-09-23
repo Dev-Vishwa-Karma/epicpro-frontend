@@ -42,6 +42,29 @@ class Fullcalender extends Component {
                         const startDate = formatDate(localStorage.getItem('startDate'));
                         const endDate = formatDate(localStorage.getItem('endDate'));
 
+                        // Highlight all Sundays
+                        if (cell.hasClass && cell.hasClass('fc-sun')) {
+                            cell.css('background-color', '#FFE599');
+                        }
+
+                        // Highlight configured Alternate Saturdays
+                        if (cell.hasClass && cell.hasClass('fc-sat')) {
+                            if (alternateSatudays && alternateSatudays.length > 0) {
+                                alternateSatudays.forEach((alternateSatuday) => {
+                                    try {
+                                        const saturday = JSON.parse(alternateSatuday.date);
+                                        saturday.forEach((element) => {
+                                            if (formatDate(date) === formatDate(element)) {
+                                                cell.css('background-color', '#FFE599');
+                                            }
+                                        });
+                                    } catch (e) {
+                                        console.error('Error parsing alternateSatuday.date:', e);
+                                    }
+                                });
+                            }
+                        }
+
                         if (events && events.length > 0) {
                             events.forEach((event) => {
                                 if (
@@ -101,7 +124,7 @@ class Fullcalender extends Component {
                                                     ) {
                                                        
                                                         
-                                                        cell.css('background-color', 'white');
+                                                        cell.css('background-color', '#FFF2CC');
                                                     }
                                                 });
                                             } catch (e) {
@@ -120,6 +143,12 @@ class Fullcalender extends Component {
                                     cell.css('background-color', 'white');
                                 }
                             });
+                        }
+
+                        // Finally, highlight current date with light pink
+                        if (cell.hasClass && cell.hasClass('fc-today')) {
+                            cell.css('background-color', '#FFD6E7');
+                            cell.css('color', 'inherit');
                         }
                     }}
                     viewRender={(view, element) => {

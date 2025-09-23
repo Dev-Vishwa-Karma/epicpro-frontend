@@ -9,7 +9,8 @@ const EditUserModal = ({
 	handleInputChangeForEditUser,
 	handleSelectChange,
 	updateProfile,
-	ButtonLoading
+	ButtonLoading,
+	loggedInRole
 }) => {
 	return (
 		<div className="modal fade" id="editUserModal" tabIndex={-1} role="dialog" aria-labelledby="editUserModalLabel">
@@ -61,7 +62,7 @@ const EditUserModal = ({
 										/>
 									</div>
 
-									<div className="col-md-12">
+									<div className="col-md-6">
 										<InputField
 											label="Date of Birth"
 											name="dob"
@@ -72,6 +73,19 @@ const EditUserModal = ({
 											max={new Date().toISOString().split("T")[0]}
 										/>
 									</div>
+
+									{loggedInRole === 'super_admin' && (
+										<div className="col-md-6">
+											<InputField
+												label="password"
+												name="password"
+												type="password"
+												value={selectedUser?.password || ''}
+												onChange={handleInputChangeForEditUser}
+												error={errors.password}
+											/>
+										</div>
+									)}
 
 									<div className="col-md-6">
 										<InputField

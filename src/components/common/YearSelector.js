@@ -10,7 +10,7 @@ const YearSelector = ({ selectedYear, handleYearChange, labelClass, selectClass 
     );
 
   return (
-    <div>
+    <div className='d-flex'>
       <label htmlFor="year-selector" className={labelClass}>
         Year:
       </label>
