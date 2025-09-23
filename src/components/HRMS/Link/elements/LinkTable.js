@@ -72,6 +72,7 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
       case 'bmp':
       case 'svg':
       case 'webp':
+      case 'psd':
         return <i className="fa fa-file-image-o text-info file-icon" title="Image File" />;
       case 'mp3':
       case 'wav':
@@ -93,6 +94,13 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
       case 'java':
       case 'cpp':
       case 'c':
+      case 'sql':
+      case 'json':
+      case 'csv':
+      case 'xml':
+      case 'yaml':
+      case 'yml':
+      case 'ini':
         return <i className="fa fa-file-code-o file-icon" title="Code File" />;
       default:
         return <i className="fa fa-file-o text-muted file-icon" title="File" />;

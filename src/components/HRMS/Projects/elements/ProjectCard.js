@@ -75,7 +75,19 @@ const ProjectCard = ({
         </div>
 
         <div className="card-body flex-grow-1">
-          <span className="tag tag-blue mb-3">{project.project_technology}</span>
+          <div className="mb-3 d-flex flex-wrap gap-2">
+              {project.project_technology
+                ?.split(',')
+                .map((tech, idx) => (
+                  <span 
+                    key={idx} 
+                    className="mr-2 mb-2"
+                    style={{ fontSize: "0.7rem", padding: "4px 6px", borderRadius: "12px", backgroundColor:"#dbeafe", color:"#1e40af"  }}
+                  >
+                    {tech.trim()}
+                  </span>
+              ))}
+            </div>
           <p
             style={{
               display: '-webkit-box',

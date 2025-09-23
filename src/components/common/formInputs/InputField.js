@@ -20,17 +20,23 @@ const InputField = ({
   multiple = false,
   style = {},
   autoComplete = 'off',
-  firstOption= true
+  firstOption= true,
+  containerClassName = '',
+  inputClassName = ''
 }) => {
+  const wrapperClass = `${(type !== 'file' && type !== 'checkbox') ? 'form-group' : ''}${containerClassName ? ` ${containerClassName}` : ''}`.trim();
+  const controlClass = `form-control${error ? ' is-invalid' : ''}${inputClassName ? ` ${inputClassName}` : ''}`.trim();
+  const checkboxClass = `form-check-input${error ? ' is-invalid' : ''}${inputClassName ? ` ${inputClassName}` : ''}`.trim();
+
   return (
-    <div className={type !== 'file' && type !== 'checkbox' ? 'form-group' : ''}>
+    <div className={wrapperClass}>
       {label && <label className="form-label" htmlFor={name}>{label}</label>}
 
       {type === 'textarea' ? (
         <textarea
           id={name}
           name={name}
-          className={`form-control${error ? ' is-invalid' : ''}`}
+          className={controlClass}
           placeholder={placeholder}
           value={value || ""}
           onChange={onChange}
@@ -38,12 +44,13 @@ const InputField = ({
           ref={refInput}
           rows={rows}
           disabled={disabled}
+          style={style}
         />
       ) : type === 'select' ? (
         <select
           id={name}
           name={name}
-          className={`form-control${error ? ' is-invalid' : ''}`}
+          className={controlClass}
           value={value || ""}
           onChange={onChange}
           required={required}
@@ -65,7 +72,7 @@ const InputField = ({
           id={name}
           type="file"
           name={name}
-          className={`form-control${error ? ' is-invalid' : ''}`}
+          className={controlClass}
           onChange={onChange}
           required={required}
           ref={refInput}
@@ -79,7 +86,7 @@ const InputField = ({
             id={name}
             type="checkbox"
             name={name}
-            className={`form-check-input${error ? ' is-invalid' : ''}`}
+            className={checkboxClass}
             checked={value || false}
             onChange={onChange}
             required={required}
@@ -91,7 +98,7 @@ const InputField = ({
           id={name}
           type={type}
           name={name}
-          className={`form-control${error ? ' is-invalid' : ''}`}
+          className={controlClass}
           placeholder={placeholder}
           value={value || ""}
           onChange={onChange}
@@ -102,6 +109,7 @@ const InputField = ({
           disabled={disabled}
           min={min}
           autoComplete={autoComplete || 'off'}
+          style={style}
         />
       )}
 

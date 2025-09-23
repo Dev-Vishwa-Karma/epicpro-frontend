@@ -10,6 +10,8 @@ import { validateFields } from '../../common/validations';
 import ImageUploadModal from './elements/ImageUploadModal';
 import GallerySkeleton from '../../common/skeletons/GallerySkeleton';
 import Button from '../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../utils';
+import InputField from '../../common/formInputs/InputField';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -44,13 +46,18 @@ class Gallery extends Component {
     }
 
     fetchImages = () => {
-        const { sortOrder } = this.state;
-        const { role, id } = window.user;
-        const params = role === "employee" ? id : null;
+        const { sortOrder, selectedEmployeeId } = this.state;
+        const { role, id } = window.user || {};
+        let userIdParam = null;
+        if (role === "employee") {
+            userIdParam = id;
+        } else if (role === 'admin' || role === 'super_admin') {
+            userIdParam = selectedEmployeeId || null;
+        }
         this.setState({ loading: true });
         getService.getCall('gallery.php', {
             action: 'view',
-            user_id: params,
+            user_id: userIdParam,
             sortOrder: sortOrder
         })
         .then(data => {
@@ -194,6 +201,10 @@ class Gallery extends Component {
         this.setState({
             selectedEmployeeId,
             errors: { ...this.state.errors, selectedEmployeeId: '' },
+            currentPage: 1,
+        }, () => {
+            // Refetch images from backend for the selected employee (admin only)
+            this.fetchImages();
         });
     };
 
@@ -291,12 +302,14 @@ class Gallery extends Component {
                         selectedImages: [],
                         selectedEmployeeId: '',
                         images: sortedImages,
-                        filteredImages: sortedImages // Apply sorting dynamically
+                        filteredImages: sortedImages, // Apply sorting dynamically
+                        currentPage: 1
                     };
                                 });
                 
                 // Close the modal after successful upload
                 this.closeModal();
+                this.fetchImages();
 
                 // Auto-hide success message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);
@@ -333,16 +346,16 @@ class Gallery extends Component {
         });
     };
 
-    handleSearch = (event) => {
-        const query = event.target.value.toLowerCase(); // Get search input
-        this.setState({ searchQuery: query }, () => {
-            const filtered = this.state.images.filter(image => {
-                const fileName = image.url.split('/').pop().toLowerCase();
-                return fileName.includes(query);
-            });
-            this.setState({ filteredImages: filtered });
-        });
-    };
+    // handleSearch = (event) => {
+    //     const query = event.target.value.toLowerCase(); // Get search input
+    //     this.setState({ searchQuery: query }, () => {
+    //         const filtered = this.state.images.filter(image => {
+    //             const fileName = image.url.split('/').pop().toLowerCase();
+    //             return fileName.includes(query);
+    //         });
+    //         this.setState({ filteredImages: filtered });
+    //     });
+    // };
 
     // Handle Pagination
     handlePageChange = (newPage) => {
@@ -493,6 +506,7 @@ class Gallery extends Component {
     render() {
         const { fixNavbar } = this.props;
         const { sortOrder, filteredImages, currentPage, imagesPerPage, employees, loading, showSuccess, successMessage, showError, errorMessage, showDeleteModal, deleteLoading, imageToDelete } = this.state;
+        const { role } = window.user || {};
 
         // Pagination Logic
         const indexOfLastImage = currentPage * imagesPerPage;
@@ -539,12 +553,24 @@ class Gallery extends Component {
                                                 <option value="desc">Newest</option>
                                                 <option value="asc">Oldest</option>
                                             </select>
-                                            <div className="input-icon ml-2">
-                                                <span className="input-icon-addon">
-                                                    <i className="fe fe-search" />
-                                                </span>
-                                                <input type="text" className="form-control" placeholder="Search photo" value={this.state.searchQuery} onChange={this.handleSearch}/>
-                                            </div>
+                                            { (role === 'admin' || role === 'super_admin') ? (
+                                                    <div className="ml-2" style={{ minWidth: '240px' }}>
+                                                        <InputField
+                                                            type="select"
+                                                            // label="Select Employees"
+                                                            name="employee_id"
+                                                            value={this.state.selectedEmployeeId}
+                                                            onChange={this.handleEmployeeSelection}
+                                                            options={getSortedEmployees(employees).map(emp => ({
+                                                                value: emp.id,
+                                                                label: `${emp.first_name} ${emp.last_name}`
+                                                            }))}
+                                                            style={{ minWidth: '240px' }}
+                                                            containerClassName="mb-0"
+                                                            inputClassName="custom-select w-auto"
+                                                        />
+                                                    </div>
+                                                ) : null }
                                             <Button
                                                 label="Upload New"
                                                 className="btn-primary ml-2"
@@ -591,7 +617,7 @@ class Gallery extends Component {
                                 ) : (
                                 <div className="col-12">
                                     <div
-                                    className="card p-3 d-flex align-items-center justify-content-center"
+                                    className="d-flex align-items-center justify-content-center"
                                     style={{ height: '300px' }}
                                     >
                                     <BlankState message="Image not available" />
