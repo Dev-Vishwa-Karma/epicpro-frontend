@@ -149,32 +149,16 @@ export function getSortedEmployees(employees = []) {
         });
 }
 
-// export function formatDueLabel(dateInput) {
-//     const d = new Date(dateInput);
-//     if (isNaN(d)) return '';
-
-//     const today = new Date();
-//     const startOfDay = (dt) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-//     const t0 = startOfDay(today).getTime();
-//     const d0 = startOfDay(d).getTime();
-
-//     const oneDay = 24 * 60 * 60 * 1000;
-//     const diffDays = Math.round((d0 - t0) / oneDay);
-//     if (diffDays === 0) return 'Today';
-//     if (diffDays === -1) return 'Yesterday';
-//     if (diffDays === 1) return 'Tomorrow';
-//     if (diffDays === 2) return 'Day after tomorrow';
-
-//     // Weekday within current week window (Mon-Sun)
-//     const dayOfWeekToday = (today.getDay() + 6) % 7; // 0=Mon ... 6=Sun
-//     const weekStart = new Date(startOfDay(today).getTime() - dayOfWeekToday * oneDay);
-//     const weekEnd = new Date(weekStart.getTime() + 6 * oneDay);
-//     if (d0 >= weekStart.getTime() && d0 <= weekEnd.getTime()) {
-//         return d.toLocaleDateString(undefined, { weekday: 'long' });
-//     }
-
-//     return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-// }
+// for Tomorrow date
+export function getDateRangeUpToTomorrow() {
+  const today = new Date();
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const toYmd = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return {
+    fromDate: '1970-01-01',
+    toDate: toYmd(tomorrow)
+  };
+}
 
 
 export function formatDueLabel(dateInput) {
@@ -211,3 +195,19 @@ export function formatDueLabel(dateInput) {
     // For dates outside this week, show the full date in format DD MMM YYYY
     return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
 }
+
+// isOverduePending use for overdue
+export function isOverduePending(todo) {
+  const status = String(todo?.todoStatus || todo?.status || '').toLowerCase();
+  const dueStr = String(todo?.due_date || '').slice(0, 10);
+  if (!dueStr) return false;
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${y}-${m}-${d}`;
+  return status === 'pending' && dueStr < todayStr;
+}
+
+// Password String, If want to use any other component or in future
+export const PASSWORD_SENTINEL = '********';

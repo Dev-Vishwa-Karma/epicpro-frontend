@@ -14,7 +14,7 @@ import Button from '../../../common/formInputs/Button';
 import { withRouter } from 'react-router-dom'; 
 
 
-const PASSWORD_STRING = '********';
+import { PASSWORD_SENTINEL as PASSWORD_STRING } from '../../../../utils';
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);

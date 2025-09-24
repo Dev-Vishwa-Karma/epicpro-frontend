@@ -5,6 +5,7 @@ import ListSkeleton from '../../../common/skeletons/ListSkeleton';
 import { formatDueLabel } from '../../../../utils';
 import { withRouter } from 'react-router-dom';
 import { appendDataToFormData } from '../../../../utils';
+import { isOverduePending } from '../../../../utils';
 
 class TodoList extends Component {
   constructor(props) {
@@ -87,17 +88,6 @@ class TodoList extends Component {
       .catch((err) => console.error('Failed to update todo status', err));
   }
 
-  isOverduePending = (todo) => {
-    const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
-    const dueStr = String(todo.due_date || '').slice(0, 10);
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const d = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${y}-${m}-${d}`;
-    return status === 'pending' && !!dueStr && dueStr < todayStr;
-  };
-
   render() {
     const { employees, logged_in_employee_role } = this.props;
     const { todos, selectedEmployeeIdForTodo, loading } = this.state;
@@ -164,7 +154,7 @@ class TodoList extends Component {
                           }`}>
                             {(todo.priority || 'low').toString().toUpperCase()}
                           </span>
-                          {this.isOverduePending(todo) && (
+                          {isOverduePending(todo) && (
                             <span className="badge ml-2 mr-0 over-due">Overdue</span>
                           )}
                         </div> */}

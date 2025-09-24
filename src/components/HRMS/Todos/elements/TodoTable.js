@@ -75,7 +75,7 @@ const TodoTable = ({
                                             <span className="custom-control-label">{todo.title}</span>
                                         </label>
                                     </td>
-                                    <td className="text-right">
+                                    <td className="text-left">
                                         {formatDueLabel(todo.due_date)}
                                     </td>
                                     <td className='d-flex'>

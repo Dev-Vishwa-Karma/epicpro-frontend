@@ -8,7 +8,7 @@ import InputField from '../../common/formInputs/InputField';
 import CheckboxGroup from '../../common/formInputs/CheckboxGroup';
 import CheckFileAvailability from './elements/CheckFileAvailability';
 import Button from '../../common/formInputs/Button';
-const PASSWORD_SENTINEL = '********';
+import { PASSWORD_SENTINEL } from '../../../utils';
 class EditEmployee extends Component {
     constructor(props) {
         super(props);

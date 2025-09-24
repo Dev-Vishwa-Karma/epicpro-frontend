@@ -3,6 +3,7 @@ import { getService } from '../../../../services/getService';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { withRouter } from 'react-router-dom';
 import Avatar from '../../../common/Avatar';
+import { getDateRangeUpToTomorrow, isOverduePending } from '../../../../utils';
 
 class DashboardAdminTodo extends Component {
 	constructor(props) {
@@ -19,17 +20,20 @@ class DashboardAdminTodo extends Component {
 			return;
 		}
 
+		const { fromDate, toDate } = getDateRangeUpToTomorrow();
+
 		getService.getCall('project_todo.php', {
 			action: 'view',
 			status: 'pending',
 			logged_in_employee_id: window.user.id,
-			role: window.user.role
+			role: window.user.role,
+			from_date: fromDate,
+			to_date: toDate
 		})
 		.then(res => {
 			if (res.status === 'success') {
 				const list = Array.isArray(res.data) ? res.data : [];
-				const filtered = this.filterUpToTomorrow(list);
-				const grouped = this.groupByEmployee(filtered);
+				const grouped = this.groupByEmployee(list);
 				this.setState({ loading: false, cards: grouped });
 			} else {
 				this.setState({ loading: false, cards: [] });
@@ -69,31 +73,9 @@ class DashboardAdminTodo extends Component {
 		return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
 	};
 
-	isOverduePending = (todo) => {
-		const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
-		const dueStr = String(todo.due_date || '').slice(0, 10);
-		if (!dueStr) return false;
-		const today = new Date();
-		const y = today.getFullYear();
-		const m = String(today.getMonth() + 1).padStart(2, '0');
-		const d = String(today.getDate()).padStart(2, '0');
-		const todayStr = `${y}-${m}-${d}`;
-		return status === 'pending' && dueStr < todayStr;
-	};
 
-	filterUpToTomorrow = (todos) => {
-		const strip = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
-		const today = strip(new Date());
-		const tomorrow = new Date(today);
-		tomorrow.setDate(today.getDate() + 1);
-		const tomorrowTime = strip(tomorrow).getTime();
-		return (todos || []).filter(t => {
-			const due = new Date(t.due_date);
-			if (isNaN(due)) return false;
-			const dueTime = strip(due).getTime();
-			return dueTime <= tomorrowTime;
-		});
-	};
+
+
 
 	renderCard = (card) => {
 		return (
@@ -113,7 +95,7 @@ class DashboardAdminTodo extends Component {
 					</div>
 					<div className="card-body todo_list" style={{ overflowY: "auto", flexGrow: 1 }}>
 						<ul className="list-unstyled mb-0">
-							{this.filterUpToTomorrow(card.todos).sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => (
+							{card.todos.sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => (
 								<li
 									key={t.id}
 									className="mb-2"
@@ -133,7 +115,7 @@ class DashboardAdminTodo extends Component {
 									</div>
 									<small className="text-muted d-block">
 										{this.formatFriendlyDate(t.due_date)}{' '}
-										{this.isOverduePending(t) && (
+										{isOverduePending(t) && (
 											<span className="badge badge-danger text-uppercase">Overdue</span>
 										)}
 										<span className={`ml-2 badge ${String(t.priority).toLowerCase()==='high' ? 'tag-danger' : String(t.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(t.priority||'low').toUpperCase()}</span>

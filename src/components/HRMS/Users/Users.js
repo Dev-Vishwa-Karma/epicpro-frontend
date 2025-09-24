@@ -8,9 +8,7 @@ import { validateFields } from '../../common/validations';
 import UserTable from './elements/UserTable';
 import AddUserForm from './elements/AddUserForm';
 import EditUserModal from './elements/EditUserModal';
-import { appendDataToFormData } from '../../../utils';
-
-const PASSWORD_SENTINEL = '********';
+import { appendDataToFormData, PASSWORD_SENTINEL } from '../../../utils';
 
 class Users extends Component {
 	constructor(props) {
