@@ -43,7 +43,9 @@ class Users extends Component {
 			errors: {},
 			ButtonLoading: false,
 			activeTab: 'list',
-			tabKey: 0
+			tabKey: 0,
+			showPassword: false,
+			passwordCleared: false
 		};
 	}
 
@@ -83,6 +85,10 @@ class Users extends Component {
 			this.setState({ departments: data.data });
         })
         .catch(error => console.error("Error fetching departments:", error));
+	}
+
+	toggleShowPassword = () => {
+		this.setState(prev => ({ showPassword: !prev.showPassword }));
 	}
 
 	getAdmins = () => {
@@ -242,7 +248,7 @@ class Users extends Component {
 
 	// Handle edit button click
     handleEditClick = (user) => {
-        this.setState({ selectedUser: { ...user, password: PASSWORD_SENTINEL } });
+        this.setState({ selectedUser: { ...user, password: PASSWORD_SENTINEL }, showPassword: false, passwordCleared: false });
     };
 
 	// Handle input change for editing fields
@@ -253,6 +259,7 @@ class Users extends Component {
                 ...prevState.selectedUser,
                 [name]: value, // Dynamically update the field
             },
+			passwordCleared: name === 'password' ? (value === '' ? true : prevState.passwordCleared) : prevState.passwordCleared
         }));
     };
 
@@ -577,7 +584,11 @@ class Users extends Component {
 						handleSelectChange={this.handleSelectChange}
 						updateProfile={this.updateProfile}
 						ButtonLoading={this.state.ButtonLoading}
-						loggedInRole={(this.state.logged_in_employee_role || '').toLowerCase().replace(/\s+/g,'_')}
+						loggedInRole={(this.state.logged_in_employee_role || '').toLowerCase().replace(/\s+/g, '_')}
+						showPassword={this.state.showPassword}
+						onTogglePassword={this.toggleShowPassword}
+						passwordSentinel={PASSWORD_SENTINEL}
+						passwordCleared={this.state.passwordCleared}
 					/>
 
 					{/* Delete User Model */}

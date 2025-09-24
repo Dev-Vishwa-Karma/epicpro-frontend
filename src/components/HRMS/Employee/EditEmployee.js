@@ -70,6 +70,8 @@ class EditEmployee extends Component {
             showCropper: false,
             cropperImage: null,
             photoInputName: '',
+            showPassword: false,
+            passwordCleared: false,
         };
         this.fieldRefs = {
             firstName: React.createRef(),
@@ -89,6 +91,10 @@ class EditEmployee extends Component {
             visibilityPriority: React.createRef(),
             salaryAmount: React.createRef(),
         };
+    }
+
+    onTogglePassword = () => {
+        this.setState(prev => ({ showPassword: !prev.showPassword }));
     }
 
     // Function to dismiss messages
@@ -141,6 +147,7 @@ class EditEmployee extends Component {
                     mobile1: employee.mobile_no1,
                     mobile2: employee.mobile_no2,
                     password: PASSWORD_SENTINEL,
+                    passwordCleared: false,
                     address1: employee.address_line1,
                     address2: employee.address_line2,
                     emergencyContact1: employee.emergency_contact1,
@@ -219,12 +226,13 @@ class EditEmployee extends Component {
         return Array.isArray(skills) ? skills : [];
     }
 
-    handleChange = (event) => {
-		const { name, value } = event.target;
-		
-		// Update state for the selected user
+        handleChange = (event) => {
+        const { name, value } = event.target;
+        
+        // Update state for the selected user
         this.setState((prevState) => ({
             [name]: value,
+            passwordCleared: name === 'password' ? (value === '' ? true : prevState.passwordCleared) : prevState.passwordCleared
         }));
     };
 
@@ -818,15 +826,35 @@ class EditEmployee extends Component {
                                                     />
                                                 </div>
                                                     <div className="col-sm-6 col-md-4">
-                                                        <InputField
-                                                            label="Password"
-                                                            name="password"
-                                                            type="password"
-                                                            value={password}
-                                                            onChange={this.handleChange}
-                                                            placeholder="Enter New Password"
-                                                            refInput={this.fieldRefs.password}
-                                                        />
+                                                        <div className="form-group">
+                                                            <label className="form-label" htmlFor="password">Password</label>
+                                                            <div className="input-group">
+                                                                <input
+                                                                    id="password"
+                                                                    type={this.state.showPassword ? 'text' : 'password'}
+                                                                    name="password"
+                                                                    className={`form-control${this.state.errors.password ? ' is-invalid' : ''}`}
+                                                                    value={password}
+                                                                    onChange={this.handleChange}
+                                                                    placeholder="Enter New Password"
+                                                                    autoComplete="new-password"
+                                                                    ref={this.fieldRefs.password}
+                                                                />
+                                                                {this.state.passwordCleared && String(password || '') !== '' && (
+                                                                <div className="input-group-append">
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-secondary"
+                                                                        onClick={this.onTogglePassword}
+                                                                        title={this.state.showPassword ? 'Hide' : 'Show'}
+                                                                    >
+                                                                        <i className={`fe ${this.state.showPassword ? 'fe-eye-off' : 'fe-eye'}`}></i>
+                                                                    </button>
+                                                                </div>
+                                                                )}
+                                                            </div>
+                                                            {this.state.errors.password && <div className="invalid-feedback d-block">{this.state.errors.password}</div>}
+                                                        </div>
                                                     </div>
                                                 <div className="col-md-12">
                                                      <InputField

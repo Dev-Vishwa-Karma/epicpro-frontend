@@ -79,7 +79,7 @@ const TodoTable = ({
                                         {formatDueLabel(todo.due_date)}
                                     </td>
                                     <td className='d-flex'>
-                                        <span className={`tag ml-0 mr-0 ${
+                                        <span className={`tag mt-2 ml-0 mr-0 ${
                                             todo.priority === "high" ? "tag-danger"
                                             : todo.priority === "medium" ? "tag-warning"
                                             : "tag-success"
@@ -88,7 +88,7 @@ const TodoTable = ({
                                         </span>
                                         <span className='ml-2'>
                                             {isOverduePending(todo) && (
-                                                <span className="tag ml-0 mr-0 over-due">Overdue</span>
+                                                <span className="tag mt-2 ml-0 mr-0 over-due">Overdue</span>
                                             )}
                                         </span>
                                     </td>

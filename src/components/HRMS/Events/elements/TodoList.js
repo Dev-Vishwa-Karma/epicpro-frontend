@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { getService } from '../../../../services/getService';
 import EmployeeSelector from '../../../common/EmployeeSelector';
 import ListSkeleton from '../../../common/skeletons/ListSkeleton';
+import { formatDueLabel } from '../../../../utils';
+import { withRouter } from 'react-router-dom';
+import { appendDataToFormData } from '../../../../utils';
 
 class TodoList extends Component {
   constructor(props) {
@@ -23,7 +26,8 @@ class TodoList extends Component {
 
     getService.getCall('project_todo.php', {
 			action: 'view',
-      employee_id:employeeId
+      employee_id:employeeId,
+      // status: 'pending'
 		})
       .then((data) => {
         if (data.status === 'success' && Array.isArray(data.data)) {
@@ -53,6 +57,47 @@ class TodoList extends Component {
     );
   };
 
+  handleCheckboxClick = (todo) => {
+    const { logged_in_employee_role } = this.props;
+    if (!(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')) return;
+
+    const isCompleted = String(todo.todoStatus).toLowerCase() === 'completed';
+    const newStatus = isCompleted ? 'pending' : 'completed';
+
+    const formData = new FormData();
+    const data = {
+      id: todo.id,
+      status: newStatus,
+      logged_in_employee_id: window.user?.id,
+      logged_in_employee_role: window.user?.role,
+      to_do_created_by: todo.created_by,
+      to_do_created_for: todo.employee_id,
+      logged_in_employee_name: todo.first_name
+    };
+    appendDataToFormData(formData, data);
+
+    getService
+      .addCall('project_todo.php', 'update_status', formData)
+      .then((res) => {
+        if (res.status === 'success') {
+          // Refetch current employee's todos to reflect the update
+          this.fetchTodos(this.state.selectedEmployeeIdForTodo);
+        }
+      })
+      .catch((err) => console.error('Failed to update todo status', err));
+  }
+
+  isOverduePending = (todo) => {
+    const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
+    const dueStr = String(todo.due_date || '').slice(0, 10);
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${y}-${m}-${d}`;
+    return status === 'pending' && !!dueStr && dueStr < todayStr;
+  };
+
   render() {
     const { employees, logged_in_employee_role } = this.props;
     const { todos, selectedEmployeeIdForTodo, loading } = this.state;
@@ -78,14 +123,52 @@ class TodoList extends Component {
           <ListSkeleton rows={todos.length} />
         ) : (
           Array.isArray(todos) && (
+            <>
             <div className="todo-container mt-3" style={{ maxHeight: '250px', overflowY: 'auto' }}>
               <ul className="list-unstyled mb-0">
                 {selectedEmployeeIdForTodo === '' ? (
                   <li className="text-center w-100 small">Select an employee to view the To-Do list</li>
                 ) : todos.length > 0 ? (
                   todos.map((todo) => (
-                    <li key={todo.id}>
-                      <span className="custom-control-label">{todo.title}</span>
+                    <li key={todo.id} className="d-flex align-items-center justify-content-between">
+                      <div>
+                        <div className="d-flex align-items-center">
+                          {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
+                            <label className="custom-control custom-checkbox mb-0 mr-2">
+                              <input
+                                type="checkbox"
+                                className="custom-control-input"
+                                checked={String(todo.todoStatus).toLowerCase() === 'completed'}
+                                onChange={() => this.handleCheckboxClick(todo)}
+                              />
+                              <span className="custom-control-label"></span>
+                            </label>
+                          )}
+                          <span 
+                            key={todo.id}
+                            style={{ cursor: 'pointer', textDecoration: String(todo.todoStatus).toLowerCase() === 'completed' ? 'line-through' : 'none', opacity: String(todo.todoStatus).toLowerCase() === 'completed' ? 0.7 : 1 }}
+                            onClick={() => {
+                              const date = todo.due_date.slice(0, 10);
+                              this.props.history.push(`/project-todo?employee_id=${todo.employee_id}&status=${todo.todoStatus}&date=${date}`);
+                            }}
+                           className="">{todo.title}</span>
+                        </div>
+                        {/* <div>
+                          {todo.due_date && (
+                            <small className="text-muted ml-2">{formatDueLabel(todo.due_date)}</small>
+                          )} &nbsp;
+                          <span className={`badge ml-0 ${
+                            String(todo.priority).toLowerCase() === 'high' ? 'tag-danger'
+                            : String(todo.priority).toLowerCase() === 'medium' ? 'tag-warning'
+                            : 'tag-success'
+                          }`}>
+                            {(todo.priority || 'low').toString().toUpperCase()}
+                          </span>
+                          {this.isOverduePending(todo) && (
+                            <span className="badge ml-2 mr-0 over-due">Overdue</span>
+                          )}
+                        </div> */}
+                      </div>
                     </li>
                   ))
                 ) : (
@@ -95,6 +178,18 @@ class TodoList extends Component {
                 )}
               </ul>
             </div>
+            {/* {selectedEmployeeIdForTodo && todos.length > 0 && (
+              <div className="mt-2 mb-2 text-right">
+                <button
+                  type="button"
+                  className="btn p-0 view-all"
+                  onClick={() => this.props.history.push(`/project-todo?employee_id=${selectedEmployeeIdForTodo}&status=pending&day=all`)}
+                >
+                  View All <span className="arrow"><i className='fa fa-arrow-right'></i></span>
+                </button>
+              </div>
+            )} */}
+            </>
           )
         )}
       </div>
@@ -102,4 +197,4 @@ class TodoList extends Component {
   }
 }
 
-export default TodoList;
+export default withRouter(TodoList);

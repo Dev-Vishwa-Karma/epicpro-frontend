@@ -257,13 +257,14 @@ class TodoList extends Component {
 
     handleCheckboxClick = (todo) => {
         // if (this.state.logged_in_employee_role === 'employee') {
-            if (todo.todoStatus === 'completed') {
-                // If todo is completed, unchecking will set to pending
-                this.setState({ 
-                    showOverdueModal: true, 
-                    selectedTodo: todo,
-                    isUnchecking: true 
-                });
+            const { logged_in_employee_role } = this.state;
+            const isAdmin = (logged_in_employee_role === 'super_admin');
+            const isUnchecking = (todo.todoStatus === 'completed');
+            if (isAdmin) {
+			// Admins update immediately without confirmation modal
+			this.setState({ selectedTodo: todo, isUnchecking }, () => {
+				this.handleUpdateTodo();
+			});
             } else {
                 // If todo is not completed, checking will set to completed
                 this.setState({ 
@@ -815,7 +816,7 @@ class TodoList extends Component {
                                                         ))}
                                                     </select>
                                                 </div>
-                                                <div className="col-lg-5 col-md-12 col-sm-12 text-right">
+                                                <div className="col-lg-6 col-md-12 col-sm-12 text-right">
                                                     {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                     <Button
                                                     label="Add New"

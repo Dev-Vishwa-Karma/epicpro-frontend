@@ -3,15 +3,10 @@ import PropTypes from 'prop-types';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../../utils'
 
 const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, openDeleteModal, message }) => {
-    const sortedEmployees = Array.isArray(employeeList)
-        ? [...employeeList].sort((a, b) => {
-            const aName = `${(a.first_name || '').trim()} ${(a.last_name || '').trim()}`.toLowerCase();
-            const bName = `${(b.first_name || '').trim()} ${(b.last_name || '').trim()}`.toLowerCase();
-            return aName.localeCompare(bName);
-          })
-        : [];
+    const sortedEmployees = Array.isArray(employeeList) ? getSortedEmployees(employeeList) : [];
 
     return (
         <div className="card-body">

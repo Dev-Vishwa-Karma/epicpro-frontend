@@ -138,7 +138,7 @@ class DashboardTodo extends Component {
 									<span className={`tag ml-0 mr-2 ${String(item.priority).toLowerCase()==='high' ? 'tag-danger' : String(item.priority).toLowerCase()==='medium' ? 'tag-warning' : 'tag-success'}`}>{(item.priority || 'low').toUpperCase()}</span>
 									<span>
 										{this.isOverduePending(item) && (
-											<span className="badge badge-danger ml-1">Overdue</span>
+											<span className="tag over-due">Overdue</span>
 										)}
 									</span>
 									<small className="float-right text-right">
