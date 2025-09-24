@@ -149,16 +149,7 @@ export function getSortedEmployees(employees = []) {
         });
 }
 
-// for Tomorrow date
-export function getDateRangeUpToTomorrow() {
-  const today = new Date();
-  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-  const toYmd = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  return {
-    fromDate: '1970-01-01',
-    toDate: toYmd(tomorrow)
-  };
-}
+
 
 
 export function formatDueLabel(dateInput) {

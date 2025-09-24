@@ -3,7 +3,7 @@ import { getService } from '../../../../services/getService';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { withRouter } from 'react-router-dom';
 import Avatar from '../../../common/Avatar';
-import { getDateRangeUpToTomorrow, isOverduePending } from '../../../../utils';
+import { isOverduePending } from '../../../../utils';
 
 class DashboardAdminTodo extends Component {
 	constructor(props) {
@@ -20,15 +20,12 @@ class DashboardAdminTodo extends Component {
 			return;
 		}
 
-		const { fromDate, toDate } = getDateRangeUpToTomorrow();
-
 		getService.getCall('project_todo.php', {
 			action: 'view',
 			status: 'pending',
 			logged_in_employee_id: window.user.id,
 			role: window.user.role,
-			from_date: fromDate,
-			to_date: toDate
+			day: 'upto_tomorrow'
 		})
 		.then(res => {
 			if (res.status === 'success') {
@@ -79,7 +76,7 @@ class DashboardAdminTodo extends Component {
 
 	renderCard = (card) => {
 		return (
-			<div className="col-md-4" key={card.employee.id}>
+			<div className="col-md-3" key={card.employee.id}>
 				<div className="card admin-task-card" >
 					<div className="card-header d-flex align-items-center">
 						<Avatar
@@ -146,7 +143,7 @@ class DashboardAdminTodo extends Component {
 		if (!loading && (!cards || cards.length === 0)) return null;
 
 		return (
-			<div className='container mt-2 mb-2'>
+			<div className='mt-2 mb-2'>
 				<div className='card'>
 					<div className="card-header">
 						<h3 className="card-title">Employees Todos</h3>
