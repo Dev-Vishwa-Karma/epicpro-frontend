@@ -220,7 +220,8 @@ class Users extends Component {
 					confirmPassword: "",
 					showSuccess: true,
                 	successMessage: "User added successfully!",
-					ButtonLoading: false
+					ButtonLoading: false,
+					activeTab: 'list', // Switch to user-list tab after add new User
                 }));
 
 				setTimeout(() => this.setState({ showSuccess: false }), 3000);

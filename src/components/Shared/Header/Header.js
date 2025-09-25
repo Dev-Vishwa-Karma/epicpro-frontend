@@ -846,7 +846,7 @@ class Header extends Component {
           report={this.state.report}
           start_time={this.state.start_time}
           end_time={this.state.end_time}
-          breakDuration={this.state.breakDuration}
+          breakDuration={this.props.breakDuration}
           todays_working_hours={this.state.todays_working_hours}
           todays_total_hours={this.state.todays_total_hours}
           error={this.state.error}

@@ -3,7 +3,7 @@ import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import NoDataRow from '../../../common/NoDataRow';
 import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
-import { formatDueLabel } from '../../../../utils';
+import { formatDueLabel, isOverduePending } from '../../../../utils';
 
 const TodoTable = ({
     todos,
@@ -12,18 +12,9 @@ const TodoTable = ({
     logged_in_employee_role,
     handleCheckboxClick,
     handleEditTodo,
-    handleDeleteClick
+    handleDeleteClick,
+    todoLoading = {}
 }) => {
-    const isOverduePending = (todo) => {
-        const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
-        const dueStr = String(todo.due_date || '').slice(0, 10);
-        const today = new Date();
-        const y = today.getFullYear();
-        const m = String(today.getMonth() + 1).padStart(2, '0');
-        const d = String(today.getDate()).padStart(2, '0');
-        const todayStr = `${y}-${m}-${d}`;
-        return status === 'pending' && !!dueStr && dueStr < todayStr;
-    };
 
     const isAdmin = (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin");
     const columnCount = isAdmin ? 6 : 4; // Task, Due, Priority, Overdue, [User, Action]
@@ -70,9 +61,15 @@ const TodoTable = ({
                                                 type="checkbox"
                                                 className="custom-control-input"
                                                 checked={todo.todoStatus === 'completed'}
+                                                disabled={todoLoading && todoLoading[todo.id]}
                                                 onChange={() => handleCheckboxClick(todo)}
                                             />
-                                            <span className="custom-control-label">{todo.title}</span>
+                                            <span className="custom-control-label">
+                                                {todo.title}
+                                                {todoLoading && todoLoading[todo.id] && (
+                                                    <span className="spinner-border spinner-border-sm ml-2" />
+                                                )}
+                                            </span>
                                         </label>
                                     </td>
                                     <td className="text-left">

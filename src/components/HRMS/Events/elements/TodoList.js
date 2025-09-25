@@ -156,7 +156,7 @@ class TodoList extends Component {
                             {(todo.priority || 'low').toString().toUpperCase()}
                           </span> */}
                           {isOverduePending(todo) && (
-                            <span className="ml-2 mr-0" style={{backgroundColor:"red", color:"white", fontSize:"10px", fontWeight:"bold", padding:"2px"}}>Overdue</span>
+                            <span className="ml-2 mr-0 overdue-event-todo">Overdue</span>
                           )}
                         </div>
                       </div>

@@ -476,3 +476,12 @@ border-left: 6px solid #e6140d !important;
   object-fit: cover !important;
   border: 2px solid #f5f5f5;
 }
+
+.overdue-event-todo{
+  background-color: red !important;
+  color: white !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  padding: 2.5px !important;
+  border-radius: 3px !important;
+}

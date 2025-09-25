@@ -7,7 +7,7 @@ import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import TodoTable from './elements/TodoTable';
-import { appendDataToFormData, getSortedEmployees } from '../../../utils';
+import { appendDataToFormData, getSortedEmployees, isOverduePending } from '../../../utils';
 import Button from '../../common/formInputs/Button';
 import BlankState from '../../common/BlankState';
 import { withRouter } from 'react-router-dom';
@@ -257,6 +257,13 @@ class TodoList extends Component {
 
     handleCheckboxClick = (todo) => {
         // if (this.state.logged_in_employee_role === 'employee') {
+        // Add loading state for this todo
+        this.setState(prev => ({
+            todoLoading: { ...prev.todoLoading, [todo.id]: true }
+        }));
+
+        setTimeout(() => {
+            // Call backend to update status here (your existing logic)
             const { logged_in_employee_role } = this.state;
             const isAdmin = (logged_in_employee_role === 'super_admin');
             const isUnchecking = (todo.todoStatus === 'completed');
@@ -272,8 +279,12 @@ class TodoList extends Component {
                     selectedTodo: todo,
                     isUnchecking: false 
                 });
-            // }
-        }
+            }
+            // Remove loading after status update
+            this.setState(prev => ({
+                todoLoading: { ...prev.todoLoading, [todo.id]: false }
+            }));
+        }, 1000); // Take 1 sec to action
     };
 
     handleEditTodo = (todo) => {
@@ -663,20 +674,12 @@ class TodoList extends Component {
         return `${y}-${m}-${day}`;
     };
 
-    // Determine if a todo is overdue and pending (due_date < today and status pending)
-    isOverduePending = (todo) => {
-        const status = (todo.todoStatus || todo.status || '').toString().toLowerCase();
-        const dueStr = String(todo.due_date || '').slice(0, 10);
-        const todayStr = this.toYmd(new Date());
-        return status === 'pending' && dueStr < todayStr;
-    };
-
     // Sort so that overdue pending appear first, then by due_date ascending
     sortTodosForDisplay = (list) => {
         const safeList = Array.isArray(list) ? list.slice() : [];
         return safeList.sort((a, b) => {
-            const aOver = this.isOverduePending(a);
-            const bOver = this.isOverduePending(b);
+            const aOver = isOverduePending(a);
+            const bOver = isOverduePending(b);
             if (aOver !== bOver) return aOver ? -1 : 1;
             const aDue = String(a.due_date || '').slice(0, 10);
             const bDue = String(b.due_date || '').slice(0, 10);
@@ -856,6 +859,7 @@ class TodoList extends Component {
                                                     }
                                                 });
                                             }}
+                                            todoLoading={this.state.todoLoading}
                                         />
                                         )}
 
