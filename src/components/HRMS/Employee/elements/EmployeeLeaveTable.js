@@ -16,7 +16,7 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
           <table className="table table-hover table-striped table-vcenter text-nowrap mb-0">
             <thead>
               <tr>
-                <th>#</th>
+                <th></th>
                 <th>Name</th>
                 <th>Date</th>
                 <th>Reason</th>

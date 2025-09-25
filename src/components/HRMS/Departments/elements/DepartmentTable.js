@@ -8,7 +8,7 @@ const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }
       <table className="table table-striped table-vcenter table-hover mb-0">
         <thead>
           <tr>
-            <th>#</th>
+            <th></th>
             <th>Department Name</th>
             <th>Department Head</th>
             <th>Total Employee</th>

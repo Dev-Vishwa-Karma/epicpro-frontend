@@ -9,7 +9,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
             <table className="table table-striped table-vcenter table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th></th>
                         <th>Title</th>
                         <th>Body</th>
                         <th>Type</th>
