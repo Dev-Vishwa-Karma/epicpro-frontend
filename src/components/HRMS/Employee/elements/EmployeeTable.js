@@ -21,7 +21,7 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                     <table className="table table-hover table-striped table-vcenter text-nowrap mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th></th>
                                 <th>Name</th>
                                 <th>Employee ID</th>
                                 <th>Phone</th>

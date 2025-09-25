@@ -140,7 +140,7 @@ class Fullcalender extends Component {
                                     formatDate(date) === formatDate(event.start) &&
                                     (event.className === 'leave-event' || event.className === 'missing-report-day')
                                 ) {
-                                    cell.css('background-color', 'white');
+                                    cell.css('background-color', '#FFE599');
                                 }
                             });
                         }

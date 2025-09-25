@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { getService } from '../../../../services/getService';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Avatar from '../../../common/Avatar';
-import { isOverduePending } from '../../../../utils';
+import { isOverduePending, filterUpToTomorrow } from '../../../../utils';
 
 class DashboardTodo extends Component {
 	constructor(props) {
@@ -25,13 +25,16 @@ class DashboardTodo extends Component {
 			status: 'pending',
 			logged_in_employee_id: window.user.id,
 			role: 'employee',
-			day: 'upto_tomorrow'
+			// day: 'upto_tomorrow'
 		})
 		.then(res => {
 			if (res.status === 'success') {
 				const list = Array.isArray(res.data) ? res.data : [];
 				// Sort todos by due date (oldest first)
-				const sortedTodos = list.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+				// const sortedTodos = list.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+				const filtered = filterUpToTomorrow(list);
+				// Sort todos by due date (oldest first)
+				const sortedTodos = filtered.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
 				this.setState({ todos: sortedTodos, loading: false });
 			} else {
 				this.setState({ todos: [], loading: false });
@@ -65,8 +68,6 @@ class DashboardTodo extends Component {
 		}
 		return dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 	};
-
-
 
 	renderTimeline = (todos) => {
 		return (

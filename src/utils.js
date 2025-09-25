@@ -202,3 +202,18 @@ export function isOverduePending(todo) {
 
 // Password String, If want to use any other component or in future
 export const PASSWORD_SENTINEL = '********';
+
+// Filter todos whose due_date is today or tomorrow (inclusive)
+export function filterUpToTomorrow(todos) {
+  const strip = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+  const today = strip(new Date());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const tomorrowTime = strip(tomorrow).getTime();
+  return (todos || []).filter((t) => {
+    const due = new Date(t?.due_date);
+    if (isNaN(due)) return false;
+    const dueTime = strip(due).getTime();
+    return dueTime <= tomorrowTime;
+  });
+}

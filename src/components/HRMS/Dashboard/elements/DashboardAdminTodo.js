@@ -3,7 +3,7 @@ import { getService } from '../../../../services/getService';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { withRouter } from 'react-router-dom';
 import Avatar from '../../../common/Avatar';
-import { isOverduePending } from '../../../../utils';
+import { isOverduePending, filterUpToTomorrow } from '../../../../utils';
 
 class DashboardAdminTodo extends Component {
 	constructor(props) {
@@ -25,12 +25,14 @@ class DashboardAdminTodo extends Component {
 			status: 'pending',
 			logged_in_employee_id: window.user.id,
 			role: window.user.role,
-			day: 'upto_tomorrow'
+			// day: 'upto_tomorrow'
 		})
 		.then(res => {
 			if (res.status === 'success') {
 				const list = Array.isArray(res.data) ? res.data : [];
-				const grouped = this.groupByEmployee(list);
+				// const grouped = this.groupByEmployee(list);
+				const filtered = filterUpToTomorrow(list);
+				const grouped = this.groupByEmployee(filtered);
 				this.setState({ loading: false, cards: grouped });
 			} else {
 				this.setState({ loading: false, cards: [] });
@@ -71,9 +73,6 @@ class DashboardAdminTodo extends Component {
 	};
 
 
-
-
-
 	renderCard = (card) => {
 		return (
 			<div className="col-md-3" key={card.employee.id}>
@@ -92,7 +91,8 @@ class DashboardAdminTodo extends Component {
 					</div>
 					<div className="card-body todo_list" style={{ overflowY: "auto", flexGrow: 1 }}>
 						<ul className="list-unstyled mb-0">
-							{card.todos.sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => (
+							{/* {card.todos.sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => ( */}
+							{filterUpToTomorrow(card.todos).sort((a,b) => new Date(a.due_date) - new Date(b.due_date)).map(t => (
 								<li
 									key={t.id}
 									className="mb-2"

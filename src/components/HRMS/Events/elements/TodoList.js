@@ -5,7 +5,7 @@ import ListSkeleton from '../../../common/skeletons/ListSkeleton';
 import { formatDueLabel } from '../../../../utils';
 import { withRouter } from 'react-router-dom';
 import { appendDataToFormData } from '../../../../utils';
-import { isOverduePending } from '../../../../utils';
+import { isOverduePending, filterUpToTomorrow } from '../../../../utils';
 
 class TodoList extends Component {
   constructor(props) {
@@ -28,21 +28,22 @@ class TodoList extends Component {
     getService.getCall('project_todo.php', {
 			action: 'view',
       employee_id:employeeId,
-      // status: 'pending'
+      status: 'pending'
 		})
-      .then((data) => {
-        if (data.status === 'success' && Array.isArray(data.data)) {
-          this.setState({ todos: data.data, loading: false });
-        } else {
-          this.setState({ todos: [], loading: false });
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching todos:', error);
-        this.setState({ todos: [], loading: false });
-      });
+    .then(res => {
+			if (res.status === 'success') {
+				const list = Array.isArray(res.data) ? res.data : [];
+				const filtered = filterUpToTomorrow(list);
+				// Sort todos by due date (oldest first)
+				const sortedTodos = filtered.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+				this.setState({ todos: sortedTodos, loading: false });
+			} else {
+				this.setState({ todos: [], loading: false });
+			}
+		})
+		.catch(() => this.setState({ todos: [], loading: false }));
   };
-
+  
   handleEmployeeSelection = (e) => {
     const selectedId = e.target.value;
     this.setState(
@@ -131,7 +132,7 @@ class TodoList extends Component {
                                 checked={String(todo.todoStatus).toLowerCase() === 'completed'}
                                 onChange={() => this.handleCheckboxClick(todo)}
                               />
-                              <span className="custom-control-label"></span>
+                              <span className="custom-control-label "></span>
                             </label>
                           )}
                           <span 
@@ -143,21 +144,21 @@ class TodoList extends Component {
                             }}
                            className="">{todo.title}</span>
                         </div>
-                        {/* <div>
+                        <div>
                           {todo.due_date && (
                             <small className="text-muted ml-2">{formatDueLabel(todo.due_date)}</small>
                           )} &nbsp;
-                          <span className={`badge ml-0 ${
+                          {/* <span className={`badge ml-0 ${
                             String(todo.priority).toLowerCase() === 'high' ? 'tag-danger'
                             : String(todo.priority).toLowerCase() === 'medium' ? 'tag-warning'
                             : 'tag-success'
                           }`}>
                             {(todo.priority || 'low').toString().toUpperCase()}
-                          </span>
+                          </span> */}
                           {isOverduePending(todo) && (
-                            <span className="badge ml-2 mr-0 over-due">Overdue</span>
+                            <span className="ml-2 mr-0" style={{backgroundColor:"red", color:"white", fontSize:"10px", fontWeight:"bold", padding:"2px"}}>Overdue</span>
                           )}
-                        </div> */}
+                        </div>
                       </div>
                     </li>
                   ))
