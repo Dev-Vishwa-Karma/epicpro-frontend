@@ -42,30 +42,36 @@ class Fullcalender extends Component {
                         const startDate = formatDate(localStorage.getItem('startDate'));
                         const endDate = formatDate(localStorage.getItem('endDate'));
 
+                        // Detect if this cell is an Alternate Saturday date
+                        const isAlternateSaturday = (() => {
+                            if (!(cell.hasClass && cell.hasClass('fc-sat'))) return false;
+                            if (!alternateSatudays || alternateSatudays.length === 0) return false;
+                            try {
+                                for (const alternateSatuday of alternateSatudays) {
+                                    const saturdayArr = JSON.parse(alternateSatuday.date);
+                                    for (const element of saturdayArr) {
+                                        if (formatDate(date) === formatDate(element)) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                // Ignore JSON parse issues and treat as not alternate
+                            }
+                            return false;
+                        })();
+
                         // Highlight all Sundays
                         if (cell.hasClass && cell.hasClass('fc-sun')) {
                             cell.css('background-color', '#FFE599');
                         }
 
-                        // Highlight configured Alternate Saturdays
-                        if (cell.hasClass && cell.hasClass('fc-sat')) {
-                            if (alternateSatudays && alternateSatudays.length > 0) {
-                                alternateSatudays.forEach((alternateSatuday) => {
-                                    try {
-                                        const saturday = JSON.parse(alternateSatuday.date);
-                                        saturday.forEach((element) => {
-                                            if (formatDate(date) === formatDate(element)) {
-                                                cell.css('background-color', '#FFE599');
-                                            }
-                                        });
-                                    } catch (e) {
-                                        console.error('Error parsing alternateSatuday.date:', e);
-                                    }
-                                });
-                            }
+                        // Highlight configured Alternate Saturdays with fixed color
+                        if (isAlternateSaturday) {
+                            cell.css('background-color', '#FFE599');
                         }
 
-                        if (events && events.length > 0) {
+                        if (events && events.length > 0 && !isAlternateSaturday) {
                             events.forEach((event) => {
                                 if (
                                     event.className === 'green-event' &&
@@ -111,6 +117,7 @@ class Fullcalender extends Component {
                                     cell.css('color', 'white');
                                 }
 
+                                // Special handling for Saturdays when not alternate
                                 if (cell.hasClass && cell.hasClass('fc-sat')) {
                                     if (alternateSatudays && alternateSatudays.length > 0) {
                                         alternateSatudays.forEach((alternateSatuday) => {
@@ -124,7 +131,7 @@ class Fullcalender extends Component {
                                                     ) {
                                                        
                                                         
-                                                        cell.css('background-color', '#FFF2CC');
+                                                        cell.css('background-color', '#FFE599');
                                                     }
                                                 });
                                             } catch (e) {
@@ -145,9 +152,9 @@ class Fullcalender extends Component {
                             });
                         }
 
-                        // Finally, highlight current date with light pink
-                        if (cell.hasClass && cell.hasClass('fc-today')) {
-                            cell.css('background-color', '#FFD6E7');
+                        // Finally, highlight current date with light pink (unless alternate Saturday)
+                        if (cell.hasClass && cell.hasClass('fc-today') && !isAlternateSaturday) {
+                            cell.css('background-color', '#FFEAF3');
                             cell.css('color', 'inherit');
                         }
                     }}
