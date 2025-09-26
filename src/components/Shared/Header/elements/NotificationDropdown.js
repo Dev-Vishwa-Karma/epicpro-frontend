@@ -32,7 +32,7 @@ class NotificationDropdown extends Component {
           data-toggle="dropdown"
         >
           <i className="fa fa-bell" />
-          {notifications.filter((n) => n.read === 0).length > 0 && (
+          {notifications.filter((n) => Number(n.read) === 0).length > 0 && (
             <span className="badge badge-primary nav-unread" />
           )}
         </a>
@@ -64,7 +64,7 @@ class NotificationDropdown extends Component {
                         key={index}
                         style={{
                           backgroundColor:
-                            notification.read === 0 ? "#E8E9E9" : "transparent",
+                            Number(notification.read) === 0 ? "#E8E9E9" : "transparent",
                           cursor: "pointer",
                           borderBottom: "1px solid #ddd",
                         }}
@@ -73,7 +73,7 @@ class NotificationDropdown extends Component {
                         <div className="feeds-body">
                           <h4
                             className={`title text-danger ${
-                              notification.read === 0 ? "font-weight-bold" : ""
+                              Number(notification.read) === 0 ? "font-weight-bold" : ""
                             }`}
                           >
                             {notification.title}
@@ -81,8 +81,8 @@ class NotificationDropdown extends Component {
                               {formattedDate}
                             </small>
                           </h4>
-                          <small className="notification-body">
-                            {notification.body}
+                          <small className="notification-body" dangerouslySetInnerHTML={{__html: notification.body}} >
+                            
                           </small>
                         </div>
                       </li>

@@ -50,7 +50,9 @@ const TodoModal = ({
                         options={[
                           { value: 'all', label: 'All Employees' },
                           // ...employees.map((emp) => ({
-                            ...getSortedEmployees(employees).map((emp) => ({
+                            ...getSortedEmployees(employees)
+                            .filter(emp => emp.status === 1)
+                            .map((emp) => ({
                             value: emp.id,
                             label: `${emp.first_name} ${emp.last_name}`
                           }))

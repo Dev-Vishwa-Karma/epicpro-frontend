@@ -257,13 +257,6 @@ class Report extends Component {
         }
 
         const formData = new FormData();
-        // formData.append('activity_id', existingActivityId);
-        // formData.append('description', existingActivityDescription);
-        // formData.append('in_time', existingActivityInTime);
-        // formData.append('out_time', existingActivityOutTime);
-        // formData.append('status', existingActivitySatus);
-        // formData.append('updated_by', window.user.id); //updated by admin
-        // formData.append('note', this.state.editNotes || '');
 
         const data = {
             activity_id: existingActivityId,

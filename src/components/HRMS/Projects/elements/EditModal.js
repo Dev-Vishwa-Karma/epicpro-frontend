@@ -1,6 +1,7 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../../utils';
 
 const EditModal = ({ 
     modalId, 
@@ -20,6 +21,8 @@ const EditModal = ({
     isLoading 
 }) => {
     const labelId = `${modalId}Label`;
+    
+    const sortedEmployees = Array.isArray(employees) ? getSortedEmployees(employees) : [];
     
     return (
         <>
@@ -124,7 +127,9 @@ const EditModal = ({
 
                                         {dropdownOpen && (
                                             <div className="dropdown-menu show w-100 p-2" style={{ maxHeight:"120px", overflowY: "auto" }}>
-                                                {employees && employees.map((employee) => (
+                                                {sortedEmployees && sortedEmployees
+                                                .filter(employee => employee.status === 1)
+                                                .map((employee) => (
                                                    <ul style={{ listStyleType: "none", padding: 0 }} key={employee.id}>
                                                         <li>
                                                     <div key={employee.id} className="form-check">

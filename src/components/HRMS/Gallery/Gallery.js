@@ -561,7 +561,9 @@ class Gallery extends Component {
                                                             name="employee_id"
                                                             value={this.state.selectedEmployeeId}
                                                             onChange={this.handleEmployeeSelection}
-                                                            options={getSortedEmployees(employees).map(emp => ({
+                                                            options={getSortedEmployees(employees)
+                                                                .filter(emp => emp.status === 1) 
+                                                                .map(emp => ({
                                                                 value: emp.id,
                                                                 label: `${emp.first_name} ${emp.last_name}`
                                                             }))}

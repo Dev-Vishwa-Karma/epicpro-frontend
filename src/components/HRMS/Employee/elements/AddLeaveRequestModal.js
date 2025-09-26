@@ -64,7 +64,9 @@ const AddLeaveRequestModal = ({
                       error={addLeaveErrors && addLeaveErrors.employee_id}
                       options={[
                         { value: "", label: "Select Employee" },
-                        ...getSortedEmployees(employeeData).map((emp) => ({
+                        ...getSortedEmployees(employeeData)
+                        .filter(emp => emp.status === 1) 
+                        .map((emp) => ({
                           value: emp.id,
                           label: `${emp.first_name} ${emp.last_name}`
                         }))

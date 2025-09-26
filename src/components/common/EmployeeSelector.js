@@ -19,7 +19,8 @@ const sortedEmployees = getSortedEmployees(allEmployeesData);
                 {sortedEmployees
                     .filter(employee => {
                         const role = (employee.role || '').toLowerCase();
-                        return role !== 'admin' && role !== 'super_admin';
+                        const isActive = Number(employee.status) === 1;
+                        return role !== 'admin' && role !== 'super_admin' && isActive;
                     })
                     .map((employee) => (
                         <option key={employee.id} value={employee.id}>

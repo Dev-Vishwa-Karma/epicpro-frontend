@@ -191,12 +191,6 @@ class TodoList extends Component {
             : logged_in_employee_id;
 
         const addTodoFormData = new FormData();
-        // addTodoFormData.append('employee_id', employee_id);
-        // addTodoFormData.append('title', title);
-        // addTodoFormData.append('due_date', due_date);
-        // addTodoFormData.append('priority', priority);
-        // addTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
-        // addTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
         const data = {
             employee_id: employee_id,
@@ -342,13 +336,6 @@ class TodoList extends Component {
             : 'Todo marked as completed!';
 
         const formData = new FormData();
-        // formData.append('id', selectedTodo.id);
-        // formData.append('status', newStatus);
-        // formData.append('logged_in_employee_id', logged_in_employee_id);
-        // formData.append('logged_in_employee_role', logged_in_employee_role);
-        // formData.append('to_do_created_by', selectedTodo.created_by);
-        // formData.append('to_do_created_for', selectedTodo.employee_id);
-        // formData.append('logged_in_employee_name', selectedTodo.first_name);
 
         const data = {
             id: selectedTodo.id,
@@ -453,13 +440,6 @@ class TodoList extends Component {
         : logged_in_employee_id;
 
         const updateTodoFormData = new FormData();
-        // updateTodoFormData.append('todo_id', selectedTodo.id);
-        // updateTodoFormData.append('employee_id', employee_id);
-        // updateTodoFormData.append('title', title);
-        // updateTodoFormData.append('due_date', due_date);
-        // updateTodoFormData.append('priority', priority);
-        // updateTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
-        // updateTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
         const data = {
             todo_id: selectedTodo.id,
@@ -787,7 +767,9 @@ class TodoList extends Component {
                                                         onChange={this.handleEmployeeFilterChange}
                                                     >
                                                         <option value="">All Employees</option>
-                                                        {getSortedEmployees(this.state.employees).map(emp => (
+                                                        {getSortedEmployees(this.state.employees)
+                                                        .filter(emp => emp.status === 1)
+                                                        .map(emp => (
                                                             <option key={emp.id} value={emp.id}>
                                                                 {emp.first_name} {emp.last_name}
                                                             </option>

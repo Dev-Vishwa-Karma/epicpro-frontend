@@ -1042,7 +1042,9 @@ class Events extends Component {
                               }}
                             >
                               <option value="">All Events</option>
-                              {getSortedEmployees(employees).map((emp) => (
+                              {getSortedEmployees(employees)
+                              .filter(emp => emp.status === 1)
+                              .map((emp) => (
                                 <option key={emp.id} value={emp.id}>
                                   {emp.first_name} {emp.last_name}
                                 </option>
