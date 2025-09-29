@@ -62,6 +62,12 @@ class Header extends Component {
     };
   }
 
+  stripHtml(html) {
+    const div = document.createElement("div");
+    div.innerHTML = html || '';
+    return div.textContent || div.innerText || "";
+  }
+
   // Function to dismiss messages
   dismissMessages = () => {
     this.setState({
@@ -634,7 +640,7 @@ class Header extends Component {
     } = this.state;
     const formData = new FormData();
     formData.append("employee_id", this.state.userId);
-    formData.append("report", report);
+    formData.append("report", this.stripHtml(this.state.report));
     formData.append("start_time", this.formatToMySQLDateTime(start_time));
     formData.append("break_duration_in_minutes", this.props.breakDuration);
     formData.append("end_time", this.formatToMySQLDateTime(end_time));

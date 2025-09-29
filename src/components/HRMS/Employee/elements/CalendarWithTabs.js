@@ -222,13 +222,13 @@ class CalendarWithTabs extends Component {
     getAlternateSaturday = async () => {
         const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
         try {
-            const data = getService.getCall('alternate_saturdays.php', {
+            const res = await getService.getCall('alternate_saturdays.php', {
                 action: 'view',
                 year: now.getFullYear()
-            })
+            });
             this.setState({
-                alternateSatudays: data?.data
-            })
+                alternateSatudays: res && res.data ? res.data : []
+            });
 
         } catch (error) {
             console.error("Failed to fetch saved Saturdays:", error);

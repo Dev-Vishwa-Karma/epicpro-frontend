@@ -104,7 +104,7 @@ class DashboardAdminTodo extends Component {
 								>
 									<div className="d-flex align-items-center justify-content-between">
 										<span
-											className="ml-2 task-title-admin"
+											className="task-title-admin"
 										>
 											{t.title}
 										</span>

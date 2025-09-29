@@ -55,7 +55,7 @@ const ReportTable = ({
                                         <td>
                                             {report.todays_total_hours?.slice(0, 5)}
                                             {report.note ? (
-                                                <span style={{ marginLeft: '6px' }} title={report.note} aria-label="Note">
+                                                <span style={{ marginLeft: '6px' }} title="Admin has added a note for this report" aria-label="Note">
                                                     <i className="fa fa-exclamation-circle text-primary" style={{ fontSize: '15px' }}></i>
                                                 </span>
                                             ) : null}

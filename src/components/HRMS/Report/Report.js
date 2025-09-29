@@ -70,6 +70,12 @@ class Report extends Component {
         this.reportMessageTimeout = null;
     }
 
+    stripHtml(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html || '';
+        return div.textContent || div.innerText || '';
+    }
+
     componentDidMount() {
         const today = new Date();
         const yesterday = new Date();
@@ -631,7 +637,7 @@ class Report extends Component {
         // formData.append("note", editNotes || '');
 
         const data = {
-            report: report,
+            report: this.stripHtml(report),
             start_time: this.formatToMySQLDateTime(finalStartTime),
             end_time: this.formatToMySQLDateTime(finalEndTime),
             break_duration_in_minutes: break_duration_in_minutes,

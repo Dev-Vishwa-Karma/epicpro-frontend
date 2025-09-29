@@ -7,7 +7,7 @@ import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import UserTable from './elements/UserTable';
 import AddUserForm from './elements/AddUserForm';
-import { appendDataToFormData, PASSWORD_SENTINEL } from '../../../utils';
+import { appendDataToFormData } from '../../../utils';
 
 class Users extends Component {
 	constructor(props) {
@@ -293,6 +293,7 @@ class Users extends Component {
 					errorMessage: data.message || "Failed to delete user. Please try again.",
                     ButtonLoading: false,
 				});
+				setTimeout(this.dismissMessages, 3000);
 			}
         })
 		.catch((error) => {
@@ -372,6 +373,16 @@ class Users extends Component {
 		}
 	};
 
+	// Function to dismiss messages
+	dismissMessages = () => {
+		this.setState({
+		showSuccess: false,
+		successMessage: "",
+		showError: false,
+		errorMessage: "",
+		});
+	};
+
 	render() {
 
 		const { fixNavbar } = this.props;
@@ -407,11 +418,13 @@ class Users extends Component {
 											List
 										</a>
 									</li>
+									{(this.state.logged_in_employee_role == 'super_admin') && (
 									<li className="nav-item">
 										<a className={`nav-link ${activeTab === 'add' ? 'active' : ''}`} id="user-tab" data-toggle="tab" href="#user-add" onClick={() => this.handleTabChange('add')}>
 											Add New
 										</a>
 									</li>
+									)}
 								</ul>
 							</div>
 						</div>
