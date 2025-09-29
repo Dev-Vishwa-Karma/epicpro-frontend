@@ -80,8 +80,6 @@ const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) 
                     onClick={() => handleEditClick(user)}
                     className="btn-icon"
                     title="Edit"
-                    dataToggle="modal"
-                    dataTarget="#editUserModal"
                     icon="fa fa-edit"
                   />
 

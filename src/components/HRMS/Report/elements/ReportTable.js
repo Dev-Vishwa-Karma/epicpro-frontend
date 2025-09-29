@@ -52,7 +52,14 @@ const ReportTable = ({
                                         <td>{report.break_duration_in_minutes} Mins</td>
                                         <td>{formatDateTimeAMPM(report.end_time)}</td>
                                         <td>{report.todays_working_hours?.slice(0, 5)}</td>
-                                        <td>{report.todays_total_hours?.slice(0, 5)}</td>
+                                        <td>
+                                            {report.todays_total_hours?.slice(0, 5)}
+                                            {report.note ? (
+                                                <span style={{ marginLeft: '6px' }} title={report.note} aria-label="Note">
+                                                    <i className="fa fa-exclamation-circle text-primary" style={{ fontSize: '15px' }}></i>
+                                                </span>
+                                            ) : null}
+                                        </td>
                                         <td width="15%">
                                             <Button
                                             label=""

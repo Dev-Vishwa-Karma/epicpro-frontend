@@ -110,7 +110,7 @@ const TodoModal = ({
                 />
 
                 <Button
-                  label="Save changes"
+                  label={loading ? "Saving..." : "Save changes"}
                   onClick={onSubmit}
                   className="btn-primary"
                   disabled={loading}

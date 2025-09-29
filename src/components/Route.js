@@ -20,6 +20,7 @@ import Link from './HRMS/Link/Link';
 import Notifications from './HRMS/notifications/Notifications';
 import Applicant from './HRMS/Applicants/Applicant';
 import ApplicantForm from './HRMS/Applicants/ApplicantForm';
+import EditUser from './HRMS/Users/EditUser';
 
 const Routes = [
     {
@@ -219,6 +220,15 @@ const Routes = [
         exact: true,
         pageTitle: "Referral",
         component: ApplicantForm
+    },
+    {
+        path: "/hr-users/edit/:id",
+        name: 'edit-user',
+        exact: true,
+        pageTitle: "Edit User",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: EditUser
     },
 ];
 

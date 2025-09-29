@@ -7,7 +7,6 @@ import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import UserTable from './elements/UserTable';
 import AddUserForm from './elements/AddUserForm';
-import EditUserModal from './elements/EditUserModal';
 import { appendDataToFormData, PASSWORD_SENTINEL } from '../../../utils';
 
 class Users extends Component {
@@ -42,8 +41,6 @@ class Users extends Component {
 			ButtonLoading: false,
 			activeTab: 'list',
 			tabKey: 0,
-			showPassword: false,
-			passwordCleared: false
 		};
 	}
 
@@ -83,10 +80,6 @@ class Users extends Component {
 			this.setState({ departments: data.data });
         })
         .catch(error => console.error("Error fetching departments:", error));
-	}
-
-	toggleShowPassword = () => {
-		this.setState(prev => ({ showPassword: !prev.showPassword }));
 	}
 
 	getAdmins = () => {
@@ -130,7 +123,8 @@ class Users extends Component {
 	// Handle input changes
     handleInputChangeForAddUser = (event) => {
         const { name, value } = event.target;
-        this.setState({ [name]: value });
+        const nextValue = name === 'mobileNo' ? String(value).replace(/\D/g, '').slice(0, 10) : value;
+        this.setState({ [name]: nextValue });
     };
 
 	handleSelectChange = (event) => {
@@ -157,8 +151,9 @@ class Users extends Component {
 			{ name: 'email', value: email, type: 'email', required: true, messageName: 'Email ID'},
 			{ name: 'gender', value: gender, required: true, messageName: 'Gender' },
 			{ name: 'selectedDepartment', value: selectedDepartment, required: true, messageName: 'Department' },
+			{ name: 'selectedRole', value: selectedRole, required: true, messageName: 'Role' },
 			{ name: 'dob', value: dob, type: 'date', required: true, messageName: 'Date of Birth'},
-			{ name: 'mobileNo', value: mobileNo, required: false, messageName: 'Mobile Number', maxLength:20},
+			{ name: 'mobileNo', value: mobileNo, required: false, type: 'mobile', messageName: 'Mobile Number', maxLength:10 },
 			{ name: 'password', value: password, required: true, messageName: 'Password'},
 			{ name: 'confirmPassword', value: confirmPassword, required: true, messageName: 'Confirm Password',
 				customValidator: (val) => (password && val && password !== val ? 'Passwords do not match.' : undefined)
@@ -247,101 +242,11 @@ class Users extends Component {
 
 	// Handle edit button click
     handleEditClick = (user) => {
-        this.setState({ selectedUser: { ...user, password: PASSWORD_SENTINEL }, showPassword: false, passwordCleared: false });
-    };
-
-	// Handle input change for editing fields
-    handleInputChangeForEditUser = (e) => {
-        const { name, value } = e.target;
-        this.setState((prevState) => ({
-            selectedUser: {
-                ...prevState.selectedUser,
-                [name]: value, // Dynamically update the field
-            },
-			passwordCleared: name === 'password' ? (value === '' ? true : prevState.passwordCleared) : prevState.passwordCleared
-        }));
-    };
-
-	// Update/Edit User profile (API Call)
-	updateProfile = () => {
-        const {logged_in_employee_id, logged_in_employee_role, selectedUser } = this.state;
-        if (!selectedUser) return;
-
-        this.setState({ ButtonLoading: true });
-
-        // Apply Validation component
-        const validationSchema = [
-            { name: 'firstName', value: selectedUser.first_name, type: 'name', required: true, messageName: 'First Name'},
-			{ name: 'lastName', value: selectedUser.last_name, type: 'name', required: false, messageName: 'Last Name' },
-			{ name: 'email', value: selectedUser.email, type: 'email', required: true, messageName: 'Email Address'},
-            { name: 'dob', value: selectedUser.dob, type: 'date', required: false, messageName: 'Date of Birth'},
-			
-        ];
-        const errors = validateFields(validationSchema);
-        if (Object.keys(errors).length > 0) {
-            this.setState({ errors, ButtonLoading: false });
-            return;
-        } else {
-            this.setState({ errors: {} });
-        }
-
-		const updateProfileData = new FormData();
-
-		const data = {
-			first_name: selectedUser.first_name,
-			last_name: selectedUser.last_name,
-			email: selectedUser.email,
-			selected_role: selectedUser.role,
-			dob: selectedUser.dob,
-			department_id: selectedUser.department_id,
-			logged_in_employee_id: logged_in_employee_id,
-			logged_in_employee_role:logged_in_employee_role
-		};
-
-    	appendDataToFormData(updateProfileData, data);
-
-		// Only super_admin can reset password, and only if changed from sentinel
-		if (logged_in_employee_role === 'super_admin') {
-			const pwd = (selectedUser.password || '').trim();
-			if (pwd !== '' && pwd !== PASSWORD_SENTINEL) {
-				updateProfileData.append('password', pwd);
-			}
+		if (this.props.history && user && user.id) {
+			this.props.history.push(`/hr-users/edit/${user.id}`);
 		}
+	};
 
-        // Example API call
-		getService.editCall('get_employees.php', 'edit', updateProfileData, null, selectedUser.id)
-        .then((data) => {
-            if (data.status === "success") {
-				this.getAdmins();
-                this.setState((prevState) => {
-                    return {
-						successMessage: "User updated successfully!",
-						showSuccess: true,
-                        ButtonLoading: false
-                    };
-                });
-
-                document.querySelector("#editUserModal .close").click();
-
-				setTimeout(() => this.setState({ showSuccess: false }), 3000);
-            } else {
-				this.setState({
-					showError: true,
-					errorMessage: "Failed to update user. Please try again.",
-                    ButtonLoading: false
-				});
-				setTimeout(() => this.setState({ showError: false }), 3000);
-            }
-        })
-		.catch((error) => {
-			console.error("Error:", error);
-			this.setState({
-				showError: true,
-				errorMessage: "An error occurred. Please try again later.",
-                ButtonLoading: false
-			});
-		});
-    };
 
 	openDeleteModal = (userId) => {
         this.setState({
@@ -385,7 +290,7 @@ class Users extends Component {
 			} else {
 				this.setState({
 					showError: true,
-					errorMessage: "Failed to delete user. Please try again.",
+					errorMessage: data.message || "Failed to delete user. Please try again.",
                     ButtonLoading: false,
 				});
 			}
@@ -574,21 +479,6 @@ class Users extends Component {
 						</div>
 					</div>
 
-					{/* Edit User Modal */}
-					<EditUserModal
-						selectedUser={this.state.selectedUser}
-						departments={this.state.departments}
-						errors={this.state.errors}
-						handleInputChangeForEditUser={this.handleInputChangeForEditUser}
-						handleSelectChange={this.handleSelectChange}
-						updateProfile={this.updateProfile}
-						ButtonLoading={this.state.ButtonLoading}
-						loggedInRole={(this.state.logged_in_employee_role || '').toLowerCase().replace(/\s+/g, '_')}
-						showPassword={this.state.showPassword}
-						onTogglePassword={this.toggleShowPassword}
-						passwordSentinel={PASSWORD_SENTINEL}
-						passwordCleared={this.state.passwordCleared}
-					/>
 
 					{/* Delete User Model */}
 					<DeleteModal

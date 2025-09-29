@@ -148,13 +148,13 @@ class TodoList extends Component {
                           {todo.due_date && (
                             <small className="text-muted ml-2">{formatDueLabel(todo.due_date)}</small>
                           )} &nbsp;
-                          {/* <span className={`badge ml-0 ${
+                          <span className={`badge ml-0 ${
                             String(todo.priority).toLowerCase() === 'high' ? 'tag-danger'
                             : String(todo.priority).toLowerCase() === 'medium' ? 'tag-warning'
                             : 'tag-success'
                           }`}>
                             {(todo.priority || 'low').toString().toUpperCase()}
-                          </span> */}
+                          </span>
                           {isOverduePending(todo) && (
                             <span className="ml-2 mr-0 overdue-event-todo">Overdue</span>
                           )}

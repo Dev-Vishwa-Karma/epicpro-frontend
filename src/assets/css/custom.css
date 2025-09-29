@@ -484,4 +484,5 @@ border-left: 6px solid #e6140d !important;
   font-weight: bold !important;
   padding: 2.5px !important;
   border-radius: 3px !important;
+  text-transform: uppercase;
 }
