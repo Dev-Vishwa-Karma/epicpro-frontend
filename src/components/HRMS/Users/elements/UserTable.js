@@ -23,7 +23,7 @@ const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) 
               <th>Role</th>
               <th>Created Date</th>
               <th>Position</th>
-              <th className="w100">Action</th>
+              <th className="w100">Actions</th>
             </tr>
           </thead>
           <tbody>

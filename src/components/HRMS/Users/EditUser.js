@@ -73,6 +73,16 @@ class EditUser extends Component {
 		if (!selectedUser) return;
 		this.setState({ ButtonLoading: true });
 
+		if (logged_in_employee_role === 'admin' && selectedUser.role === 'super_admin') {
+			this.setState({
+			showError: true,
+			errorMessage: "Admin not allowed to edit a Super Admin.",
+			ButtonLoading: false
+			});
+			setTimeout(() => this.setState({ showError: false }), 3000);
+			return;
+		}
+
 		const validationSchema = [
 			{ name: 'firstName', value: selectedUser.first_name, type: 'name', required: true, messageName: 'First Name'},
 			{ name: 'lastName', value: selectedUser.last_name, type: 'name', required: true, messageName: 'Last Name' },
@@ -211,7 +221,7 @@ class EditUser extends Component {
 													/>
 												</div>
 
-												{(this.state.logged_in_employee_role || '').toLowerCase().replace(/\s+/g, '_') === 'super_admin' || 'admin' && (
+												{/* {(this.state.logged_in_employee_role || '').toLowerCase().replace(/\s+/g, '_') === 'super_admin' || 'admin' && ( */}
 													<div className="col-md-6">
 														<div className="form-group">
 															<label className="form-label" htmlFor="password">password</label>
@@ -241,7 +251,7 @@ class EditUser extends Component {
 															</div>
 														</div>
 													</div>
-												)}
+												{/* )} */}
 
 												<div className="col-md-6">
 													<InputField

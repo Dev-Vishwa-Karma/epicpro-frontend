@@ -22,7 +22,7 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
                 <th>Reason</th>
                 <th>Leave On</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>

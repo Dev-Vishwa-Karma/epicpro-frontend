@@ -47,24 +47,24 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
     
     switch (fileExtension) {
       case 'pdf':
-        return <i className="fa fa-file-pdf-o text-danger file-icon" title="PDF File" />;
+        return <i className="fa fa-file-pdf-o text-danger file-icon" title={fileExtension} />;
       case 'zip':
       case 'rar':
       case '7z':
       case 'tar':
       case 'gz':
-        return <i className="fa fa-file-archive-o text-warning file-icon" title="Archive File" />;
+        return <i className="fa fa-file-archive-o text-warning file-icon" title={fileExtension} />;
       case 'doc':
       case 'docx':
-        return <i className="fa fa-file-word-o text-primary file-icon" title="Word Document" />;
+        return <i className="fa fa-file-word-o text-primary file-icon" title={fileExtension} />;
       case 'xls':
       case 'xlsx':
-        return <i className="fa fa-file-excel-o text-success file-icon" title="Excel Spreadsheet" />;
+        return <i className="fa fa-file-excel-o text-success file-icon" title={fileExtension} />;
       case 'ppt':
       case 'pptx':
-        return <i className="fa fa-file-powerpoint-o text-danger file-icon" title="PowerPoint Presentation" />;
+        return <i className="fa fa-file-powerpoint-o text-danger file-icon" title={fileExtension} />;
       case 'txt':
-        return <i className="fa fa-file-text-o file-icon" title="Text File" />;
+        return <i className="fa fa-file-text-o file-icon" title={fileExtension} />;
       case 'jpg':
       case 'jpeg':
       case 'png':
@@ -73,18 +73,18 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
       case 'svg':
       case 'webp':
       case 'psd':
-        return <i className="fa fa-file-image-o text-info file-icon" title="Image File" />;
+        return <i className="fa fa-file-image-o text-info file-icon" title={fileExtension} />;
       case 'mp3':
       case 'wav':
       case 'ogg':
       case 'flac':
-        return <i className="fa fa-file-audio-o text-info file-icon" title="Audio File" />;
+        return <i className="fa fa-file-audio-o text-info file-icon" title={fileExtension} />;
       case 'mp4':
       case 'avi':
       case 'mov':
       case 'wmv':
       case 'flv':
-        return <i className="fa fa-file-video-o text-info file-icon" title="Video File" />;
+        return <i className="fa fa-file-video-o text-info file-icon" title={fileExtension} />;
       case 'html':
       case 'htm':
       case 'css':
@@ -101,9 +101,9 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
       case 'yaml':
       case 'yml':
       case 'ini':
-        return <i className="fa fa-file-code-o file-icon" title="Code File" />;
+        return <i className="fa fa-file-code-o file-icon" title={fileExtension} />;
       default:
-        return <i className="fa fa-file-o text-muted file-icon" title="File" />;
+        return <i className="fa fa-file-o text-muted file-icon" title={fileExtension}/>;
     }
   };
 
@@ -125,8 +125,31 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
     }
   
     // For other types (Excel, Codebase)
-    if (row.url) {
-      // If URL exists, show as link
+    if (row.url && row.file_path) {
+      const fileName = row.file_path.split('/').pop() || row.file_path;
+      return (
+        <div className="d-flex align-items-center">
+          <a 
+            href={row.url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            title={row.url}
+            className="text-primary mr-2"
+            style={{ marginRight: 8 }}
+          >
+            {shortenUrl(row.url)}
+          </a>
+          <button
+            onClick={() => handleDownload(row.file_path)}
+            title={`Download ${fileName}`}
+            className="btn btn-link p-0 border-0 bg-transparent"
+          >
+            {getFileTypeIcon(row.file_path)}
+          </button>
+        </div>
+      );
+    } else if (row.url) {
+      // If only URL exists, show as link
       return (
         <a 
           href={row.url} 
@@ -139,7 +162,7 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
         </a>
       );
     } else if (row.file_path) {
-      // If file exists, show only the icon (clickable for download)
+      // If only file exists, show only the icon (clickable for download)
       const fileName = row.file_path.split('/').pop() || row.file_path;
       return (
         <button
@@ -162,7 +185,7 @@ const LinkTable = ({ data, type, onEdit, onDelete, onDownload }) => {
           <tr>
             <th>Title</th>
             <th className='w100'>Link</th>
-            <th className='w100'>Action</th>
+            <th className='w100'>Actions</th>
           </tr>
         </thead>
         <tbody>

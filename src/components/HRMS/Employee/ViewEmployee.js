@@ -334,12 +334,13 @@ class ViewEmployee extends Component {
                                             {/* Profile Image */}
                                             <img
                                                 className="card-profile-img"
-                                                src={this.state.previewImage || '/assets/images/sm/avatar4.jpg'}
+                                                src={this.state.previewImage}
                                                 alt="Profile"
                                                 style={{
                                                     borderRadius: "50%",
-                                                    objectFit: "cover",
+                                                    objectFit: "cover"
                                                 }}
+                                                onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
                                             />
 
                                             {/* Camera Icon Overlay */}
@@ -366,7 +367,14 @@ class ViewEmployee extends Component {
                                             </label>
                                         </div>
 
-                                        <h4 className="mb-3">{`${employeeNew.first_name} ${employeeNew.last_name || ''}`}</h4>
+                                        <h4 className="mb-3">{`${employeeNew.first_name} ${employeeNew.last_name || ''}`}
+                                            {(window.user?.role === 'admin' || window.user?.role === 'super_admin') && (
+                                                <span className={`badge ${employeeNew.status === 1 ? 'active-profile' : 'inactive-profile'}`} style={{ marginLeft: 10 }}>
+                                                    {employeeNew.status === 1 ? 'Active' : 'In-active'}
+                                                </span>
+                                            )}
+                                        </h4>
+                                        
                                         <p className="mb-4" style={{ whiteSpace: "pre-line" }}>{employeeNew.about_me}</p>
                                     </div>
                                 </div>

@@ -12,7 +12,7 @@ const DepartmentTable = ({ departmentData, message, onEditClick, onDeleteClick }
             <th>Department Name</th>
             <th>Department Head</th>
             <th>Total Employee</th>
-            <th>Action</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>

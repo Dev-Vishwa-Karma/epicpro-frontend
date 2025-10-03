@@ -27,7 +27,7 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                                 <th>Phone</th>
                                 <th>Join Date</th>
                                 <th>Role</th>
-                                <th>Action</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,6 +49,9 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                                             <div className="ml-3">
                                                 <h6 className="mb-0">
                                                     {`${employee.first_name} ${employee.last_name}`}
+                                                    <span className={`badge ${employee.status === 1 ? 'active-employee' : 'inactive-employee'}`}>
+                                                        {employee.status === 1 ? 'Active' : 'In-active'}
+                                                    </span>
                                                 </h6>
                                                 <span className="text-muted">
                                                     {employee.email}

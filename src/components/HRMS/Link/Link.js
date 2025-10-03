@@ -235,15 +235,32 @@ class Link extends Component {
         required: (activeTab === 'Git'), 
         messageName: 'URL',
         customValidator: (val) => {
+          const isValidUrl = (str) => {
+            try {
+              new URL(str);
+              return true;
+            } catch (_) {
+              return false;
+            }
+          };
+          const urlTrimmed = val?.trim();
+          const hasUrl = !!urlTrimmed;
+          const hasFile = !!formData.file_path;
           if (activeTab === 'Git') {
-            if (!val || !val.trim()) {
+            if (!hasUrl) {
               return 'URL is required.';
             }
-          } else if (activeTab === 'Excel' || activeTab === 'Codebase') {
-            const hasUrl = val && val.trim();
-            const hasFile = !!formData.file_path;
+            if (!isValidUrl(urlTrimmed)) {
+              return 'Only a valid URL is allowed.';
+            }
+          }
+          if (activeTab === 'Excel' || activeTab === 'Codebase') {
             if (!hasUrl && !hasFile) {
-              return 'Either URL or File is required.';
+              return 'Either a valid URL or a File is required.';
+            }
+
+            if (hasUrl && !isValidUrl(urlTrimmed)) {
+              return 'Only a valid URL is allowed.';
             }
           }
           return undefined;

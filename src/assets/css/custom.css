@@ -327,6 +327,11 @@ border-left: 6px solid #e6140d !important;
   background: #fafbfc !important;
   cursor: pointer !important;
   margin-bottom: 8px !important;
+  transition: border 0.2s, background 0.2s;
+}
+.drag-and-drop-file:hover, .drag-and-drop-file:focus-within {
+  border-color: #007bff !important;
+  background: #eaf4ff !important;
 }
 
 .drag-drop-content{
@@ -485,4 +490,102 @@ border-left: 6px solid #e6140d !important;
   padding: 2.5px !important;
   border-radius: 3px !important;
   text-transform: uppercase;
+}
+
+.active-employee{
+  background-color: rgb(224, 248, 224) !important;
+  color: green !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+}
+
+.inactive-employee{
+  background-color: rgb(255, 219, 219) !important;
+  color: red !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+}
+
+.active-profile{
+  background-color: rgb(224, 248, 224) !important;
+  color: green !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+  position: absolute !important;
+  transform: translate(-3%, -10%) !important;
+}
+
+.inactive-profile{
+  background-color: rgb(255, 219, 219) !important;
+  color: red !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+  position: absolute !important;
+  transform: translate(-3%, -10%) !important;
+}
+
+/* .file-badge{
+  margin: 10px 0 20px 0 !important;
+  background: transparent !important;
+  color: #bdbbbb !important;
+  border-radius: 10px !important;
+  height: 150px ;
+  padding: 1px 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  z-index: 2 !important;
+  border: 1px solid #bdbbbb !important;
+  width: fit-content !important;
+}
+
+.file-path-name {
+  margin-left: 10px;
+  font-size: 12px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #bdbbbb !important;
+} */
+
+.file-badge {
+  position: relative;
+  margin: 10px 0 20px 0;
+  background: transparent;
+  color: #bdbbbb;
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  z-index: 2;
+  border: 1px solid #bdbbbb;
+  max-width: 100%;
+  width: auto;
+  min-height: 50px;
+}
+
+.file-path-name {
+  font-size: 12px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #bdbbbb;
+  padding-right: 20px;
+}
+
+.file-close-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 14px;
+  color: #bdbbbb;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.img-thumbnail {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }

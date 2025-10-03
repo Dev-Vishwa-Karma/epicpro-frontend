@@ -762,7 +762,7 @@ class TodoList extends Component {
                                                 <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
                                                     <select
                                                         id="employeeFilter"
-                                                        className="form-control"
+                                                        className="form-control custom-select"
                                                         value={this.state.employeeFilter}
                                                         onChange={this.handleEmployeeFilterChange}
                                                     >
@@ -779,7 +779,7 @@ class TodoList extends Component {
                                                 <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
                                                     <select
                                                         id="statusFilter"
-                                                        className="form-control"
+                                                        className="form-control custom-select"
                                                         value={statusFilter}
                                                         onChange={this.handleStatusFilterChange}
                                                     >
@@ -792,7 +792,7 @@ class TodoList extends Component {
                                                 <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
                                                     <select
                                                         id="dayFilter"
-                                                        className="form-control"
+                                                        className="form-control custom-select"
                                                         value={this.state.dayFilter}
                                                         onChange={this.handleDayFilterChange}
                                                     >

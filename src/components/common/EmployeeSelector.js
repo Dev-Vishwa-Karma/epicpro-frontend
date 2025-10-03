@@ -8,7 +8,7 @@ const sortedEmployees = getSortedEmployees(allEmployeesData);
         <div className="form-group">
             <label className="form-label">Select Employee</label>
             <select 
-                className="form-control" 
+                className="form-control custom-select" 
                 value={selectedEmployee} 
                 onChange={handleEmployeeChange}
             >

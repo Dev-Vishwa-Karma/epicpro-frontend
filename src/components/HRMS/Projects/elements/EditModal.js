@@ -95,6 +95,9 @@ const EditModal = ({
                                 label="Select Client"
                                 name="selectedClient"
                                 type="select"
+                                style={{ minWidth: '220px' }}
+                                containerClassName="mb-0"
+                                inputClassName="custom-select w-auto"
                                 value={formData.selectedClient || ""}
                                 onChange={onSelectionChange}
                                 error={errors.selectedClient}
@@ -116,7 +119,7 @@ const EditModal = ({
                                     <div className="dropdown w-100">
                                         <button
                                             type="button"
-                                            className="form-control dropdown-toggle"
+                                            className="form-control custom-select"
                                             onClick={toggleDropdown}
                                             style={{ textAlign: "left" }}
                                         >

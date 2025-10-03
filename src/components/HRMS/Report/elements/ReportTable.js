@@ -29,7 +29,7 @@ const ReportTable = ({
                                 <th>End Time</th>
                                 <th>Working Hours</th>
                                 <th>Total Hours</th>
-                                <th>Action</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>

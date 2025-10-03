@@ -221,7 +221,10 @@ class departments extends Component {
             showSuccess: false,
             ButtonLoading: false,
           });
-          setTimeout(this.dismissMessages, 3000);
+          setTimeout(() => {
+            this.onCloseDeleteModal();
+            this.dismissMessages();
+          }, 3000);
         }
       })
       .catch((error) => {
@@ -234,7 +237,10 @@ class departments extends Component {
           showSuccess: false,
           ButtonLoading: false,
         });
-        setTimeout(this.dismissMessages, 3000);
+        setTimeout(() => {
+          this.onCloseDeleteModal();
+          this.dismissMessages();
+        }, 3000);
       });
   };
 

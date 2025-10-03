@@ -293,7 +293,10 @@ class Users extends Component {
 					errorMessage: data.message || "Failed to delete user. Please try again.",
                     ButtonLoading: false,
 				});
-				setTimeout(this.dismissMessages, 3000);
+				setTimeout(() => {
+					this.setState({ deleteUser: null });
+					this.dismissMessages();
+				}, 3000);
 			}
         })
 		.catch((error) => {
@@ -303,6 +306,10 @@ class Users extends Component {
 				errorMessage: `An error occurred: ${error.message || error}`,
                 ButtonLoading: false,
 			});
+			setTimeout(() => {
+				this.setState({ deleteUser: null });
+				this.dismissMessages();
+			}, 3000);
 		});
     };
 
@@ -460,6 +467,8 @@ class Users extends Component {
 												loading={loading}
 												currentUsers={currentUsers}
 												handleEditClick={this.handleEditClick}
+									loggedInRole={this.state.logged_in_employee_role}
+									loggedInId={this.state.logged_in_employee_id}
 												openDeleteModal={this.openDeleteModal}
 											/>
 										</div>

@@ -57,6 +57,8 @@ const AddLeaveRequestModal = ({
                 {['admin', 'super_admin'].includes(logged_in_employee_role) && (
                   <div className="col-md-12">
                     <InputField
+                      style={{ minWidth: '460px' }}
+                      inputClassName="custom-select w-auto"
                       name="employee_id"
                       type="select"
                       value={employee_id}

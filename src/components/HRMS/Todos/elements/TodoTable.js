@@ -25,13 +25,12 @@ const TodoTable = ({
                 <thead>
                     <tr>
                         <th><p className="w150">Task</p></th>
-                        <th className="w150 text-right">Due</th>
+                        <th className="w120 text-left align-middle">Due</th>
                         <th className="w100">Priority</th>
-                        {/* <th className="w100">Overdue</th> */}
                         {isAdmin && (
                             <>
                                 <th className="w80"><i className="icon-user" /></th>
-                                <th className="w150">Action</th>
+                                <th className="w150">Actions</th>
                             </>
                         )}
                     </tr>
@@ -72,8 +71,10 @@ const TodoTable = ({
                                             </span>
                                         </label>
                                     </td>
-                                    <td className="text-left">
-                                        {formatDueLabel(todo.due_date)}
+                                    <td className="text-left align-middle" style={{ minWidth: 110 }}>
+                                        <span style={{ display: 'inline-block', minWidth: 90 }}>
+                                            {formatDueLabel(todo.due_date)}
+                                        </span>
                                     </td>
                                     <td className='d-flex'>
                                         <span className={`tag mt-2 ml-0 mr-0 ${
