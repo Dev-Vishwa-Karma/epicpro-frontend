@@ -11,9 +11,21 @@ class LinkModal extends React.Component {
     this.state = {
       previewUrl: null,
       previewType: null,
-      showConfirmRemove: false
+      showConfirmRemove: false,
+      selectedFiles: [],
+      previews: [],
+      removeIndex: null
     };
   }
+
+  // Helper: make absolute URL for previews if backend returns relative paths
+  getAbsoluteUrl = (fileUrl) => {
+    if (!fileUrl) return '';
+    if (/^https?:\/\//i.test(fileUrl) || fileUrl.startsWith('data:image/')) return fileUrl;
+    const base = (process.env.REACT_APP_API_URL || '').replace(/\/$/, '');
+    const path = String(fileUrl).replace(/^\//, '');
+    return base ? `${base}/${path}` : `/${path}`;
+  };
 
   handleDrag = (e) => {
     e.preventDefault();
@@ -35,13 +47,14 @@ class LinkModal extends React.Component {
     this.dragActive = false;
     e.currentTarget.style.border = '2px dashed #ccc';
     e.currentTarget.style.background = '#fafbfc';
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      this.handleFilePreview(e.dataTransfer.files[0]);
+    const files = e.dataTransfer.files;
+    if (files && files.length) {
+      this.consumeFiles(Array.from(files));
       const fakeEvent = {
         target: {
           name: 'file_path',
           type: 'file',
-          files: e.dataTransfer.files
+          files
         }
       };
       this.props.onChange(fakeEvent);
@@ -57,13 +70,45 @@ class LinkModal extends React.Component {
   };
 
   handleFileInputChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      this.handleFilePreview(file);
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length > 0) {
+      this.consumeFiles(files);
     } else {
-      this.setState({ previewUrl: null, previewType: null });
+      this.setState({ previewUrl: null, previewType: null, selectedFiles: [], previews: [] });
     }
     this.props.onChange(e);
+  };
+
+  consumeFiles = (files) => {
+    const nextFiles = [...this.state.selectedFiles, ...files];
+    const seen = new Set();
+    const deduped = [];
+    nextFiles.forEach(f => {
+      const key = [f.name, f.size, f.type].join('|');
+      if (!seen.has(key)) { seen.add(key); deduped.push(f); }
+    });
+
+    const previews = [];
+    let pendingReaders = 0;
+    deduped.forEach((file, idx) => {
+      if (file && file.type && file.type.startsWith('image/')) {
+        pendingReaders++;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          previews[idx] = { type: 'image', url: ev.target.result, name: file.name };
+          pendingReaders--;
+          if (pendingReaders === 0) {
+            this.setState({ selectedFiles: deduped, previews });
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previews[idx] = { type: 'file', url: null, name: file ? file.name : '' };
+      }
+    });
+    if (pendingReaders === 0) {
+      this.setState({ selectedFiles: deduped, previews });
+    }
   };
 
   handleFilePreview = (file) => {
@@ -81,27 +126,27 @@ class LinkModal extends React.Component {
   };
 
   // For remove file while add/edit
-  handleRemoveFile = () => {
-    if (this.fileInput) {
-      try { this.fileInput.value = ''; } catch (e) {}
-    }
+  handleRemoveFile = (index = null) => {
+    if (index === null) {
+      if (this.fileInput) { try { this.fileInput.value = ''; } catch (e) {} }
     this.setState({ previewUrl: null, previewType: null });
-    const fakeEvent = {
-      target: {
-        name: 'file_path',
-        value: '',
-        type: 'text',
-        files: null
-      }
-    };
-    if (typeof this.props.onChange === 'function') {
-      this.props.onChange(fakeEvent);
+      const fakeEvent = { target: { name: 'file_path', value: '', type: 'text', files: null } };
+      if (typeof this.props.onChange === 'function') { this.props.onChange(fakeEvent); }
+      return;
     }
+    const files = [...this.state.selectedFiles];
+    const previews = [...this.state.previews];
+    files.splice(index, 1);
+    previews.splice(index, 1);
+    if (this.fileInput) { try { this.fileInput.value = ''; } catch (e) {} }
+    this.setState({ selectedFiles: files, previews });
+    const fakeEvent = { target: { name: 'file_path', type: 'file', files } };
+    if (typeof this.props.onChange === 'function') { this.props.onChange(fakeEvent); }
   };
 
-  openConfirmRemove = (e) => {
+  openConfirmRemove = (e, index = null) => {
     e && e.stopPropagation();
-    this.setState({ showConfirmRemove: true });
+    this.setState({ showConfirmRemove: true, removeIndex: index });
   };
 
   cancelConfirmRemove = (e) => {
@@ -111,18 +156,63 @@ class LinkModal extends React.Component {
 
   confirmRemoveFile = (e) => {
     e && e.stopPropagation();
-    this.setState({ showConfirmRemove: false });
-    this.handleRemoveFile();
+    const idx = this.state.removeIndex;
+    this.setState({ showConfirmRemove: false, removeIndex: null });
+    if (typeof idx === 'number') {
+      this.handleRemoveFile(idx);
+    } else {
+      this.handleRemoveFile(null);
+    }
   };
 
   componentDidUpdate(prevProps) {
-    // If file_path is cleared (e.g. after submit or delete), remove preview
-    if (
-      prevProps.formData.file_path &&
-      !this.props.formData.file_path &&
-      (this.state.previewUrl || this.state.previewType)
-    ) {
+    // Helper to detect if a path looks like an image
+    const isImagePath = (p) => {
+      if (!p || typeof p !== 'string') return false;
+      const lowered = p.split('?')[0].toLowerCase();
+      return /\.(png|jpe?g|webp|gif)$/.test(lowered) || lowered.indexOf('data:image/') === 0;
+    };
+
+    //  When modal opens for a new row, reset selection and show that row's saved file
+    if ((!prevProps.show && this.props.show) || (prevProps.formData?.id !== this.props.formData?.id)) {
+      // Clear input element so same file can be re-picked
+      if (this.fileInput) { try { this.fileInput.value = ''; } catch (e) {} }
+      const filePath = this.props.formData?.file_path || null;
+      if (filePath && typeof filePath === 'string') {
+        this.setState({
+          selectedFiles: [],
+          previews: [],
+          removeIndex: null,
+          previewUrl: isImagePath(filePath) ? this.getAbsoluteUrl(filePath) : null,
+          previewType: isImagePath(filePath) ? 'image' : 'file',
+          showConfirmRemove: false
+        });
+      } else {
+        this.setState({
+          selectedFiles: [],
+          previews: [],
+          removeIndex: null,
+          previewUrl: null,
+          previewType: null,
+          showConfirmRemove: false
+        });
+      }
+    }
+
+    // If file_path changes while open (e.g., after save fetch), reflect it
+    if (prevProps.formData?.file_path !== this.props.formData?.file_path && this.props.show) {
+      const filePath = this.props.formData?.file_path || null;
+      if (filePath && typeof filePath === 'string') {
+        this.setState({
+          selectedFiles: [],
+          previews: [],
+          removeIndex: null,
+          previewUrl: isImagePath(filePath) ? this.getAbsoluteUrl(filePath) : null,
+          previewType: isImagePath(filePath) ? 'image' : 'file'
+        });
+      } else if (!filePath) {
       this.setState({ previewUrl: null, previewType: null });
+      }
     }
   }
 
@@ -132,8 +222,9 @@ class LinkModal extends React.Component {
     } = this.props;
     const { title = '', url = '', file_path = null } = formData;
     const showFileInput = activeTab === 'Excel' || activeTab === 'Codebase';
-    const { previewUrl, previewType, showConfirmRemove } = this.state;
+    const { previewUrl, previewType, showConfirmRemove, selectedFiles, previews } = this.state;
     const fileDisplayName = file_path && (typeof file_path === 'object' ? file_path.name : (typeof file_path === 'string' ? file_path.split('/').pop() : ''));
+    const hasAnyFile = (selectedFiles && selectedFiles.length > 0) || !!previewUrl || (!!file_path);
     return (
       <>
         {show && (
@@ -168,9 +259,12 @@ class LinkModal extends React.Component {
                     <>
                       <div className="or-content d-flex align-items-center my-3">
                         <div className="flex-grow-1 or-line" />
+                          {!hasAnyFile && (
                         <span className="or-main mx-2">OR</span>
+                          )}
                         <div className="flex-grow-1 or-line" />
                       </div>
+                      {!hasAnyFile && (
                       <div
                         className="drag-and-drop-file p-3 mb-3 rounded border border-dashed bg-light text-center"
                         style={{ position: 'relative', minHeight: 180, cursor: 'pointer' }}
@@ -188,6 +282,7 @@ class LinkModal extends React.Component {
                           onChange={this.handleFileInputChange}
                           refInput={this.setFileInputRef}
                           style={{ display: 'none' }}
+                          multiple
                         />
                         <div className='drag-drop-content mb-2'>
                           <i className='fa fa-upload fa-2x text-primary mb-2' />
@@ -195,40 +290,64 @@ class LinkModal extends React.Component {
                             <span className='text-secondary'>Drag &amp; drop a file here, or <span className='text-primary drag-browser'>browse</span></span>
                           </div>
                         </div>
-                        {/* File badge and remove */}
-                        {file_path && (
-                          <div
-                            onClick={this.openConfirmRemove}
-                            className='file-badge d-inline-flex align-items-center mt-2 px-2 py-1 bg-white border rounded shadow-sm'
-                            title='Remove attached file'
-                            role='button'
-                            tabIndex={0}
-                            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && this.openConfirmRemove()}
-                          >
-                            <span className='file-path-name mr-2'>{fileDisplayName}</span>
-                            <span className='file-close-icon text-danger'>
-                              <i className='fa fa-times' aria-hidden='true'></i>
-                            </span>
+                      </div>
+                      )}
+                      {/* Outside Preview Grid */}
+                      {(selectedFiles && selectedFiles.length > 0) && (
+                        <div className='d-flex flex-wrap mt-2 justify-content-center'>
+                          {selectedFiles.map((f, idx) => (
+                            <div key={idx} className='mr-2 mb-2' style={{ width: 140 }}>
+                              <div className='border rounded shadow-sm' style={{ position: 'relative', width: '100%', height: 100, overflow: 'hidden', background: '#fff' }}>
+                                {previews[idx]?.type === 'image' && previews[idx]?.url ? (
+                                  <img src={previews[idx].url} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                  <div className='h-100 w-100 d-flex align-items-center justify-content-center text-muted'>
+                                    <i className='fa fa-file fa-2x' />
+                                  </div>
+                                )}
+                                <button
+                                  type='button'
+                                  className='btn btn-light btn-sm file-close-icon'
+                                  onClick={(e)=>this.openConfirmRemove(e, idx)}
+                                  title='Remove'
+                                >
+                                  <i className='fa fa-times text-danger' />
+                                </button>
+                              </div>
+                              <div style={{ wordBreak: 'break-full', overflowWrap: 'anywhere', whiteSpace: 'normal', hyphens: 'auto', fontSize: 13 }}>
+                                {f.name}
+                              </div>
+                            </div>
+                          ))}
                           </div>
                         )}
-                        {/* Preview section */}
-                        <div className='mt-3 d-flex flex-column align-items-center'>
-                          {previewType === 'image' && previewUrl && (
-                            <img
-                              src={previewUrl}
-                              alt='Preview'
-                              className='img-thumbnail'
-                              style={{ maxWidth: 180, maxHeight: 120, borderRadius: 8, border: '1px solid #eee' }}
-                            />
-                          )}
-                          {previewType === 'file' && file_path && (
-                            <div className='file-preview d-flex align-items-center' style={{ color: '#888', fontSize: 15 }}>
-                              <i className='fa fa-file fa-2x mr-2' />
-                              <span>{file_path.name || (typeof file_path === 'string' ? file_path.split('/').pop() : '')}</span>
+                      {/* single file preview outside */}
+                      {(!selectedFiles || selectedFiles.length === 0) && (file_path || previewUrl) && (
+                        <div className='d-flex flex-wrap mt-2 justify-content-center'>
+                          <div className='mr-2 mb-2' style={{ width: 140 }}>
+                            <div className='border rounded shadow-sm' style={{ position: 'relative', width: '100%', height: 100, overflow: 'hidden', background: '#fff' }}>
+                              {previewType === 'image' && previewUrl ? (
+                                <img src={previewUrl} alt={fileDisplayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                <div className='h-100 w-100 d-flex align-items-center justify-content-center text-muted'>
+                                  <i className='fa fa-file fa-2x' />
+                                </div>
+                              )}
+                              <button
+                                type='button'
+                                className='btn btn-light btn-sm file-close-icon'
+                                onClick={(e)=>this.openConfirmRemove(e, null)}
+                                title='Remove'
+                              >
+                                <i className='fa fa-times text-danger' />
+                              </button>
                             </div>
-                          )}
+                            <div style={{ whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'ellipsis', fontSize: 13, textAlign:'left' }}>
+                              {fileDisplayName}
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                       {errors.file_path && (
                         <small className='invalid-feedback d-block text-left'>{errors.file_path}</small>
                       )}

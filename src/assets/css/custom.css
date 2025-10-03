@@ -550,40 +550,44 @@ border-left: 6px solid #e6140d !important;
 } */
 
 .file-badge {
-  position: relative;
-  margin: 10px 0 20px 0;
-  background: transparent;
-  color: #bdbbbb;
-  border-radius: 6px;
-  padding: 6px 10px;
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-  z-index: 2;
-  border: 1px solid #bdbbbb;
-  max-width: 100%;
-  width: auto;
-  min-height: 50px;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: white !important;
+  color: #000 !important;
+  font-size: 12px !important;
+  padding: 2px 6px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: center !important;
 }
 
 .file-path-name {
-  font-size: 12px;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #bdbbbb;
-  padding-right: 20px;
+   position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: white !important;
+    color: #000 !important;
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: center !important;
 }
 
 .file-close-icon {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  font-size: 14px;
-  color: #bdbbbb;
-  cursor: pointer;
-  margin-left: 8px;
+  position: absolute !important;
+  top: 2px !important;
+  right: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  line-height: 12px !important;
+  border-radius: 50% !important;
 }
 
 .img-thumbnail {
