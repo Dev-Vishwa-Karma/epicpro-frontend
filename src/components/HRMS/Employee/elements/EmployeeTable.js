@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../../utils'
 
 const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, openDeleteModal, message }) => {
+    const sortedEmployees = Array.isArray(employeeList) ? getSortedEmployees(employeeList) : [];
+
     return (
         <div className="card-body">
             {loading ? (
@@ -18,18 +21,18 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                     <table className="table table-hover table-striped table-vcenter text-nowrap mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th></th>
                                 <th>Name</th>
                                 <th>Employee ID</th>
                                 <th>Phone</th>
                                 <th>Join Date</th>
                                 <th>Role</th>
-                                <th>Action</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {employeeList.length > 0 ? (
-                                employeeList.map((employee, index) => (
+                            {sortedEmployees.length > 0 ? (
+                                sortedEmployees.map((employee, index) => (
                                     <tr key={employee.id}>
                                         <td className="w40">
                                             {(index + 1).toString().padStart(2, '0')}
@@ -46,6 +49,9 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                                             <div className="ml-3">
                                                 <h6 className="mb-0">
                                                     {`${employee.first_name} ${employee.last_name}`}
+                                                    <span className={`badge ${employee.status === 1 ? 'active-employee' : 'inactive-employee'}`}>
+                                                        {employee.status === 1 ? 'Active' : 'In-active'}
+                                                    </span>
                                                 </h6>
                                                 <span className="text-muted">
                                                     {employee.email}

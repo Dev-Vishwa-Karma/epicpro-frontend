@@ -7,8 +7,10 @@ import { getService } from '../../../services/getService';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import TodoTable from './elements/TodoTable';
-import { appendDataToFormData } from '../../../utils';
+import { appendDataToFormData, getSortedEmployees, isOverduePending } from '../../../utils';
 import Button from '../../common/formInputs/Button';
+import BlankState from '../../common/BlankState';
+import { withRouter } from 'react-router-dom';
 class TodoList extends Component {
     constructor(props) {
 		super(props);
@@ -27,7 +29,7 @@ class TodoList extends Component {
 			due_date: "",
             priority: "",
             todoStatus: "",
-            statusFilter: '',
+            statusFilter: 'pending',
 			errors: {
 				title: '',
         		due_date: '',
@@ -42,6 +44,10 @@ class TodoList extends Component {
             ButtonLoading: false,
             currentPageTodos: 1, //pagination
             dataPerPage: 10,
+            employeeFilter: '',
+            allTodos: [],
+            baseTodos: [],
+            dayFilter: '' // will be set to `date:YYYY-MM-DD` for Today on mount
 		}
 	}
 
@@ -53,28 +59,43 @@ class TodoList extends Component {
             logged_in_employee_role: window.user.role
 		});
 
-		// Fetch todos using getService
-		getService.getCall('project_todo.php', {
-			action: 'view',
-			logged_in_employee_id: window.user.id,
-			role: window.user.role
-		})
-		.then(data => {
-			if (data.status === 'success') {
-				const todoData = data.data.map(t => ({ ...t, imageError: false }));
-				this.setState({
-					todos: todoData,
-					loading: false
-				});
-			} else {
-			  	this.setState({ message: data.message, loading: false });
-			}
-		})
-		.catch(err => {
-			this.setState({ message: 'Failed to fetch data', loading: false });
-			console.error(err);
-		});
+        // Check for query params
+        const params = new URLSearchParams(this.props.location.search);
+        const employee_id = params.get('employee_id') || '';
+        const status = params.get('status') || '';
+        const date = params.get('date');
+        const day = params.get('day');
+        let dayFilter = '';
+        if (date) dayFilter = `date:${date}`;
+        else if (day) dayFilter = day;
 
+        if (employee_id || status || date || day) {
+            this.setState({
+                employeeFilter: employee_id,
+                statusFilter: status,
+                dayFilter: dayFilter
+            }, () => {
+                this.fetchFilteredTodos(employee_id, status);
+            });
+        } else {
+            // Default behavior differs for employee vs admin
+            if (role === 'employee') {
+                // Employees: show ALL pending by default (no date filter)
+                this.setState({ dayFilter: '' }, () => {
+                    this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
+                });
+            } else {
+                // Admins: default to Today
+                const today = new Date();
+                const y = today.getFullYear();
+                const m = String(today.getMonth() + 1).padStart(2, '0');
+                const d = String(today.getDate()).padStart(2, '0');
+                const dayFilterDefault = `date:${y}-${m}-${d}`;
+                this.setState({ dayFilter: dayFilterDefault }, () => {
+                    this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
+                });
+            }
+        }
 
         // Check if user is admin or superadmin
         if (role === 'admin' || role === 'super_admin') {
@@ -111,11 +132,18 @@ class TodoList extends Component {
 
     // Validate Add Department Form
 	validateAddTodoForm = (e) => {
-		const { title, due_date, priority } = this.state;
+		const { title, due_date, priority, logged_in_employee_role, selectedEmployeeId } = this.state;
 		
 		// Apply Validation component
 		const validationSchema = [
-			{ name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
+			{ name: 'title', value: title, required: true, messageName: 'Todo title',
+				customValidator: (val) => {
+					if (!String(val || '').trim()) {
+						return 'Todo title is required:';
+					}
+					return undefined;
+				}
+			},
 			{ name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
 				customValidator: (val) => {
 					const today = new Date().toISOString().split("T")[0];
@@ -127,6 +155,22 @@ class TodoList extends Component {
 			},
 			{ name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
 		];
+
+		// Employee selection required for admin/super_admin when adding
+		if (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') {
+			validationSchema.push({
+				name: 'selectedEmployeeId',
+				value: selectedEmployeeId,
+				required: true,
+				messageName: 'Employee',
+				customValidator: (val) => {
+					if (!String(val || '').trim()) {
+						return 'Employee is required:';
+					}
+					return undefined;
+				}
+			});
+		}
 		const errors = validateFields(validationSchema);
 		
 		this.setState({ errors });
@@ -147,12 +191,6 @@ class TodoList extends Component {
             : logged_in_employee_id;
 
         const addTodoFormData = new FormData();
-        // addTodoFormData.append('employee_id', employee_id);
-        // addTodoFormData.append('title', title);
-        // addTodoFormData.append('due_date', due_date);
-        // addTodoFormData.append('priority', priority);
-        // addTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
-        // addTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
         const data = {
             employee_id: employee_id,
@@ -168,38 +206,17 @@ class TodoList extends Component {
         getService.addCall('project_todo.php', 'add', addTodoFormData)
         .then((data) => {
             if (data.status === 'success') {
-                // Fetch the updated todo list
-                getService.getCall('project_todo.php', {
-                    action: 'view',
-                    logged_in_employee_id: window.user.id,
-                    role: window.user.role
-                })
-                .then(updatedData => {
-                    if (updatedData.status === 'success') {
-                        this.setState({
-                            todos: updatedData.data,
-                            title: "",
-                            due_date: "",
-                            priority: "",
-                            selectedEmployeeId: "",
-                            errors: {},
-                            successMessage: "Todo added successfully!",
-                            showSuccess: true,
-                            showAddTodoModal: false
-                        });
-                    } else {
-                        this.setState({
-                            errorMessage: "Todo added but failed to refresh the list.",
-                            showError: true,
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    this.setState({
-                        errorMessage: "Todo added but failed to refresh the list.",
-                        showError: true,
-                    });
+                // Fetch the updated todo list with current filters
+                this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+                this.setState({
+                    title: "",
+                    due_date: "",
+                    priority: "",
+                    selectedEmployeeId: "",
+                    errors: {},
+                    successMessage: "Todo added successfully!",
+                    showSuccess: true,
+                    showAddTodoModal: false
                 });
 
                 // Auto-hide success message after 5 seconds
@@ -234,13 +251,21 @@ class TodoList extends Component {
 
     handleCheckboxClick = (todo) => {
         // if (this.state.logged_in_employee_role === 'employee') {
-            if (todo.todoStatus === 'completed') {
-                // If todo is completed, unchecking will set to pending
-                this.setState({ 
-                    showOverdueModal: true, 
-                    selectedTodo: todo,
-                    isUnchecking: true 
-                });
+        // Add loading state for this todo
+        this.setState(prev => ({
+            todoLoading: { ...prev.todoLoading, [todo.id]: true }
+        }));
+
+        setTimeout(() => {
+            // Call backend to update status here (your existing logic)
+            const { logged_in_employee_role } = this.state;
+            const isAdmin = (logged_in_employee_role === 'super_admin');
+            const isUnchecking = (todo.todoStatus === 'completed');
+            if (isAdmin) {
+			// Admins update immediately without confirmation modal
+			this.setState({ selectedTodo: todo, isUnchecking }, () => {
+				this.handleUpdateTodo();
+			});
             } else {
                 // If todo is not completed, checking will set to completed
                 this.setState({ 
@@ -248,8 +273,12 @@ class TodoList extends Component {
                     selectedTodo: todo,
                     isUnchecking: false 
                 });
-            // }
-        }
+            }
+            // Remove loading after status update
+            this.setState(prev => ({
+                todoLoading: { ...prev.todoLoading, [todo.id]: false }
+            }));
+        }, 1000); // Take 1 sec to action
     };
 
     handleEditTodo = (todo) => {
@@ -307,13 +336,6 @@ class TodoList extends Component {
             : 'Todo marked as completed!';
 
         const formData = new FormData();
-        // formData.append('id', selectedTodo.id);
-        // formData.append('status', newStatus);
-        // formData.append('logged_in_employee_id', logged_in_employee_id);
-        // formData.append('logged_in_employee_role', logged_in_employee_role);
-        // formData.append('to_do_created_by', selectedTodo.created_by);
-        // formData.append('to_do_created_for', selectedTodo.employee_id);
-        // formData.append('logged_in_employee_name', selectedTodo.first_name);
 
         const data = {
             id: selectedTodo.id,
@@ -328,18 +350,15 @@ class TodoList extends Component {
         getService.addCall('project_todo.php', 'update_status', formData)
         .then(data => {
             if (data.status === 'success') {
-                this.setState(prevState => ({
-                    todos: prevState.todos.map(todo =>
-                        todo.id === selectedTodo.id
-                            ? { ...todo, todoStatus: newStatus }
-                            : todo
-                    ),
+                // Re-fetch to respect active filters
+                this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+                this.setState({
                     showOverdueModal: false,
                     selectedTodo: null,
                     isUnchecking: false,
                     successMessage: successMessage,
                     showSuccess: true
-                }));
+                });
                 
                 setTimeout(() => {
                     this.setState({
@@ -392,23 +411,26 @@ class TodoList extends Component {
         const { selectedTodo, logged_in_employee_id, logged_in_employee_role, title, due_date, priority, selectedEmployeeId } = this.state;
 
         // Apply Validation component for edit
-        const validationSchema = [
-            { name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
-            { name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
-                customValidator: (val) => {
-                    const today = new Date().toISOString().split("T")[0];
-                    if (val < today) {
-                        return "Due date not less than current date:";
-                    }
-                    return undefined;
-                }
-            },
-            { name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
-        ];
-        const errors = validateFields(validationSchema);
+        // const validationSchema = [
+        //     { name: 'title', value: title, type: 'name', required: true, messageName: 'Todo title'},
+        //     { name: 'due_date', value: due_date, type: 'date', required: true, messageName: 'Due date',
+        //         customValidator: (val) => {
+        //             const today = new Date().toISOString().split("T")[0];
+        //             if (val < today) {
+        //                 return "Due date not less than current date:";
+        //             }
+        //             return undefined;
+        //         }
+        //     },
+        //     { name: 'priority', value: priority, required: true, messageName: 'Todo priority'}
+        // ];
+        // const errors = validateFields(validationSchema);
         
-        if (Object.keys(errors).length > 0) {
-            this.setState({ errors });
+        // if (Object.keys(errors).length > 0) {
+        //     this.setState({ errors });
+        //     return; // Stop execution if validation fails
+        // }
+        if (!this.validateAddTodoForm()) {
             return; // Stop execution if validation fails
         }
 
@@ -418,13 +440,6 @@ class TodoList extends Component {
         : logged_in_employee_id;
 
         const updateTodoFormData = new FormData();
-        // updateTodoFormData.append('todo_id', selectedTodo.id);
-        // updateTodoFormData.append('employee_id', employee_id);
-        // updateTodoFormData.append('title', title);
-        // updateTodoFormData.append('due_date', due_date);
-        // updateTodoFormData.append('priority', priority);
-        // updateTodoFormData.append('logged_in_employee_id', logged_in_employee_id);
-        // updateTodoFormData.append('logged_in_employee_role', logged_in_employee_role);
 
         const data = {
             todo_id: selectedTodo.id,
@@ -439,15 +454,11 @@ class TodoList extends Component {
 
         // API call to update todo using getService
         getService.addCall('project_todo.php', 'edit', updateTodoFormData)
-        .then((data) => {
-            if (data.status === 'success') {
-                // Update the todo list
-                this.setState((prevState) => ({
-                    todos: prevState.todos.map(todo =>
-                        todo.id === selectedTodo.id
-                            ? { ...todo, title, due_date, priority,  employee_id }
-                            : todo
-                    ),
+        .then((resp) => {
+            if (resp.status === 'success') {
+                // After edit, re-fetch with active filters
+                this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+                this.setState({
                     title: "",
                     due_date: "",
                     priority: "",
@@ -457,7 +468,7 @@ class TodoList extends Component {
                     showSuccess: true,
                     showEditModal: false,
                     selectedTodo: null
-                }));
+                });
 
                 // Auto-hide success message after 3 seconds
                 setTimeout(() => {
@@ -507,14 +518,15 @@ class TodoList extends Component {
     getService.deleteCall('project_todo.php', 'delete', todoToDelete.id)
     .then(data => {
         if (data.status === 'success') {
-            this.setState(prevState => ({
-                todos: prevState.todos.filter(todo => todo.id !== todoToDelete.id),
+            // Re-fetch to respect filters
+            this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+            this.setState({
                 showDeleteModal: false,
                 todoToDelete: null,
                 ButtonLoading: false,
                 successMessage: "Todo deleted successfully!",
                 showSuccess: true
-            }));
+            });
             setTimeout(() => {
                 this.setState({
                     showSuccess: false,
@@ -544,34 +556,169 @@ class TodoList extends Component {
     });
 };
 
-    // Add handler for status filter
-    handleStatusFilterChange = (e) => {
-        this.setState({
-            statusFilter: e.target.value,
-            currentPageTodos: 1
-        });
-        // Make the GET API call when the component is mounted
-		getService.getCall('project_todo.php', {
+    // Unified filter handler for employee and status
+    fetchFilteredTodos = (employeeId, status) => {
+        const params = {
             action: 'view',
             logged_in_employee_id: window.user.id,
-            role: window.user.role,
-            status: e.target.value
-        })
-		.then(data => {
-			if (data.status === 'success') {
-				const todoData = data.data;
-				this.setState({
-					todos: todoData,
-					loading: false
-				});
-			} else {
-			  	this.setState({ message: data.message, loading: false });
-			}
-		})
-		.catch(err => {
-			this.setState({ message: 'Failed to fetch data', loading: false });
-			console.error(err);
-		});
+            role: window.user.role
+        };
+        if (employeeId) {
+            params.employee_id = employeeId;
+        }
+        if (status) {
+            params.status = status;
+        }
+        // Map dayFilter to backend params
+        const { dayFilter } = this.state;
+        if (dayFilter) {
+            if (dayFilter.startsWith('date:')) {
+                params.date = dayFilter.replace('date:','');
+            } else {
+                // day keywords like this_week, yesterday, tomorrow, weekdays
+                params.day = dayFilter;
+            }
+        }
+        this.setState({ loading: true });
+        getService.getCall('project_todo.php', params)
+            .then(data => {
+                if (data.status === 'success') {
+                    const list = data.data;
+                    const sorted = this.sortTodosForDisplay(list);
+                    this.setState({
+                        baseTodos: sorted,
+                        todos: sorted,
+                        loading: false
+                    });
+                } else {
+                    this.setState({
+                        todos: [],
+                        baseTodos: [],
+                        loading: false,
+                        message: 'No task available for this employee'
+                    });
+                }
+            })
+            .catch(err => {
+                this.setState({
+                    todos: [],
+                    baseTodos: [],
+                    loading: false,
+                    message: 'No task available for this employee'
+                });
+                console.error(err);
+            });
+    };
+
+    handleStatusFilterChange = (e) => {
+        const value = e.target.value;
+        this.setState({
+            statusFilter: value,
+            currentPageTodos: 1
+        });
+        this.fetchFilteredTodos(this.state.employeeFilter, value);
+    };
+
+    handleEmployeeFilterChange = (e) => {
+        const employeeId = e.target.value;
+        this.setState({
+            employeeFilter: employeeId,
+            currentPageTodos: 1
+        });
+        this.fetchFilteredTodos(employeeId, this.state.statusFilter);
+    };
+
+    // Day filter helpers and handler
+    getStartOfWeek = (date) => {
+        const d = new Date(date);
+        const day = d.getDay(); // 0=Sun ... 6=Sat
+        const diffToMonday = (day === 0 ? -6 : 1) - day; // Monday as start
+        d.setDate(d.getDate() + diffToMonday);
+        d.setHours(0,0,0,0);
+        return d;
+    };
+
+    getEndOfWeek = (date) => {
+        const start = this.getStartOfWeek(date);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23,59,59,999);
+        return end;
+    };
+
+    toYmd = (date) => {
+        const d = new Date(date);
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+    };
+
+    // Sort so that overdue pending appear first, then by due_date ascending
+    sortTodosForDisplay = (list) => {
+        const safeList = Array.isArray(list) ? list.slice() : [];
+        return safeList.sort((a, b) => {
+            const aOver = isOverduePending(a);
+            const bOver = isOverduePending(b);
+            if (aOver !== bOver) return aOver ? -1 : 1;
+            const aDue = String(a.due_date || '').slice(0, 10);
+            const bDue = String(b.due_date || '').slice(0, 10);
+            if (aDue && bDue) {
+                if (aDue < bDue) return -1;
+                if (aDue > bDue) return 1;
+            }
+            return 0;
+        });
+    };
+
+    // Removed client-side applyDayFilter usage; now server returns filtered list
+    applyDayFilter = (todos, dayFilter) => {
+        if (!dayFilter) return todos;
+        const today = new Date();
+        if (dayFilter === 'this_week') {
+            const start = this.getStartOfWeek(today);
+            const end = this.getEndOfWeek(today);
+            return (todos || []).filter(t => {
+                const due = new Date(t.due_date);
+                return due >= start && due <= end;
+            });
+        }
+        if (dayFilter.startsWith('date:')) {
+            const target = dayFilter.replace('date:','');
+            return (todos || []).filter(t => String(t.due_date).slice(0,10) === target);
+        }
+        return todos;
+    };
+
+    getDayOptions = () => {
+        const options = [];
+        const now = new Date();
+        const todayStr = this.toYmd(now);
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        const yesterdayStr = this.toYmd(yesterday);
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        const tomorrowStr = this.toYmd(tomorrow);
+        // const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+
+        options.push({ value: 'all', label: 'All Days' });
+        options.push({ value: `date:${todayStr}`, label: `Today` });
+        // options.push({ value: `date:${yesterdayStr}`, label: `Yesterday` });
+        options.push({ value: `date:${tomorrowStr}`, label: `Tomorrow` });
+        // Also allow keyword week days for server-side
+        // weekdays.forEach(wd => {
+        //     options.push({ value: wd, label: wd.charAt(0).toUpperCase() + wd.slice(1) });
+        // });
+        options.push({ value: 'this_week', label: 'This Week' });
+        return options;
+    };
+
+    handleDayFilterChange = (e) => {
+        const value = e.target.value;
+        this.setState({ dayFilter: value, currentPageTodos: 1 }, () => {
+            this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+        });
     };
 
     handlePageChange = (newPage) => {
@@ -612,22 +759,49 @@ class TodoList extends Component {
                                     <div className="card">
                                         <div className="card-body">
                                             <div className="row align-items-center">
-                                                <div className="col-lg-4 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
-                                                    <label htmlFor="year-selector" className='d-flex card-title mr-3 align-items-center'>
-                                                        Status:
-                                                    </label>
+                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+                                                    <select
+                                                        id="employeeFilter"
+                                                        className="form-control custom-select"
+                                                        value={this.state.employeeFilter}
+                                                        onChange={this.handleEmployeeFilterChange}
+                                                    >
+                                                        <option value="">All Employees</option>
+                                                        {getSortedEmployees(this.state.employees)
+                                                        .filter(emp => emp.status === 1)
+                                                        .map(emp => (
+                                                            <option key={emp.id} value={emp.id}>
+                                                                {emp.first_name} {emp.last_name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
                                                     <select
                                                         id="statusFilter"
-                                                        className="form-control"
+                                                        className="form-control custom-select"
                                                         value={statusFilter}
                                                         onChange={this.handleStatusFilterChange}
                                                     >
+                                                        <option value="">All</option>
                                                         <option value="pending">Pending</option>
                                                         <option value="completed">Completed</option>
                                                         {/* Add more statuses if needed */}
                                                     </select>
                                                 </div>
-                                                <div className="col-lg-8 col-md-12 col-sm-12 text-right">
+                                                <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
+                                                    <select
+                                                        id="dayFilter"
+                                                        className="form-control custom-select"
+                                                        value={this.state.dayFilter}
+                                                        onChange={this.handleDayFilterChange}
+                                                    >
+                                                        {this.getDayOptions().map(opt => (
+                                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="col-lg-6 col-md-12 col-sm-12 text-right">
                                                     {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
                                                     <Button
                                                     label="Add New"
@@ -647,6 +821,9 @@ class TodoList extends Component {
                                 <div className="card">
                                     <div className="card-body">
                                         {/* Add Seperate Todo Table Component */}
+                                        {currentTodos.length === 0 ? (
+                                            <BlankState message="No todos available" />
+                                        ) : (
                                         <TodoTable
                                             todos={todos}
                                             loading={loading}
@@ -664,7 +841,9 @@ class TodoList extends Component {
                                                     }
                                                 });
                                             }}
+                                            todoLoading={this.state.todoLoading}
                                         />
+                                        )}
 
                                         <div className="mt-3">
                                        {totalPagesTodos > 1 && (
@@ -778,4 +957,4 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({})
-export default connect(mapStateToProps, mapDispatchToProps)(TodoList);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TodoList));

@@ -16,13 +16,13 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
           <table className="table table-hover table-striped table-vcenter text-nowrap mb-0">
             <thead>
               <tr>
-                <th>#</th>
+                <th></th>
                 <th>Name</th>
                 <th>Date</th>
                 <th>Reason</th>
                 <th>Leave On</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>

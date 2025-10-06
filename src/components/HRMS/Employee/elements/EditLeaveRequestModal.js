@@ -1,6 +1,7 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../../utils';
 
 const EditLeaveRequestModal = ({
   showModal,
@@ -49,6 +50,8 @@ const EditLeaveRequestModal = ({
                     {['admin', 'super_admin'].includes(logged_in_employee_role) && (
                       <div className="col-md-12">
                         <InputField
+                          style={{ minWidth: '470px' }}
+                          inputClassName="custom-select w-auto"
                           label="Select Employee"
                           name="employee_id"
                           type="select"
@@ -57,7 +60,7 @@ const EditLeaveRequestModal = ({
                           error={addLeaveErrors && addLeaveErrors.employee_id}
                           options={[
                             { value: "", label: "Select Employee" },
-                            ...employeeData.map((emp) => ({
+                            ...getSortedEmployees(employeeData).map((emp) => ({
                               value: emp.id,
                               label: `${emp.first_name} ${emp.last_name}`
                             }))

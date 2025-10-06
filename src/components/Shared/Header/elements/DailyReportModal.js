@@ -8,7 +8,7 @@ class DailyReportModal extends Component {
       onClose,
       punchErrorModel,
       report,
-      start_time,
+      start_time,                                                   
       end_time,
       breakDuration,
       todays_working_hours,

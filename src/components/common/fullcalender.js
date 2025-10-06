@@ -42,84 +42,120 @@ class Fullcalender extends Component {
                         const startDate = formatDate(localStorage.getItem('startDate'));
                         const endDate = formatDate(localStorage.getItem('endDate'));
 
+                        const isDateInRange = (dStr) => {
+                            const d = formatDate(dStr);
+                            return d >= startDate && d <= endDate;
+                        };
+
+                        const hasEvent = (cls) => {
+                            if (!events || events.length === 0) return false;
+                            return events.some(ev => ev.className === cls && ev.start === dateStr && isDateInRange(dateStr));
+                        };
+
+                        const hasFullDayLeave = hasEvent('leave-event');
+                        const hasHalfDayLeave = hasEvent('half-day-leave-event');
+                        const hasDailyReport = hasEvent('daily-report');
+                        const hasLowHoursRed = hasEvent('red-event');
+
+                        // Detect if this cell is an Alternate Saturday date
+                        const isAlternateSaturday = (() => {
+                            if (!(cell.hasClass && cell.hasClass('fc-sat'))) return false;
+                            if (!alternateSatudays || alternateSatudays.length === 0) return false;
+                            try {
+                                for (const alternateSatuday of alternateSatudays) {
+                                    const saturdayArr = JSON.parse(alternateSatuday.date);
+                                    for (const element of saturdayArr) {
+                                        if (formatDate(date) === formatDate(element)) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                // Ignore JSON parse issues and treat as not alternate
+                            }
+                            return false;
+                        })();
+
+                        // Base highlights
+                        const isSunday = cell.hasClass && cell.hasClass('fc-sun');
+
+                        // If Sunday or Alternate Saturday and there is a leave, show leave color in background
+                        if ((isSunday || isAlternateSaturday)) {
+                            if (hasHalfDayLeave) {
+                                cell.css('background-color', '#87ceeb');
+                                cell.css('color', 'white');
+                            } else if (hasFullDayLeave) {
+                                cell.css('background-color', 'red');
+                                cell.css('color', 'white');
+                            } else {
+                                // Fallback highlight for Sundays or alternate Saturdays when no leave
+                                cell.css('background-color', '#FFE599'); // fff2cc
+                            }
+                        }
+
+                        // Normal weekdays or non-alternate Saturdays: color by events
                         if (events && events.length > 0) {
                             events.forEach((event) => {
                                 if (
                                     event.className === 'green-event' &&
                                     event.start === dateStr &&
-                                    formatDate(dateStr) >= startDate &&
-                                    formatDate(dateStr) <= endDate
+                                    isDateInRange(dateStr)
                                 ) {
-                                    cell.css('background-color', '#4FA845');
-                                    cell.css('color', 'white');
+                                    // Do not override leave colors already applied for Sundays/alternate Saturdays
+                                    if (!(isSunday || isAlternateSaturday)) {
+                                        cell.css('background-color', '#4FA845');
+                                        cell.css('color', 'white');
+                                    }
                                 } else if (
                                     event.className === 'blue-event' &&
                                     event.start === dateStr &&
-                                    formatDate(dateStr) >= startDate &&
-                                    formatDate(dateStr) <= endDate
+                                    isDateInRange(dateStr)
                                 ) {
-                                    cell.css('background-color', '#0879FA');
-                                    cell.css('color', 'white');
+                                    if (!(isSunday || isAlternateSaturday)) {
+                                        cell.css('background-color', '#0879FA');
+                                        cell.css('color', 'white');
+                                    }
                                 } else if (
                                     (event.className === 'red-event' ||
                                         event.className === 'leave-event' ||
                                         event.className === 'missing-report-day') &&
                                     event.start === dateStr &&
-                                    formatDate(dateStr) >= startDate &&
-                                    formatDate(dateStr) <= endDate
+                                    isDateInRange(dateStr)
                                 ) {
-                                    cell.css('background-color', 'red');
-                                    cell.css('color', 'white');
+                                    // If already handled Sunday/Alternate Saturday leaves above, skip here
+                                    if (!(isSunday || isAlternateSaturday)) {
+                                        cell.css('background-color', 'red');
+                                        cell.css('color', 'white');
+                                    }
                                 } else if (
                                     event.className === 'daily-report' &&
                                     event.start === dateStr &&
-                                    formatDate(dateStr) >= startDate &&
-                                    formatDate(dateStr) <= endDate
+                                    isDateInRange(dateStr)
                                 ) {
-                                    cell.css('background-color', '#4FA845');
-                                    cell.css('color', 'white');
+                                    if (!(isSunday || isAlternateSaturday)) {
+                                        cell.css('background-color', '#4FA845');
+                                        cell.css('color', 'white');
+                                    }
                                 } else if (
                                     event.className === 'half-day-leave-event' &&
                                     event.start === dateStr &&
-                                    formatDate(dateStr) >= startDate &&
-                                    formatDate(dateStr) <= endDate
+                                    isDateInRange(dateStr)
                                 ) {
-                                    cell.css('background-color', '#87ceeb');
-                                    cell.css('color', 'white');
-                                }
-
-                                if (cell.hasClass && cell.hasClass('fc-sat')) {
-                                    if (alternateSatudays && alternateSatudays.length > 0) {
-                                        alternateSatudays.forEach((alternateSatuday) => {
-                                            try {
-                                                const saturday = JSON.parse(alternateSatuday.date);
-                                                saturday.forEach((element) => {
-                                                    if (
-                                                        formatDate(date) === formatDate(element) &&
-                                                       ( event.className === 'missing-report-day' || 
-                                                        event.className === 'leave-event')
-                                                    ) {
-                                                       
-                                                        
-                                                        cell.css('background-color', 'white');
-                                                    }
-                                                });
-                                            } catch (e) {
-                                                console.error('Error parsing alternateSatuday.date:', e);
-                                            }
-                                        });
+                                    if (!(isSunday || isAlternateSaturday)) {
+                                        cell.css('background-color', '#87ceeb');
+                                        cell.css('color', 'white');
                                     }
                                 }
 
-                                if (
-                                    cell.hasClass &&
-                                    cell.hasClass('fc-sun') &&
-                                    formatDate(date) === formatDate(event.start) &&
-                                    (event.className === 'leave-event' || event.className === 'missing-report-day')
-                                ) {
-                                    cell.css('background-color', 'white');
-                                }
+
                             });
+                        }
+
+                        // Finally, highlight current date with light pink only if no report/leave color is applied
+                        const hasReportColorToday = hasDailyReport || hasLowHoursRed || hasHalfDayLeave || hasFullDayLeave;
+                        if (cell.hasClass && cell.hasClass('fc-today') && !hasReportColorToday) {
+                            cell.css('background-color', '#FFEAF3');
+                            cell.css('color', 'inherit');
                         }
                     }}
                     viewRender={(view, element) => {

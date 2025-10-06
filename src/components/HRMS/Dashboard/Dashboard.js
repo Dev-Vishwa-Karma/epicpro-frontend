@@ -5,6 +5,8 @@ import authService from "../../Authentication/authService";
 import BirthdayBannerModal from '../../Shared/modals/BirthdayBannerModal';
 import { getService } from '../../../services/getService';
 import DashboardTable from './elements/DashboardTable';
+import DashboardTodo from './elements/DashboardTodo';
+import DashboardAdminTodo from './elements/DashboardAdminTodo';
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -14,6 +16,7 @@ class Dashboard extends Component {
 			totalEmployees: 0,
 			totalEvents: 0,
 			totalHolidays: 0,
+			totalPendingTodos: 0,
 			user: authService.getUser(),
 			projects: [],
 			loading: true,
@@ -39,6 +42,7 @@ class Dashboard extends Component {
 				let totalEmployees = data.data[0].total_employees;
 				const totalHolidays = data.data[0].total_holidays;
 				const totalEvents = data.data[0].total_events;
+				const totalPendingTodos = data.data[0].total_pending_todos;
 
 				// Check user role
 				if (loggedInUser && loggedInUser.role === "employee") {
@@ -47,7 +51,7 @@ class Dashboard extends Component {
 				}
 
 				this.setState(
-					{ totalUsers: totalUsers, totalEmployees: totalEmployees, totalHolidays: totalHolidays, totalEvents: totalEvents}
+					{ totalUsers: totalUsers, totalEmployees: totalEmployees, totalHolidays: totalHolidays, totalEvents: totalEvents, totalPendingTodos: totalPendingTodos}
 				);
 			} else {
 				this.setState({ message: data.message });
@@ -101,22 +105,26 @@ class Dashboard extends Component {
 		if (!(user.role === 'admin' || user.role === 'super_admin')) return null;
 
 		const items = [
+			{ label: 'Todos', class_color: 'indigo', count: this.state.totalPendingTodos, icon: 'fa-tasks', link: '/project-todo', isFa: true },
 			{ label: 'Users', class_color: 'green', count: this.state.totalUsers, icon: 'users', link: '/hr-users' },
 			{ label: 'Employees', class_color: 'pink', count: this.state.totalEmployees, icon: 'users', link: '/hr-employee' },
 			{ label: 'Holidays', class_color: 'info', count: this.state.totalHolidays, icon: 'like', link: '/hr-holidays' },
 			{ label: 'Events', class_color: 'orange', count: this.state.totalEvents, icon: 'calendar', link: '/hr-events' },
-			{ label: 'Report', class_color: null, count: null, icon: 'pie-chart', link: '/hr-report' },
 		];
 
 		return (
 			<div className="row clearfix justify-content-start">
-				{items.map(({ label, class_color, count, icon, link }) => (
+				{items.map(({ label, class_color, count, icon, link, isFa }) => (
 					<div className="col-6 col-md-4 col-xl-1_7" key={label}>
 						<div className="card">
 							<div className="card-body ribbon">
 							{count !== null && <div className={`ribbon-box ${class_color}`}>{count}</div>}
 							<Link to={link} className="my_sort_cut text-muted">
-								<i className={`icon-${icon}`} />
+								{isFa ? (
+									<i className={`fa ${icon}`} />
+								) : (
+									<i className={`icon-${icon}`} />
+								)}
 								<span>{label}</span>
 							</Link>
 							</div>
@@ -149,6 +157,17 @@ class Dashboard extends Component {
 					<div className="section-body">
 						<div className="container-fluid">
 							<div className="row clearfix">
+								{/* Admin see all task and Employee see their task */}
+								{user.role === 'employee' && (
+									<div className="col-12 col-sm-12">
+										<DashboardTodo />
+									</div>
+								)}
+								{(user.role === 'admin' || user.role === 'super_admin') &&  (
+									<div className="col-12 col-sm-12">
+										<DashboardAdminTodo />
+									</div>
+								)}
 								<div className="col-12 col-sm-12">
 									<div className="card">
 										<div className="card-header">

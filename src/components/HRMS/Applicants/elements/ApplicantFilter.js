@@ -23,7 +23,9 @@ class ApplicantFilter extends Component {
               <label>Status</label>
               <div className="multiselect_div">
                 <InputField
-                  className="custom-select"
+                  style={{ minWidth: '210px' }}
+                  containerClassName="mb-0"
+                  inputClassName="custom-select w-auto"
                   name="status"
                   type="select"
                   value={status}
@@ -44,7 +46,9 @@ class ApplicantFilter extends Component {
               <label>Sort</label>
               <div className="form-group">
                 <InputField
-                  className="custom-select"
+                  style={{ minWidth: '210px' }}
+                  containerClassName="mb-0"
+                  inputClassName="custom-select w-auto"
                   name="order"
                   type="select"
                   value={order}

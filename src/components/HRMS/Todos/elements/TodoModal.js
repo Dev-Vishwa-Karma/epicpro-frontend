@@ -1,6 +1,7 @@
 import React from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../../utils';
 
 const TodoModal = ({
   isEdit = false,
@@ -36,6 +37,30 @@ const TodoModal = ({
 
               <div className="modal-body">
                 <div className="row clearfix">
+                  {/* Show dropdown only for admin and only when not in edit mode */}
+                  {(loggedInEmployeeRole === 'admin' || loggedInEmployeeRole === 'super_admin') && (
+                    <div className="col-md-12 col-sm-12">
+                      <InputField
+                        label="Select Employee"
+                        name="selectedEmployeeId"
+                        type="select"
+                        value={selectedEmployeeId}
+                        onChange={onChange}
+                        error={errors.selectedEmployeeId}
+                        options={[
+                          { value: 'all', label: 'All Employees' },
+                          // ...employees.map((emp) => ({
+                            ...getSortedEmployees(employees)
+                            .filter(emp => emp.status === 1)
+                            .map((emp) => ({
+                            value: emp.id,
+                            label: `${emp.first_name} ${emp.last_name}`
+                          }))
+                        ]}
+                      />
+                    </div>
+                  )}
+
                   <div className="col-md-12">
                     <InputField
                       label="Title"
@@ -74,29 +99,6 @@ const TodoModal = ({
                       ]}
                     />
                   </div>
-                  
-
-                  {/* Show dropdown only for admin */}
-                  {/* Show dropdown only for admin and only when not in edit mode */}
-                  {(loggedInEmployeeRole === 'admin' || loggedInEmployeeRole === 'super_admin') && !isEdit && (
-                    <div className="col-md-12 col-sm-12">
-                      <InputField
-                        label="Select Employee"
-                        name="selectedEmployeeId"
-                        type="select"
-                        value={selectedEmployeeId}
-                        onChange={onChange}
-                        error={errors.selectedEmployeeId}
-                        options={[
-                          { value: 'all', label: 'All Employees' },
-                          ...employees.map((emp) => ({
-                            value: emp.id,
-                            label: `${emp.first_name} ${emp.last_name}`
-                          }))
-                        ]}
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -108,7 +110,7 @@ const TodoModal = ({
                 />
 
                 <Button
-                  label="Save changes"
+                  label={loading ? "Saving..." : "Save changes"}
                   onClick={onSubmit}
                   className="btn-primary"
                   disabled={loading}

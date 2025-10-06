@@ -215,20 +215,32 @@ class departments extends Component {
           setTimeout(this.dismissMessages, 3000);
         } else {
           this.setState({
-            errorMessage: "Failed to delete department",
+            errorMessage: data.error || "Failed to delete department",
             showError: true,
             successMessage: '',
             showSuccess: false,
             ButtonLoading: false,
           });
-          setTimeout(this.dismissMessages, 3000);
+          setTimeout(() => {
+            this.onCloseDeleteModal();
+            this.dismissMessages();
+          }, 3000);
         }
       })
       .catch((error) => {
         console.error("Error:", error);
+        const backendMsg = (error && error.response && (error.response.data?.error || error.response.data?.message)) || error.message || 'Failed to delete department';
         this.setState({
+          errorMessage: backendMsg,
+          showError: true,
+          successMessage: '',
+          showSuccess: false,
           ButtonLoading: false,
         });
+        setTimeout(() => {
+          this.onCloseDeleteModal();
+          this.dismissMessages();
+        }, 3000);
       });
   };
 

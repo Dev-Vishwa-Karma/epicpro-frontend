@@ -1,11 +1,14 @@
 import React from 'react';
+import {getSortedEmployees} from '../../utils'
 
 const EmployeeSelector = ({ allEmployeesData, selectedEmployee, handleEmployeeChange, showAllInOption }) => {
+
+const sortedEmployees = getSortedEmployees(allEmployeesData);
     return (
         <div className="form-group">
             <label className="form-label">Select Employee</label>
             <select 
-                className="form-control" 
+                className="form-control custom-select" 
                 value={selectedEmployee} 
                 onChange={handleEmployeeChange}
             >
@@ -13,10 +16,11 @@ const EmployeeSelector = ({ allEmployeesData, selectedEmployee, handleEmployeeCh
                     ? <option value="">All Employees</option> 
                     : <option value="">Select an Employee</option>
                 }
-                {allEmployeesData
+                {sortedEmployees
                     .filter(employee => {
                         const role = (employee.role || '').toLowerCase();
-                        return role !== 'admin' && role !== 'super_admin';
+                        const isActive = Number(employee.status) === 1;
+                        return role !== 'admin' && role !== 'super_admin' && isActive;
                     })
                     .map((employee) => (
                         <option key={employee.id} value={employee.id}>

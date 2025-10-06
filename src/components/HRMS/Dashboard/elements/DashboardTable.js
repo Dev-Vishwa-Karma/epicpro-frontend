@@ -15,7 +15,7 @@ const DashboardTable = ({ projects, loading }) => {
           <table className="table table-hover table-striped text-nowrap table-vcenter mb-0">
             <thead>
               <tr>
-                <th>#</th>
+                <th></th>
                 <th>Client Name</th>
                 <th>Team</th>
                 <th>Project Name</th>

@@ -327,6 +327,11 @@ border-left: 6px solid #e6140d !important;
   background: #fafbfc !important;
   cursor: pointer !important;
   margin-bottom: 8px !important;
+  transition: border 0.2s, background 0.2s;
+}
+.drag-and-drop-file:hover, .drag-and-drop-file:focus-within {
+  border-color: #007bff !important;
+  background: #eaf4ff !important;
 }
 
 .drag-drop-content{
@@ -374,4 +379,217 @@ border-left: 6px solid #e6140d !important;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
+}
+
+
+
+
+/* Admin Task Dashboard */
+.over-due{
+  background-color: red !important;
+  color: white !important;
+  text-transform: uppercase !important;
+}
+
+.view-all {
+  position: relative;
+  font-size: 13px;
+  font-weight: 500;
+  color: #007bff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+}
+
+.view-all .arrow {
+  display: inline-block;
+  margin-left: 8px;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.view-all:hover {
+  color: #0056b3;
+  transform: translateX(5px);
+}
+
+.view-all:hover .arrow {
+  opacity: 1;
+  transform: translateX(8px);
+}
+
+
+.admin-task-card{
+  border-top: 5px solid blue !important;
+  height: 350px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.task-title-admin{
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+
+/* Employee Todo */
+
+.task-title-employee{
+  width: 40% !important;
+   display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.date-seperator{
+  display: flex !important;
+  align-items: center !important;
+  margin: 16px 0 !important;
+  width: 100% !important;
+}
+
+.date-border{
+  flex: 1 !important;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.date-show{
+  margin: 0 12px !important;
+  padding: 6px 12px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: #4b5563 !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+}
+
+.employee-task-avtar{
+  width: 35px !important;
+  height: 35px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid #f5f5f5;
+}
+
+.overdue-event-todo{
+  background-color: red !important;
+  color: white !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  padding: 2.5px !important;
+  border-radius: 3px !important;
+  text-transform: uppercase;
+}
+
+.active-employee{
+  background-color: rgb(224, 248, 224) !important;
+  color: green !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+}
+
+.inactive-employee{
+  background-color: rgb(255, 219, 219) !important;
+  color: red !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+}
+
+.active-profile{
+  background-color: rgb(224, 248, 224) !important;
+  color: green !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+  position: absolute !important;
+  transform: translate(-3%, -10%) !important;
+}
+
+.inactive-profile{
+  background-color: rgb(255, 219, 219) !important;
+  color: red !important;
+  font-size: 10px !important;
+  margin-left: 5px !important;
+  position: absolute !important;
+  transform: translate(-3%, -10%) !important;
+}
+
+/* .file-badge{
+  margin: 10px 0 20px 0 !important;
+  background: transparent !important;
+  color: #bdbbbb !important;
+  border-radius: 10px !important;
+  height: 150px ;
+  padding: 1px 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  z-index: 2 !important;
+  border: 1px solid #bdbbbb !important;
+  width: fit-content !important;
+}
+
+.file-path-name {
+  margin-left: 10px;
+  font-size: 12px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #bdbbbb !important;
+} */
+
+.file-badge {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: white !important;
+  color: #000 !important;
+  font-size: 12px !important;
+  padding: 2px 6px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: center !important;
+}
+
+.file-path-name {
+   position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: white !important;
+    color: #000 !important;
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: center !important;
+}
+
+.file-close-icon {
+  position: absolute !important;
+  top: 2px !important;
+  right: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  line-height: 12px !important;
+  border-radius: 50% !important;
+}
+
+.img-thumbnail {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }

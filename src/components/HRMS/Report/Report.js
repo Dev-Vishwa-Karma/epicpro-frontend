@@ -70,6 +70,12 @@ class Report extends Component {
         this.reportMessageTimeout = null;
     }
 
+    stripHtml(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html || '';
+        return div.textContent || div.innerText || '';
+    }
+
     componentDidMount() {
         const today = new Date();
         const yesterday = new Date();
@@ -257,13 +263,6 @@ class Report extends Component {
         }
 
         const formData = new FormData();
-        // formData.append('activity_id', existingActivityId);
-        // formData.append('description', existingActivityDescription);
-        // formData.append('in_time', existingActivityInTime);
-        // formData.append('out_time', existingActivityOutTime);
-        // formData.append('status', existingActivitySatus);
-        // formData.append('updated_by', window.user.id); //updated by admin
-        // formData.append('note', this.state.editNotes || '');
 
         const data = {
             activity_id: existingActivityId,
@@ -638,7 +637,7 @@ class Report extends Component {
         // formData.append("note", editNotes || '');
 
         const data = {
-            report: report,
+            report: this.stripHtml(report),
             start_time: this.formatToMySQLDateTime(finalStartTime),
             end_time: this.formatToMySQLDateTime(finalEndTime),
             break_duration_in_minutes: break_duration_in_minutes,

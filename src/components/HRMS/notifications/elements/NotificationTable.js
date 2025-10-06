@@ -9,7 +9,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
             <table className="table table-striped table-vcenter table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th></th>
                         <th>Title</th>
                         <th>Body</th>
                         <th>Type</th>
@@ -17,7 +17,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
                         {(userRole === "admin" || userRole === "super_admin") && (
                             <th><i className="icon-user" /></th>
                         )}
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                <tbody>
@@ -26,7 +26,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
                         <tr key={index}>
                             <td>{index + 1}</td>
                             <td>{notification.title}</td>
-                            <td>{notification.body}</td>
+                            <td dangerouslySetInnerHTML={{__html: notification.body}}></td>
                             <td>{notification.type}</td>
                             <td>
                                 <span className={`tag ${

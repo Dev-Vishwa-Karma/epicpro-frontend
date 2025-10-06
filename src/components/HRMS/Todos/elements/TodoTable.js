@@ -3,6 +3,7 @@ import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import NoDataRow from '../../../common/NoDataRow';
 import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
+import { formatDueLabel, isOverduePending } from '../../../../utils';
 
 const TodoTable = ({
     todos,
@@ -11,20 +12,25 @@ const TodoTable = ({
     logged_in_employee_role,
     handleCheckboxClick,
     handleEditTodo,
-    handleDeleteClick
+    handleDeleteClick,
+    todoLoading = {}
 }) => {
+
+    const isAdmin = (logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin");
+    const columnCount = isAdmin ? 6 : 4; // Task, Due, Priority, Overdue, [User, Action]
+
     return (
         <div className="table-responsive todo_list">
             <table className="table table-hover table-striped table-vcenter mb-0">
                 <thead>
                     <tr>
                         <th><p className="w150">Task</p></th>
-                        <th className="w150 text-right">Due</th>
+                        <th className="w120 text-left align-middle">Due</th>
                         <th className="w100">Priority</th>
-                        {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                        {isAdmin && (
                             <>
                                 <th className="w80"><i className="icon-user" /></th>
-                                <th className="w150">Action</th>
+                                <th className="w150">Actions</th>
                             </>
                         )}
                     </tr>
@@ -32,9 +38,9 @@ const TodoTable = ({
                 {loading ? (
                     <tbody>
                         <tr>
-                            <td colSpan="5">
+                            <td colSpan={columnCount.toString()}>
                                 <div className="d-flex justify-content-center align-items-center" style={{ height: "150px" }}>
-                                    <TableSkeleton columns={4} rows={currentTodos.length} />
+                                    <TableSkeleton columns={columnCount} rows={currentTodos.length} />
                                 </div>
                             </td>
                         </tr>
@@ -54,28 +60,37 @@ const TodoTable = ({
                                                 type="checkbox"
                                                 className="custom-control-input"
                                                 checked={todo.todoStatus === 'completed'}
+                                                disabled={todoLoading && todoLoading[todo.id]}
                                                 onChange={() => handleCheckboxClick(todo)}
                                             />
-                                            <span className="custom-control-label">{todo.title}</span>
+                                            <span className="custom-control-label">
+                                                {todo.title}
+                                                {todoLoading && todoLoading[todo.id] && (
+                                                    <span className="spinner-border spinner-border-sm ml-2" />
+                                                )}
+                                            </span>
                                         </label>
                                     </td>
-                                    <td className="text-right">
-                                        {new Date(todo.due_date).toLocaleDateString("en-US", {
-                                            day: "2-digit",
-                                            month: "short",
-                                            year: "numeric"
-                                        })}
+                                    <td className="text-left align-middle" style={{ minWidth: 110 }}>
+                                        <span style={{ display: 'inline-block', minWidth: 90 }}>
+                                            {formatDueLabel(todo.due_date)}
+                                        </span>
                                     </td>
-                                    <td>
-                                        <span className={`tag ml-0 mr-0 ${
+                                    <td className='d-flex'>
+                                        <span className={`tag mt-2 ml-0 mr-0 ${
                                             todo.priority === "high" ? "tag-danger"
                                             : todo.priority === "medium" ? "tag-warning"
                                             : "tag-success"
                                         }`}>
                                             {todo.priority.toUpperCase()}
                                         </span>
+                                        <span className='ml-2'>
+                                            {isOverduePending(todo) && (
+                                                <span className="tag mt-2 ml-0 mr-0 over-due">Overdue</span>
+                                            )}
+                                        </span>
                                     </td>
-                                    {(logged_in_employee_role === "admin" || logged_in_employee_role === "super_admin") && (
+                                    {isAdmin && (
                                         <>
                                             <td>
                                                 <Avatar
@@ -115,7 +130,7 @@ const TodoTable = ({
                                 </tr>
                             ))
                         ) : (
-                            <NoDataRow colSpan={7} message="Todo not available." />
+                            <NoDataRow colSpan={columnCount} message="Todo not available." />
                         )}
                     </tbody>
                 )}

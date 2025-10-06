@@ -184,22 +184,6 @@ class Clients extends Component {
     this.setState({ clientFieldLoading: true });
 
     const formData = new FormData();
-    // formData.append('name', clientFieldFormData.name);
-    // formData.append('email', clientFieldFormData.email);
-    // formData.append('about', clientFieldFormData.about);
-    // formData.append('country', clientFieldFormData.country);
-    // formData.append('state', clientFieldFormData.state);
-    // formData.append('city', clientFieldFormData.city);
-    // formData.append('status', clientFieldFormData.status);
-
-    // // Only append profile if it's a file (new upload)
-    // if (clientFieldFormData.profilePic instanceof File) {
-    //   formData.append('profile', clientFieldFormData.profilePic);
-    // }
-
-    // if (isEditClientField) {
-    //   formData.append('client_id', editingClientId);
-    // }
     const data = {
       name: clientFieldFormData.name,
       email: clientFieldFormData.email,

@@ -9,7 +9,12 @@ const EditUserModal = ({
 	handleInputChangeForEditUser,
 	handleSelectChange,
 	updateProfile,
-	ButtonLoading
+	ButtonLoading,
+	loggedInRole,
+	showPassword,
+	onTogglePassword,
+	passwordSentinel,
+	passwordCleared
 }) => {
 	return (
 		<div className="modal fade" id="editUserModal" tabIndex={-1} role="dialog" aria-labelledby="editUserModalLabel">
@@ -61,7 +66,7 @@ const EditUserModal = ({
 										/>
 									</div>
 
-									<div className="col-md-12">
+									<div className="col-md-6">
 										<InputField
 											label="Date of Birth"
 											name="dob"
@@ -72,6 +77,39 @@ const EditUserModal = ({
 											max={new Date().toISOString().split("T")[0]}
 										/>
 									</div>
+
+									{loggedInRole === 'super_admin' && (
+										<div className="col-md-6">
+											<div className="form-group">
+												<label className="form-label" htmlFor="password">password</label>
+												<div className="input-group">
+												<input
+													id="password"
+													type={showPassword ? 'text' : 'password'}
+													name="password"
+													className={`form-control${errors.password ? ' is-invalid' : ''}`}
+													value={selectedUser?.password || ''}
+													onChange={handleInputChangeForEditUser}
+													autoComplete="new-password"
+												/>
+												{/* Show eye only after field has been cleared once and now has non-empty value */}
+												{passwordCleared && String(selectedUser?.password || '') !== '' && (
+												<div className="input-group-append">
+													<button
+														type="button"
+														className="btn btn-outline-secondary"
+														onClick={onTogglePassword}
+														title={showPassword ? 'Hide' : 'Show'}
+													>
+														<i className={`fe ${showPassword ? 'fe-eye-off' : 'fe-eye'}`}></i>
+													</button>
+												</div>
+												)}
+												{errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+												</div>
+											</div>
+										</div>
+									)}
 
 									<div className="col-md-6">
 										<InputField

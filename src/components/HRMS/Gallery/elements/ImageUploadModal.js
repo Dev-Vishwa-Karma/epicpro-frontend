@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
+import { getSortedEmployees } from '../../../../utils';
 
 const ImageUploadModal = ({
   isOpen,
@@ -18,6 +19,8 @@ const ImageUploadModal = ({
   const fileInputRef = useRef();
 
   if (!isOpen) return null;
+
+  const sortedEmployees = Array.isArray(employees) ? getSortedEmployees(employees) : [];
 
   return (
     <div
@@ -48,7 +51,9 @@ const ImageUploadModal = ({
                   onChange={handleEmployeeSelection}
                 >
                   <option value="">Select an Employee</option>
-                  {employees.map(employee => (
+                  {sortedEmployees
+                  .filter(employee => employee.status === 1)
+                  .map(employee => (
                     <option key={employee.id} value={employee.id}>
                       {employee.first_name} {employee.last_name}
                     </option>

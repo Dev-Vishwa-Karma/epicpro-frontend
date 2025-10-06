@@ -33,7 +33,7 @@ const HolidaysTable = ({
                 <th>DATE</th>
                 <th>HOLIDAY</th>
                 {(logged_in_user_role === 'admin' || logged_in_user_role === 'super_admin') && (
-                  <th>Action</th>
+                  <th>Actions</th>
                 )}
               </tr>
             </thead>

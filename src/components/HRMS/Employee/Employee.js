@@ -765,8 +765,15 @@ class Employee extends Component {
 
 	// Add searching user by name and email
 	handleSearch = (event) => {
-        const query = event.target.value.toLowerCase(); // Get search input
-        this.setState({ searchQuery: query }, () => {
+		const query = event.target.value.toLowerCase(); // Get search input
+		// Clear any existing timeout to debounce
+		if (this.searchTimeout) {
+			clearTimeout(this.searchTimeout);
+		}
+		// Save the search query immediately
+		this.setState({ searchQuery: query });
+		
+        this.searchTimeout = setTimeout(() => {
 			if (query === "") {
 				// If search is empty, reset users to the original list
 				this.setState({ employeeData: this.state.filterEmployeesData, currentPageEmployees: 1 });
@@ -781,7 +788,7 @@ class Employee extends Component {
 				});
 				this.setState({ employeeData: filtered, currentPageEmployees: 1});
 			}
-        });
+        }, 1000);
     };
 
 

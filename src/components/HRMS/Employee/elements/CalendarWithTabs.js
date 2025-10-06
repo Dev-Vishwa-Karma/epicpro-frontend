@@ -11,7 +11,10 @@ import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
 import { getToday, formatDate } from '../../../../utils';
 import Button from '../../../common/formInputs/Button';
+import { withRouter } from 'react-router-dom'; 
 
+
+import { PASSWORD_SENTINEL as PASSWORD_STRING } from '../../../../utils';
 class CalendarWithTabs extends Component {
     constructor(props) {
         super(props);
@@ -22,7 +25,7 @@ class CalendarWithTabs extends Component {
                 email: "",
                 mobile_no1: "",
                 mobile_no2: "",
-                password: "",
+                password: PASSWORD_STRING,
                 gender: "",
                 dob: "",
                 address_line1: "",
@@ -57,6 +60,8 @@ class CalendarWithTabs extends Component {
             filterToDate: getToday(),
             errors: {},
             col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
+            showPassword: false,
+            passwordCleared: false,
         };
         localStorage.removeItem('empId');
         localStorage.removeItem('startDate');
@@ -81,6 +86,10 @@ class CalendarWithTabs extends Component {
             emergency_contact3: React.createRef(),
             password: React.createRef(),
         };
+    }
+
+    onTogglePassword = () => {
+        this.setState(prev => ({ showPassword: !prev.showPassword }));
     }
 
     // Function to dismiss messages
@@ -213,13 +222,13 @@ class CalendarWithTabs extends Component {
     getAlternateSaturday = async () => {
         const now = localStorage.getItem('startDate') ? new Date(localStorage.getItem('startDate')) : new Date();
         try {
-            const data = getService.getCall('alternate_saturdays.php', {
+            const res = await getService.getCall('alternate_saturdays.php', {
                 action: 'view',
                 year: now.getFullYear()
-            })
+            });
             this.setState({
-                alternateSatudays: data?.data
-            })
+                alternateSatudays: res && res.data ? res.data : []
+            });
 
         } catch (error) {
             console.error("Failed to fetch saved Saturdays:", error);
@@ -454,7 +463,8 @@ class CalendarWithTabs extends Component {
             employee: {
                 ...prevState.employee,
                 [name]: value,
-            }
+            },
+            passwordCleared: name === 'password' ? (value === '' ? true : prevState.passwordCleared) : prevState.passwordCleared
         }));
     };
 
@@ -523,7 +533,7 @@ class CalendarWithTabs extends Component {
         appendField("joining_date", employee.joining_date);
         appendField("mobile_no1", employee.mobile_no1);
         appendField('mobile_no2', employee.mobile_no2);
-        if(employee.password !== "" && employee.password !== undefined){
+        if (typeof employee.password === 'string' && employee.password.trim() !== "" && employee.password !== PASSWORD_STRING) {
             appendField("password", employee.password);
         }
         appendField("dob", employee.dob);
@@ -567,6 +577,7 @@ class CalendarWithTabs extends Component {
                         showError: false
                     }));
 
+                    this.props.history.push('/');
                     // Auto-hide success message after 5 seconds
                     setTimeout(this.dismissMessages, 5000);
                 } else {
@@ -926,17 +937,36 @@ class CalendarWithTabs extends Component {
                                                         />
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
-                                                        <InputField
-                                                            label="Password"
-                                                            name="password"
-                                                            value={employee.password}
-                                                            onChange={this.handleProfileChange}
-                                                            placeholder="Enter password"
-                                                            error={errors.password}
-                                                            refInput={this.fieldRefs.password}
-                                                            type="password"
-                                                            required
-                                                        />
+                                                        <div className="form-group">
+                                                            <label className="form-label" htmlFor="password">Password</label>
+                                                            <div className="input-group">
+                                                                <input
+                                                                    id="password"
+                                                                    type={this.state.showPassword ? 'text' : 'password'}
+                                                                    name="password"
+                                                                    className={`form-control${errors.password ? ' is-invalid' : ''}`}
+                                                                    value={employee.password}
+                                                                    onChange={this.handleProfileChange}
+                                                                    placeholder="Enter password"
+                                                                    autoComplete="new-password"
+                                                                    required
+                                                                    ref={this.fieldRefs.password}
+                                                                />
+                                                                {this.state.passwordCleared && String(employee.password || '') !== '' && (
+                                                                <div className="input-group-append">
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-secondary"
+                                                                        onClick={this.onTogglePassword}
+                                                                        title={this.state.showPassword ? 'Hide' : 'Show'}
+                                                                    >
+                                                                        <i className={`fe ${this.state.showPassword ? 'fe-eye-off' : 'fe-eye'}`}></i>
+                                                                    </button>
+                                                                </div>
+                                                                )}
+                                                            </div>
+                                                            {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                                                        </div>
                                                     </div>
                                                     <div className="col-md-12">
                                                     <InputField
@@ -1061,4 +1091,4 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({})
-export default connect(mapStateToProps, mapDispatchToProps)(CalendarWithTabs);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(CalendarWithTabs));

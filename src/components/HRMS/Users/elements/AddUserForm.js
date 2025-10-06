@@ -73,6 +73,7 @@ const AddUserForm = ({
 					type="select"
 					value={state.selectedRole}
 					onChange={handleSelectChange}
+					error={state.errors.selectedRole}
 					options={[
 							{ value: 'super_admin', label: 'Super Admin' },
 							{ value: 'admin', label: 'Admin' }
