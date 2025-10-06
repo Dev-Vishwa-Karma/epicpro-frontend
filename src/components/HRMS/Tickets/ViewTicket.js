@@ -8,6 +8,7 @@ import { validateFields } from "../../common/validations";
 import { appendDataToFormData, formatDateTimeAMPM, shortformatDate } from "../../../utils";
 import ProgressModal from "./elements/ProgressModal";
 import BlankState from "../../common/BlankState";
+import TableSkeleton from '../../common/skeletons/TableSkeleton';
 
 class ViewTicket extends Component {
     constructor(props) {
@@ -17,6 +18,7 @@ class ViewTicket extends Component {
             ticket: '',
             comments: [],
             logs: [],
+            isLoading: true,
             ButtonLoading: false,
             comment: '',
             showProgressModal: false,
@@ -191,6 +193,10 @@ class ViewTicket extends Component {
         });
     };
 
+    handleBack = () => {
+        this.props.history.goBack(); // Navigate to the previous page
+    };
+
     addComment = async (e) => {
         e.preventDefault();
         const { id } = window.user;
@@ -268,7 +274,7 @@ class ViewTicket extends Component {
 
     getData = (ticket_id) => {
         if (ticket_id) {
-            this.setState({ ticket_id });
+            this.setState({ ticket_id, isLoading: true });
             getService.getCall('tickets.php', {
                 action: 'ticket-with-comments',
                 ticket_id: ticket_id
@@ -282,8 +288,9 @@ class ViewTicket extends Component {
                         });
                     }
                 })
-                .catch((error) => {
-                    console.error("Failed to fetch ticket details", error);
+                .catch(() => {})
+                .finally(() => {
+                    this.setState({ isLoading: false });
                 });
         }
     }
@@ -303,7 +310,7 @@ class ViewTicket extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { ticket, comments, logs, showProgressModal, progress_date, working_hours, progress_done, current_progress, progressErrors, showError, errorMessage } = this.state;
+        const { ticket, comments, logs, isLoading, showProgressModal, progress_date, working_hours, progress_done, current_progress, progressErrors, showError, errorMessage } = this.state;
         return (
             <>
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} mt-3`}>
@@ -312,107 +319,92 @@ class ViewTicket extends Component {
                             <div className="col-lg-4 col-md-12">
                                 <div className="card c_grid c_yellow">
                                     <div className="card-body text-center">
-                                        <div className="circle">
-                                            <Avatar
-                                                profile={ticket.assigned_to?.profile}
-                                                first_name={ticket.assigned_to?.first_name}
-                                                last_name={ticket.assigned_to?.last_name}
-                                                size={130}
-                                                className="avatar avatar-blue add-space me-2"
-                                                onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
-                                            />
-                                        </div>
-                                        <h6 className="mt-3 mb-0">{(ticket.assigned_to?.first_name || '') + ' ' + (ticket.assigned_to?.last_name || '')}</h6>
-                                        <span>{(ticket.assigned_to?.email)}</span>
+                                        {isLoading ? (
+                                            <>
+                                                <div className="mb-3"><TableSkeleton columns={1} rows={1} /></div>
+                                                <div className="mb-2"><TableSkeleton columns={2} rows={1} /></div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="circle">
+                                                    <Avatar
+                                                        profile={ticket.assigned_to?.profile}
+                                                        first_name={ticket.assigned_to?.first_name}
+                                                        last_name={ticket.assigned_to?.last_name}
+                                                        size={130}
+                                                        className="avatar avatar-blue add-space me-2"
+                                                        onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
+                                                    />
+                                                </div>
+                                                <h6 className="mt-3 mb-0">{(ticket.assigned_to?.first_name || '') + ' ' + (ticket.assigned_to?.last_name || '')}</h6>
+                                                <span>{(ticket.assigned_to?.email)}</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="card">
                                     <div className="card-header">
                                         <h3 className="card-title">Ticket Details</h3>
                                         <div className="card-options">
-                                            <span className="card-options-remove" data-toggle="card-remove" onClick={() => this.closeBox(false)}><i className="fe fe-x" /></span>
-                                            <div className="item-action dropdown ml-2">
-                                                <a href="fake_url" data-toggle="dropdown"><i className="fe fe-more-vertical" /></a>
-                                                <div className="dropdown-menu dropdown-menu-right">
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-eye" /> View Details </a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-share-alt" /> Share </a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-cloud-download" /> Download</a>
-                                                    <div className="dropdown-divider" />
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-copy" /> Copy to</a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-folder" /> Move to</a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-edit" /> Rename</a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-trash" /> Delete</a>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                     <div className="card-body">
-                                        <span>{ticket.title}</span>
+                                        {isLoading ? <TableSkeleton columns={2} rows={1} /> : <span>{ticket.title}</span>}
                                     </div>
                                 </div>
                                 <div className="card">
                                     <div className="card-header">
                                         <h3 className="card-title">Ticket Info</h3>
                                         <div className="card-options">
-                                            <span className="card-options-remove" data-toggle="card-remove" onClick={() => this.closeBox2(false)}><i className="fe fe-x" /></span>
-                                            <div className="item-action dropdown ml-2">
-                                                <a href="fake_url" data-toggle="dropdown"><i className="fe fe-more-vertical" /></a>
-                                                <div className="dropdown-menu dropdown-menu-right">
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-eye" /> View Details </a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-share-alt" /> Share </a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-cloud-download" /> Download</a>
-                                                    <div className="dropdown-divider" />
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-copy" /> Copy to</a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-folder" /> Move to</a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-edit" /> Rename</a>
-                                                    <a href="fake_url" className="dropdown-item"><i className="dropdown-icon fa fa-trash" /> Delete</a>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                     <div className="card-body">
-                                        <ul className="list-group">
-                                            <li className="list-group-item">
-                                                <small className="text-muted">Description: </small>
-                                                <p className="mb-0">{ticket.description}</p>
-                                            </li>
-                                            <li className="list-group-item">
-                                                <small className="text-muted">Priority: </small>
-                                                <p className="mb-0">
-                                                    <span className={`tag ml-0 mr-0 ${ticket.priority === "high" ? "tag-danger"
-                                                        : ticket.priority === "medium" ? "tag-warning"
-                                                            : "tag-success"
-                                                        }`}>
-                                                        {ticket.priority ? ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) : ''}
-                                                    </span>
-                                                </p>
-                                            </li>
-                                            <li className="list-group-item">
-                                                <div className="d-flex justify-content-between">
-                                                    <small className="text-muted">Due Date: </small>
-                                                    {ticket.due_date && (new Date(ticket.due_date) < new Date() && ticket.status !== 'completed') ? <span className="tag tag-danger">Overdue</span> : ''}
-                                                </div>
-                                                <p className="mb-0">{ticket.due_date ? this.formatDate(ticket.due_date) : '--/--/--'}</p>
-                                            </li>
-                                            <li className="list-group-item">
-                                                <div className="d-flex justify-content-between">
-                                                    <div>Progress</div>
-                                                    <small><span className={`tag ml-1 mr-0 mb-1 ${ticket.progress === "100" ? "tag-blue"
-                                                        : "tag-gray"
-                                                        }`}>{`${ticket.progress !== '100' ? ticket.progress + '%' : 'Completed'}`}
-                                                    </span></small>
-                                                </div>
-                                                <div className="progress progress-xs mb-0">
-                                                    <div className="progress-bar bg-info" style={{ width: `${ticket.progress}%` }} />
-                                                </div>
-                                            </li>
-                                            {ticket.completed_at == null && ticket.progress !== 100 ? '' :
+                                        {isLoading ? (
+                                            <TableSkeleton columns={3} rows={4} />
+                                        ) : (
+                                            <ul className="list-group">
                                                 <li className="list-group-item">
-                                                    <small className="text-muted">Completed On: </small>
-                                                    <p className="mb-0">{this.formatDate(ticket.completed_at)}</p>
+                                                    <small className="text-muted">Description: </small>
+                                                    <p className="mb-0">{ticket.description}</p>
                                                 </li>
-                                            }
-                                        </ul>
+                                                <li className="list-group-item">
+                                                    <small className="text-muted">Priority: </small>
+                                                    <p className="mb-0">
+                                                        <span className={`tag ml-0 mr-0 ${ticket.priority === "high" ? "tag-danger"
+                                                            : ticket.priority === "medium" ? "tag-warning"
+                                                                : "tag-success"
+                                                            }`}>
+                                                            {ticket.priority ? ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) : ''}
+                                                        </span>
+                                                    </p>
+                                                </li>
+                                                <li className="list-group-item">
+                                                    <div className="d-flex justify-content-between">
+                                                        <small className="text-muted">Due Date: </small>
+                                                        {ticket.due_date && (new Date(ticket.due_date) < new Date() && ticket.status !== 'completed') ? <span className="tag tag-danger">Overdue</span> : ''}
+                                                    </div>
+                                                    <p className="mb-0">{ticket.due_date ? this.formatDate(ticket.due_date) : '--/--/--'}</p>
+                                                </li>
+                                                <li className="list-group-item">
+                                                    <div className="d-flex justify-content-between">
+                                                        <div>Progress</div>
+                                                        <small><span className={`tag ml-1 mr-0 mb-1 ${ticket.progress === "100" ? "tag-blue"
+                                                            : "tag-gray"
+                                                            }`}>{`${ticket.progress !== '100' ? ticket.progress + '%' : 'Completed'}`}
+                                                        </span></small>
+                                                    </div>
+                                                    <div className="progress progress-xs mb-0">
+                                                        <div className="progress-bar bg-info" style={{ width: `${ticket.progress}%` }} />
+                                                    </div>
+                                                </li>
+                                                {ticket.completed_at == null && ticket.progress !== 100 ? '' :
+                                                    <li className="list-group-item">
+                                                        <small className="text-muted">Completed On: </small>
+                                                        <p className="mb-0">{this.formatDate(ticket.completed_at)}</p>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="card">
@@ -433,21 +425,23 @@ class ViewTicket extends Component {
                                         )}
                                     </div>
                                     <div className="card-body">
-                                        <ul className="list-group" style={{
-                                            height: "150px",
-                                            overflowY: "auto"
-                                        }}>
-                                            {logs.length === 0 ?
-                                                <BlankState message="No logs to show" /> :
-                                                logs.map((log, index) => (
-                                                    <>
-                                                        <div className="d-flex justify-content-between m-3" key={index}>
+                                        {isLoading ? (
+                                            <TableSkeleton columns={2} rows={4} />
+                                        ) : (
+                                            <ul className="list-group" style={{
+                                                height: "150px",
+                                                overflowY: "auto"
+                                            }}>
+                                                {logs.length === 0 ?
+                                                    <BlankState message="No logs to show" /> :
+                                                    logs.map((log, index) => (
+                                                        <div className="d-flex justify-content-between m-3" key={log.log_id || index}>
                                                             <p>{log.log_date}</p>
                                                             <p>{log.log_working_hours} hrs</p>
                                                         </div>
-                                                    </>
-                                                ))}
-                                        </ul>
+                                                    ))}
+                                            </ul>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -482,52 +476,46 @@ class ViewTicket extends Component {
                                         <h3 className="card-title">Ticket Replies</h3>
                                     </div>
                                     <div className="card-body" style={{
-                                        height: "300px",
+                                        height: "480px",
                                         overflow: "auto"
                                     }}>
-                                        {comments.length > 0 ? (
-                                            comments.map((comment, index) => (
-                                                <div className="timeline_item" key={index}>
-                                                    <Avatar
-                                                        profile={comment.commented_by?.profile}
-                                                        first_name={comment.commented_by?.first_name}
-                                                        last_name={comment.commented_by?.last_name}
-                                                        size={30}
-                                                        className="avatar avatar-blue add-space me-2 mr-2 tl_avatar"
-                                                        onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
-                                                    />
-                                                    <span>{comment.commented_by?.first_name + ' ' + comment.commented_by?.last_name} <small className="float-right text-right">{this.formatDate(comment.comment_created_at)}</small></span>
-                                                    <div className="msg">
-                                                        <p>{comment.comment_comment}</p>
-                                                        <div className="collapse p-4 section-gray mt-2" id="collapseExample">
-                                                            <form className="well">
-                                                                <div className="form-group">
-                                                                    <textarea rows={2} className="form-control no-resize" placeholder="Enter here for tweet..." defaultValue={""} />
-                                                                </div>
-                                                                <button className="btn btn-primary">Submit</button>
-                                                            </form>
-                                                            <ul className="recent_comments list-unstyled mt-4 mb-0">
-                                                                <li>
-                                                                    <div className="avatar_img">
-                                                                        <img className="rounded img-fluid" src="../assets/images/xs/avatar4.jpg" alt="fake_url" />
-                                                                    </div>
-                                                                    <div className="comment_body">
-                                                                        <h6>Donald Gardner <small className="float-right font-14">Just now</small></h6>
-                                                                        <p>Lorem ipsum Veniam aliquip culpa laboris minim tempor</p>
-                                                                    </div>
-                                                                </li>
-                                                            </ul>
+                                        {isLoading ? (
+                                            <TableSkeleton columns={3} rows={6} />
+                                        ) : (
+                                            comments.length > 0 ? (
+                                                comments.map((comment, index) => (
+                                                    <div className="timeline_item" key={comment.comment_id || index}>
+                                                        <Avatar
+                                                            profile={comment.commented_by?.profile}
+                                                            first_name={comment.commented_by?.first_name}
+                                                            last_name={comment.commented_by?.last_name}
+                                                            size={30}
+                                                            className="avatar avatar-blue add-space me-2 mr-2 tl_avatar"
+                                                            onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
+                                                        />
+                                                        <span>{comment.commented_by?.first_name + ' ' + comment.commented_by?.last_name} <small className="float-right text-right">{this.formatDate(comment.comment_created_at)}</small></span>
+                                                        <div className="msg">
+                                                            <p>{comment.comment_comment}</p>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))
-                                        ) :
-                                            <BlankState message="No comments to Show" />
-                                        }
+                                                ))
+                                            ) :
+                                                <BlankState message="No comments to Show" />
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div
+                        className="card-footer text-right mt-4"
+                        style={{ display: "flex", justifyContent: "flex-end", gap: "10px"}}
+                    >
+                        <Button
+                            label="Back"
+                            onClick={this.handleBack}
+                            className="btn-secondary"
+                        />
                     </div>
                 </div>
 

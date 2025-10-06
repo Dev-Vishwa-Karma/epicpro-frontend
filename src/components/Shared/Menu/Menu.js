@@ -267,9 +267,6 @@ class Menu extends Component {
 				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
 				else hrms.content.push(linkItem);
 
-				const ticket = { id: 21, label: "Ticket", to: "/ticket" };
-				const ticketIndex = hrms.content.findIndex(item => item.id === 22);
-				if (ticketIndex !== -1) hrms.content.splice(ticketIndex + 1, 0, ticket);
 				}
 
 				// Add Project section if not exists
@@ -363,19 +360,29 @@ class Menu extends Component {
 						<Header dataFromParent={this.props.dataFromParent} dataFromSubParent={pageHeading[0].pageTitle} />
 						<Switch>
 							{Routes.map((layout, i) => {
-							// Use ProtectedRoute if roles are defined, otherwise use Route
-							const RouteComponent = layout.roles ? ProtectedRoute : Route;
-							
-							return (
-								<RouteComponent
-								key={i}
-								exact={layout.exact}
-								path={layout.path}
-								component={layout.component}
-								roles={layout.roles || []} // Pass roles (empty array for public routes)
-								currentUser={this.state.currentUser} // Pass currentUser
-								/>
-							);
+								// Use ProtectedRoute if roles are defined, otherwise use Route
+								const isProtected = Array.isArray(layout.roles) && layout.roles.length > 0;
+								const Comp = layout.component;
+								if (isProtected) {
+									return (
+										<ProtectedRoute
+											key={i}
+											exact={layout.exact}
+											path={layout.path}
+											component={Comp}
+											roles={layout.roles}
+											currentUser={this.state.currentUser}
+										/>
+									);
+								}
+								return (
+									<Route
+										key={i}
+										exact={layout.exact}
+										path={layout.path}
+										render={(props) => <Comp {...props} />}
+									/>
+								);
 							})}
 						</Switch>
 						<Footer />

@@ -3,10 +3,8 @@ import { connect } from 'react-redux';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import Button from '../../common/formInputs/Button';
+import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
-import {
-    boxAction, box2Action, box3Action, boxCloseAction, box2CloseAction, box3CloseAction
-} from '../../../actions/settingsAction';
 import TicketListTable from "./elements/TicketListTable";
 import DeleteModal from "../../common/DeleteModal";
 import Pagination from "../../common/Pagination";
@@ -39,8 +37,11 @@ class Ticket extends Component {
             deleteTicket: null,
             currentPage: 1,
             dataPerPage: 10,
+            showSuccess: false,
+            successMessage: '',
         };
         this.handleSearchChange = this.handleSearchChange.bind(this);
+        this.searchTimeout = null;
     }
 
     handlePageChange = (newPage) => {
@@ -79,37 +80,15 @@ class Ticket extends Component {
             })
     }
 
-    getEmployee = () => {
-        getService.getCall('get_employees.php', {
-            action: 'view',
-            role: 'employee',
-        })
-            .then((employeesData) => {
-                let employeesArray = Array.isArray(employeesData.data) ? employeesData.data : [employeesData.data];
-
-                this.setState({
-                    employeeData: employeesArray,
-                })
-            })
-    }
-
-    fetchData = (searchQuery = '') => {
-        try {
-            this.getEmployee();
-            this.getTicket(searchQuery);
-            this.setState({ loading: false });
-        } catch (err) {
-            this.setState({ message: "Failed to fetch data", loading: false });
-            console.error(err);
-        }
-    }
-
     handleSearchChange(event) {
         const searchQuery = event.target.value;
 
-        this.setState({ searchQuery }, () => {
-            this.fetchData(searchQuery);
-        });
+        this.setState({ searchQuery });
+        if (this.searchTimeout) clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.setState({ loading: true });
+            this.getTicket(searchQuery);
+        }, 2000);
     }
 
     componentDidMount() {
@@ -119,7 +98,7 @@ class Ticket extends Component {
             logged_in_employee_role: role || null,
         });
 
-        this.fetchData()
+        this.getTicket()
     }
 
     openDeleteModal = (ticketId) => {
@@ -189,8 +168,15 @@ class Ticket extends Component {
                     this.setState({
                         ticketListData: updatedTickets,
                         deleteTicket: null,
-                        ButtonLoading: false
+                        ButtonLoading: false,
+                        showSuccess: true,
+                        successMessage: 'Ticket deleted successfully',
                     });
+                    setTimeout(() => 
+                        this.setState({ 
+                            showSuccess: false, 
+                            successMessage: '' 
+                        }), 3000);
                 } else {
                     console.error("Failed to delete the ticket.");
                     this.setState({ ButtonLoading: false });
@@ -203,7 +189,7 @@ class Ticket extends Component {
     }
 
     render() {
-        const { fixNavbar, boxOpen, box2Open, box3Open, boxClose, box2Close, box3Close } = this.props;
+        const { fixNavbar } = this.props;
         const { ticketListData, message, loading, searchQuery, InProgressTicketCount, TodoTicketCount, CompletedTicketCount, dataPerPage, currentPage } = this.state;
 
         const indexOfLastTicket = currentPage * dataPerPage;
@@ -213,14 +199,18 @@ class Ticket extends Component {
 
         return (
             <>
+                <AlertMessages
+                    showSuccess={this.state.showSuccess}
+                    successMessage={this.state.successMessage}
+                    showError={false}
+                    errorMessage={''}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={() => {}}
+                />
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
                     <div className="container-fluid">
                         <div className="d-md-flex justify-content-between align-items-center">
-                            <ul className="nav nav-tabs page-header-tab">
-                                {/* <li className="nav-item"><a className="nav-link active" id="TaskBoard-tab" data-toggle="tab" href="#TaskBoard-list">List View</a></li> */}
-                                {/* <li className="nav-item"><a className="nav-link" id="TaskBoard-tab" data-toggle="tab" href="#TaskBoard-grid">Grid View</a></li> */}
-                            </ul>
-                            <div className="header-action d-flex">
+                            <div className="header-action d-flex mt-2">
                                 <div className="input-group">
                                     <input
                                         type="text"

@@ -56,7 +56,7 @@ class AddTicket extends Component {
             action: 'view'
         })
             .then((employeesData) => {
-                let employeesArray = Array.isArray(employeesData.data) ? employeesData.data : [employeesData.data];
+                const employeesArray = employeesData?.data || [];
                 this.setState({ employeeData: employeesArray });
             })
             .catch((error) => console.error("Error fetching employees:", error));
@@ -143,7 +143,6 @@ class AddTicket extends Component {
                     }));
                     this.props.history.push('/ticket');
                 } else {
-                    console.error("Failed to add ticket details:", data);
                     this.setState({
                         errorMessage: data.message || "Failed to add ticket.",
                         showError: true,
@@ -151,8 +150,7 @@ class AddTicket extends Component {
                         ButtonLoading: false,
                     });
                 }
-            }).catch((error) => {
-                console.error("Error adding ticket:", error);
+            }).catch(() => {
                 this.setState({
                     errorMessage: "An error occurred while adding the ticket.",
                     showError: true,

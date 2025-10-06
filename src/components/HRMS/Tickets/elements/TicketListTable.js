@@ -6,9 +6,6 @@ import Button from '../../../common/formInputs/Button';
 import Avatar from '../../../common/Avatar';
 import { shortformatDate } from '../../../../utils';
 
-const formatDate = (date) => {
-    return shortformatDate(date)
-}
 const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goToViewTicket, message, goToEditTicket, openDeleteModal }) => {
     return (
         <div className="card-body">
@@ -75,7 +72,7 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                                 </div>
                                             </td>
                                         }
-                                        <td><div className="text-info">{formatDate(ticket.assigned_at)}</div></td>
+                                        <td><div className="text-info">{shortformatDate(ticket.assigned_at)}</div></td>
                                         <td style={{ width: ticket.progress}}>
                                             <div className="clearfix">
                                                 <div className="float-left"><strong>{ticket.progress}</strong></div>
@@ -86,8 +83,8 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                             </div>
                                         </td>
                                         <td className='text-center'>
-                                            <div className="text-pink" title="Due Date">{ticket.due_date ? formatDate(ticket.due_date) : '--/--/--'}</div>
-                                            <div className="text-green" title="Completed At">{ticket.completed_at ? formatDate(ticket.completed_at) : '--/--/--'}</div>
+                                            <div className="text-pink" title="Due Date">{ticket.due_date ? shortformatDate(ticket.due_date) : '--/--/--'}</div>
+                                            <div className="text-green" title="Completed At">{ticket.completed_at ? shortformatDate(ticket.completed_at) : '--/--/--'}</div>
                                         </td>
                                         <td>
                                             <Button
