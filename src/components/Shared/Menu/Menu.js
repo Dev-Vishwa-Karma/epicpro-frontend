@@ -217,7 +217,8 @@ class Menu extends Component {
 					{ "id": 7, "label": "Gallery", "to": "/gallery" },
 					{ "id": 8, "label": "Todo List", "to": "/project-todo" },
 					{ "id": 9, "label": "Notifications", "to": "/notifications" },
-					{ "id": 10, "label": "Referral", "to": "/job-application" }
+					{ "id": 10, "label": "Referral", "to": "/job-application" },
+					{ "id": 21, "label": "Ticket", "to": "/ticket" },
 					]
 				}
 			];
@@ -265,6 +266,10 @@ class Menu extends Component {
 				const todoIndex = hrms.content.findIndex(item => item.id === 8);
 				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
 				else hrms.content.push(linkItem);
+
+				const ticket = { id: 21, label: "Ticket", to: "/ticket" };
+				const ticketIndex = hrms.content.findIndex(item => item.id === 22);
+				if (ticketIndex !== -1) hrms.content.splice(ticketIndex + 1, 0, ticket);
 				}
 
 				// Add Project section if not exists

@@ -15,6 +15,7 @@ const InputField = ({
   maxLength = null,
   onInput = null,
   min = null,
+  max = null,
   rows = 5,
   accept = '',
   multiple = false,
@@ -101,6 +102,7 @@ const InputField = ({
           onInput={onInput}
           disabled={disabled}
           min={min}
+          max={max}
           autoComplete={autoComplete || 'off'}
         />
       )}

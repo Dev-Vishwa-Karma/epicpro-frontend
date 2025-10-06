@@ -20,6 +20,10 @@ import Link from './HRMS/Link/Link';
 import Notifications from './HRMS/notifications/Notifications';
 import Applicant from './HRMS/Applicants/Applicant';
 import ApplicantForm from './HRMS/Applicants/ApplicantForm';
+import Ticket from './HRMS/Tickets/Ticket';
+import AddTicket from './HRMS/Tickets/AddTicket';
+import EditTicket from './HRMS/Tickets/EditTicket';
+import ViewTicket from './HRMS/Tickets/ViewTicket';
 
 const Routes = [
     {
@@ -220,6 +224,40 @@ const Routes = [
         pageTitle: "Referral",
         component: ApplicantForm
     },
+    {
+        path: "/ticket",
+        name: 'ticket',
+        exact: true,
+        pageTitle: "Ticket",
+        adminAccess: true,
+        component: Ticket
+    },
+    {
+        path: "/add-ticket",
+        name: 'add-ticket',
+        exact: true,
+        pageTitle: "Add Ticket",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: AddTicket
+    },
+    {
+        path: "/edit-ticket",
+        name: 'edit-ticket',
+        exact: true,
+        pageTitle: "Edit Ticket",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: EditTicket
+    },
+    {
+        path: "/view-ticket",
+        name: 'view-ticket',
+        exact: true,
+        pageTitle: "View Ticket",
+        adminAccess: true,
+        component: ViewTicket
+    }
 ];
 
 export default Routes;
