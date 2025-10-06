@@ -40,26 +40,7 @@ class Ticket extends Component {
             currentPage: 1,
             dataPerPage: 10,
         };
-        this.handleBox = this.handleBox.bind(this);
         this.handleSearchChange = this.handleSearchChange.bind(this);
-    }
-    handleBox(e) {
-        this.props.boxAction(e)
-    }
-    handleBox2(e) {
-        this.props.box2Action(e)
-    }
-    handleBox3(e) {
-        this.props.box3Action(e)
-    }
-    closeBox(e) {
-        this.props.boxCloseAction(e)
-    }
-    closeBox2(e) {
-        this.props.box2CloseAction(e)
-    }
-    closeBox3(e) {
-        this.props.box3CloseAction(e)
     }
 
     handlePageChange = (newPage) => {
@@ -334,20 +315,6 @@ class Ticket extends Component {
 }
 const mapStateToProps = state => ({
     fixNavbar: state.settings.isFixNavbar,
-    boxOpen: state.settings.isbox,
-    box2Open: state.settings.isbox2,
-    box3Open: state.settings.isbox3,
-    boxClose: state.settings.isBoxClose,
-    box2Close: state.settings.isBox2Close,
-    box3Close: state.settings.isBox3Close,
 })
 
-const mapDispatchToProps = dispatch => ({
-    boxAction: (e) => dispatch(boxAction(e)),
-    box2Action: (e) => dispatch(box2Action(e)),
-    box3Action: (e) => dispatch(box3Action(e)),
-    boxCloseAction: (e) => dispatch(boxCloseAction(e)),
-    box2CloseAction: (e) => dispatch(box2CloseAction(e)),
-    box3CloseAction: (e) => dispatch(box3CloseAction(e)),
-})
-export default connect(mapStateToProps, mapDispatchToProps)(Ticket);
+export default connect(mapStateToProps)(Ticket);

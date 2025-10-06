@@ -86,8 +86,8 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                             </div>
                                         </td>
                                         <td className='text-center'>
-                                            <div className="text-pink">{ticket.due_date ? formatDate(ticket.due_date) : '--/--/--'}</div>
-                                            <div className="text-green">{ticket.completed_at ? formatDate(ticket.completed_at) : '--/--/--'}</div>
+                                            <div className="text-pink" title="Due Date">{ticket.due_date ? formatDate(ticket.due_date) : '--/--/--'}</div>
+                                            <div className="text-green" title="Completed At">{ticket.completed_at ? formatDate(ticket.completed_at) : '--/--/--'}</div>
                                         </td>
                                         <td>
                                             <Button
