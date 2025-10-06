@@ -116,7 +116,9 @@ class EditUser extends Component {
 		};
 		appendDataToFormData(form, data);
 
-		if (logged_in_employee_role === 'super_admin') {
+		// Allow super_admin to update password for anyone, and allow admin to update their own password
+		const isSelfEdit = String(logged_in_employee_id) === String(selectedUser.id);
+		if (logged_in_employee_role === 'super_admin' || (logged_in_employee_role === 'admin' && isSelfEdit)) {
 			const pwd = (selectedUser.password || '').trim();
 			if (pwd !== '' && pwd !== PASSWORD_SENTINEL) {
 				form.append('password', pwd);
