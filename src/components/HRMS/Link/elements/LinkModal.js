@@ -294,6 +294,7 @@ class LinkModal extends React.Component {
                       )}
                       {/* Outside Preview Grid */}
                       {(selectedFiles && selectedFiles.length > 0) && (
+                        <>
                         <div className='d-flex flex-wrap mt-2 justify-content-center'>
                           {selectedFiles.map((f, idx) => (
                             <div key={idx} className='mr-2 mb-2' style={{ width: 140 }}>
@@ -314,15 +315,20 @@ class LinkModal extends React.Component {
                                   <i className='fa fa-times text-danger' />
                                 </button>
                               </div>
-                              <div style={{ wordBreak: 'break-full', overflowWrap: 'anywhere', whiteSpace: 'normal', hyphens: 'auto', fontSize: 13 }}>
-                                {f.name}
-                              </div>
+                              
                             </div>
                           ))}
+                        </div>
+                        {selectedFiles.map((f, idx) => (
+                          <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, textAlign: 'start' }}>
+                            {f.name}
                           </div>
+                        ))}  
+                        </>
                         )}
                       {/* single file preview outside */}
                       {(!selectedFiles || selectedFiles.length === 0) && (file_path || previewUrl) && (
+                        <>
                         <div className='d-flex flex-wrap mt-2 justify-content-center'>
                           <div className='mr-2 mb-2' style={{ width: 140 }}>
                             <div className='border rounded shadow-sm' style={{ position: 'relative', width: '100%', height: 100, overflow: 'hidden', background: '#fff' }}>
@@ -342,11 +348,12 @@ class LinkModal extends React.Component {
                                 <i className='fa fa-times text-danger' />
                               </button>
                             </div>
-                            <div style={{ whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'ellipsis', fontSize: 13, textAlign:'left' }}>
-                              {fileDisplayName}
-                            </div>
                           </div>
                         </div>
+                        <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, textAlign: 'start'  }}>
+                            {fileDisplayName}
+                        </div>
+                      </>
                       )}
                       {errors.file_path && (
                         <small className='invalid-feedback d-block text-left'>{errors.file_path}</small>
