@@ -52,7 +52,19 @@ class EditTicket extends Component {
                 if (!dateStr) return "";
                 const d = new Date(dateStr);
                 if (isNaN(d.getTime())) return "";
-                
+
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+
+                return `${year}-${month}-${day}`;
+            };
+
+            const formatDateTime = (dateStr) => {
+                if (!dateStr) return "";
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return "";
+
                 const year = d.getFullYear();
                 const month = String(d.getMonth() + 1).padStart(2, '0');
                 const day = String(d.getDate()).padStart(2, '0');
@@ -232,7 +244,7 @@ class EditTicket extends Component {
                                                 <InputField
                                                     label="Due Date"
                                                     name="due_date"
-                                                    type="datetime-local"
+                                                    type="date"
                                                     value={due_date}
                                                     onChange={this.handleChange}
                                                     error={this.state.errors.due_date}
@@ -253,7 +265,7 @@ class EditTicket extends Component {
                                                 <InputField
                                                     label="Completed At"
                                                     name="completed_at"
-                                                    type="datetime-local"
+                                                    type="date"
                                                     value={completed_at}
                                                     onChange={this.handleChange}
                                                     error={this.state.errors.completed_at}

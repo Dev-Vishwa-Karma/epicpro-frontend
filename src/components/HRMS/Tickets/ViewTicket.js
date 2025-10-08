@@ -362,7 +362,7 @@ class ViewTicket extends Component {
                                         {isLoading ? (
                                             <TableSkeleton columns={3} rows={4} />
                                         ) : (
-                                            <ul className="list-group">
+                                            <ul className="list-group" style={{height:"500px", overflow:"aito"}}>
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Description: </small>
                                                     <p className="mb-0" style={{height:"180px", overflow:"auto"}}>{ticket.description}</p>

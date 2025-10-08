@@ -239,7 +239,7 @@ class AddTicket extends Component {
                                                     <InputField
                                                         label="Due Date"
                                                         name="due_date"
-                                                        type="datetime-local"
+                                                        type="date"
                                                         value={due_date}
                                                         onChange={this.handleChange}
                                                         error={this.state.errors.due_date}
