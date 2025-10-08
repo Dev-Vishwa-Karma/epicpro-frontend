@@ -69,14 +69,14 @@ class EditTicket extends Component {
                 .then((ticketDetails) => {
                     if (ticketDetails.data) {
                         this.setState({
-                            ticket_id: ticketDetails.data[0].ticket_id || "",
-                            title: ticketDetails.data[0].title || "",
-                            description: ticketDetails.data[0].description || "",
-                            priority: ticketDetails.data[0].priority || "",
-                            due_date: formatDate(ticketDetails.data[0].due_date) || "",
-                            progress: ticketDetails.data[0].progress || "",
-                            completed_at: formatDate(ticketDetails.data[0].completed_at) || "",
-                            selectedEmployee: ticketDetails.data[0].assigned_to || "",
+                            ticket_id: ticketDetails.data.ticket.ticket_id || "",
+                            title: ticketDetails.data.ticket.title || "",
+                            description: ticketDetails.data.ticket.description || "",
+                            priority: ticketDetails.data.ticket.priority || "",
+                            due_date: formatDate(ticketDetails.data.ticket.due_date) || "",
+                            progress: ticketDetails.data.ticket.progress || "",
+                            completed_at: formatDate(ticketDetails.data.ticket.completed_at) || "",
+                            selectedEmployee: ticketDetails.data.ticket.assigned_to.employee_id || "",
                         });
                     } else {
                         console.warn("No ticket found.");
@@ -154,7 +154,8 @@ class EditTicket extends Component {
             assigned_by: id,
             assigned_to: selectedEmployee,
             progress: progress,
-            completed_at: completed_at
+            completed_at: completed_at,
+            updated_by: id
         }
 
         appendDataToFormData(editTicketData, data)
@@ -256,7 +257,7 @@ class EditTicket extends Component {
                                                     value={completed_at}
                                                     onChange={this.handleChange}
                                                     error={this.state.errors.completed_at}
-                                                    min={due_date || new Date().toISOString().split('T')[0]}
+                                                    // min={due_date || new Date().toISOString().split('T')[0]}
                                                 />
                                             </div>
                                             <div className="col-sm-6 col-md-6">

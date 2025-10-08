@@ -276,7 +276,7 @@ class ViewTicket extends Component {
         if (ticket_id) {
             this.setState({ ticket_id, isLoading: true });
             getService.getCall('tickets.php', {
-                action: 'ticket-with-comments',
+                action: 'get',
                 ticket_id: ticket_id
             })
                 .then((response) => {
@@ -365,7 +365,7 @@ class ViewTicket extends Component {
                                             <ul className="list-group">
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Description: </small>
-                                                    <p className="mb-0">{ticket.description}</p>
+                                                    <p className="mb-0" style={{height:"180px", overflow:"auto"}}>{ticket.description}</p>
                                                 </li>
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Priority: </small>
@@ -381,7 +381,7 @@ class ViewTicket extends Component {
                                                 <li className="list-group-item">
                                                     <div className="d-flex justify-content-between">
                                                         <small className="text-muted">Due Date: </small>
-                                                        {ticket.due_date && (new Date(ticket.due_date) < new Date() && ticket.status !== 'completed') ? <span className="tag tag-danger">Overdue</span> : ''}
+                                                        {ticket.due_date && (new Date(ticket.due_date) < new Date() && ticket.status !== 'completed') ? <span className="tag over-due-ticket">Overdue</span> : ''}
                                                     </div>
                                                     <p className="mb-0">{ticket.due_date ? this.formatDate(ticket.due_date) : '--/--/--'}</p>
                                                 </li>
@@ -416,7 +416,7 @@ class ViewTicket extends Component {
                                                     label="Add Progress"
                                                     loading={this.state.ButtonLoading}
                                                     disabled={this.state.ButtonLoading}
-                                                    className="btn-primary"
+                                                    className="btn-primary btn-custom"
                                                     dataToggle="modal"
                                                     dataTarget="#ticketProgressModal"
                                                     onClick={() => this.openProgressModal(ticket.ticket_id)}
@@ -432,14 +432,29 @@ class ViewTicket extends Component {
                                                 height: "150px",
                                                 overflowY: "auto"
                                             }}>
-                                                {logs.length === 0 ?
-                                                    <BlankState message="No logs to show" /> :
-                                                    logs.map((log, index) => (
-                                                        <div className="d-flex justify-content-between m-3" key={log.log_id || index}>
-                                                            <p>{log.log_date}</p>
-                                                            <p>{log.log_working_hours} hrs</p>
-                                                        </div>
-                                                    ))}
+                                                {logs.length === 0 ? (
+                                                    <BlankState message="No logs to show" /> 
+                                                    ) : (
+                                                    <table className="table table-hover table-vcenter mb-0 table_custom spacing8 text-nowrap">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Date</th>
+                                                                <th>Working</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {logs
+                                                            .sort((a, b) => new Date(a.log_date) - new Date(b.log_date))
+                                                            .map((log, index) => (
+                                                            <tr key={log.log_id || index}>
+                                                                <td>{shortformatDate(log.log_date)}</td>
+                                                                <td>{log.log_working_hours} hrs</td>
+                                                            </tr>
+                                                        ))}
+                                                        </tbody>
+                                                    </table>
+                                                    
+                                                )}
                                             </ul>
                                         )}
                                     </div>
@@ -476,7 +491,7 @@ class ViewTicket extends Component {
                                         <h3 className="card-title">Ticket Replies</h3>
                                     </div>
                                     <div className="card-body" style={{
-                                        height: "480px",
+                                        height: "681px",
                                         overflow: "auto"
                                     }}>
                                         {isLoading ? (
@@ -506,16 +521,6 @@ class ViewTicket extends Component {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div
-                        className="card-footer text-right mt-4"
-                        style={{ display: "flex", justifyContent: "flex-end", gap: "10px"}}
-                    >
-                        <Button
-                            label="Back"
-                            onClick={this.handleBack}
-                            className="btn-secondary"
-                        />
                     </div>
                 </div>
 

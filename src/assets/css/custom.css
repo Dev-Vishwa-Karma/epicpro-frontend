@@ -389,6 +389,14 @@ border-left: 6px solid #e6140d !important;
   background-color: red !important;
   color: white !important;
   text-transform: uppercase !important;
+  font-weight: 500 !important;
+}
+
+/* Ticket Overdue */
+.over-due-ticket{
+  background-color: red !important;
+  color: white !important;
+  font-weight: 500 !important;
 }
 
 .view-all {
@@ -592,4 +600,10 @@ border-left: 6px solid #e6140d !important;
 
 .img-thumbnail {
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.btn-custom{
+  font-size: 12px !important;
+  font-weight: bold !important;
+  padding: 6px 8px !important;
 }

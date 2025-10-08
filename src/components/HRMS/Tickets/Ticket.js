@@ -210,7 +210,7 @@ class Ticket extends Component {
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
                     <div className="container-fluid">
                         <div className="d-md-flex justify-content-between align-items-center">
-                            <div className="header-action d-flex mt-2">
+                            <div className="header-action d-flex mt-2 align-items-center ml-auto justify-content-end">
                                 <div className="input-group">
                                     <input
                                         type="text"
