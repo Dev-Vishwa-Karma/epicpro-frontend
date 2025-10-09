@@ -21,6 +21,10 @@ class Dashboard extends Component {
 			projects: [],
 			loading: true,
 			showBirthdayBannerModal: false,
+			user_show_todo: true,
+			user_show_project: true,
+			global_show_todo: true,
+			global_show_project: true
 		};
 	}
 
@@ -33,6 +37,70 @@ class Dashboard extends Component {
 			this.openBirthdayBannerModel();
 		}
 
+		this.getDashboardPreferences();
+		this.fetchDashboardData();
+		this.fetchProjectsData();
+
+		// Reference changes from RightSidebar
+		window.addEventListener('globalDashboardPrefsChanged', this.handlePrefsChange);
+		window.addEventListener('dashboardPrefsChanged', this.handlePrefsChange);
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener('globalDashboardPrefsChanged', this.handlePrefsChange);
+		window.removeEventListener('dashboardPrefsChanged', this.handlePrefsChange);
+	}
+
+	handlePrefsChange = (e) => {
+		if (e.type === 'dashboardPrefsChanged') {
+			this.setState({
+				user_show_todo: e.detail.show_todo,
+				user_show_project: e.detail.show_project
+			});
+		} else if (e.type === 'globalDashboardPrefsChanged') {
+			this.setState({
+				global_show_todo: e.detail.show_todo,
+				global_show_project: e.detail.show_project
+			});
+		}
+	};
+
+	getDashboardPreferences = () => {
+	  // Fetch user preferences for current user
+	  getService.getCall('Settings.php', {
+	    action: 'get-dashboard-preferences',
+	    user_id: window.user.id
+	  })
+	  .then((data) => {
+	    if (data.status === "success") {
+	      this.setState({
+	        user_show_todo: data.data.show_todo,
+	        user_show_project: data.data.show_project
+	      });
+	    }
+	  })
+	  .catch((err) => {
+	    console.error('Failed to fetch user preferences:', err);
+	  });
+
+	  // Fetch global preferences
+	  getService.getCall('Settings.php', {
+	    action: 'get-global-dashboard-preferences'
+	  })
+	  .then((data) => {
+	    if (data.status === "success") {
+	      this.setState({
+	        global_show_todo: data.data.show_todo,
+	        global_show_project: data.data.show_project
+	      });
+	    }
+	  })
+	  .catch((err) => {
+	    console.error('Failed to fetch global preferences:', err);
+	  });
+	};
+
+	fetchDashboardData = () => {
 		getService.getCall('dashboard.php', {
 			action: 'view'
 		})
@@ -45,6 +113,7 @@ class Dashboard extends Component {
 				const totalPendingTodos = data.data[0].total_pending_todos;
 
 				// Check user role
+				const loggedInUser = authService.getUser();
 				if (loggedInUser && loggedInUser.role === "employee") {
 					totalUsers = 0;
 					totalEmployees = 1;
@@ -61,7 +130,9 @@ class Dashboard extends Component {
 			this.setState({ message: 'Failed to fetch data' });
 			console.error(err);
 		});
+	};
 
+	fetchProjectsData = () => {
 		// Get projects data
 		getService.getCall('projects.php', {
 			action: 'view',
@@ -82,7 +153,7 @@ class Dashboard extends Component {
             this.setState({ error: 'Failed to fetch employees data' });
             console.error(err);
 		});
-	}
+	};
 
 	openBirthdayBannerModel = () => {
 		this.setState({
@@ -136,7 +207,9 @@ class Dashboard extends Component {
 	}
 	render() {
 		const { fixNavbar } = this.props;
-		const { user, projects, loading, showBirthdayBannerModal} = this.state;
+		const { user, projects, loading, showBirthdayBannerModal, user_show_todo, user_show_project, global_show_todo, global_show_project } = this.state;
+		const show_todo = global_show_todo && user_show_todo;
+		const show_project = global_show_project && user_show_project;
 		return (
 			<>
 				<div>
@@ -158,24 +231,26 @@ class Dashboard extends Component {
 						<div className="container-fluid">
 							<div className="row clearfix">
 								{/* Admin see all task and Employee see their task */}
-								{user.role === 'employee' && (
+								{show_todo && user.role === 'employee' && (
 									<div className="col-12 col-sm-12">
 										<DashboardTodo />
 									</div>
 								)}
-								{(user.role === 'admin' || user.role === 'super_admin') &&  (
+								{show_todo && (user.role === 'admin' || user.role === 'super_admin') &&  (
 									<div className="col-12 col-sm-12">
 										<DashboardAdminTodo />
 									</div>
 								)}
-								<div className="col-12 col-sm-12">
-									<div className="card">
-										<div className="card-header">
-											<h3 className="card-title">Project Summary</h3>
+								{show_project && (
+									<div className="col-12 col-sm-12">
+										<div className="card">
+											<div className="card-header">
+												<h3 className="card-title">Project Summary</h3>
+											</div>
+											<DashboardTable projects={projects} loading={loading}/>
 										</div>
-										<DashboardTable projects={projects} loading={loading}/>
 									</div>
-								</div>
+								)}
 							</div>
 						</div>
 					</div>

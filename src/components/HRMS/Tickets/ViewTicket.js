@@ -45,12 +45,6 @@ class ViewTicket extends Component {
         return `${formattedDate} ${formattedTime}`;
     }
 
-    stripHtml(html) {
-        const div = document.createElement("div");
-        div.innerHTML = html;
-        return div.textContent || div.innerText || "";
-    }
-
     handleChange = (e) => {
         const { name, value } = e.target;
         this.setState({
@@ -228,7 +222,7 @@ class ViewTicket extends Component {
         const addCommentData = new FormData();
         const data = {
             ticket_id: ticket_id,
-            comment: this.stripHtml(comment),
+            comment: comment,
             comment_by: id
         }
 
@@ -365,7 +359,7 @@ class ViewTicket extends Component {
                                             <ul className="list-group" style={{height:"500px", overflow:"aito"}}>
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Description: </small>
-                                                    <p className="mb-0" style={{height:"180px", overflow:"auto"}}>{ticket.description}</p>
+                                                    <p className="mb-0" style={{height:"180px", overflow:"auto"}} dangerouslySetInnerHTML={{ __html: ticket.description }}></p>
                                                 </li>
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Priority: </small>
@@ -510,7 +504,8 @@ class ViewTicket extends Component {
                                                         />
                                                         <span>{comment.commented_by?.first_name + ' ' + comment.commented_by?.last_name} <small className="float-right text-right">{this.formatDate(comment.comment_created_at)}</small></span>
                                                         <div className="msg">
-                                                            <p>{comment.comment_comment}</p>
+                                                            <p dangerouslySetInnerHTML={{ __html: comment.comment_comment }}></p>
+                                                            
                                                         </div>
                                                     </div>
                                                 ))

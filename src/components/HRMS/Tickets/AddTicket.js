@@ -38,12 +38,6 @@ class AddTicket extends Component {
         };
     }
 
-    stripHtml(html) {
-        const div = document.createElement("div");
-        div.innerHTML = html;
-        return div.textContent || div.innerText || "";
-    }
-
     componentDidMount() {
         const { location } = this.props;
         if (location && location.state && location.state.ticket) {
@@ -119,7 +113,7 @@ class AddTicket extends Component {
         const addTicketData = new FormData();
         const data = {
             title: title,
-            description: this.stripHtml(description),
+            description: description,
             priority: priority,
             due_date: due_date,
             assigned_by: id,

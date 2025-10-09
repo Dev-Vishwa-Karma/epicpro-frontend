@@ -23,6 +23,32 @@ const TodoModal = ({
     selectedEmployeeId = '' 
   } = formData;
 
+  //state for button disabled status using ref to avoid hooks
+  const buttonDisabledRef = React.useRef(false);
+
+  const handleSubmit = (e) => {
+    // If already submitted and loading, prevent double click
+    if (buttonDisabledRef.current) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Set button as disabled
+    buttonDisabledRef.current = true;
+    
+    // original onSubmit
+    if (onSubmit) {
+      onSubmit(e);
+    }
+  };
+
+  // Reset button disabled state when modal closes or when loading becomes false
+  React.useEffect(() => {
+    if (!show || !loading) {
+      buttonDisabledRef.current = false;
+    }
+  }, [show, loading]);
+
   return (
     <>
       {show && (
@@ -111,9 +137,9 @@ const TodoModal = ({
 
                 <Button
                   label={loading ? "Saving..." : "Save changes"}
-                  onClick={onSubmit}
+                  onClick={handleSubmit}
                   className="btn-primary"
-                  disabled={loading}
+                  disabled={loading || buttonDisabledRef.current}
                   loading={loading} 
                 />
               </div>

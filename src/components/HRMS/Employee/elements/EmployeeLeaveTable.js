@@ -29,7 +29,7 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
               {currentEmployeeLeaves.length > 0 ? (
                 currentEmployeeLeaves.filter(l => l).map((leave, index) => (
                   <tr key={index}>
-                    <td className="width45">
+                    <td className="width60">
                       <Avatar
                         profile={leave.profile}
                         first_name={leave.first_name}

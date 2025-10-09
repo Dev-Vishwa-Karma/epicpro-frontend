@@ -5,20 +5,28 @@ import BlankState from '../../../common/BlankState';
 
 class RightSidebar extends Component {
     constructor(props) {
-    super(props);
-    this.state = {
-      activities: [],
-      loading:false
-    };
-  }
+      super(props);
+      this.state = {
+        activities: [],
+        loading:false,
+        show_todo: true,
+        show_project: true,
+        global_show_todo: true,
+        global_show_project: true
+      };
+    }
 
   componentDidMount() {
-      this.getTodayActivity()
+      this.getTodayActivity();
+      this.getDashboardPreferences();
+      this.getGlobalDashboardPreferences();
   }
 
   componentDidUpdate(prevProps) {
       if (!prevProps.isOpenRightSidebar && this.props.isOpenRightSidebar) {
           this.getTodayActivity();
+          this.getDashboardPreferences();
+          this.getGlobalDashboardPreferences();
       }
   }
 
@@ -46,6 +54,89 @@ class RightSidebar extends Component {
      }
   };
 
+  getDashboardPreferences = () => {
+    getService.getCall('Settings.php', {
+      action: 'get-dashboard-preferences',
+      user_id: window.user.id
+    })
+    .then((data) => {
+      if (data.status === "success") {
+        this.setState({
+          show_todo: data.data.show_todo,
+          show_project: data.data.show_project
+        });
+      }
+    })
+    .catch((err) => {
+      console.error('Failed to fetch preferences:', err);
+    });
+  };
+
+  getGlobalDashboardPreferences = () => {
+    getService.getCall('Settings.php', {
+      action: 'get-global-dashboard-preferences'
+    })
+    .then((data) => {
+      if (data.status === "success") {
+        this.setState({
+          global_show_todo: data.data.show_todo,
+          global_show_project: data.data.show_project
+        });
+      }
+    })
+    .catch((err) => {
+      console.error('Failed to fetch global preferences:', err);
+    });
+  };
+
+  handlePreferenceChange = (preferenceType, value) => {
+    this.setState({ [preferenceType]: value }, () => {
+      // Update preference on server
+      getService.editCall('Settings.php', 'update-dashboard-preferences', { [preferenceType]: value, user_id: window.user.id })
+      .then((data) => {
+        if (data.status === "success") {
+          console.log('Preference updated successfully');
+          // Dispatch custom event to update dashboard
+          window.dispatchEvent(new CustomEvent('dashboardPrefsChanged', {
+            detail: {
+              show_todo: this.state.show_todo,
+              show_project: this.state.show_project
+            }
+          }));
+        } else {
+          console.error('Failed to update preference:', data.message);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to update preference:', err);
+      });
+    });
+  };
+
+  handleGlobalPreferenceChange = (preferenceType, value) => {
+    this.setState({ [preferenceType]: value }, () => {
+      // Update global preference on server
+      getService.editCall('Settings.php', 'update-global-dashboard-preferences', { [preferenceType.replace('global_', '')]: value })
+      .then((data) => {
+        if (data.status === "success") {
+          console.log('Global preference updated successfully');
+          // Dispatch custom event to update dashboard
+          window.dispatchEvent(new CustomEvent('globalDashboardPrefsChanged', {
+            detail: {
+              show_todo: this.state.global_show_todo,
+              show_project: this.state.global_show_project
+            }
+          }));
+        } else {
+          console.error('Failed to update global preference:', data.message);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to update global preference:', err);
+      });
+    });
+  };
+
   render() {
     const { 
       isOpenRightSidebar, 
@@ -60,7 +151,7 @@ class RightSidebar extends Component {
       handleSidebar,  
       handleGradientColor,  
     } = this.props;
-    const { activities,loading} = this.state;
+    const { activities, loading, show_todo, show_project, global_show_todo, global_show_project} = this.state;
 
     return (
       <div id="rightsidebar" className={`right_sidebar ${isOpenRightSidebar ? 'open' : ''}`}>
@@ -68,104 +159,127 @@ class RightSidebar extends Component {
           <i className="fa fa-close" />
         </span>
         <ul className="nav nav-tabs" role="tablist">
-          {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
-          <li className="nav-item">
-            <a className="nav-link active" data-toggle="tab" href="#Settings" aria-expanded="true">
-              Settings
-            </a>
-          </li>
-          )}
-          {(window.user.role === 'employee') && (
-          <li className="nav-item">
-            <a className="nav-link active" data-toggle="tab" href="#activity" aria-expanded="false">
-              Today Activity
-            </a>
-          </li>
-          )}
-        </ul>
+           <li className="nav-item">
+             <a className="nav-link active" data-toggle="tab" href="#Settings" aria-expanded="true">
+               Settings
+             </a>
+           </li>
+           {(window.user.role === 'employee') && (
+           <li className="nav-item">
+             <a className="nav-link" data-toggle="tab" href="#activity" aria-expanded="false">
+               Today Activity
+             </a>
+           </li>
+           )}
+         </ul>
         <div className="tab-content">
-          {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
           <div role="tabpanel" className="tab-pane vivify fadeIn active" id="Settings" aria-expanded="true">
+            {/* Dashboard Setting */}
             <div className="mb-4">
-              <h6 className="font-14 font-weight-bold text-muted">Font Style</h6>
-              <div className="custom-controls-stacked font_setting">
-                {['font-opensans', 'font-montserrat', 'font-roboto'].map(font => (
-                  <label className="custom-control custom-radio custom-control-inline" key={font}>
-                    <input
-                      type="radio"
-                      className="custom-control-input"
-                      name="font"
-                      defaultValue={font}
-                      onChange={() => handleFont(font)}
-                    />
-                    <span className="custom-control-label">{font.replace('font-', '').replace('-', ' ').toUpperCase()}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="mb-4">
-              <h6 className="font-14 font-weight-bold text-muted">Selected Menu Icon</h6>
-              <div className="custom-controls-stacked arrow_option">
-                {['list-a', 'list-b', 'list-c'].map(icon => (
-                  <label className="custom-control custom-radio custom-control-inline" key={icon}>
-                    <input
-                      type="radio"
-                      className="custom-control-input"
-                      name="marrow"
-                      defaultValue={icon}
-                      onChange={() => handleMenuIcon(icon)}
-                    />
-                    <span className="custom-control-label">{icon.toUpperCase()}</span>
-                  </label>
-                ))}
-              </div>
-
-              <h6 className="font-14 font-weight-bold mt-4 text-muted">SubMenu List Icon</h6>
-              <div className="custom-controls-stacked list_option">
-                {['list-a', 'list-b', 'list-c'].map(icon => (
-                  <label className="custom-control custom-radio custom-control-inline" key={icon}>
-                    <input
-                      type="radio"
-                      className="custom-control-input"
-                      name="listicon"
-                      defaultValue={icon}
-                      onChange={() => handleSubMenuIcon(icon)}
-                    />
-                    <span className="custom-control-label">{icon.toUpperCase()}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h6 className="font-14 font-weight-bold mt-4 text-muted">General Settings</h6>
-              <ul className="setting-list list-unstyled mt-1 setting_switch">
-                {[
-                  { label: 'Night Mode', onChange: handleDarkMode },
-                  { label: 'Fix Navbar top', onChange: handleFixNavbar },
-                  { label: 'Header Dark', onChange: handleDarkHeader },
-                  { label: 'Min Sidebar Dark', onChange: handleMinSidebar },
-                  { label: 'Sidebar Dark', onChange: handleSidebar },
-                  { label: 'Gradient Color', onChange: handleGradientColor },
-                  //{ label: 'RTL Support', onChange: handleRtl }
-                ].map((setting, index) => (
-                  <li key={index}>
-                    <label className="custom-switch">
-                      <span className="custom-switch-description">{setting.label}</span>
+                <h6 className="font-14 font-weight-bold text-muted">Dashboard Setting</h6>
+                <div className="setting-list list-unstyled mt-1 setting_switch">
+                  <li>
+                    <label className="custom-checkbox">
                       <input
                         type="checkbox"
-                        name="custom-switch-checkbox"
-                        className="custom-switch-input"
-                        onChange={setting.onChange}
+                        checked={show_todo}
+                        onChange={(e) => this.handlePreferenceChange('show_todo', e.target.checked)}
                       />
-                      <span className="custom-switch-indicator" />
+                      <span className="checkmark"></span>
+                      <span className="custom-checkbox-description">Show Todos</span>
                     </label>
                   </li>
-                ))}
-              </ul>
+                  <li>
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={show_project}
+                        onChange={(e) => this.handlePreferenceChange('show_project', e.target.checked)}
+                      />
+                      <span className="checkmark"></span>
+                      <span className="custom-checkbox-description">Show Projects</span>
+                    </label>
+                </li>
+                  {/* Global Hide  and show Todos and Projects */}
+                  {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
+                    <>
+                      {/* <li>
+                        <label className="custom-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={global_show_todo}
+                            onChange={(e) => this.handleGlobalPreferenceChange('global_show_todo', e.target.checked)}
+                          />
+                          <span className="checkmark"></span>
+                          <span className="custom-checkbox-description">Global Show Todos</span>
+                        </label>
+                      </li>
+                      <li>
+                        <label className="custom-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={global_show_project}
+                            onChange={(e) => this.handleGlobalPreferenceChange('global_show_project', e.target.checked)}
+                          />
+                          <span className="checkmark"></span>
+                          <span className="custom-checkbox-description">Global Show Projects</span>
+                        </label>
+                      </li> */}
+                    </>
+                  )}
+                </div>
             </div>
+
+              {(window.user.role === 'admin' || window.user.role === 'super_admin') && (
+                <div>
+                  <div className="mb-4">
+                    <h6 className="font-14 font-weight-bold text-muted">Font Style</h6>
+                    <div className="custom-controls-stacked font_setting">
+                      {['font-opensans', 'font-montserrat', 'font-roboto'].map(font => (
+                        <label className="custom-control custom-radio custom-control-inline" key={font}>
+                          <input
+                            type="radio"
+                            className="custom-control-input"
+                            name="font"
+                            defaultValue={font}
+                            onChange={() => handleFont(font)}
+                          />
+                          <span className="custom-control-label">{font.replace('font-', '').replace('-', ' ').toUpperCase()}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h6 className="font-14 font-weight-bold mt-4 text-muted">General Settings</h6>
+                    <ul className="setting-list list-unstyled mt-1 setting_switch">
+                      {[
+                        { label: 'Night Mode', onChange: handleDarkMode },
+                        { label: 'Fix Navbar top', onChange: handleFixNavbar },
+                        { label: 'Header Dark', onChange: handleDarkHeader },
+                        { label: 'Min Sidebar Dark', onChange: handleMinSidebar },
+                        { label: 'Sidebar Dark', onChange: handleSidebar },
+                        { label: 'Gradient Color', onChange: handleGradientColor },
+                        //{ label: 'RTL Support', onChange: handleRtl }
+                      ].map((setting, index) => (
+                        <li key={index}>
+                          <label className="custom-switch">
+                            <span className="custom-switch-description">{setting.label}</span>
+                            <input
+                              type="checkbox"
+                              name="custom-switch-checkbox"
+                              className="custom-switch-input"
+                              onChange={setting.onChange}
+                            />
+                            <span className="custom-switch-indicator" />
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
           </div>
-          )}
           {(window.user.role === 'employee' ) && (
           <div role="tabpanel" className="tab-pane vivify fadeIn active" id="activity" aria-expanded="false">
               <ul className="new_timeline mt-3">

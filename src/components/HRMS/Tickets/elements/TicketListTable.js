@@ -40,8 +40,10 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                         <td>
                                             <div className="font-15"></div>
                                             <h6 className="mb-0">{ticket.title}</h6>
-                                            <span title={ticket.description}>
-                                                {`${(ticket.description.length < 10) ? ticket.description : ticket.description.substring(0, 10) + ' ...'}`}
+                                            <span title={ticket.description.replace(/<[^>]+>/g, '')}>
+                                                {ticket.description.replace(/<[^>]+>/g, '').length < 10
+                                                    ? ticket.description.replace(/<[^>]+>/g, '')
+                                                    : `${ticket.description.replace(/<[^>]+>/g, '').substring(0, 10)} ...`}
                                             </span>
                                         </td>
                                         <td>

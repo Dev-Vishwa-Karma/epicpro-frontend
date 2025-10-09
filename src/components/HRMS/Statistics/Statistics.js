@@ -306,7 +306,7 @@ class Statistics extends Component {
 
                       return (
                         <tr key={rowIndex} style={highlightRow ? { backgroundColor: isHoliday ? '#FAAA69' : '#fff2cc' } : {}}>
-                          <td style={{ backgroundColor: "#b7e1cd" }}>{day.display}</td>
+                          <td style={{ backgroundColor: "#b7e1cd", minWidth:"180px" }}>{day.display}</td>
                           {employeesData.map((employee, colIndex) => {
                             const value = dayAttendance[employee.id] || "";
                             const isMissingReport = value === "";

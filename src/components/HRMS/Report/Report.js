@@ -70,12 +70,6 @@ class Report extends Component {
         this.reportMessageTimeout = null;
     }
 
-    stripHtml(html) {
-        const div = document.createElement('div');
-        div.innerHTML = html || '';
-        return div.textContent || div.innerText || '';
-    }
-
     componentDidMount() {
         const today = new Date();
         const yesterday = new Date();
@@ -627,17 +621,9 @@ class Report extends Component {
 		const formData = new FormData();
         const finalStartTime = start_time || selectedReport.start_time;
         const finalEndTime = end_time || selectedReport.end_time;
-        // formData.append("report", report);
-        // formData.append("start_time", this.formatToMySQLDateTime(finalStartTime));
-        // formData.append("end_time", this.formatToMySQLDateTime(finalEndTime));
-        // formData.append("break_duration_in_minutes", break_duration_in_minutes);
-        // formData.append("todays_working_hours", todays_working_hours);
-        // formData.append("todays_total_hours", todays_total_hours);
-        // formData.append("logged_in_employee_role", window.user.role);
-        // formData.append("note", editNotes || '');
 
         const data = {
-            report: this.stripHtml(report),
+            report: report,
             start_time: this.formatToMySQLDateTime(finalStartTime),
             end_time: this.formatToMySQLDateTime(finalEndTime),
             break_duration_in_minutes: break_duration_in_minutes,
