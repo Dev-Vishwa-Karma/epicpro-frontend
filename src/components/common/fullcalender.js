@@ -79,8 +79,18 @@ class Fullcalender extends Component {
                         // Base highlights
                         const isSunday = cell.hasClass && cell.hasClass('fc-sun');
 
-                        // If Sunday or Alternate Saturday and there is a leave, show leave color in background
-                        if ((isSunday || isAlternateSaturday)) {
+                        // Check if birthday event exists for this date
+                        const hasBirthdayEvent = events && events.some(ev =>
+                            ev.className === 'blue-event' &&
+                            ev.start === dateStr &&
+                            isDateInRange(dateStr)
+                        );
+
+                        // If birthday, always show birthday color (even on Sunday/alternate Saturday)
+                        if (hasBirthdayEvent) {
+                            cell.css('background-color', '#0879FA');
+                            cell.css('color', 'white');
+                        } else if ((isSunday || isAlternateSaturday)) {
                             if (hasHalfDayLeave) {
                                 cell.css('background-color', '#87ceeb');
                                 cell.css('color', 'white');
@@ -88,7 +98,7 @@ class Fullcalender extends Component {
                                 cell.css('background-color', 'red');
                                 cell.css('color', 'white');
                             } else {
-                                // Fallback highlight for Sundays or alternate Saturdays when no leave
+                                // Fallback highlight for Sundays or alternate Saturdays when no leave and birthday
                                 cell.css('background-color', '#FFE599'); // fff2cc
                             }
                         }
@@ -152,8 +162,21 @@ class Fullcalender extends Component {
                         }
 
                         // Finally, highlight current date with light pink only if no report/leave color is applied
-                        const hasReportColorToday = hasDailyReport || hasLowHoursRed || hasHalfDayLeave || hasFullDayLeave;
-                        if (cell.hasClass && cell.hasClass('fc-today') && !hasReportColorToday) {
+                        // Check if today has an event (green-event, blue-event, red-event, daily-report, half-day-leave-event, leave-event)
+                        const hasEventToday = events && events.some(ev =>
+                            ev.start === dateStr &&
+                            (
+                                ev.className === 'green-event' ||
+                                ev.className === 'blue-event' ||
+                                ev.className === 'red-event' ||
+                                ev.className === 'daily-report' ||
+                                ev.className === 'half-day-leave-event' ||
+                                ev.className === 'leave-event'
+                            )
+                        );
+
+                        // Only apply pink highlight if today and NO event/report/leave color is present
+                        if (cell.hasClass && cell.hasClass('fc-today') && !hasEventToday && !hasDailyReport && !hasLowHoursRed && !hasHalfDayLeave && !hasFullDayLeave) {
                             cell.css('background-color', '#FFEAF3');
                             cell.css('color', 'inherit');
                         }

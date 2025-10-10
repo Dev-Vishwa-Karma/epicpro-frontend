@@ -39,7 +39,7 @@ const EmployeeTable = ({ loading, employeeList, viewEmployee, goToEditEmployee, 
                                         </td>
                                         <td className="d-flex">
                                          <Avatar
-                                            profile={employee.profile}
+                                            profile={employee.profile || '/assets/images/sm/avatar2.jpg'}
                                             first_name={employee.first_name}
                                             last_name={employee.last_name}
                                             size={40}

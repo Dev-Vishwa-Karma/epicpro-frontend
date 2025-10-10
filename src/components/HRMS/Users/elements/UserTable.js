@@ -32,7 +32,7 @@ const UserTable = ({ loading, currentUsers, handleEditClick, openDeleteModal }) 
                 <tr key={index}>
                   <td className="width45">
                     <Avatar
-                      profile={user.profile}
+                      profile={user.profile || '/assets/images/sm/avatar2.jpg'}
                       first_name={user.first_name}
                       last_name={user.last_name}
                       size={45}

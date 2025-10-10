@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { getToday } from '../../../../utils';
 import { getService } from '../../../../services/getService';
 import BlankState from '../../../common/BlankState';
+import AlertMessages from '../../../common/AlertMessages';
 
 class RightSidebar extends Component {
     constructor(props) {
@@ -12,7 +13,11 @@ class RightSidebar extends Component {
         show_todo: true,
         show_project: true,
         global_show_todo: true,
-        global_show_project: true
+        global_show_project: true,
+        showSuccess: false,
+        successMessage: '',
+        showError: false,
+        errorMessage: '',
       };
     }
 
@@ -95,7 +100,11 @@ class RightSidebar extends Component {
       getService.editCall('Settings.php', 'update-dashboard-preferences', { [preferenceType]: value, user_id: window.user.id })
       .then((data) => {
         if (data.status === "success") {
-          console.log('Preference updated successfully');
+          this.setState({
+            showSuccess: true,
+            successMessage: 'Preference updated successfully!',
+          });
+          setTimeout(() => this.setState({ showSuccess: false }), 3000);
           // Dispatch custom event to update dashboard
           window.dispatchEvent(new CustomEvent('dashboardPrefsChanged', {
             detail: {
@@ -104,11 +113,19 @@ class RightSidebar extends Component {
             }
           }));
         } else {
-          console.error('Failed to update preference:', data.message);
+          this.setState({
+            showError: true,
+            errorMessage: data.message || 'Failed to update preference.',
+          });
+          setTimeout(() => this.setState({ showError: false }), 3000);
         }
       })
       .catch((err) => {
-        console.error('Failed to update preference:', err);
+        this.setState({
+          showError: true,
+          errorMessage: 'Failed to update preference.',
+        });
+        setTimeout(() => this.setState({ showError: false }), 3000);
       });
     });
   };
@@ -154,6 +171,15 @@ class RightSidebar extends Component {
     const { activities, loading, show_todo, show_project, global_show_todo, global_show_project} = this.state;
 
     return (
+      <>
+      <AlertMessages
+          showSuccess={this.state.showSuccess}
+          successMessage={this.state.successMessage}
+          showError={this.state.showError}
+          errorMessage={this.state.errorMessage}
+          setShowSuccess={(v) => this.setState({ showSuccess: v })}
+          setShowError={(v) => this.setState({ showError: v })}
+        />
       <div id="rightsidebar" className={`right_sidebar ${isOpenRightSidebar ? 'open' : ''}`}>
         <span className="p-3 settingbar float-right" onClick={() => { toggleRightSidebar(); this.getTodayActivity(); }}>
           <i className="fa fa-close" />
@@ -316,8 +342,8 @@ class RightSidebar extends Component {
           </div>
           )}
           </div>
-        </div>
-      
+      </div>
+      </>
     );
   }
 }

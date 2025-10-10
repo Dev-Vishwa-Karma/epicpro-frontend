@@ -90,7 +90,6 @@ const AddHolidayModal = ({
                 className="btn-primary"
                 type="submit"
                 disabled={ButtonLoading}
-                loading={ButtonLoading}
               />
               </div>
             </form>

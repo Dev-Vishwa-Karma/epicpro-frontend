@@ -69,7 +69,6 @@ class EditHolidayModal extends Component {
                     className="btn-primary"
                     type="submit"
                     disabled={ButtonLoading}
-                    loading={ButtonLoading}
                   />
                 </div>
               </form>

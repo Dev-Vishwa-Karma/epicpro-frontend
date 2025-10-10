@@ -34,13 +34,14 @@ const DashboardTable = ({ projects, loading }) => {
                           {project.team_members.map((member, idx) => (
                           <Avatar
                               key = {idx}
-                              profile={member.profile}
+                              profile={member.profile || '/assets/images/sm/avatar2.jpg'}
                               first_name={member.first_name}
                               last_name={member.last_name}
                               size={35}
                               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
                               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
                               className="avatar-img"
+                              onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
                               style={{ marginLeft: idx === 0 ? 0 : -14,
                                }}
                             />

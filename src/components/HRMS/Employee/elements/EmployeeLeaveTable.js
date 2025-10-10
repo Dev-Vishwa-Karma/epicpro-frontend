@@ -31,7 +31,7 @@ const EmployeeLeaveTable = ({ currentEmployeeLeaves, loading, handleEditClickFor
                   <tr key={index}>
                     <td className="width60">
                       <Avatar
-                        profile={leave.profile}
+                        profile={leave.profile || '/assets/images/sm/avatar2.jpg'}
                         first_name={leave.first_name}
                         last_name={leave.last_name}
                         size={40}

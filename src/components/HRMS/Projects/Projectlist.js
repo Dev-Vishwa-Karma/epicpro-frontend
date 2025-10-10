@@ -51,6 +51,23 @@ class ProjectList extends Component {
             isSubmitting: false,
         }
     }
+    // Sort projects (active first, then inactive; each by date in decending order)
+    sortProjects = (projects) => {
+        const toTime = (p) => {
+            const dateStr = p.created_at || p.project_start_date || p.updated_at || null;
+            const t = dateStr ? Date.parse(dateStr) : 0;
+            return isNaN(t) ? 0 : t;
+        };
+        const isActive = (p) => Number(p.project_is_active) === 1 ? 1 : 0;
+        const copy = Array.isArray(projects) ? [...projects] : [];
+        copy.sort((a, b) => {
+            const aAct = isActive(a);
+            const bAct = isActive(b);
+            if (aAct !== bAct) return bAct - aAct; // active first
+            return toTime(b) - toTime(a); // newer first
+        });
+        return copy;
+    };
     handleBoxToggle = (index) => {
         this.setState((prevState) => ({
             collapsedCards: {
@@ -125,8 +142,8 @@ class ProjectList extends Component {
                     collapsedCards[project.project_id] = Number(project.project_is_active) === 0;
                 });
                 this.setState({
-                    projects: data.data,
-                    allProjects: data.data,
+                    projects: this.sortProjects(data.data),
+                    allProjects: this.sortProjects(data.data),
                     loading: false
                 });
             } else {
@@ -313,7 +330,7 @@ class ProjectList extends Component {
                 if (isEditing) {
                     // Update existing project in the list
                     this.setState((prevState) => ({
-                        projects: prevState.projects.map(project => 
+                        projects: this.sortProjects(prevState.projects.map(project => 
                             project.project_id === editingProjectId ? {
                                 ...project,
                                 project_name: projectName,
@@ -333,8 +350,8 @@ class ProjectList extends Component {
                                     };
                                 })
                             } : project
-                        ),
-                        allProjects: prevState.allProjects.map(project => 
+                        )),
+                        allProjects: this.sortProjects(prevState.allProjects.map(project => 
                             project.project_id === editingProjectId ? {
                                 ...project,
                                 project_name: projectName,
@@ -354,7 +371,7 @@ class ProjectList extends Component {
                                     };
                                 })
                             } : project
-                        ),
+                        )),
                     }));
                 } else {
                     // Add new project to the list
@@ -379,8 +396,8 @@ class ProjectList extends Component {
                         })
                     };
                     this.setState(prevState => ({
-                        projects: [newProject, ...prevState.projects],
-                        allProjects: [newProject, ...prevState.allProjects],
+                        projects: this.sortProjects([newProject, ...prevState.projects]),
+                        allProjects: this.sortProjects([newProject, ...prevState.allProjects]),
                     }));
                 }
 
@@ -486,16 +503,16 @@ class ProjectList extends Component {
     
             if (data.status === 'success') {
                 this.setState(prevState => ({
-                    projects: prevState.projects.map(p =>
+                    projects: this.sortProjects(prevState.projects.map(p =>
                         p.project_id === projectId
                             ? { ...p, project_is_active: newStatus }
                             : p
-                    ),
-                    allProjects: prevState.allProjects.map(p =>
+                    )),
+                    allProjects: this.sortProjects(prevState.allProjects.map(p =>
                         p.project_id === projectId
                             ? { ...p, project_is_active: newStatus }
                             : p
-                    ),
+                    )),
                     showSuccess: true,
                     successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
                 }));
@@ -551,8 +568,8 @@ class ProjectList extends Component {
          apiCall.then(data => {
                 if (data.status === 'success') {
                     this.setState({
-                        projects: data.data,
-                        allProjects: data.data,
+                        projects: this.sortProjects(data.data),
+                        allProjects: this.sortProjects(data.data),
                     });
                 } else {
                     this.setState({ projects: [], allProjects: [] });
@@ -704,7 +721,8 @@ class ProjectList extends Component {
         // Filter projects for employees: only show active projects
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
             ? projects
-            : projects.filter(project => Number(project.project_is_active) === 1);
+            : projects.filter(project => Number(project.project_is_active) === 1)
+                .sort((a, b) => (Date.parse(b.created_at || b.project_start_date || 0) || 0) - (Date.parse(a.created_at || a.project_start_date || 0) || 0));
         const skeletonCount = visibleProjects.length === 0 ? 6 : visibleProjects.length;
 
         return (

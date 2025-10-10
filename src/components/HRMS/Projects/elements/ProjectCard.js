@@ -123,7 +123,7 @@ const ProjectCard = ({
                 {project.team_members.map((member, idx) => (
                 <Avatar
                     key={member.id || idx}  // Use member.id if available, otherwise fall back to idx
-                    profile={member.profile}
+                    profile={member.profile || '/assets/images/sm/avatar2.jpg'}
                     first_name={member.first_name}
                     last_name={member.last_name}
                     size={40}
