@@ -20,6 +20,28 @@ export default class Login extends Component {
 		};
 	}
 
+	componentDidMount() {
+		// Check for stored message
+		const loginMessage = sessionStorage.getItem('loginMessage');
+		
+		if (loginMessage) {
+			try {
+			const messageData = JSON.parse(loginMessage);
+			this.setState({ 
+				loginError: messageData.text 
+			});
+			} catch (e) {
+			// Fallback for simple string messages
+			this.setState({ 
+				loginError: loginMessage 
+			});
+			}
+			
+			// Clear the stored message
+			sessionStorage.removeItem('loginMessage');
+		}
+	}
+
 	handleLoginIn = () => {
 
 		const { email, password } = this.state;

@@ -23,6 +23,7 @@ import DailyReportModal from "./elements/DailyReportModal";
 class Header extends Component {
   constructor(props) {
     super(props);
+    this.userStatusInterval = null;
     this.state = {
       showModal: false,
       report: "",
@@ -84,6 +85,7 @@ class Header extends Component {
         () => {
           this.startTimerInterval();
           if (user.role === "employee") {
+            this.setState({ isPunchedInLocal: true });
             this.getPunchInStatus();
             this.getActivities();
           }
@@ -92,6 +94,7 @@ class Header extends Component {
           this.checkBirthdays();
           this.startNotificationInterval();
           this.checktodayDueDate();
+          this.startUserStatusCheck();
         }
       );
     }
@@ -101,6 +104,9 @@ class Header extends Component {
   componentWillUnmount() {
     window.removeEventListener("refreshActivities", this.handleApplyFilter);
     clearInterval(this.state.timer);
+    if (this.userStatusInterval) {
+      clearInterval(this.userStatusInterval);
+    }
   }
 
   startNotificationInterval() {
@@ -134,6 +140,26 @@ class Header extends Component {
       .catch((err) => {
         console.error("Error checking birthdays:", err);
       });
+  };
+
+    startUserStatusCheck = () => {
+      this.userStatusInterval = setInterval(() => {
+        getService.getCall('get_employees.php', { action: 'check_status' })
+          .then(() => {
+            // User is active, do nothing
+          })
+          .catch((err) => {
+            if (err.response && err.response.status === 401) {
+              // User is deleted
+              localStorage.removeItem('user');
+              sessionStorage.setItem('loginMessage', JSON.stringify({
+                type: 'error',
+                text: 'Your account has been deactivated. Please contact administrator.'
+              }));
+              window.location.href = '/login';
+            }
+          });
+      }, 3000);
   };
 
   startTimerInterval = (punchInTime, isAutoClose = true) => {
@@ -203,6 +229,7 @@ class Header extends Component {
         let data = response.data;
         if (data.status === "success") {
           this.setState({
+            isPunchedInLocal: false,
             punchInTime: null,
             disableButton: false,
           });
@@ -243,19 +270,21 @@ class Header extends Component {
       .then((data) => {
         if (data.status === "success") {
           const inTime = new Date(data.data[0].in_time);
-          this.props.punchInAction(true);
           this.setState({
+            isPunchedInLocal: true,
             punchInTime: inTime,
             start_time: inTime.toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
               hour12: true,
             }),
+            isPunchStatusLoading: false,
           });
+          this.props.punchInAction(true);
           this.startTimerInterval(inTime);
         } else {
+          this.setState({ isPunchedInLocal: false, isTimeLoading: false, isPunchStatusLoading: false });
           this.props.punchInAction(false);
-          this.setState({ isTimeLoading: false });
         }
       })
       .catch((error) => {
@@ -404,6 +433,74 @@ class Header extends Component {
   };
 
   handlePunchIn = () => {
+  // First check if user is already punched out for today
+  const current_date = new Date().toISOString().split('T')[0];
+  
+  getService
+    .getCall("activities.php", {
+      action: "get_punch_status",
+      user_id: this.state.userId,
+    })
+    .then((data) => {
+      if (data.status === "success") {
+        // User has active punch in, proceed with punch in
+        this.proceedWithPunchIn();
+      } else {
+        // Check if user has already punched out today
+        this.checkIfAlreadyPunchedOut();
+      }
+    })
+    .catch((error) => {
+      this.setState({
+        isPunchedInLocal: false,
+        errorMessage: "Something went wrong. Please try again.",
+        showError: true,
+        showSuccess: false,
+        isPunchStatusLoading: false,
+      });
+      setTimeout(this.dismissMessages, 3000);
+    });
+};
+
+  checkIfAlreadyPunchedOut = () => {
+    const current_date = new Date().toISOString().split('T')[0];
+    
+    getService
+      .getCall("activities.php", {
+        action: "view",
+        user_id: this.state.userId,
+        from_date: current_date,
+        to_date: current_date
+      })
+      .then((data) => {
+        if (data.status === "success" && data.data.length > 0) {
+          // Check if any punch activity is completed for today
+          const todayPunches = data.data.filter(activity => 
+            activity.activity_type === 'Punch' && 
+            activity.status === 'completed'
+          );
+          
+          if (todayPunches.length > 0) {
+            // User has already punched out today, show error immediately without loading
+            this.setState({
+              errorMessage: "You already punched out for today.",
+              showError: true,
+              showSuccess: false,
+            });
+            setTimeout(this.dismissMessages, 3000);
+            return;
+          }
+        }
+        // If no completed punches found, proceed with punch in
+        this.proceedWithPunchIn();
+      })
+      .catch((error) => {
+        // If check fails, still proceed with punch in ( backend handle validation)
+        this.proceedWithPunchIn();
+      });
+  };
+
+  proceedWithPunchIn = () => {
     this.setState({ isTimeLoading: true });
     const formData = new FormData();
     formData.append("employee_id", this.state.userId);
@@ -422,6 +519,7 @@ class Header extends Component {
           window.dispatchEvent(new CustomEvent("refreshActivities"));
 
           this.setState({
+            isPunchedInLocal: true,
             punchInTime: currentTime,
             start_time: currentTime.toLocaleTimeString([], {
               hour: "2-digit",
@@ -431,6 +529,7 @@ class Header extends Component {
             successMessage: data.message,
             showError: false,
             showSuccess: true,
+            isTimeLoading: false,
           });
 
           this.startTimerInterval(currentTime, false);
@@ -675,6 +774,7 @@ class Header extends Component {
             isReportSubmitted: true, //disable after submit
           });
 
+          this.setState({ isPunchedInLocal: false });
           this.props.punchInAction(false);
           this.props.breakDurationCalAction(0);
           clearInterval(this.state.timer);
@@ -793,7 +893,7 @@ class Header extends Component {
                 {window.user && window.user.role === "employee" && (
                   <Button
                     label={
-                      isPunchedIn ? (
+                      this.state.isPunchedInLocal ? (
                         this.state.isTimeLoading ? (
                           <span
                             style={{
@@ -812,7 +912,7 @@ class Header extends Component {
                       )
                     }
                     onClick={
-                      isPunchedIn ? this.handlePunchOut : this.handlePunchIn
+                      this.state.isPunchedInLocal ? this.handlePunchOut : this.handlePunchIn
                     }
                     disabled={disableButton}
                     className="btn-primary"
