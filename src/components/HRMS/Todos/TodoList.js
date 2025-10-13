@@ -510,22 +510,46 @@ class TodoList extends Component {
     };
 
     handleDeleteTodo = () => {
-    const { todoToDelete } = this.state;
+    const { todoToDelete, currentPageTodos } = this.state;
     if (!todoToDelete) return;
     this.setState({ ButtonLoading: true });
+
+    // Store current page before deletion for navigation logic
+    const currentPageBeforeDelete = currentPageTodos;
 
     // API call to delete todo using getService
     getService.deleteCall('project_todo.php', 'delete', todoToDelete.id)
     .then(data => {
         if (data.status === 'success') {
             // Re-fetch to respect filters
-            this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter);
+            this.fetchFilteredTodos(this.state.employeeFilter, this.state.statusFilter)
+            .then(() => {
+                // Calculate new page based on updated todos
+                const { todos, dataPerPage } = this.state;
+                const totalPages = Math.ceil(todos.length / dataPerPage);
+                
+                let newPage = currentPageBeforeDelete;
+                
+                // If current page is now empty and there are previous pages, go to previous page
+                if (currentPageBeforeDelete > totalPages && totalPages > 0) {
+                    newPage = totalPages; // Go to last available page
+                }
+                // If we're on page 1 and it becomes empty, stay on page 1
+                else if (currentPageBeforeDelete === 1 && totalPages === 0) {
+                    newPage = 1;
+                }
+                // If current page becomes empty but there are previous pages, go to previous page
+                else if (currentPageBeforeDelete > 1 && currentPageBeforeDelete > totalPages) {
+                    newPage = currentPageBeforeDelete - 1;
+                }
+                
             this.setState({
                 showDeleteModal: false,
                 todoToDelete: null,
                 ButtonLoading: false,
                 successMessage: "Todo deleted successfully!",
-                showSuccess: true
+                showSuccess: true,
+                currentPageTodos: newPage
             });
             setTimeout(() => {
                 this.setState({
@@ -533,6 +557,7 @@ class TodoList extends Component {
                     successMessage: ''
                 });
             }, 3000);
+        });
 
         } else {
             this.setState({ 
@@ -580,7 +605,7 @@ class TodoList extends Component {
             }
         }
         this.setState({ loading: true });
-        getService.getCall('project_todo.php', params)
+        return getService.getCall('project_todo.php', params)
             .then(data => {
                 if (data.status === 'success') {
                     const list = data.data;

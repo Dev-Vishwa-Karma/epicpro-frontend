@@ -60,6 +60,7 @@ class Header extends Component {
       hasMore: true,
       limit: 5,
       isTimeLoading: false,
+      isPunchedInLocal: localStorage.getItem('isPunchedIn') === 'true',
     };
   }
 
@@ -85,7 +86,6 @@ class Header extends Component {
         () => {
           this.startTimerInterval();
           if (user.role === "employee") {
-            this.setState({ isPunchedInLocal: true });
             this.getPunchInStatus();
             this.getActivities();
           }
@@ -233,6 +233,7 @@ class Header extends Component {
             punchInTime: null,
             disableButton: false,
           });
+          localStorage.setItem('isPunchedIn', 'false');
           clearInterval(this.state.timer);
           this.props.punchInAction(false);
           this.props.breakInAction(false);
@@ -280,10 +281,12 @@ class Header extends Component {
             }),
             isPunchStatusLoading: false,
           });
+          localStorage.setItem('isPunchedIn', 'true');
           this.props.punchInAction(true);
           this.startTimerInterval(inTime);
         } else {
           this.setState({ isPunchedInLocal: false, isTimeLoading: false, isPunchStatusLoading: false });
+          localStorage.setItem('isPunchedIn', 'false');
           this.props.punchInAction(false);
         }
       })
