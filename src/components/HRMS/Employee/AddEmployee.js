@@ -443,6 +443,7 @@ appendDataToFormData(addEmployeeData, data)
             showError: false,
             ButtonLoading: false,
           }));
+          this.props.history.push('/hr-employee');
 
           setTimeout(this.dismissMessages, 5000);
 

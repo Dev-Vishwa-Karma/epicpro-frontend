@@ -594,6 +594,32 @@ class Events extends Component {
         };
       })
       .filter((event) => event !== null); // Remove null entries
+    
+
+  // Uncomment this code if only display active employee birthday on event list and comment above code  
+  //   const birthdayEvents = this.state.employees
+  // .map((employee) => {
+  //   if (!employee.dob || employee.status !== 1) {
+  //     return null;
+  //   }
+
+  //   // Create birthday event for the selected year
+  //   const dob = new Date(employee.dob);
+  //   const month = dob.getMonth();
+  //   const day = dob.getDate();
+  //   const selectedYear = this.state.selectedYear;
+  //   const birthdayDate = new Date(selectedYear, month, day);
+
+  //   return {
+  //     id: `birthday_${employee.id}`,
+  //     event_name: `${employee.first_name} ${employee.last_name}'s Birthday`,
+  //     event_date: formatDate(birthdayDate),
+  //     event_type: "birthday",
+  //     employee_id: employee.id,
+  //   };
+  // })
+  // .filter((event) => event !== null); 
+
 
     getService
       .getCall("events.php", {

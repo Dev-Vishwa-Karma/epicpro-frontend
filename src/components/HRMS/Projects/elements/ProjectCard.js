@@ -119,7 +119,7 @@ const ProjectCard = ({
               <strong>Team:</strong>
             </div>
             <div className="col-8 py-1">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="overflow-auto" style={{ display: 'flex', alignItems: 'center' }}>
                 {project.team_members.map((member, idx) => (
                 <Avatar
                     key={member.id || idx}  // Use member.id if available, otherwise fall back to idx
