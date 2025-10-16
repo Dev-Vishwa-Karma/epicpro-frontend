@@ -57,10 +57,11 @@ const AddLeaveRequestModal = ({
                 {['admin', 'super_admin'].includes(logged_in_employee_role) && (
                   <div className="col-md-12">
                     <InputField
-                      style={{ minWidth: '460px' }}
+                      style={{ minWidth: '340px' }}
                       inputClassName="custom-select w-auto"
                       name="employee_id"
                       type="select"
+                      label='Select Employee'
                       value={employee_id}
                       onChange={handleInputChangeForAddLeaves}
                       error={addLeaveErrors && addLeaveErrors.employee_id}

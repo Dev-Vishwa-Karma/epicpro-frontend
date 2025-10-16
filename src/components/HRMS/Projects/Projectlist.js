@@ -739,8 +739,7 @@ class ProjectList extends Component {
                     <div className="container-fluid">
                         <div className="d-flex justify-content-between align-items-center">
                             <ul className="nav nav-tabs page-header-tab">
-                                <li className="nav-item"><a className="nav-link active" id="Project-tab" data-toggle="tab" href="#Project-OnGoing">OnGoing</a></li>
-                                {/* <li className="nav-item"><a className="nav-link" id="Project-tab" data-toggle="tab" href="#Project-UpComing">UpComing</a></li> */}
+                                {/* <li className="nav-item"><a className="nav-link active" id="Project-tab" data-toggle="tab" href="#Project-OnGoing">OnGoing</a></li> */}
                             </ul>
                             <div className="header-action d-md-flex">
                                 <div className="input-group mr-2">
@@ -808,83 +807,6 @@ class ProjectList extends Component {
                                     )}
                                 </div>
 
-                            </div>
-                            <div className="tab-pane fade" id="Project-UpComing" role="tabpanel">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <div className="table-responsive">
-                                            <table className="table table-hover table-striped table-vcenter mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Owner</th>
-                                                        <th>Milestone</th>
-                                                        <th className="w100">Work</th>
-                                                        <th className="w100">Duration</th>
-                                                        <th>Priority</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar1.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>Isidore Dilao</span></td>
-                                                        <td>Account receivable</td>
-                                                        <td><span>30:00</span></td>
-                                                        <td>30:0 hrs</td>
-                                                        <td><span className="text-warning">Medium</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar2.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>Maricel Villalon</span></td>
-                                                        <td>Account receivable</td>
-                                                        <td><span>68:00</span></td>
-                                                        <td>105:0 hrs</td>
-                                                        <td><span className="text-danger">High</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar3.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>Theresa Wright</span></td>
-                                                        <td>Approval site</td>
-                                                        <td><span>74:00</span></td>
-                                                        <td>89:0 hrs</td>
-                                                        <td><span>None</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar4.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>Jason Porter</span></td>
-                                                        <td>Final touch up</td>
-                                                        <td><span>30:00</span></td>
-                                                        <td>30:0 hrs</td>
-                                                        <td><span>None</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar5.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>Annelyn Mercado</span></td>
-                                                        <td>Account receivable</td>
-                                                        <td><span>30:00</span></td>
-                                                        <td>30:0 hrs</td>
-                                                        <td><span>None</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar6.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>Sean Black</span></td>
-                                                        <td>Basement slab preparation</td>
-                                                        <td><span>88:00</span></td>
-                                                        <td>88:0 hrs</td>
-                                                        <td><span>None</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar7.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>Scott Ortega</span></td>
-                                                        <td>Account receivable</td>
-                                                        <td><span>56:00</span></td>
-                                                        <td>125:0 hrs</td>
-                                                        <td><span className="text-warning">Medium</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><img src="../assets/images/xs/avatar8.jpg" alt="Avatar" className="w30 rounded-circle mr-2" /> <span>David Wallace</span></td>
-                                                        <td>Account receivable</td>
-                                                        <td><span>30:00</span></td>
-                                                        <td>30:0 hrs</td>
-                                                        <td><span>None</span></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

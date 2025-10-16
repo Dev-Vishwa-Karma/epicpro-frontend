@@ -47,7 +47,7 @@ class CalendarWithTabs extends Component {
             showSuccess: false,
             errorMessage: "",
             showError: false,
-            activeTab: "calendar",
+            activeTab: this.props.activeTab || "calendar",
             activities: [],
             reports: [],
             leaves: [],
@@ -91,6 +91,11 @@ class CalendarWithTabs extends Component {
     onTogglePassword = () => {
         this.setState(prev => ({ showPassword: !prev.showPassword }));
     }
+    componentDidMount() {
+        if (this.props.activeTab && this.props.activeTab !== this.state.activeTab) {
+            this.setState({ activeTab: this.props.activeTab });
+        }
+    }
 
     // Function to dismiss messages
     dismissMessages = () => {
@@ -113,6 +118,10 @@ class CalendarWithTabs extends Component {
                 this.getDepartments();
                 this.handleApplyFilter();
             }
+        }
+        // Sync when only tab changes
+        if (prevProps.activeTab !== this.props.activeTab && this.props.activeTab !== this.state.activeTab) {
+            this.setState({ activeTab: this.props.activeTab || 'profile' });
         }
     }
 
@@ -704,7 +713,10 @@ class CalendarWithTabs extends Component {
                                                 role="tab"
                                                 aria-controls="pills-calendar"
                                                 aria-selected={this.state.activeTab === "calendar"}
-                                                onClick={() => this.setState({ activeTab: "calendar" })}
+                                                onClick={() => {
+                                                    this.props.history.push(`/view-employee/${this.props.employeeId}/calendar`);
+                                                    this.setState({ activeTab: "calendar" });
+                                                }}
                                             >
                                                 Calendar
                                             </a>
@@ -720,7 +732,10 @@ class CalendarWithTabs extends Component {
                                                 role="tab"
                                                 aria-controls="pills-timeline"
                                                 aria-selected={this.state.activeTab === "timeline"}
-                                                onClick={() => this.setState({ activeTab: "timeline" })}
+                                                onClick={() => {
+                                                    this.props.history.push(`/view-employee/${this.props.employeeId}/timeline`);
+                                                    this.setState({ activeTab: "timeline" });
+                                                }}
                                             >
                                                 Timeline
                                             </a>
@@ -735,7 +750,10 @@ class CalendarWithTabs extends Component {
                                             role="tab"
                                             aria-controls="pills-profile"
                                             aria-selected={this.state.activeTab === "profile"}
-                                            onClick={() => this.setState({ activeTab: "profile" })}
+                                            onClick={() => {
+                                                this.props.history.push(`/view-employee/${this.props.employeeId}/profile`);
+                                                this.setState({ activeTab: "profile" });
+                                            }}
                                         >
                                             Profile
                                         </a>
@@ -801,7 +819,7 @@ class CalendarWithTabs extends Component {
                                                 </div>
                                             </div>
                                                             
-                                        <ActivitiesTime activities = { activities } />
+                                        <ActivitiesTime activities = { activities } employeeId={this.state.employeeId || this.props.employeeId} fromDate={this.state.filterFromDate} toDate={this.state.filterToDate} />
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "profile" ? "show active" : ""}`} id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
                                         <div className="card">

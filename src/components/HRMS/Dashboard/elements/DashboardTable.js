@@ -12,7 +12,7 @@ const DashboardTable = ({ projects, loading }) => {
         </div>
       ) : (
         <div className="table-responsive">
-          <table className="table table-hover table-striped table-vcenter mb-0">
+          <table className="table table-hover table-striped table-vcenter text-nowrap mb-0">
             <thead>
               <tr>
                 <th></th>
@@ -26,9 +26,9 @@ const DashboardTable = ({ projects, loading }) => {
               {projects && projects.length > 0 ? (
                 projects.map((project, index) => (
                   <tr key={project.id || index}>
-                    <td>{(index + 1).toString().padStart(2, '0')}</td>
+                    <td className="w40">{(index + 1).toString().padStart(2, '0')}</td>
                     <td>{project.client_name}</td>
-                    <td className='w200'>
+                    <td className="d-flex w200">
                       {project.team_members && project.team_members.length > 0 && (
                         <div style={{ display: 'flex', alignItems: 'center', marginTop: 8 }}>
                           {project.team_members.map((member, idx) => (

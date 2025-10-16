@@ -268,7 +268,7 @@ class Statistics extends Component {
                 />
               </div>
 
-              <div className="ml-auto">
+              <div className="legend-container ml-auto">
                 <span className="leave">Leave</span>
                 <span className="halfDay">Half day</span>
                 <span className="extraWorking">Extra working</span>
