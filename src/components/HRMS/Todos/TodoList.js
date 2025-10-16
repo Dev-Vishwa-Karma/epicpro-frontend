@@ -783,7 +783,7 @@ class TodoList extends Component {
                             	<div className="col-12">
                                     <div className="card">
                                         <div className="card-body">
-                                            <div className="row align-items-center">
+                                            <div className="row align-items-center todo-filter">
                                                 <div className="col-lg-2 col-md-12 col-sm-12" style={{backgroundColor:"transparent"}}>
                                                     <select
                                                         id="employeeFilter"

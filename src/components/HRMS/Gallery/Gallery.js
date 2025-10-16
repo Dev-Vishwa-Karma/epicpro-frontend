@@ -542,42 +542,43 @@ class Gallery extends Component {
                         <div className="row row-cards">
                             <div className="col-12">
                                 <div className="card">
-                                    <div className="card-header">
-                                        <div className="page-subtitle ml-0">
+                                    <div className="card-header d-flex flex-wrap align-items-center justify-content-between gallery-card">
+                                        <div className="page-subtitle ml-0 mb-2 mb-md-0 gallery-page-subtitle">
                                             {filteredImages.length > 0
-                                            ? `${indexOfFirstImage + 1} - ${Math.min(indexOfLastImage, filteredImages.length)} of ${filteredImages.length} photos`
-                                            : <span className="text-muted">Image not available</span>}
+                                                ? (`${indexOfFirstImage + 1} - ${Math.min(indexOfLastImage, filteredImages.length)} of ${filteredImages.length} photos`
+                                        ) : (
+                                            <span className="text-muted">Image not available</span>
+                                        )}
                                         </div>
-                                        <div className="page-options d-flex">
-                                            <select className="form-control custom-select w-auto" onChange={this.handleSortChange} value={sortOrder}>
-                                                <option value="desc">Newest</option>
-                                                <option value="asc">Oldest</option>
-                                            </select>
-                                            { (role === 'admin' || role === 'super_admin') ? (
-                                                    <div className="ml-2" style={{ minWidth: '240px' }}>
-                                                        <InputField
-                                                            type="select"
-                                                            // label="Select Employees"
-                                                            name="employee_id"
-                                                            value={this.state.selectedEmployeeId}
-                                                            onChange={this.handleEmployeeSelection}
-                                                            options={getSortedEmployees(employees)
-                                                                .filter(emp => emp.status === 1) 
-                                                                .map(emp => ({
-                                                                value: emp.id,
-                                                                label: `${emp.first_name} ${emp.last_name}`
-                                                            }))}
-                                                            style={{ minWidth: '240px' }}
-                                                            containerClassName="mb-0"
-                                                            inputClassName="custom-select w-auto"
-                                                        />
-                                                    </div>
-                                                ) : null }
-                                            <Button
-                                                label="Upload New"
-                                                className="btn-primary ml-2"
-                                                onClick={this.openModal}
-                                            />
+                                        <div className="page-options d-flex flex-wrap align-items-center justify-content-end gallery-page-options">
+                                        <select className="form-control custom-select w-auto mb-2 mb-md-0" onChange={this.handleSortChange} value={sortOrder}>
+                                            <option value="desc">Newest</option>
+                                            <option value="asc">Oldest</option>
+                                        </select>
+                                        { (role === 'admin' || role === 'super_admin') && (
+                                            <div className="ml-md-2 mb-2 mb-md-0" style={{ minWidth: '240px' }}>
+                                                <InputField
+                                                    type="select"
+                                                    name="employee_id"
+                                                    value={this.state.selectedEmployeeId}
+                                                    onChange={this.handleEmployeeSelection}
+                                                    options={getSortedEmployees(employees)
+                                                        .filter((emp) => emp.status === 1)
+                                                        .map((emp) => ({
+                                                            value: emp.id,
+                                                            label: `${emp.first_name} ${emp.last_name}`
+                                                    }))}
+                                                    style={{ minWidth: "240px" }}
+                                                    containerClassName="mb-0"
+                                                    inputClassName="custom-select w-auto"
+                                                />
+                                            </div>
+                                        )}
+                                        <Button
+                                            label="Upload New"
+                                            className="btn-primary ml-md-2 mb-2 mb-md-0"
+                                            onClick={this.openModal}
+                                        />
                                             <ImageUploadModal
                                                 isOpen={this.state.isModalOpen}
                                                 closeModal={this.closeModal}

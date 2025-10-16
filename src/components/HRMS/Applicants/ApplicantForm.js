@@ -82,6 +82,9 @@ class ApplicantForm extends Component {
           isSubmitting: false,
           submitError: error.message || 'An error occurred while submitting the application',
         });
+        setTimeout(() => {
+          this.setState({ submitError: null });
+        }, 3000);
         console.error('Error:', error);
       });
   };
@@ -208,12 +211,12 @@ class ApplicantForm extends Component {
                 </div>
 
                 <div className="card-body">
-                  {submitError && (
+                  {/* {submitError && (
                     <div className="alert alert-danger" role="alert">
                       <i className="fa fa-exclamation-circle mr-2"></i>
                       {submitError}
                     </div>
-                  )}
+                  )} */}
 
                   <div className="row">
                     <div className="col-md-6">
