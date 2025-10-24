@@ -144,7 +144,7 @@ const EditUserModal = ({
 								<p>Loading user data...</p>
 							)}
 						</div>
-						<div className="modal-footer">
+						<div className="modal-footer d-flex justify-content-end align-items-center">
 							<Button
 							label="Close"
 							className="btn-secondary"

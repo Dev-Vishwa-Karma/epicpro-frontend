@@ -172,24 +172,27 @@ const AddUserForm = ({
 						</tbody>
 					</table>
 				</div>
+				<div className='card-footer'>
+					<div className='d-flex justify-content-end align-items-center'>
+						<Button
+							label={state.ButtonLoading ? (
+								<>
+								<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+								Adding...
+								</>
+							) : "Add"}
+							onClick={addUser}
+							disabled={state.ButtonLoading}
+							className="btn-primary mr-2"
+						/>
 
-				<Button
-					label={state.ButtonLoading ? (
-						<>
-						<span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-						Adding...
-						</>
-					) : "Add"}
-					onClick={addUser}
-					disabled={state.ButtonLoading}
-					className="btn-primary mr-2"
-				/>
-
-				<Button
-					label="Back"
-					onClick={() => onTabChange && onTabChange('list')}
-					className="btn-secondary"
-				/>
+						<Button
+							label="Back"
+							onClick={() => onTabChange && onTabChange('list')}
+							className="btn-secondary"
+					/>
+					</div>
+				</div>	
 			</div>
 		</div>
 	);

@@ -29,11 +29,6 @@ const ImageModal = ({
           alt="Gallery Large"
           className="gallery-large"
         />
-        {(window.user?.role === "admin" || window.user?.role === "super_admin") && (
-          <div className="image-info" style={{ textAlign: 'center', marginBottom: '16px' }}>
-            <p><strong>Employee:</strong> {image.first_name} {image.last_name}</p>
-          </div>
-        )}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
           <Button
             label="DELETE"

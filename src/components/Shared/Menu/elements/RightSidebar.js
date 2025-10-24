@@ -307,7 +307,7 @@ class RightSidebar extends Component {
               )}
           </div>
           {(window.user.role === 'employee' ) && (
-          <div role="tabpanel" className="tab-pane vivify fadeIn active" id="activity" aria-expanded="false">
+          <div role="tabpanel" className="tab-pane vivify fadeIn" id="activity" aria-expanded="false">
               <ul className="new_timeline mt-3">
                   {this.state.loading && (
                       <li>
