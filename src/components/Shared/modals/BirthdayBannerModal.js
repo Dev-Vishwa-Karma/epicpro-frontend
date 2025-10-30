@@ -1,5 +1,6 @@
 // BirthdayBanner.js
 import React, { Component } from 'react';
+import Avatar from '../../common/Avatar';
 
 const messages = [
     "Wishing you an incredible year filled with success, happiness, and health!",
@@ -49,13 +50,6 @@ class BirthdayBannerModal extends Component {
         this.props.onClose();
     };
 
-    // Helper to get full profile URL
-    getProfileUrl = (profile) => {
-        if (!profile) return null;
-        const backendUrl = process.env.REACT_APP_API_URL || '';
-        return `${backendUrl.replace(/\/$/, '')}/${profile.replace(/^\/+/, '')}`;
-    };
-
     render() {
         const { visible } = this.props;
         const { message, defaultProfileUrl, user } = this.state;
@@ -81,12 +75,12 @@ class BirthdayBannerModal extends Component {
                         </h5>
                     </div>
                     <div className="modal-body">
-                        <img
-                            src={this.getProfileUrl(user.profile) || defaultProfileUrl}
-                            alt={user.first_name}
+                        <Avatar
+                            profile={user.profile || defaultProfileUrl}
+                            first_name={user.first_name}
+                            last_name={user.last_name}
+                            size={130}
                             className="rounded-circle shadow mb-3"
-                            width="130"
-                            height="130"
                             onError={e => { e.target.onerror = null; e.target.src = defaultProfileUrl; }}/>
                         <h3 className="fw-bold text-dark mb-2">
                             {user.first_name} {user.last_name}

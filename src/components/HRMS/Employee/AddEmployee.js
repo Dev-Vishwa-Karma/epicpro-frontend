@@ -459,6 +459,7 @@ appendDataToFormData(addEmployeeData, data)
             showSuccess: false,
             ButtonLoading: false,
           });
+          setTimeout(this.dismissMessages, 3000);
         }
       })
       .catch((error) => {
@@ -470,7 +471,7 @@ appendDataToFormData(addEmployeeData, data)
           ButtonLoading: false,
         });
 
-        // setTimeout(this.dismissMessages, 3000);
+        setTimeout(this.dismissMessages, 3000);
       });
   };
 
