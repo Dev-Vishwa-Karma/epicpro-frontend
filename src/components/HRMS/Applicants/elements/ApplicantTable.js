@@ -183,7 +183,7 @@ class ApplicantTable extends Component {
                                 <span className='ml-2'>
                                   {applicant.source === 'sync' && (
                                     <i
-                                      className={`fa fa-refresh ${styles.syncIcon}`}
+                                      className={`fa fa-refresh text-success ${styles.syncIcon}`}
                                       data-toggle="tooltip"
                                       data-placement="top"
                                       title="Synced"

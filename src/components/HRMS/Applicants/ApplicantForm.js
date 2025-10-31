@@ -10,6 +10,8 @@ const initialState = {
   fullname: '',
   email: '',
   phone: '',
+  alternate_phone: '',
+  experience: '',
   resume: null,
   errors: {},
   submitted: false,
@@ -33,7 +35,9 @@ class ApplicantForm extends Component {
       fullname,
       email,
       phone,
+      alternate_phone,
       resume,
+      experience,
     } = this.state;
 
     const formData = new FormData();
@@ -52,7 +56,9 @@ class ApplicantForm extends Component {
       fullname: fullname,
       email: email,
       phone: phone,
+      alternate_phone: alternate_phone,
       resume: resume,
+      experience: experience,
       source: 'referral',
       employee_id: user.id,
       employee_name: employeeName,
@@ -158,13 +164,34 @@ class ApplicantForm extends Component {
     this.setState({ ...initialState });
   };
 
+   experienceOptions = () => {
+    let opts = [];
+    for (let i = 0; i <= 8; i++) {
+      let label = "";
+      if (i === 0) {
+        label = "Fresher";
+      } else if (i === 8) {
+        label = "8+ years";
+      } else {
+        label = `${i} year${i > 1 ? "s" : ""}`;
+      }
+      opts.push({
+        label: label,
+        value: i.toString(),
+      });
+    }
+    return opts;
+  };
+
   render() {
 
     const {
       fullname,
       email,
       phone,
+      alternate_phone,
       resume,
+      experience,
       errors,
       submitError,
       isSubmitting,
@@ -175,7 +202,7 @@ class ApplicantForm extends Component {
       <>
         <AlertMessages
           showSuccess={showSuccess}
-          successMessage="Thanks! We’ve received your referral"
+          successMessage="Thanks! We've received your referral"
           showError={!!submitError}
           errorMessage={submitError}
           setShowSuccess={(val) => this.setState({ showSuccess: val })}
@@ -211,13 +238,6 @@ class ApplicantForm extends Component {
                 </div>
 
                 <div className="card-body">
-                  {/* {submitError && (
-                    <div className="alert alert-danger" role="alert">
-                      <i className="fa fa-exclamation-circle mr-2"></i>
-                      {submitError}
-                    </div>
-                  )} */}
-
                   <div className="row">
                     <div className="col-md-6">
                       <InputField
@@ -259,26 +279,58 @@ class ApplicantForm extends Component {
                     </div>
 
                     <div className="col-md-6">
-                      <label htmlFor="resume" style={{ fontWeight: 500 }}>
-                        Resume <small className="text-muted">(PDF, DOC, DOCX, TXT, RTF)</small>
-                      </label>
-                      <div className="custom-file">
+                      <InputField
+                        label="Alternate Phone"
+                        name="alternate_phone"
+                        type="tel"
+                        value={alternate_phone}
+                        onChange={this.handleChange}
+                        placeholder="10-digit mobile number"
+                        error={errors.alternate_phone}
+                        maxLength={10}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    {/* Fixed alignment for Years of Experience and Resume */}
+                    <div className="col-md-6">
+                      <div className="form-group">
                         <InputField
-                          type="file"
-                          id="resume"
-                          name="resume"
-                          onChange={this.handleFileChange}
-                          accept=".pdf,.doc,.docx,.txt,.rtf"
-                          disabled={isSubmitting}
+                          label="Years of Experience"
+                          name="experience"
+                          type="select"
+                          value={experience}
+                          onChange={this.handleChange}
+                          error={this.state.errors.experience}
+                          options={this.experienceOptions()}
                         />
-                        <label className="custom-file-label" htmlFor="resume">
-                          {resume ? resume.name : 'Choose file...'}
-                        </label>
-                        {errors.resume && <div className="invalid-feedback d-block">{errors.resume}</div>}
                       </div>
-                      <small className="form-text text-muted">
-                        Max file size: 2MB.
-                      </small>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label htmlFor="resume" className="form-label" style={{ fontWeight: 500 }}>
+                          Resume <small className="text-muted">(PDF, DOC, DOCX, TXT, RTF)</small>
+                        </label>
+                        <div className="custom-file">
+                          <input
+                            type="file"
+                            className={`custom-file-input ${errors.resume ? 'is-invalid' : ''}`}
+                            id="resume"
+                            name="resume"
+                            onChange={this.handleFileChange}
+                            accept=".pdf,.doc,.docx,.txt,.rtf"
+                            disabled={isSubmitting}
+                          />
+                          <label className="custom-file-label" htmlFor="resume">
+                            {resume ? resume.name : 'Choose file...'}
+                          </label>
+                          {errors.resume && <div className="invalid-feedback d-block">{errors.resume}</div>}
+                        </div>
+                        <small className="form-text text-muted">
+                          Max file size: 2MB.
+                        </small>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -220,6 +220,10 @@ class Applicant extends Component {
     }
   };
 
+  refreshApplicants = () => {
+    this.fetchApplicants();
+  };
+
   openDeleteModal = (id) => {
     this.setState({ showDeleteModal: true, deleteId: id });
   };
@@ -353,7 +357,7 @@ class Applicant extends Component {
                 </div>
               </div>
               <div className={`tab-pane fade ${activeTab === 'add' ? 'show active' : ''}`} id="applicant-add" role="tabpanel">
-                <AddApplicant key={this.state.tabKey} onTabChange={this.handleTabChange} />
+                <AddApplicant key={this.state.tabKey} onTabChange={this.handleTabChange} onAddSuccess={this.refreshApplicants} />
               </div>
             </div>
                     </div>
