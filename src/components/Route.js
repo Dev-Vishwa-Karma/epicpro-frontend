@@ -25,6 +25,8 @@ import Ticket from './HRMS/Tickets/Ticket';
 import AddTicket from './HRMS/Tickets/AddTicket';
 import EditTicket from './HRMS/Tickets/EditTicket';
 import ViewTicket from './HRMS/Tickets/ViewTicket';
+import ForgotPassword from './Authentication/ForgotPassword';
+import ResetPassword from './Authentication/ResetPassword';
 
 const Routes = [
     {
@@ -210,6 +212,20 @@ const Routes = [
         adminAccess: true,
         roles: ['admin', 'super_admin'],
         component: Applicant
+    },
+    {
+        path: "/forgot-password",
+        name: 'forgot-password',
+        exact: true,
+        pageTitle: "Forgot Password",
+        component: ForgotPassword
+    },
+    {
+        path: "/reset-password",
+        name: 'reset-password',
+        exact: true,
+        pageTitle: "Reset Password",
+        component: ResetPassword
     },
     {
         path: "/login",

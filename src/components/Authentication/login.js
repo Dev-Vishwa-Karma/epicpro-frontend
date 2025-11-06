@@ -178,6 +178,9 @@ export default class Login extends Component {
 										Click to login
 									</button>
 								</div>
+								<div className="text-center mt-3">
+									<Link to="/forgot-password">Forgot Password?</Link>
+								</div>
 							</div>
 						</div>
 					</div>

@@ -4,7 +4,8 @@ import './App.css';
 import Layout from './components/Shared/Layout';
 import Login from './components/Authentication/login';
 import authService from "./components/Authentication/authService";
-
+import ForgotPassword from './components/Authentication/ForgotPassword';
+import ResetPassword from './components/Authentication/ResetPassword';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 
 class App extends Component {
@@ -41,6 +42,12 @@ class App extends Component {
 					<Switch>
 						<Route path="/login">
 							{user ? <Redirect to="/" /> : <Login onLogin={this.handleLogin} />}
+						</Route>
+						<Route path="/forgot-password">
+							{user ? <Redirect to="/" /> : <ForgotPassword />}
+						</Route>
+						<Route path="/reset-password">
+							{user ? <Redirect to="/" /> : <ResetPassword />}
 						</Route>
 						<Route path="/">
 							{user ? <Route component={Layout} /> : <Redirect to="/login" />}
