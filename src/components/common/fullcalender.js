@@ -99,7 +99,7 @@ class Fullcalender extends Component {
                                 cell.css('color', 'white');
                             } else {
                                 // Fallback highlight for Sundays or alternate Saturdays when no leave and birthday
-                                cell.css('background-color', '#FFE599'); // fff2cc
+                                cell.css('background-color', '#FFF2CC'); // fff2cc
                             }
                         }
 
