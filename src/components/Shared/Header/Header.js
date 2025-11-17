@@ -366,6 +366,13 @@ class Header extends Component {
       });
   };
 
+  getCalculatedTimes = (startTime, breakDuration) => {
+    const formData = new FormData();
+    formData.append('start_time', this.formatToMySQLDateTime(startTime));
+    formData.append('break_duration_in_minutes', breakDuration);
+    return getService.addCall("reports.php", "calculate-report-times", formData);
+  };
+
   markAsRead = (notification_id) => {
     const apiCall = notification_id
       ? getService.getCall("notifications.php", {
@@ -584,19 +591,61 @@ class Header extends Component {
 
     this.setState({ end_time: endTimeFormatted });
 
-    const start = start_time;
-    const end = endTimeFormatted;
-    const breakMinutes = this.props.breakDuration;
-    this.calculateWorkingHours(start, end, breakMinutes);
-    this.setState({
-      showModal: true,
-      error: {
-        report: "",
-        start_time: "",
-        end_time: "",
-        break_duration_in_minutes: "",
-      },
-    });
+    this.getCalculatedTimes(start_time, this.props.breakDuration)
+      .then((data) => {
+        if (data.status === 'success') {
+          const endTimeFormattedFromBackend = new Date(data.data.end_time).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+          this.setState({
+            todays_working_hours: data.data.todays_working_hours,
+            todays_total_hours: data.data.todays_total_hours,
+            end_time: endTimeFormattedFromBackend,
+          });
+        } else {
+          // Fallback to frontend calculation
+          const start = start_time;
+          const end = endTimeFormatted;
+          const breakMinutes = this.props.breakDuration;
+          const { withoutBreak, withBreak } = this.calculateWorkingHours(start, end, breakMinutes);
+          this.setState({
+            todays_working_hours: withBreak,
+            todays_total_hours: withoutBreak,
+          });
+        }
+      })
+      .then(() => {
+        this.setState({
+          showModal: true,
+          error: {
+            report: "",
+            start_time: "",
+            end_time: "",
+            break_duration_in_minutes: "",
+          },
+        });
+      })
+      .catch((err) => {
+        console.error('Error calculating times:', err);
+        // Fallback
+        const start = start_time;
+        const end = endTimeFormatted;
+        const breakMinutes = this.props.breakDuration;
+        const { withoutBreak, withBreak } = this.calculateWorkingHours(start, end, breakMinutes);
+        this.setState({
+          todays_working_hours: withBreak,
+          todays_total_hours: withoutBreak,
+          showModal: true,
+          error: {
+            report: "",
+            start_time: "",
+            end_time: "",
+            break_duration_in_minutes: "",
+          },
+        });
+      });
   };
 
   convertToDateTime(timeString) {
@@ -740,14 +789,6 @@ class Header extends Component {
     formData.append("start_time", this.formatToMySQLDateTime(start_time));
     formData.append("break_duration_in_minutes", this.props.breakDuration);
     formData.append("end_time", this.formatToMySQLDateTime(end_time));
-    formData.append(
-      "todays_working_hours",
-      this.formatToMySQLDateTime(todays_working_hours)
-    );
-    formData.append(
-      "todays_total_hours",
-      this.formatToMySQLDateTime(todays_total_hours)
-    );
 
     getService
       .addCall("reports.php", "add-report-by-user", formData)

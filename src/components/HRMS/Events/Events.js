@@ -224,6 +224,7 @@ class Events extends Component {
         start_date: start_date,
         end_date: end_date,
         employee_id: employee_id,
+        status: "approved",
       })
       .then((data) => {
         if (data.status === "success" && Array.isArray(data.data)) {

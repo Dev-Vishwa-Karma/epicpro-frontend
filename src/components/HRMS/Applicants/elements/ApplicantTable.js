@@ -51,7 +51,6 @@ class ApplicantTable extends Component {
   };
 
   handleStatusChange = (applicantId, newStatus, applicantName) => {
-    console.log('handleStatusChange called:', { applicantId, newStatus, applicantName });
     if (newStatus === 'rejected') {
       this.setState({ showRejectModal: true, rejectReason: '', rejectingForApplicant: { id: applicantId, name: applicantName } });
       return;
