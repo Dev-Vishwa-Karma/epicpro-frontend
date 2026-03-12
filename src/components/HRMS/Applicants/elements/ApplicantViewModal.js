@@ -8,16 +8,28 @@ import { shortformatDate } from '../../../../utils';
 class ApplicantViewModal extends Component {
   state = {
     employeeDetails: null,
-    loadingEmployee: false
+    loadingEmployee: false,
+    attempts: [],
+    loadingAttempts: false,
+    showAttempts: true,
+    openAttemptIndex: 0,
+    activeActionMenu: null, // Tracks which attempt's action menu is open
   };
 
   componentDidMount() {
     this.fetchEmployeeDetails();
+    this.fetchAttempts();
+    window.addEventListener('click', this.closeAllMenus);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this.closeAllMenus);
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.applicant?.employee_id !== prevProps.applicant?.employee_id) {
+    if (this.props.applicant?.id !== prevProps.applicant?.id) {
       this.fetchEmployeeDetails();
+      this.fetchAttempts();
     }
   }
 
@@ -37,6 +49,62 @@ class ApplicantViewModal extends Component {
         .catch(() => this.setState({ loadingEmployee: false }));
     }
   };
+
+  fetchAttempts = () => {
+    const { applicant } = this.props;
+    if (applicant?.id) {
+      this.setState({ loadingAttempts: true });
+      getService.getCall('applicants.php', { action: 'get_attempts', applicant_id: applicant.id })
+        .then(response => {
+          if (response.status === 'success') {
+            this.setState({
+              attempts: response.data || [],
+              loadingAttempts: false
+            });
+          }
+        })
+        .catch(() => this.setState({ loadingAttempts: false }));
+    }
+  };
+
+  toggleAttempts = () => {
+    this.setState(prevState => ({ showAttempts: !prevState.showAttempts }));
+  };
+
+  handleToggleAttemptDetail = (index) => {
+    this.setState(prevState => ({
+      openAttemptIndex: prevState.openAttemptIndex === index ? null : index
+    }));
+  };
+
+  closeAllMenus = () => {
+    this.setState({ activeActionMenu: null });
+  };
+
+  toggleActionMenu = (e, index) => {
+    e.stopPropagation();
+    this.setState(prevState => ({
+      activeActionMenu: prevState.activeActionMenu === index ? null : index
+    }));
+  };
+
+  handleDeleteClick = (e, attempt) => {
+    e.stopPropagation();
+    this.setState({ activeActionMenu: null });
+    if (window.confirm('Are you sure you want to delete this attempt?')) {
+      this.props.onDeleteAttempt(attempt.id)
+        .then(() => {
+          this.fetchAttempts();
+        });
+    }
+  };
+
+  handleEditClick = (e, attempt) => {
+    e.stopPropagation();
+    this.setState({ activeActionMenu: null });
+    this.props.onEditAttempt(this.props.applicant, attempt);
+  };
+
   render() {
     const { 
       show, 
@@ -279,6 +347,137 @@ class ApplicantViewModal extends Component {
                       </div>
                     </div>
                   )}
+
+                  {/* Attempts Section */}
+                  <div className="mb-4">
+                    <h6
+                      onClick={this.toggleAttempts}
+                      style={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid rgb(171, 172, 173)",
+                        paddingBottom: "10px",
+                        marginBottom: "15px",
+                        fontSize: "14px",
+                        textTransform: "uppercase",
+                        color: "#2C3E50",
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                      }}
+                    >
+                      Attempts {this.state.attempts.length > 0 && `(${this.state.attempts.length})`}
+                      <i className={`fa ${this.state.showAttempts ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                    </h6>
+                    {this.state.showAttempts && (
+                      <div className="attempts-list">
+                        {this.state.loadingAttempts ? (
+                          <div className="text-center py-3 text-muted">
+                            <i className="fa fa-spinner fa-spin mr-2"></i> Loading attempts...
+                          </div>
+                        ) : this.state.attempts.length === 0 ? (
+                          <div className="text-center py-4 text-muted" style={{ fontStyle: 'italic', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+                            <i className="fa fa-info-circle mr-2"></i> No attempts found for this applicant.
+                          </div>
+                        ) : (
+                          <div className="accordion-attempts">
+                            {this.state.attempts.map((attempt, index) => (
+                              <div key={index} className="mb-3" style={{ border: '1px solid #eff0f1', borderRadius: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', position: 'relative' }}>
+                                <div
+                                  className="d-flex justify-content-between align-items-center p-2"
+                                  style={{ backgroundColor: '#fcfcfd', cursor: 'pointer', borderTopLeftRadius: '10px', borderTopRightRadius: '10px', borderBottom: this.state.openAttemptIndex === index ? '1px solid #eff0f1' : 'none', borderBottomLeftRadius: this.state.openAttemptIndex === index ? '0' : '10px', borderBottomRightRadius: this.state.openAttemptIndex === index ? '0' : '10px' }}
+                                  onClick={() => this.handleToggleAttemptDetail(index)}
+                                >
+                                  <div>
+                                    {/* <span style={{ fontWeight: '600', color: '#495057', fontSize: '13px' }}>
+                                      Attempt #{this.state.attempts.length - index}
+                                    </span>
+                                    <span className="text-muted mx-2" style={{ fontSize: '12px' }}>•</span> */}
+                                    <span style={{ fontSize: '13px', color: '#6c757d' }}>
+                                      {shortformatDate(attempt.applied_date || attempt.created_at)}
+                                    </span>
+                                  </div>
+                                  <div className="d-flex align-items-center">
+                                    <span
+                                      className="badge badge-pill mr-3"
+                                      style={{
+                                        ...getStatusColor(attempt.result),
+                                        padding: '5px 12px',
+                                        fontSize: '11px',
+                                        textTransform: 'capitalize'
+                                      }}
+                                    >
+                                      {attempt.result}
+                                    </span>
+
+                                    {/* Action Menu (Three dots) */}
+                                    <div className={styles.attemptActions} onClick={(e) => e.stopPropagation()}>
+                                      <div
+                                        className={styles.actionToggle}
+                                        onClick={(e) => this.toggleActionMenu(e, index)}
+                                      >
+                                        <i className="fa fa-ellipsis-v"></i>
+                                      </div>
+
+                                      {this.state.activeActionMenu === index && (
+                                        <div className={styles.actionMenu}>
+                                          <div
+                                            className={styles.actionItem}
+                                            onClick={(e) => this.handleEditClick(e, attempt)}
+                                          >
+                                            <i className="fa fa-pencil"></i> Edit
+                                          </div>
+                                          <div
+                                            className={`${styles.actionItem} ${styles.deleteItem}`}
+                                            onClick={(e) => this.handleDeleteClick(e, attempt)}
+                                          >
+                                            <i className="fa fa-trash"></i> Delete
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <i
+                                      className={`fa ${this.state.openAttemptIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'} text-muted ml-2`}
+                                      style={{ fontSize: '12px', width: '15px', textAlign: 'center' }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        this.handleToggleAttemptDetail(index);
+                                      }}
+                                    ></i>
+                                  </div>
+                                </div>
+                                {this.state.openAttemptIndex === index && (
+                                  <div className="p-3 bg-white" style={{ animation: 'slideDown 0.3s ease-out', borderBottomLeftRadius: '10px', borderBottomRightRadius: '10px' }}>
+                                    <div className="row mb-3">
+                                      <div className="col-md-4">
+                                        <div className="small text-muted mb-1 text-uppercase font-weight-bold" style={{ fontSize: '10px', letterSpacing: '0.5px' }}>Applied On</div>
+                                        <div style={{ fontSize: '13px', color: '#2c3e50' }}>{shortformatDate(attempt.applied_date) || "N/A"}</div>
+                                      </div>
+                                      <div className="col-md-4">
+                                        <div className="small text-muted mb-1 text-uppercase font-weight-bold" style={{ fontSize: '10px', letterSpacing: '0.5px' }}>Contacted On</div>
+                                        <div style={{ fontSize: '13px', color: '#2c3e50' }}>{shortformatDate(attempt.contacted_date) || "N/A"}</div>
+                                      </div>
+                                      <div className="col-md-4">
+                                        <div className="small text-muted mb-1 text-uppercase font-weight-bold" style={{ fontSize: '10px', letterSpacing: '0.5px' }}>Interview On</div>
+                                        <div style={{ fontSize: '13px', color: '#2c3e50' }}>{shortformatDate(attempt.interview_date) || "N/A"}</div>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <div className="small text-muted mb-1 text-uppercase font-weight-bold" style={{ fontSize: '10px', letterSpacing: '0.5px' }}>Interviewer Comments</div>
+                                      <div style={{ fontSize: '13px', color: '#2c3e50' }}>
+                                        {attempt.comments || "No comments provided for this attempt."}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Right Sidebar - Dark Background */}

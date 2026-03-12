@@ -9,6 +9,8 @@ import InputField from '../../../common/formInputs/InputField';
 import { shortformatDate } from '../../../../utils';
 import styles from './applicant.module.css';
 import Avatar from '../../../common/Avatar';
+import AddAttemptModal from './AddAttemptModal';
+
 class ApplicantTable extends Component {
   static getStatusColor(status) {
     switch (status) {
@@ -17,6 +19,8 @@ class ApplicantTable extends Component {
       case 'interviewed': return { background: '#FFFFE0', color: 'orange' };
       case 'hired': return { background: '#DCFCE7', color: 'green' };
       case 'rejected': return { background: '#FEE2E2', color: 'red' };
+      case 'blacklisted': return { background: '#8f8989ff', color: 'white' };
+      case 'noresponse': return { background: '#E0E0E0', color: 'gray' };
       default: return {};
     }
   }
@@ -33,6 +37,9 @@ class ApplicantTable extends Component {
       showRejectModal: false,
       rejectReason: '',
       rejectingForApplicant: null,
+      showAddAttemptModal: false,
+      attemptApplicant: null,
+      editingAttempt: null,
     };
   }
 
@@ -116,6 +123,40 @@ class ApplicantTable extends Component {
     this.setState({ showRejectModal: false, rejectingForApplicant: null, rejectReason: '' });
   };
 
+  handleAddAttemptClick = (applicant) => {
+    this.setState({
+      attemptApplicant: applicant,
+      editingAttempt: null,
+      showAddAttemptModal: true
+    });
+  };
+
+  handleEditAttemptClick = (applicant, attempt) => {
+    this.setState({
+      attemptApplicant: applicant,
+      editingAttempt: attempt,
+      showAddAttemptModal: true
+    });
+  };
+
+  handleCloseAddAttemptModal = () => {
+    this.setState({
+      showAddAttemptModal: false,
+      attemptApplicant: null,
+      editingAttempt: null
+    });
+  };
+
+  handleAttemptSuccess = () => {
+    const { onRefresh } = this.props;
+    if (onRefresh) onRefresh();
+    // Also refresh the view modal if it's open to reflect latest attempt changes
+    if (this.state.showViewModal && this.viewModal) {
+      this.viewModal.fetchAttempts();
+    }
+  };
+
+
   render() {
     const {
       applicants,
@@ -127,7 +168,8 @@ class ApplicantTable extends Component {
       syncing,
     } = this.props;
 
-    const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus, showRejectModal, rejectReason } = this.state;
+    const { selectedApplicant, showViewModal, showConfirmModal, pendingStatusChange, isUpdatingStatus, showRejectModal, rejectReason, showAddAttemptModal, attemptApplicant, editingAttempt } = this.state;
+
 
     return (
       <div className="col-lg-12 col-md-12 col-sm-12">
@@ -263,6 +305,9 @@ class ApplicantTable extends Component {
                                   <i className="dropdown-icon fa fa-cloud-download" /> Download Resume
                                 </a>
                               )}
+                              <a href="fake_url" className="dropdown-item" onClick={(e) => { e.preventDefault(); this.handleAddAttemptClick(applicant); }}>
+                                <i className="dropdown-icon fa fa-plus" /> Add Attempts
+                              </a>
                             </div>
                           </div>
                         </td>
@@ -287,10 +332,13 @@ class ApplicantTable extends Component {
 
         {/* View Modal */}
         <ApplicantViewModal
+          ref={el => this.viewModal = el}
           show={showViewModal}
           onClose={this.handleCloseViewModal}
           applicant={selectedApplicant}
           getStatusColor={ApplicantTable.getStatusColor}
+          onEditAttempt={this.handleEditAttemptClick}
+          onDeleteAttempt={this.props.onDeleteAttempt}
         />
 
         {/* Status Change Confirmation Modal */}
@@ -331,7 +379,19 @@ class ApplicantTable extends Component {
           onCancel={this.handleCancelSync}
           isLoading={syncing}
         />
+
+        {/* Add Attempt Modal */}
+        <AddAttemptModal
+          show={showAddAttemptModal}
+          onClose={this.handleCloseAddAttemptModal}
+          applicant={attemptApplicant}
+          onSuccess={this.handleAttemptSuccess}
+          onAddAttempt={this.props.onAddAttempt}
+          attempt={editingAttempt}
+          onUpdateAttempt={this.props.onUpdateAttempt}
+        />
       </div>
+
     );
   }
 }

@@ -241,3 +241,66 @@
 
 
 
+
+.attemptActions {
+  position: relative;
+}
+
+.actionToggle {
+  cursor: pointer;
+  padding: 5px 10px;
+  color: #6c757d;
+  transition: color 0.2s;
+}
+
+.actionToggle:hover {
+  color: #2c3e50;
+}
+
+.actionMenu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #eff0f1;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 120px;
+  padding: 8px 0;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.actionItem {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #495057;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.actionItem:hover {
+  background-color: #f8f9fa;
+}
+
+.actionItem i {
+  width: 16px;
+  margin-right: 10px;
+  font-size: 12px;
+}
+
+.deleteItem {
+  color: #e74c3c;
+}
+
+.deleteItem:hover {
+  color: #c0392b;
+  background-color: #fdf2f2;
+}

@@ -232,6 +232,59 @@ class Applicant extends Component {
     this.setState({ showDeleteModal: false, deleteId: null, isDeleting: false });
   };
 
+  handleAddAttempt = (payload) => {
+    return getService.addCall('applicants.php', 'add_attempt', payload)
+      .then(data => {
+        if (data.status === 'success') {
+          this.setState({
+            showSuccess: true,
+            syncSuccess: 'Attempt added successfully'
+          });
+          setTimeout(() => this.setState({ showSuccess: false, syncSuccess: '' }), 3000);
+          this.refreshApplicants();
+          return data;
+        } else {
+          throw new Error(data.data.message || 'Failed to add attempt');
+        }
+      });
+  };
+
+  handleUpdateAttempt = (payload) => {
+    return getService.addCall('applicants.php', 'update_attempt', payload)
+      .then(data => {
+        if (data.status === 'success') {
+          this.setState({
+            showSuccess: true,
+            syncSuccess: 'Attempt updated successfully'
+          });
+          setTimeout(() => this.setState({ showSuccess: false, syncSuccess: '' }), 3000);
+          this.refreshApplicants();
+          return data;
+        } else {
+          throw new Error(data.data.message || 'Failed to update attempt');
+        }
+      });
+  };
+
+  handleDeleteAttempt = (id) => {
+    const formData = new FormData();
+    formData.append('id', id);
+    return getService.addCall('applicants.php', 'delete_attempt', formData)
+      .then(data => {
+        if (data.status === 'success') {
+          this.setState({
+            showSuccess: true,
+            syncSuccess: 'Attempt deleted successfully'
+          });
+          setTimeout(() => this.setState({ showSuccess: false, syncSuccess: '' }), 3000);
+          this.refreshApplicants();
+          return data;
+        } else {
+          throw new Error(data.data.message || 'Failed to delete attempt');
+        }
+      });
+  };
+
   confirmDelete = () => {
     const { deleteId } = this.state;
     if (!deleteId) return;
@@ -353,6 +406,10 @@ class Applicant extends Component {
                     onDelete={this.openDeleteModal}
                     onSync={this.handleSync}
                     syncing={isSyncing}
+                    onRefresh={this.refreshApplicants}
+                    onAddAttempt={this.handleAddAttempt}
+                    onUpdateAttempt={this.handleUpdateAttempt}
+                    onDeleteAttempt={this.handleDeleteAttempt}
                   />
                 </div>
               </div>
