@@ -40,6 +40,7 @@ class AddApplicant extends Component {
       dob: "",
       marital_status: "",
       address: "",
+      location: "",
       experience: "",
       skills: [],
       resume: null,
@@ -48,10 +49,12 @@ class AddApplicant extends Component {
       bond_agreement: "",
       branch: "",
       graduate_year: "",
+      status: "pending",
       successMessage: "",
       showSuccess: false,
       errorMessage: "",
       showError: false,
+      note: "",
       errors: {},
       ButtonLoading: false,
     };
@@ -60,6 +63,48 @@ class AddApplicant extends Component {
       fullname: React.createRef(),
       email: React.createRef(),
     };
+  }
+
+  componentDidMount() {
+    const { applicant } = this.props;
+    if (applicant) {
+      let skills = [];
+      try {
+        skills = applicant.skills ? JSON.parse(applicant.skills) : [];
+      } catch (e) {
+        skills = [];
+      }
+
+      this.setState({
+        fullname: applicant.fullname || "",
+        email: applicant.email || "",
+        phone: applicant.phone || "",
+        alternate_phone: applicant.alternate_phone || "",
+        dob: applicant.dob || "",
+        marital_status: applicant.marital_status || "",
+        address: applicant.address || "",
+        location: applicant.location || "",
+        experience: applicant.experience || "",
+        skills: Array.isArray(skills) ? skills : [],
+        joining_timeframe: ["Same Week", "Next Week", "After 15 Days"].includes(
+          applicant.joining_timeframe
+        )
+          ? applicant.joining_timeframe
+          : applicant.joining_timeframe
+            ? "custom"
+            : "",
+        custom_joining_time: !["Same Week", "Next Week", "After 15 Days"].includes(
+          applicant.joining_timeframe
+        )
+          ? applicant.joining_timeframe || ""
+          : "",
+        bond_agreement: applicant.bond_agreement || "",
+        branch: applicant.branch || "",
+        graduate_year: applicant.graduate_year || "",
+        status: applicant.status || "pending",
+        note: applicant.note || "",
+      });
+    }
   }
 
   dismissMessages = () => {
@@ -162,6 +207,7 @@ class AddApplicant extends Component {
       dob,
       marital_status,
       address,
+      location,
       experience,
       skills,
       resume,
@@ -170,6 +216,7 @@ class AddApplicant extends Component {
       bond_agreement,
       branch,
       graduate_year,
+      note,
     } = this.state;
 
     const validationSchema = [
@@ -194,6 +241,7 @@ class AddApplicant extends Component {
 
     if (Object.keys(errors).length === 0) {
       const formData = new FormData();
+      const isEdit = !!this.props.applicant?.id;
 
       const data = {
         fullname: fullname,
@@ -203,6 +251,7 @@ class AddApplicant extends Component {
         dob: dob,
         marital_status: marital_status,
         address: address,
+        location: location,
         experience: experience,
         skills: JSON.stringify(skills),
         resume: resume,
@@ -213,18 +262,31 @@ class AddApplicant extends Component {
         bond_agreement: bond_agreement,
         branch: branch,
         graduate_year: graduate_year ? parseInt(graduate_year) : null,
+        status: this.state.status,
+        note: note,
       };
-      data.source = 'admin';
+
+      if (isEdit) {
+        data.id = this.props.applicant.id;
+        data.source = this.props.applicant.source;
+      } else {
+        data.source = "admin";
+      }
+
       appendDataToFormData(formData, data);
 
+      const action = isEdit ? "update" : "add";
+
       getService
-        .addCall("applicants.php", "add", formData)
+        .addCall("applicants.php", action, formData)
         .then((data) => {
           if (data.status === "success") {
             this.setState({
               ButtonLoading: false,
               showSuccess: true,
-              successMessage: "Applicant added successfully!",
+              successMessage: isEdit
+                ? "Applicant updated successfully!"
+                : "Applicant added successfully!",
               fullname: "",
               email: "",
               phone: "",
@@ -232,6 +294,7 @@ class AddApplicant extends Component {
               dob: "",
               marital_status: "",
               address: "",
+              location: "",
               experience: "",
               skills: [],
               resume: null,
@@ -240,11 +303,20 @@ class AddApplicant extends Component {
               bond_agreement: "",
               branch: "",
               graduate_year: new Date().getFullYear(),
+              note: "",
               errors: {},
             });
-            setTimeout(this.dismissMessages, 3000);
+            if (this.props.onAddSuccess) this.props.onAddSuccess();
+            setTimeout(() => {
+              this.dismissMessages();
+              if (isEdit && this.props.onTabChange) {
+                this.props.onTabChange("list");
+              }
+            }, 3000);
           } else {
-            throw new Error(data.data?.message || "Failed to add applicant");
+            throw new Error(
+              data.data?.message || `Failed to ${action} applicant`
+            );
           }
         })
         .catch((error) => {
@@ -252,7 +324,9 @@ class AddApplicant extends Component {
             ButtonLoading: false,
             showError: true,
             errorMessage:
-              error.message || "An error occurred while adding the applicant",
+              error.message ||
+              `An error occurred while ${isEdit ? "updating" : "adding"
+              } the applicant`,
           });
           console.error("Error:", error);
           setTimeout(this.dismissMessages, 3000);
@@ -287,6 +361,7 @@ class AddApplicant extends Component {
       dob,
       marital_status,
       address,
+      location,
       experience,
       skills,
       joining_timeframe,
@@ -294,6 +369,8 @@ class AddApplicant extends Component {
       bond_agreement,
       branch,
       graduate_year,
+      status,
+      note,
       showSuccess,
       successMessage,
       showError,
@@ -337,6 +414,7 @@ class AddApplicant extends Component {
                   error={this.state.errors.email}
                   refInput={this.fieldRefs.email}
                   autoComplete="off"
+                  disabled={!!this.props.applicant}
                 />
               </div>
             </div>
@@ -402,7 +480,7 @@ class AddApplicant extends Component {
               </div>
             </div>
             <div className="row">
-              <div className="col-md-12">
+              <div className="col-md-6">
                 <InputField
                   label="Address"
                   name="address"
@@ -411,6 +489,17 @@ class AddApplicant extends Component {
                   onChange={this.handleChange}
                   placeholder="Enter Complete Address"
                   error={this.state.errors.address}
+                />
+              </div>
+              <div className="col-md-6">
+                <InputField
+                  label="Location"
+                  name="location"
+                  type="text"
+                  value={location}
+                  onChange={this.handleChange}
+                  placeholder="Enter Location"
+                  error={this.state.errors.location}
                 />
               </div>
             </div>
@@ -518,34 +607,72 @@ class AddApplicant extends Component {
                 />
               </div>
             </div>
-            {/* Resume Upload */}
-            <div className="row mb-4">
-              <div className="col-md-12">
-                <div className="form-group">
-                  <label className="form-label">
-                    Resume{" "}
-                    <small className="text-muted">
-                      (PDF, DOC, DOCX, TXT, RTF)
-                    </small>
-                  </label>
+            {this.props.applicant && (
+              <div className="row">
+                <div className="col-sm-6 col-md-6">
                   <InputField
-                    type="file"
-                    name="resume"
-                    placeholder="Select your resume"
-                    onChange={this.handleFileChange}
-                    accept=".pdf,.doc,.docx,.txt,.rtf"
+                    label="Status"
+                    name="status"
+                    type="select"
+                    value={status}
+                    onChange={this.handleChange}
+                    options={[
+                      { value: "pending", label: "Pending" },
+                      { value: "reviewed", label: "Reviewed" },
+                      { value: "interviewed", label: "Interviewed" },
+                      { value: "hired", label: "Hired" },
+                      { value: "rejected", label: "Rejected" },
+                    ]}
+                    firstOption={false}
                   />
-                  {this.state.errors.resume && (
-                    <div className="invalid-feedback d-block">
-                      {this.state.errors.resume}
-                    </div>
-                  )}
-                  <small className="form-text text-muted">
-                    Max file size: 2MB.
-                  </small>
                 </div>
               </div>
-            </div>
+            )}
+            {!this.props.applicant && (
+              <div className="row mb-4">
+                <div className="col-md-12">
+                  <div className="form-group">
+                    <label className="form-label">
+                      Resume{" "}
+                      <small className="text-muted">
+                        (PDF, DOC, DOCX, TXT, RTF)
+                      </small>
+                    </label>
+                    <InputField
+                      type="file"
+                      name="resume"
+                      placeholder="Select your resume"
+                      onChange={this.handleFileChange}
+                      accept=".pdf,.doc,.docx,.txt,.rtf"
+                    />
+                    {this.state.errors.resume && (
+                      <div className="invalid-feedback d-block">
+                        {this.state.errors.resume}
+                      </div>
+                    )}
+                    <small className="form-text text-muted">
+                      Max file size: 2MB.
+                    </small>
+                  </div>
+                </div>
+              </div>
+            )}
+            {this.props.applicant && (
+              <div className="row">
+                <div className="col-md-12">
+                  <InputField
+                    label="Note / Comment"
+                    name="note"
+                    type="textarea"
+                    value={note}
+                    onChange={this.handleChange}
+                    placeholder="Enter any note/comments about the applicant"
+                    error={this.state.errors.note}
+                    rows="3"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <div
             className={`card-footer text-right add-resume ${styles.cardFooter}`}
@@ -556,7 +683,7 @@ class AddApplicant extends Component {
               className="btn-secondary"
             />
             <Button
-              label="Add Applicant"
+              label={this.props.applicant ? "Update Applicant" : "Add Applicant"}
               type="submit"
               className="btn-primary"
               loading={this.state.ButtonLoading}

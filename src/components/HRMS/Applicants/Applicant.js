@@ -37,6 +37,7 @@ class Applicant extends Component {
     selectedDuplicates: {},
     tabKey: 0,
     lastSyncTime: null,
+    editingApplicant: null,
   };
 
   componentDidMount() {
@@ -211,17 +212,29 @@ class Applicant extends Component {
   handleTabChange = (tabId) => {
     // for clear form
     if (tabId === 'add') {
-      this.setState(prevState => ({ 
-        activeTab: tabId, 
-        tabKey: prevState.tabKey + 1 
+      this.setState(prevState => ({
+        activeTab: tabId,
+        tabKey: prevState.tabKey + 1,
+        editingApplicant: null // Reset editing state when clicking "Add New"
       }));
     } else {
-      this.setState({ activeTab: tabId });
+      this.setState({
+        activeTab: tabId,
+        editingApplicant: null // Reset editing state when switching to list
+      });
     }
   };
 
   refreshApplicants = () => {
     this.fetchApplicants();
+  };
+
+  handleEditApplicant = (applicant) => {
+    this.setState({
+      activeTab: 'add',
+      editingApplicant: applicant,
+      tabKey: this.state.tabKey + 1
+    });
   };
 
   openDeleteModal = (id) => {
@@ -346,7 +359,7 @@ class Applicant extends Component {
                     href="#applicant-add" 
                     onClick={() => this.handleTabChange('add')}
                   >
-                    Add New                                                                                                                                                                                             
+                    {this.state.editingApplicant ? "Update" : "Add New"}
                   </a>
                 </li>                                                         
               </ul>
@@ -410,11 +423,17 @@ class Applicant extends Component {
                     onAddAttempt={this.handleAddAttempt}
                     onUpdateAttempt={this.handleUpdateAttempt}
                     onDeleteAttempt={this.handleDeleteAttempt}
+                    onEdit={this.handleEditApplicant}
                   />
                 </div>
               </div>
               <div className={`tab-pane fade ${activeTab === 'add' ? 'show active' : ''}`} id="applicant-add" role="tabpanel">
-                <AddApplicant key={this.state.tabKey} onTabChange={this.handleTabChange} onAddSuccess={this.refreshApplicants} />
+                <AddApplicant
+                  key={this.state.tabKey}
+                  onTabChange={this.handleTabChange}
+                  onAddSuccess={this.refreshApplicants}
+                  applicant={this.state.editingApplicant}
+                />
               </div>
             </div>
                     </div>

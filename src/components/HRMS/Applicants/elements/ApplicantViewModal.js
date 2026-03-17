@@ -130,8 +130,7 @@ class ApplicantViewModal extends Component {
     const skills = getSkills();
 
     // Check if section has data
-    const hasContactInfo = applicant.email || applicant.address || applicant.phone || applicant.alternate_phone;
-    
+    const hasContactInfo = applicant.email || applicant.address || applicant.location || applicant.phone || applicant.alternate_phone;
 
     const hasAdditionalInfo = applicant.dob || applicant.marital_status || 
                              applicant.graduate_year || applicant.bond_agreement;
@@ -205,7 +204,7 @@ class ApplicantViewModal extends Component {
                           color: "#2C3E50",
                         }}
                       >
-                        Contact Details
+                        Basic Info
                       </h6>
                       <div style={{ fontSize: "14px", lineHeight: "1.6" }}>
                         {applicant.email && (
@@ -218,6 +217,12 @@ class ApplicantViewModal extends Component {
                           <div className="mb-2">
                             <i className="fa fa-map-marker mr-2"></i>
                             {applicant.address}
+                          </div>
+                        )}
+                        {applicant.location && (
+                          <div className="mb-2">
+                            <i className="fa fa-location-arrow mr-2"></i>
+                            {applicant.location}
                           </div>
                         )}
                         <div className="d-flex gap-4">
@@ -298,7 +303,7 @@ class ApplicantViewModal extends Component {
                           color: "#2C3E50",
                         }}
                       >
-                        Additional Details
+                        Additional Info
                       </h6>
                       <div
                         style={{
@@ -344,6 +349,29 @@ class ApplicantViewModal extends Component {
                             </div>
                           </div>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Note Section - only show if has note */}
+                  {applicant.note && (
+                    <div className="mb-4">
+                      <h6
+                        style={{
+                          fontWeight: "bold",
+                          borderBottom: "1px solid rgb(171, 172, 173)",
+                          paddingBottom: "5px",
+                          marginBottom: "15px",
+                          fontSize: "14px",
+                          textTransform: "uppercase",
+                          color: "#2C3E50",
+                        }}
+                      >
+                        Notes / Comments
+                      </h6>
+
+                      <div className="text-left pl-3 pr-3 py-2 text-muted" style={{ backgroundColor: '#FEE2E2', borderRadius: '8px' }}>
+                        {applicant.note}
                       </div>
                     </div>
                   )}
@@ -533,7 +561,7 @@ class ApplicantViewModal extends Component {
                           textTransform: "uppercase",
                         }}
                       >
-                        Professional Details
+                        Professional Info
                       </h6>
                       <div style={{ fontSize: "13px", lineHeight: "1.6" }}>
                         {(applicant.experience_display ||
@@ -577,7 +605,7 @@ class ApplicantViewModal extends Component {
                         textTransform: "uppercase",
                       }}
                     >
-                      Application Details
+                      Application Info
                     </h6>
                     <div style={{ fontSize: "13px", lineHeight: "1.6" }}>
                       <div className="mb-2">

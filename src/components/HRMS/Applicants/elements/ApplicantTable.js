@@ -184,7 +184,9 @@ class ApplicantTable extends Component {
                     <th className="w40"><i className="fa fa-user"></i></th>
                     <th>Name</th>
                     <th>Mobile</th>
+                    <th>Location</th>
                     <th>Applied On</th>
+                    <th>Last Updated</th>
                     <th>Experience</th>
                     <th>Status</th>
                     <th className="w40" />
@@ -193,16 +195,16 @@ class ApplicantTable extends Component {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="7" style={{ padding: 0 }}>
-                        <TableSkeleton columns={7} rows={applicants.length} />
+                      <td colSpan="9" style={{ padding: 0 }}>
+                        <TableSkeleton columns={9} rows={applicants.length} />
                       </td>
                     </tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan="7" className="text-danger">{error}</td>
+                      <td colSpan="9" className="text-danger">{error}</td>
                     </tr>
                   ) : applicants.length === 0 ? (
-                    <NoDataRow colSpan={8} message="No applicants found." />
+                    <NoDataRow colSpan={9} message="No applicants found." />
                   ) : (
                     applicants.map((applicant) => (
                       <tr key={applicant.id}>
@@ -254,7 +256,9 @@ class ApplicantTable extends Component {
                           </div>
                         </td>
                         <td className={styles.tableCellCenter}>{applicant.phone || "--"}</td>
+                        <td>{applicant.location || "--"}</td>
                         <td>{shortformatDate(applicant.created_at)}</td>
+                        <td>{shortformatDate(applicant.updated_at || "--")}</td>
                         <td className={styles.tableCellCenter}>{applicant.experience_display || applicant.experience || "--"}</td>
                         <td>
                           <div >
@@ -294,6 +298,9 @@ class ApplicantTable extends Component {
                             <div className={`dropdown-menu dropdown-menu-right ${styles.dropdownMenu}`}>
                               <a href="fake_url" className="dropdown-item" onClick={(e) => { e.preventDefault(); this.handleViewApplicant(applicant); }}>
                                 <i className="dropdown-icon fa fa-eye" /> View Details
+                              </a>
+                              <a href="fake_url" className="dropdown-item" onClick={(e) => { e.preventDefault(); this.props.onEdit(applicant); }}>
+                                <i className="dropdown-icon fa fa-pencil" /> Edit Details
                               </a>
                               {applicant.resume_path && (
                                 <a
