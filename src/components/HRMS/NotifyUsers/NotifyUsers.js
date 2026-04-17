@@ -20,8 +20,8 @@ class NotifyUsers extends Component {
         this.state = {
             notificationData: [],
             employeeData: [],
-            filterFromDate: '',
-            filterToDate: '',
+            filterFromDate: getToday(),
+            filterToDate: getToday(),
             filterEmployeeId: "",
             loading: true,
             notificationToHide: null,
