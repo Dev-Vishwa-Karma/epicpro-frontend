@@ -219,6 +219,10 @@ code {
     color: #fff !important;
     opacity: 0.9 !important;
 }
+.modal-dialog.modal-xxl {
+  max-width: 80% !important;
+  width: 80% !important;
+}
 
 /* For Header Notification Dropdown */
 

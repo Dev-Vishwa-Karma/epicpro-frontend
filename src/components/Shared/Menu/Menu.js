@@ -219,6 +219,7 @@ class Menu extends Component {
 					{ "id": 9, "label": "Notifications", "to": "/notifications" },
 					{ "id": 10, "label": "Referral", "to": "/job-application" },
 					{ "id": 21, "label": "Ticket", "to": "/ticket" },
+					{ id: 22, label: "Notify Users", to: "/notify-user"}
 					]
 				}
 			];
@@ -265,7 +266,10 @@ class Menu extends Component {
 				const linkItem = { id: 15, label: "Link", to: "/link" };
 				const todoIndex = hrms.content.findIndex(item => item.id === 8);
 				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
+
 				else hrms.content.push(linkItem);
+				
+				// hrms.content.push({ id: 22, label: "Notify Users", to: "/notify-user"});
 
 				}
 
@@ -283,6 +287,18 @@ class Menu extends Component {
 				}
 
 				// Add Job Board section if not exists
+				if (!content.find(item => item.id === 19)) {
+					content.push({
+						id: 19,
+						icon: "icon-briefcase",
+						label: "Job Board",
+						content: [
+						{ id: 20, label: "Applicants", to: "/applicant" }
+						]
+					});
+				}
+
+				// Add Notify section if not exists
 				if (!content.find(item => item.id === 19)) {
 					content.push({
 						id: 19,
@@ -331,7 +347,7 @@ class Menu extends Component {
 					/>
 
 						<div id="left-sidebar" className="sidebar ">
-							<h6 className="brand-name">Profilics Systems HR</h6>
+							<h6 className="brand-name">Profilics Systems</h6>
 							<nav id="left-sidebar-nav" className="sidebar-nav">
 								<MetisMenu className=""
 									content={content}

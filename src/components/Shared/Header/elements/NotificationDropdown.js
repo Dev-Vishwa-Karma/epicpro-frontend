@@ -32,7 +32,7 @@ class NotificationDropdown extends Component {
           data-toggle="dropdown"
         >
           <i className="fa fa-bell" />
-          {notifications.filter((n) => Number(n.read) === 0).length > 0 && (
+          {notifications.filter((n) => n.read === 'unread').length > 0 && (
             <span className="badge badge-primary nav-unread" />
           )}
         </a>
@@ -64,7 +64,7 @@ class NotificationDropdown extends Component {
                         key={index}
                         style={{
                           backgroundColor:
-                            Number(notification.read) === 0 ? "#E8E9E9" : "transparent",
+                            notification.read === 'unread' ? "#E8E9E9" : "transparent",
                           cursor: "pointer",
                           borderBottom: "1px solid #ddd",
                         }}

@@ -27,6 +27,9 @@ import EditTicket from './HRMS/Tickets/EditTicket';
 import ViewTicket from './HRMS/Tickets/ViewTicket';
 import ForgotPassword from './Authentication/ForgotPassword';
 import ResetPassword from './Authentication/ResetPassword';
+// import NotifyUsers from './HRMS/NotifyUsers/elements/NotifyUsersForm';
+import NotifyUsers from './HRMS/NotifyUsers/NotifyUsers';
+
 
 const Routes = [
     {
@@ -283,7 +286,15 @@ const Routes = [
         pageTitle: "View Ticket",
         adminAccess: true,
         component: ViewTicket
-    }
+    },
+    {
+        path: "/notify-user",
+        name: 'Notify User',
+        exact: true,
+        pageTitle: "Notify User",
+        roles: ['admin', 'super_admin','employee'],
+        component: NotifyUsers
+    },
 ];
 
 export default Routes;
