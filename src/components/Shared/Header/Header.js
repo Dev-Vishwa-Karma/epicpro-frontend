@@ -19,7 +19,6 @@ import Button from "../../common/formInputs/Button";
 import NotificationDropdown from "./elements/NotificationDropdown";
 import UserDropdown from "./elements/UserDropdown";
 import DailyReportModal from "./elements/DailyReportModal";
-import emitter from "../../../emitter";
 
 class Header extends Component {
   constructor(props) {
@@ -317,9 +316,8 @@ class Header extends Component {
     this.setState({ loading: true });
 
     getService
-      .getCall("push_notification.php", {
-        action: "get_push_notification",
-        filter: 'all',
+      .getCall("notifications.php", {
+        action: "get_notifications",
         user_id: window.user.id,
         page: page,
         limit: limit,
@@ -327,7 +325,7 @@ class Header extends Component {
       .then((data) => {
         if (data.status === "success") {
           const newNotifications = data.data;
-          
+
           this.setState({
             notifications: [...notifications, ...newNotifications],
             hasMore: newNotifications.length === limit, // If less than limit, there's no more to load
@@ -338,15 +336,15 @@ class Header extends Component {
           this.setState({ hasMore: false, loading: false });
         }
       })
-    .catch((err) => {
-      console.error(err);
-      this.setState({ loading: false });
-    });
+      .catch((err) => {
+        console.error(err);
+        this.setState({ loading: false });
+      });
   };
 
   checkBirthdays = () => {
     getService
-      .getCall("push_notification.php", {
+      .getCall("notifications.php", {
         action: "birthday_notify",
       })
       .then((data) => {
@@ -370,12 +368,12 @@ class Header extends Component {
 
   markAsRead = (notification_id) => {
     const apiCall = notification_id
-      ? getService.getCall("push_notification.php", {
+      ? getService.getCall("notifications.php", {
           action: "mark_read",
           user_id: window.user.id,
           notification_id: notification_id,
         })
-      : getService.getCall("push_notification.php", {
+      : getService.getCall("notifications.php", {
           action: "mark_read",
           user_id: window.user.id,
         });
@@ -383,8 +381,6 @@ class Header extends Component {
     apiCall
       .then((data) => {
         if (data.status === "success") {
-          //event to trigger when notification has mark as read
-          emitter.emit("notificationUpdated");
           this.setState(
             {
               page: 1,
@@ -405,7 +401,7 @@ class Header extends Component {
 
   // Navigate to notifications page
   navigateToNotifications = () => {
-    this.props.history.push("/notify-user");
+    this.props.history.push("/notifications");
   };
 
   getActivities = () => {

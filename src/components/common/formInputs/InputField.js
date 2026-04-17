@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 
 const InputField = ({
   label,
@@ -28,18 +28,6 @@ const InputField = ({
   const wrapperClass = `${(type !== 'file' && type !== 'checkbox') ? 'form-group' : ''}${containerClassName ? ` ${containerClassName}` : ''}`.trim();
   const controlClass = `form-control${error ? ' is-invalid' : ''}${inputClassName ? ` ${inputClassName}` : ''}`.trim();
   const checkboxClass = `form-check-input${error ? ' is-invalid' : ''}${inputClassName ? ` ${inputClassName}` : ''}`.trim();
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setOpen(false);
-    }
-  };
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
 
   return (
     <div className={wrapperClass}>
@@ -59,73 +47,7 @@ const InputField = ({
           disabled={disabled}
           style={style}
         />
-      ) : 
-
-      type === 'select' && multiple ? (
-       <div className="position-relative" ref={dropdownRef}>
-    
-    {/* Dropdown Header */}
-    <div
-      className={`form-control d-flex justify-content-between align-items-center ${error ? 'is-invalid' : ''}`}
-      onClick={() => setOpen(!open)}
-      style={{ cursor: 'pointer' }}
-    >
-      <span>
-        {(value && value.length > 0)
-          ? options
-              .filter(opt => value.includes(opt.value))
-              .map(opt => opt.label)
-              .join(', ')
-          : `Select ${label}`}
-      </span>
-      <span>▼</span>
-    </div>
-
-    {/* Dropdown List */}
-    {open && (
-      <div
-        className="position-absolute bg-white border rounded w-100 mt-1 p-2"
-        style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}
-      >
-        {options.map(option => (
-          <div key={option.value} className="form-check">
-            <input
-              type="checkbox"
-              id={`${name}_${option.value}`}
-              className={checkboxClass}
-              checked={(value || []).includes(option.value)}
-              onChange={(e) => {
-                let updatedValues = [...(value || [])];
-
-                if (e.target.checked) {
-                  updatedValues.push(option.value);
-                } else {
-                  updatedValues = updatedValues.filter(v => v !== option.value);
-                }
-
-                onChange({
-                  target: {
-                    name,
-                    value: updatedValues
-                  }
-                });
-              }}
-            />
-            <label
-              htmlFor={`${name}_${option.value}`}
-              className="form-check-label ml-2"
-            >
-              {option.label}
-            </label>
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-      )
-      :
-
-      type === 'select' && !multiple  ? (
+      ) : type === 'select' ? (
         <select
           id={name}
           name={name}

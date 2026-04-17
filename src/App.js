@@ -7,75 +7,20 @@ import authService from "./components/Authentication/authService";
 import ForgotPassword from './components/Authentication/ForgotPassword';
 import ResetPassword from './components/Authentication/ResetPassword';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import Pusher from 'pusher-js';
-import logo from "./logo.svg";
-import emitter from "./emitter";
 
 class App extends Component {
-	pusher = null;
-    channel = null;
 	constructor(props) {
         super(props);
         this.state = {
-            user: authService.getUser(),
+            user: authService.getUser(), // Load user from authService
         };
     }
 
 	componentDidMount() {
+        // Listen for login/logout updates
         authService.subscribe((user) => {
             this.setState({ user });
         });
-		if (this.state.user) {
-			this.handlePusher();
-		}
-    }
-
-	handlePusher = ()=>{
-
-		// Request notification permission
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
-		const {id, first_name} = window.user
-		const eventTarget = `new_notification${id}`;
-		console.log('Binding Pusher event:', eventTarget);
-
-        // Initialize Pusher
-        Pusher.logToConsole = true;
-        const pusher = new Pusher('f77b8bad1d56965b1b7c', {
-            cluster: 'ap2'
-        });
-
-        const channel = pusher.subscribe('my-channel');
-        channel.bind(eventTarget, (data) => {
-
-            if (Notification.permission === "granted") {
-               const notification =  new Notification(`hi ${first_name}, You have a message`, {
-                    body: `${data.title},\n\n${data.message}`,
-                    icon: logo
-                });
-				emitter.emit("notificationUpdated");
-				notification.onclick = function () {
-					window.open("http://localhost:3000/notify-user", "_blank");
-				};
-			}
-        });
-
-        // Cleanup on unmount
-        this.pusher = pusher;
-        this.channel = channel;
-
-	}
-
-	componentWillUnmount() {
-        if (this.channel) {
-            this.channel.unbind_all();
-            this.channel.unsubscribe();
-        }
-        if (this.pusher) {
-            this.pusher.disconnect();
-        }
     }
 
 	handleLogin = (userData) => {
