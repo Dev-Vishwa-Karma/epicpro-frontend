@@ -106,7 +106,9 @@ class NotifyUsers extends Component {
         })
             .then(data => {
                 if (data.status === 'success') {
-                    this.setState({ employeeData: data.data });
+
+                    const employees = data.data.filter(data => data.status === 1);
+                    this.setState({ employeeData: employees });
                 } else {
                     this.setState({ error: data.message });
                 }
@@ -145,8 +147,8 @@ class NotifyUsers extends Component {
             {
                 filterNotification: event,
                 currentPage: 1,
-                filterFromDate: '',
-                filterToDate: '',
+                filterFromDate: getToday(),
+                filterToDate: getToday(),
                 currentTab: tab
             },
             () => {
