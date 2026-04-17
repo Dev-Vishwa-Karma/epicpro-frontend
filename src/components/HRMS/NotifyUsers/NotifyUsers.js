@@ -364,10 +364,6 @@ class NotifyUsers extends Component {
             errors.body = "Body is required.";
             isValid = false;
         }
-        if (!attach || attach.length === 0) {
-            errors.attach = "Attach is required.";
-            isValid = false;
-        }
         if (!type.trim()) {
             errors.type = "Notification Type is required.";
             isValid = false;
@@ -386,7 +382,6 @@ class NotifyUsers extends Component {
             const errors = {
                 title: "Title is required.",
                 body: "Body is required.",
-                attach: "File is required.",
                 type: " Notification Type is required",
                 selectedEmployee: "SelectedEmployee is required."
             };
