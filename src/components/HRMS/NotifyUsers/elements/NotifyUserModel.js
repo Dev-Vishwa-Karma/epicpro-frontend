@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect  } from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
 import AlertMessages from '../../../common/AlertMessages';
@@ -23,7 +23,7 @@ const NotifyUserModal = ({
         value: emp.id
       }));
 
-  return (
+    return (
     <>
       {show && (
         <div className="modal fade show d-block" id={1} tabIndex={-1} role="dialog" aria-modal="true">

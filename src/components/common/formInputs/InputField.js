@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Select from "react-select";
+
 
 const InputField = ({
   label,
@@ -61,69 +63,51 @@ const InputField = ({
         />
       ) : 
 
-      type === 'select' && multiple ? (
-       <div className="position-relative" ref={dropdownRef}>
-    
-    {/* Dropdown Header */}
-    <div
-      className={`form-control d-flex justify-content-between align-items-center ${error ? 'is-invalid' : ''}`}
-      onClick={() => setOpen(!open)}
-      style={{ cursor: 'pointer' }}
-    >
-      <span>
-        {(value && value.length > 0)
-          ? options
-              .filter(opt => value.includes(opt.value))
-              .map(opt => opt.label)
-              .join(', ')
-          : `Select ${label}`}
-      </span>
-      <span>▼</span>
-    </div>
+     type === "select" && multiple ? (
+          <div className={wrapperClass}>
+                {label && <label className="form-label"></label>}
 
-    {/* Dropdown List */}
-    {open && (
-      <div
-        className="position-absolute bg-white border rounded w-100 mt-1 p-2"
-        style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}
-      >
-        {options.map(option => (
-          <div key={option.value} className="form-check">
-            <input
-              type="checkbox"
-              id={`${name}_${option.value}`}
-              className={checkboxClass}
-              checked={(value || []).includes(option.value)}
-              onChange={(e) => {
-                let updatedValues = [...(value || [])];
+                <Select
+              isMulti
+              options={options}
 
-                if (e.target.checked) {
-                  updatedValues.push(option.value);
-                } else {
-                  updatedValues = updatedValues.filter(v => v !== option.value);
-                }
+              value={
+                options.filter(opt =>
+                  Array.isArray(value) && value.includes(opt.value)
+                )
+              }
 
+              onChange={(selected) => {
                 onChange({
                   target: {
                     name,
-                    value: updatedValues
+                    value: selected ? selected.map(s => s.value) : []
                   }
                 });
               }}
+
+              placeholder={`Select ${label}`}
+              closeMenuOnSelect={false}
+              hideSelectedOptions={false}
+              classNamePrefix="react-select"
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: base => ({ ...base, zIndex: 999999 }),
+                control: base => ({
+                  ...base,
+                  minHeight: "38px",
+                  borderColor: error ? "red" : base.borderColor
+                })
+              }}
             />
-            <label
-              htmlFor={`${name}_${option.value}`}
-              className="form-check-label ml-2"
-            >
-              {option.label}
-            </label>
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-      )
-      :
+
+            {error && (
+              <div className="invalid-feedback d-block">
+                {error}
+              </div>
+            )}
+        </div>
+      ) :
 
       type === 'select' && !multiple  ? (
         <select

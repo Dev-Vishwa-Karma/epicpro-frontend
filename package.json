@@ -39,6 +39,7 @@
 		"react-router-dom": "^4.3.1",
 		"react-script-tag": "^1.1.2",
 		"react-scripts": "^3.4.0",
+		"react-select": "^5.10.2",
 		"react-simple-maps": "^2.0.0",
 		"reactjs-popup": "^2.0.6",
 		"redux": "^4.0.5",
