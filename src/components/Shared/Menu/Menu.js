@@ -216,7 +216,7 @@ class Menu extends Component {
 					{ "id": 6, "label": "Reports", "to": "/hr-report" },
 					{ "id": 7, "label": "Gallery", "to": "/gallery" },
 					{ "id": 8, "label": "Todo List", "to": "/project-todo" },
-					{ "id": 9, "label": "Notifications", "to": "/notifications" },
+					// { "id": 9, "label": "Notifications", "to": "/notifications" },
 					{ "id": 10, "label": "Referral", "to": "/job-application" },
 					{ "id": 21, "label": "Ticket", "to": "/ticket" },
 					{ id: 22, label: "Notify Users", to: "/notify-user"}

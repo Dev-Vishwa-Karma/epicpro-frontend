@@ -21,8 +21,6 @@ const ViewNotificationModel = ({
     const [filePath, setFilePath] = React.useState(null);
     const [editStatus, setEditStatus] = React.useState(false);
     const [showPreview, setShowPreview] = React.useState(false);
-    console.log('selectedNotification=>',selectedNotification);
-    console.log('selectedEmployee=>',selectedEmployee);
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const formattedDate = shortformatDate(date);
@@ -43,7 +41,6 @@ const ViewNotificationModel = ({
             receiver = [];
         }
     }
-    console.log('receiver=>',receiver);
 
     const getExt = (file) => file.split('.').pop().toLowerCase();
 
@@ -170,7 +167,11 @@ const ViewNotificationModel = ({
                                                                             name="status"
                                                                             type="select"
                                                                             value={selectedNotification?.read}
-                                                                            onChange={onChange}
+                                                                            // onChange={onChange}
+                                                                            onChange={(e) => {
+                                                                                onChange(e);
+                                                                                setEditStatus(false);
+                                                                            }}
                                                                             options={[
                                                                                 { value: "unread", label: "Unread" },
                                                                                 { value: "read", label: "Read" },
@@ -189,7 +190,6 @@ const ViewNotificationModel = ({
 
                                                                 <p
                                                                     className="mb-0 d-flex align-items-center justify-content-between"
-                                                                    onClick={() => toggleEditStatus(notification.id)}
                                                                 >
                                                                     <span className={`tag ${notification.read === '1' || notification.read === 'read' ? 'tag-blue' :
                                                                         notification.read === '0' || notification.read === 'unread' ? 'tag-red' :
@@ -200,7 +200,6 @@ const ViewNotificationModel = ({
                                                                     </span>
 
                                                                     <span>
-                                                                                                                                            <small className="text-muted">Status: </small>
                                                                         <small className="text-muted">Receiver: </small>
 
                                                                         {notification.receiver_name}
@@ -208,9 +207,6 @@ const ViewNotificationModel = ({
                                                                 </p>
                                                             </li>
                                                         ))}
-
-
-
 
                                                         <li className="list-group-item">
                                                             <small className="text-muted">Type: </small>

@@ -53,7 +53,8 @@ class App extends Component {
             if (Notification.permission === "granted") {
                const notification =  new Notification(`hi ${first_name}, You have a message`, {
                     body: `${data.title},\n\n${data.message}`,
-                    icon: logo
+                    icon: logo,
+					requireInteraction: true
                 });
 				emitter.emit("notificationUpdated");
 				notification.onclick = function () {

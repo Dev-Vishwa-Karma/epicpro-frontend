@@ -473,7 +473,7 @@ class NotifyUsers extends Component {
         const { selectedNotification } = this.state;
         getService.getCall("push_notification.php", {
             action: "update_status",
-            notification_id: selectedNotification.notification,
+            notification_id: selectedNotification.id,
             status: value
         }).then((data) => {
             if (data.status === "success") {

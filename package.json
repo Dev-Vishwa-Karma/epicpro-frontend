@@ -40,6 +40,7 @@
 		"react-script-tag": "^1.1.2",
 		"react-scripts": "^3.4.0",
 		"react-simple-maps": "^2.0.0",
+		"reactjs-popup": "^2.0.6",
 		"redux": "^4.0.5",
 		"redux-thunk": "^2.3.0",
 		"typescript": "^5.7.3"

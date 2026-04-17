@@ -874,7 +874,6 @@ class Header extends Component {
       disableButton,
     } = this.state;
     const currentTab = this.props.location?.state?.tab;
-
     return (
       <div>
         <AlertMessages
@@ -893,7 +892,10 @@ class Header extends Component {
         >
           <div className="container-fluid">
             <div className="page-header">
-              <div className="left">
+              <div className="">
+                <h1 className="page-title" style={{ marginBottom: "10px" }}>
+                  {`${window?.user?.first_name || ''} ${window?.user?.last_name || ''} (${window?.user?.role || ''})`}
+                </h1>            
                 <h1 className="page-title">{this.props.dataFromSubParent}</h1>
               </div>
               <div className="right">

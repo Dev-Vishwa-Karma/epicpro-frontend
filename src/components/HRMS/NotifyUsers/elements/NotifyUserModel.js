@@ -16,10 +16,12 @@ const NotifyUserModal = ({
 
 }) => {
   const { title = '', body = '', attach = [], selectedEmployee = [], type = '' } = formData;
-  const mappedOptions = employeeData.map(emp => ({
-    label: `${emp.first_name} ${emp.last_name}`,
-    value: emp.id
-  }));
+  const mappedOptions = employeeData
+    .filter(emp => emp.id !== window.user.id)
+    .map(emp => ({
+        label: `${emp.first_name} ${emp.last_name}`,
+        value: emp.id
+      }));
 
   return (
     <>

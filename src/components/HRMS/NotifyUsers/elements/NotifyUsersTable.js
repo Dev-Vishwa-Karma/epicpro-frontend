@@ -2,8 +2,19 @@ import React, { useState } from 'react';
 import NoDataRow from '../../../common/NoDataRow';
 import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
+import Popup from "reactjs-popup";
+import "reactjs-popup/dist/index.css";
 
 const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordClick, filterNotification, currentTab }) => {
+    const onViewReceivers = (notification) => {
+    try {
+        return typeof notification.receiver === "string"
+            ? JSON.parse(notification.receiver)
+            : notification.receiver || [];
+    } catch {
+        return [];
+    }
+};
     return (
         <div className="table-responsive">
             <table className="table table-striped table-vcenter table-hover mb-0">
@@ -48,7 +59,7 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                                     notification.read === 'read' ? 'tag-blue' :
                                                         notification.read === 'unread' ? 'tag-red' :
                                                             notification.read === 'ready_to_discuss' ? 'tag-warm' :
-                                                                notification.read === 'completed' ? 'tag-sucess' : ''
+                                                                notification.read === 'completed' ? 'tag-success' : ''
                                                 }`}>
                                             {notification.read === '1' ? 'read' : notification.read === '0' ? 'unread' : notification.read}
                                         </span>
@@ -75,16 +86,73 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                 )}
 
 
-                                {(currentTab === "sent") && (
+                                {currentTab === "sent" && (
                                     <td>
-                                        <Button
-                                            label=""
-                                            title="view Receivers"
-                                            className="btn-icon btn-sm js-sweetalert"
-                                            icon="fa fa-info-circle text-danger"
-                                        />
-                                    </td>
+                                        <Popup
+                                            trigger={
+                                                <i
+                                                    className="fa fa-info-circle text-danger"
+                                                    style={{ cursor: "pointer" }}
+                                                />
+                                            }
+                                            position="right center"
+                                            on="hover"
+                                            mouseEnterDelay={0}
+                                            mouseLeaveDelay={200}
+                                            closeOnDocumentClick
+                                            overlayStyle={{ background: "transparent" }}
+                                            contentStyle={{
+                                                background: "#fff",
+                                                opacity: 1,
+                                                backdropFilter: "none",
+                                                WebkitBackdropFilter: "none",
+                                                padding: "10px",
+                                                borderRadius: "8px",
+                                                width: "220px",
+                                                maxHeight: "200px",
+                                                overflowY: "auto",
+                                                boxShadow: "0 2px 10px rgba(0,0,0,0.15)"
+                                            }}
+                                        >
+                                            {() => {
+                                                const receivers = onViewReceivers(notification);
 
+                                                return (
+                                                    <div>
+                                                        <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
+                                                            Receivers
+                                                        </div>
+
+                                                        {receivers.length > 0 ? (
+                                                            receivers.map((rec, i) => (
+                                                                <div key={i} style={{ marginBottom: "6px" }}>
+                                                                    <strong>{rec.receiver_name}</strong>
+
+                                                                    <div>
+                                                                        <span
+                                                                            className={`tag ${
+                                                                                rec.read === 'completed'
+                                                                                    ? 'tag-success'
+                                                                                    : rec.read === 'ready_to_discuss'
+                                                                                    ? 'tag-warn'
+                                                                                    : rec.read === 'read'
+                                                                                    ? 'tag-blue'
+                                                                                    : 'tag-red'
+                                                                            }`}
+                                                                        >
+                                                                            {rec.read}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div>No receivers</div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }}
+                                        </Popup>
+                                    </td>
                                 )}
 
                                 {(currentTab === "receive") && (
