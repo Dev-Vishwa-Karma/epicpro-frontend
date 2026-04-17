@@ -1,20 +1,300 @@
-import departments from "./view/hr-departments/departments";
-import user from "./view/user/user";
+import Dashboard from './HRMS/Dashboard/Dashboard';
+import Users from './HRMS/Users/Users';
+import Departments from './HRMS/Departments/Departments';
+import Employee from './HRMS/Employee/Employee';
+import AddEmployee from './HRMS/Employee/AddEmployee';
+import EditEmployee from './HRMS/Employee/EditEmployee';
+import Holidays from './HRMS/Holidays/Holidays';
+import Events from './HRMS/Events/Events';
+import Activities from './HRMS/Activities/Activities';
+import Report from './HRMS/Report/Report';
+import Gallery from './HRMS/Gallery/Gallery';
+import SaturdaySettings from './HRMS/SaturdaySettings/SaturdaySettings';
+import Statistics from './HRMS/Statistics/Statistics';
+import ProjectList from './HRMS/Projects/Projectlist';
+import Clients from './HRMS/Clients/Clients';
+import TodoList from './HRMS/Todos/TodoList';
+import Login from './Authentication/login';
+import ViewEmployee from './HRMS/Employee/ViewEmployee';
+import Link from './HRMS/Link/Link';
+import Notifications from './HRMS/notifications/Notifications';
+import Applicant from './HRMS/Applicants/Applicant';
+import ApplicantForm from './HRMS/Applicants/ApplicantForm';
+import EditUser from './HRMS/Users/EditUser';
+import Ticket from './HRMS/Tickets/Ticket';
+import AddTicket from './HRMS/Tickets/AddTicket';
+import EditTicket from './HRMS/Tickets/EditTicket';
+import ViewTicket from './HRMS/Tickets/ViewTicket';
+import ForgotPassword from './Authentication/ForgotPassword';
+import ResetPassword from './Authentication/ResetPassword';
+// import NotifyUsers from './HRMS/NotifyUsers/elements/NotifyUsersForm';
+import NotifyUsers from './HRMS/NotifyUsers/NotifyUsers';
 
-const dashboardRoutes = [
-  {
-    path: "/user",
-    name: "User Profile",
-    component: user,
-    layout: "/admin"
-  },
-  {
-    path: "/department",
-    name: "Department",
-    component: departments,
-    layout: "/admin"
-  }
 
+const Routes = [
+    {
+        path: "/",
+        name: 'dashboard',
+        exact: true,
+        pageTitle: "HR Dashboard",
+        component: Dashboard,
+        roles: ['admin', 'super_admin', 'employee']
+    },
+    {
+        path: "/hr-users",
+        name: 'hr-users',
+        exact: true,
+        pageTitle: "Users",
+        adminAccess: true,
+        component: Users,
+        roles: ['admin', 'super_admin']
+    },
+    {
+        path: "/hr-department",
+        name: 'department',
+        exact: true,
+        pageTitle: "Departments",
+        adminAccess: true,
+        component: Departments,
+        roles: ['admin', 'super_admin']
+    },
+    {
+        path: "/hr-employee",
+        name: 'employee',
+        exact: true,
+        pageTitle: "Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: Employee
+    },
+    {
+        path: "/add-employee",
+        name: 'add-employee',
+        exact: true,
+        pageTitle: "Add Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+
+        component: AddEmployee
+    },
+    {
+        path: "/edit-employee",
+        name: 'edit-employee',
+        exact: true,
+        pageTitle: "Edit Employee",
+        roles: ['admin', 'super_admin'],
+        component: EditEmployee
+    },
+    {
+        path: "/view-employee/:id/:activeTab",
+        name: 'view-employee',
+        exact: true,
+        pageTitle: "View Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin', 'employee'],
+        component: ViewEmployee
+    },
+    {
+        path: "/view-employee/:id",
+        name: 'view-employee',
+        exact: true,
+        pageTitle: "View Employee",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: ViewEmployee
+    },
+    {
+        path: "/hr-holidays",
+        name: 'holidays',
+        exact: true,
+        pageTitle: "Holidays",
+        roles: ['admin', 'super_admin', 'employee'],
+        component: Holidays
+    },
+    {
+        path: "/hr-events",
+        name: 'events',
+        exact: true,
+        pageTitle: "Events",
+        component: Events,
+        roles: ['admin', 'super_admin', 'employee']
+    },
+    {
+        path: "/hr-activities",
+        name: 'activities',
+        exact: true,
+        pageTitle: "Activities",
+        component: Activities,
+        roles: ['admin', 'super_admin', 'employee']
+    },
+    {
+        path: "/hr-report",
+        name: 'report',
+        exact: true,
+        pageTitle: "Report",
+        component: Report,
+        roles: ['admin', 'super_admin', 'employee']
+    },
+    {
+        path: "/gallery",
+        name: 'gallery',
+        exact: true,
+        pageTitle: "Image Gallery",
+        component: Gallery,
+        roles: ['admin', 'super_admin', 'employee']
+    },
+    {
+        path: "/saturday-settings",
+        name: 'saturday settings',
+        exact: true,
+        pageTitle: "Saturday Settings",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: SaturdaySettings
+    },
+    {
+        path: "/statistics",
+        name: 'Statistics',
+        exact: true,
+        pageTitle: "Statistics",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: Statistics
+    },
+    //project
+    {
+        path: "/project-list",
+        name: 'project-list',
+        exact: true,
+        pageTitle: "Project",
+        roles: ['admin', 'super_admin'],
+        component: ProjectList
+    },
+
+    {
+        path: "/project-clients",
+        name: 'project-clients',
+        exact: true,
+        pageTitle: "Clients",
+        roles: ['admin', 'super_admin'],
+        component: Clients
+    },
+    {
+        path: "/project-todo",
+        name: 'project-todo',
+        exact: true,
+        pageTitle: "Todo List",
+        roles: ['admin', 'super_admin', 'employee'],
+        component: TodoList
+    },
+
+    //Git-Excel-Codebase
+    {
+        path: "/link",
+        name: 'Link-Work',
+        exact: true,
+        pageTitle: "Link",
+        roles: ['admin', 'super_admin'],
+        component: Link
+    },
+
+    {
+        path: "/notifications",
+        name: 'NOtifications',
+        exact: true,
+        pageTitle: "Notifications",
+        roles: ['admin', 'super_admin','employee'],
+        component: Notifications
+    },
+    //job portal
+    {
+        path: "/applicant",
+        name: 'ApplicantTabble',
+        exact: true,
+        pageTitle: "Applicants",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: Applicant
+    },
+    {
+        path: "/forgot-password",
+        name: 'forgot-password',
+        exact: true,
+        pageTitle: "Forgot Password",
+        component: ForgotPassword
+    },
+    {
+        path: "/reset-password",
+        name: 'reset-password',
+        exact: true,
+        pageTitle: "Reset Password",
+        component: ResetPassword
+    },
+    {
+        path: "/login",
+        name: 'login',
+        exact: true,
+        pageTitle: "Tables",
+        component: Login
+    },
+    {
+        path: "/job-application",
+        name: 'job-application',
+        exact: true,
+        pageTitle: "Referral",
+        component: ApplicantForm
+    },
+    {
+        path: "/hr-users/edit/:id",
+        name: 'edit-user',
+        exact: true,
+        pageTitle: "Edit User",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: EditUser
+    },
+    {
+        path: "/ticket",
+        name: 'ticket',
+        exact: true,
+        pageTitle: "Ticket",
+        adminAccess: true,
+        component: Ticket
+    },
+    {
+        path: "/add-ticket",
+        name: 'add-ticket',
+        exact: true,
+        pageTitle: "Add Ticket",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: AddTicket
+    },
+    {
+        path: "/edit-ticket",
+        name: 'edit-ticket',
+        exact: true,
+        pageTitle: "Edit Ticket",
+        adminAccess: true,
+        roles: ['admin', 'super_admin'],
+        component: EditTicket
+    },
+    {
+        path: "/view-ticket",
+        name: 'view-ticket',
+        exact: true,
+        pageTitle: "View Ticket",
+        adminAccess: true,
+        component: ViewTicket
+    },
+    {
+        path: "/notify-user",
+        name: 'Notify User',
+        exact: true,
+        pageTitle: "Notify User",
+        roles: ['admin', 'super_admin','employee'],
+        component: NotifyUsers
+    },
 ];
 
-export default dashboardRoutes;
+export default Routes;
