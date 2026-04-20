@@ -22,7 +22,6 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                             <tr>
                                 <th></th>
                                 <th>Title</th>
-                                <th>Priority</th>
                                 {logged_in_employee_role !== 'employee' &&
                                     <th>Assigned To</th>
                                 }
@@ -39,20 +38,45 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                         <td>{index + 1}</td>
                                         <td>
                                             <div className="font-15"></div>
-                                            <h6 className="mb-0">{ticket.title}</h6>
+                                            <h6
+                                                className="mb-0"
+                                                onClick={() => goToViewTicket(ticket, ticket.ticket_id)}
+                                                style={{ cursor: 'pointer', color: '#007bff' }}
+                                            >
+                                                {ticket.title}</h6>
                                             <span title={ticket.description.replace(/<[^>]+>/g, '')}>
                                                 {ticket.description.replace(/<[^>]+>/g, '').length < 10
                                                     ? ticket.description.replace(/<[^>]+>/g, '')
                                                     : `${ticket.description.replace(/<[^>]+>/g, '').substring(0, 10)} ...`}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <span className={`tag ml-0 mr-0 ${ticket.priority === "high" ? "tag-danger"
-                                                : ticket.priority === "medium" ? "tag-warning"
-                                                    : "tag-success"
-                                                }`}>
-                                                {ticket.priority.toUpperCase()}
-                                            </span>
+
+                                            <div className="text-muted d-flex align-items-center gap-2 ticket-tags">
+
+                                                <span className={`tag mr-1 small ${ticket.priority === "high" ? "tag-danger"
+                                                    : ticket.priority === "medium" ? "tag-warning"
+                                                        : "tag-success"
+                                                    }`} style={{ cursor: "pointer" }}>
+                                                    {ticket.priority.toUpperCase()}
+                                                </span>
+
+                                                <span className={`tag ml-1 small ${ticket.status === "to-do" ? "tag-danger"
+                                                    : ticket.status === "in-progress" ? "tag-warning"
+                                                        : "tag-success"
+                                                    }`} style={{ cursor: "pointer" }}>
+                                                    {ticket.status === 'to-do'
+                                                        ? 'Pending'.toUpperCase()
+                                                        : ticket.status === 'in-progress'
+                                                            ? 'In Progress'.toUpperCase()
+                                                            : 'Completed'.toUpperCase()
+                                                    }
+                                                </span>
+
+                                                <div className="ticket-tooltip shadow bg-dark text-white p-2 rounded">
+                                                    <div>Status: {ticket.status}</div>
+                                                    <div>Priority: {ticket.priority}</div>
+                                                </div>
+
+                                            </div>
                                         </td>
                                         {logged_in_employee_role !== 'employee' &&
                                             <td className='d-flex'>
@@ -68,33 +92,25 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                                     <h6 className="mb-0">
                                                         {`${ticket.assigned_to.first_name} ${ticket.assigned_to.last_name}`}
                                                     </h6>
-                                                    <span className="text-muted">
-                                                        {ticket.assigned_to.email}
-                                                    </span>
                                                 </div>
                                             </td>
                                         }
                                         <td><div className="text-info">{shortformatDate(ticket.assigned_at)}</div></td>
-                                        <td style={{ width: ticket.progress}}>
+
+                                        <td style={{ width: ticket.progress }}>
                                             <div className="clearfix">
                                                 <div className="float-left"><strong>{ticket.progress}</strong></div>
                                                 <div className="float-right"><small className="text-muted">Progress</small></div>
                                             </div>
                                             <div className="progress progress-xs">
-                                                <div className="progress-bar bg-blue" role="progressbar" style={{ width: ticket.progress }} aria-valuemin={0} aria-valuemax={100} data-width={ticket.progress}/>
+                                                <div className="progress-bar bg-blue" role="progressbar" style={{ width: ticket.progress }} aria-valuemin={0} aria-valuemax={100} data-width={ticket.progress} />
                                             </div>
                                         </td>
                                         <td className='text-center'>
                                             <div className="text-pink" title="Due Date">{ticket.due_date ? shortformatDate(ticket.due_date) : '--/--/--'}</div>
-                                            <div className="text-green" title="Completed At">{ticket.completed_at ? shortformatDate(ticket.completed_at) : '--/--/--'}</div>
+                                            <div className="text-green" title="Completed At">{ticket.completed_at ? shortformatDate(ticket.completed_at) : null}</div>
                                         </td>
                                         <td>
-                                            <Button
-                                                icon="fa fa-eye"
-                                                title="View"
-                                                onClick={() => goToViewTicket(ticket, ticket.ticket_id)}
-                                                className="btn-icon btn-sm"
-                                            />
                                             {logged_in_employee_role !== 'employee' &&
                                                 <>
                                                     <Button
