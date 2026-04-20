@@ -81,16 +81,17 @@ class TodoList extends Component {
             // Default behavior differs for employee vs admin
             if (role === 'employee') {
                 // Employees: show ALL pending by default (no date filter)
-                this.setState({ dayFilter: '' }, () => {
+                this.setState({ dayFilter: 'all' }, () => {
                     this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
                 });
             } else {
                 // Admins: default to Today
-                const today = new Date();
-                const y = today.getFullYear();
-                const m = String(today.getMonth() + 1).padStart(2, '0');
-                const d = String(today.getDate()).padStart(2, '0');
-                const dayFilterDefault = `date:${y}-${m}-${d}`;
+                // const today = new Date();
+                // const y = today.getFullYear();
+                // const m = String(today.getMonth() + 1).padStart(2, '0');
+                // const d = String(today.getDate()).padStart(2, '0');
+                // const dayFilterDefault = `date:${y}-${m}-${d}`;
+                const dayFilterDefault = 'all'; // Show all by default for admins, they can choose day filter
                 this.setState({ dayFilter: dayFilterDefault }, () => {
                     this.fetchFilteredTodos(this.state.employeeFilter, 'pending');
                 });

@@ -50,33 +50,52 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                                     : `${ticket.description.replace(/<[^>]+>/g, '').substring(0, 10)} ...`}
                                             </span>
 
-                                            <div className="text-muted d-flex align-items-center gap-2 ticket-tags">
-
-                                                <span className={`tag mr-1 small ${ticket.priority === "high" ? "tag-danger"
-                                                    : ticket.priority === "medium" ? "tag-warning"
-                                                        : "tag-success"
-                                                    }`} style={{ cursor: "pointer" }}>
+                                           <div className="text-muted d-flex align-items-center gap-2">
+                                            <div className="tag-wrapper">
+                                                Priority:
+                                                <span
+                                                    className={`tag mr-1 small ${
+                                                        ticket.priority === "high"
+                                                            ? "tag-danger"
+                                                            : ticket.priority === "medium"
+                                                            ? "tag-warning"
+                                                            : "tag-success"
+                                                    }`}
+                                                >
                                                     {ticket.priority.toUpperCase()}
                                                 </span>
 
-                                                <span className={`tag ml-1 small ${ticket.status === "to-do" ? "tag-danger"
-                                                    : ticket.status === "in-progress" ? "tag-warning"
-                                                        : "tag-success"
-                                                    }`} style={{ cursor: "pointer" }}>
-                                                    {ticket.status === 'to-do'
-                                                        ? 'Pending'.toUpperCase()
-                                                        : ticket.status === 'in-progress'
-                                                            ? 'In Progress'.toUpperCase()
-                                                            : 'Completed'.toUpperCase()
-                                                    }
+                                                <div className="tooltip-box">
+                                                    Priority: {ticket.priority.toUpperCase()}
+                                                </div>
+                                            </div>
+                                            <div className="tag-wrapper">
+                                                Status:
+                                                <span
+                                                    className={`tag ml-1 small ${
+                                                        ticket.status === "to-do"
+                                                            ? "tag-danger"
+                                                            : ticket.status === "in-progress"
+                                                            ? "tag-warning"
+                                                            : "tag-success"
+                                                    }`}
+                                                >
+                                                    {ticket.status === "to-do"
+                                                        ? "PENDING"
+                                                        : ticket.status === "in-progress"
+                                                        ? "IN PROGRESS"
+                                                        : "COMPLETED"}
                                                 </span>
 
-                                                <div className="ticket-tooltip shadow bg-dark text-white p-2 rounded">
-                                                    <div>Status: {ticket.status}</div>
-                                                    <div>Priority: {ticket.priority}</div>
+                                                <div className="tooltip-box">
+                                                    Status: {ticket.status === "to-do"
+                                                        ? "PENDING"
+                                                        : ticket.status === "in-progress"
+                                                        ? "IN PROGRESS"
+                                                        : "COMPLETED"}
                                                 </div>
-
                                             </div>
+                                        </div>
                                         </td>
                                         {logged_in_employee_role !== 'employee' &&
                                             <td className='d-flex'>

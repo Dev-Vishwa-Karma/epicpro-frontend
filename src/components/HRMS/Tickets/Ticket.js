@@ -96,7 +96,7 @@ class Ticket extends Component {
 
     handleTodoChange = (event) => {
         const filterTodoQuery = event.target.value;
-        this.setState({ filterTodoQuery });
+        this.setState({ filterTodoQuery, searchQuery: "" });
         if (this.searchTimeout) clearTimeout(this.searchTimeout);
         this.searchTimeout = setTimeout(() => {
             this.setState({ loading: true });
@@ -232,6 +232,18 @@ class Ticket extends Component {
                                         value={searchQuery}
                                         onChange={this.handleSearchChange}
                                     />
+                                    <select
+                                        className="custom-select"
+                                        name="selectedtodo"
+                                        value={filterTodoQuery}
+                                        onChange={this.handleTodoChange}
+                                    >
+                                        <option value="">Todo Filter</option>
+                                        <option value="to-do">Pending</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+
                                 </div>
                                 {this.state.logged_in_employee_role != 'employee' && (
                                     <Button
@@ -281,23 +293,6 @@ class Ticket extends Component {
                     <div className="container-fluid">
                         <div className="tab-content taskboard">
                             <div className="tab-pane fade show active" id="TaskBoard-list" role="tabpanel">
-
-                                <div className="">
-                                    <InputField
-                                        label="Filter Todo"
-                                        name="selectedtodo"
-                                        type="select"
-                                        value={filterTodoQuery}
-                                        onChange={this.handleTodoChange}
-                                        // error={errors.selectedStatus}
-                                        options={[
-                                        { value: 'to-do', label: 'To Do' },
-                                        { value: 'in-progress', label: 'In Progress' },
-                                        { value: 'completed', label: 'Completed' },
-                                        ]}
-                                    />
-                                </div>
-
 
                                 <TicketListTable
                                     loading={loading}
