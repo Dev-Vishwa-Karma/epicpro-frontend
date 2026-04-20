@@ -351,6 +351,7 @@ class NotifyUsers extends Component {
             errors: {},
             ButtonLoading: false
         })
+        this.getNotifications();
     }
 
     validateNotificationForm = (title, body, attach, type, selectedEmployee) => {

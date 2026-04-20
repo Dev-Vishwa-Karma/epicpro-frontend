@@ -893,9 +893,11 @@ class Header extends Component {
           <div className="container-fluid">
             <div className="page-header">
               <div className="">
-                <h1 className="page-title" style={{ marginBottom: "10px" }}>
-                  {`${window?.user?.first_name || ''} ${window?.user?.last_name || ''} (${window?.user?.role || ''})`}
-                </h1>            
+                {this.props.dataFromSubParent !== 'HR Dashboard' && (
+                  <h1 className="page-title" style={{ marginBottom: "10px" }}>
+                    {`${window?.user?.first_name || ''} ${window?.user?.last_name || ''} (${window?.user?.role || ''})`}
+                  </h1>
+                )}
                 <h1 className="page-title">{this.props.dataFromSubParent}</h1>
               </div>
               <div className="right">

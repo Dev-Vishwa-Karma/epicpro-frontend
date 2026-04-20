@@ -54,7 +54,7 @@ class App extends Component {
                const notification =  new Notification(`hi ${first_name}, You have a message`, {
                     body: `${data.title},\n\n${data.message}`,
                     icon: logo,
-					requireInteraction: true
+					requireInteraction: true,
                 });
 				emitter.emit("notificationUpdated");
 				notification.onclick = function () {
