@@ -395,6 +395,10 @@ code {
   scroll-behavior: smooth !important;
 }
 
+.ribbon-box::before {
+    margin-right: 1px !important;
+}
+
 /* Responsive notification sizing */
 @media (max-width: 768px) {
   .notification .dropdown-menu {
