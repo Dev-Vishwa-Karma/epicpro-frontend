@@ -238,7 +238,7 @@ class Ticket extends Component {
                                         value={filterTodoQuery}
                                         onChange={this.handleTodoChange}
                                     >
-                                        <option value="">Todo Filter</option>
+                                        <option value="">Status Filter</option>
                                         <option value="to-do">Pending</option>
                                         <option value="in-progress">In Progress</option>
                                         <option value="completed">Completed</option>
