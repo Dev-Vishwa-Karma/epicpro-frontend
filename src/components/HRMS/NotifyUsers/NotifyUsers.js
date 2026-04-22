@@ -55,7 +55,7 @@ class NotifyUsers extends Component {
 
         //event to update the status when notification has mark as read
         emitter.on("notificationUpdated", () => {
-            if (window.location.pathname === "/notify-user") {
+            if (window.location.pathname === "/connects") {
                 this.getNotifications();
             }
         });
@@ -437,8 +437,8 @@ class NotifyUsers extends Component {
                 filterNotification: selectFilter,
                 currentTab: selectedTab,
                 currentPage: 1,
-                filterFromDate: '',
-                filterToDate: ''
+                filterFromDate: getToday(),
+                filterToDate: getToday()
             },
             () => {
                 this.getNotifications();
@@ -566,9 +566,9 @@ class NotifyUsers extends Component {
                                 <li className="nav-item">
                                     <a className={`nav-link ${currentTab === "sent" ? "active" : ""}`} href="#sent" onClick={() => this.notificationDetail("sent")}> Sent </a>
                                 </li>
-                                <li className="nav-item">
+                                {/* <li className="nav-item">
                                     <a className={`nav-link ${currentTab === "draft" ? "active" : ""}`} href="#draft" onClick={() => this.notificationDetail("draft")}> Draft </a>
-                                </li>
+                                </li> */}
                             </ul>
                         </div>
                         <div className="card">
@@ -584,7 +584,7 @@ class NotifyUsers extends Component {
                                     />
                                     <div className={`col-md-${col}`}>
                                         <Button
-                                            label="Notify Users"
+                                            label="Connect"
                                             onClick={() => this.handleAddClick()}
                                             className="btn-primary"
                                             style={{ float: "right", marginTop: 26 }}
@@ -616,7 +616,7 @@ class NotifyUsers extends Component {
                                                 options={[
                                                     { value: "manual", label: "Manual" },
                                                     { value: "all", label: "All" },
-                                                    { value: "automated", label: "Automated" },
+                                                    // { value: "automated", label: "Automated" },
                                                 ]}
                                             />
                                         </div>)}

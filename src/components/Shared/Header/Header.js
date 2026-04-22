@@ -405,7 +405,7 @@ class Header extends Component {
 
   // Navigate to notifications page
   navigateToNotifications = () => {
-    this.props.history.push("/notify-user");
+    this.props.history.push("/connects");
   };
 
   getActivities = () => {

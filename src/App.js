@@ -58,7 +58,7 @@ class App extends Component {
                 });
 				emitter.emit("notificationUpdated");
 				notification.onclick = function () {
-					window.open("http://localhost:3000/notify-user", "_blank");
+					window.open("http://localhost:3000/connects", "_blank");
 				};
 			}
         });

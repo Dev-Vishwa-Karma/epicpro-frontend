@@ -150,8 +150,8 @@ const ViewNotificationModel = ({
                                                                         selectedNotification.read === '0' ? 'tag-red' :
                                                                             selectedNotification.read === 'read' ? 'tag-blue' :
                                                                                 selectedNotification.read === 'unread' ? 'tag-red' :
-                                                                                    selectedNotification.read === 'ready_to_discuss' ? 'tag-warn' :
-                                                                                        selectedNotification.read === 'completed' ? 'tag-success' : ''
+                                                                                    selectedNotification.read === 'ready_to_discuss' ? 'tag-warning' :
+                                                                                        selectedNotification.read === 'completed' ? 'tag-danger' : ''
                                                                         }`}
                                                                     >
                                                                         {selectedNotification?.read}
@@ -193,8 +193,8 @@ const ViewNotificationModel = ({
                                                                 >
                                                                     <span className={`tag ${notification.read === '1' || notification.read === 'read' ? 'tag-blue' :
                                                                         notification.read === '0' || notification.read === 'unread' ? 'tag-red' :
-                                                                            notification.read === 'ready_to_discuss' ? 'tag-warn' :
-                                                                                notification.read === 'completed' ? 'tag-success' : ''
+                                                                            notification.read === 'ready_to_discuss' ? 'tag-warning' :
+                                                                                notification.read === 'completed' ? 'tag-danger' : ''
                                                                         }`}>
                                                                         {notification.read}
                                                                     </span>

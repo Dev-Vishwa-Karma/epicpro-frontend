@@ -229,6 +229,36 @@ code {
   padding: 7px 0 !important;
 }
 
+.tag-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* hidden by default */
+.tooltip-box {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    margin-left: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    box-Shadow: "0 4px 15px rgba(0,0,0,0.4)";
+    border: "1px solid rgba(255,255,255,0.1)";
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 999;
+}
+
+/* show on hover */
+.tag-wrapper:hover .tooltip-box {
+    display: block;
+}
+
+
 /* For Header Notification Dropdown */
 
 @media (max-width: 768px) {

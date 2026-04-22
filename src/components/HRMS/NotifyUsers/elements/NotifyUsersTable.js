@@ -46,7 +46,28 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                         onClick={() => { onRecordClick(notification); }}
                                     >
                                         {notification.title}
+
                                     </span>
+                                    <div className="text-muted d-flex align-items-center gap-2">
+                                            <div className="tag-wrapper">
+                                                Priority:
+                                                <span
+                                                    className={`tag mx-1 small ${
+                                                        notification.priority === "high"
+                                                            ? "tag-danger"
+                                                            : notification.priority === "medium"
+                                                            ? "tag-warning"
+                                                            : "tag-success"
+                                                    }`}
+                                                >
+                                                    {notification.priority}
+                                                </span>
+
+                                                <div className="tooltip-box">
+                                                    Priority: {notification.priority}
+                                                </div>
+                                            </div>
+                                        </div>
                                 </td>
                                 <td dangerouslySetInnerHTML={{ __html: notification.body }}></td>
                                 <td>{notification.type}</td>
@@ -58,8 +79,8 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                                 notification.read === '0' ? 'tag-red' :
                                                     notification.read === 'read' ? 'tag-blue' :
                                                         notification.read === 'unread' ? 'tag-red' :
-                                                            notification.read === 'ready_to_discuss' ? 'tag-warm' :
-                                                                notification.read === 'completed' ? 'tag-success' : ''
+                                                            notification.read === 'ready_to_discuss' ? 'tag-warning' :
+                                                                notification.read === 'completed' ? 'tag-danger' : ''
                                                 }`}>
                                             {notification.read === '1' ? 'read' : notification.read === '0' ? 'unread' : notification.read}
                                         </span>
@@ -102,16 +123,17 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                             closeOnDocumentClick
                                             overlayStyle={{ background: "transparent" }}
                                             contentStyle={{
-                                                background: "#fff",
-                                                opacity: 1,
-                                                backdropFilter: "none",
-                                                WebkitBackdropFilter: "none",
+                                                background: "rgba(0, 0, 0, 0.75)",  
+                                                color: "#fff",
+                                                backdropFilter: "blur(6px)",        
+                                                WebkitBackdropFilter: "blur(6px)",  
                                                 padding: "10px",
-                                                borderRadius: "8px",
+                                                borderRadius: "6px",
                                                 width: "220px",
                                                 maxHeight: "200px",
                                                 overflowY: "auto",
-                                                boxShadow: "0 2px 10px rgba(0,0,0,0.15)"
+                                                boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+                                                border: "1px solid rgba(255,255,255,0.1)"
                                             }}
                                         >
                                             {() => {
@@ -132,9 +154,9 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                                                         <span
                                                                             className={`tag ${
                                                                                 rec.read === 'completed'
-                                                                                    ? 'tag-success'
+                                                                                    ? 'tag-danger'
                                                                                     : rec.read === 'ready_to_discuss'
-                                                                                    ? 'tag-warn'
+                                                                                    ? 'tag-warning'
                                                                                     : rec.read === 'read'
                                                                                     ? 'tag-blue'
                                                                                     : 'tag-red'

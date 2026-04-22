@@ -288,10 +288,10 @@ const Routes = [
         component: ViewTicket
     },
     {
-        path: "/notify-user",
-        name: 'Notify User',
+        path: "/connects",
+        name: 'Connects',
         exact: true,
-        pageTitle: "Notify User",
+        pageTitle: "Connects",
         roles: ['admin', 'super_admin','employee'],
         component: NotifyUsers
     },

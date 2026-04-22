@@ -93,7 +93,7 @@ const NotifyUserModal = ({
                   error={errors.attach}
                 />
 
-                {attach && attach.length > 0 && (
+                {/* {attach && attach.length > 0 && (
                   <div className="existing-files form-group">
                     <label className="form-label">Existing Files:</label>
                     <div className="form-control">
@@ -102,7 +102,7 @@ const NotifyUserModal = ({
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
 
                 <InputField
                   label="Users"
@@ -121,13 +121,13 @@ const NotifyUserModal = ({
               <div className="modal-footer d-flex justify-content-between">
 
                 <div>
-                  <Button
+                  {/* <Button
                     label="Draft"
                     onClick={() => onSubmit('draft')}
                     // loading={loading}
                     // disabled={loading}
                     className="btn-warning mr-2"
-                  />
+                  /> */}
                 </div>
 
                 <div className="d-flex">
