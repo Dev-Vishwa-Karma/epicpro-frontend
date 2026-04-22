@@ -124,8 +124,8 @@ const NotifyUserModal = ({
                   <Button
                     label="Draft"
                     onClick={() => onSubmit('draft')}
-                    loading={loading}
-                    disabled={loading}
+                    // loading={loading}
+                    // disabled={loading}
                     className="btn-warning mr-2"
                   />
                 </div>

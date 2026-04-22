@@ -41,15 +41,7 @@ class NotifyUsers extends Component {
                 status: "",
                 selectedEmployee: []
             },
-            // title: "",
-            // body: "",
-            // type: "",
-            // read: 0,
-            // priority: "",
-            // status: "",
             filterNotification: 'all',
-            attach: [],
-            // selectedEmployee: [],
             col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
             currentPage: 1,
             dataPerPage: 10,
@@ -174,8 +166,37 @@ class NotifyUsers extends Component {
         })
     }
 
+    validateNotificationForm = (title, body, attach, type, priority, selectedEmployee) => {
+
+        let errors = {};
+        let isValid = true;
+
+        if (!title.trim()) {
+            errors.title = "Title is required.";
+            isValid = false;
+        }
+        if (!body.trim()) {
+            errors.body = "Body is required.";
+            isValid = false;
+        }
+        if (!type.trim()) {
+            errors.type = "Notification Type is required.";
+            isValid = false;
+        }
+        if (!priority.trim()) {
+            errors.priority = "Priority is required.";
+            isValid = false;
+        }
+        if (!selectedEmployee || selectedEmployee.length === 0) {
+            errors.selectedEmployee = "SelectedEmployee is required.";
+            isValid = false;
+        }
+
+        return { isValid, errors };
+    };
+
     handleSubmit = (event) => {
-        const { selectedNotification } = this.state;
+        const { selectedNotification, currentTab } = this.state;
         if (selectedNotification == null) {
             const errors = {
                 title: "Title is required.",
@@ -188,7 +209,7 @@ class NotifyUsers extends Component {
             return
         }
 
-        const { title, body, attach, type, priority, selectedEmployee, currentTab } = selectedNotification;
+        const { title, body, attach, type, priority, selectedEmployee } = selectedNotification;
         const { isValid, errors } = this.validateNotificationForm(title, body, attach, type, priority, selectedEmployee);
         if (!isValid) {
             this.setState({ errors });
@@ -220,18 +241,12 @@ class NotifyUsers extends Component {
                     this.setState((prevState) => {
 
                         let updatedData = prevState.notificationData || [];
-                        console.log('updatedData:', updatedData);
-                        console.log('newNotification:', newNotification);
-                        console.log('currentTab:', currentTab);
-
-                        // if (currentTab === 'sent') {
+                        if (currentTab !== 'receive') {
                             updatedData = [
                                 newNotification,
                                 ...updatedData
                             ];
-                        // }
-
-                        console.log('updatedData after addition:', updatedData);    
+                        }
                         return {
                             notificationData: updatedData,
                             selectedNotification: {
@@ -269,94 +284,6 @@ class NotifyUsers extends Component {
                 });
                 setTimeout(this.dismissMessages, 3000);
             });
-    };
-
-
-
-    openModal = (notification) => {
-        this.setState({
-            selectedNotification: notification,
-            notificationToHide: notification.id
-        });
-    };
-
-
-    notificationDetail = (tab) => {
-        const event = tab === 'sent' ? 'sent' : tab === 'draft' ? 'draft' : 'all';
-        this.setState(
-            {
-                filterNotification: event,
-                currentPage: 1,
-                filterFromDate: getToday(),
-                filterToDate: getToday(),
-                currentTab: tab
-            },
-            () => {
-                this.getNotifications();
-            });
-    }
-
-    handlePageChange = (newPage) => {
-        const { dataPerPage, currentTab, notificationData, filterNotification } = this.state;
-        const totalPages = Math.ceil(notificationData.length / dataPerPage);
-        if (newPage >= 1 && newPage <= totalPages) {
-            this.setState({ currentPage: newPage });
-        }
-    };
-
-    onCloseRemoveModal = () => {
-        this.setState({ notificationToHide: null });
-    }
-
-    confirmRemove = () => {
-        const { notificationToHide, selectedNotification, currentPage, notificationData, dataPerPage } = this.state;
-        if (!notificationToHide) return;
-        this.setState({ ButtonLoading: true });
-
-        getService.getCall("push_notification.php", {
-            action: 'is_removed',
-            id: selectedNotification.id,
-            hidden: 1,
-            employee_id: selectedNotification.employee_id
-        }).then((data) => {
-            if (data.success) {
-
-                let newPage = currentPage;
-                const updatedRecord = notificationData?.filter((d) => d.id !== notificationToHide);
-                const totalPages = Math.ceil(updatedRecord.length / dataPerPage);
-                if (newPage >= 1 && newPage <= totalPages) {
-                    this.setState({ currentPage: newPage });
-                }
-
-                this.setState((prevState) => ({
-                    notificationData: updatedRecord,
-                    currentPage: newPage,
-                    successMessage: "Notification hide successfully",
-                    showSuccess: true,
-                    errorMessage: '',
-                    showError: false,
-                    ButtonLoading: false,
-                }));
-
-                this.onCloseRemoveModal();
-                setTimeout(this.dismissMessages, 3000);
-            } else {
-                this.setState({
-                    errorMessage: "Failed to delete notification",
-                    showError: true,
-                    successMessage: '',
-                    showSuccess: false,
-                    ButtonLoading: false,
-                });
-                setTimeout(this.dismissMessages, 3000);
-            }
-        }).catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                ButtonLoading: false,
-            });
-        });
-
     };
 
     handleEditNotification = (notification) => {
@@ -417,6 +344,68 @@ class NotifyUsers extends Component {
         this.setState({ selectedNotification: { ...this.state.selectedNotification, selectedEmployee: event.target.value } });
     };
 
+    openRemoveModal = (notification) => {
+        this.setState({
+            selectedNotification: notification,
+            notificationToHide: notification.id
+        });
+    };
+
+    onCloseRemoveModal = () => {
+        this.setState({ notificationToHide: null });
+    }
+
+    confirmRemove = () => {
+        const { notificationToHide, selectedNotification, currentPage, notificationData, dataPerPage } = this.state;
+        if (!notificationToHide) return;
+        this.setState({ ButtonLoading: true });
+
+        getService.getCall("push_notification.php", {
+            action: 'is_removed',
+            id: selectedNotification.id,
+            hidden: 1,
+            employee_id: selectedNotification.employee_id
+        }).then((data) => {
+            if (data.success) {
+
+                let newPage = currentPage;
+                const updatedRecord = notificationData?.filter((d) => d.id !== notificationToHide);
+                const totalPages = Math.ceil(updatedRecord.length / dataPerPage);
+                if (newPage >= 1 && newPage <= totalPages) {
+                    this.setState({ currentPage: newPage });
+                }
+
+                this.setState((prevState) => ({
+                    notificationData: updatedRecord,
+                    currentPage: newPage,
+                    successMessage: "Notification hide successfully",
+                    showSuccess: true,
+                    errorMessage: '',
+                    showError: false,
+                    ButtonLoading: false,
+                }));
+
+                this.onCloseRemoveModal();
+                setTimeout(this.dismissMessages, 3000);
+            } else {
+                this.setState({
+                    errorMessage: "Failed to delete notification",
+                    showError: true,
+                    successMessage: '',
+                    showSuccess: false,
+                    ButtonLoading: false,
+                });
+                setTimeout(this.dismissMessages, 3000);
+            }
+        }).catch((error) => {
+            console.error("Error:", error);
+            this.setState({
+                ButtonLoading: false,
+            });
+        });
+
+    };
+
     handleDateChange = (date, type) => {
         if (date) {
             const newDate = formatDate(new Date(date));
@@ -433,10 +422,11 @@ class NotifyUsers extends Component {
         const { filterFromDate, filterToDate } = this.state;
     };
 
-    handleApplyFilter = async () => {
+    handleDateApplyFilter = async () => {
         this.getNotifications();
     };
 
+    //Need to perform task
     handleNotificationFilter = async (event) => {
         const { currentTab, filterNotification } = this.state;
         const selectedTab = event === 'sent' ? 'sent' : currentTab;
@@ -456,7 +446,7 @@ class NotifyUsers extends Component {
     }
 
     onOpenViewNotificationModel = (selected) => {
-        const { employeeData, selectedEmployee } = this.state;
+        const { employeeData } = this.state;
         let empId= 0;
         if(selected.employee_id){
             empId = selected.employee_id;
@@ -469,7 +459,6 @@ class NotifyUsers extends Component {
         this.setState({
             viewNotificationModal: true,
             selectedNotification: selected,
-            selectedEmployee: selectedEmploy ?? [],
             errors: {},
             ButtonLoading: false
         })
@@ -487,41 +476,11 @@ class NotifyUsers extends Component {
                 status: "",
                 selectedEmployee: []
             },
-            selectedEmployee: [],
             errors: {},
             ButtonLoading: false
         })
         this.getNotifications();
     }
-
-    validateNotificationForm = (title, body, attach, type, priority, selectedEmployee) => {
-
-        let errors = {};
-        let isValid = true;
-
-        if (!title.trim()) {
-            errors.title = "Title is required.";
-            isValid = false;
-        }
-        if (!body.trim()) {
-            errors.body = "Body is required.";
-            isValid = false;
-        }
-        if (!type.trim()) {
-            errors.type = "Notification Type is required.";
-            isValid = false;
-        }
-        if (!priority.trim()) {
-            errors.priority = "Priority is required.";
-            isValid = false;
-        }
-        if (!selectedEmployee || selectedEmployee.length === 0) {
-            errors.selectedEmployee = "SelectedEmployee is required.";
-            isValid = false;
-        }
-
-        return { isValid, errors };
-    };
 
     handleStatusChange = (e) => {
         const value = e.target.value;
@@ -549,6 +508,30 @@ class NotifyUsers extends Component {
             });
     };
 
+    notificationDetail = (tab) => {
+        const event = tab === 'sent' ? 'sent' : tab === 'draft' ? 'draft' : 'all';
+        this.setState(
+            {
+                filterNotification: event,
+                currentPage: 1,
+                filterFromDate: getToday(),
+                filterToDate: getToday(),
+                currentTab: tab
+            },
+            () => {
+                console.log('Current Tab:', this.state.currentTab);
+                this.getNotifications();
+            });
+    }
+
+    handlePageChange = (newPage) => {
+        const { dataPerPage, currentTab, notificationData, filterNotification } = this.state;
+        const totalPages = Math.ceil(notificationData.length / dataPerPage);
+        if (newPage >= 1 && newPage <= totalPages) {
+            this.setState({ currentPage: newPage });
+        }
+    };
+
     dismissMessages = () => {
         this.setState({
             showSuccess: false,
@@ -560,7 +543,7 @@ class NotifyUsers extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, selectedEmployee, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal } = this.state;
+        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal } = this.state;
 
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
@@ -596,7 +579,7 @@ class NotifyUsers extends Component {
                                         toDate={this.state.filterToDate}
                                         ButtonLoading={this.state.ButtonLoading}
                                         handleDateChange={this.handleDateChange}
-                                        handleApplyFilters={this.handleApplyFilter}
+                                        handleApplyFilters={this.handleDateApplyFilter}
                                         col={col}
                                     />
                                     <div className={`col-md-${col}`}>
@@ -653,7 +636,7 @@ class NotifyUsers extends Component {
                                                     currentTab={currentTab}
                                                     filterNotification={filterNotification}
                                                     onRecordClick={this.onOpenViewNotificationModel}
-                                                    onRemoveClick={this.openModal}
+                                                    onRemoveClick={this.openRemoveModal}
                                                     userRole={window.user.role}
                                                     handleEditNotification={this.handleEditNotification}
                                                 />
@@ -706,7 +689,7 @@ class NotifyUsers extends Component {
                     errors={this.state.errors}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}
-                    selectedEmployee={selectedEmployee}
+                    selectedEmployee={selectedNotification.selectedEmployee}
                     selectedNotification={selectedNotification}
                     onChange={this.handleStatusChange}
                     currentTab={currentTab}
