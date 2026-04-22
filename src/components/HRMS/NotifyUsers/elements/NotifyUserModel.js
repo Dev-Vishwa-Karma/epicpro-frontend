@@ -15,7 +15,7 @@ const NotifyUserModal = ({
 
 
 }) => {
-  const { title = '', body = '', attach = [], selectedEmployee = [], type = '' } = formData;
+  const { title = '', body = '', attach = [], selectedEmployee = [], type = '', priority = '', status = '' } = formData;
   const mappedOptions = employeeData
     .filter(emp => emp.id !== window.user.id)
     .map(emp => ({
@@ -68,6 +68,20 @@ const NotifyUserModal = ({
                   ]}
                 />
 
+                <InputField
+                  label="Priority"
+                  name="priority"
+                  type="select"
+                  value={priority}
+                  onChange={onChange}
+                  // error={errors.priority}
+                  options={[
+                    { value: 'low', label: 'Low' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'high', label: 'High' }
+                  ]}
+                />
+
                 {/* File Attachment */}
                 <InputField
                   label="Attached Files"
@@ -78,6 +92,18 @@ const NotifyUserModal = ({
                   onChange={onChange}
                   error={errors.attach}
                 />
+
+                {attach && attach.length > 0 && (
+                  <div className="existing-files form-group">
+                    <label className="form-label">Existing Files:</label>
+                    <div className="form-control">
+                      {attach.map((file, i) => (
+                        <div key={i}>{file}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <InputField
                   label="Users"
                   name="selectedEmployee"
@@ -92,19 +118,32 @@ const NotifyUserModal = ({
 
               </div>
 
-              <div className="modal-footer">
-                <Button
-                  label="Close"
-                  onClick={onClose}
-                  className="btn-secondary"
-                />
-                <Button
-                  label="Send"
-                  onClick={onSubmit}
-                  loading={loading}
-                  disabled={loading}
-                  className="btn-primary"
-                />
+              <div className="modal-footer d-flex justify-content-between">
+
+                <div>
+                  <Button
+                    label="Draft"
+                    onClick={() => onSubmit('draft')}
+                    loading={loading}
+                    disabled={loading}
+                    className="btn-warning mr-2"
+                  />
+                </div>
+
+                <div className="d-flex">
+                  <Button
+                    label="Close"
+                    onClick={onClose}
+                    className="btn-secondary  mr-"
+                  />
+                  <Button
+                    label="Send"
+                    onClick={() => onSubmit('sent')}
+                    loading={loading}
+                    disabled={loading}
+                    className="btn-primary ml-1"
+                  />
+                </div>
               </div>
 
             </div>

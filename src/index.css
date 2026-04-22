@@ -224,6 +224,11 @@ code {
   width: 80% !important;
 }
 
+.existing-files {
+  margin: 7px 0 !important;
+  padding: 7px 0 !important;
+}
+
 /* For Header Notification Dropdown */
 
 @media (max-width: 768px) {

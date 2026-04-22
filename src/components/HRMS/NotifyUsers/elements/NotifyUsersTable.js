@@ -5,7 +5,7 @@ import Button from '../../../common/formInputs/Button';
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 
-const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordClick, filterNotification, currentTab }) => {
+const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordClick, filterNotification, currentTab, handleEditNotification }) => {
     const onViewReceivers = (notification) => {
     try {
         return typeof notification.receiver === "string"
@@ -152,6 +152,17 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                                 );
                                             }}
                                         </Popup>
+                                    </td>
+                                )}
+
+                                {(currentTab === "draft") && (
+                                    <td>
+                                        <Button
+                                        icon="fa fa-edit"
+                                        onClick={() => handleEditNotification(notification)}
+                                        className="btn-icon"
+                                        title="Edit"
+                                        />
                                     </td>
                                 )}
 
