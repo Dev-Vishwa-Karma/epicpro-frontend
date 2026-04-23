@@ -292,7 +292,7 @@ const Routes = [
         name: 'Connects',
         exact: true,
         pageTitle: "Connects",
-        roles: ['admin', 'super_admin','employee'],
+        roles: ['admin', 'super_admin'],
         component: NotifyUsers
     },
 ];

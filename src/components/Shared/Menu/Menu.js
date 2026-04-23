@@ -219,7 +219,6 @@ class Menu extends Component {
 					{ "id": 9, "label": "Notifications", "to": "/notifications" },
 					{ "id": 10, "label": "Referral", "to": "/job-application" },
 					{ "id": 21, "label": "Ticket", "to": "/ticket" },
-					{ id: 22, label: "Connects", to: "/connects"}
 					]
 				}
 			];
@@ -269,7 +268,7 @@ class Menu extends Component {
 
 				else hrms.content.push(linkItem);
 				
-				// hrms.content.push({ id: 22, label: "Notify Users", to: "/connects"});
+				hrms.content.push({ id: 22, label: "Connects", to: "/connects"});
 
 				}
 

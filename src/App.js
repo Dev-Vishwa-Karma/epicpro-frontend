@@ -39,15 +39,13 @@ class App extends Component {
 
 		const {id, first_name} = window.user
 		const eventTarget = `new_notification${id}`;
-		console.log('Binding Pusher event:', eventTarget);
 
         // Initialize Pusher
         Pusher.logToConsole = true;
-        const pusher = new Pusher('f77b8bad1d56965b1b7c', {
-            cluster: 'ap2'
-        });
-
-        const channel = pusher.subscribe('my-channel');
+		const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
+			cluster: process.env.REACT_APP_PUSHER_CLUSTER,
+		});
+		const channel = pusher.subscribe(process.env.REACT_APP_PUSHER_CHANNEL);
         channel.bind(eventTarget, (data) => {
 
             if (Notification.permission === "granted") {
@@ -58,7 +56,7 @@ class App extends Component {
                 });
 				emitter.emit("notificationUpdated");
 				notification.onclick = function () {
-					window.open("http://localhost:3000/connects", "_blank");
+					window.open(process.env.REACT_APP_NOTIFICATION_REDIRECT_URL, "_blank");
 				};
 			}
         });
