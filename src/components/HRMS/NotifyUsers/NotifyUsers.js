@@ -519,7 +519,6 @@ class NotifyUsers extends Component {
                 currentTab: tab
             },
             () => {
-                console.log('Current Tab:', this.state.currentTab);
                 this.getNotifications();
             });
     }

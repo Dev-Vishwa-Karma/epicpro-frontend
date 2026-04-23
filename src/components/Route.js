@@ -27,9 +27,7 @@ import EditTicket from './HRMS/Tickets/EditTicket';
 import ViewTicket from './HRMS/Tickets/ViewTicket';
 import ForgotPassword from './Authentication/ForgotPassword';
 import ResetPassword from './Authentication/ResetPassword';
-// import NotifyUsers from './HRMS/NotifyUsers/elements/NotifyUsersForm';
 import NotifyUsers from './HRMS/NotifyUsers/NotifyUsers';
-
 
 const Routes = [
     {
