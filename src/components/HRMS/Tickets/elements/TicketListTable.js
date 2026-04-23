@@ -52,7 +52,7 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
 
                                            <div className="text-muted d-flex align-items-center gap-2">
                                             <div className="tag-wrapper">
-                                                Priority:
+                                                
                                                 <span
                                                     className={`tag mr-1 small ${
                                                         ticket.priority === "high"
@@ -70,7 +70,7 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                                 </div>
                                             </div>
                                             <div className="tag-wrapper">
-                                                Status:
+                                                
                                                 <span
                                                     className={`tag ml-1 small ${
                                                         ticket.status === "to-do"
