@@ -52,6 +52,9 @@ class NotifyUsers extends Component {
     componentDidMount() {
         this.getNotifications()
         this.getEmployees()
+        const hash = window.location.hash;
+        const map = { '#sent': 'sent', '#draft': 'draft' };
+        this.notificationDetail(map[hash] || 'receive');
 
         //event to update the status when notification has mark as read
         emitter.on("notificationUpdated", () => {
@@ -300,6 +303,7 @@ class NotifyUsers extends Component {
         this.setState({
             showModal: true,
             selectedNotification: {
+                id: notification.id,
                 title: notification.title || "",
                 body: notification.body ||  "",
                 type: notification.type || "",
@@ -565,9 +569,9 @@ class NotifyUsers extends Component {
                                 <li className="nav-item">
                                     <a className={`nav-link ${currentTab === "sent" ? "active" : ""}`} href="#sent" onClick={() => this.notificationDetail("sent")}> Sent </a>
                                 </li>
-                                {/* <li className="nav-item">
+                                <li className="nav-item">
                                     <a className={`nav-link ${currentTab === "draft" ? "active" : ""}`} href="#draft" onClick={() => this.notificationDetail("draft")}> Draft </a>
-                                </li> */}
+                                </li>
                             </ul>
                         </div>
                         <div className="card">

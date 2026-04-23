@@ -23,6 +23,12 @@ const NotifyUserModal = ({
         value: emp.id
       }));
 
+  let attachedFiles = [];
+
+  if (status === 'draft' && Array.isArray(attach)) {
+    attachedFiles = attach.filter(file => typeof file === "string");
+  }
+
     return (
     <>
       {show && (
@@ -93,16 +99,16 @@ const NotifyUserModal = ({
                   error={errors.attach}
                 />
 
-                {/* {attach && attach.length > 0 && (
+                {attachedFiles && attachedFiles.length > 0 && (
                   <div className="existing-files form-group">
                     <label className="form-label">Existing Files:</label>
                     <div className="form-control">
-                      {attach.map((file, i) => (
+                      {attachedFiles.map((file, i) => (
                         <div key={i}>{file}</div>
                       ))}
                     </div>
                   </div>
-                )} */}
+                )}
 
                 <InputField
                   label="Users"
@@ -121,13 +127,14 @@ const NotifyUserModal = ({
               <div className="modal-footer d-flex justify-content-between">
 
                 <div>
-                  {/* <Button
-                    label="Draft"
-                    onClick={() => onSubmit('draft')}
-                    // loading={loading}
-                    // disabled={loading}
-                    className="btn-warning mr-2"
-                  /> */}
+                  {(status !== 'draft') && (
+                    <Button
+                      label="Draft"
+                      onClick={() => onSubmit('draft')}
+                      // loading={loading}
+                      // disabled={loading}
+                      className="btn-warning mr-2"
+                  />)}
                 </div>
 
                 <div className="d-flex">
