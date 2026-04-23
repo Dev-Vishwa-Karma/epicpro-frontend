@@ -267,7 +267,6 @@ class Menu extends Component {
 				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
 
 				else hrms.content.push(linkItem);
-				
 				hrms.content.push({ id: 22, label: "Connects", to: "/connects"});
 
 				}
@@ -286,18 +285,6 @@ class Menu extends Component {
 				}
 
 				// Add Job Board section if not exists
-				if (!content.find(item => item.id === 19)) {
-					content.push({
-						id: 19,
-						icon: "icon-briefcase",
-						label: "Job Board",
-						content: [
-						{ id: 20, label: "Applicants", to: "/applicant" }
-						]
-					});
-				}
-
-				// Add Notify section if not exists
 				if (!content.find(item => item.id === 19)) {
 					content.push({
 						id: 19,
