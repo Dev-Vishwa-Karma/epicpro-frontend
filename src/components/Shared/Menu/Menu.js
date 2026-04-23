@@ -265,7 +265,6 @@ class Menu extends Component {
 				const linkItem = { id: 15, label: "Link", to: "/link" };
 				const todoIndex = hrms.content.findIndex(item => item.id === 8);
 				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
-
 				else hrms.content.push(linkItem);
 				hrms.content.push({ id: 22, label: "Connects", to: "/connects"});
 
@@ -333,7 +332,7 @@ class Menu extends Component {
 					/>
 
 						<div id="left-sidebar" className="sidebar ">
-							<h6 className="brand-name">Profilics Systems</h6>
+							<h6 className="brand-name">Profilics Systems HR</h6>
 							<nav id="left-sidebar-nav" className="sidebar-nav">
 								<MetisMenu className=""
 									content={content}
