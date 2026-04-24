@@ -16,6 +16,7 @@ const NotifyUserModal = ({
 
 }) => {
   const { title = '', body = '', attach = [], selectedEmployee = [], type = '', priority = '', status = '' } = formData;
+  const [actionLoading, setActionLoading] = useState(null);
   const mappedOptions = employeeData
     .filter(emp => emp.id !== window.user.id)
     .map(emp => ({
@@ -128,13 +129,16 @@ const NotifyUserModal = ({
 
                 <div>
                   {(status !== 'draft') && (
-                    <Button
-                      label="Draft"
-                      onClick={() => onSubmit('draft')}
-                      // loading={loading}
-                      // disabled={loading}
-                      className="btn-warning mr-2"
-                  />)}
+                  <Button
+                    label="Draft"
+                    onClick={() => {
+                      setActionLoading('draft');
+                      onSubmit('draft');
+                    }}
+                    loading={actionLoading === 'draft'}
+                    className="btn-warning mr-2"
+                  />
+                  )}
                 </div>
 
                 <div className="d-flex">
@@ -145,9 +149,11 @@ const NotifyUserModal = ({
                   />
                   <Button
                     label="Send"
-                    onClick={() => onSubmit('sent')}
-                    loading={loading}
-                    disabled={loading}
+                    onClick={() => {
+                      setActionLoading('sent');
+                      onSubmit('sent');
+                    }}
+                    loading={actionLoading === 'sent'}
                     className="btn-primary ml-1"
                   />
                 </div>

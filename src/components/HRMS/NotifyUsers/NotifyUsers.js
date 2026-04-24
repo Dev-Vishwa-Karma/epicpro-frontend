@@ -244,12 +244,18 @@ class NotifyUsers extends Component {
                     this.setState((prevState) => {
 
                         let updatedData = prevState.notificationData || [];
-                        if (currentTab !== 'receive') {
+
+                        if(currentTab === 'draft' && event === 'sent'){
+                             updatedData = updatedData.filter(
+                                    item => item.id !== newNotification.id
+                            );
+                        }else if (currentTab === 'sent' && event === 'sent' || currentTab === 'draft' && event === 'draft') {
                             updatedData = [
                                 newNotification,
                                 ...updatedData
                             ];
                         }
+
                         return {
                             notificationData: updatedData,
                             selectedNotification: {
@@ -430,25 +436,6 @@ class NotifyUsers extends Component {
         this.getNotifications();
     };
 
-    //Need to perform task
-    handleNotificationFilter = async (event) => {
-        const { currentTab, filterNotification } = this.state;
-        const selectedTab = event === 'sent' ? 'sent' : currentTab;
-        const selectFilter = event !== 'sent' ? event : filterNotification;
-
-        this.setState(
-            {
-                filterNotification: selectFilter,
-                currentTab: selectedTab,
-                currentPage: 1,
-                filterFromDate: getToday(),
-                filterToDate: getToday()
-            },
-            () => {
-                this.getNotifications();
-            });
-    }
-
     onOpenViewNotificationModel = (selected) => {
         const { employeeData } = this.state;
         let empId= 0;
@@ -609,20 +596,6 @@ class NotifyUsers extends Component {
                                 <div className="card">
                                     <div className="card-header">
                                         <h3 className="card-title">Notification List</h3>
-                                        {currentTab === "receive" && notificationData && (<div className="card-options" >
-                                            <InputField
-                                                label="Filter"
-                                                name="filter"
-                                                type="select"
-                                                value={filterNotification}
-                                                onChange={(e) => this.handleNotificationFilter(e.target.value)}
-                                                options={[
-                                                    { value: "manual", label: "Manual" },
-                                                    { value: "all", label: "All" },
-                                                    // { value: "automated", label: "Automated" },
-                                                ]}
-                                            />
-                                        </div>)}
                                     </div>
                                     <div className="card-body">
                                         {loading ? (
