@@ -12,6 +12,7 @@ import DeleteModal from '../../common/DeleteModal';
 import emitter from "../../../emitter";
 import InputField from '../../common/formInputs/InputField';
 import ViewNotificationModel from './elements/ViewNotificationModel'
+import DefaultUsersSetting from './elements/DefaultUsersSetting';
 
 
 class NotifyUsers extends Component {
@@ -32,6 +33,11 @@ class NotifyUsers extends Component {
             ButtonLoading: false,
             showModal: false,
             viewNotificationModal: false,
+            DefaultUsersSettingModal: false,
+            defaultUserSetting: {
+                kye: "",
+                value: [],
+            },
             selectedNotification: {
                 title: "",
                 body: "",
@@ -52,6 +58,7 @@ class NotifyUsers extends Component {
     componentDidMount() {
         this.getNotifications()
         this.getEmployees()
+        this.getUserDefaultSetting();
         const hash = window.location.hash;
         const map = { '#sent': 'sent', '#draft': 'draft' };
         this.notificationDetail(map[hash] || 'receive');
@@ -98,6 +105,26 @@ class NotifyUsers extends Component {
             });
     }
 
+    getUserDefaultSetting = () => {
+        getService.getCall('notification_setting.php', {
+            action: 'view',
+            user_id: window.user.id
+        })
+            .then(data => {
+                if (data.status === 'success') {
+                    const setting = data.data;
+                    const selectedEmployee = JSON.parse(setting.value).map(Number) || [];
+                    this.setState({ defaultUserSetting: {key: setting.key, value: selectedEmployee} });
+                } else {
+                    this.setState({ defaultUserSetting: {key : "", value: []} });
+                }
+            })
+            .catch(err => {
+                this.setState({ defaultUserSetting: {key : "", value: []} });
+                console.error(err);
+            });
+    }
+
     getEmployees = () => {
         getService.getCall('get_employees.php', {
             action: 'view',
@@ -120,9 +147,18 @@ class NotifyUsers extends Component {
     }
 
     getFormData = () => {
-        const { selectedNotification } = this.state;
+        const { selectedNotification, defaultUserSetting } = this.state;
         if (selectedNotification) {
-            return selectedNotification;
+            const updatedNotification = {
+                ...selectedNotification,
+                selectedEmployee: [
+                    ...new Set([
+                        ...(selectedNotification.selectedEmployee || []),
+                        ...(defaultUserSetting.value || [])
+                    ])
+                ]
+            };
+            return updatedNotification;
         } else {
             return {
                 title: "",
@@ -131,7 +167,7 @@ class NotifyUsers extends Component {
                 priority: "",
                 attach: [],
                 status: "",
-                selectedEmployee: []
+                selectedEmployee: defaultUserSetting.value || []
             };
         }
     };
@@ -522,6 +558,60 @@ class NotifyUsers extends Component {
         }
     };
 
+    handleDefaultUsers = () => {
+        const formData = new FormData();
+            formData.append('key', 'user_ids');
+            formData.append('value', JSON.stringify(this.state.defaultUserSetting.value));
+            formData.append('created_by', window.user.id);
+
+        getService.addCall('notification_setting.php', 'update', formData)
+            .then((data) => {
+                
+                if (data.status === "success") {
+                    this.setState((prevState) => ({
+                        DefaultUsersSettingModal: false,
+                        successMessage: "Default users setting saved successfully!",
+                        showSuccess: true,
+                        errorMessage: "",
+                        showError: false,
+                }));
+                    setTimeout(this.dismissMessages, 3000);
+                } else {
+                    this.setState({
+                        errorMessage: "Failed to save default users setting. Please try again.",
+                        showError: true,
+                        successMessage: "",
+                        showSuccess: false,
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                }       
+        })
+            .catch((error) => {
+                console.error("Error:", error);
+                this.setState({
+                    errorMessage: "An error occurred while saving default users setting.",
+                    showError: true,
+                    successMessage: "",
+                    showSuccess: false,
+                });
+                setTimeout(this.dismissMessages, 3000);
+            });
+    }
+
+    changeDefaultUserSetting = (e) => {
+        const { name, value } = e.target;
+        const { defaultUserSetting } = this.state;
+        const finalValues = [
+            ...new Set([...value, ...defaultUserSetting.value])
+        ];
+        this.setState((prevState) => ({
+            defaultUserSetting: {
+                ...prevState.defaultUserSetting,
+                value: finalValues
+            }
+        }));
+    };
+
     dismissMessages = () => {
         this.setState({
             showSuccess: false,
@@ -533,7 +623,7 @@ class NotifyUsers extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal } = this.state;
+        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, DefaultUsersSettingModal, defaultUserSetting } = this.state;
 
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
@@ -560,6 +650,9 @@ class NotifyUsers extends Component {
                                     <a className={`nav-link ${currentTab === "draft" ? "active" : ""}`} href="#draft" onClick={() => this.notificationDetail("draft")}> Draft </a>
                                 </li>
                             </ul>
+                            <span onClick={() => this.setState({ DefaultUsersSettingModal: true })} style={{ cursor: 'pointer' }} data-toggle="tooltip" data-placement="right" title="Default Users Setting">
+                                <i className="fa fa-gear fa-spin" data-toggle="tooltip" data-placement="right" title="Default User Settings"></i>
+                            </span>
                         </div>
                         <div className="card">
                             <div className="card-body">
@@ -670,6 +763,16 @@ class NotifyUsers extends Component {
                     onChange={this.handleStatusChange}
                     currentTab={currentTab}
 
+                />
+                <DefaultUsersSetting
+                    show={DefaultUsersSettingModal}
+                    onClose={() => this.setState({ DefaultUsersSettingModal: false })}
+                    onSubmit={this.handleDefaultUsers}
+                    formData={defaultUserSetting ? defaultUserSetting.value : []}
+                    onChange={this.changeDefaultUserSetting}
+                    // errors={{}}
+                    loading={this.state.ButtonLoading}
+                    employeeData={employeeData}
                 />
 
 
