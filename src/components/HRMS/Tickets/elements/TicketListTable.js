@@ -74,10 +74,10 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                                 <span
                                                     className={`tag ml-1 small ${
                                                         ticket.status === "to-do"
-                                                            ? "tag-danger"
+                                                            ? "tag-success"
                                                             : ticket.status === "in-progress"
                                                             ? "tag-warning"
-                                                            : "tag-success"
+                                                            : "tag-danger"
                                                     }`}
                                                 >
                                                     {ticket.status === "to-do"
