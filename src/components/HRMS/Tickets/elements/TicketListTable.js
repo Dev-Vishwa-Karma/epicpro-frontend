@@ -27,7 +27,7 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                 }
                                 <th>Assigned At</th>
                                 <th>Progress</th>
-                                <th>Duration</th>
+                                <th>Duration</th>                            
                                 {logged_in_employee_role !== 'employee' &&
                                     <th>Action</th>
                                 }
