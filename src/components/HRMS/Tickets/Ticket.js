@@ -8,6 +8,7 @@ import { getService } from '../../../services/getService';
 import TicketListTable from "./elements/TicketListTable";
 import DeleteModal from "../../common/DeleteModal";
 import Pagination from "../../common/Pagination";
+import InputField from "../../common/formInputs/InputField";
 
 class Ticket extends Component {
     constructor(props) {
@@ -39,6 +40,7 @@ class Ticket extends Component {
             dataPerPage: 10,
             showSuccess: false,
             successMessage: '',
+            filterTodoQuery: "",
         };
         this.handleSearchChange = this.handleSearchChange.bind(this);
         this.searchTimeout = null;
@@ -51,13 +53,14 @@ class Ticket extends Component {
         }
     };
 
-    getTicket = (searchQuery) => {
+    getTicket = (searchQuery, filterTodoQuery) => {
         const { id, role } = window.user;
 
         getService.getCall('tickets.php', {
             action: 'view',
             role: role === "admin" || role === "super_admin" ? null : id,
             searchQuery: searchQuery,
+            filterTodoQuery: filterTodoQuery
         })
             .then((ticketListData) => {
                 let ticketsArray = Array.isArray(ticketListData.data) ? ticketListData.data : [ticketListData.data];
@@ -86,9 +89,19 @@ class Ticket extends Component {
         this.setState({ searchQuery });
         if (this.searchTimeout) clearTimeout(this.searchTimeout);
         this.searchTimeout = setTimeout(() => {
-            this.setState({ loading: true });
-            this.getTicket(searchQuery);
+            this.setState({ loading: true, filterTodoQuery: "" });
+            this.getTicket(searchQuery, null);
         }, 2000);
+    }
+
+    handleTodoChange = (event) => {
+        const filterTodoQuery = event.target.value;
+        this.setState({ filterTodoQuery, searchQuery: "" });
+        if (this.searchTimeout) clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.setState({ loading: true });
+            this.getTicket(null, filterTodoQuery);
+        }, 1000);
     }
 
     componentDidMount() {
@@ -190,7 +203,7 @@ class Ticket extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { ticketListData, message, loading, searchQuery, InProgressTicketCount, TodoTicketCount, CompletedTicketCount, dataPerPage, currentPage } = this.state;
+        const { ticketListData, message, loading, searchQuery, InProgressTicketCount, TodoTicketCount, CompletedTicketCount, dataPerPage, currentPage, filterTodoQuery } = this.state;
 
         const indexOfLastTicket = currentPage * dataPerPage;
         const indexOfFirstTicket = indexOfLastTicket - dataPerPage;
@@ -219,6 +232,18 @@ class Ticket extends Component {
                                         value={searchQuery}
                                         onChange={this.handleSearchChange}
                                     />
+                                    <select
+                                        className="custom-select"
+                                        name="selectedtodo"
+                                        value={filterTodoQuery}
+                                        onChange={this.handleTodoChange}
+                                    >
+                                        <option value="">Status Filter</option>
+                                        <option value="to-do">Pending</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+
                                 </div>
                                 {this.state.logged_in_employee_role != 'employee' && (
                                     <Button
@@ -268,6 +293,7 @@ class Ticket extends Component {
                     <div className="container-fluid">
                         <div className="tab-content taskboard">
                             <div className="tab-pane fade show active" id="TaskBoard-list" role="tabpanel">
+
                                 <TicketListTable
                                     loading={loading}
                                     logged_in_employee_role={this.state.logged_in_employee_role}
