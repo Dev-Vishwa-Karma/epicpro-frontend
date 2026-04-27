@@ -13,6 +13,7 @@ import emitter from "../../../emitter";
 import InputField from '../../common/formInputs/InputField';
 import ViewNotificationModel from './elements/ViewNotificationModel'
 import DefaultUsersSetting from './elements/DefaultUsersSetting';
+import NotifyUserCards from './elements/NotifyUserCards';
 
 
 class NotifyUsers extends Component {
@@ -34,6 +35,8 @@ class NotifyUsers extends Component {
             showModal: false,
             viewNotificationModal: false,
             DefaultUsersSettingModal: false,
+            viewFilter: 'list',
+            search: '',
             defaultUserSetting: {
                 kye: "",
                 value: [],
@@ -72,11 +75,12 @@ class NotifyUsers extends Component {
     }
 
     getNotifications = () => {
-        const { filterFromDate, filterToDate, notificationData, filterNotification, currentTab } = this.state;
+        const { filterFromDate, filterToDate, notificationData, filterNotification, currentTab, search } = this.state;
         const filter = currentTab === 'sent' || currentTab === 'draft' ? currentTab : filterNotification;
         let requestData = {
             action: 'get_push_notification',
             filter: filter,
+            search: JSON.stringify(search)
         };
 
         if (filterFromDate) {
@@ -282,8 +286,8 @@ class NotifyUsers extends Component {
                         let updatedData = prevState.notificationData || [];
 
                         if(currentTab === 'draft' && event === 'sent'){
-                             updatedData = updatedData.filter(
-                                    item => item.id !== newNotification.id
+                            updatedData = updatedData.filter(
+                                item => item.id !== newNotification.id
                             );
                         }else if (currentTab === 'sent' && event === 'sent' || currentTab === 'draft' && event === 'draft') {
                             updatedData = [
@@ -512,11 +516,17 @@ class NotifyUsers extends Component {
     handleStatusChange = (e) => {
         const value = e.target.value;
         const { selectedNotification } = this.state;
-        getService.getCall("push_notification.php", {
-            action: "update_status",
-            notification_id: selectedNotification.id,
-            status: value
-        }).then((data) => {
+
+        const formData = new FormData();
+        formData.append('id', selectedNotification.id);
+        formData.append('status', value);
+        formData.append('sender', selectedNotification.sender);
+        formData.append('user', JSON.stringify({
+            id: window.user.id,
+            name: `${window.user.first_name} ${window.user.last_name}`
+        }));
+
+        getService.addCall("push_notification.php", 'update_status',formData).then((data) => {
             if (data.status === "success") {
                 this.setState((prevState) => ({
                     selectedNotification: {
@@ -540,6 +550,7 @@ class NotifyUsers extends Component {
         this.setState(
             {
                 filterNotification: event,
+                notificationData: [],
                 currentPage: 1,
                 filterFromDate: getToday(),
                 filterToDate: getToday(),
@@ -560,13 +571,13 @@ class NotifyUsers extends Component {
 
     handleDefaultUsers = () => {
         const formData = new FormData();
-            formData.append('key', 'user_ids');
-            formData.append('value', JSON.stringify(this.state.defaultUserSetting.value));
-            formData.append('created_by', window.user.id);
+        formData.append('key', 'user_ids');
+        formData.append('value', JSON.stringify(this.state.defaultUserSetting.value));
+        formData.append('created_by', window.user.id);
 
         getService.addCall('notification_setting.php', 'update', formData)
             .then((data) => {
-                
+
                 if (data.status === "success") {
                     this.setState((prevState) => ({
                         DefaultUsersSettingModal: false,
@@ -574,7 +585,7 @@ class NotifyUsers extends Component {
                         showSuccess: true,
                         errorMessage: "",
                         showError: false,
-                }));
+                    }));
                     setTimeout(this.dismissMessages, 3000);
                 } else {
                     this.setState({
@@ -584,8 +595,8 @@ class NotifyUsers extends Component {
                         showSuccess: false,
                     });
                     setTimeout(this.dismissMessages, 3000);
-                }       
-        })
+                }
+            })
             .catch((error) => {
                 console.error("Error:", error);
                 this.setState({
@@ -621,9 +632,28 @@ class NotifyUsers extends Component {
         });
     };
 
+    handleViewFilterChange = (e) => {
+        const event = e.target.value;
+        this.setState({ viewFilter: event });
+    }
+
+    handleRecordFilterChange = (e,filter) => {
+        const value = e.target.value;
+         this.setState((prevState) => ({
+                search: {
+                    // [filter]: value
+                    type: filter === 'type' ? value : '',
+                    status: filter === 'status' ? value : ''
+                }
+            }), () => {
+                this.getNotifications();
+        });
+
+    }
+
     render() {
         const { fixNavbar } = this.props;
-        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, DefaultUsersSettingModal, defaultUserSetting } = this.state;
+        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, DefaultUsersSettingModal, defaultUserSetting, viewFilter } = this.state;
 
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
@@ -650,9 +680,28 @@ class NotifyUsers extends Component {
                                     <a className={`nav-link ${currentTab === "draft" ? "active" : ""}`} href="#draft" onClick={() => this.notificationDetail("draft")}> Draft </a>
                                 </li>
                             </ul>
-                            <span onClick={() => this.setState({ DefaultUsersSettingModal: true })} style={{ cursor: 'pointer' }} data-toggle="tooltip" data-placement="right" title="Default Users Setting">
-                                <i className="fa fa-gear fa-spin" data-toggle="tooltip" data-placement="right" title="Default User Settings"></i>
-                            </span>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <select
+                                        id="employeeFilter"
+                                        className="form-control custom-select"
+                                        value={viewFilter}
+                                        onChange={this.handleViewFilterChange}
+                                    >
+                                        {/* <option value="">Card/List</option> */}
+                                        <option value="list">List View</option>
+                                        <option value="card">Card View</option>
+                                    </select>
+                                </div>
+
+                                <div
+                                    onClick={() => this.setState({ DefaultUsersSettingModal: true })}
+                                    style={{ cursor: 'pointer', marginLeft:'4px' }}
+                                    title="Default Users Setting"
+                                >
+                                    <i className="fa fa-gear"></i>
+                                </div>
+                            </div>
                         </div>
                         <div className="card">
                             <div className="card-body">
@@ -687,8 +736,36 @@ class NotifyUsers extends Component {
                         <div className="tab-content mt-3">
                             <div className="tab-pane fade show active" id="Notifications-list" role="tabpanel">
                                 <div className="card">
-                                    <div className="card-header">
-                                        <h3 className="card-title">Notification List</h3>
+                                    <div className="">
+                                        <div className="d-flex justify-content-between align-items-center p-20">
+                                            <h3 className="card-title">Notification List</h3>
+
+                                            {currentTab === 'receive' &&(<div className="d-flex justify-content-between align-items-center">
+                                                <select
+                                                    id="employeeFilter"
+                                                    className="form-control custom-select ml-2"
+                                                    value={this.state.search.type ?? ''}
+                                                    onChange={(event) => this.handleRecordFilterChange(event,'type')}
+                                                >
+                                                    <option value="">Filter Type</option>
+                                                    <option value="todo">Todo</option>
+                                                    <option value="need_discussion">Need Discussion</option>
+                                                    <option value="information">Information</option>
+                                                </select>
+                                                <select
+                                                    id="employeeFilter"
+                                                    className="form-control custom-select ml-2"
+                                                    value={this.state.search.status ?? ''}
+                                                    onChange={(event) => this.handleRecordFilterChange(event,'status')}
+                                                >
+                                                    <option value="">Filter Status</option>
+                                                    <option value="unread">Unread</option>
+                                                    <option value="read">Read</option>
+                                                    <option value="ready_to_discuss">Ready To Discussion</option>
+                                                    <option value="completed">Completed</option>
+                                                </select>
+                                            </div>)}
+                                        </div>
                                     </div>
                                     <div className="card-body">
                                         {loading ? (
@@ -699,16 +776,33 @@ class NotifyUsers extends Component {
                                             </div>
                                         ) : (
                                             <>
-                                                <NotifyUsersTable
-                                                    notificationData={currentNotifications}
-                                                    message={message}
-                                                    currentTab={currentTab}
-                                                    filterNotification={filterNotification}
-                                                    onRecordClick={this.onOpenViewNotificationModel}
-                                                    onRemoveClick={this.openRemoveModal}
-                                                    userRole={window.user.role}
-                                                    handleEditNotification={this.handleEditNotification}
-                                                />
+                                                {
+                                                    viewFilter === 'list' ? (
+
+                                                        <NotifyUsersTable
+                                                            notificationData={currentNotifications}
+                                                            message={message}
+                                                            currentTab={currentTab}
+                                                            filterNotification={filterNotification}
+                                                            onRecordClick={this.onOpenViewNotificationModel}
+                                                            onRemoveClick={this.openRemoveModal}
+                                                            userRole={window.user.role}
+                                                            handleEditNotification={this.handleEditNotification}
+                                                        />
+                                                    ) : (
+
+                                                        <NotifyUserCards
+                                                            notificationData={currentNotifications}
+                                                            message={message}
+                                                            currentTab={currentTab}
+                                                            filterNotification={filterNotification}
+                                                            onRecordClick={this.onOpenViewNotificationModel}
+                                                            onRemoveClick={this.openRemoveModal}
+                                                            userRole={window.user.role}
+                                                            handleEditNotification={this.handleEditNotification}
+                                                        />
+                                                    )
+                                                }
                                                 {/* Pagination inside card body */}
                                                 {totalPages > 1 && (
                                                     <div className="d-flex justify-content-end mt-3">

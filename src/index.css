@@ -258,6 +258,80 @@ code {
     display: block;
 }
 
+/* Container */
+.notification-container {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0;
+    margin-left: 10px;
+    gap: 30px;
+    background: #f8f9fa;
+}
+
+/* Card */
+.custom-card {
+    width: 60%;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.custom-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Header */
+.custom-card-header {
+    font-size: 16px;  
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+/* Body text */
+.custom-card-meta {
+    font-size: 13px;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+/* Type */
+.custom-card-description {
+    font-size: 13px;
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+/* Footer */
+.custom-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Priority left border */
+.custom-card.high {
+    border-left: 4px solid #dc3545;
+}
+
+.custom-card.medium {
+    border-left: 4px solid #ffc107;
+}
+
+.custom-card.low {
+    border-left: 4px solid #6c757d;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .custom-card {
+        width: 90%;
+    }
+}
+
 
 /* For Header Notification Dropdown */
 

@@ -38,28 +38,39 @@ class App extends Component {
         }
 
 		const {id, first_name} = window.user
-		const eventTarget = `new_notification${id}`;
-
         // Initialize Pusher
         Pusher.logToConsole = true;
 		const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
 			cluster: process.env.REACT_APP_PUSHER_CLUSTER,
 		});
 		const channel = pusher.subscribe(process.env.REACT_APP_PUSHER_CHANNEL);
-        channel.bind(eventTarget, (data) => {
 
-            if (Notification.permission === "granted") {
-               const notification =  new Notification(`hi ${first_name}, You have a message`, {
-                    body: `${data.title},\n\n${data.message}`,
-                    icon: logo,
+		const events = [
+				`new_notification${id}`,
+				`update_status${id}`
+			];
+
+			events.forEach(eventName => {
+				channel.bind(eventName, (data) => {
+					showNotification(data, first_name);
+				emitter.emit("notificationUpdated");
+			});
+		});
+
+		const showNotification = (data, first_name) => {
+				console.log('data=> under Push Notification=>')
+			if (Notification.permission === "granted") {
+				const notification = new Notification(`Hi ${first_name}`, {
+					body: `${data.title} | ${data.message}`,
+					icon: logo,
 					requireInteraction: true,
-                });
+				});
 				emitter.emit("notificationUpdated");
 				notification.onclick = function () {
 					window.open(process.env.REACT_APP_NOTIFICATION_REDIRECT_URL, "_blank");
 				};
 			}
-        });
+		};
 
         // Cleanup on unmount
         this.pusher = pusher;
