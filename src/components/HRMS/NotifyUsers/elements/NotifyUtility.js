@@ -56,41 +56,39 @@ export const Type = ({ type }) => {
 };
 
 export const Status = ({ status }) => {
-    console.log("Rendering status:", status);
-  const map = {
+    const map = {
     unread: {
-      tag: " tag-red",
-      label: "unread"
+      tag: "tag-red",
+      label: "Unread"
     },
     read: {
       tag: "tag-blue",
-      label: "read",
+      label: "Read",
     },
-    ready: {
+    ready_to_discuss: {
       tag: "tag-warning",
-      label: "ready_to_discuss",
+      label: "Ready To Discuss",
     },
-    complete: {
+    completed: {
       tag: "tag-danger",
-      label: "completed",
+      label: "Completed",
     }
   };
 
   const config = map[status] || {
-    label: status,
-    tag: "grey"
+    tag: "tag-light",
+    label: status || "Unknown"
   };
 
   return (
-    <span className={`ui ${config.tag} label`}>
+    <span className={`tag mx-1 small ${config.tag}`}>
       {config.label}
     </span>
   );
 };
 
-export const Receivers = (receivers) => {
+export const Receivers = ({receivers, currentTab}) => {
         if (!receivers) return null;
-
         const raw = receivers.receivers || receivers;
 
         let parsed = [];
@@ -114,6 +112,9 @@ export const Receivers = (receivers) => {
                             <span key={i} className="" style={{marginLeft:'4px'}}>
                                 <span className="receiver">
                                     👤 {r.receiver_name}
+                                </span>
+                                <span>
+                                    {currentTab !== 'draft'&&(<Status status={r.read} />)}
                                 </span>
                             </span>
                         );

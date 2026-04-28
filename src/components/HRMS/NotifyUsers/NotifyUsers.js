@@ -37,10 +37,11 @@ class NotifyUsers extends Component {
             DefaultUsersSettingModal: false,
             viewFilter: 'list',
             search: '',
-            defaultUserSetting: {
+            defaultEmployeeSetting: {
                 kye: "",
                 value: [],
             },
+            defaultSelectedEmployee:[],
             selectedNotification: {
                 title: "",
                 body: "",
@@ -112,19 +113,29 @@ class NotifyUsers extends Component {
     getUserDefaultSetting = () => {
         getService.getCall('notification_setting.php', {
             action: 'view',
-            user_id: window.user.id
+            user_ids: window.user.id
         })
             .then(data => {
                 if (data.status === 'success') {
                     const setting = data.data;
                     const selectedEmployee = JSON.parse(setting.value).map(Number) || [];
-                    this.setState({ defaultUserSetting: {key: setting.key, value: selectedEmployee} });
+                    this.setState({
+                        defaultEmployeeSetting: {
+                            key: setting.key,
+                            value: selectedEmployee
+                        },
+                        defaultSelectedEmployee:selectedEmployee,
+                        selectedNotification: {
+                            ...this.state.selectedNotification,
+                            selectedEmployee
+                        }
+                    });
                 } else {
-                    this.setState({ defaultUserSetting: {key : "", value: []} });
+                    this.setState({ defaultEmployeeSetting: {key : "", value: []} });
                 }
             })
             .catch(err => {
-                this.setState({ defaultUserSetting: {key : "", value: []} });
+                this.setState({ defaultEmployeeSetting: {key : "", value: []} });
                 console.error(err);
             });
     }
@@ -151,14 +162,14 @@ class NotifyUsers extends Component {
     }
 
     getFormData = () => {
-        const { selectedNotification, defaultUserSetting } = this.state;
+        const { selectedNotification, defaultEmployeeSetting } = this.state;
         if (selectedNotification) {
             const updatedNotification = {
                 ...selectedNotification,
                 selectedEmployee: [
                     ...new Set([
                         ...(selectedNotification.selectedEmployee || []),
-                        ...(defaultUserSetting.value || [])
+                        ...(defaultEmployeeSetting.value || [])
                     ])
                 ]
             };
@@ -171,7 +182,7 @@ class NotifyUsers extends Component {
                 priority: "",
                 attach: [],
                 status: "",
-                selectedEmployee: defaultUserSetting.value || []
+                selectedEmployee: defaultEmployeeSetting.value || []
             };
         }
     };
@@ -572,7 +583,7 @@ class NotifyUsers extends Component {
     handleDefaultUsers = () => {
         const formData = new FormData();
         formData.append('key', 'user_ids');
-        formData.append('value', JSON.stringify(this.state.defaultUserSetting.value));
+        formData.append('value', JSON.stringify(this.state.defaultSelectedEmployee));
         formData.append('created_by', window.user.id);
 
         getService.addCall('notification_setting.php', 'update', formData)
@@ -581,6 +592,10 @@ class NotifyUsers extends Component {
                 if (data.status === "success") {
                     this.setState((prevState) => ({
                         DefaultUsersSettingModal: false,
+                        defaultEmployeeSetting: {
+                            ...prevState.defaultEmployeeSetting,
+                            value: this.state.defaultSelectedEmployee
+                        },
                         successMessage: "Default users setting saved successfully!",
                         showSuccess: true,
                         errorMessage: "",
@@ -609,18 +624,13 @@ class NotifyUsers extends Component {
             });
     }
 
-    changeDefaultUserSetting = (e) => {
-        const { name, value } = e.target;
-        const { defaultUserSetting } = this.state;
-        const finalValues = [
-            ...new Set([...value, ...defaultUserSetting.value])
-        ];
-        this.setState((prevState) => ({
-            defaultUserSetting: {
-                ...prevState.defaultUserSetting,
-                value: finalValues
-            }
-        }));
+    changeDefaultEmployeeSetting = (e) => {
+        const { name } = e.target;
+        let { value } = e.target;
+        const { defaultSelectedEmployee } = this.state;
+        this.setState({
+            defaultSelectedEmployee: value
+        });
     };
 
     dismissMessages = () => {
@@ -653,7 +663,7 @@ class NotifyUsers extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, DefaultUsersSettingModal, defaultUserSetting, viewFilter } = this.state;
+        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, DefaultUsersSettingModal, defaultEmployeeSetting, viewFilter, defaultSelectedEmployee } = this.state;
 
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
@@ -862,8 +872,8 @@ class NotifyUsers extends Component {
                     show={DefaultUsersSettingModal}
                     onClose={() => this.setState({ DefaultUsersSettingModal: false })}
                     onSubmit={this.handleDefaultUsers}
-                    formData={defaultUserSetting ? defaultUserSetting.value : []}
-                    onChange={this.changeDefaultUserSetting}
+                    formData={defaultSelectedEmployee ? defaultSelectedEmployee : []}
+                    onChange={this.changeDefaultEmployeeSetting}
                     // errors={{}}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}

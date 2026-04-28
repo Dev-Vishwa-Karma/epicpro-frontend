@@ -26,13 +26,18 @@ const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, han
 
                         {(currentTab === 'receive') && (
                             <div className="custom-card-description">
-                                Sender: {JSON.parse(notification.sender).name || "No sender information"}
+                                <div>
+                                    Sender: {JSON.parse(notification.sender).name || "No sender information"}
+                                </div>
+                                <div>
+                                    Status:<Status status={notification.read} />
+                                </div>
                             </div>
                         )}
 
                         {(currentTab !== 'receive') && (
                             <div className="custom-card-description">
-                                Receiver: <Receivers receivers={notification.receiver} />
+                                Receiver: <Receivers receivers={notification.receiver} currentTab={currentTab}/>
                             </div>
                         )}
 
