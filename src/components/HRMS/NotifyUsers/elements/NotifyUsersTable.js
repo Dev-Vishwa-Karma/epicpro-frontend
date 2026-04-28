@@ -42,7 +42,7 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                 <td>
                                     {/* {notification.title} */}
                                     <span
-                                        style={{ cursor: "pointer", color: "#007bff" }}
+                                        style={currentTab !== 'draft' ? { cursor: "pointer", color: "#007bff" } : {}}
                                         onClick={() => { onRecordClick(notification); }}
                                     >
                                         {notification.title}
@@ -92,16 +92,14 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                     <td className="d-flex">
                                         <Avatar
                                             profile={notification.profile}
-                                            first_name={notification.full_name ? notification.full_name.split(' ')[0] : ''}
-                                            last_name={notification.full_name ? notification.full_name.split(' ')[1] : ''}
                                             size={35}
-                                            alt={notification.sender_name}
+                                            alt={notification.sender ? JSON.parse(notification.sender).name: ''}
                                             className="avatar avatar-blue add-space me-2"
                                             style={{
                                                 objectFit: 'cover',
                                             }}
                                             onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
-                                            title={notification.full_name || 'User'}
+                                            title={JSON.parse(notification.sender).name || 'User'}
                                         />
                                     </td>
                                 )}

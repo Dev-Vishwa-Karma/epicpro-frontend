@@ -26,7 +26,7 @@ const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, han
 
                         {(currentTab === 'receive') && (
                             <div className="custom-card-description">
-                                Sender: {notification.sender_name || "No sender information"}
+                                Sender: {JSON.parse(notification.sender).name || "No sender information"}
                             </div>
                         )}
 

@@ -4,7 +4,7 @@ import * as React from "react";
 export const Priority = ({ priority }) => {
   const map = {
     low: {
-      tag: "tag-danger",
+      tag: "tag-success",
       label: "Low"
     },
     medium: {
@@ -31,7 +31,7 @@ export const Priority = ({ priority }) => {
 export const Type = ({ type }) => {
   const map = {
     low: {
-      tag: "tag-danger",
+      tag: "tag-success",
       label: "todo"
     },
     medium: {
@@ -39,7 +39,7 @@ export const Type = ({ type }) => {
       label: "information"   
     },
     high: {
-      tag: "tag-success",
+      tag: "tag-danger",
         label: "need_discussion"
     }
   };
@@ -59,11 +59,11 @@ export const Status = ({ status }) => {
     console.log("Rendering status:", status);
   const map = {
     unread: {
-      tag: "tag-danger",
+      tag: " tag-red",
       label: "unread"
     },
     read: {
-      tag: "tag-info",
+      tag: "tag-blue",
       label: "read",
     },
     ready: {
@@ -71,7 +71,7 @@ export const Status = ({ status }) => {
       label: "ready_to_discuss",
     },
     complete: {
-      tag: "tag-success",
+      tag: "tag-danger",
       label: "completed",
     }
   };

@@ -21,6 +21,7 @@ const ViewNotificationModel = ({
     const [filePath, setFilePath] = React.useState(null);
     const [editStatus, setEditStatus] = React.useState(false);
     const [showPreview, setShowPreview] = React.useState(false);
+    const user = window.user;
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const formattedDate = shortformatDate(date);
@@ -101,16 +102,16 @@ const ViewNotificationModel = ({
                                                     <>
                                                         <div className="circle">
                                                             <Avatar
-                                                                profile={`${process.env.REACT_APP_API_URL}/${selectedEmployee.profile}`}
-                                                                first_name={selectedEmployee.first_name}
-                                                                last_name={selectedEmployee.last_name}
+                                                                profile={`${process.env.REACT_APP_API_URL}/${user.profile}`}
+                                                                first_name={user.first_name}
+                                                                last_name={user.last_name}
                                                                 size={130}
                                                                 className="avatar avatar-blue add-space me-2"
                                                                 onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
                                                             />
                                                         </div>
-                                                        <h6 className="mt-3 mb-0">{(selectedEmployee?.first_name || '') + ' ' + (selectedEmployee?.last_name || '')}</h6>
-                                                        <span>{(selectedEmployee?.email)}</span>
+                                                        <h6 className="mt-3 mb-0">{(user?.first_name || '') + ' ' + (user?.last_name || '')}</h6>
+                                                        <span>{(user?.email)}</span>
 
                                                     </>
                                                 )}
@@ -220,7 +221,7 @@ const ViewNotificationModel = ({
                                                             <small className="text-muted">Sender: </small>
                                                             <p className="mb-0">
                                                                 <span className="">
-                                                                    {selectedNotification.sender_name}
+                                                                    {JSON.parse(selectedNotification.sender).name}
                                                                 </span>
                                                             </p>
                                                         </li>
