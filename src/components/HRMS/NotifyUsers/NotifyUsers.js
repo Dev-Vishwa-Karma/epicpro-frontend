@@ -125,10 +125,6 @@ class NotifyUsers extends Component {
                             value: selectedEmployee
                         },
                         defaultSelectedEmployee:selectedEmployee,
-                        selectedNotification: {
-                            ...this.state.selectedNotification,
-                            selectedEmployee
-                        }
                     });
                 } else {
                     this.setState({ defaultEmployeeSetting: {key : "", value: []} });
@@ -161,32 +157,6 @@ class NotifyUsers extends Component {
             });
     }
 
-    getFormData = () => {
-        const { selectedNotification, defaultEmployeeSetting } = this.state;
-        if (selectedNotification) {
-            const updatedNotification = {
-                ...selectedNotification,
-                selectedEmployee: [
-                    ...new Set([
-                        ...(selectedNotification.selectedEmployee || []),
-                        ...(defaultEmployeeSetting.value || [])
-                    ])
-                ]
-            };
-            return updatedNotification;
-        } else {
-            return {
-                title: "",
-                body: "",
-                type: "",
-                priority: "",
-                attach: [],
-                status: "",
-                selectedEmployee: defaultEmployeeSetting.value || []
-            };
-        }
-    };
-
     handleAddClick = () => {
         this.setState({
             showModal: true,
@@ -197,7 +167,7 @@ class NotifyUsers extends Component {
                 priority: "",
                 attach: [],
                 status: "",
-                selectedEmployee: []
+                selectedEmployee: this.state.defaultEmployeeSetting.value
             },
             errors: {}
         });
@@ -388,6 +358,15 @@ class NotifyUsers extends Component {
         let { value } = e.target;
         if (name === 'attach') {
             value = this.onFileSelected(e);
+        }
+
+       if (name === 'selectedEmployee') {
+            value = [
+                ...new Set([
+                    ...(value || []),
+                    ...(this.state.defaultEmployeeSetting.value || [])
+                ])
+            ];
         }
         this.setState((prevState) => ({
             selectedNotification: {
@@ -837,11 +816,10 @@ class NotifyUsers extends Component {
                     onClose={this.onCloseNotificationModal}
                     onSubmit={this.handleSubmit}
                     onChange={this.handleInputChange}
-                    formData={this.getFormData()}
+                    formData={selectedNotification}
                     errors={this.state.errors}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}
-                    selectedEmployee={selectedNotification.selectedEmployee}
                     handleEmployeeChange={this.handleEmployeeChange}
 
                 />

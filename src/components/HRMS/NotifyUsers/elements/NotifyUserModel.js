@@ -68,6 +68,7 @@
                     type="select"
                     value={type}
                     onChange={onChange}
+                    error={errors.type}
                     options={[
                       { value: "todo", label: "Todo" },
                       { value: "information", label: "Information" },
@@ -81,7 +82,7 @@
                     type="select"
                     value={priority}
                     onChange={onChange}
-                    // error={errors.priority}
+                    error={errors.priority}
                     options={[
                       { value: 'low', label: 'Low' },
                       { value: 'medium', label: 'Medium' },
@@ -134,6 +135,9 @@
                       onClick={() => {
                         setActionLoading('draft');
                         onSubmit('draft');
+                        setTimeout(() => {
+                          setActionLoading(null);
+                        }, 1000);
                       }}
                       loading={actionLoading === 'draft'}
                       className="btn-warning mr-2"
@@ -152,6 +156,9 @@
                       onClick={() => {
                         setActionLoading('sent');
                         onSubmit('sent');
+                       setTimeout(() => {
+                          setActionLoading(null);
+                        }, 1000);
                       }}
                       loading={actionLoading === 'sent'}
                       className="btn-primary ml-1"
