@@ -42,6 +42,7 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                 <td>
                                     {/* {notification.title} */}
                                     <span
+                                        className='custom-card-meta'
                                         style={currentTab !== 'draft' ? { cursor: "pointer", color: "#007bff" } : {}}
                                         onClick={() => { onRecordClick(notification); }}
                                     >

@@ -16,7 +16,7 @@ const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, han
                         className={`custom-card ${notification.priority}`}
                     >
 
-                        <div className="custom-card-header">
+                        <div className="custom-card-header custom-card-meta">
                             <span
                                 onClick={() => onRecordClick(notification)}
                                         style={{ color: 'blue', textDecoration: 'none', cursor: 'pointer' }}>
