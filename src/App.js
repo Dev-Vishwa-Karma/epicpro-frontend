@@ -9,7 +9,6 @@ import ResetPassword from './components/Authentication/ResetPassword';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import Pusher from 'pusher-js';
 import logo from "./logo.svg";
-import emitter from "./emitter";
 
 class App extends Component {
 	pusher = null;
@@ -53,19 +52,16 @@ class App extends Component {
 			events.forEach(eventName => {
 				channel.bind(eventName, (data) => {
 					showNotification(data, first_name);
-				emitter.emit("notificationUpdated");
 			});
 		});
 
 		const showNotification = (data, first_name) => {
-				console.log('data=> under Push Notification=>')
 			if (Notification.permission === "granted") {
 				const notification = new Notification(`Hi ${first_name}`, {
 					body: `${data.title} | ${data.message}`,
 					icon: logo,
 					requireInteraction: true,
 				});
-				emitter.emit("notificationUpdated");
 				notification.onclick = function () {
 					window.open(process.env.REACT_APP_NOTIFICATION_REDIRECT_URL, "_blank");
 				};

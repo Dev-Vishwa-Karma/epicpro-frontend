@@ -9,7 +9,6 @@ import { formatDate, getToday } from '../../../utils';
 import DateFilterForm from '../../common/DateFilterForm';
 import Button from '../../common/formInputs/Button';
 import DeleteModal from '../../common/DeleteModal';
-import emitter from "../../../emitter";
 import InputField from '../../common/formInputs/InputField';
 import ViewNotificationModel from './elements/ViewNotificationModel'
 import DefaultUsersSetting from './elements/DefaultUsersSetting';
@@ -66,13 +65,6 @@ class NotifyUsers extends Component {
         const hash = window.location.hash;
         const map = { '#sent': 'sent', '#draft': 'draft' };
         this.notificationDetail(map[hash] || 'receive');
-
-        //event to update the status when notification has mark as read
-        emitter.on("notificationUpdated", () => {
-            if (window.location.pathname === "/connect") {
-                this.getNotifications();
-            }
-        });
     }
 
     getNotifications = () => {
