@@ -71,7 +71,7 @@ class Connect extends Component {
         const { filterFromDate, filterToDate, notificationData, filterNotification, currentTab, search } = this.state;
         const filter = currentTab === 'sent' || currentTab === 'draft' ? currentTab : filterNotification;
         let requestData = {
-            action: 'get_push_notification',
+            action: 'get_connects',
             filter: filter,
             search: JSON.stringify(search)
         };
@@ -88,7 +88,7 @@ class Connect extends Component {
             requestData.user_id = window.user.id;
         }
 
-        getService.getCall('push_notification.php', requestData)
+        getService.getCall('connect.php', requestData)
             .then(data => {
                 if (data.status === 'success') {
                     this.setState({ notificationData: data.data, message: data.message, loading: false });
@@ -103,7 +103,7 @@ class Connect extends Component {
     }
 
     getUserDefaultSetting = () => {
-        getService.getCall('notification_setting.php', {
+        getService.getCall('connect_setting.php', {
             action: 'view',
             user_ids: window.user.id
         })
@@ -248,7 +248,7 @@ class Connect extends Component {
         });
 
         // API call to add Notification
-        getService.addCall('push_notification.php', 'add', formData
+        getService.addCall('connect.php', 'add', formData
         )
             .then((data) => {
                 if (data.success) {
@@ -383,7 +383,7 @@ class Connect extends Component {
         if (!notificationToHide) return;
         this.setState({ ButtonLoading: true });
 
-        getService.getCall("push_notification.php", {
+        getService.getCall("connect.php", {
             action: 'is_removed',
             id: selectedNotification.id,
             hidden: 1,
@@ -499,7 +499,7 @@ class Connect extends Component {
             name: `${window.user.first_name} ${window.user.last_name}`
         }));
 
-        getService.addCall("push_notification.php", 'update_status',formData).then((data) => {
+        getService.addCall("connect.php", 'update_status',formData).then((data) => {
             if (data.status === "success") {
                 this.setState((prevState) => ({
                     selectedNotification: {
@@ -548,7 +548,7 @@ class Connect extends Component {
         formData.append('value', JSON.stringify(this.state.defaultSelectedEmployee));
         formData.append('created_by', window.user.id);
 
-        getService.addCall('notification_setting.php', 'update', formData)
+        getService.addCall('connect_setting.php', 'update', formData)
             .then((data) => {
 
                 if (data.status === "success") {
