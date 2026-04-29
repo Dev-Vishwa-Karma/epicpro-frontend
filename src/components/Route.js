@@ -137,7 +137,7 @@ const Routes = [
         path: "/hr-report",
         name: 'report',
         exact: true,
-        pageTitle: "Report",
+        pageTitle: "Reports",
         component: Report,
         roles: ['admin', 'super_admin', 'employee']
     },
