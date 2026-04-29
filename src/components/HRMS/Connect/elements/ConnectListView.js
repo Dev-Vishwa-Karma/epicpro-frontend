@@ -5,12 +5,13 @@ import Button from '../../../common/formInputs/Button';
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 
-const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordClick, filterNotification, currentTab, handleEditNotification }) => {
-    const onViewReceivers = (notification) => {
+
+const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, filterNotification, currentTab, handleEditconnect }) => {
+    const onViewReceivers = (connect) => {
     try {
-        return typeof notification.receiver === "string"
-            ? JSON.parse(notification.receiver)
-            : notification.receiver || [];
+        return typeof connect.receiver === "string"
+            ? JSON.parse(connect.receiver)
+            : connect.receiver || [];
     } catch {
         return [];
     }
@@ -35,18 +36,18 @@ const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordCl
                     </tr>
                 </thead>
                 <tbody>
-                    {notificationData.length > 0 ? (
-                        notificationData.map((notification, index) => (
+                    {connectData.length > 0 ? (
+                        connectData.map((connect, index) => (
                             <tr key={index}>
                                 <td>{index + 1}</td>
                                 <td>
-                                    {/* {notification.title} */}
+                                    {/* {connect.title} */}
                                     <span
                                         className='custom-card-meta'
                                         style={currentTab !== 'draft' ? { cursor: "pointer", color: "#007bff" } : {}}
-                                        onClick={() => { onRecordClick(notification); }}
+                                        onClick={() => { onRecordClick(connect); }}
                                     >
-                                        {notification.title}
+                                        {connect.title}
 
                                     </span>
                                     <div className="text-muted d-flex align-items-center gap-2">
@@ -54,38 +55,38 @@ const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordCl
                                                 Priority:
                                                 <span
                                                     className={`tag mx-1 small ${
-                                                        notification.priority === "high"
+                                                        connect.priority === "high"
                                                             ? "tag-danger"
-                                                            : notification.priority === "medium"
+                                                            : connect.priority === "medium"
                                                             ? "tag-warning"
                                                             : "tag-success"
                                                     }`}
                                                 >
-                                                    {notification.priority}
+                                                    {connect.priority}
                                                 </span>
 
                                                 <div className="tooltip-box">
-                                                    Priority: {notification.priority}
+                                                    Priority: {connect.priority}
                                                 </div>
                                             </div>
                                         </div>
                                 </td>
-                                <td className="custom-card-meta" dangerouslySetInnerHTML={{ __html: notification.body }}></td>
+                                <td className="custom-card-meta" dangerouslySetInnerHTML={{ __html: connect.body }}></td>
                                 <td>
-                                    {notification.type === 'todo' ? 'Todo' : notification.type === 'information' ?  'Information' : notification.type === 'need_discussion' ? 'Neede Discussion' : 'Completed'}
+                                    {connect.type === 'todo' ? 'Todo' : connect.type === 'information' ?  'Information' : connect.type === 'need_discussion' ? 'Neede Discussion' : 'Completed'}
                                 </td>
 
                                 {currentTab === "receive" && (
                                     <td>
                                         <span
-                                            className={`tag ${notification.read === '1' ? 'tag-blue' :
-                                                notification.read === '0' ? 'tag-red' :
-                                                    notification.read === 'read' ? 'tag-blue' :
-                                                        notification.read === 'unread' ? 'tag-red' :
-                                                            notification.read === 'ready_to_discuss' ? 'tag-warning' :
-                                                                notification.read === 'completed' ? 'tag-danger' : ''
+                                            className={`tag ${connect.read === '1' ? 'tag-blue' :
+                                                connect.read === '0' ? 'tag-red' :
+                                                    connect.read === 'read' ? 'tag-blue' :
+                                                        connect.read === 'unread' ? 'tag-red' :
+                                                            connect.read === 'ready_to_discuss' ? 'tag-warning' :
+                                                                connect.read === 'completed' ? 'tag-danger' : ''
                                                 }`}>
-                                            {notification.read === '1' ? 'read' : notification.read === '0' ? 'unread' : notification.read}
+                                            {connect.read === '1' ? 'read' : connect.read === '0' ? 'unread' : connect.read}
                                         </span>
                                     </td>
                                 )}
@@ -94,15 +95,15 @@ const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordCl
                                 {currentTab === "receive" && (
                                     <td className="d-flex">
                                         <Avatar
-                                            profile={notification.profile}
+                                            profile={connect.profile}
                                             size={35}
-                                            alt={notification.sender ? JSON.parse(notification.sender).name: ''}
+                                            alt={connect.sender ? JSON.parse(connect.sender).name: ''}
                                             className="avatar avatar-blue add-space me-2"
                                             style={{
                                                 objectFit: 'cover',
                                             }}
                                             onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
-                                            title={JSON.parse(notification.sender).name || 'User'}
+                                            title={JSON.parse(connect.sender).name || 'User'}
                                         />
                                     </td>
                                 )}
@@ -138,7 +139,7 @@ const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordCl
                                             }}
                                         >
                                             {() => {
-                                                const receivers = onViewReceivers(notification);
+                                                const receivers = onViewReceivers(connect);
 
                                                 return (
                                                     <div>
@@ -182,7 +183,7 @@ const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordCl
                                     <td>
                                         <Button
                                         icon="fa fa-edit"
-                                        onClick={() => handleEditNotification(notification)}
+                                        onClick={() => handleEditconnect(connect)}
                                         className="btn-icon"
                                         title="Edit"
                                         />
@@ -193,11 +194,11 @@ const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordCl
                                     <td>
                                         <Button
                                             label=""
-                                            onClick={() => onRemoveClick(notification)}
-                                            title={notification.hidden ? "Unhide" : "Hide"}
+                                            onClick={() => onRemoveClick(connect)}
+                                            title={connect.hidden ? "Unhide" : "Hide"}
                                             className="btn-icon btn-sm js-sweetalert"
                                             icon={
-                                                notification.hidden
+                                                connect.hidden
                                                     ? "fa fa-eye text-success"      // Unhide icon
                                                     : "fa fa-eye-slash text-danger" // Hide icon
                                             }
@@ -208,7 +209,7 @@ const ConnectListView = ({ notificationData, onRemoveClick, userRole, onRecordCl
                             </tr>
                         ))
                     ) : (
-                        <NoDataRow colSpan={userRole === "admin" || userRole === "super_admin" ? 7 : 6} message="Notifications not found" />
+                        <NoDataRow colSpan={userRole === "admin" || userRole === "super_admin" ? 7 : 6} message="connects not found" />
                     )}
                 </tbody>
             </table>

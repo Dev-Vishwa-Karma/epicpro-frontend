@@ -3,53 +3,53 @@ import NoDataRow from '../../../common/NoDataRow';
 import { Priority, Status, Type, Receivers } from './CardUtility';
 import Button from '../../../common/formInputs/Button';
 
-const ConnectCardsView = ({ notificationData = [], onRecordClick, currentTab, handleEditNotification, loading, onSubmit }) => {
+const ConnectCardsView = ({ connectData = [], onRecordClick, currentTab, handleEditconnect, loading, onSubmit }) => {
 
     return (
         <div className="notification-container">
-            {notificationData.length === 0 ? (
+            {connectData.length === 0 ? (
                 <div>No Data Found</div>
             ) : (
-                notificationData.map((notification) => (
+                connectData.map((connect) => (
                     <div
-                        key={notification.id}
-                        className={`custom-card ${notification.priority}`}
+                        key={connect.id}
+                        className={`custom-card ${connect.priority}`}
                     >
 
                         <div className="custom-card-header custom-card-meta">
                             <span
-                                onClick={() => onRecordClick(notification)}
+                                onClick={() => onRecordClick(connect)}
                                         style={{ color: 'blue', textDecoration: 'none', cursor: 'pointer' }}>
-                                {notification.title || "Untitled"}
+                                {connect.title || "Untitled"}
                             </span>
                         </div>
 
                         <div className="custom-card-meta">
-                            {notification.body || "No description"}
+                            {connect.body || "No description"}
                         </div>
 
                         {(currentTab === 'receive') && (
                             <div className="custom-card-description">
                                 <div>
-                                    {JSON.parse(notification.sender).name || "No sender information"}
+                                    {JSON.parse(connect.sender).name || "No sender information"}
                                 </div>
                                 <div>
-                                    <Status status={notification.read} />
+                                    <Status status={connect.read} />
                                 </div>
                             </div>
                         )}
 
                         {(currentTab !== 'receive') && (
                             <div className="custom-card-description">
-                                <Receivers receivers={notification.receiver} currentTab={currentTab}/>
+                                <Receivers receivers={connect.receiver} currentTab={currentTab}/>
                             </div>
                         )}
 
 
                         <div className="custom-card-footer">
                             <div className="footer-left">
-                                <Type type={notification.type} />
-                                <Priority priority={notification.priority} />
+                                <Type type={connect.type} />
+                                <Priority priority={connect.priority} />
                             </div>
 
                             {currentTab === "draft" && (
@@ -57,7 +57,7 @@ const ConnectCardsView = ({ notificationData = [], onRecordClick, currentTab, ha
                                     <Button
                                         label="Edit"
                                         onClick={() => {
-                                            handleEditNotification(notification);
+                                            handleEditconnect(connect);
                                         }}
                                         className="btn-primary ml-1"
                                     />

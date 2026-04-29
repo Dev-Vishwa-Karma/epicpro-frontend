@@ -4,7 +4,7 @@ import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { formatDateTimeAMPM, shortformatDate } from "../../../../utils";
 import InputField from '../../../common/formInputs/InputField';
 
-const ViewNotificationModel = ({
+const ViewConnectModel = ({
 
     show = false,
     isLoading = false,
@@ -13,7 +13,7 @@ const ViewNotificationModel = ({
     errors = {},
     loading = false,
     employeeData = {},
-    selectedNotification = {},
+    selectedConnect = {},
     selectedEmployee = {},
     currentTab = {}
 
@@ -28,16 +28,16 @@ const ViewNotificationModel = ({
         const formattedTime = formatDateTimeAMPM(dateString);
         return `${formattedDate} ${formattedTime}`;
     };
-    const files = selectedNotification.filePath
-        ? JSON.parse(selectedNotification.filePath)
+    const files = selectedConnect.filePath
+        ? JSON.parse(selectedConnect.filePath)
         : [];
     let receiver = [];
 
-    if (selectedNotification.receiver) {
+    if (selectedConnect.receiver) {
         try {
-            receiver = typeof selectedNotification.receiver === "string"
-                ? JSON.parse(selectedNotification.receiver)
-                : selectedNotification.receiver;
+            receiver = typeof selectedConnect.receiver === "string"
+                ? JSON.parse(selectedConnect.receiver)
+                : selectedConnect.receiver;
         } catch (e) {
             receiver = [];
         }
@@ -84,7 +84,7 @@ const ViewNotificationModel = ({
                     <div className="modal-dialog modal-dialog-scrollable modal-xxl" role="document">
                         <div className="modal-content section-body" style={{ maxHeight: "90vh" }}>
                             <div className="modal-header">
-                                <h5 className="modal-title">View Notification</h5>
+                                <h5 className="modal-title">View Connects</h5>
                                 <button type="button" className="close" onClick={onClose}><span aria-hidden="true">×</span></button>
                             </div>
                             <div className="container-fluid" style={{ overflowY: "auto" }}>
@@ -120,17 +120,17 @@ const ViewNotificationModel = ({
 
                                         <div className="card">
                                             <div className="card-header">
-                                                <h3 className="card-title">Notification Details</h3>
+                                                <h3 className="card-title">Connects Details</h3>
                                                 <div className="card-options">
                                                 </div>
                                             </div>
                                             <div className="card-body">
-                                                {isLoading ? <TableSkeleton columns={2} rows={1} /> : <span>{selectedNotification.title}</span>}
+                                                {isLoading ? <TableSkeleton columns={2} rows={1} /> : <span>{selectedConnect.title}</span>}
                                             </div>
                                         </div>
                                         <div className="card">
                                             <div className="card-header">
-                                                <h3 className="card-title">Notification Info</h3>
+                                                <h3 className="card-title">Connects Info</h3>
                                                 <div className="card-options">
                                                 </div>
                                             </div>
@@ -141,21 +141,21 @@ const ViewNotificationModel = ({
                                                     <ul className="list-group" style={{ height: "500px", overflow: "aito" }}>
                                                         <li className="list-group-item">
                                                             <small className="text-muted">Description: </small>
-                                                            <p className="mb-0" style={{ height: "180px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: selectedNotification.body }}></p>
+                                                            <p className="mb-0" style={{ height: "180px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: selectedConnect.body }}></p>
                                                         </li>
                                                         {currentTab === 'receive' && (
                                                             <li className="list-group-item">
                                                                 <small className="text-muted">Status: </small>
                                                                 <p className="mb-0 d-flex align-items-center justify-content-between" onClick={toggleEditStatus}>
-                                                                    <span className={`tag ${selectedNotification.read === '1' ? 'tag-blue' :
-                                                                        selectedNotification.read === '0' ? 'tag-red' :
-                                                                            selectedNotification.read === 'read' ? 'tag-blue' :
-                                                                                selectedNotification.read === 'unread' ? 'tag-red' :
-                                                                                    selectedNotification.read === 'ready_to_discuss' ? 'tag-warning' :
-                                                                                        selectedNotification.read === 'completed' ? 'tag-danger' : ''
+                                                                    <span className={`tag ${selectedConnect.read === '1' ? 'tag-blue' :
+                                                                        selectedConnect.read === '0' ? 'tag-red' :
+                                                                            selectedConnect.read === 'read' ? 'tag-blue' :
+                                                                                selectedConnect.read === 'unread' ? 'tag-red' :
+                                                                                    selectedConnect.read === 'ready_to_discuss' ? 'tag-warning' :
+                                                                                        selectedConnect.read === 'completed' ? 'tag-danger' : ''
                                                                         }`}
                                                                     >
-                                                                        {selectedNotification?.read}
+                                                                        {selectedConnect?.read}
                                                                     </span>
                                                                     <span>
                                                                         <i className="fa fa-pencil" />
@@ -167,7 +167,7 @@ const ViewNotificationModel = ({
                                                                             label="Status"
                                                                             name="status"
                                                                             type="select"
-                                                                            value={selectedNotification?.read}
+                                                                            value={selectedConnect?.read}
                                                                             // onChange={onChange}
                                                                             onChange={(e) => {
                                                                                 onChange(e);
@@ -185,25 +185,25 @@ const ViewNotificationModel = ({
                                                             </li>
                                                         )}
 
-                                                        {currentTab === 'sent' && Array.isArray(receiver) && receiver.map((notification) => (
-                                                            <li className="list-group-item" key={notification.id}>
+                                                        {currentTab === 'sent' && Array.isArray(receiver) && receiver.map((connect) => (
+                                                            <li className="list-group-item" key={connect.id}>
                                                                 <small className="text-muted">Status: </small>
 
                                                                 <p
                                                                     className="mb-0 d-flex align-items-center justify-content-between"
                                                                 >
-                                                                    <span className={`tag ${notification.read === '1' || notification.read === 'read' ? 'tag-blue' :
-                                                                        notification.read === '0' || notification.read === 'unread' ? 'tag-red' :
-                                                                            notification.read === 'ready_to_discuss' ? 'tag-warning' :
-                                                                                notification.read === 'completed' ? 'tag-danger' : ''
+                                                                    <span className={`tag ${connect.read === '1' || connect.read === 'read' ? 'tag-blue' :
+                                                                        connect.read === '0' || connect.read === 'unread' ? 'tag-red' :
+                                                                            connect.read === 'ready_to_discuss' ? 'tag-warning' :
+                                                                                connect.read === 'completed' ? 'tag-danger' : ''
                                                                         }`}>
-                                                                        {notification.read}
+                                                                        {connect.read}
                                                                     </span>
 
                                                                     <span>
                                                                         <small className="text-muted">Receiver: </small>
 
-                                                                        {notification.receiver_name}
+                                                                        {connect.receiver_name}
                                                                 </span>
                                                                 </p>
                                                             </li>
@@ -213,7 +213,7 @@ const ViewNotificationModel = ({
                                                             <small className="text-muted">Type: </small>
                                                             <p className="mb-0">
                                                                 <span className="">
-                                                                    {selectedNotification.type}
+                                                                    {selectedConnect.type}
                                                                 </span>
                                                             </p>
                                                         </li>
@@ -221,16 +221,16 @@ const ViewNotificationModel = ({
                                                             <small className="text-muted">Sender: </small>
                                                             <p className="mb-0">
                                                                 <span className="">
-                                                                    {JSON.parse(selectedNotification.sender).name}
+                                                                    {JSON.parse(selectedConnect.sender).name}
                                                                 </span>
                                                             </p>
                                                         </li>
                                                         <li className="list-group-item">
                                                             <div className="d-flex justify-content-between">
                                                                 <small className="text-muted">Created Data: </small>
-                                                                {selectedNotification.created_at && (new Date(selectedNotification.created_at) < new Date()) ? '' : <span className="tag over-due-ticket">New</span>}
+                                                                {selectedConnect.created_at && (new Date(selectedConnect.created_at) < new Date()) ? '' : <span className="tag over-due-ticket">New</span>}
                                                             </div>
-                                                            <p className="mb-0">{selectedNotification.created_at ? formatDate(selectedNotification.created_at) : '--/--/--'}</p>
+                                                            <p className="mb-0">{selectedConnect.created_at ? formatDate(selectedConnect.created_at) : '--/--/--'}</p>
                                                         </li>
 
 
@@ -370,4 +370,4 @@ const ViewNotificationModel = ({
 
 };
 
-export default ViewNotificationModel;
+export default ViewConnectModel;

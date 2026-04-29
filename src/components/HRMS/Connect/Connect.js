@@ -10,7 +10,7 @@ import DateFilterForm from '../../common/DateFilterForm';
 import Button from '../../common/formInputs/Button';
 import DeleteModal from '../../common/DeleteModal';
 import InputField from '../../common/formInputs/InputField';
-import ViewNotificationModel from './elements/ViewNotificationModel'
+import ViewConnectModel from './elements/ViewConnectModel'
 import ConnectSetting from './elements/ConnectSetting';
 import ConnectCardsView from './elements/ConnectCardView';
 
@@ -19,29 +19,29 @@ class Connect extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            notificationData: [],
+            connectData: [],
             employeeData: [],
             filterFromDate: getToday(),
             filterToDate: getToday(),
             filterEmployeeId: "",
             loading: true,
-            notificationToHide: null,
+            connectsToHide: null,
             successMessage: "",
             errorMessage: "",
             showSuccess: false,
             showError: false,
             ButtonLoading: false,
             showModal: false,
-            viewNotificationModal: false,
-            ConnectSettingModal: false,
+            viewConnectModal: false,
+            connectSettingModal: false,
             viewFilter: 'list',
             search: '',
-            defaultEmployeeSetting: {
+            defaultConnectEmployee: {
                 kye: "",
                 value: [],
             },
             defaultSelectedEmployee:[],
-            selectedNotification: {
+            selectedConnect: {
                 title: "",
                 body: "",
                 type: "",
@@ -64,11 +64,11 @@ class Connect extends Component {
         this.getUserDefaultSetting();
         const hash = window.location.hash;
         const map = { '#sent': 'sent', '#draft': 'draft' };
-        this.notificationDetail(map[hash] || 'receive');
+        this.connectDetail(map[hash] || 'receive');
     }
 
     getNotifications = () => {
-        const { filterFromDate, filterToDate, notificationData, filterNotification, currentTab, search } = this.state;
+        const { filterFromDate, filterToDate, connectData, filterNotification, currentTab, search } = this.state;
         const filter = currentTab === 'sent' || currentTab === 'draft' ? currentTab : filterNotification;
         let requestData = {
             action: 'get_connects',
@@ -91,9 +91,9 @@ class Connect extends Component {
         getService.getCall('connect.php', requestData)
             .then(data => {
                 if (data.status === 'success') {
-                    this.setState({ notificationData: data.data, message: data.message, loading: false });
+                    this.setState({ connectData: data.data, message: data.message, loading: false });
                 } else {
-                    this.setState({ notificationData: [], message: data.message, loading: false });
+                    this.setState({ connectData: [], message: data.message, loading: false });
                 }
             })
             .catch(err => {
@@ -112,18 +112,18 @@ class Connect extends Component {
                     const setting = data.data;
                     const selectedEmployee = JSON.parse(setting.value).map(Number) || [];
                     this.setState({
-                        defaultEmployeeSetting: {
+                        defaultConnectEmployee: {
                             key: setting.key,
                             value: selectedEmployee
                         },
                         defaultSelectedEmployee:selectedEmployee,
                     });
                 } else {
-                    this.setState({ defaultEmployeeSetting: {key : "", value: []} });
+                    this.setState({ defaultConnectEmployee: {key : "", value: []} });
                 }
             })
             .catch(err => {
-                this.setState({ defaultEmployeeSetting: {key : "", value: []} });
+                this.setState({ defaultConnectEmployee: {key : "", value: []} });
                 console.error(err);
             });
     }
@@ -152,14 +152,14 @@ class Connect extends Component {
     handleAddClick = () => {
         this.setState({
             showModal: true,
-            selectedNotification: {
+            selectedConnect: {
                 title: "",
                 body: "",
                 type: "",
                 priority: "",
                 attach: [],
                 status: "",
-                selectedEmployee: this.state.defaultEmployeeSetting.value
+                selectedEmployee: this.state.defaultConnectEmployee.value
             },
             errors: {}
         });
@@ -168,7 +168,7 @@ class Connect extends Component {
     onCloseNotificationModal = () => {
         this.setState({
             showModal: false,
-            selectedNotification: {
+            selectedConnect: {
                 title: "",
                 body: "",
                 type: "",
@@ -212,8 +212,8 @@ class Connect extends Component {
     };
 
     handleSubmit = (event) => {
-        const { selectedNotification, currentTab } = this.state;
-        if (selectedNotification == null) {
+        const { selectedConnect, currentTab } = this.state;
+        if (selectedConnect == null) {
             const errors = {
                 title: "Title is required.",
                 body: "Body is required.",
@@ -225,7 +225,7 @@ class Connect extends Component {
             return
         }
 
-        const { title, body, attach, type, priority, selectedEmployee } = selectedNotification;
+        const { title, body, attach, type, priority, selectedEmployee } = selectedConnect;
         const { isValid, errors } = this.validateNotificationForm(title, body, attach, type, priority, selectedEmployee);
         if (!isValid) {
             this.setState({ errors });
@@ -235,7 +235,7 @@ class Connect extends Component {
         const { id, email } = window.user;
         const formData = new FormData();
         Object.entries({
-            ...selectedNotification,
+            ...selectedConnect,
             createdBy: id,
             email: email,
             status:event,
@@ -256,7 +256,7 @@ class Connect extends Component {
                     const newNotification = data.newNotification;
                     this.setState((prevState) => {
 
-                        let updatedData = prevState.notificationData || [];
+                        let updatedData = prevState.connectData || [];
 
                         if(currentTab === 'draft' && event === 'sent'){
                             updatedData = updatedData.filter(
@@ -270,8 +270,8 @@ class Connect extends Component {
                         }
 
                         return {
-                            notificationData: updatedData,
-                            selectedNotification: {
+                            connectData: updatedData,
+                            selectedConnect: {
                                 title: "",
                                 body: "",
                                 type: "",
@@ -308,7 +308,7 @@ class Connect extends Component {
             });
     };
 
-    handleEditNotification = (notification) => {
+    handleEditconnect = (notification) => {
         const safeParse = (data, mapFn) => {
             try {
                 return data ? JSON.parse(data).map(mapFn) : [];
@@ -321,7 +321,7 @@ class Connect extends Component {
 
         this.setState({
             showModal: true,
-            selectedNotification: {
+            selectedConnect: {
                 id: notification.id,
                 title: notification.title || "",
                 body: notification.body ||  "",
@@ -352,8 +352,8 @@ class Connect extends Component {
             value = this.onFileSelected(e);
         }
         this.setState((prevState) => ({
-            selectedNotification: {
-                ...prevState.selectedNotification,
+            selectedConnect: {
+                ...prevState.selectedConnect,
                 [name]: value,
             },
             errors: {
@@ -364,42 +364,42 @@ class Connect extends Component {
     };
 
     handleEmployeeChange = (event) => {
-        this.setState({ selectedNotification: { ...this.state.selectedNotification, selectedEmployee: event.target.value } });
+        this.setState({ selectedConnect: { ...this.state.selectedConnect, selectedEmployee: event.target.value } });
     };
 
     openRemoveModal = (notification) => {
         this.setState({
-            selectedNotification: notification,
-            notificationToHide: notification.id
+            selectedConnect: notification,
+            connectsToHide: notification.id
         });
     };
 
     onCloseRemoveModal = () => {
-        this.setState({ notificationToHide: null });
+        this.setState({ connectsToHide: null });
     }
 
     confirmRemove = () => {
-        const { notificationToHide, selectedNotification, currentPage, notificationData, dataPerPage } = this.state;
-        if (!notificationToHide) return;
+        const { connectsToHide, selectedConnect, currentPage, connectData, dataPerPage } = this.state;
+        if (!connectsToHide) return;
         this.setState({ ButtonLoading: true });
 
         getService.getCall("connect.php", {
             action: 'is_removed',
-            id: selectedNotification.id,
+            id: selectedConnect.id,
             hidden: 1,
-            employee_id: selectedNotification.employee_id
+            employee_id: selectedConnect.employee_id
         }).then((data) => {
             if (data.success) {
 
                 let newPage = currentPage;
-                const updatedRecord = notificationData?.filter((d) => d.id !== notificationToHide);
+                const updatedRecord = connectData?.filter((d) => d.id !== connectsToHide);
                 const totalPages = Math.ceil(updatedRecord.length / dataPerPage);
                 if (newPage >= 1 && newPage <= totalPages) {
                     this.setState({ currentPage: newPage });
                 }
 
                 this.setState((prevState) => ({
-                    notificationData: updatedRecord,
+                    connectData: updatedRecord,
                     currentPage: newPage,
                     successMessage: "Notification hide successfully",
                     showSuccess: true,
@@ -461,17 +461,17 @@ class Connect extends Component {
             data => data.id == empId
         );
         this.setState({
-            viewNotificationModal: true,
-            selectedNotification: selected,
+            viewConnectModal: true,
+            selectedConnect: selected,
             errors: {},
             ButtonLoading: false
         })
     };
 
-    onCloseViewNotificationModel = () => {
+    onCloseViewConnectModel = () => {
         this.setState({
-            viewNotificationModal: false,
-            selectedNotification: {
+            viewConnectModal: false,
+            selectedConnect: {
                 title: "",
                 body: "",
                 attach: [],
@@ -488,12 +488,12 @@ class Connect extends Component {
 
     handleStatusChange = (e) => {
         const value = e.target.value;
-        const { selectedNotification } = this.state;
+        const { selectedConnect } = this.state;
 
         const formData = new FormData();
-        formData.append('id', selectedNotification.id);
+        formData.append('id', selectedConnect.id);
         formData.append('status', value);
-        formData.append('sender', selectedNotification.sender);
+        formData.append('sender', selectedConnect.sender);
         formData.append('user', JSON.stringify({
             id: window.user.id,
             name: `${window.user.first_name} ${window.user.last_name}`
@@ -502,8 +502,8 @@ class Connect extends Component {
         getService.addCall("connect.php", 'update_status',formData).then((data) => {
             if (data.status === "success") {
                 this.setState((prevState) => ({
-                    selectedNotification: {
-                        ...prevState.selectedNotification,
+                    selectedConnect: {
+                        ...prevState.selectedConnect,
                         read: value
                     },
                     status: value,
@@ -518,12 +518,12 @@ class Connect extends Component {
             });
     };
 
-    notificationDetail = (tab) => {
+    connectDetail = (tab) => {
         const event = tab === 'sent' ? 'sent' : tab === 'draft' ? 'draft' : 'all';
         this.setState(
             {
                 filterNotification: event,
-                notificationData: [],
+                connectData: [],
                 currentPage: 1,
                 filterFromDate: getToday(),
                 filterToDate: getToday(),
@@ -535,8 +535,8 @@ class Connect extends Component {
     }
 
     handlePageChange = (newPage) => {
-        const { dataPerPage, currentTab, notificationData, filterNotification } = this.state;
-        const totalPages = Math.ceil(notificationData.length / dataPerPage);
+        const { dataPerPage, currentTab, connectData, filterNotification } = this.state;
+        const totalPages = Math.ceil(connectData.length / dataPerPage);
         if (newPage >= 1 && newPage <= totalPages) {
             this.setState({ currentPage: newPage });
         }
@@ -553,9 +553,9 @@ class Connect extends Component {
 
                 if (data.status === "success") {
                     this.setState((prevState) => ({
-                        ConnectSettingModal: false,
-                        defaultEmployeeSetting: {
-                            ...prevState.defaultEmployeeSetting,
+                        connectSettingModal: false,
+                        defaultConnectEmployee: {
+                            ...prevState.defaultConnectEmployee,
                             value: this.state.defaultSelectedEmployee
                         },
                         successMessage: "Default users setting saved successfully!",
@@ -586,7 +586,7 @@ class Connect extends Component {
             });
     }
 
-    changeDefaultEmployeeSetting = (e) => {
+    changeDefaultConnectEmployee = (e) => {
         const { name } = e.target;
         let { value } = e.target;
         const { defaultSelectedEmployee } = this.state;
@@ -625,16 +625,16 @@ class Connect extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, ConnectSettingModal, defaultEmployeeSetting, viewFilter, defaultSelectedEmployee } = this.state;
+        const { connectData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedConnect, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewConnectModal, connectSettingModal, defaultConnectEmployee, viewFilter, defaultSelectedEmployee } = this.state;
 
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
 
-        const currentNotifications = notificationData.slice(
+        const currentConnect = connectData.slice(
             indexOfFirstNotification,
             indexOfLastNotification
         );
-        const totalPages = Math.ceil(notificationData.length / dataPerPage);
+        const totalPages = Math.ceil(connectData.length / dataPerPage);
 
         return (
             <>
@@ -643,13 +643,13 @@ class Connect extends Component {
                         <div className="d-flex justify-content-between align-items-center">
                             <ul className="nav nav-tabs page-header-tab">
                                 <li className="nav-item">
-                                    <a className={`nav-link ${currentTab === "receive" ? "active" : ""}`} href="#received" onClick={() => this.notificationDetail("receive")}> Received </a>
+                                    <a className={`nav-link ${currentTab === "receive" ? "active" : ""}`} href="#received" onClick={() => this.connectDetail("receive")}> Received </a>
                                 </li>
                                 <li className="nav-item">
-                                    <a className={`nav-link ${currentTab === "sent" ? "active" : ""}`} href="#sent" onClick={() => this.notificationDetail("sent")}> Sent </a>
+                                    <a className={`nav-link ${currentTab === "sent" ? "active" : ""}`} href="#sent" onClick={() => this.connectDetail("sent")}> Sent </a>
                                 </li>
                                 <li className="nav-item">
-                                    <a className={`nav-link ${currentTab === "draft" ? "active" : ""}`} href="#draft" onClick={() => this.notificationDetail("draft")}> Draft </a>
+                                    <a className={`nav-link ${currentTab === "draft" ? "active" : ""}`} href="#draft" onClick={() => this.connectDetail("draft")}> Draft </a>
                                 </li>
                             </ul>
                             <div className="d-flex justify-content-between align-items-center">
@@ -676,7 +676,7 @@ class Connect extends Component {
                                 </div>
 
                                 <div
-                                    onClick={() => this.setState({ ConnectSettingModal: true })}
+                                    onClick={() => this.setState({ connectSettingModal: true })}
                                     style={{ cursor: 'pointer', marginLeft:'4px' }}
                                     title="Default Users Setting"
                                 >
@@ -752,7 +752,7 @@ class Connect extends Component {
                                         {loading ? (
                                             <div className="card-body">
                                                 <div className="dimmer active">
-                                                    <TableSkeleton columns={6} rows={currentNotifications.length} />
+                                                    <TableSkeleton columns={6} rows={currentConnect.length} />
                                                 </div>
                                             </div>
                                         ) : (
@@ -761,26 +761,26 @@ class Connect extends Component {
                                                     viewFilter === 'list' ? (
 
                                                         <ConnectListView
-                                                            notificationData={currentNotifications}
+                                                            connectData={currentConnect}
                                                             message={message}
                                                             currentTab={currentTab}
                                                             filterNotification={filterNotification}
                                                             onRecordClick={this.onOpenViewNotificationModel}
                                                             onRemoveClick={this.openRemoveModal}
                                                             userRole={window.user.role}
-                                                            handleEditNotification={this.handleEditNotification}
+                                                            handleEditconnect={this.handleEditconnect}
                                                         />
                                                     ) : (
 
                                                         <ConnectCardsView
-                                                            notificationData={currentNotifications}
+                                                            connectData={currentConnect}
                                                             message={message}
                                                             currentTab={currentTab}
                                                             filterNotification={filterNotification}
                                                             onRecordClick={this.onOpenViewNotificationModel}
                                                             onRemoveClick={this.openRemoveModal}
                                                             userRole={window.user.role}
-                                                            handleEditNotification={this.handleEditNotification}
+                                                            handleEditconnect={this.handleEditconnect}
                                                         />
                                                     )
                                                 }
@@ -808,7 +808,7 @@ class Connect extends Component {
                     onClose={this.onCloseNotificationModal}
                     onSubmit={this.handleSubmit}
                     onChange={this.handleInputChange}
-                    formData={selectedNotification}
+                    formData={selectedConnect}
                     errors={this.state.errors}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}
@@ -817,7 +817,7 @@ class Connect extends Component {
                 />
 
                 <DeleteModal
-                    show={!!this.state.notificationToHide}
+                    show={!!this.state.connectsToHide}
                     onConfirm={this.confirmRemove}
                     isLoading={this.state.ButtonLoading}
                     deleteBody='Are you sure you want to hide the Notification?'
@@ -825,25 +825,25 @@ class Connect extends Component {
                     onClose={this.onCloseRemoveModal}
                     label='Hide'
                 />
-                <ViewNotificationModel
-                    show={viewNotificationModal}
+                <ViewConnectModel
+                    show={viewConnectModal}
                     isLoading={false}
-                    onClose={this.onCloseViewNotificationModel}
+                    onClose={this.onCloseViewConnectModel}
                     errors={this.state.errors}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}
-                    selectedEmployee={selectedNotification.selectedEmployee}
-                    selectedNotification={selectedNotification}
+                    selectedEmployee={selectedConnect.selectedEmployee}
+                    selectedConnect={selectedConnect}
                     onChange={this.handleStatusChange}
                     currentTab={currentTab}
 
                 />
                 <ConnectSetting
-                    show={ConnectSettingModal}
-                    onClose={() => this.setState({ ConnectSettingModal: false })}
+                    show={connectSettingModal}
+                    onClose={() => this.setState({ connectSettingModal: false })}
                     onSubmit={this.handleDefaultUsers}
                     formData={defaultSelectedEmployee ? defaultSelectedEmployee : []}
-                    onChange={this.changeDefaultEmployeeSetting}
+                    onChange={this.changeDefaultConnectEmployee}
                     // errors={{}}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}
