@@ -4,7 +4,7 @@ import Button from '../../../common/formInputs/Button';
 import AlertMessages from '../../../common/AlertMessages';
 
 
-const DefaultUsersSetting = ({
+const ConnectSetting = ({
     show = false,
     onClose = () => { },
     onSubmit = () => { },
@@ -68,4 +68,4 @@ const DefaultUsersSetting = ({
     );
 };
 
-export default DefaultUsersSetting;
+export default ConnectSetting;

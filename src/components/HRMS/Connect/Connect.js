@@ -1,8 +1,8 @@
 import React, { Component, useEffect } from 'react'
 import { connect } from 'react-redux';
-import NotifyUsersTable from '../NotifyUsers/elements/NotifyUsersTable'
+import ConnectListView from './elements/ConnectListView'
 import { getService } from '../../../services/getService';
-import NotifyUserModal from './elements/NotifyUserModel';
+import AddConnectModal from './elements/AddConnectModal';
 import Pagination from '../../common/Pagination';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
 import { formatDate, getToday } from '../../../utils';
@@ -11,11 +11,11 @@ import Button from '../../common/formInputs/Button';
 import DeleteModal from '../../common/DeleteModal';
 import InputField from '../../common/formInputs/InputField';
 import ViewNotificationModel from './elements/ViewNotificationModel'
-import DefaultUsersSetting from './elements/DefaultUsersSetting';
-import NotifyUserCards from './elements/NotifyUserCards';
+import ConnectSetting from './elements/ConnectSetting';
+import ConnectCardsView from './elements/ConnectCardView';
 
 
-class NotifyUsers extends Component {
+class Connect extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -33,7 +33,7 @@ class NotifyUsers extends Component {
             ButtonLoading: false,
             showModal: false,
             viewNotificationModal: false,
-            DefaultUsersSettingModal: false,
+            ConnectSettingModal: false,
             viewFilter: 'list',
             search: '',
             defaultEmployeeSetting: {
@@ -553,7 +553,7 @@ class NotifyUsers extends Component {
 
                 if (data.status === "success") {
                     this.setState((prevState) => ({
-                        DefaultUsersSettingModal: false,
+                        ConnectSettingModal: false,
                         defaultEmployeeSetting: {
                             ...prevState.defaultEmployeeSetting,
                             value: this.state.defaultSelectedEmployee
@@ -625,7 +625,7 @@ class NotifyUsers extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, DefaultUsersSettingModal, defaultEmployeeSetting, viewFilter, defaultSelectedEmployee } = this.state;
+        const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewNotificationModal, ConnectSettingModal, defaultEmployeeSetting, viewFilter, defaultSelectedEmployee } = this.state;
 
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
@@ -676,7 +676,7 @@ class NotifyUsers extends Component {
                                 </div>
 
                                 <div
-                                    onClick={() => this.setState({ DefaultUsersSettingModal: true })}
+                                    onClick={() => this.setState({ ConnectSettingModal: true })}
                                     style={{ cursor: 'pointer', marginLeft:'4px' }}
                                     title="Default Users Setting"
                                 >
@@ -760,7 +760,7 @@ class NotifyUsers extends Component {
                                                 {
                                                     viewFilter === 'list' ? (
 
-                                                        <NotifyUsersTable
+                                                        <ConnectListView
                                                             notificationData={currentNotifications}
                                                             message={message}
                                                             currentTab={currentTab}
@@ -772,7 +772,7 @@ class NotifyUsers extends Component {
                                                         />
                                                     ) : (
 
-                                                        <NotifyUserCards
+                                                        <ConnectCardsView
                                                             notificationData={currentNotifications}
                                                             message={message}
                                                             currentTab={currentTab}
@@ -803,7 +803,7 @@ class NotifyUsers extends Component {
                     </div>
                 </div>
 
-                <NotifyUserModal
+                <AddConnectModal
                     show={showModal}
                     onClose={this.onCloseNotificationModal}
                     onSubmit={this.handleSubmit}
@@ -838,9 +838,9 @@ class NotifyUsers extends Component {
                     currentTab={currentTab}
 
                 />
-                <DefaultUsersSetting
-                    show={DefaultUsersSettingModal}
-                    onClose={() => this.setState({ DefaultUsersSettingModal: false })}
+                <ConnectSetting
+                    show={ConnectSettingModal}
+                    onClose={() => this.setState({ ConnectSettingModal: false })}
                     onSubmit={this.handleDefaultUsers}
                     formData={defaultSelectedEmployee ? defaultSelectedEmployee : []}
                     onChange={this.changeDefaultEmployeeSetting}
@@ -860,7 +860,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({})
-export default connect(mapStateToProps, mapDispatchToProps)(NotifyUsers);
+export default connect(mapStateToProps, mapDispatchToProps)(Connect);
 
 
 

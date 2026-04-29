@@ -3,7 +3,7 @@
   import Button from '../../../common/formInputs/Button';
   import AlertMessages from '../../../common/AlertMessages';
 
-  const NotifyUserModal = ({
+  const AddConnectModal = ({
     show = false,
     onClose = () => { },
     onSubmit = () => { },
@@ -175,4 +175,4 @@
     );
   };
 
-  export default NotifyUserModal;
+  export default AddConnectModal;

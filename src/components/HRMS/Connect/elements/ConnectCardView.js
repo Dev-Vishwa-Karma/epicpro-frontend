@@ -1,9 +1,9 @@
 import React from 'react';
 import NoDataRow from '../../../common/NoDataRow';
-import { Priority, Status, Type, Receivers } from './NotifyUtility';
+import { Priority, Status, Type, Receivers } from './CardUtility';
 import Button from '../../../common/formInputs/Button';
 
-const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, handleEditNotification, loading, onSubmit }) => {
+const ConnectCardsView = ({ notificationData = [], onRecordClick, currentTab, handleEditNotification, loading, onSubmit }) => {
 
     return (
         <div className="notification-container">
@@ -80,4 +80,4 @@ const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, han
     );
 };
 
-export default NotifyUserCards;
+export default ConnectCardsView;
