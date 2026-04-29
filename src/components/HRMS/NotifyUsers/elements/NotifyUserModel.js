@@ -158,7 +158,7 @@
                         onSubmit('sent');
                        setTimeout(() => {
                           setActionLoading(null);
-                        }, 1000);
+                        }, 15000);
                       }}
                       loading={actionLoading === 'sent'}
                       className="btn-primary ml-1"

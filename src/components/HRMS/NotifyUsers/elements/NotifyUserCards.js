@@ -17,7 +17,11 @@ const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, han
                     >
 
                         <div className="custom-card-header">
-                            {notification.title || "Untitled"}
+                            <span
+                                onClick={() => onRecordClick(notification)}
+                                        style={{ color: 'blue', textDecoration: 'none', cursor: 'pointer' }}>
+                                {notification.title || "Untitled"}
+                            </span>
                         </div>
 
                         <div className="custom-card-meta">
@@ -27,17 +31,17 @@ const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, han
                         {(currentTab === 'receive') && (
                             <div className="custom-card-description">
                                 <div>
-                                    Sender: {JSON.parse(notification.sender).name || "No sender information"}
+                                    {JSON.parse(notification.sender).name || "No sender information"}
                                 </div>
                                 <div>
-                                    Status:<Status status={notification.read} />
+                                    <Status status={notification.read} />
                                 </div>
                             </div>
                         )}
 
                         {(currentTab !== 'receive') && (
                             <div className="custom-card-description">
-                                Receiver: <Receivers receivers={notification.receiver} currentTab={currentTab}/>
+                                <Receivers receivers={notification.receiver} currentTab={currentTab}/>
                             </div>
                         )}
 
@@ -47,12 +51,6 @@ const NotifyUserCards = ({ notificationData = [], onRecordClick, currentTab, han
                                 <Type type={notification.type} />
                                 <Priority priority={notification.priority} />
                             </div>
-
-                            {currentTab !== "draft" && (
-                                <span
-                                    onClick={() => onRecordClick(notification)}
-                                    style={{ color: 'blue', textDecoration: 'none', cursor: 'pointer' }}>View</span>
-                            )}
 
                             {currentTab === "draft" && (
                                 <div>

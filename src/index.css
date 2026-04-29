@@ -294,8 +294,17 @@ code {
 /* Body text */
 .custom-card-meta {
     font-size: 13px;
+    max-width: 250px;
+    word-wrap: break-word;
     color: #6c757d;
     margin-bottom: 4px;
+}
+
+.text-truncate {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Type */

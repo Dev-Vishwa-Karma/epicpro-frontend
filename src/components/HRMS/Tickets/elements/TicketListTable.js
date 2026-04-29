@@ -39,7 +39,9 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                         <td>{index + 1}</td>
                                         <td>
                                             <div className="font-15"></div>
-                                            <h6 className="mb-0">{ticket.title}</h6>
+                                            <h6 className="mb-0 text-truncate" title={ticket.title}>
+                                                {ticket.title}
+                                                </h6>
                                             <span title={ticket.description.replace(/<[^>]+>/g, '')}>
                                                 {ticket.description.replace(/<[^>]+>/g, '').length < 10
                                                     ? ticket.description.replace(/<[^>]+>/g, '')

@@ -69,8 +69,10 @@ const NotifyUsersTable = ({ notificationData, onRemoveClick, userRole, onRecordC
                                             </div>
                                         </div>
                                 </td>
-                                <td dangerouslySetInnerHTML={{ __html: notification.body }}></td>
-                                <td>{notification.type}</td>
+                                <td className="custom-card-meta" dangerouslySetInnerHTML={{ __html: notification.body }}></td>
+                                <td>
+                                    {notification.type === 'todo' ? 'Todo' : notification.type === 'information' ?  'Information' : notification.type === 'need_discussion' ? 'Neede Discussion' : 'Completed'}
+                                </td>
 
                                 {currentTab === "receive" && (
                                     <td>

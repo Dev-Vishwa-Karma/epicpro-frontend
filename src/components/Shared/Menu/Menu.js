@@ -255,10 +255,14 @@ class Menu extends Component {
 				const empItem = { id: 13, label: "Employee", to: "/hr-employee" };
 				const deptIndex = hrms.content.findIndex(item => item.id === 12);
 				if (deptIndex !== -1) hrms.content.splice(deptIndex + 1, 0, empItem);
+				
+				const connectItem = { id: 22, label: "Connect", to: "/connect" };
+				const connectIndex = hrms.content.findIndex(item => item.id === 13);
+				if (connectIndex !== -1)hrms.content.splice(connectIndex + 1, 0, connectItem);
 
 				// Insert "Statistics" after Employee
 				const statItem = { id: 14, label: "Statistics", to: "/statistics" };
-				const empIndex = hrms.content.findIndex(item => item.id === 13);
+				const empIndex = hrms.content.findIndex(item => item.id === 22);
 				if (empIndex !== -1) hrms.content.splice(empIndex + 1, 0, statItem);
 
 				// Insert "Link" after Todo
@@ -266,8 +270,6 @@ class Menu extends Component {
 				const todoIndex = hrms.content.findIndex(item => item.id === 8);
 				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
 				else hrms.content.push(linkItem);
-				hrms.content.push({ id: 22, label: "Connects", to: "/connects"});
-
 				}
 
 				// Add Project section if not exists

@@ -57,6 +57,14 @@ const Routes = [
         roles: ['admin', 'super_admin']
     },
     {
+        path: "/connect",
+        name: 'Connect',
+        exact: true,
+        pageTitle: "Connect",
+        roles: ['admin', 'super_admin'],
+        component: NotifyUsers
+    },
+    {
         path: "/hr-employee",
         name: 'employee',
         exact: true,
@@ -284,15 +292,7 @@ const Routes = [
         pageTitle: "View Ticket",
         adminAccess: true,
         component: ViewTicket
-    },
-    {
-        path: "/connects",
-        name: 'Connects',
-        exact: true,
-        pageTitle: "Connects",
-        roles: ['admin', 'super_admin'],
-        component: NotifyUsers
-    },
+    }
 ];
 
 export default Routes;

@@ -69,7 +69,7 @@ class NotifyUsers extends Component {
 
         //event to update the status when notification has mark as read
         emitter.on("notificationUpdated", () => {
-            if (window.location.pathname === "/connects") {
+            if (window.location.pathname === "/connect") {
                 this.getNotifications();
             }
         });
@@ -358,15 +358,6 @@ class NotifyUsers extends Component {
         let { value } = e.target;
         if (name === 'attach') {
             value = this.onFileSelected(e);
-        }
-
-       if (name === 'selectedEmployee') {
-            value = [
-                ...new Set([
-                    ...(value || []),
-                    ...(this.state.defaultEmployeeSetting.value || [])
-                ])
-            ];
         }
         this.setState((prevState) => ({
             selectedNotification: {
@@ -671,13 +662,22 @@ class NotifyUsers extends Component {
                             </ul>
                             <div className="d-flex justify-content-between align-items-center">
                                 <div>
+                                    <Button
+                                        label="Connect"
+                                        onClick={() => this.handleAddClick()}
+                                        className="btn-primary small-btn"
+                                        style={{ float: "right", marginRight: 4 }}
+                                        icon="fe fe-plus"
+                                        iconStyle={{ marginRight: '8px' }}
+                                    />
+                                </div>
+                                <div>
                                     <select
                                         id="employeeFilter"
                                         className="form-control custom-select"
                                         value={viewFilter}
                                         onChange={this.handleViewFilterChange}
                                     >
-                                        {/* <option value="">Card/List</option> */}
                                         <option value="list">List View</option>
                                         <option value="card">Card View</option>
                                     </select>
@@ -704,7 +704,7 @@ class NotifyUsers extends Component {
                                         col={col}
                                     />
                                     <div className={`col-md-${col}`}>
-                                        <Button
+                                        {/* <Button
                                             label="Connect"
                                             onClick={() => this.handleAddClick()}
                                             className="btn-primary"
@@ -713,7 +713,7 @@ class NotifyUsers extends Component {
                                             iconStyle={{ marginRight: '8px' }}
                                         // dataToggle="modal"
                                         // dataTarget="#addBreakModal"
-                                        />
+                                        /> */}
                                     </div>
                                 </div>
                             </div>
