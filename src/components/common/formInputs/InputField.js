@@ -89,11 +89,6 @@ const InputField = ({
               }}
             />
 
-            {error && (
-              <div className="invalid-feedback d-block">
-                {error}
-              </div>
-            )}
         </div>
       ) :
 

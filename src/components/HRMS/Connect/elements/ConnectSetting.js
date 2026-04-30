@@ -15,7 +15,7 @@ const ConnectSetting = ({
     employeeData = {},
 }) => {
     if (!show) return null;
-    const selectedEmployee = formData;
+    const defaultSelectedEmployee = formData;
     const mappedOptions = employeeData
     .filter(emp => emp.id !== window.user.id)
     .map(emp => ({
@@ -33,18 +33,17 @@ const ConnectSetting = ({
                                 <h5 className="modal-title">Select Default Users</h5>
                                 <button type="button" className="close" onClick={onClose}><span aria-hidden="true">×</span></button>
                             </div>
-                            <AlertMessages {...errors} />
                             <div className="modal-body">
 
                                 <InputField
                                     label="Users"
-                                    name="selectedEmployee"
+                                    name="defaultSelectedEmployee"
                                     type='select'
                                     options={mappedOptions}
                                     multiple={true}
-                                    value={selectedEmployee}
+                                    value={defaultSelectedEmployee}
                                     onChange={onChange}
-                                    // error={errors.selectedEmployee}
+                                    error={errors.defaultSelectedEmployee}
                                 />
                             </div>
                             <div className="modal-footer">

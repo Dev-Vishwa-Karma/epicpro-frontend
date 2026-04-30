@@ -543,6 +543,15 @@ class Connect extends Component {
     };
 
     handleDefaultUsers = () => {
+
+        if (!this.state.defaultSelectedEmployee || this.state.defaultSelectedEmployee.length === 0) {
+            const errors = {
+                defaultSelectedEmployee: "At least one Employee is required."
+            };
+            this.setState({ errors });
+            return;
+        }
+
         const formData = new FormData();
         formData.append('key', 'user_ids');
         formData.append('value', JSON.stringify(this.state.defaultSelectedEmployee));
@@ -843,7 +852,7 @@ class Connect extends Component {
                     onSubmit={this.handleDefaultUsers}
                     formData={defaultSelectedEmployee ? defaultSelectedEmployee : []}
                     onChange={this.changeDefaultConnectEmployee}
-                    // errors={{}}
+                    errors={this.state.errors}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}
                 />
