@@ -30,7 +30,7 @@ const ConnectSetting = ({
                     <div className="modal-dialog modal-dialog-scrollable" role="document">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">Select Default Users</h5>
+                                <h5 className="modal-title">Set Users(Default)</h5>
                                 <button type="button" className="close" onClick={onClose}><span aria-hidden="true">×</span></button>
                             </div>
                             <div className="modal-body">

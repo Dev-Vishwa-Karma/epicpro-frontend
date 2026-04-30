@@ -65,7 +65,11 @@ const ConnectCardsView = ({ connectData = [], onRecordClick, currentTab, handleE
                                     />
                                 </div>
                             )}
+
                         </div>
+                        <span style={{ fontSize: '10px' }}>
+                            Created:- {connect.created_at}
+                        </span>
 
                     </div>
                 ))

@@ -45,7 +45,7 @@ class App extends Component {
 		const channel = pusher.subscribe(process.env.REACT_APP_PUSHER_CHANNEL);
 
 		const events = [
-				`new_notification${id}`,
+				`new_connect${id}`,
 				`update_status${id}`
 			];
 

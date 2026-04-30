@@ -13,7 +13,7 @@ import InputField from '../../common/formInputs/InputField';
 import ViewConnectModel from './elements/ViewConnectModel'
 import ConnectSetting from './elements/ConnectSetting';
 import ConnectCardsView from './elements/ConnectCardView';
-
+import dayjs from 'dayjs';
 
 class Connect extends Component {
     constructor(props) {
@@ -21,7 +21,7 @@ class Connect extends Component {
         this.state = {
             connectData: [],
             employeeData: [],
-            filterFromDate: getToday(),
+            filterFromDate: dayjs().subtract(30, 'day').format('YYYY-MM-DD'),
             filterToDate: getToday(),
             filterEmployeeId: "",
             loading: true,
@@ -59,7 +59,7 @@ class Connect extends Component {
     }
 
     componentDidMount() {
-        this.getNotifications()
+        this.getConnects()
         this.getEmployees()
         this.getUserDefaultSetting();
         const hash = window.location.hash;
@@ -67,7 +67,7 @@ class Connect extends Component {
         this.connectDetail(map[hash] || 'receive');
     }
 
-    getNotifications = () => {
+    getConnects = () => {
         const { filterFromDate, filterToDate, connectData, connectFilter, currentTab, search } = this.state;
         const filter = currentTab === 'sent' || currentTab === 'draft' ? currentTab : connectFilter;
         let requestData = {
@@ -165,7 +165,7 @@ class Connect extends Component {
         });
     }
 
-    onCloseNotificationModal = () => {
+    onCloseConnectModal = () => {
         this.setState({
             showModal: false,
             selectedConnect: {
@@ -182,7 +182,7 @@ class Connect extends Component {
         })
     }
 
-    validateNotificationForm = (title, body, attach, type, priority, selectedEmployee) => {
+    validateConnectForm = (title, body, attach, type, priority, selectedEmployee) => {
 
         let errors = {};
         let isValid = true;
@@ -196,7 +196,7 @@ class Connect extends Component {
             isValid = false;
         }
         if (!type.trim()) {
-            errors.type = "Notification Type is required.";
+            errors.type = "Connect Type is required.";
             isValid = false;
         }
         if (!priority.trim()) {
@@ -217,7 +217,7 @@ class Connect extends Component {
             const errors = {
                 title: "Title is required.",
                 body: "Body is required.",
-                type: " Notification Type is required",
+                type: " Connect Type is required",
                 priority: "Priority is required",
                 selectedEmployee: "SelectedEmployee is required."
             };
@@ -226,7 +226,7 @@ class Connect extends Component {
         }
 
         const { title, body, attach, type, priority, selectedEmployee } = selectedConnect;
-        const { isValid, errors } = this.validateNotificationForm(title, body, attach, type, priority, selectedEmployee);
+        const { isValid, errors } = this.validateConnectForm(title, body, attach, type, priority, selectedEmployee);
         if (!isValid) {
             this.setState({ errors });
             return;
@@ -247,24 +247,24 @@ class Connect extends Component {
             }
         });
 
-        // API call to add Notification
+        // API call to add Connects
         getService.addCall('connect.php', 'add', formData
         )
             .then((data) => {
                 if (data.success) {
-                    // Update the Notification list
-                    const newNotification = data.newNotification;
+                    // Update the Connects list
+                    const newConnects = data.newConnects;
                     this.setState((prevState) => {
 
                         let updatedData = prevState.connectData || [];
 
                         if(currentTab === 'draft' && event === 'sent'){
                             updatedData = updatedData.filter(
-                                item => item.id !== newNotification.id
+                                item => item.id !== newConnects.id
                             );
                         }else if (currentTab === 'sent' && event === 'sent' || currentTab === 'draft' && event === 'draft') {
                             updatedData = [
-                                newNotification,
+                                newConnects,
                                 ...updatedData
                             ];
                         }
@@ -280,16 +280,16 @@ class Connect extends Component {
                                 status:[],
                                 selectedEmployee: []
                             },
-                            successMessage: "Notification added successfully!",
+                            successMessage: "Connects added successfully!",
                             showSuccess: true,
                             ButtonLoading: false,
                         };
                     });
-                    this.onCloseNotificationModal();
+                    this.onCloseConnectModal();
                     setTimeout(this.dismissMessages, 3000);
                 } else {
                     this.setState({
-                        errorMessage: "Failed to add Notification. Please try again.",
+                        errorMessage: "Failed to add Connect. Please try again.",
                         showError: true,
                         ButtonLoading: false
                     });
@@ -300,7 +300,7 @@ class Connect extends Component {
             .catch((error) => {
                 console.error("Error:", error);
                 this.setState({
-                    errorMessage: "An error occurred while adding the Notification.",
+                    errorMessage: "An error occurred while adding the Connect.",
                     showError: true,
                     ButtonLoading: false
                 });
@@ -308,7 +308,7 @@ class Connect extends Component {
             });
     };
 
-    handleEditconnect = (notification) => {
+    handleEditconnect = (connect) => {
         const safeParse = (data, mapFn) => {
             try {
                 return data ? JSON.parse(data).map(mapFn) : [];
@@ -316,19 +316,19 @@ class Connect extends Component {
                 return [];
             }
         };
-        const attachments = safeParse(notification.filePath, p => p.split('/').pop());
-        const employees = safeParse(notification.receiver, r => r.employee_id);
+        const attachments = safeParse(connect.filePath, p => p.split('/').pop());
+        const employees = safeParse(connect.receiver, r => r.employee_id);
 
         this.setState({
             showModal: true,
             selectedConnect: {
-                id: notification.id,
-                title: notification.title || "",
-                body: notification.body ||  "",
-                type: notification.type || "",
+                id: connect.id,
+                title: connect.title || "",
+                body: connect.body ||  "",
+                type: connect.type || "",
                 attach: attachments,
-                priority: notification.priority || "",
-                status: notification.status || "",
+                priority: connect.priority || "",
+                status: connect.status || "",
                 selectedEmployee: employees
             },
             errors: {}
@@ -367,10 +367,10 @@ class Connect extends Component {
         this.setState({ selectedConnect: { ...this.state.selectedConnect, selectedEmployee: event.target.value } });
     };
 
-    openRemoveModal = (notification) => {
+    openRemoveModal = (connect) => {
         this.setState({
-            selectedConnect: notification,
-            connectsToHide: notification.id
+            selectedConnect: connect,
+            connectsToHide: connect.id
         });
     };
 
@@ -401,7 +401,7 @@ class Connect extends Component {
                 this.setState((prevState) => ({
                     connectData: updatedRecord,
                     currentPage: newPage,
-                    successMessage: "Notification hide successfully",
+                    successMessage: "Connect hide successfully",
                     showSuccess: true,
                     errorMessage: '',
                     showError: false,
@@ -412,7 +412,7 @@ class Connect extends Component {
                 setTimeout(this.dismissMessages, 3000);
             } else {
                 this.setState({
-                    errorMessage: "Failed to delete notification",
+                    errorMessage: "Failed to delete connect",
                     showError: true,
                     successMessage: '',
                     showSuccess: false,
@@ -446,10 +446,10 @@ class Connect extends Component {
     };
 
     handleDateApplyFilter = async () => {
-        this.getNotifications();
+        this.getConnects();
     };
 
-    onOpenViewNotificationModel = (selected) => {
+    onOpenViewConnectModel = (selected) => {
         const { employeeData } = this.state;
         let empId= 0;
         if(selected.employee_id){
@@ -483,7 +483,7 @@ class Connect extends Component {
             errors: {},
             ButtonLoading: false
         })
-        this.getNotifications();
+        this.getConnects();
     }
 
     handleStatusChange = (e) => {
@@ -510,11 +510,11 @@ class Connect extends Component {
                 }));
 
             } else {
-                console.error("Error marking notification as read");
+                console.error("Error marking connect as read");
             }
         })
             .catch((err) => {
-                console.error("Error marking notification as read", err);
+                console.error("Error marking connect as read", err);
             });
     };
 
@@ -525,12 +525,12 @@ class Connect extends Component {
                 connectFilter: event,
                 connectData: [],
                 currentPage: 1,
-                filterFromDate: getToday(),
+                filterFromDate: dayjs().subtract(30, 'day').format('YYYY-MM-DD'),
                 filterToDate: getToday(),
                 currentTab: tab
             },
             () => {
-                this.getNotifications();
+                this.getConnects();
             });
     }
 
@@ -546,7 +546,7 @@ class Connect extends Component {
 
         if (!this.state.defaultSelectedEmployee || this.state.defaultSelectedEmployee.length === 0) {
             const errors = {
-                defaultSelectedEmployee: "At least one Employee is required."
+                defaultSelectedEmployee: "At least one user is required."
             };
             this.setState({ errors });
             return;
@@ -627,7 +627,7 @@ class Connect extends Component {
                     status: filter === 'status' ? value : ''
                 }
             }), () => {
-                this.getNotifications();
+                this.getConnects();
         });
 
     }
@@ -636,12 +636,12 @@ class Connect extends Component {
         const { fixNavbar } = this.props;
         const { connectData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedConnect, showModal, employeeData, currentPage, dataPerPage, currentTab, connectFilter, viewConnectModal, connectSettingModal, defaultConnectEmployee, viewFilter, defaultSelectedEmployee } = this.state;
 
-        const indexOfLastNotification = currentPage * dataPerPage;
-        const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
+        const indexOfLastConnect = currentPage * dataPerPage;
+        const indexOfFirstConnect = indexOfLastConnect - dataPerPage;
 
         const currentConnect = connectData.slice(
-            indexOfFirstNotification,
-            indexOfLastNotification
+            indexOfFirstConnect,
+            indexOfLastConnect
         );
         const totalPages = Math.ceil(connectData.length / dataPerPage);
 
@@ -705,16 +705,6 @@ class Connect extends Component {
                                         col={col}
                                     />
                                     <div className={`col-md-${col}`}>
-                                        {/* <Button
-                                            label="Connect"
-                                            onClick={() => this.handleAddClick()}
-                                            className="btn-primary"
-                                            style={{ float: "right", marginTop: 26 }}
-                                            icon="fe fe-plus"
-                                            iconStyle={{ marginRight: '8px' }}
-                                        // dataToggle="modal"
-                                        // dataTarget="#addBreakModal"
-                                        /> */}
                                     </div>
                                 </div>
                             </div>
@@ -724,11 +714,11 @@ class Connect extends Component {
                 <div className="section-body mt-3">
                     <div className="container-fluid">
                         <div className="tab-content mt-3">
-                            <div className="tab-pane fade show active" id="Notifications-list" role="tabpanel">
+                            <div className="tab-pane fade show active" id="connect" role="tabpanel">
                                 <div className="card">
                                     <div className="">
                                         <div className="d-flex justify-content-between align-items-center p-20">
-                                            <h3 className="card-title">Notification List</h3>
+                                            <h3 className="card-title">Connects</h3>
 
                                             {currentTab === 'receive' &&(<div className="d-flex justify-content-between align-items-center">
                                                 <select
@@ -773,7 +763,7 @@ class Connect extends Component {
                                                             connectData={currentConnect}
                                                             message={message}
                                                             currentTab={currentTab}
-                                                            onRecordClick={this.onOpenViewNotificationModel}
+                                                            onRecordClick={this.onOpenViewConnectModel}
                                                             onRemoveClick={this.openRemoveModal}
                                                             userRole={window.user.role}
                                                             handleEditconnect={this.handleEditconnect}
@@ -785,7 +775,7 @@ class Connect extends Component {
                                                             message={message}
                                                             currentTab={currentTab}
                                                             connectFilter={connectFilter}
-                                                            onRecordClick={this.onOpenViewNotificationModel}
+                                                            onRecordClick={this.onOpenViewConnectModel}
                                                             onRemoveClick={this.openRemoveModal}
                                                             userRole={window.user.role}
                                                             handleEditconnect={this.handleEditconnect}
@@ -813,7 +803,7 @@ class Connect extends Component {
 
                 <AddConnectModal
                     show={showModal}
-                    onClose={this.onCloseNotificationModal}
+                    onClose={this.onCloseConnectModal}
                     onSubmit={this.handleSubmit}
                     onChange={this.handleInputChange}
                     formData={selectedConnect}
