@@ -7,20 +7,81 @@ import authService from "./components/Authentication/authService";
 import ForgotPassword from './components/Authentication/ForgotPassword';
 import ResetPassword from './components/Authentication/ResetPassword';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import Pusher from 'pusher-js';
+import logo from "./logo.svg";
 
 class App extends Component {
+	pusher = null;
+    channel = null;
 	constructor(props) {
         super(props);
         this.state = {
-            user: authService.getUser(), // Load user from authService
+            user: authService.getUser(),
         };
     }
 
 	componentDidMount() {
-        // Listen for login/logout updates
         authService.subscribe((user) => {
             this.setState({ user });
         });
+		if (this.state.user) {
+			this.handlePusher();
+		}
+    }
+
+	handlePusher = ()=>{
+
+		// Request notification permission
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
+		const {id, first_name} = window.user
+        // Initialize Pusher
+        Pusher.logToConsole = true;
+		const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
+			cluster: process.env.REACT_APP_PUSHER_CLUSTER,
+		});
+		const channel = pusher.subscribe(process.env.REACT_APP_PUSHER_CHANNEL);
+
+		const events = [
+				`new_connect${id}`,
+				`update_status${id}`
+			];
+
+			events.forEach(eventName => {
+				channel.bind(eventName, (data) => {
+					showNotification(data, first_name);
+			});
+		});
+
+		const showNotification = (data, first_name) => {
+			if (Notification.permission === "granted") {
+				const notification = new Notification(`Hi ${first_name}`, {
+					body: `${data.title} | ${data.message}`,
+					icon: logo,
+					requireInteraction: true,
+				});
+				notification.onclick = function () {
+					window.open(process.env.REACT_APP_NOTIFICATION_REDIRECT_URL, "_blank");
+				};
+			}
+		};
+
+        // Cleanup on unmount
+        this.pusher = pusher;
+        this.channel = channel;
+
+	}
+
+	componentWillUnmount() {
+        if (this.channel) {
+            this.channel.unbind_all();
+            this.channel.unsubscribe();
+        }
+        if (this.pusher) {
+            this.pusher.disconnect();
+        }
     }
 
 	handleLogin = (userData) => {

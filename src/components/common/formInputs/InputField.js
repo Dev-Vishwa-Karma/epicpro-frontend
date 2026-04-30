@@ -1,4 +1,6 @@
 import React from 'react';
+import Select from "react-select";
+
 
 const InputField = ({
   label,
@@ -47,7 +49,50 @@ const InputField = ({
           disabled={disabled}
           style={style}
         />
-      ) : type === 'select' ? (
+      ) : 
+
+     type === "select" && multiple ? (
+          <div className={wrapperClass}>
+                {label && <label className="form-label"></label>}
+
+                <Select
+              isMulti
+              options={options}
+
+              value={
+                options.filter(opt =>
+                  Array.isArray(value) && value.includes(opt.value)
+                )
+              }
+
+              onChange={(selected) => {
+                onChange({
+                  target: {
+                    name,
+                    value: selected ? selected.map(s => s.value) : []
+                  }
+                });
+              }}
+
+              placeholder={`Select ${label}`}
+              closeMenuOnSelect={false}
+              hideSelectedOptions={false}
+              classNamePrefix="react-select"
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: base => ({ ...base, zIndex: 999999 }),
+                control: base => ({
+                  ...base,
+                  minHeight: "38px",
+                  borderColor: error ? "red" : base.borderColor
+                })
+              }}
+            />
+
+        </div>
+      ) :
+
+      type === 'select' && !multiple  ? (
         <select
           id={name}
           name={name}

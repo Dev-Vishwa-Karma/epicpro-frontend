@@ -41,7 +41,7 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                         <td>
                                             <div className="font-15"></div>
                                             <h6
-                                                className="mb-0"
+                                                className="mb-0 text-truncate"
                                                 onClick={() => goToViewTicket(ticket, ticket.ticket_id)}
                                                 style={{ cursor: 'pointer', color: '#007bff' }}
                                             >

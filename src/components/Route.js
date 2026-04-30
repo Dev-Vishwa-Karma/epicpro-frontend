@@ -27,6 +27,7 @@ import EditTicket from './HRMS/Tickets/EditTicket';
 import ViewTicket from './HRMS/Tickets/ViewTicket';
 import ForgotPassword from './Authentication/ForgotPassword';
 import ResetPassword from './Authentication/ResetPassword';
+import Connect from './HRMS/Connect/Connect';
 
 const Routes = [
     {
@@ -54,6 +55,14 @@ const Routes = [
         adminAccess: true,
         component: Departments,
         roles: ['admin', 'super_admin']
+    },
+    {
+        path: "/connect",
+        name: 'Connect',
+        exact: true,
+        pageTitle: "Connect",
+        roles: ['admin', 'super_admin'],
+        component: Connect
     },
     {
         path: "/hr-employee",

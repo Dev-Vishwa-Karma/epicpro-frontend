@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from './formInputs/Button';
 
-const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId }) => {
+const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId, label = "Delete" }) => {
     if (!show) return null;
   
     return (
@@ -43,7 +43,7 @@ const DeleteModal = ({ show, onConfirm, isLoading, onClose, deleteBody, modalId 
                         />
 
                         <Button
-                        label="Delete"
+                        label={label}
                         onClick={onConfirm}
                         className="btn-danger"
                         disabled={isLoading}
