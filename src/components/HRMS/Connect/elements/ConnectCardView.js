@@ -28,29 +28,23 @@ const ConnectCardsView = ({ connectData = [], onRecordClick, currentTab, handleE
                             {connect.body || "No description"}
                         </div>
 
-                        {(currentTab === 'receive') && (
-                            <div className="custom-card-description">
-                                <div>
-                                    {JSON.parse(connect.sender).name || "No sender information"}
-                                </div>
-                                <div>
-                                    <Status status={connect.read} />
-                                </div>
-                            </div>
-                        )}
-
-                        {(currentTab !== 'receive') && (
-                            <div className="custom-card-description">
-                                <Receivers receivers={connect.receiver} currentTab={currentTab}/>
-                            </div>
-                        )}
-
-
                         <div className="custom-card-footer">
                             <div className="footer-left">
                                 <Type type={connect.type} />
                                 <Priority priority={connect.priority} />
                             </div>
+
+                            {(currentTab === 'receive') && (
+                                <div className="custom-card-description">
+                                    <Status connect={connect} />
+                                </div>
+                            )}
+
+                            {(currentTab !== 'receive' && currentTab !== 'draft') && (
+                                <div className="custom-card-description">
+                                    <Receivers receivers={connect.receiver} currentTab={currentTab}/>
+                                </div>
+                            )}
 
                             {currentTab === "draft" && (
                                 <div>
