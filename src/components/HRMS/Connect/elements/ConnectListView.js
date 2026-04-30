@@ -6,7 +6,7 @@ import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 
 
-const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, filterNotification, currentTab, handleEditconnect }) => {
+const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, currentTab, handleEditconnect }) => {
     const onViewReceivers = (connect) => {
     try {
         return typeof connect.receiver === "string"
@@ -41,7 +41,6 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                             <tr key={index}>
                                 <td>{index + 1}</td>
                                 <td>
-                                    {/* {connect.title} */}
                                     <span
                                         className='custom-card-meta'
                                         style={currentTab !== 'draft' ? { cursor: "pointer", color: "#007bff" } : {}}

@@ -50,7 +50,7 @@ class Connect extends Component {
                 status: "",
                 selectedEmployee: []
             },
-            filterNotification: 'all',
+            connectFilter: 'all',
             col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
             currentPage: 1,
             dataPerPage: 10,
@@ -68,8 +68,8 @@ class Connect extends Component {
     }
 
     getNotifications = () => {
-        const { filterFromDate, filterToDate, connectData, filterNotification, currentTab, search } = this.state;
-        const filter = currentTab === 'sent' || currentTab === 'draft' ? currentTab : filterNotification;
+        const { filterFromDate, filterToDate, connectData, connectFilter, currentTab, search } = this.state;
+        const filter = currentTab === 'sent' || currentTab === 'draft' ? currentTab : connectFilter;
         let requestData = {
             action: 'get_connects',
             filter: filter,
@@ -522,7 +522,7 @@ class Connect extends Component {
         const event = tab === 'sent' ? 'sent' : tab === 'draft' ? 'draft' : 'all';
         this.setState(
             {
-                filterNotification: event,
+                connectFilter: event,
                 connectData: [],
                 currentPage: 1,
                 filterFromDate: getToday(),
@@ -535,7 +535,7 @@ class Connect extends Component {
     }
 
     handlePageChange = (newPage) => {
-        const { dataPerPage, currentTab, connectData, filterNotification } = this.state;
+        const { dataPerPage, currentTab, connectData, connectFilter } = this.state;
         const totalPages = Math.ceil(connectData.length / dataPerPage);
         if (newPage >= 1 && newPage <= totalPages) {
             this.setState({ currentPage: newPage });
@@ -625,7 +625,7 @@ class Connect extends Component {
 
     render() {
         const { fixNavbar } = this.props;
-        const { connectData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedConnect, showModal, employeeData, currentPage, dataPerPage, currentTab, filterNotification, viewConnectModal, connectSettingModal, defaultConnectEmployee, viewFilter, defaultSelectedEmployee } = this.state;
+        const { connectData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedConnect, showModal, employeeData, currentPage, dataPerPage, currentTab, connectFilter, viewConnectModal, connectSettingModal, defaultConnectEmployee, viewFilter, defaultSelectedEmployee } = this.state;
 
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
@@ -764,7 +764,6 @@ class Connect extends Component {
                                                             connectData={currentConnect}
                                                             message={message}
                                                             currentTab={currentTab}
-                                                            filterNotification={filterNotification}
                                                             onRecordClick={this.onOpenViewNotificationModel}
                                                             onRemoveClick={this.openRemoveModal}
                                                             userRole={window.user.role}
@@ -776,7 +775,7 @@ class Connect extends Component {
                                                             connectData={currentConnect}
                                                             message={message}
                                                             currentTab={currentTab}
-                                                            filterNotification={filterNotification}
+                                                            connectFilter={connectFilter}
                                                             onRecordClick={this.onOpenViewNotificationModel}
                                                             onRemoveClick={this.openRemoveModal}
                                                             userRole={window.user.role}
@@ -820,8 +819,8 @@ class Connect extends Component {
                     show={!!this.state.connectsToHide}
                     onConfirm={this.confirmRemove}
                     isLoading={this.state.ButtonLoading}
-                    deleteBody='Are you sure you want to hide the Notification?'
-                    modalId="deleteNotificationModal"
+                    deleteBody='Are you sure you want to hide the Connnect?'
+                    modalId="deleteConnectModal"
                     onClose={this.onCloseRemoveModal}
                     label='Hide'
                 />
