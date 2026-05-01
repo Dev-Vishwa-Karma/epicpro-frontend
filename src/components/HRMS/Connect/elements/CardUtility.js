@@ -33,6 +33,15 @@ const getStatusConfig = (status) => {
   };
 };
 
+const TooltipWrapper = ({ children, text }) => {
+  return (
+    <div className="tag-wrapper">
+      {children}
+      <div className="tooltip-box">{text}</div>
+    </div>
+  );
+};
+
 
 export const Priority = ({ priority }) => {
   const map = {
@@ -53,11 +62,11 @@ export const Priority = ({ priority }) => {
   const config = map[priority] || map.low;
 
   return (
-     <span className={`tag mx-1 small 
-            ${config.tag}`}
-    >
-        {config.label || priority}
-    </span>
+    <TooltipWrapper text={`Priority: ${config.label}`}>
+      <span className={`tag mx-1 small ${config.tag}`}>
+        {config.label}
+      </span>
+    </TooltipWrapper>
   );
 };
 
@@ -80,11 +89,11 @@ export const Type = ({ type }) => {
   const config = map[type] || map.low;
 
   return (
-     <span className={`tag mx-1 small 
-            ${config.tag}`}
-    >
-        {config.label || type}
-    </span>
+    <TooltipWrapper text={`Type: ${config.label}`}>
+      <span className={`tag mx-1 small ${config.tag}`}>
+        {config.label}
+      </span>
+    </TooltipWrapper>
   );
 };
 

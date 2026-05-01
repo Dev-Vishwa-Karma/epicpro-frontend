@@ -13,6 +13,7 @@ import InputField from '../../common/formInputs/InputField';
 import ViewConnectModel from './elements/ViewConnectModel'
 import ConnectSetting from './elements/ConnectSetting';
 import ConnectCardsView from './elements/ConnectCardView';
+import Select from "react-select";
 import dayjs from 'dayjs';
 
 class Connect extends Component {
@@ -35,7 +36,10 @@ class Connect extends Component {
             viewConnectModal: false,
             connectSettingModal: false,
             viewFilter: 'list',
-            search: '',
+            search: {
+                status: ['read', 'unread', 'ready_to_discuss'],
+                type: null
+            },
             defaultConnectEmployee: {
                 kye: "",
                 value: [],
@@ -110,10 +114,10 @@ class Connect extends Component {
             .then(data => {
                 if (data.status === 'success') {
                     const setting = data.data;
-                    const selectedEmployee = JSON.parse(setting.value).map(Number) || [];
+                    const selectedEmployee = setting ? (JSON.parse(setting.value || '[]')).map(Number) : [];
                     this.setState({
                         defaultConnectEmployee: {
-                            key: setting.key,
+                            key: setting?.key || '',
                             value: selectedEmployee
                         },
                         defaultSelectedEmployee:selectedEmployee,
@@ -613,24 +617,19 @@ class Connect extends Component {
         });
     };
 
-    handleViewFilterChange = (e) => {
-        const event = e.target.value;
-        this.setState({ viewFilter: event });
+    handleViewFilterChange = (event) => {
+        this.setState({ viewFilter: event?.value });
     }
 
-    handleRecordFilterChange = (e,filter) => {
-        const value = e.target.value;
-         this.setState((prevState) => ({
-                search: {
-                    // [filter]: value
-                    type: filter === 'type' ? value : '',
-                    status: filter === 'status' ? value : ''
-                }
-            }), () => {
-                this.getConnects();
-        });
-
-    }
+    handleRecordFilterChange = (selected, filter) => {
+        this.setState(prev => ({
+            search: {
+            ...prev.search,
+            type: filter === "type" ? (selected ? selected.value : "") : null,
+            status: filter === "status" ? (selected ? selected.map(i => i.value) : []) : []
+            }
+        }), this.getConnects);
+    };
 
     render() {
         const { fixNavbar } = this.props;
@@ -644,6 +643,22 @@ class Connect extends Component {
             indexOfLastConnect
         );
         const totalPages = Math.ceil(connectData.length / dataPerPage);
+        const optionsStatus = [
+            { value: "unread", label: "Unread" },
+            { value: "read", label: "Read" },
+            { value: "ready_to_discuss", label: "Ready To Discussion" },
+            { value: "completed", label: "Completed" },
+        ];
+        const optionsType = [
+            { value: "", label: "Filter Type" },
+            { value: "todo", label: "Todo" },
+            { value: "need_discussion", label: "Need Discussion" },
+            { value: "information", label: "Information" },
+        ];
+        const viewType = [
+            { value: "list", label: "ListView" },
+            { value: "card", label: "CardView" },
+        ];
 
         return (
             <>
@@ -673,23 +688,24 @@ class Connect extends Component {
                                     />
                                 </div>
                                 <div>
-                                    <select
+                                    <Select
                                         id="employeeFilter"
-                                        className="form-control custom-select"
-                                        value={viewFilter}
-                                        onChange={this.handleViewFilterChange}
-                                    >
-                                        <option value="list">List View</option>
-                                        <option value="card">Card View</option>
-                                    </select>
+                                        className="form-control custom-select ml-2"
+                                        options={viewType}
+                                        value={viewType.find(opt => opt.value === this.state.viewFilter)}
+                                        placeholder="Filter View"
+                                        onChange={(selected) =>
+                                            this.handleViewFilterChange(selected)
+                                        }
+                                    />
                                 </div>
 
                                 <div
                                     onClick={() => this.setState({ connectSettingModal: true })}
-                                    style={{ cursor: 'pointer', marginLeft:'4px' }}
+                                    style={{ cursor: 'pointer', marginLeft:'10px' }}
                                     title="Default Users Setting"
                                 >
-                                    <i className="fa fa-gear"></i>
+                                    <i className="fa fa-gear" style={{ fontSize: "22px" }}></i>
                                 </div>
                             </div>
                         </div>
@@ -721,29 +737,33 @@ class Connect extends Component {
                                             <h3 className="card-title">Connects</h3>
 
                                             {currentTab === 'receive' &&(<div className="d-flex justify-content-between align-items-center">
-                                                <select
+                                                <Select
                                                     id="employeeFilter"
                                                     className="form-control custom-select ml-2"
-                                                    value={this.state.search.type ?? ''}
-                                                    onChange={(event) => this.handleRecordFilterChange(event,'type')}
-                                                >
-                                                    <option value="">Filter Type</option>
-                                                    <option value="todo">Todo</option>
-                                                    <option value="need_discussion">Need Discussion</option>
-                                                    <option value="information">Information</option>
-                                                </select>
-                                                <select
+                                                    options={optionsType}
+                                                    value={
+                                                    this.state.search.type
+                                                        ? optionsType.find(opt => opt.value === this.state.search.type)
+                                                        : null
+                                                    }
+                                                    placeholder="Filter Type"
+                                                    onChange={(selected) =>
+                                                        this.handleRecordFilterChange(selected, "type")
+                                                    }
+                                                />
+                                                <Select
+                                                    isMulti
                                                     id="employeeFilter"
                                                     className="form-control custom-select ml-2"
-                                                    value={this.state.search.status ?? ''}
-                                                    onChange={(event) => this.handleRecordFilterChange(event,'status')}
-                                                >
-                                                    <option value="">Filter Status</option>
-                                                    <option value="unread">Unread</option>
-                                                    <option value="read">Read</option>
-                                                    <option value="ready_to_discuss">Ready To Discussion</option>
-                                                    <option value="completed">Completed</option>
-                                                </select>
+                                                    options={optionsStatus}
+                                                    value={optionsStatus.filter(opt =>
+                                                        (this.state.search.status || []).includes(opt.value)
+                                                    )}
+                                                    placeholder="Filter Status"
+                                                    onChange={(selected) =>
+                                                        this.handleRecordFilterChange(selected, "status")
+                                                    }
+                                                />
                                             </div>)}
                                         </div>
                                     </div>
