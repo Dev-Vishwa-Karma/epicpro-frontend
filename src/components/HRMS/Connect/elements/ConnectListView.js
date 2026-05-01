@@ -56,7 +56,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                     </span>
                                     <div className="text-muted d-flex align-items-center gap-2">
                                             <div className="tag-wrapper">
-                                                Priority:
+                                                {/* Priority: */}
                                                 <span
                                                     className={`tag mx-1 small ${
                                                         connect.priority === "high"
@@ -122,7 +122,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                                     style={{ cursor: "pointer" }}
                                                 />
                                             }
-                                            position="right center"
+                                            position="bottom center"
                                             on="hover"
                                             mouseEnterDelay={0}
                                             mouseLeaveDelay={200}
