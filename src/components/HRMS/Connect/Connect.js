@@ -110,10 +110,10 @@ class Connect extends Component {
             .then(data => {
                 if (data.status === 'success') {
                     const setting = data.data;
-                    const selectedEmployee = JSON.parse(setting.value).map(Number) || [];
+                    const selectedEmployee = setting ? (JSON.parse(setting.value || '[]')).map(Number) : [];
                     this.setState({
                         defaultConnectEmployee: {
-                            key: setting.key,
+                            key: setting?.key || '',
                             value: selectedEmployee
                         },
                         defaultSelectedEmployee:selectedEmployee,
@@ -686,10 +686,10 @@ class Connect extends Component {
 
                                 <div
                                     onClick={() => this.setState({ connectSettingModal: true })}
-                                    style={{ cursor: 'pointer', marginLeft:'4px' }}
+                                    style={{ cursor: 'pointer', marginLeft:'10px' }}
                                     title="Default Users Setting"
                                 >
-                                    <i className="fa fa-gear"></i>
+                                    <i className="fa fa-gear" style={{ fontSize: "22px" }}></i>
                                 </div>
                             </div>
                         </div>

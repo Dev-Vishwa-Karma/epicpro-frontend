@@ -254,7 +254,7 @@ const ViewConnectModel = ({
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {files.length > 0 ? (
+                                                    {Array.isArray(files) && files.length > 0 ? (
                                                         files.map((file, index) => {
                                                             const ext = getExt(file);
                                                             const isImg = isImage(ext);

@@ -133,13 +133,10 @@ const AddConnectModal = ({
                 <Button
                   label="Send"
                   onClick={() => {
-                    setActionLoading('sent');
                     onSubmit('sent');
-                    setTimeout(() => {
-                      setActionLoading(null);
-                    }, 15000);
+                    setActionLoading('sent');
                   }}
-                  loading={actionLoading === 'sent'}
+                  loading={actionLoading === 'sent' ? loading : false}
                   className="btn-primary ml-1"
                 />
 
@@ -147,13 +144,10 @@ const AddConnectModal = ({
                   <Button
                     label="Draft"
                     onClick={() => {
-                      setActionLoading('draft');
                       onSubmit('draft');
-                      setTimeout(() => {
-                        setActionLoading(null);
-                      }, 1000);
+                        setActionLoading('draft');
                     }}
-                    loading={actionLoading === 'draft'}
+                    loading={actionLoading === 'draft'? loading : false}
                     className="btn-warning mr-2"
                   />
                 )}
