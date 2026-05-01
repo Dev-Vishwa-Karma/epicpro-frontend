@@ -44,13 +44,19 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                     <span
                                         className='custom-card-meta'
                                         style={currentTab !== 'draft' ? { cursor: "pointer", color: "#007bff" } : {}}
-                                        onClick={() => { onRecordClick(connect); }}
+                                        onClick={() => { 
+                                                if (currentTab !== 'draft') {
+                                                    onRecordClick(connect);
+                                                }
+                                            }
+                                        }
                                     >
                                         {connect.title}
 
                                     </span>
                                     <div className="text-muted d-flex align-items-center gap-2">
                                             <div className="tag-wrapper">
+                                                Priority:
                                                 <span
                                                     className={`tag mx-1 small ${
                                                         connect.priority === "high"
@@ -116,7 +122,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                                     style={{ cursor: "pointer" }}
                                                 />
                                             }
-                                            position="bottom center"
+                                            position="right center"
                                             on="hover"
                                             mouseEnterDelay={0}
                                             mouseLeaveDelay={200}
@@ -129,15 +135,9 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                                 WebkitBackdropFilter: "blur(6px)",  
                                                 padding: "10px",
                                                 borderRadius: "6px",
-                                                width: "auto",
-                                                maxWidth: "90vw",
-                                                wordBreak: "break-word",
-                                                overflowWrap: "anywhere",
-                                                whiteSpace: "normal",  
-                                                minWidth: "180px",
+                                                width: "220px",
                                                 maxHeight: "200px",
                                                 overflowY: "auto",
-                                                overflowX: "hidden",
                                                 boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
                                                 border: "1px solid rgba(255,255,255,0.1)"
                                             }}
