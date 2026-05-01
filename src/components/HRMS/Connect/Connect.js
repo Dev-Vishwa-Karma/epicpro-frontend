@@ -803,6 +803,7 @@ class Connect extends Component {
                                                             onRemoveClick={this.openRemoveModal}
                                                             userRole={window.user.role}
                                                             handleEditconnect={this.handleEditconnect}
+                                                            onSubmit={this.handleSubmit}
                                                         />
                                                     )
                                                 }

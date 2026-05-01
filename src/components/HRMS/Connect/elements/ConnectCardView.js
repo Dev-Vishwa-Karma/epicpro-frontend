@@ -60,14 +60,14 @@ const ConnectCardsView = ({ connectData = [], onRecordClick, currentTab, handleE
                                         }}
                                         className="btn-primary ml-1"
                                     />
-                                    <Button
+                                    {/* <Button
                                         label="Send"
                                         onClick={() => {
                                             onSubmit('sent');
                                         }}
                                         loading={loading}
                                         className="btn-primary ml-1"
-                                    />
+                                    /> */}
                                 </div>
                             )}
 
