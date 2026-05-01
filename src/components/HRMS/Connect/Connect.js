@@ -531,7 +531,11 @@ class Connect extends Component {
                 currentPage: 1,
                 filterFromDate: dayjs().subtract(30, 'day').format('YYYY-MM-DD'),
                 filterToDate: getToday(),
-                currentTab: tab
+                currentTab: tab,
+                search: event === 'all' ? {
+                    status: ['read', 'unread', 'ready_to_discuss'],
+                    type: null
+                } : null
             },
             () => {
                 this.getConnects();
