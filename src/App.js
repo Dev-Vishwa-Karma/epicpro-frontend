@@ -36,9 +36,14 @@ class App extends Component {
             Notification.requestPermission();
         }
 
-		const {id, first_name} = window.user
+		const {id, first_name, role} = window.user
         // Initialize Pusher
         Pusher.logToConsole = true;
+		const url =
+		role !== "employee"
+			? process.env.REACT_APP_CONNECT_REDIRECT_URL
+			: process.env.REACT_APP_NOTIFICATION_REDIRECT_URL;
+			console.log('url=>',url)
 		const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
 			cluster: process.env.REACT_APP_PUSHER_CLUSTER,
 		});
@@ -63,7 +68,7 @@ class App extends Component {
 					requireInteraction: true,
 				});
 				notification.onclick = function () {
-					window.open(process.env.REACT_APP_NOTIFICATION_REDIRECT_URL, "_blank");
+					window.open(url, "_blank");
 				};
 			}
 		};
