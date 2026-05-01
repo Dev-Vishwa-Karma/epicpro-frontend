@@ -43,7 +43,6 @@ class App extends Component {
 		role !== "employee"
 			? process.env.REACT_APP_CONNECT_REDIRECT_URL
 			: process.env.REACT_APP_NOTIFICATION_REDIRECT_URL;
-			console.log('url=>',url)
 		const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
 			cluster: process.env.REACT_APP_PUSHER_CLUSTER,
 		});
