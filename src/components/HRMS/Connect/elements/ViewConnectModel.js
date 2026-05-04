@@ -65,8 +65,13 @@ const ViewConnectModel = ({
         const ext = getExt(file);
         const url = `${process.env.REACT_APP_API_URL}/${file}`;
         if (isImage(ext)) {
-            setShowPreview(prev => !prev);
-            setFilePath(file);
+            if (filePath === file && showPreview) {
+                setShowPreview(false);
+                setFilePath(null);
+            } else {
+                setFilePath(file);
+                setShowPreview(true);
+            }
         } else {
             window.open(`${process.env.REACT_APP_API_URL}/${file}`, "_blank");
         }
@@ -186,7 +191,7 @@ const ViewConnectModel = ({
                                                         )}
 
                                                         {currentTab === 'sent' && Array.isArray(receiver) && receiver.map((connect) => (
-                                                            <li className="list-group-item" key={connect.id}>
+                                                            <li className="list-group-item" key={connect.employee_id}>
                                                                 <small className="text-muted">Status: </small>
 
                                                                 <p
@@ -221,7 +226,7 @@ const ViewConnectModel = ({
                                                             <small className="text-muted">Sender: </small>
                                                             <p className="mb-0">
                                                                 <span className="">
-                                                                    {JSON.parse(selectedConnect.sender).name}
+                                                                    {JSON.parse(selectedConnect?.sender || '{}')?.name || ''}
                                                                 </span>
                                                             </p>
                                                         </li>
