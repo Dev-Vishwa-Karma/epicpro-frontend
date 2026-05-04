@@ -256,13 +256,15 @@ class Connect extends Component {
         )
             .then((data) => {
                 if (data.success) {
-                    getService.addCall('email.php','add',formData).then((data)=>{
-                    })
                     // Update the Connects list
                     const newConnects = data.newConnects;
                     this.setState((prevState) => {
 
                         let updatedData = prevState.connectData || [];
+
+                        if(event === 'sent'){
+                            getService.addCall('email.php','add',formData).then((data)=>{})
+                        }
 
                         if(currentTab === 'draft' && event === 'sent'){
                             updatedData = updatedData.filter(
