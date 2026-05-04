@@ -263,7 +263,11 @@ class Connect extends Component {
                         let updatedData = prevState.connectData || [];
 
                         if(event === 'sent'){
-                            getService.addCall('email.php','add',formData).then((data)=>{})
+                            const emailData = new FormData();
+                            emailData.append('title', selectedConnect.title);
+                            emailData.append('body', selectedConnect.body);
+                            emailData.append('selectedEmployee', selectedConnect.selectedEmployee);
+                            getService.addCall('email.php','add',emailData).then((data)=>{})
                         }
 
                         if(currentTab === 'draft' && event === 'sent'){
