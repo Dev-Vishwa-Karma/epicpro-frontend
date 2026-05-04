@@ -256,6 +256,8 @@ class Connect extends Component {
         )
             .then((data) => {
                 if (data.success) {
+                    getService.addCall('email.php','add',formData).then((data)=>{
+                    })
                     // Update the Connects list
                     const newConnects = data.newConnects;
                     this.setState((prevState) => {
