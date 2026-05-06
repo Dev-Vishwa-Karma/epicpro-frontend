@@ -156,7 +156,7 @@ export const Status = ({ connect }) => {
   return (
     <div className="mt-2">
       <Avatar
-        profile={connect.sender ? JSON.parse(connect.sender).profile : ''}
+        profile={connect.profile}
         size={35}
         alt={connect.sender ? JSON.parse(connect.sender).name : ''}
         className="avatar avatar-blue add-space me-2"

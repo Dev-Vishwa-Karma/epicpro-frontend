@@ -99,7 +99,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                 {currentTab === "receive" && (
                                     <td className="d-flex">
                                         <Avatar
-                                            profile={connect.sender ? JSON.parse(connect.sender).profile : ''}
+                                            profile={connect.profile}
                                             size={35}
                                             alt={connect.sender ? JSON.parse(connect.sender).name: ''}
                                             className="avatar avatar-blue add-space me-2"

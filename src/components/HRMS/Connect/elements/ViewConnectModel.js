@@ -333,8 +333,6 @@ const ViewConnectModel = ({
                                         </div>
                                         {/* </div> */}
 
-                                        {showPreview && (
-
                                         <div className="card">
                                             <div className="card-header">
                                                 <h3 className="card-title">Preview:</h3>
@@ -343,7 +341,7 @@ const ViewConnectModel = ({
                                                 height: "486px",
                                                 overflow: "auto"
                                             }}>
-                                                {filePath && isImage(getExt(filePath)) && (
+                                                {showPreview && filePath && isImage(getExt(filePath)) && (
                                                     <img
                                                         src={`${process.env.REACT_APP_API_URL}/${filePath}`}
                                                         alt="preview"
@@ -363,7 +361,6 @@ const ViewConnectModel = ({
 
                                             </div>
                                         </div>
-                                        )}
                                     </div>
                                 </div>
                             </div>
