@@ -38,7 +38,7 @@ class App extends Component {
 
 		const {id, first_name, role} = window.user
         // Initialize Pusher
-        Pusher.logToConsole = true;
+        Pusher.logToConsole = false;
 		const url =
 		role !== "employee"
 			? process.env.REACT_APP_CONNECT_REDIRECT_URL

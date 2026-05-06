@@ -15,6 +15,7 @@ import ConnectSetting from './elements/ConnectSetting';
 import ConnectCardsView from './elements/ConnectCardView';
 import Select from "react-select";
 import dayjs from 'dayjs';
+import {optionsStatus, optionsType, viewType, customStyles} from './elements/CardUtility'
 
 class Connect extends Component {
     constructor(props) {
@@ -38,7 +39,7 @@ class Connect extends Component {
             viewFilter: 'list',
             search: {
                 status: ['read', 'unread', 'ready_to_discuss'],
-                type: null
+                type: []
             },
             defaultConnectEmployee: {
                 kye: "",
@@ -542,7 +543,7 @@ class Connect extends Component {
                 currentTab: tab,
                 search: event === 'all' ? {
                     status: ['read', 'unread', 'ready_to_discuss'],
-                    type: null
+                    type: []
                 } : null
             },
             () => {
@@ -637,7 +638,7 @@ class Connect extends Component {
         this.setState(prev => ({
             search: {
             ...prev.search,
-            type: filter === "type" ? (selected ? selected.value : "") : null,
+            type: filter === "type" ? (selected ? selected.map(i => i.value) : []) : [],
             status: filter === "status" ? (selected ? selected.map(i => i.value) : []) : []
             }
         }), this.getConnects);
@@ -655,22 +656,6 @@ class Connect extends Component {
             indexOfLastConnect
         );
         const totalPages = Math.ceil(connectData.length / dataPerPage);
-        const optionsStatus = [
-            { value: "unread", label: "Unread" },
-            { value: "read", label: "Read" },
-            { value: "ready_to_discuss", label: "Ready To Discussion" },
-            { value: "completed", label: "Completed" },
-        ];
-        const optionsType = [
-            { value: "", label: "Filter Type" },
-            { value: "todo", label: "Todo" },
-            { value: "need_discussion", label: "Need Discussion" },
-            { value: "information", label: "Information" },
-        ];
-        const viewType = [
-            { value: "list", label: "ListView" },
-            { value: "card", label: "CardView" },
-        ];
 
         return (
             <>
@@ -750,15 +735,15 @@ class Connect extends Component {
 
                                             {currentTab === 'receive' &&(<div className="d-flex justify-content-between align-items-center">
                                                 <Select
+                                                    isMulti
                                                     id="employeeFilter"
                                                     className="form-control custom-select ml-2"
                                                     options={optionsType}
-                                                    value={
-                                                    this.state.search.type
-                                                        ? optionsType.find(opt => opt.value === this.state.search.type)
-                                                        : null
-                                                    }
-                                                    placeholder="Filter Type"
+                                                    value={ optionsType.filter(opt => 
+                                                            (this.state.search.type || []).includes(opt.value)
+                                                    )}
+                                                    styles={customStyles}
+                                                    placeholder="Type"
                                                     onChange={(selected) =>
                                                         this.handleRecordFilterChange(selected, "type")
                                                     }
@@ -771,7 +756,8 @@ class Connect extends Component {
                                                     value={optionsStatus.filter(opt =>
                                                         (this.state.search.status || []).includes(opt.value)
                                                     )}
-                                                    placeholder="Filter Status"
+                                                    styles={customStyles}
+                                                    placeholder="Status"
                                                     onChange={(selected) =>
                                                         this.handleRecordFilterChange(selected, "status")
                                                     }
