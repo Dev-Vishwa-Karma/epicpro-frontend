@@ -684,7 +684,7 @@ class Connect extends Component {
                                         iconStyle={{ marginRight: '8px' }}
                                     />
                                 </div>
-                                <div>
+                                <div style={{ width: "180px" }}>
                                     <Select
                                         id="employeeFilter"
                                         className="form-control custom-select ml-2"
