@@ -2,8 +2,8 @@ import React from "react";
 import Avatar from "../../../common/Avatar";
 import Button from "../../../common/formInputs/Button";
 
-const ProjectCard = ({ 
-  project, 
+const ProjectCard = ({
+  project,
   index,
   logged_in_employee_role,
   onToggleStatus,
@@ -11,13 +11,12 @@ const ProjectCard = ({
   onDelete,
   collapsedCards
 }) => {
-    
+  console.log("project: ", project);
   return (
     <div className="col-lg-4 col-md-6 mb-4" key={index}>
       <div
-        className={`card h-100 d-flex flex-column ${
-          collapsedCards[project.project_id] ? 'card-collapsed' : ''
-        }`}
+        className={`card h-100 d-flex flex-column ${collapsedCards[project.project_id] ? 'card-collapsed' : ''
+          }`}
       >
         <div className="card-header">
           <h3 className="card-title">{project.project_name}</h3>
@@ -44,8 +43,8 @@ const ProjectCard = ({
                   >
                     <i className="fa fa-ellipsis-v" />
                   </a>
-                
-                  <div 
+
+                  <div
                     className="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
                     style={{
                       minWidth: '100px',
@@ -53,41 +52,41 @@ const ProjectCard = ({
                       overflow: 'hidden'
                     }}
                   >
-                  <Button
-                    label="Edit"
-                    onClick={() => onEdit(project)}
-                    className="dropdown-item project-dropdown-item"
-                    title="Edit"
-                  />
+                    <Button
+                      label="Edit"
+                      onClick={() => onEdit(project)}
+                      className="dropdown-item project-dropdown-item"
+                      title="Edit"
+                    />
 
-                  <Button
-                    label="Delete"
-                    onClick={() => onDelete(project.project_id, project.project_name)}
-                    className="dropdown-item project-dropdown-item"
-                    title="Delete"
-                    style={{ color: '#d9534f' }}
-                  />
+                    <Button
+                      label="Delete"
+                      onClick={() => onDelete(project.project_id, project.project_name)}
+                      className="dropdown-item project-dropdown-item"
+                      title="Delete"
+                      style={{ color: '#d9534f' }}
+                    />
 
                   </div>
                 </div>
-            )}
+              )}
           </div>
         </div>
 
         <div className="card-body flex-grow-1">
           <div className="mb-3 d-flex flex-wrap gap-2">
-              {project.project_technology
-                ?.split(',')
-                .map((tech, idx) => (
-                  <span 
-                    key={idx} 
-                    className="mr-2 mb-2"
-                    style={{ fontSize: "0.7rem", padding: "4px 6px", borderRadius: "12px", backgroundColor:"#dbeafe", color:"#1e40af"  }}
-                  >
-                    {tech.trim()}
-                  </span>
+            {project.project_technology
+              ?.split(',')
+              .map((tech, idx) => (
+                <span
+                  key={idx}
+                  className="mr-2 mb-2"
+                  style={{ fontSize: "0.7rem", padding: "4px 6px", borderRadius: "12px", backgroundColor: "#dbeafe", color: "#1e40af" }}
+                >
+                  {tech.trim()}
+                </span>
               ))}
-            </div>
+          </div>
           <p
             style={{
               display: '-webkit-box',
@@ -101,10 +100,28 @@ const ProjectCard = ({
           </p>
           <div className="row">
             <div className="col-4 py-1">
+              <strong>Client:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.client_name || '-'}
+            </div>
+            <div className="col-4 py-1">
+              <strong>Profile used:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.profile_used || '-'}
+            </div>
+            <div className="col-4 py-1">
+              <strong>Face used:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.face_used || '-'}
+            </div>
+            <div className="col-4 py-1">
               <strong>Started date:</strong>
             </div>
             <div className="col-8 py-1">
-              {new Date(project.created_at)
+              {new Date(project.start_date)
                 .toLocaleString('en-US', {
                   day: '2-digit',
                   month: 'short',
@@ -121,7 +138,7 @@ const ProjectCard = ({
             <div className="col-8 py-1">
               <div className="overflow-auto" style={{ display: 'flex', alignItems: 'center' }}>
                 {project.team_members.map((member, idx) => (
-                <Avatar
+                  <Avatar
                     key={member.id || idx}  // Use member.id if available, otherwise fall back to idx
                     profile={member.profile || '/assets/images/sm/avatar2.jpg'}
                     first_name={member.first_name}
@@ -132,7 +149,7 @@ const ProjectCard = ({
                     className="avatar-img"
                     style={{ marginLeft: idx === 0 ? 0 : -14 }}
                     onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
-            />
+                  />
                 ))}
               </div>
             </div>

@@ -8,46 +8,46 @@ import NotificationModal from './elements/NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
-import { formatDate, getToday } from '../../../utils';
+import { getPreviousMonthFirstDay, formatDate, getToday } from '../../../utils';
 import { appendDataToFormData } from '../../../utils';
 class Notifications extends Component {
     constructor(props) {
-		super(props);
-		this.state = {
+        super(props);
+        this.state = {
             notificationData: [],
-            employeeData:[],
-            filterFromDate: getToday(),
+            employeeData: [],
+            filterFromDate: getPreviousMonthFirstDay(),
             filterToDate: getToday(),
-            filterEmployeeId:"",
+            filterEmployeeId: "",
             loading: true,
             notificationToDelete: null,
-			successMessage: "",
+            successMessage: "",
             errorMessage: "",
-            showSuccess: false, 
+            showSuccess: false,
             showError: false,
             ButtonLoading: false,
-            showModal:false,
+            showModal: false,
             selectedNotification: null,
-            title:"",
-            body:"",
-            type:"",
-            read:0,
+            title: "",
+            body: "",
+            type: "",
+            read: 0,
             col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
             selectedEmployee: '',
             // Pagination state variables
             currentPage: 1,
             dataPerPage: 10
-		};
-	}
+        };
+    }
 
     componentDidMount() {
         this.getNotifications()
         this.getEmployees()
-       // this.markAsRead();
+        // this.markAsRead();
     }
 
     getNotifications = () => {
-        const { filterFromDate,filterToDate } = this.state;
+        const { filterFromDate, filterToDate } = this.state;
         let requestData = {
             action: 'get_notifications'
         };
@@ -67,7 +67,7 @@ class Notifications extends Component {
         getService.getCall('notifications.php', requestData)
             .then(data => {
                 if (data.status === 'success') {
-                    this.setState({ notificationData: data.data, loading: false }); 
+                    this.setState({ notificationData: data.data, loading: false });
                 } else {
                     this.setState({ notificationData: [], message: data.message, loading: false });
                 }
@@ -75,7 +75,7 @@ class Notifications extends Component {
             .catch(err => {
                 this.setState({ message: 'Failed to fetch data', loading: false });
                 console.error(err);
-        });
+            });
     }
 
     // markAsRead = (notification_id) => {
@@ -98,25 +98,25 @@ class Notifications extends Component {
     //     console.error('Error marking notification as read', err);
     // });
     // };
-    
+
 
     getEmployees = () => {
         getService.getCall('get_employees.php', {
             action: 'view',
-            role:'employee',
+            role: 'employee',
 
         })
-        .then(data => {
-            if (data.status === 'success') {
-            this.setState({ employeeData: data.data });
-            } else {
-            this.setState({ error: data.message });
-            }
-        })
-        .catch(err => {
-            this.setState({ error: 'Failed to fetch data' });
-            console.error(err);
-        });
+            .then(data => {
+                if (data.status === 'success') {
+                    this.setState({ employeeData: data.data });
+                } else {
+                    this.setState({ error: data.message });
+                }
+            })
+            .catch(err => {
+                this.setState({ error: 'Failed to fetch data' });
+                console.error(err);
+            });
     }
 
     handleApplyFilter = async () => {
@@ -136,66 +136,67 @@ class Notifications extends Component {
     }
 
     onCloseAddEdit = () => {
-    this.setState({ showModal: false,
-            selectedNotification: null, 
-            selectedEmployee:'',
+        this.setState({
+            showModal: false,
+            selectedNotification: null,
+            selectedEmployee: '',
             errors: {},
             ButtonLoading: false
         })
-    } 
+    }
 
     confirmDelete = () => {
         const { notificationToDelete, currentPage, notificationData, dataPerPage } = this.state;
         if (!notificationToDelete) return;
 
         this.setState({ ButtonLoading: true });
-        
-        getService.deleteCall('notifications.php','delete', notificationToDelete )
-        .then((data) => {
-        if (data.success) {
-            // Update notifications state after deletion
-            const updatedNotifications = notificationData.filter((d) => d.id !== notificationToDelete);
 
-            // Calculate the total pages after deletion
-            const totalPages = Math.ceil(updatedNotifications.length / dataPerPage);
+        getService.deleteCall('notifications.php', 'delete', notificationToDelete)
+            .then((data) => {
+                if (data.success) {
+                    // Update notifications state after deletion
+                    const updatedNotifications = notificationData.filter((d) => d.id !== notificationToDelete);
 
-            // Adjust currentPage if necessary (if we're on a page that no longer has data)
-            let newPage = currentPage;
-            if (updatedNotifications.length === 0) {
-                newPage = 1;
-            } else if (currentPage > totalPages) {
-                newPage = totalPages;
-            }
+                    // Calculate the total pages after deletion
+                    const totalPages = Math.ceil(updatedNotifications.length / dataPerPage);
 
-            this.setState((prevState) => ({
-                notificationData: updatedNotifications,
-                currentPage: newPage,
-                successMessage: "Notification deleted successfully",
-                showSuccess: true,
-                errorMessage: '',
-                showError: false,
-                ButtonLoading: false,
-            }));
-            this.onCloseDeleteModal();
-            setTimeout(this.dismissMessages, 3000);
-        } else {
-            this.setState({
-                errorMessage: "Failed to delete notification",
-                showError: true,
-                successMessage: '',
-                showSuccess: false,
-                ButtonLoading: false,
+                    // Adjust currentPage if necessary (if we're on a page that no longer has data)
+                    let newPage = currentPage;
+                    if (updatedNotifications.length === 0) {
+                        newPage = 1;
+                    } else if (currentPage > totalPages) {
+                        newPage = totalPages;
+                    }
+
+                    this.setState((prevState) => ({
+                        notificationData: updatedNotifications,
+                        currentPage: newPage,
+                        successMessage: "Notification deleted successfully",
+                        showSuccess: true,
+                        errorMessage: '',
+                        showError: false,
+                        ButtonLoading: false,
+                    }));
+                    this.onCloseDeleteModal();
+                    setTimeout(this.dismissMessages, 3000);
+                } else {
+                    this.setState({
+                        errorMessage: "Failed to delete notification",
+                        showError: true,
+                        successMessage: '',
+                        showSuccess: false,
+                        ButtonLoading: false,
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                this.setState({
+                    ButtonLoading: false,
+                });
             });
-            setTimeout(this.dismissMessages, 3000);
-        }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                ButtonLoading: false,
-            });
-        });
-        
+
     };
 
     // Handle Pagination of notifications listing
@@ -207,10 +208,10 @@ class Notifications extends Component {
     };
 
     handleAddClick = () => {
-        this.setState({ 
-            showModal: true, 
+        this.setState({
+            showModal: true,
             selectedNotification: null,
-            errors: {} 
+            errors: {}
         });
     }
 
@@ -239,7 +240,7 @@ class Notifications extends Component {
 
     handleInputChangeForAddNotification = (event) => {
         const { name, value } = event.target;
-        this.setState({ 
+        this.setState({
             [name]: value,
             errors: { ...this.state.errors, [name]: "" }
         });
@@ -258,23 +259,23 @@ class Notifications extends Component {
             }
         }));
     };
-    
+
     handleEmployeeChange = (event) => {
-            this.setState({ selectedEmployee: event.target.value });
+        this.setState({ selectedEmployee: event.target.value });
     };
 
     handleDateChange = (date, type) => {
         if (date) {
-        const newDate = formatDate(new Date(date));
-        if (type === 'fromDate') {
-            this.setState({ filterFromDate: newDate });
-            
-        } else if (type === 'toDate') {
-            this.setState({ filterToDate: newDate });
-        }
+            const newDate = formatDate(new Date(date));
+            if (type === 'fromDate') {
+                this.setState({ filterFromDate: newDate });
+
+            } else if (type === 'toDate') {
+                this.setState({ filterToDate: newDate });
+            }
 
         } else {
-        this.setState({ [type]: null });
+            this.setState({ [type]: null });
         }
     };
 
@@ -301,12 +302,12 @@ class Notifications extends Component {
     };
 
     addNotification = () => {
-        const { title, body, type, read, selectedEmployee} = this.state;
+        const { title, body, type, read, selectedEmployee } = this.state;
 
         const { isValid, errors } = this.validateNotificationForm(title, body, type);
         if (!isValid) {
             this.setState({ errors });
-            return; 
+            return;
         }
 
         this.setState({ ButtonLoading: true });
@@ -317,115 +318,115 @@ class Notifications extends Component {
             body: body,
             type: type,
             read: read,
-            employee_id:selectedEmployee
+            employee_id: selectedEmployee
         }
         appendDataToFormData(addNotificationFormData, data)
 
         // API call to add Notification
-        getService.addCall('notifications.php','add', addNotificationFormData)
-        .then((data) => {
-            if (data.success) {
-                // Update the Notification list
-                this.setState((prevState) => ({
-                    notificationData: [...(prevState.notificationData || []), data.newNotification],
-                    title: "",
-                    body: "",
-                    read:0,
-                    type: "",
-                    selectedEmployee:'',
-                    successMessage: "Notification added successfully!",
-                    showSuccess: true,
-                    ButtonLoading: false
-                }));
+        getService.addCall('notifications.php', 'add', addNotificationFormData)
+            .then((data) => {
+                if (data.success) {
+                    // Update the Notification list
+                    this.setState((prevState) => ({
+                        notificationData: [...(prevState.notificationData || []), data.newNotification],
+                        title: "",
+                        body: "",
+                        read: 0,
+                        type: "",
+                        selectedEmployee: '',
+                        successMessage: "Notification added successfully!",
+                        showSuccess: true,
+                        ButtonLoading: false
+                    }));
 
-                this.onCloseAddEdit();
-                setTimeout(this.dismissMessages, 3000);
-            } else {
+                    this.onCloseAddEdit();
+                    setTimeout(this.dismissMessages, 3000);
+                } else {
+                    this.setState({
+                        errorMessage: "Failed to add Notification. Please try again.",
+                        showError: true,
+                        ButtonLoading: false
+                    });
+
+                    setTimeout(this.dismissMessages, 3000);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
                 this.setState({
-                    errorMessage: "Failed to add Notification. Please try again.",
+                    errorMessage: "An error occurred while adding the Notification.",
                     showError: true,
                     ButtonLoading: false
                 });
-
                 setTimeout(this.dismissMessages, 3000);
-            }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                errorMessage: "An error occurred while adding the Notification.",
-                showError: true,
-                ButtonLoading: false
             });
-            setTimeout(this.dismissMessages, 3000);
-        });
     };
 
     editNotification = () => {
-        const {title, body, type, selectedEmployee} = this.state;
+        const { title, body, type, selectedEmployee } = this.state;
 
         const { isValid, errors } = this.validateNotificationForm(title, body, type);
         if (!isValid) {
             this.setState({ errors });
-            return; 
+            return;
         }
         this.setState({ ButtonLoading: true });
         const { selectedNotification } = this.state;
         if (!selectedNotification) return;
         const editNotificationFormData = new FormData();
-        
+
         const data = {
             title: selectedNotification.title,
             body: selectedNotification.body,
             type: selectedNotification.type,
             read: selectedNotification.read,
             employee_id: selectedEmployee,
-            id:selectedNotification.id
+            id: selectedNotification.id
         }
         appendDataToFormData(editNotificationFormData, data)
-        getService.editCall('notifications.php','edit', editNotificationFormData)
-        .then((data) => {
-            if (data.status == 'success') {
-               this.setState((prevState) => {
-                    const updateNotificationData = prevState.notificationData.map((notification) =>
-                        notification.id === selectedNotification.id ? { ...notification, ...data.updatedNotificationData } : notification
-                    );
-                    return {
-                        notificationData: updateNotificationData,
-                        successMessage: 'Notification updated successfully',
-						showSuccess: true,
-                        errorMessage: '',
-					    showError: false,
+        getService.editCall('notifications.php', 'edit', editNotificationFormData)
+            .then((data) => {
+                if (data.status == 'success') {
+                    this.setState((prevState) => {
+                        const updateNotificationData = prevState.notificationData.map((notification) =>
+                            notification.id === selectedNotification.id ? { ...notification, ...data.updatedNotificationData } : notification
+                        );
+                        return {
+                            notificationData: updateNotificationData,
+                            successMessage: 'Notification updated successfully',
+                            showSuccess: true,
+                            errorMessage: '',
+                            showError: false,
+                            ButtonLoading: false
+                        };
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                    this.onCloseAddEdit()
+                } else {
+                    this.setState({
+                        errorMessage: "Failed to update notification",
+                        showError: true,
+                        successMessage: '',
+                        showSuccess: false,
                         ButtonLoading: false
-                    };
-                });
-                setTimeout(this.dismissMessages, 3000);
-                this.onCloseAddEdit()
-            } else {
-                this.setState({ 
-                    errorMessage: "Failed to update notification",
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                this.setState({
+                    errorMessage: "Error updating notification:", error,
                     showError: true,
                     successMessage: '',
                     showSuccess: false,
                     ButtonLoading: false
                 });
                 setTimeout(this.dismissMessages, 3000);
-            }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                errorMessage: "Error updating notification:", error,
-                showError: true,
-                successMessage: '',
-                showSuccess: false,
-                ButtonLoading: false
             });
-            setTimeout(this.dismissMessages, 3000);
-        });
     };
-    
-    
+
+
     dismissMessages = () => {
         this.setState({
             showSuccess: false,
@@ -438,13 +439,13 @@ class Notifications extends Component {
     render() {
         const { fixNavbar } = this.props;
         const { notificationData, message, loading, showSuccess, successMessage, showError, errorMessage, col, selectedNotification, showModal, selectedEmployee, employeeData, currentPage, dataPerPage } = this.state;
-        
+
         // Pagination logic for notifications
         const indexOfLastNotification = currentPage * dataPerPage;
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
         const currentNotifications = notificationData.slice(indexOfFirstNotification, indexOfLastNotification);
         const totalPages = Math.ceil(notificationData.length / dataPerPage);
-        
+
         return (
             <>
                 <AlertMessages
@@ -499,16 +500,16 @@ class Notifications extends Component {
                                         {loading ? (
                                             <div className="card-body">
                                                 <div className="dimmer active">
-                                                     <TableSkeleton columns={6} rows={currentNotifications.length} />
+                                                    <TableSkeleton columns={6} rows={currentNotifications.length} />
                                                 </div>
                                             </div>
                                         ) : (
                                             <>
-                                                <NotificationTable 
-                                                    notificationData={currentNotifications} 
+                                                <NotificationTable
+                                                    notificationData={currentNotifications}
                                                     message={message}
-                                                   // onEditClick={this.handleEditClick} 
-                                                    onDeleteClick={this.openModal} 
+                                                    // onEditClick={this.handleEditClick} 
+                                                    onDeleteClick={this.openModal}
                                                     userRole={window.user.role}
                                                 />
                                                 {/* Pagination inside card body */}
@@ -541,8 +542,8 @@ class Notifications extends Component {
                     errors={this.state.errors}
                     loading={this.state.ButtonLoading}
                     employeeData={employeeData}
-                    selectedEmployee={selectedEmployee} 
-                    handleEmployeeChange={this.handleEmployeeChange} 
+                    selectedEmployee={selectedEmployee}
+                    handleEmployeeChange={this.handleEmployeeChange}
                 />
                 <DeleteModal
                     show={!!this.state.notificationToDelete}
