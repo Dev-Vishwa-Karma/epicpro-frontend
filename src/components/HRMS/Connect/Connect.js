@@ -15,7 +15,7 @@ import ConnectSetting from './elements/ConnectSetting';
 import ConnectCardsView from './elements/ConnectCardView';
 import Select from "react-select";
 import dayjs from 'dayjs';
-import {optionsStatus, optionsType, viewType, customStyles} from './elements/CardUtility'
+import { optionsStatus, optionsType, viewType, customStyles } from './elements/CardUtility'
 
 class Connect extends Component {
     constructor(props) {
@@ -45,7 +45,7 @@ class Connect extends Component {
                 kye: "",
                 value: [],
             },
-            defaultSelectedEmployee:[],
+            defaultSelectedEmployee: [],
             selectedConnect: {
                 title: "",
                 body: "",
@@ -121,14 +121,14 @@ class Connect extends Component {
                             key: setting?.key || '',
                             value: selectedEmployee
                         },
-                        defaultSelectedEmployee:selectedEmployee,
+                        defaultSelectedEmployee: selectedEmployee,
                     });
                 } else {
-                    this.setState({ defaultConnectEmployee: {key : "", value: []} });
+                    this.setState({ defaultConnectEmployee: { key: "", value: [] } });
                 }
             })
             .catch(err => {
-                this.setState({ defaultConnectEmployee: {key : "", value: []} });
+                this.setState({ defaultConnectEmployee: { key: "", value: [] } });
                 console.error(err);
             });
     }
@@ -179,7 +179,7 @@ class Connect extends Component {
                 type: "",
                 priority: "",
                 attach: [],
-                status:[],
+                status: [],
                 selectedEmployee: []
             },
             errors: {},
@@ -243,7 +243,7 @@ class Connect extends Component {
             ...selectedConnect,
             createdBy: id,
             email: email,
-            status:event,
+            status: event,
         }).forEach(([key, value]) => {
             if (Array.isArray(value)) {
                 value.forEach(v => formData.append(`${key}[]`, v));
@@ -263,19 +263,19 @@ class Connect extends Component {
 
                         let updatedData = prevState.connectData || [];
 
-                        if(event === 'sent'){
+                        if (event === 'sent') {
                             const emailData = new FormData();
                             emailData.append('title', selectedConnect.title);
                             emailData.append('body', selectedConnect.body);
                             emailData.append('selectedEmployee', selectedConnect.selectedEmployee);
-                            getService.addCall('email.php','add',emailData).then((data)=>{})
+                            getService.addCall('email.php', 'add', emailData).then((data) => { })
                         }
 
-                        if(currentTab === 'draft' && event === 'sent'){
+                        if (currentTab === 'draft' && event === 'sent') {
                             updatedData = updatedData.filter(
                                 item => item.id !== newConnects.id
                             );
-                        }else if (currentTab === 'sent' && event === 'sent' || currentTab === 'draft' && event === 'draft') {
+                        } else if (currentTab === 'sent' && event === 'sent' || currentTab === 'draft' && event === 'draft') {
                             updatedData = [
                                 newConnects,
                                 ...updatedData
@@ -290,7 +290,7 @@ class Connect extends Component {
                                 type: "",
                                 priority: "",
                                 attach: [],
-                                status:[],
+                                status: [],
                                 selectedEmployee: []
                             },
                             successMessage: "Connects added successfully!",
@@ -337,7 +337,7 @@ class Connect extends Component {
             selectedConnect: {
                 id: connect.id,
                 title: connect.title || "",
-                body: connect.body ||  "",
+                body: connect.body || "",
                 type: connect.type || "",
                 attach: attachments,
                 priority: connect.priority || "",
@@ -464,10 +464,10 @@ class Connect extends Component {
 
     onOpenViewConnectModel = (selected) => {
         const { employeeData } = this.state;
-        let empId= 0;
-        if(selected.employee_id){
+        let empId = 0;
+        if (selected.employee_id) {
             empId = selected.employee_id;
-        }else{
+        } else {
             empId = window.user.id;
         }
         const selectedEmploy = employeeData.find(
@@ -512,7 +512,7 @@ class Connect extends Component {
             name: `${window.user.first_name} ${window.user.last_name}`
         }));
 
-        getService.addCall("connect.php", 'update_status',formData).then((data) => {
+        getService.addCall("connect.php", 'update_status', formData).then((data) => {
             if (data.status === "success") {
                 this.setState((prevState) => ({
                     selectedConnect: {
@@ -532,6 +532,7 @@ class Connect extends Component {
     };
 
     connectDetail = (tab) => {
+        console.log(tab);
         const event = tab === 'sent' ? 'sent' : tab === 'draft' ? 'draft' : 'all';
         this.setState(
             {
@@ -637,9 +638,9 @@ class Connect extends Component {
     handleRecordFilterChange = (selected, filter) => {
         this.setState(prev => ({
             search: {
-            ...prev.search,
-            type: filter === "type" ? (selected ? selected.map(i => i.value) : []) : [],
-            status: filter === "status" ? (selected ? selected.map(i => i.value) : []) : []
+                ...prev.search,
+                type: filter === "type" ? (selected ? selected.map(i => i.value) : []) : [],
+                status: filter === "status" ? (selected ? selected.map(i => i.value) : []) : []
             }
         }), this.getConnects);
     };
@@ -650,7 +651,7 @@ class Connect extends Component {
 
         const indexOfLastConnect = currentPage * dataPerPage;
         const indexOfFirstConnect = indexOfLastConnect - dataPerPage;
-
+        console.log('connectData', connectData)
         const currentConnect = connectData.slice(
             indexOfFirstConnect,
             indexOfLastConnect
@@ -699,7 +700,7 @@ class Connect extends Component {
 
                                 <div
                                     onClick={() => this.setState({ connectSettingModal: true })}
-                                    style={{ cursor: 'pointer', marginLeft:'10px' }}
+                                    style={{ cursor: 'pointer', marginLeft: '10px' }}
                                     title="Default Users Setting"
                                 >
                                     <i className="fa fa-gear" style={{ fontSize: "22px" }}></i>
@@ -733,14 +734,14 @@ class Connect extends Component {
                                         <div className="d-flex justify-content-between align-items-center p-20">
                                             <h3 className="card-title">Connects</h3>
 
-                                            {currentTab === 'receive' &&(<div className="d-flex justify-content-between align-items-center">
+                                            {currentTab === 'receive' && (<div className="d-flex justify-content-between align-items-center">
                                                 <Select
                                                     isMulti
                                                     id="employeeFilter"
                                                     className="form-control custom-select ml-2"
                                                     options={optionsType}
-                                                    value={ optionsType.filter(opt => 
-                                                            (this.state.search.type || []).includes(opt.value)
+                                                    value={optionsType.filter(opt =>
+                                                        (this.state.search.type || []).includes(opt.value)
                                                     )}
                                                     styles={customStyles}
                                                     placeholder="Type"

@@ -142,24 +142,24 @@ class Header extends Component {
       });
   };
 
-    startUserStatusCheck = () => {
-      this.userStatusInterval = setInterval(() => {
-        getService.getCall('get_employees.php', { action: 'check_status' })
-          .then(() => {
-            // User is active, do nothing
-          })
-          .catch((err) => {
-            if (err.response && err.response.status === 401) {
-              // User is deleted
-              localStorage.removeItem('user');
-              sessionStorage.setItem('loginMessage', JSON.stringify({
-                type: 'error',
-                text: 'Your account has been deactivated. Please contact administrator.'
-              }));
-              window.location.href = '/login';
-            }
-          });
-      }, 3000);
+  startUserStatusCheck = () => {
+    this.userStatusInterval = setInterval(() => {
+      getService.getCall('get_employees.php', { action: 'check_status' })
+        .then(() => {
+          // User is active, do nothing
+        })
+        .catch((err) => {
+          if (err.response && err.response.status === 401) {
+            // User is deleted
+            localStorage.removeItem('user');
+            sessionStorage.setItem('loginMessage', JSON.stringify({
+              type: 'error',
+              text: 'Your account has been deactivated. Please contact administrator.'
+            }));
+            window.location.href = '/login';
+          }
+        });
+    }, 3000);
   };
 
   startTimerInterval = (punchInTime, isAutoClose = true) => {
@@ -202,9 +202,8 @@ class Header extends Component {
       const hours = Math.floor(elapsed / 3600);
       const minutes = Math.floor((elapsed % 3600) / 60);
       const seconds = elapsed % 60;
-      const elapsedFormatted = `${hours}:${minutes < 10 ? "0" : ""}${minutes}:${
-        seconds < 10 ? "0" : ""
-      }${seconds}`;
+      const elapsedFormatted = `${hours}:${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""
+        }${seconds}`;
 
       this.setState({
         elapsedTime: elapsed,
@@ -437,38 +436,38 @@ class Header extends Component {
   };
 
   handlePunchIn = () => {
-  // First check if user is already punched out for today
-  const current_date = new Date().toISOString().split('T')[0];
-  
-  getService
-    .getCall("activities.php", {
-      action: "get_punch_status",
-      user_id: this.state.userId,
-    })
-    .then((data) => {
-      if (data.status === "success") {
-        // User has active punch in, proceed with punch in
-        this.proceedWithPunchIn();
-      } else {
-        // Check if user has already punched out today
-        this.checkIfAlreadyPunchedOut();
-      }
-    })
-    .catch((error) => {
-      this.setState({
-        isPunchedInLocal: false,
-        errorMessage: "Something went wrong. Please try again.",
-        showError: true,
-        showSuccess: false,
-        isPunchStatusLoading: false,
+    // First check if user is already punched out for today
+    const current_date = new Date().toISOString().split('T')[0];
+
+    getService
+      .getCall("activities.php", {
+        action: "get_punch_status",
+        user_id: this.state.userId,
+      })
+      .then((data) => {
+        if (data.status === "success") {
+          // User has active punch in, proceed with punch in
+          this.proceedWithPunchIn();
+        } else {
+          // Check if user has already punched out today
+          this.checkIfAlreadyPunchedOut();
+        }
+      })
+      .catch((error) => {
+        this.setState({
+          isPunchedInLocal: false,
+          errorMessage: "Something went wrong. Please try again.",
+          showError: true,
+          showSuccess: false,
+          isPunchStatusLoading: false,
+        });
+        setTimeout(this.dismissMessages, 3000);
       });
-      setTimeout(this.dismissMessages, 3000);
-    });
-};
+  };
 
   checkIfAlreadyPunchedOut = () => {
     const current_date = new Date().toISOString().split('T')[0];
-    
+
     getService
       .getCall("activities.php", {
         action: "view",
@@ -479,11 +478,11 @@ class Header extends Component {
       .then((data) => {
         if (data.status === "success" && data.data.length > 0) {
           // Check if any punch activity is completed for today
-          const todayPunches = data.data.filter(activity => 
-            activity.activity_type === 'Punch' && 
+          const todayPunches = data.data.filter(activity =>
+            activity.activity_type === 'Punch' &&
             activity.status === 'completed'
           );
-          
+
           if (todayPunches.length > 0) {
             // User has already punched out today, show error immediately without loading
             this.setState({
@@ -884,9 +883,8 @@ class Header extends Component {
         />
         <div
           id="page_top"
-          className={`section-body ${fixNavbar ? "sticky-top" : ""} ${
-            darkHeader ? "top_dark" : ""
-          }`}
+          className={`section-body ${fixNavbar ? "sticky-top" : ""} ${darkHeader ? "top_dark" : ""
+            }`}
         >
           <div className="container-fluid">
             <div className="page-header">
@@ -993,11 +991,10 @@ class Header extends Component {
             {`
             @media (max-width: 576px) {
               .notification {
-                margin-top: ${
-                  ["admin", "super_admin"].includes(window.user.role)
-                    ? "-25px"
-                    : "-45px"
-                } !important;
+                margin-top: ${["admin", "super_admin"].includes(window.user.role)
+                ? "-25px"
+                : "-45px"
+              } !important;
               }
             }
           `}

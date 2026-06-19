@@ -21,7 +21,7 @@ class ProjectList extends Component {
         this.state = {
             projectName: "",
             projectDescription: "",
-            project_is_active:"",
+            project_is_active: "",
             projectTechnology: "",
             profile_used: "",
             face_used: "",
@@ -103,8 +103,8 @@ class ProjectList extends Component {
     }
 
     componentDidMount() {
-        this.setState({ loading: true }); 
-        const {role} = window.user;
+        this.setState({ loading: true });
+        const { role } = window.user;
         if (window.user?.id) {
             this.setState({
                 logged_in_employee_id: window.user.id,
@@ -118,7 +118,7 @@ class ProjectList extends Component {
         // })
         getService.getCall('get_employees.php', {
             action: 'view',
-            role:'employee'
+            role: 'employee'
         })
             .then(data => {
                 if (data.status === 'success') {
@@ -196,7 +196,7 @@ class ProjectList extends Component {
         let value = multiple
             ? Array.from(event.target.selectedOptions, (option) => option.value) // Store as an array
             : event.target.value;
-    
+
         this.setState((prevState) => ({
             [name]: value,
             errors: { ...prevState.errors, [name]: "" }
@@ -211,10 +211,10 @@ class ProjectList extends Component {
 
     handleCheckboxChange = (event) => {
         const { value, checked } = event.target;
-    
+
         this.setState((prevState) => {
             let updatedTeamMembers = [...prevState.teamMembers];
-    
+
             if (checked) {
                 // Add employee ID if checked
                 updatedTeamMembers.push(value);
@@ -222,10 +222,10 @@ class ProjectList extends Component {
                 // Remove employee ID if unchecked
                 updatedTeamMembers = updatedTeamMembers.filter((id) => id !== value);
             }
-    
+
             return { teamMembers: updatedTeamMembers };
         });
-    };    
+    };
 
     // Validate Add Project Form
     validateAddProjectForm = (e) => {
@@ -330,7 +330,7 @@ class ProjectList extends Component {
             project_end_date: projectEndDate,
         }
         appendDataToFormData(projectFormData, data)
-        
+
         teamMembers.forEach((member) => {
             projectFormData.append('team_members[]', member);
         });
@@ -340,11 +340,11 @@ class ProjectList extends Component {
 
         const successMessage = isEditing ? 'Project updated successfully!' : 'Project added successfully!';
 
-         const apiCall = isEditing 
+        const apiCall = isEditing
             ? getService.editCall('projects.php', 'edit', projectFormData, null, editingProjectId)
             : getService.addCall('projects.php', 'add', projectFormData);
 
-       apiCall.then((data) => {
+        apiCall.then((data) => {
             if (data.status === 'success' || data.success) {
                 // Refresh the project list from the backend instead of updating state manually
                 this.fetchProjects();
@@ -419,7 +419,7 @@ class ProjectList extends Component {
             modal.classList.remove('show');
             modal.style.display = 'none';
             document.body.classList.remove('modal-open');
-            
+
             // Remove backdrop
             const backdrop = document.getElementById('modalBackdrop');
             if (backdrop) {
@@ -444,11 +444,11 @@ class ProjectList extends Component {
         const newStatus = Number(currentStatus) === 1 ? 0 : 1; // Toggle between 1 and 0
         const user = authService.getUser();
         const token = user ? user.access_token : null;
-    
+
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                 },
@@ -458,9 +458,9 @@ class ProjectList extends Component {
                     logged_in_employee_id: this.state.logged_in_employee_id
                 })
             });
-    
+
             const data = await response.json();
-    
+
             if (data.status === 'success') {
                 this.setState(prevState => ({
                     projects: this.sortProjects(prevState.projects.map(p =>
@@ -476,25 +476,25 @@ class ProjectList extends Component {
                     showSuccess: true,
                     successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
                 }));
-                
+
                 // Auto-dismiss success message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);
             } else {
                 // Error handling
-                this.setState({ 
-                    showError: true, 
-                    errorMessage: data.message || 'Failed to update project status.' 
+                this.setState({
+                    showError: true,
+                    errorMessage: data.message || 'Failed to update project status.'
                 });
-                
+
                 setTimeout(this.dismissMessages, 3000);
             }
         } catch (error) {
             // Error handling
-            this.setState({ 
-                showError: true, 
-                errorMessage: 'Failed to update project status.' 
+            this.setState({
+                showError: true,
+                errorMessage: 'Failed to update project status.'
             });
-            
+
             // Auto-dismiss error message after 3 seconds
             setTimeout(this.dismissMessages, 3000);
         }
@@ -575,7 +575,7 @@ class ProjectList extends Component {
 
     // Handle delete project - show delete modal
     handleDeleteProject = (projectId, projectName) => {
-            this.setState({
+        this.setState({
             showDeleteModal: true,
             deleteProjectId: projectId,
             deleteProjectName: projectName
@@ -636,7 +636,7 @@ class ProjectList extends Component {
             showDeleteModal: false,
             deleteProjectId: null,
             deleteProjectName: '',
-            isDeleting: false   
+            isDeleting: false
         });
     };
 
@@ -693,7 +693,7 @@ class ProjectList extends Component {
 
     render() {
         const { fixNavbar/* , boxOpen */ } = this.props;
-        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage } = this.state;
 
         // Filter projects for employees: only show active projects
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
@@ -704,14 +704,14 @@ class ProjectList extends Component {
 
         return (
             <>
-               	<AlertMessages
-					showSuccess={showSuccess}
-					successMessage={successMessage}
-					showError={showError}
-					errorMessage={errorMessage}
-					setShowSuccess={(val) => this.setState({ showSuccess: val })}
-					setShowError={(val) => this.setState({ showError: val })}
-        		/>
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
                     <div className="container-fluid">
                         <div className="d-flex justify-content-between align-items-center mt-2">
@@ -743,8 +743,8 @@ class ProjectList extends Component {
                                 {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
                                     <Button
                                         label="Add"
-                                        onClick={() => this.setState({ 
-                                            showEditModal: true, 
+                                        onClick={() => this.setState({
+                                            showEditModal: true,
                                             isEditing: false,
                                             projectName: "",
                                             projectDescription: "",
@@ -804,7 +804,7 @@ class ProjectList extends Component {
                             </div>
                         </div>
                     </div>
-                </div>               
+                </div>
 
                 {/* Edit/Add Project Modal */}
                 <EditModal
