@@ -366,17 +366,18 @@ class Header extends Component {
       });
   };
 
-  markAsRead = (notification_id) => {
+  markAsRead = (notification_id, connect_id) => {
     const apiCall = notification_id
       ? getService.getCall("notifications.php", {
-          action: "mark_read",
-          user_id: window.user.id,
-          notification_id: notification_id,
-        })
+        action: "mark_read",
+        user_id: window.user.id,
+        notification_id: notification_id,
+        connect_id: connect_id,
+      })
       : getService.getCall("notifications.php", {
-          action: "mark_read",
-          user_id: window.user.id,
-        });
+        action: "mark_read",
+        user_id: window.user.id,
+      });
 
     apiCall
       .then((data) => {

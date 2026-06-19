@@ -101,10 +101,28 @@ const ProjectCard = ({
           </p>
           <div className="row">
             <div className="col-4 py-1">
+              <strong>Client:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.client_name || '-'}
+            </div>
+            <div className="col-4 py-1">
+              <strong>Profile used:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.profile_used || '-'}
+            </div>
+            <div className="col-4 py-1">
+              <strong>Face used:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.face_used || '-'}
+            </div>
+            <div className="col-4 py-1">
               <strong>Started date:</strong>
             </div>
             <div className="col-8 py-1">
-              {new Date(project.created_at)
+              {new Date(project.start_date)
                 .toLocaleString('en-US', {
                   day: '2-digit',
                   month: 'short',

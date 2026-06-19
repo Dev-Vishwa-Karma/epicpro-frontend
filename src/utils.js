@@ -217,3 +217,12 @@ export function filterUpToTomorrow(todos) {
     return dueTime <= tomorrowTime;
   });
 }
+
+
+export function getPreviousMonthFirstDay() {
+  const date = new Date();
+  date.setMonth(date.getMonth() - 1);
+  date.setDate(1);
+
+  return date.toISOString().split('T')[0];
+}

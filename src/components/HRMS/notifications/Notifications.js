@@ -8,15 +8,15 @@ import NotificationModal from './elements/NotificationModal';
 import Pagination from '../../common/Pagination';
 import DateFilterForm from '../../common/DateFilterForm';
 import TableSkeleton from '../../common/skeletons/TableSkeleton';
-import { formatDate, getToday } from '../../../utils';
+import { getPreviousMonthFirstDay, formatDate, getToday } from '../../../utils';
 import { appendDataToFormData } from '../../../utils';
 class Notifications extends Component {
     constructor(props) {
 		super(props);
 		this.state = {
             notificationData: [],
-            employeeData:[],
-            filterFromDate: getToday(),
+            employeeData: [],
+            filterFromDate: getPreviousMonthFirstDay(),
             filterToDate: getToday(),
             filterEmployeeId:"",
             loading: true,
@@ -136,9 +136,10 @@ class Notifications extends Component {
     }
 
     onCloseAddEdit = () => {
-    this.setState({ showModal: false,
-            selectedNotification: null, 
-            selectedEmployee:'',
+        this.setState({
+            showModal: false,
+            selectedNotification: null,
+            selectedEmployee: '',
             errors: {},
             ButtonLoading: false
         })
@@ -149,53 +150,53 @@ class Notifications extends Component {
         if (!notificationToDelete) return;
 
         this.setState({ ButtonLoading: true });
-        
-        getService.deleteCall('notifications.php','delete', notificationToDelete )
-        .then((data) => {
-        if (data.success) {
-            // Update notifications state after deletion
-            const updatedNotifications = notificationData.filter((d) => d.id !== notificationToDelete);
 
-            // Calculate the total pages after deletion
-            const totalPages = Math.ceil(updatedNotifications.length / dataPerPage);
+        getService.deleteCall('notifications.php', 'delete', notificationToDelete)
+            .then((data) => {
+                if (data.success) {
+                    // Update notifications state after deletion
+                    const updatedNotifications = notificationData.filter((d) => d.id !== notificationToDelete);
 
-            // Adjust currentPage if necessary (if we're on a page that no longer has data)
-            let newPage = currentPage;
-            if (updatedNotifications.length === 0) {
-                newPage = 1;
-            } else if (currentPage > totalPages) {
-                newPage = totalPages;
-            }
+                    // Calculate the total pages after deletion
+                    const totalPages = Math.ceil(updatedNotifications.length / dataPerPage);
 
-            this.setState((prevState) => ({
-                notificationData: updatedNotifications,
-                currentPage: newPage,
-                successMessage: "Notification deleted successfully",
-                showSuccess: true,
-                errorMessage: '',
-                showError: false,
-                ButtonLoading: false,
-            }));
-            this.onCloseDeleteModal();
-            setTimeout(this.dismissMessages, 3000);
-        } else {
-            this.setState({
-                errorMessage: "Failed to delete notification",
-                showError: true,
-                successMessage: '',
-                showSuccess: false,
-                ButtonLoading: false,
+                    // Adjust currentPage if necessary (if we're on a page that no longer has data)
+                    let newPage = currentPage;
+                    if (updatedNotifications.length === 0) {
+                        newPage = 1;
+                    } else if (currentPage > totalPages) {
+                        newPage = totalPages;
+                    }
+
+                    this.setState((prevState) => ({
+                        notificationData: updatedNotifications,
+                        currentPage: newPage,
+                        successMessage: "Notification deleted successfully",
+                        showSuccess: true,
+                        errorMessage: '',
+                        showError: false,
+                        ButtonLoading: false,
+                    }));
+                    this.onCloseDeleteModal();
+                    setTimeout(this.dismissMessages, 3000);
+                } else {
+                    this.setState({
+                        errorMessage: "Failed to delete notification",
+                        showError: true,
+                        successMessage: '',
+                        showSuccess: false,
+                        ButtonLoading: false,
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                this.setState({
+                    ButtonLoading: false,
+                });
             });
-            setTimeout(this.dismissMessages, 3000);
-        }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                ButtonLoading: false,
-            });
-        });
-        
+
     };
 
     // Handle Pagination of notifications listing
@@ -207,10 +208,10 @@ class Notifications extends Component {
     };
 
     handleAddClick = () => {
-        this.setState({ 
-            showModal: true, 
+        this.setState({
+            showModal: true,
             selectedNotification: null,
-            errors: {} 
+            errors: {}
         });
     }
 
@@ -322,43 +323,43 @@ class Notifications extends Component {
         appendDataToFormData(addNotificationFormData, data)
 
         // API call to add Notification
-        getService.addCall('notifications.php','add', addNotificationFormData)
-        .then((data) => {
-            if (data.success) {
-                // Update the Notification list
-                this.setState((prevState) => ({
-                    notificationData: [...(prevState.notificationData || []), data.newNotification],
-                    title: "",
-                    body: "",
-                    read:0,
-                    type: "",
-                    selectedEmployee:'',
-                    successMessage: "Notification added successfully!",
-                    showSuccess: true,
-                    ButtonLoading: false
-                }));
+        getService.addCall('notifications.php', 'add', addNotificationFormData)
+            .then((data) => {
+                if (data.success) {
+                    // Update the Notification list
+                    this.setState((prevState) => ({
+                        notificationData: [...(prevState.notificationData || []), data.newNotification],
+                        title: "",
+                        body: "",
+                        read: 0,
+                        type: "",
+                        selectedEmployee: '',
+                        successMessage: "Notification added successfully!",
+                        showSuccess: true,
+                        ButtonLoading: false
+                    }));
 
-                this.onCloseAddEdit();
-                setTimeout(this.dismissMessages, 3000);
-            } else {
+                    this.onCloseAddEdit();
+                    setTimeout(this.dismissMessages, 3000);
+                } else {
+                    this.setState({
+                        errorMessage: "Failed to add Notification. Please try again.",
+                        showError: true,
+                        ButtonLoading: false
+                    });
+
+                    setTimeout(this.dismissMessages, 3000);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
                 this.setState({
-                    errorMessage: "Failed to add Notification. Please try again.",
+                    errorMessage: "An error occurred while adding the Notification.",
                     showError: true,
                     ButtonLoading: false
                 });
-
                 setTimeout(this.dismissMessages, 3000);
-            }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                errorMessage: "An error occurred while adding the Notification.",
-                showError: true,
-                ButtonLoading: false
             });
-            setTimeout(this.dismissMessages, 3000);
-        });
     };
 
     editNotification = () => {
@@ -383,46 +384,46 @@ class Notifications extends Component {
             id:selectedNotification.id
         }
         appendDataToFormData(editNotificationFormData, data)
-        getService.editCall('notifications.php','edit', editNotificationFormData)
-        .then((data) => {
-            if (data.status == 'success') {
-               this.setState((prevState) => {
-                    const updateNotificationData = prevState.notificationData.map((notification) =>
-                        notification.id === selectedNotification.id ? { ...notification, ...data.updatedNotificationData } : notification
-                    );
-                    return {
-                        notificationData: updateNotificationData,
-                        successMessage: 'Notification updated successfully',
-						showSuccess: true,
-                        errorMessage: '',
-					    showError: false,
+        getService.editCall('notifications.php', 'edit', editNotificationFormData)
+            .then((data) => {
+                if (data.status == 'success') {
+                    this.setState((prevState) => {
+                        const updateNotificationData = prevState.notificationData.map((notification) =>
+                            notification.id === selectedNotification.id ? { ...notification, ...data.updatedNotificationData } : notification
+                        );
+                        return {
+                            notificationData: updateNotificationData,
+                            successMessage: 'Notification updated successfully',
+                            showSuccess: true,
+                            errorMessage: '',
+                            showError: false,
+                            ButtonLoading: false
+                        };
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                    this.onCloseAddEdit()
+                } else {
+                    this.setState({
+                        errorMessage: "Failed to update notification",
+                        showError: true,
+                        successMessage: '',
+                        showSuccess: false,
                         ButtonLoading: false
-                    };
-                });
-                setTimeout(this.dismissMessages, 3000);
-                this.onCloseAddEdit()
-            } else {
-                this.setState({ 
-                    errorMessage: "Failed to update notification",
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                this.setState({
+                    errorMessage: "Error updating notification:", error,
                     showError: true,
                     successMessage: '',
                     showSuccess: false,
                     ButtonLoading: false
                 });
                 setTimeout(this.dismissMessages, 3000);
-            }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                errorMessage: "Error updating notification:", error,
-                showError: true,
-                successMessage: '',
-                showSuccess: false,
-                ButtonLoading: false
             });
-            setTimeout(this.dismissMessages, 3000);
-        });
     };
     
     

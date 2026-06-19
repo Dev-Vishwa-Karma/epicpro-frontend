@@ -68,7 +68,7 @@ class NotificationDropdown extends Component {
                           cursor: "pointer",
                           borderBottom: "1px solid #ddd",
                         }}
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => markAsRead(notification.id, notification?.connect_id)}
                       >
                         <div className="feeds-body">
                           <h4
