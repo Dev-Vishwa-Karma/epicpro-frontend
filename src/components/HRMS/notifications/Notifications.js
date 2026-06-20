@@ -15,10 +15,10 @@ class Notifications extends Component {
         super(props);
         this.state = {
             notificationData: [],
-            employeeData: [],
+            employeeData:[],
             filterFromDate: getPreviousMonthFirstDay(),
             filterToDate: getToday(),
-            filterEmployeeId: "",
+            filterEmployeeId:"",
             loading: true,
             notificationToDelete: null,
             successMessage: "",
@@ -26,12 +26,12 @@ class Notifications extends Component {
             showSuccess: false,
             showError: false,
             ButtonLoading: false,
-            showModal: false,
+            showModal:false,
             selectedNotification: null,
-            title: "",
-            body: "",
-            type: "",
-            read: 0,
+            title:"",
+            body:"",
+            type:"",
+            read:0,
             col: (window.user.role === "admin" || window.user.role === "super_admin") ? 2 : 2,
             selectedEmployee: '',
             // Pagination state variables
@@ -43,11 +43,11 @@ class Notifications extends Component {
     componentDidMount() {
         this.getNotifications()
         this.getEmployees()
-        // this.markAsRead();
+       // this.markAsRead();
     }
 
     getNotifications = () => {
-        const { filterFromDate, filterToDate } = this.state;
+        const { filterFromDate,filterToDate } = this.state;
         let requestData = {
             action: 'get_notifications'
         };
@@ -75,7 +75,7 @@ class Notifications extends Component {
             .catch(err => {
                 this.setState({ message: 'Failed to fetch data', loading: false });
                 console.error(err);
-            });
+        });
     }
 
     // markAsRead = (notification_id) => {
@@ -99,24 +99,23 @@ class Notifications extends Component {
     // });
     // };
 
-
     getEmployees = () => {
         getService.getCall('get_employees.php', {
             action: 'view',
-            role: 'employee',
+            role:'employee',
 
         })
-            .then(data => {
-                if (data.status === 'success') {
-                    this.setState({ employeeData: data.data });
-                } else {
-                    this.setState({ error: data.message });
-                }
-            })
-            .catch(err => {
-                this.setState({ error: 'Failed to fetch data' });
-                console.error(err);
-            });
+        .then(data => {
+            if (data.status === 'success') {
+                this.setState({ employeeData: data.data });
+            } else {
+                this.setState({ error: data.message });
+            }
+        })
+        .catch(err => {
+            this.setState({ error: 'Failed to fetch data' });
+            console.error(err);
+        });
     }
 
     handleApplyFilter = async () => {
@@ -136,13 +135,13 @@ class Notifications extends Component {
     }
 
     onCloseAddEdit = () => {
-        this.setState({
-            showModal: false,
-            selectedNotification: null,
-            selectedEmployee: '',
+    this.setState({
+        showModal: false,
+        selectedNotification: null,
+        selectedEmployee: '',
             errors: {},
             ButtonLoading: false
-        })
+    })
     }
 
     confirmDelete = () => {
@@ -152,50 +151,50 @@ class Notifications extends Component {
         this.setState({ ButtonLoading: true });
 
         getService.deleteCall('notifications.php', 'delete', notificationToDelete)
-            .then((data) => {
-                if (data.success) {
-                    // Update notifications state after deletion
-                    const updatedNotifications = notificationData.filter((d) => d.id !== notificationToDelete);
+        .then((data) => {
+            if (data.success) {
+                // Update notifications state after deletion
+                const updatedNotifications = notificationData.filter((d) => d.id !== notificationToDelete);
 
-                    // Calculate the total pages after deletion
-                    const totalPages = Math.ceil(updatedNotifications.length / dataPerPage);
+                // Calculate the total pages after deletion
+                const totalPages = Math.ceil(updatedNotifications.length / dataPerPage);
 
-                    // Adjust currentPage if necessary (if we're on a page that no longer has data)
-                    let newPage = currentPage;
-                    if (updatedNotifications.length === 0) {
-                        newPage = 1;
-                    } else if (currentPage > totalPages) {
-                        newPage = totalPages;
-                    }
-
-                    this.setState((prevState) => ({
-                        notificationData: updatedNotifications,
-                        currentPage: newPage,
-                        successMessage: "Notification deleted successfully",
-                        showSuccess: true,
-                        errorMessage: '',
-                        showError: false,
-                        ButtonLoading: false,
-                    }));
-                    this.onCloseDeleteModal();
-                    setTimeout(this.dismissMessages, 3000);
-                } else {
-                    this.setState({
-                        errorMessage: "Failed to delete notification",
-                        showError: true,
-                        successMessage: '',
-                        showSuccess: false,
-                        ButtonLoading: false,
-                    });
-                    setTimeout(this.dismissMessages, 3000);
+                // Adjust currentPage if necessary (if we're on a page that no longer has data)
+                let newPage = currentPage;
+                if (updatedNotifications.length === 0) {
+                    newPage = 1;
+                } else if (currentPage > totalPages) {
+                    newPage = totalPages;
                 }
-            })
-            .catch((error) => {
-                console.error("Error:", error);
+
+                this.setState((prevState) => ({
+                    notificationData: updatedNotifications,
+                    currentPage: newPage,
+                    successMessage: "Notification deleted successfully",
+                    showSuccess: true,
+                    errorMessage: '',
+                    showError: false,
+                    ButtonLoading: false,
+                }));
+                this.onCloseDeleteModal();
+                setTimeout(this.dismissMessages, 3000);
+            } else {
                 this.setState({
+                    errorMessage: "Failed to delete notification",
+                    showError: true,
+                    successMessage: '',
+                    showSuccess: false,
                     ButtonLoading: false,
                 });
+                setTimeout(this.dismissMessages, 3000);
+            }
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+            this.setState({
+                ButtonLoading: false,
             });
+        });
 
     };
 
@@ -302,7 +301,7 @@ class Notifications extends Component {
     };
 
     addNotification = () => {
-        const { title, body, type, read, selectedEmployee } = this.state;
+        const { title, body, type, read, selectedEmployee} = this.state;
 
         const { isValid, errors } = this.validateNotificationForm(title, body, type);
         if (!isValid) {
@@ -318,39 +317,39 @@ class Notifications extends Component {
             body: body,
             type: type,
             read: read,
-            employee_id: selectedEmployee
+            employee_id:selectedEmployee
         }
         appendDataToFormData(addNotificationFormData, data)
 
         // API call to add Notification
         getService.addCall('notifications.php', 'add', addNotificationFormData)
-            .then((data) => {
-                if (data.success) {
-                    // Update the Notification list
-                    this.setState((prevState) => ({
-                        notificationData: [...(prevState.notificationData || []), data.newNotification],
-                        title: "",
-                        body: "",
-                        read: 0,
-                        type: "",
-                        selectedEmployee: '',
-                        successMessage: "Notification added successfully!",
-                        showSuccess: true,
-                        ButtonLoading: false
-                    }));
+        .then((data) => {
+            if (data.success) {
+                // Update the Notification list
+                this.setState((prevState) => ({
+                    notificationData: [...(prevState.notificationData || []), data.newNotification],
+                    title: "",
+                    body: "",
+                    read: 0,
+                    type: "",
+                    selectedEmployee: '',
+                    successMessage: "Notification added successfully!",
+                    showSuccess: true,
+                    ButtonLoading: false
+                }));
 
-                    this.onCloseAddEdit();
-                    setTimeout(this.dismissMessages, 3000);
-                } else {
-                    this.setState({
-                        errorMessage: "Failed to add Notification. Please try again.",
-                        showError: true,
-                        ButtonLoading: false
-                    });
+                this.onCloseAddEdit();
+                setTimeout(this.dismissMessages, 3000);
+            } else {
+                this.setState({
+                    errorMessage: "Failed to add Notification. Please try again.",
+                    showError: true,
+                    ButtonLoading: false
+                });
 
-                    setTimeout(this.dismissMessages, 3000);
-                }
-            })
+                setTimeout(this.dismissMessages, 3000);
+            }
+        })
             .catch((error) => {
                 console.error("Error:", error);
                 this.setState({
@@ -363,7 +362,7 @@ class Notifications extends Component {
     };
 
     editNotification = () => {
-        const { title, body, type, selectedEmployee } = this.state;
+        const {title, body, type, selectedEmployee } = this.state;
 
         const { isValid, errors } = this.validateNotificationForm(title, body, type);
         if (!isValid) {
@@ -374,14 +373,13 @@ class Notifications extends Component {
         const { selectedNotification } = this.state;
         if (!selectedNotification) return;
         const editNotificationFormData = new FormData();
-
         const data = {
             title: selectedNotification.title,
             body: selectedNotification.body,
             type: selectedNotification.type,
             read: selectedNotification.read,
             employee_id: selectedEmployee,
-            id: selectedNotification.id
+            id:selectedNotification.id
         }
         appendDataToFormData(editNotificationFormData, data)
         getService.editCall('notifications.php', 'edit', editNotificationFormData)
@@ -425,8 +423,6 @@ class Notifications extends Component {
                 setTimeout(this.dismissMessages, 3000);
             });
     };
-
-
     dismissMessages = () => {
         this.setState({
             showSuccess: false,
@@ -445,7 +441,6 @@ class Notifications extends Component {
         const indexOfFirstNotification = indexOfLastNotification - dataPerPage;
         const currentNotifications = notificationData.slice(indexOfFirstNotification, indexOfLastNotification);
         const totalPages = Math.ceil(notificationData.length / dataPerPage);
-
         return (
             <>
                 <AlertMessages
@@ -500,7 +495,7 @@ class Notifications extends Component {
                                         {loading ? (
                                             <div className="card-body">
                                                 <div className="dimmer active">
-                                                    <TableSkeleton columns={6} rows={currentNotifications.length} />
+                                                     <TableSkeleton columns={6} rows={currentNotifications.length} />
                                                 </div>
                                             </div>
                                         ) : (
