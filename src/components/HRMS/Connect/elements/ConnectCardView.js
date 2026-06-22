@@ -18,13 +18,13 @@ const ConnectCardsView = ({ connectData = [], onRecordClick, currentTab, handleE
 
                         <div className="custom-card-header custom-card-meta">
                             <span
-                                onClick={() =>{
-                                        if(currentTab !== 'draft'){
+                                onClick={() => {
+                                        if (currentTab !== 'draft') {
                                             onRecordClick(connect)
                                         }
-                                    }
                                 }
-                                style={currentTab !== 'draft' ? { color: 'blue', textDecoration: 'none', cursor: 'pointer' }: {}}>
+                                }
+                                style={currentTab !== 'draft' ? { color: 'blue', textDecoration: 'none', cursor: 'pointer' } : {}}>
                                 {connect.title || "Untitled"}
                             </span>
                         </div>

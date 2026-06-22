@@ -11,13 +11,12 @@ const ProjectCard = ({
   onDelete,
   collapsedCards
 }) => {
-    
   return (
     <div className="col-lg-4 col-md-6 mb-4" key={index}>
       <div
         className={`card h-100 d-flex flex-column ${
           collapsedCards[project.project_id] ? 'card-collapsed' : ''
-        }`}
+          }`}
       >
         <div className="card-header">
           <h3 className="card-title">{project.project_name}</h3>
@@ -44,8 +43,7 @@ const ProjectCard = ({
                   >
                     <i className="fa fa-ellipsis-v" />
                   </a>
-                
-                  <div 
+                  <div
                     className="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
                     style={{
                       minWidth: '100px',
@@ -53,20 +51,20 @@ const ProjectCard = ({
                       overflow: 'hidden'
                     }}
                   >
-                  <Button
-                    label="Edit"
-                    onClick={() => onEdit(project)}
-                    className="dropdown-item project-dropdown-item"
-                    title="Edit"
-                  />
+                    <Button
+                     label="Edit"
+                     onClick={() => onEdit(project)}
+                     className="dropdown-item project-dropdown-item"
+                     title="Edit"
+                    />
 
-                  <Button
-                    label="Delete"
-                    onClick={() => onDelete(project.project_id, project.project_name)}
-                    className="dropdown-item project-dropdown-item"
-                    title="Delete"
-                    style={{ color: '#d9534f' }}
-                  />
+                    <Button
+                     label="Delete"
+                     onClick={() => onDelete(project.project_id, project.project_name)}
+                     className="dropdown-item project-dropdown-item"
+                     title="Delete"
+                     style={{ color: '#d9534f' }}
+                    />
 
                   </div>
                 </div>
@@ -79,14 +77,14 @@ const ProjectCard = ({
               {project.project_technology
                 ?.split(',')
                 .map((tech, idx) => (
-                  <span 
-                    key={idx} 
+                  <span
+                    key={idx}
                     className="mr-2 mb-2"
-                    style={{ fontSize: "0.7rem", padding: "4px 6px", borderRadius: "12px", backgroundColor:"#dbeafe", color:"#1e40af"  }}
+                    style={{ fontSize: "0.7rem", padding: "4px 6px", borderRadius: "12px", backgroundColor: "#dbeafe", color: "#1e40af" }}
                   >
                     {tech.trim()}
                   </span>
-              ))}
+                ))}
             </div>
           <p
             style={{
@@ -101,10 +99,28 @@ const ProjectCard = ({
           </p>
           <div className="row">
             <div className="col-4 py-1">
+              <strong>Client:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.client_name || '-'}
+            </div>
+            <div className="col-4 py-1">
+              <strong>Profile used:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.profile_used || '-'}
+            </div>
+            <div className="col-4 py-1">
+              <strong>Face used:</strong>
+            </div>
+            <div className="col-8 py-1">
+              {project.face_used || '-'}
+            </div>
+            <div className="col-4 py-1">
               <strong>Started date:</strong>
             </div>
             <div className="col-8 py-1">
-              {new Date(project.created_at)
+              {new Date(project.start_date)
                 .toLocaleString('en-US', {
                   day: '2-digit',
                   month: 'short',
@@ -132,7 +148,7 @@ const ProjectCard = ({
                     className="avatar-img"
                     style={{ marginLeft: idx === 0 ? 0 : -14 }}
                     onError={(e) => e.target.src = '/assets/images/sm/avatar2.jpg'}
-            />
+                />
                 ))}
               </div>
             </div>

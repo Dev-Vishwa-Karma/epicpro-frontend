@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import InputField from '../../../common/formInputs/InputField';
 import Button from '../../../common/formInputs/Button';
 import { getSortedEmployees } from '../../../../utils';
@@ -24,6 +24,23 @@ const EditModal = ({
     
     const sortedEmployees = Array.isArray(employees) ? getSortedEmployees(employees) : [];
     
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                if (dropdownOpen) {
+                    toggleDropdown();
+                }
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [dropdownOpen, toggleDropdown]);
+
     return (
         <>
             <div
@@ -89,6 +106,66 @@ const EditModal = ({
                                 error={errors.projectTechnology}
                                 />
                             </div>
+                            <div className="col-md-6">
+                                <InputField
+                                label="Profile Used"
+                                name="profile_used"
+                                type="text"
+                                placeholder="Profile Used"
+                                value={formData.profile_used || ""}
+                                onChange={onInputChange}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <InputField
+                                label="Face Used"
+                                name="face_used"
+                                type="text"
+                                placeholder="Face Used"
+                                value={formData.face_used || ""}
+                                onChange={onInputChange}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <InputField
+                                label="Mobile Number Shared"
+                                name="mobile_number_shared"
+                                type="number"
+                                placeholder="Mobile Number"
+                                value={formData.mobile_number_shared || ""}
+                                onChange={onInputChange}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <InputField
+                                label="Projects Shared"
+                                name="projects_shared"
+                                type="text"
+                                placeholder="Projects Shared"
+                                value={formData.projects_shared || ""}
+                                onChange={onInputChange}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <InputField
+                                label="Family Information Shared"
+                                name="family_information_shared"
+                                type="text"
+                                placeholder="Family Information"
+                                value={formData.family_information_shared || ""}
+                                onChange={onInputChange}
+                                />
+                            </div>
+                            <div className="col-md-12">
+                                <InputField
+                                label="Address Shared"
+                                name="address_shared"
+                                type="textarea"
+                                placeholder="Address Shared"
+                                value={formData.address_shared || ""}
+                                onChange={onInputChange}
+                                />
+                            </div>
                             {/* Client Details */}
                             <div className="col-md-6">
                                 <InputField
@@ -116,7 +193,7 @@ const EditModal = ({
                                 <div className="form-group">
                                     <label className="form-label">Assign Team Members</label>
                                     {/* Custom dropdown */}
-                                    <div className="dropdown w-100">
+                                    <div className="dropdown w-100" ref={dropdownRef}>
                                         <button
                                             type="button"
                                             className="form-control custom-select"

@@ -21,8 +21,14 @@ class ProjectList extends Component {
         this.state = {
             projectName: "",
             projectDescription: "",
-            project_is_active:"",
+            project_is_active: "",
             projectTechnology: "",
+            profile_used: "",
+            face_used: "",
+            mobile_number_shared: "",
+            address_shared: "",
+            projects_shared: "",
+            family_information_shared: "",
             teamMembers: [],
             projectStartDate: "",
             projectEndDate: "",
@@ -38,7 +44,8 @@ class ProjectList extends Component {
             selectedClient: "",
             logged_in_employee_id: null,
             logged_in_employee_role: null,
-			searchQuery: "",
+            searchQuery: "",
+            statusFilter: "",
             errors: {},
             collapsedCards: {},
             editingProjectId: null,
@@ -96,8 +103,8 @@ class ProjectList extends Component {
     }
 
     componentDidMount() {
-        this.setState({ loading: true }); 
-        const {role} = window.user;
+        this.setState({ loading: true });
+        const { role } = window.user;
         if (window.user?.id) {
             this.setState({
                 logged_in_employee_id: window.user.id,
@@ -111,74 +118,74 @@ class ProjectList extends Component {
         // })
         getService.getCall('get_employees.php', {
             action: 'view',
-            role:'employee'
+            role: 'employee'
         })
-        .then(data => {
-            if (data.status === 'success') {
-                this.setState({
-                    employees: data.status === 'success' ? data.data : [],
-                    loading: false
-                });
-            } else {
-                this.setState({ error: data.message, loading: false });
-            }
-        })
-        .catch(err => {
-            this.setState({ error: 'Failed to fetch employees data' });
-            console.error(err);
-        });
+            .then(data => {
+                if (data.status === 'success') {
+                    this.setState({
+                        employees: data.status === 'success' ? data.data : [],
+                        loading: false
+                    });
+                } else {
+                    this.setState({ error: data.message, loading: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ error: 'Failed to fetch employees data' });
+                console.error(err);
+            });
 
 
         // Get projects data
         getService.getCall('projects.php', {
             action: 'view',
-            logged_in_employee_id:window.user.id,
-            role:window.user.id
+            logged_in_employee_id: window.user.id,
+            role: window.user.id
         })
-        .then(data => {
-            if (data.status === 'success') {
-                const collapsedCards = {};
-                data.data.forEach(project => {
-                    collapsedCards[project.project_id] = Number(project.project_is_active) === 0;
-                });
-                this.setState({
-                    projects: this.sortProjects(data.data),
-                    allProjects: this.sortProjects(data.data),
-                    loading: false
-                });
-            } else {
-                this.setState({ error: data.message, loading: false });
-            }
-        })
-        .catch(err => {
-            this.setState({ error: 'Failed to fetch employees data' });
-            console.error(err);
-        });
+            .then(data => {
+                if (data.status === 'success') {
+                    const collapsedCards = {};
+                    data.data.forEach(project => {
+                        collapsedCards[project.project_id] = Number(project.project_is_active) === 0;
+                    });
+                    this.setState({
+                        projects: this.sortProjects(data.data),
+                        allProjects: this.sortProjects(data.data),
+                        loading: false
+                    });
+                } else {
+                    this.setState({ error: data.message, loading: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ error: 'Failed to fetch employees data' });
+                console.error(err);
+            });
 
         // Get clients data
-         getService.getCall('clients.php', {
+        getService.getCall('clients.php', {
             action: 'view'
         })
-        .then(data => {
-            if (data.status === 'success') {
-                this.setState({
-                    clients: data.status === 'success' ? data.data : [],
-                    loading: false
-                });
-            } else {
-                this.setState({ error: data.message, loading: false });
-            }
-        })
-        .catch(err => {
-            this.setState({ error: 'Failed to fetch employees data' });
-            console.error(err);
-        });
+            .then(data => {
+                if (data.status === 'success') {
+                    this.setState({
+                        clients: data.status === 'success' ? data.data : [],
+                        loading: false
+                    });
+                } else {
+                    this.setState({ error: data.message, loading: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ error: 'Failed to fetch employees data' });
+                console.error(err);
+            });
     }
 
     // Handle input changes
     handleInputChangeForAddProject = (event) => {
         const { name, value } = event.target;
-        this.setState({ 
+        this.setState({
             [name]: value,
             errors: { ...this.state.errors, [name]: "" }
         });
@@ -189,7 +196,7 @@ class ProjectList extends Component {
         let value = multiple
             ? Array.from(event.target.selectedOptions, (option) => option.value) // Store as an array
             : event.target.value;
-    
+
         this.setState((prevState) => ({
             [name]: value,
             errors: { ...prevState.errors, [name]: "" }
@@ -204,10 +211,10 @@ class ProjectList extends Component {
 
     handleCheckboxChange = (event) => {
         const { value, checked } = event.target;
-    
+
         this.setState((prevState) => {
             let updatedTeamMembers = [...prevState.teamMembers];
-    
+
             if (checked) {
                 // Add employee ID if checked
                 updatedTeamMembers.push(value);
@@ -215,56 +222,56 @@ class ProjectList extends Component {
                 // Remove employee ID if unchecked
                 updatedTeamMembers = updatedTeamMembers.filter((id) => id !== value);
             }
-    
+
             return { teamMembers: updatedTeamMembers };
         });
-    };    
+    };
 
     // Validate Add Project Form
-	validateAddProjectForm = (e) => {
-		const { projectName, projectDescription, projectTechnology, teamMembers, projectStartDate, projectEndDate} = this.state;
-		
-		// Apply Validation component
-		const validationSchema = [
-			{ name: 'projectName', value: projectName, type: 'name', required: true, messageName: 'Project Name'},
-			{ name: 'projectDescription', value: projectDescription, required: true, minLength: 10,messageName: 'Project Description'},
-			{ name: 'projectTechnology', value: projectTechnology, required: true, messageName: 'Project Technology',},
-			{ 
-				name: 'teamMembers', 
-				value: teamMembers, 
-				required: true, 
-				messageName: 'Team Members',
-				customValidator: (val) => {
-					if (!val || (Array.isArray(val) && val.length === 0)) {
-						return "Please assign at least one team member.";
-					}
-					return undefined;
-				}
-			},
-			{ 
-				name: 'projectStartDate', 
-				value: projectStartDate, 
-				type: 'date', 
-				required: true, 
-				messageName: 'Project Start Date'
-			},
-			{ 
-				name: 'projectEndDate', 
-				value: projectEndDate, 
-				required: false,
-				customValidator: (val) => {
-					if (projectStartDate && val && new Date(val) < new Date(projectStartDate)) {
-						return "Project End Date must be after the Start Date.";
-					}
-					return undefined;
-				}
-			}
-		];
-		const errors = validateFields(validationSchema);
-		
-		this.setState({ errors });
-		return Object.keys(errors).length === 0;
-	};
+    validateAddProjectForm = (e) => {
+        const { projectName, projectDescription, projectTechnology, teamMembers, projectStartDate, projectEndDate } = this.state;
+
+        // Apply Validation component
+        const validationSchema = [
+            { name: 'projectName', value: projectName, type: 'name', required: true, messageName: 'Project Name' },
+            { name: 'projectDescription', value: projectDescription, required: true, minLength: 10, messageName: 'Project Description' },
+            { name: 'projectTechnology', value: projectTechnology, required: true, messageName: 'Project Technology', },
+            {
+                name: 'teamMembers',
+                value: teamMembers,
+                required: true,
+                messageName: 'Team Members',
+                customValidator: (val) => {
+                    if (!val || (Array.isArray(val) && val.length === 0)) {
+                        return "Please assign at least one team member.";
+                    }
+                    return undefined;
+                }
+            },
+            {
+                name: 'projectStartDate',
+                value: projectStartDate,
+                type: 'date',
+                required: true,
+                messageName: 'Project Start Date'
+            },
+            {
+                name: 'projectEndDate',
+                value: projectEndDate,
+                required: false,
+                customValidator: (val) => {
+                    if (projectStartDate && val && new Date(val) < new Date(projectStartDate)) {
+                        return "Project End Date must be after the Start Date.";
+                    }
+                    return undefined;
+                }
+            }
+        ];
+        const errors = validateFields(validationSchema);
+
+        this.setState({ errors });
+        return Object.keys(errors).length === 0;
+    };
 
     getEmployeeName = (employeeId, namePart) => {
         const employee = this.state.employees.find(emp => String(emp.id) === String(employeeId));
@@ -274,16 +281,22 @@ class ProjectList extends Component {
 
     // Add/Update project data API call
     addProjectData = () => {
-        const { 
-            logged_in_employee_id, 
-            projectName, 
-            projectDescription, 
-            projectTechnology, 
-            projectStartDate, 
-            projectEndDate, 
-            selectedClient, 
-            teamMembers, 
-            isEditing, 
+        const {
+            logged_in_employee_id,
+            projectName,
+            projectDescription,
+            projectTechnology,
+            profile_used,
+            face_used,
+            mobile_number_shared,
+            address_shared,
+            projects_shared,
+            family_information_shared,
+            projectStartDate,
+            projectEndDate,
+            selectedClient,
+            teamMembers,
+            isEditing,
             editingProjectId,
             project_is_active
         } = this.state;
@@ -306,12 +319,18 @@ class ProjectList extends Component {
             project_name: projectName,
             project_description: projectDescription,
             project_technology: projectTechnology,
+            profile_used: profile_used,
+            face_used: face_used,
+            mobile_number_shared: mobile_number_shared,
+            address_shared: address_shared,
+            projects_shared: projects_shared,
+            family_information_shared: family_information_shared,
             client_id: selectedClient,
             project_start_date: projectStartDate,
             project_end_date: projectEndDate,
         }
         appendDataToFormData(projectFormData, data)
-        
+
         teamMembers.forEach((member) => {
             projectFormData.append('team_members[]', member);
         });
@@ -321,90 +340,25 @@ class ProjectList extends Component {
 
         const successMessage = isEditing ? 'Project updated successfully!' : 'Project added successfully!';
 
-         const apiCall = isEditing 
+        const apiCall = isEditing
             ? getService.editCall('projects.php', 'edit', projectFormData, null, editingProjectId)
             : getService.addCall('projects.php', 'add', projectFormData);
 
-       apiCall.then((data) => {
+        apiCall.then((data) => {
             if (data.status === 'success' || data.success) {
-                if (isEditing) {
-                    // Update existing project in the list
-                    this.setState((prevState) => ({
-                        projects: this.sortProjects(prevState.projects.map(project => 
-                            project.project_id === editingProjectId ? {
-                                ...project,
-                                project_name: projectName,
-                                project_description: projectDescription,
-                                project_technology: projectTechnology,
-                                client_id: selectedClient,
-                                project_start_date: projectStartDate,
-                                project_end_date: projectEndDate,
-                                project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
-                                team_members: teamMembers.map(id => {
-                                    const emp = this.state.employees.find(e => String(e.id) === String(id));
-                                    return {
-                                        employee_id: id,
-                                        first_name: emp ? emp.first_name : '',
-                                        last_name: emp ? emp.last_name : '',
-                                        profile: emp ? emp.profile : ''
-                                    };
-                                })
-                            } : project
-                        )),
-                        allProjects: this.sortProjects(prevState.allProjects.map(project => 
-                            project.project_id === editingProjectId ? {
-                                ...project,
-                                project_name: projectName,
-                                project_description: projectDescription,
-                                project_technology: projectTechnology,
-                                client_id: selectedClient,
-                                project_start_date: projectStartDate,
-                                project_end_date: projectEndDate,
-                                project_is_active: data.updatedProject?.project_is_active || project.project_is_active,
-                                team_members: teamMembers.map(id => {
-                                    const emp = this.state.employees.find(e => String(e.id) === String(id));
-                                    return {
-                                        employee_id: id,
-                                        first_name: emp ? emp.first_name : '',
-                                        last_name: emp ? emp.last_name : '',
-                                        profile: emp ? emp.profile : ''
-                                    };
-                                })
-                            } : project
-                        )),
-                    }));
-                } else {
-                    // Add new project to the list
-                    const newProject = data.newProject || {
-                        project_id: data.project_id || data.id, // Adjust based on API response
-                        project_name: projectName,
-                        project_description: projectDescription,
-                        project_technology: projectTechnology,
-                        client_id: selectedClient,
-                        project_start_date: projectStartDate,
-                        project_end_date: projectEndDate,
-                        created_at: new Date().toISOString(),
-                        project_is_active: project_is_active,
-                        team_members: teamMembers.map(id => {
-                            const emp = this.state.employees.find(e => String(e.id) === String(id));
-                            return {
-                                employee_id: id,
-                                first_name: emp ? emp.first_name : '',
-                                last_name: emp ? emp.last_name : '',
-                                profile: emp ? emp.profile : ''
-                            };
-                        })
-                    };
-                    this.setState(prevState => ({
-                        projects: this.sortProjects([newProject, ...prevState.projects]),
-                        allProjects: this.sortProjects([newProject, ...prevState.allProjects]),
-                    }));
-                }
+                // Refresh the project list from the backend instead of updating state manually
+                this.fetchProjects();
 
                 this.setState({
                     projectName: "",
                     projectDescription: "",
                     projectTechnology: "",
+                    profile_used: "",
+                    face_used: "",
+                    mobile_number_shared: "",
+                    address_shared: "",
+                    projects_shared: "",
+                    family_information_shared: "",
                     selectedClient: "",
                     teamMembers: [],
                     projectStartDate: "",
@@ -427,15 +381,15 @@ class ProjectList extends Component {
                 setTimeout(this.dismissMessages, 3000);
             }
         })
-        .catch((error) => {
-            console.error("Error:", error);
-            this.setState({
-                errorMessage: `An error occurred while ${isEditing ? 'editting' : 'adding'} the project.`,
-                showError: true,
-                isSubmitting: false,
+            .catch((error) => {
+                console.error("Error:", error);
+                this.setState({
+                    errorMessage: `An error occurred while ${isEditing ? 'editting' : 'adding'} the project.`,
+                    showError: true,
+                    isSubmitting: false,
+                });
+                setTimeout(this.dismissMessages, 3000);
             });
-            setTimeout(this.dismissMessages, 3000);
-        });
     };
 
     // Reset form errors when modal is closed
@@ -445,6 +399,12 @@ class ProjectList extends Component {
             projectName: "",
             projectDescription: "",
             projectTechnology: "",
+            profile_used: "",
+            face_used: "",
+            mobile_number_shared: "",
+            address_shared: "",
+            projects_shared: "",
+            family_information_shared: "",
             selectedClient: "",
             teamMembers: [],
             projectStartDate: "",
@@ -459,7 +419,7 @@ class ProjectList extends Component {
             modal.classList.remove('show');
             modal.style.display = 'none';
             document.body.classList.remove('modal-open');
-            
+
             // Remove backdrop
             const backdrop = document.getElementById('modalBackdrop');
             if (backdrop) {
@@ -484,11 +444,11 @@ class ProjectList extends Component {
         const newStatus = Number(currentStatus) === 1 ? 0 : 1; // Toggle between 1 and 0
         const user = authService.getUser();
         const token = user ? user.access_token : null;
-    
+
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/projects.php?action=update_active_status`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                 },
@@ -498,9 +458,9 @@ class ProjectList extends Component {
                     logged_in_employee_id: this.state.logged_in_employee_id
                 })
             });
-    
+
             const data = await response.json();
-    
+
             if (data.status === 'success') {
                 this.setState(prevState => ({
                     projects: this.sortProjects(prevState.projects.map(p =>
@@ -516,25 +476,25 @@ class ProjectList extends Component {
                     showSuccess: true,
                     successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
                 }));
-                
+
                 // Auto-dismiss success message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);
             } else {
                 // Error handling
-                this.setState({ 
-                    showError: true, 
-                    errorMessage: data.message || 'Failed to update project status.' 
+                this.setState({
+                    showError: true,
+                    errorMessage: data.message || 'Failed to update project status.'
                 });
-                
+
                 setTimeout(this.dismissMessages, 3000);
             }
         } catch (error) {
             // Error handling
-            this.setState({ 
-                showError: true, 
-                errorMessage: 'Failed to update project status.' 
+            this.setState({
+                showError: true,
+                errorMessage: 'Failed to update project status.'
             });
-            
+
             // Auto-dismiss error message after 3 seconds
             setTimeout(this.dismissMessages, 3000);
         }
@@ -548,24 +508,30 @@ class ProjectList extends Component {
         if (this.searchTimeout) clearTimeout(this.searchTimeout);
 
         this.searchTimeout = setTimeout(() => {
-            const { searchQuery } = this.state;
-            const searchParam = searchQuery.trim();
+            this.fetchProjects();
+        }, 500);
+    };
 
-            // Build the API URL with the search query for both name and technology
-             const apiCall = searchParam !== ""
-                ? getService.getCall('projects.php', {
-                    action: 'view',
-                    logged_in_employee_id:window.user.id,
-                    role:window.user.role,
-                    search:searchParam
-                })
-                : getService.getCall('projects.php', {
-                    action: 'view',
-                    logged_in_employee_id:window.user.id,
-                    role:window.user.role
-                })
+    handleStatusFilterChange = (event) => {
+        const status = event.target.value;
+        this.setState({ statusFilter: status }, this.fetchProjects);
+    };
 
-         apiCall.then(data => {
+    fetchProjects = () => {
+        const { searchQuery, statusFilter } = this.state;
+        const searchParam = searchQuery.trim();
+
+        const params = {
+            action: 'view',
+            logged_in_employee_id: window.user.id,
+            role: window.user.role
+        };
+
+        if (searchParam !== "") params.search = searchParam;
+        if (statusFilter !== "") params.status = statusFilter;
+
+        getService.getCall('projects.php', params)
+            .then(data => {
                 if (data.status === 'success') {
                     this.setState({
                         projects: this.sortProjects(data.data),
@@ -579,11 +545,10 @@ class ProjectList extends Component {
                 this.setState({ projects: [], allProjects: [] });
                 console.error(err);
             });
-        }, 500);
     };
 
     handleEditProject = (project) => {
-        const teamMemberIds = project.team_members 
+        const teamMemberIds = project.team_members
             ? project.team_members.map(member => String(member.employee_id || member.id))
             : [];
 
@@ -591,6 +556,12 @@ class ProjectList extends Component {
             projectName: project.project_name || "",
             projectDescription: project.project_description || "",
             projectTechnology: project.project_technology || "",
+            profile_used: project.profile_used || "",
+            face_used: project.face_used || "",
+            mobile_number_shared: project.mobile_number_shared || "",
+            address_shared: project.address_shared || "",
+            projects_shared: project.projects_shared || "",
+            family_information_shared: project.family_information_shared || "",
             selectedClient: project.client_id || "",
             teamMembers: teamMemberIds,
             projectStartDate: project.project_start_date || "",
@@ -604,60 +575,60 @@ class ProjectList extends Component {
 
     // Handle delete project - show delete modal
     handleDeleteProject = (projectId, projectName) => {
-            this.setState({
+        this.setState({
             showDeleteModal: true,
             deleteProjectId: projectId,
             deleteProjectName: projectName
         });
     };
 
-    confirmDeleteProject = () => {    
-    const { deleteProjectId } = this.state;
-    if (!deleteProjectId) return;
-    
-    this.setState({ ButtonLoading: true, isDeleting: true });
-    
-    getService.deleteCall('projects.php', 'delete', deleteProjectId, null, null, null)
-    .then(data => {
-        if (data.status === 'success' || data.success) {
-            this.setState(prevState => ({
-                projects: prevState.projects.filter(project => project.project_id !== deleteProjectId),
-                allProjects: prevState.allProjects.filter(project => project.project_id !== deleteProjectId),
-                showSuccess: true,
-                successMessage: 'Project deleted successfully!',
-                showDeleteModal: false,
-                deleteProjectId: null,
-                deleteProjectName: '',
-                isDeleting: false
-            }));
-            
-            setTimeout(this.dismissMessages, 3000);
-        } else {
-            // Error handling remains the same
-            this.setState({
-                showError: true,
-                errorMessage: data.message || 'Failed to delete project',
-                showDeleteModal: false,
-                deleteProjectId: null,
-                deleteProjectName: '',
-                isDeleting: false
+    confirmDeleteProject = () => {
+        const { deleteProjectId } = this.state;
+        if (!deleteProjectId) return;
+
+        this.setState({ ButtonLoading: true, isDeleting: true });
+
+        getService.deleteCall('projects.php', 'delete', deleteProjectId, null, null, null)
+            .then(data => {
+                if (data.status === 'success' || data.success) {
+                    this.setState(prevState => ({
+                        projects: prevState.projects.filter(project => project.project_id !== deleteProjectId),
+                        allProjects: prevState.allProjects.filter(project => project.project_id !== deleteProjectId),
+                        showSuccess: true,
+                        successMessage: 'Project deleted successfully!',
+                        showDeleteModal: false,
+                        deleteProjectId: null,
+                        deleteProjectName: '',
+                        isDeleting: false
+                    }));
+
+                    setTimeout(this.dismissMessages, 3000);
+                } else {
+                    // Error handling remains the same
+                    this.setState({
+                        showError: true,
+                        errorMessage: data.message || 'Failed to delete project',
+                        showDeleteModal: false,
+                        deleteProjectId: null,
+                        deleteProjectName: '',
+                        isDeleting: false
+                    });
+                    setTimeout(this.dismissMessages, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting project:', error);
+                this.setState({
+                    showError: true,
+                    errorMessage: 'An error occurred while deleting the project',
+                    showDeleteModal: false,
+                    deleteProjectId: null,
+                    deleteProjectName: '',
+                    isDeleting: false
+                });
+                setTimeout(this.dismissMessages, 3000);
             });
-            setTimeout(this.dismissMessages, 3000);
-        }
-    })
-    .catch(error => {
-        console.error('Error deleting project:', error);
-        this.setState({
-            showError: true,
-            errorMessage: 'An error occurred while deleting the project',
-            showDeleteModal: false,
-            deleteProjectId: null,
-            deleteProjectName: '',
-            isDeleting: false
-        });
-        setTimeout(this.dismissMessages, 3000);
-    });
-};
+    };
 
     // Close delete modal
     closeDeleteModal = () => {
@@ -665,7 +636,7 @@ class ProjectList extends Component {
             showDeleteModal: false,
             deleteProjectId: null,
             deleteProjectName: '',
-            isDeleting: false   
+            isDeleting: false
         });
     };
 
@@ -678,6 +649,12 @@ class ProjectList extends Component {
             projectName: "",
             projectDescription: "",
             projectTechnology: "",
+            profile_used: "",
+            face_used: "",
+            mobile_number_shared: "",
+            address_shared: "",
+            projects_shared: "",
+            family_information_shared: "",
             selectedClient: "",
             teamMembers: [],
             projectStartDate: "",
@@ -716,7 +693,7 @@ class ProjectList extends Component {
 
     render() {
         const { fixNavbar/* , boxOpen */ } = this.props;
-        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { projects, message, logged_in_employee_role, showSuccess, successMessage, showError, errorMessage } = this.state;
 
         // Filter projects for employees: only show active projects
         const visibleProjects = (logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin')
@@ -727,21 +704,32 @@ class ProjectList extends Component {
 
         return (
             <>
-               	<AlertMessages
-					showSuccess={showSuccess}
-					successMessage={successMessage}
-					showError={showError}
-					errorMessage={errorMessage}
-					setShowSuccess={(val) => this.setState({ showSuccess: val })}
-					setShowError={(val) => this.setState({ showError: val })}
-        		/>
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                    setShowError={(val) => this.setState({ showError: val })}
+                />
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
                     <div className="container-fluid">
-                        <div className="d-flex justify-content-between align-items-center">
+                        <div className="d-flex justify-content-between align-items-center mt-2">
                             <ul className="nav nav-tabs page-header-tab">
                                 {/* <li className="nav-item"><a className="nav-link active" id="Project-tab" data-toggle="tab" href="#Project-OnGoing">OnGoing</a></li> */}
                             </ul>
                             <div className="header-action d-md-flex">
+                                <div className="input-group mr-2">
+                                    <select
+                                        className="form-control"
+                                        value={this.state.statusFilter}
+                                        onChange={this.handleStatusFilterChange}
+                                    >
+                                        <option value="">All</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
                                 <div className="input-group mr-2">
                                     <input
                                         type="text"
@@ -755,12 +743,18 @@ class ProjectList extends Component {
                                 {(logged_in_employee_role === 'admin' || logged_in_employee_role === 'super_admin') && (
                                     <Button
                                         label="Add"
-                                        onClick={() => this.setState({ 
-                                            showEditModal: true, 
+                                        onClick={() => this.setState({
+                                            showEditModal: true,
                                             isEditing: false,
                                             projectName: "",
                                             projectDescription: "",
                                             projectTechnology: "",
+                                            profile_used: "",
+                                            face_used: "",
+                                            mobile_number_shared: "",
+                                            address_shared: "",
+                                            projects_shared: "",
+                                            family_information_shared: "",
                                             selectedClient: "",
                                             teamMembers: [],
                                             projectStartDate: "",
@@ -780,37 +774,37 @@ class ProjectList extends Component {
                     <div className="container-fluid">
                         <div className="tab-content">
                             <div className="tab-pane fade show active" id="Project-OnGoing" role="tabpanel">
-                            <div className="row">
-                                {this.state.loading ? (
-                                    Array.from({ length: skeletonCount }).map((_, index) => (
-                                        <ProjectCardSkeleton key={index} />
-                                    ))
+                                <div className="row">
+                                    {this.state.loading ? (
+                                        Array.from({ length: skeletonCount }).map((_, index) => (
+                                            <ProjectCardSkeleton key={index} />
+                                        ))
                                     ) : visibleProjects && visibleProjects.length > 0 ? (
-                                    visibleProjects.map((project, index) => (
-                                        <ProjectCard
-                                            key={index}
-                                            project={project}
-                                            index={index}
-                                            logged_in_employee_role={logged_in_employee_role}
-                                            onToggleStatus={this.handleToggleProjectStatus}
-                                            onEdit={this.handleEditProject}
-                                            onDelete={this.handleDeleteProject}
-                                            collapsedCards={this.state.collapsedCards}
-                                        />
-                                    ))
+                                        visibleProjects.map((project, index) => (
+                                            <ProjectCard
+                                                key={index}
+                                                project={project}
+                                                index={index}
+                                                logged_in_employee_role={logged_in_employee_role}
+                                                onToggleStatus={this.handleToggleProjectStatus}
+                                                onEdit={this.handleEditProject}
+                                                onDelete={this.handleDeleteProject}
+                                                collapsedCards={this.state.collapsedCards}
+                                            />
+                                        ))
                                     ) : (
-                                    !message && (
-                                        <div className="col-12">
-                                        <BlankState message="Projects not available" />
-                                        </div>
-                                    )
+                                        !message && (
+                                            <div className="col-12">
+                                                <BlankState message="Projects not available" />
+                                            </div>
+                                        )
                                     )}
                                 </div>
 
                             </div>
                         </div>
                     </div>
-                </div>               
+                </div>
 
                 {/* Edit/Add Project Modal */}
                 <EditModal
@@ -822,6 +816,12 @@ class ProjectList extends Component {
                         projectName: this.state.projectName,
                         projectDescription: this.state.projectDescription,
                         projectTechnology: this.state.projectTechnology,
+                        profile_used: this.state.profile_used,
+                        face_used: this.state.face_used,
+                        mobile_number_shared: this.state.mobile_number_shared,
+                        address_shared: this.state.address_shared,
+                        projects_shared: this.state.projects_shared,
+                        family_information_shared: this.state.family_information_shared,
                         selectedClient: this.state.selectedClient,
                         teamMembers: this.state.teamMembers,
                         projectStartDate: this.state.projectStartDate,

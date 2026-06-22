@@ -15,7 +15,7 @@ import ConnectSetting from './elements/ConnectSetting';
 import ConnectCardsView from './elements/ConnectCardView';
 import Select from "react-select";
 import dayjs from 'dayjs';
-import {optionsStatus, optionsType, viewType, customStyles} from './elements/CardUtility'
+import {optionsStatus, optionsType, viewType, customStyles } from './elements/CardUtility'
 
 class Connect extends Component {
     constructor(props) {
@@ -119,16 +119,16 @@ class Connect extends Component {
                     this.setState({
                         defaultConnectEmployee: {
                             key: setting?.key || '',
-                            value: selectedEmployee
+                            value:selectedEmployee
                         },
-                        defaultSelectedEmployee:selectedEmployee,
+                        defaultSelectedEmployee: selectedEmployee,
                     });
                 } else {
-                    this.setState({ defaultConnectEmployee: {key : "", value: []} });
+                    this.setState({ defaultConnectEmployee: {key: "", value: [] } });
                 }
             })
             .catch(err => {
-                this.setState({ defaultConnectEmployee: {key : "", value: []} });
+                this.setState({ defaultConnectEmployee: { key: "", value: [] } });
                 console.error(err);
             });
     }
@@ -263,15 +263,15 @@ class Connect extends Component {
 
                         let updatedData = prevState.connectData || [];
 
-                        if(event === 'sent'){
+                        if (event === 'sent'){
                             const emailData = new FormData();
                             emailData.append('title', selectedConnect.title);
                             emailData.append('body', selectedConnect.body);
                             emailData.append('selectedEmployee', selectedConnect.selectedEmployee);
-                            getService.addCall('email.php','add',emailData).then((data)=>{})
+                            getService.addCall('email.php', 'add', emailData).then((data) => { })
                         }
 
-                        if(currentTab === 'draft' && event === 'sent'){
+                        if(currentTab === 'draft' && event === 'sent') {
                             updatedData = updatedData.filter(
                                 item => item.id !== newConnects.id
                             );
@@ -337,7 +337,7 @@ class Connect extends Component {
             selectedConnect: {
                 id: connect.id,
                 title: connect.title || "",
-                body: connect.body ||  "",
+                body: connect.body || "",
                 type: connect.type || "",
                 attach: attachments,
                 priority: connect.priority || "",
@@ -465,7 +465,7 @@ class Connect extends Component {
     onOpenViewConnectModel = (selected) => {
         const { employeeData } = this.state;
         let empId= 0;
-        if(selected.employee_id){
+        if(selected.employee_id) {
             empId = selected.employee_id;
         }else{
             empId = window.user.id;
@@ -650,7 +650,6 @@ class Connect extends Component {
 
         const indexOfLastConnect = currentPage * dataPerPage;
         const indexOfFirstConnect = indexOfLastConnect - dataPerPage;
-
         const currentConnect = connectData.slice(
             indexOfFirstConnect,
             indexOfLastConnect
@@ -739,8 +738,8 @@ class Connect extends Component {
                                                     id="employeeFilter"
                                                     className="form-control custom-select ml-2"
                                                     options={optionsType}
-                                                    value={ optionsType.filter(opt => 
-                                                            (this.state.search.type || []).includes(opt.value)
+                                                    value={ optionsType.filter(opt =>
+                                                        (this.state.search.type || []).includes(opt.value)
                                                     )}
                                                     styles={customStyles}
                                                     placeholder="Type"

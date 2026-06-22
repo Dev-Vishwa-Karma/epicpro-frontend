@@ -111,7 +111,8 @@ class Employee extends Component {
 			selectedLeaveEmployee: (window.user.role === 'admin' || window.user.role === 'super_admin') ? "" : window.user.id,
 			ButtonLoading: false,
     		showEditLeaveModal: false, 
-			col: 3
+			col: 3,
+			statusFilter: '1'
 		};
 	}
 	handleStatistics(e) {
@@ -175,7 +176,8 @@ class Employee extends Component {
 				getService.getCall('get_employees.php', {
 					action: 'view',
 					role: 'employee',
-					employee_id:id
+					employee_id:id,
+					status: this.state.statusFilter
 				}),
 				getService.getCall('employee_leaves.php', {
 					action: 'view',
@@ -215,6 +217,59 @@ class Employee extends Component {
 			console.warn("window.user is undefined");
 		}
 	}
+
+	handleStatusFilterChange = (event) => {
+		const newStatus = event.target.value;
+		this.setState({ statusFilter: newStatus, loading: true }, () => {
+			this.fetchEmployees();
+		});
+	};
+
+	fetchEmployees = () => {
+		getService.getCall('get_employees.php', {
+			action: 'view',
+			role: 'employee',
+			employee_id: window.user ? window.user.id : null,
+			status: this.state.statusFilter
+		})
+		.then(data => {
+			if (data.status === 'success') {
+				let employeesArray = Array.isArray(data.data) ? data.data : [data.data];
+				this.setState({
+					employeeData: employeesArray,
+					allEmployeesData: employeesArray,
+					filterEmployeesData: employeesArray,
+					loading: false,
+					currentPageEmployees: 1
+				}, () => {
+					if (this.state.searchQuery) {
+						const query = this.state.searchQuery.toLowerCase();
+						const filtered = this.state.filterEmployeesData.filter(employee => {
+							return (
+								employee.first_name.toLowerCase().includes(query) ||
+								employee.last_name.toLowerCase().includes(query) ||
+								`${employee.first_name.toLowerCase()} ${employee.last_name.toLowerCase()}`.includes(query) ||  
+								employee.email.toLowerCase().includes(query)
+							);
+						});
+						this.setState({ employeeData: filtered });
+					}
+				});
+			} else {
+				this.setState({
+					employeeData: [],
+					allEmployeesData: [],
+					filterEmployeesData: [],
+					loading: false,
+					currentPageEmployees: 1
+				});
+			}
+		})
+		.catch(err => {
+			this.setState({ message: "Failed to fetch data", loading: false });
+			console.error(err);
+		});
+	};
 
 	fetchEmployeeLeaves = () => {
 		const { fromDate, toDate, selectedLeaveEmployee } = this.state;
@@ -902,6 +957,17 @@ class Employee extends Component {
 												<h3 className="card-title">Employee List</h3>
 												<div className="card-options">
 													<div className="input-group">
+														<div className="input-icon ml-2">
+															<select
+																className="form-control"
+																value={this.state.statusFilter}
+																onChange={this.handleStatusFilterChange}
+															>
+																<option value="all">All</option>
+																<option value="1">Active</option>
+																<option value="0">Inactive</option>
+															</select>
+														</div>
 														<div className="input-icon ml-2">
 															<span className="input-icon-addon">
 																<i className="fe fe-search" />

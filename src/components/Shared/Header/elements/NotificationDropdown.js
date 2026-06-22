@@ -68,21 +68,20 @@ class NotificationDropdown extends Component {
                           cursor: "pointer",
                           borderBottom: "1px solid #ddd",
                         }}
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => markAsRead(notification.id, notification?.connect_id)}
                       >
                         <div className="feeds-body">
                           <h4
-                            className={`title text-danger ${
-                              Number(notification.read) === 0 ? "font-weight-bold" : ""
-                            }`}
+                            className={`title text-danger ${Number(notification.read) === 0 ? "font-weight-bold" : ""
+                              }`}
                           >
                             {notification.title}
                             <small className="float-right text-muted">
                               {formattedDate}
                             </small>
                           </h4>
-                          <small className="notification-body" dangerouslySetInnerHTML={{__html: notification.body}} >
-                            
+                          <small className="notification-body" dangerouslySetInnerHTML={{ __html: notification.body }} >
+
                           </small>
                         </div>
                       </li>
