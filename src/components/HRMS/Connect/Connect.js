@@ -258,6 +258,47 @@ class Connect extends Component {
         )
             .then((data) => {
                 if (data.success) {
+                    // Update the Connects list // Send Specific section after save connect
+                    // const newConnects = data.newConnects;
+                    // this.setState((prevState) => {
+
+                    //     let updatedData = prevState.connectData || [];
+
+                    //     if (event === 'sent'){
+                    //         const emailData = new FormData();
+                    //         emailData.append('title', selectedConnect.title);
+                    //         emailData.append('body', selectedConnect.body);
+                    //         emailData.append('selectedEmployee', selectedConnect.selectedEmployee);
+                    //         getService.addCall('email.php', 'add', emailData).then((data) => { })
+                    //     }
+
+                    //     if(currentTab === 'draft' && event === 'sent') {
+                    //         updatedData = updatedData.filter(
+                    //             item => item.id !== newConnects.id
+                    //         );
+                    //     }else if (currentTab === 'sent' && event === 'sent' || currentTab === 'draft' && event === 'draft') {
+                    //         updatedData = [
+                    //             newConnects,
+                    //             ...updatedData
+                    //         ];
+                    //     }
+
+                    //     return {
+                    //         connectData: updatedData,
+                    //         selectedConnect: {
+                    //             title: "",
+                    //             body: "",
+                    //             type: "",
+                    //             priority: "",
+                    //             attach: [],
+                    //             status:[],
+                    //             selectedEmployee: []
+                    //         },
+                    //         successMessage: "Connects added successfully!",
+                    //         showSuccess: true,
+                    //         ButtonLoading: false,
+                    //     };
+                    // });
                     if (event === 'sent') {
                         const emailData = new FormData();
                         emailData.append('title', selectedConnect.title);
