@@ -97,7 +97,7 @@ class Employee extends Component {
 			searchQuery: "",
 			currentPageEmployees: 1,
 			currentPageLeaves: 1,
-            dataPerPage: 8,
+            dataPerPage: 10,
 			loading: true,
 			showSuccess: false,
 			successMessage: '',
@@ -111,6 +111,7 @@ class Employee extends Component {
 			selectedLeaveEmployee: (window.user.role === 'admin' || window.user.role === 'super_admin') ? "" : window.user.id,
 			ButtonLoading: false,
     		showEditLeaveModal: false, 
+			totalPagesEmployees: 1,
 			col: 3,
 			statusFilter: '1'
 		};
@@ -155,6 +156,26 @@ class Employee extends Component {
 	};
 
 	componentDidMount() {
+		if (this.props.location && this.props.location.state) {
+			const { successMessage, showSuccess, errorMessage, showError } = this.props.location.state;
+			if (showSuccess || showError) {
+				this.setState({
+					showSuccess: showSuccess || false,
+					successMessage: successMessage || '',
+					showError: showError || false,
+					errorMessage: errorMessage || ''
+				});
+				
+				// Clear the location state so it doesn't show again on refresh
+				this.props.history.replace({
+					pathname: this.props.location.pathname,
+					state: {}
+				});
+				
+				setTimeout(this.dismissMessages, 5000);
+			}
+		}
+
 		if (window.user) {
 			const { id, role } = window.user;
 			this.setState({
@@ -846,6 +867,14 @@ class Employee extends Component {
         }, 1000);
     };
 
+	handleEmployeePageChange = (newPage) => {
+		const allEmployeeList = (this.state.employeeData || []).filter(emp => emp.role === "employee");
+		const totalPages = Math.ceil(allEmployeeList.length / this.state.dataPerPage);
+		if (newPage >= 1 && newPage <= totalPages) {
+			this.setState({ currentPageEmployees: newPage });
+		}
+	};
+
 
 
 	render() {
@@ -854,9 +883,14 @@ class Employee extends Component {
 		const { activeTab, employeeData, employeeLeavesData, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves, message,  currentPageLeaves, dataPerPage, loading, selectedLeaveEmployee, showSuccess, successMessage, showError, errorMessage  } = this.state;
 
 		// Handle empty employee data safely
-		const employeeList = (employeeData || []).length > 0
+		const allEmployeeList = (employeeData || []).length > 0
 			? employeeData.filter(emp => emp.role === "employee")
 			: [];
+			
+		const indexOfLastEmployee = this.state.currentPageEmployees * dataPerPage;
+		const indexOfFirstEmployee = indexOfLastEmployee - dataPerPage;
+		const employeeList = allEmployeeList.slice(indexOfFirstEmployee, indexOfLastEmployee);
+		const totalPagesEmployees = Math.ceil(allEmployeeList.length / dataPerPage);
 		const leaveList = (employeeLeavesData || []).length > 0 ? employeeLeavesData : [];
 
 		// Filter leaves
@@ -993,6 +1027,13 @@ class Employee extends Component {
 												message={message}
 											/>
 										</div>
+										{totalPagesEmployees > 0 && (
+											<Pagination
+												currentPage={this.state.currentPageEmployees}
+												totalPages={totalPagesEmployees}
+												onPageChange={this.handleEmployeePageChange}
+											/>
+										)}
 									</div>
 									<div className="tab-pane fade" id="Employee-Request" role="tabpanel">
 										<div className="card">

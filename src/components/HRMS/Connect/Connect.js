@@ -10,6 +10,7 @@ import DateFilterForm from '../../common/DateFilterForm';
 import Button from '../../common/formInputs/Button';
 import DeleteModal from '../../common/DeleteModal';
 import InputField from '../../common/formInputs/InputField';
+import AlertMessages from '../../common/AlertMessages';
 import ViewConnectModel from './elements/ViewConnectModel'
 import ConnectSetting from './elements/ConnectSetting';
 import ConnectCardsView from './elements/ConnectCardView';
@@ -257,48 +258,25 @@ class Connect extends Component {
         )
             .then((data) => {
                 if (data.success) {
-                    // Update the Connects list
-                    const newConnects = data.newConnects;
-                    this.setState((prevState) => {
+                    if (event === 'sent') {
+                        const emailData = new FormData();
+                        emailData.append('title', selectedConnect.title);
+                        emailData.append('body', selectedConnect.body);
+                        emailData.append('selectedEmployee', selectedConnect.selectedEmployee);
+                        getService.addCall('email.php', 'add', emailData).then((data) => { })
+                    }
 
-                        let updatedData = prevState.connectData || [];
-
-                        if (event === 'sent'){
-                            const emailData = new FormData();
-                            emailData.append('title', selectedConnect.title);
-                            emailData.append('body', selectedConnect.body);
-                            emailData.append('selectedEmployee', selectedConnect.selectedEmployee);
-                            getService.addCall('email.php', 'add', emailData).then((data) => { })
-                        }
-
-                        if(currentTab === 'draft' && event === 'sent') {
-                            updatedData = updatedData.filter(
-                                item => item.id !== newConnects.id
-                            );
-                        }else if (currentTab === 'sent' && event === 'sent' || currentTab === 'draft' && event === 'draft') {
-                            updatedData = [
-                                newConnects,
-                                ...updatedData
-                            ];
-                        }
-
-                        return {
-                            connectData: updatedData,
-                            selectedConnect: {
-                                title: "",
-                                body: "",
-                                type: "",
-                                priority: "",
-                                attach: [],
-                                status:[],
-                                selectedEmployee: []
-                            },
-                            successMessage: "Connects added successfully!",
-                            showSuccess: true,
-                            ButtonLoading: false,
-                        };
-                    });
                     this.onCloseConnectModal();
+                    
+                    const newTab = event === 'sent' ? 'sent' : 'draft';
+                    this.connectDetail(newTab);
+                    window.location.hash = `#${newTab}`;
+
+                    this.setState({
+                        successMessage: event === 'sent' ? "Connect sent successfully!" : "Connect saved to draft!",
+                        showSuccess: true,
+                        ButtonLoading: false,
+                    });
                     setTimeout(this.dismissMessages, 3000);
                 } else {
                     this.setState({
@@ -658,6 +636,14 @@ class Connect extends Component {
 
         return (
             <>
+                <AlertMessages
+                    showSuccess={showSuccess}
+                    successMessage={successMessage}
+                    showError={showError}
+                    errorMessage={errorMessage}
+                    setShowSuccess={val => this.setState({ showSuccess: val })}
+                    setShowError={val => this.setState({ showError: val })}
+                />
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
                     <div className="container-fluid">
                         <div className="d-flex justify-content-between align-items-center">
