@@ -49,8 +49,8 @@ class Link extends Component {
     this.searchDebounceTimer = null;
   }
 
-  fetchLinks = (search = '') => {
-    const params = { action: 'view' };
+  fetchLinks = (tabId = this.state.activeTab, search = '') => {
+    const params = { action: 'view', type: tabId };
     if (search) params.search = search;
     getService.getCall('resources.php', params)
       .then(res => {
@@ -70,7 +70,7 @@ class Link extends Component {
 
   handleTabChange = (tabId) => {
     this.setState({ activeTab: tabId, searchQuery: '', loading: true });
-    this.fetchLinks()
+    this.fetchLinks(tabId)
   };
 
   handleAddClick = () => {
@@ -320,7 +320,7 @@ class Link extends Component {
             successMessage: res.message || (isEdit ? 'Data updated successfully!' : 'Data added successfully!'),
             loading: false,
           });
-          this.fetchLinks();
+          this.fetchLinks(activeTab);
         } else {
           this.setState({ showError: true, errorMessage: res.message || 'Failed to save data', loading: false });
         }
@@ -355,7 +355,7 @@ class Link extends Component {
     }
   };
 
-  handleSearch = (event) => {
+  handleSearch = (event, tabId) => {
     const query = event.target.value;
     this.setState({ 
       searchQuery: query, 
@@ -368,7 +368,7 @@ class Link extends Component {
     }
     this.searchDebounceTimer = setTimeout(() => {
       this.setState({ loading: true });
-      this.fetchLinks(query);
+      this.fetchLinks(tabId, query);
     }, 1000);
   };
 
@@ -562,7 +562,7 @@ class Link extends Component {
                         className="form-control"
                         placeholder="Search by title or URL..."
                         value={searchQuery}
-                        onChange={this.handleSearch}
+                        onChange={(e) => this.handleSearch(e, 'Git')}
                       />
                     </div>
                   </div>
@@ -595,7 +595,7 @@ class Link extends Component {
                         className="form-control"
                         placeholder="Search by title or URL..."
                         value={searchQuery}
-                        onChange={this.handleSearch}
+                        onChange={(e) => this.handleSearch(e, 'Excel')}
                       />
                     </div>
                   </div>
@@ -629,7 +629,7 @@ class Link extends Component {
                         className="form-control"
                         placeholder="Search by title or URL..."
                         value={searchQuery}
-                        onChange={this.handleSearch}
+                        onChange={(e) => this.handleSearch(e, 'Codebase')}
                       />
                     </div>
                   </div>

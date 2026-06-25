@@ -144,13 +144,19 @@ class ApplicantForm extends Component {
 
     const {
       fullname,
-      email
+      email,
+      resume,
+      experience,
+      phone
     } = this.state;
 
 
     const validationSchema = [
       { name: 'fullname', value: fullname, type: 'name', required: true, messageName: 'Full Name' },
       { name: 'email', value: email, type: 'email', required: true, messageName: 'Email' },
+      { name: 'resume', value: resume, type: 'file', required: true, messageName: 'Resume' },
+      { name: 'experience', value: experience, type: 'select', required: true, messageName: 'Experience' },
+      { name: 'phone', value: phone, type: 'phone', required: true, messageName: 'Phone' },
     ];
 
     const errors = validateFields(validationSchema);

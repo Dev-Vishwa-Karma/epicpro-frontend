@@ -556,7 +556,10 @@ class EditEmployee extends Component {
                 
                 // Redirect to employee list after successful update
                 if (this.props.history && typeof this.props.history.push === 'function') {
-                    this.props.history.push('/hr-employee');
+                    this.props.history.push({
+                        pathname: '/hr-employee',
+                        state: { showSuccess: true, successMessage: "Employee updated successfully!" }
+                    });
                 }
                 
                 // Fetch latest salary details after successful update

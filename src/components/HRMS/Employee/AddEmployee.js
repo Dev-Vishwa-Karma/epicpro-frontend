@@ -443,7 +443,10 @@ appendDataToFormData(addEmployeeData, data)
             showError: false,
             ButtonLoading: false,
           }));
-          this.props.history.push('/hr-employee');
+          this.props.history.push({
+            pathname: '/hr-employee',
+            state: { showSuccess: true, successMessage: "Employee added successfully!" }
+          });
 
           setTimeout(this.dismissMessages, 5000);
 

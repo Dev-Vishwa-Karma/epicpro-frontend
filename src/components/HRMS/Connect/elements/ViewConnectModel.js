@@ -143,7 +143,7 @@ const ViewConnectModel = ({
                                                 {isLoading ? (
                                                     <TableSkeleton columns={3} rows={4} />
                                                 ) : (
-                                                    <ul className="list-group" style={{ height: "500px", overflow: "aito" }}>
+                                                    <ul className="list-group" style={{overflow: "aito" }}>
                                                         <li className="list-group-item">
                                                             <small className="text-muted">Description: </small>
                                                             <p className="mb-0" style={{ height: "180px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: selectedConnect.body }}></p>
@@ -218,7 +218,7 @@ const ViewConnectModel = ({
                                                             <small className="text-muted">Type: </small>
                                                             <p className="mb-0">
                                                                 <span className="">
-                                                                    {selectedConnect.type}
+                                                                    {selectedConnect.type === 'todo' ? 'Todo' : selectedConnect.type === 'information' ?  'Information' : selectedConnect.type === 'need_discussion' ? 'Need Discussion' : 'Completed'}
                                                                 </span>
                                                             </p>
                                                         </li>

@@ -77,7 +77,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                 </td>
                                 <td className="custom-card-meta" dangerouslySetInnerHTML={{ __html: connect.body }}></td>
                                 <td>
-                                    {connect.type === 'todo' ? 'Todo' : connect.type === 'information' ?  'Information' : connect.type === 'need_discussion' ? 'Neede Discussion' : 'Completed'}
+                                    {connect.type === 'todo' ? 'Todo' : connect.type === 'information' ?  'Information' : connect.type === 'need_discussion' ? 'Need Discussion' : 'Completed'}
                                 </td>
 
                                 {currentTab === "receive" && (
