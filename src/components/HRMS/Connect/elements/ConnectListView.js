@@ -90,7 +90,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                                             connect.read === 'ready_to_discuss' ? 'tag-warning' :
                                                                 connect.read === 'completed' ? 'tag-danger' : ''
                                                 }`}>
-                                            {connect.read === '1' ? 'read' : connect.read === '0' ? 'unread' : connect.read}
+												{connect.read === '1' || connect.read === 'read' ? 'read' : connect.read === '0' || connect.read === 'unread' ? 'unread' : connect.read === 'ready_to_discuss' ? 'Ready To Discuss' : connect.read === 'completed' ? 'Completed' : connect.read}
                                         </span>
                                     </td>
                                 )}
