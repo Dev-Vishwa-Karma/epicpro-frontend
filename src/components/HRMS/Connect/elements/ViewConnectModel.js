@@ -169,10 +169,11 @@ const ViewConnectModel = ({
                                                                                 {selectedConnect?.read === '1' || selectedConnect?.read === 'read' ? 'Read' : selectedConnect?.read === '0' || selectedConnect?.read === 'unread' ? 'Unread' : selectedConnect?.read === 'ready_to_discuss' ? 'Ready To Discuss' : selectedConnect?.read === 'completed' ? 'Completed' : selectedConnect?.read}
                                                                             </span>
                                                                         ) : (
-                                                                            <div className="ml-2 mt-3">
+                                                                            <div className="ml-2">
                                                                                 <InputField
                                                                                     name="status"
                                                                                     type="select"
+                                                                                    containerClassName="mb-0"
                                                                                     value={selectedConnect?.read}
                                                                                     onChange={(e) => {
                                                                                         onChange(e);
@@ -353,34 +354,34 @@ const ViewConnectModel = ({
 
                                         {showPreview && (
 
-                                        <div className="card">
-                                            <div className="card-header">
-                                                <h3 className="card-title">Preview:</h3>
-                                            </div>
-                                            <div className="card-body" style={{
-                                                height: "486px",
-                                                overflow: "auto"
-                                            }}>
-                                                {filePath && isImage(getExt(filePath)) && (
-                                                    <img
-                                                        src={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                                        alt="preview"
-                                                        style={{ width: "450px", height: "450px", objectFit: "contain" }}
-                                                    />
-                                                )}
+                                            <div className="card">
+                                                <div className="card-header">
+                                                    <h3 className="card-title">Preview:</h3>
+                                                </div>
+                                                <div className="card-body" style={{
+                                                    height: "486px",
+                                                    overflow: "auto"
+                                                }}>
+                                                    {filePath && isImage(getExt(filePath)) && (
+                                                        <img
+                                                            src={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                                                            alt="preview"
+                                                            style={{ width: "450px", height: "450px", objectFit: "contain" }}
+                                                        />
+                                                    )}
 
-                                                {filePath && !isImage(getExt(filePath)) && (
-                                                    <a
-                                                        href={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                                        download
-                                                        className="btn btn-primary"
-                                                    >
-                                                        Download File
-                                                    </a>
-                                                )}
+                                                    {filePath && !isImage(getExt(filePath)) && (
+                                                        <a
+                                                            href={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                                                            download
+                                                            className="btn btn-primary"
+                                                        >
+                                                            Download File
+                                                        </a>
+                                                    )}
 
+                                                </div>
                                             </div>
-                                        </div>
                                         )}
                                     </div>
                                 </div>
