@@ -66,18 +66,18 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                                             : "tag-success"
                                                     }`}
                                                 >
-                                                    {connect.priority}
-                                                </span>
+                                                {connect.priority === "high" ? "High" : connect.priority === "medium" ? "Medium" : "Low"}
+                                            </span>
 
-                                                <div className="tooltip-box">
-                                                    Priority: {connect.priority}
-                                                </div>
+                                            <div className="tooltip-box">
+                                                Priority: {connect.priority === "high" ? "High" : connect.priority === "medium" ? "Medium" : "Low"}
                                             </div>
                                         </div>
+                                    </div>
                                 </td>
                                 <td className="custom-card-meta" dangerouslySetInnerHTML={{ __html: connect.body }}></td>
                                 <td>
-                                    {connect.type === 'todo' ? 'Todo' : connect.type === 'information' ?  'Information' : connect.type === 'need_discussion' ? 'Need Discussion' : 'Completed'}
+                                    {connect.type === 'todo' ? 'Todo' : connect.type === 'information' ? 'Information' : connect.type === 'need_discussion' ? 'Need Discussion' : 'Completed'}
                                 </td>
 
                                 {currentTab === "receive" && (
@@ -90,7 +90,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                                             connect.read === 'ready_to_discuss' ? 'tag-warning' :
                                                                 connect.read === 'completed' ? 'tag-danger' : ''
                                                 }`}>
-                                            {connect.read === '1' ? 'read' : connect.read === '0' ? 'unread' : connect.read}
+                                            {connect.read === '1' || connect.read === 'read' ? 'Read' : connect.read === '0' || connect.read === 'unread' ? 'Unread' : connect.read === 'ready_to_discuss' ? 'Ready To Discuss' : connect.read === 'completed' ? 'Completed' : connect.read}
                                         </span>
                                     </td>
                                 )}
@@ -168,7 +168,7 @@ const ConnectListView = ({ connectData, onRemoveClick, userRole, onRecordClick, 
                                                                                     : 'tag-red'
                                                                             }`}
                                                                         >
-                                                                            {rec.read}
+                                                                            {rec.read === '1' || rec.read === 'read' ? 'Read' : rec.read === '0' || rec.read === 'unread' ? 'Unread' : rec.read === 'ready_to_discuss' ? 'Ready To Discuss' : rec.read === 'completed' ? 'Completed' : rec.read}
                                                                         </span>
                                                                     </div>
                                                                 </div>

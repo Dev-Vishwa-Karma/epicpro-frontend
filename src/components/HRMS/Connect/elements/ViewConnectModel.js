@@ -150,92 +150,111 @@ const ViewConnectModel = ({
                                                         </li>
                                                         {currentTab === 'receive' && (
                                                             <li className="list-group-item">
-                                                                <small className="text-muted">Status: </small>
-                                                                <p className="mb-0 d-flex align-items-center justify-content-between" onClick={toggleEditStatus}>
-                                                                    <span className={`tag ${selectedConnect.read === '1' ? 'tag-blue' :
-                                                                        selectedConnect.read === '0' ? 'tag-red' :
-                                                                            selectedConnect.read === 'read' ? 'tag-blue' :
-                                                                                selectedConnect.read === 'unread' ? 'tag-red' :
-                                                                                    selectedConnect.read === 'ready_to_discuss' ? 'tag-warning' :
-                                                                                        selectedConnect.read === 'completed' ? 'tag-danger' : ''
-                                                                        }`}
-                                                                    >
-                                                                        {selectedConnect?.read}
-                                                                    </span>
-                                                                    <span>
-                                                                        <i className="fa fa-pencil" />
-                                                                    </span>
-                                                                </p>
-                                                                {editStatus && (
-                                                                    <div>
-                                                                        <InputField
-                                                                            label="Status"
-                                                                            name="status"
-                                                                            type="select"
-                                                                            value={selectedConnect?.read}
-                                                                            // onChange={onChange}
-                                                                            onChange={(e) => {
-                                                                                onChange(e);
-                                                                                setEditStatus(false);
-                                                                            }}
-                                                                            options={[
-                                                                                { value: "unread", label: "Unread" },
-                                                                                { value: "read", label: "Read" },
-                                                                                { value: "ready_to_discuss", label: "Ready To Discuss" },
-                                                                                { value: "completed", label: "Completed" },
-                                                                            ]}
-                                                                        />
+                                                                <div className="mb-0 d-flex align-items-center justify-content-between">
+                                                                    <div className="d-flex align-items-center">
+                                                                        <small className="text-muted me-2">Status: </small>
+                                                                        {!editStatus ? (
+                                                                            <span
+                                                                                className={`ml-1 tag ${selectedConnect?.read === "1" || selectedConnect?.read === "read"
+                                                                                    ? "tag-blue"
+                                                                                    : selectedConnect?.read === "0" || selectedConnect?.read === "unread"
+                                                                                        ? "tag-red"
+                                                                                        : selectedConnect?.read === "ready_to_discuss"
+                                                                                            ? "tag-warning"
+                                                                                            : selectedConnect?.read === "completed"
+                                                                                                ? "tag-danger"
+                                                                                                : ""
+                                                                                    }`}
+                                                                            >
+                                                                                {selectedConnect?.read === '1' || selectedConnect?.read === 'read' ? 'Read' : selectedConnect?.read === '0' || selectedConnect?.read === 'unread' ? 'Unread' : selectedConnect?.read === 'ready_to_discuss' ? 'Ready To Discuss' : selectedConnect?.read === 'completed' ? 'Completed' : selectedConnect?.read}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <div className="ml-2">
+                                                                                <InputField
+                                                                                    name="status"
+                                                                                    type="select"
+                                                                                    containerClassName="mb-0"
+                                                                                    value={selectedConnect?.read}
+                                                                                    onChange={(e) => {
+                                                                                        onChange(e);
+                                                                                        setEditStatus(false); // Hide dropdown after selecting
+                                                                                    }}
+                                                                                    options={[
+                                                                                        { value: "unread", label: "Unread" },
+                                                                                        { value: "read", label: "Read" },
+                                                                                        { value: "ready_to_discuss", label: "Ready To Discuss" },
+                                                                                        { value: "completed", label: "Completed" },
+                                                                                    ]}
+                                                                                />
+                                                                            </div>
+                                                                        )}
                                                                     </div>
-                                                                )}
+                                                                    <i className="fa fa-pencil" onClick={toggleEditStatus} style={{ cursor: "pointer" }} />
+                                                                </div>
                                                             </li>
                                                         )}
 
-                                                        {currentTab === 'sent' && Array.isArray(receiver) && receiver.map((connect) => (
-                                                            <li className="list-group-item" key={connect.employee_id}>
-                                                                <small className="text-muted">Status: </small>
+                                                        {currentTab === "sent" && Array.isArray(receiver) && receiver.length > 0 && (
+                                                            <li className="list-group-item">
+                                                                <div className="connect-table-container table-responsive">
 
-                                                                <p
-                                                                    className="mb-0 d-flex align-items-center justify-content-between"
-                                                                >
-                                                                    <span className={`tag ${connect.read === '1' || connect.read === 'read' ? 'tag-blue' :
-                                                                        connect.read === '0' || connect.read === 'unread' ? 'tag-red' :
-                                                                            connect.read === 'ready_to_discuss' ? 'tag-warning' :
-                                                                                connect.read === 'completed' ? 'tag-danger' : ''
-                                                                        }`}>
-                                                                        {connect.read}
-                                                                    </span>
-
-                                                                    <span>
-                                                                        <small className="text-muted">Receiver: </small>
-
-                                                                        {connect.receiver_name}
-                                                                </span>
-                                                                </p>
+                                                                    <table className="table table-sm table-borderless">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th className="w-50"><small className="text-muted">Status</small></th>
+                                                                                <th className="w-50"><small className="text-muted">Receiver</small></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {receiver.map((connect) => (
+                                                                                <tr key={connect.employee_id}>
+                                                                                    <td>
+                                                                                        <span
+                                                                                            className={`tag ${connect.read === "1" || connect.read === "read"
+                                                                                                ? "tag-blue"
+                                                                                                : connect.read === "0" || connect.read === "unread"
+                                                                                                    ? "tag-red"
+                                                                                                    : connect.read === "ready_to_discuss"
+                                                                                                        ? "tag-warning"
+                                                                                                        : connect.read === "completed"
+                                                                                                            ? "tag-danger"
+                                                                                                            : ""
+                                                                                                }`}
+                                                                                        >
+                                                                                            {connect.read === 'unread' ? 'Unread' : connect.read === 'read' ? 'Read' : connect.read === 'ready_to_discuss' ? 'Ready To Discuss' : connect.read === 'completed' ? 'Completed' : connect.read}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                    <td>{connect.receiver_name}</td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </li>
-                                                        ))}
+                                                        )}
 
                                                         <li className="list-group-item">
-                                                            <small className="text-muted">Type: </small>
-                                                            <p className="mb-0">
+                                                            <span>
+                                                                <small className="text-muted">Type: </small>
                                                                 <span className="">
-                                                                    {selectedConnect.type === 'todo' ? 'Todo' : selectedConnect.type === 'information' ?  'Information' : selectedConnect.type === 'need_discussion' ? 'Need Discussion' : 'Completed'}
+                                                                    {selectedConnect.type === 'todo' ? 'Todo' : selectedConnect.type === 'information' ? 'Information' : selectedConnect.type === 'need_discussion' ? 'Need Discussion' : 'Completed'}
                                                                 </span>
-                                                            </p>
+                                                            </span>
                                                         </li>
                                                         <li className="list-group-item">
-                                                            <small className="text-muted">Sender: </small>
-                                                            <p className="mb-0">
+                                                            <span>
+                                                                <small className="text-muted">Sender: </small>
                                                                 <span className="">
                                                                     {JSON.parse(selectedConnect?.sender || '{}')?.name || ''}
                                                                 </span>
-                                                            </p>
+                                                            </span>
                                                         </li>
                                                         <li className="list-group-item">
-                                                            <div className="d-flex justify-content-between">
-                                                                <small className="text-muted">Created Data: </small>
+                                                            <span>
+                                                                <small className="text-muted">Created Date: </small>
                                                                 {selectedConnect.created_at && (new Date(selectedConnect.created_at) < new Date()) ? '' : <span className="tag over-due-ticket">New</span>}
-                                                            </div>
-                                                            <p className="mb-0">{selectedConnect.created_at ? formatDate(selectedConnect.created_at) : '--/--/--'}</p>
+                                                                <span className="mb-0">{selectedConnect.created_at ? formatDate(selectedConnect.created_at) : '--/--/--'}</span>
+                                                            </span>
                                                         </li>
 
 
@@ -361,8 +380,8 @@ const ViewConnectModel = ({
                                                     </a>
                                                 )}
 
+                                                </div>
                                             </div>
-                                        </div>
                                         )}
                                     </div>
                                 </div>

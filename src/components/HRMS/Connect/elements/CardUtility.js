@@ -127,15 +127,15 @@ export const Type = ({ type }) => {
   const map = {
     low: {
       tag: "tag-success",
-      label: "todo"
+      label: "Todo"
     },
     medium: {
       tag: "tag-warning",
-      label: "information"
+      label: "Information"
     },
     high: {
       tag: "tag-danger",
-      label: "need_discussion"
+      label: "Need Discussion"
     }
   };
 
