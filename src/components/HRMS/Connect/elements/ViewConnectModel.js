@@ -143,7 +143,7 @@ const ViewConnectModel = ({
                                                 {isLoading ? (
                                                     <TableSkeleton columns={3} rows={4} />
                                                 ) : (
-                                                    <ul className="list-group" style={{ overflow: "aito" }}>
+                                                    <ul className="list-group" style={{overflow: "aito" }}>
                                                         <li className="list-group-item">
                                                             <small className="text-muted">Description: </small>
                                                             <p className="mb-0" style={{ height: "180px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: selectedConnect.body }}></p>
@@ -354,31 +354,31 @@ const ViewConnectModel = ({
 
                                         {showPreview && (
 
-                                            <div className="card">
-                                                <div className="card-header">
-                                                    <h3 className="card-title">Preview:</h3>
-                                                </div>
-                                                <div className="card-body" style={{
-                                                    height: "486px",
-                                                    overflow: "auto"
-                                                }}>
-                                                    {filePath && isImage(getExt(filePath)) && (
-                                                        <img
-                                                            src={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                                            alt="preview"
-                                                            style={{ width: "450px", height: "450px", objectFit: "contain" }}
-                                                        />
-                                                    )}
+                                        <div className="card">
+                                            <div className="card-header">
+                                                <h3 className="card-title">Preview:</h3>
+                                            </div>
+                                            <div className="card-body" style={{
+                                                height: "486px",
+                                                overflow: "auto"
+                                            }}>
+                                                {filePath && isImage(getExt(filePath)) && (
+                                                    <img
+                                                        src={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                                                        alt="preview"
+                                                        style={{ width: "450px", height: "450px", objectFit: "contain" }}
+                                                    />
+                                                )}
 
-                                                    {filePath && !isImage(getExt(filePath)) && (
-                                                        <a
-                                                            href={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                                            download
-                                                            className="btn btn-primary"
-                                                        >
-                                                            Download File
-                                                        </a>
-                                                    )}
+                                                {filePath && !isImage(getExt(filePath)) && (
+                                                    <a
+                                                        href={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                                                        download
+                                                        className="btn btn-primary"
+                                                    >
+                                                        Download File
+                                                    </a>
+                                                )}
 
                                                 </div>
                                             </div>
