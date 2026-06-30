@@ -35,6 +35,21 @@ const ClientInfoModal = ({ client, onClose }) => {
                       />
                     )}
               </>
+              {/* Status Badge */}
+              <span
+                className={client.client_status === '1' ? 'bg-success' : 'bg-danger'}
+                style={{
+                  position: 'absolute',
+                  bottom: '5px',
+                  right: '5px',
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  border: '3px solid #fff',
+                  zIndex: 10
+                }}
+                title={client.client_status === '1' ? 'Active' : 'Inactive'}
+              />
             </div>
           </div>
 
@@ -68,6 +83,9 @@ const ClientInfoModal = ({ client, onClose }) => {
                           <Link to={`/project-list`}>
                             {project.project_name}
                           </Link>
+                        <p className={`badge ${project.is_active === '1' ? 'active-employee' : 'inactive-employee'}`}>
+                            {project.is_active === '1' ? 'Active' : 'In-active'}
+                        </p>
                         </div>
                         {/* Divider for spacing and separation */}
                         <div style={{ height: 5 }} />

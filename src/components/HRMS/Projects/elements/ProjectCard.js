@@ -21,7 +21,7 @@ const ProjectCard = ({
         <div className="card-header">
           <h3 className="card-title">{project.project_name}</h3>
           <div className="card-options">
-            <label className="custom-switch m-0">
+            <label className="custom-switch m-0" title={`Update status ${project.project_is_active === '1' ? 'Active' : 'Inactive'} to ${project.project_is_active !== '1' ? 'Active' : 'Inactive'}`}>
               <input
                 type="checkbox"
                 className="custom-switch-input"

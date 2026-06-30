@@ -49,7 +49,11 @@ const DashboardTable = ({ projects, loading }) => {
                         </div>
                       )}
                     </td>
-                    <td>{project.project_name}</td>
+                    <td>{project.project_name}
+                      <span className={`badge ${project.project_is_active === "1" ? 'active-employee' : 'inactive-employee'}`}>
+                        {project.project_is_active === "1" ? 'Active' : 'In-active'}
+                      </span>
+                    </td>
                     <td>{project.project_technology}</td>
                   </tr>
                 ))

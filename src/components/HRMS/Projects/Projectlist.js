@@ -462,20 +462,12 @@ class ProjectList extends Component {
             const data = await response.json();
 
             if (data.status === 'success') {
-                this.setState(prevState => ({
-                    projects: this.sortProjects(prevState.projects.map(p =>
-                        p.project_id === projectId
-                            ? { ...p, project_is_active: newStatus }
-                            : p
-                    )),
-                    allProjects: this.sortProjects(prevState.allProjects.map(p =>
-                        p.project_id === projectId
-                            ? { ...p, project_is_active: newStatus }
-                            : p
-                    )),
+                this.fetchProjects();
+
+                this.setState({
                     showSuccess: true,
                     successMessage: `Project ${newStatus === 1 ? 'activated' : 'deactivated'}!`
-                }));
+                });
 
                 // Auto-dismiss success message after 3 seconds
                 setTimeout(this.dismissMessages, 3000);

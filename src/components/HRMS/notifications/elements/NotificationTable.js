@@ -3,6 +3,16 @@ import NoDataRow from '../../../common/NoDataRow';
 import Avatar from '../../../common/Avatar';
 import Button from '../../../common/formInputs/Button';
 
+const NotificationType = (type) => {
+    const custom = {
+        todo: 'Todo',
+    };
+
+    return (
+        custom[type] ||
+        type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    );
+};
 const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userRole }) => {
     return (
         <div className="table-responsive">
@@ -27,7 +37,7 @@ const NotificationTable = ({ notificationData, onEditClick, onDeleteClick, userR
                             <td>{index + 1}</td>
                             <td>{notification.title}</td>
                             <td dangerouslySetInnerHTML={{__html: notification.body}}></td>
-                            <td>{notification.type}</td>
+                            <td>{NotificationType(notification.type)}</td>
                             <td>
                                 <span className={`tag ${
                                     notification.read == '1' ? 'tag-blue' :
