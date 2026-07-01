@@ -2,7 +2,7 @@ import React from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-const TextEditor = ({ name, value, onChange, error }) => {
+const TextEditor = ({ name, value, onChange, error, height = '300px' }) => {
   return (
     <div className={`ck-editor-wrapper ${error ? 'is-invalid' : ''}`}>
       <CKEditor
@@ -10,7 +10,7 @@ const TextEditor = ({ name, value, onChange, error }) => {
         data={value}
         onReady={(editor) => {
           // Set a fixed height for the editor
-          editor.ui.view.editable.element.style.height = '300px';
+          editor.ui.view.editable.element.style.height = height;
         }}
         onChange={(event, editor) => {
           const data = editor.getData();
@@ -26,7 +26,7 @@ const TextEditor = ({ name, value, onChange, error }) => {
       <style>
         {`
           .ck-editor__editable {
-            height: 300px !important;  /* Fix the height */
+            height: ${height} !important;  /* Fix the height */
             overflow: auto; /* Enable scrolling if content exceeds the height */
           }
         `}
