@@ -100,7 +100,7 @@ const TicketListTable = ({ loading, logged_in_employee_role, ticketListData, goT
                                         </div>
                                         </td>
                                         {logged_in_employee_role !== 'employee' &&
-                                            <td className='d-flex'>
+                                            <td className='d-flex align-items-center mt-3'>
                                                 <Avatar
                                                     profile={ticket.assigned_to.profile}
                                                     first_name={ticket.assigned_to.first_name}

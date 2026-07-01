@@ -33,6 +33,9 @@ const ClientCard = ({
               />
             )}
           </div>
+          <span className={`badge ${client.client_status === "1" ? 'active-employee' : 'inactive-employee'}`}>
+              {client.client_status === "1" ? 'Active' : 'In-active'}
+          </span>
           
           <div
             className="dropdown d-flex"
