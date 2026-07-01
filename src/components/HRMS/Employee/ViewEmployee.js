@@ -146,15 +146,42 @@ class ViewEmployee extends Component {
     }
 
     saveCroppedImage = () => {
-        this.setState({ showGallery: false});
+        this.setState({ showGallery: false, showCropPreview: false });
     };
 
     handleBack = () => {
         this.setState({ showGallery: true});
     }
 
+    handleCropPreview = async () => {
+        const blob = await new Promise(resolve => this.cropper.getCroppedCanvas().toBlob(resolve, 'image/jpeg', 0.8));
+
+        const maxSize = 1 * 1024 * 1024; // 1MB limit
+        if (blob.size > maxSize) {
+            this.setState({
+                errorMessage: `The cropped image is ${(blob.size / 1024 / 1024).toFixed(2)} MB. Please crop a smaller area or use a lower-resolution image to keep the file size under 1 MB.`,
+                showError: true,
+                showSuccess: false
+            });
+            setTimeout(this.dismissMessages, 3000);
+            return;
+        }
+
+        const finalCroppedDataUrl = URL.createObjectURL(blob);
+        this.setState({
+            showCropPreview: true,
+            finalCroppedBlob: blob,
+            finalCroppedDataUrl: finalCroppedDataUrl
+        });
+    };
+
+    handleBackToCrop = () => {
+        this.setState({ showCropPreview: false });
+    };
+
     handleSave = async () => {
-        const croppedImage = this.cropper.getCroppedCanvas().toDataURL();
+        const blob = this.state.finalCroppedBlob;
+        const croppedImage = this.blobToFile(blob, 'profile.jpg');
         try {
             const uploadImageData = new FormData();
             uploadImageData.append('employee_id', this.state.employeeId);
@@ -173,10 +200,11 @@ class ViewEmployee extends Component {
                     errorMessage: "",
                     showError: false,
                     openFileSelectModel: false,
-                    showGallery: true
+                    showGallery: true,
+                    showCropPreview: false
                 });
                 setTimeout(this.dismissMessages, 3000);
-            } else{
+            } else {
                 this.setState({
                     errorMessage: "An error occurred while uploading the image. Check your image size",
                     showError: true,
@@ -313,14 +341,16 @@ class ViewEmployee extends Component {
 
         return (
             <>
-                {/* <AlertMessages
-                    showSuccess={showSuccess}
-                    successMessage={successMessage}
-                    showError={showError}
-                    errorMessage={errorMessage}
-                    setShowSuccess={(val) => this.setState({ showSuccess: val })}
-                    setShowError={(val) => this.setState({ showError: val })}
-                /> */}
+                {!openFileSelectModel && (
+                    <AlertMessages
+                        showSuccess={showSuccess}
+                        successMessage={successMessage}
+                        showError={showError}
+                        errorMessage={errorMessage}
+                        setShowSuccess={(val) => this.setState({ showSuccess: val })}
+                        setShowError={(val) => this.setState({ showError: val })}
+                    />
+                )}
 
                 <div className={`section-body ${fixNavbar ? "marginTop" : ""} `}>
                     <div className="container-fluid">
@@ -405,7 +435,7 @@ class ViewEmployee extends Component {
                                     <div 
                                         className="btn btn-close" 
                                         onClick={() => {
-                                            this.setState({ openFileSelectModel: false,showGallery:true, selectedImage:null });
+                                            this.setState({ openFileSelectModel: false, showGallery: true, selectedImage: null, showCropPreview: false });
                                             document.body.style.overflow = 'auto';
                                         }}
                                         aria-label="Close"
@@ -441,7 +471,7 @@ class ViewEmployee extends Component {
                                             {!showGallery ? "Crop your profile image" : "Choose from existing images or upload a new one"}
                                         </p>
 
-                                        {!showGallery && (
+                                        {!showGallery && !this.state.showCropPreview && (
                                             <div style={{
                                                 display: 'flex',
                                                 justifyContent: 'center',
@@ -462,6 +492,21 @@ class ViewEmployee extends Component {
                                                         />
                                                     )}
                                                 </div>
+                                            </div>
+                                        )}
+
+                                        {!showGallery && this.state.showCropPreview && (
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                minHeight: '400px'
+                                            }}>
+                                                <img
+                                                    src={this.state.finalCroppedDataUrl}
+                                                    alt="Cropped Preview"
+                                                    style={{ width: '200px', height: '200px', borderRadius: '50%', objectFit: 'cover' }}
+                                                />
                                             </div>
                                         )}
 
@@ -550,6 +595,7 @@ class ViewEmployee extends Component {
                                         openFileSelectModel: false,
                                         showGallery: true,
                                         selectedImage: null,
+                                        showCropPreview: false
                                         });
                                         document.body.style.overflow = 'auto';
                                     }}
@@ -565,7 +611,7 @@ class ViewEmployee extends Component {
                                     />
                                     )}
 
-                                    {!showGallery && (
+                                    {!showGallery && !this.state.showCropPreview && (
                                     <Button
                                         label="Back"
                                         onClick={this.handleBack}
@@ -573,12 +619,28 @@ class ViewEmployee extends Component {
                                     />
                                     )}
 
-                                    {!showGallery && (
-                                    <Button
-                                        label="Save Changes"
-                                        onClick={this.handleSave}
-                                        className="btn-primary px-4"
-                                    />
+                                    {!showGallery && !this.state.showCropPreview && (
+                                        <Button
+                                            label="Crop Preview"
+                                            onClick={this.handleCropPreview}
+                                            className="btn-primary px-4"
+                                        />
+                                    )}
+
+                                    {!showGallery && this.state.showCropPreview && (
+                                        <Button
+                                            label="Back to Crop"
+                                            onClick={this.handleBackToCrop}
+                                            className="btn-primary px-4"
+                                        />
+                                    )}
+
+                                    {!showGallery && this.state.showCropPreview && (
+                                        <Button
+                                            label="Update Profile"
+                                            onClick={this.handleSave}
+                                            className="btn-primary px-4"
+                                        />
                                     )}
                                 </div>
                             </div>
