@@ -108,7 +108,7 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
                     </div>
                 )}
 
-                <div style={{ fontSize: '0.9rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingBottom: '4px', paddingRight: isCurrentUser ? '15px' : '0' }} dangerouslySetInnerHTML={{ __html: comment.message }}>
+                <div className="message-content" style={{ fontSize: '0.9rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingBottom: '4px', paddingRight: isCurrentUser ? '15px' : '0' }} dangerouslySetInnerHTML={{ __html: comment.message }}>
                 </div>
 
                 <div className="d-flex align-items-center mt-1">
@@ -131,6 +131,14 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
                     </div>
                 </div>
             </div>
+            <style>
+                {`
+                .message-content p {
+                    margin-bottom: 0 !important;
+                    margin-top: 0 !important;
+                }
+                `}
+            </style>
         </div>
     );
 };
