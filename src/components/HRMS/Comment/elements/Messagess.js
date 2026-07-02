@@ -42,9 +42,9 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
                             </span>
                         )}
                         {isCurrentUser && (
-                            <div className="position-relative ml-2">
+                            <div className="dropdown position-relative ml-2">
                                 <button
-                                    className="btn btn-sm btn-link p-0 text-muted"
+                                    className="btn btn-sm btn-link p-0 text-muted fw-bold"
                                     style={{ fontSize: '1.2rem', textDecoration: 'none', lineHeight: '0.5' }}
                                     onClick={() => setShowMenu(!showMenu)}
                                     onBlur={() => setTimeout(() => setShowMenu(false), 200)}
@@ -53,22 +53,22 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
                                 </button>
                                 {showMenu && (
                                     <div
-                                        className="position-absolute bg-white shadow rounded p-1"
-                                        style={{ top: '100%', right: '0', zIndex: 100, minWidth: '80px', border: '1px solid #ddd' }}
+                                        className="dropdown-menu dropdown-menu-right show shadow-sm"
+                                        style={{ top: '100%', right: '0', left: 'auto', zIndex: 100, minWidth: '100px', padding: '0.25rem 0', position: 'absolute' }}
                                     >
                                         <button
-                                            className="btn btn-sm btn-link d-block w-100 text-start p-1 px-2 text-primary text-decoration-none"
-                                            style={{ fontSize: '0.8rem' }}
+                                            className="dropdown-item text-primary"
+                                            style={{ fontSize: '0.85rem' }}
                                             onClick={() => { setShowMenu(false); onEdit(comment); }}
                                         >
-                                            Edit
+                                            <i className="fa fa-edit mr-1"></i>Edit
                                         </button>
                                         <button
-                                            className="btn btn-sm btn-link d-block w-100 text-start p-1 px-2 text-danger text-decoration-none"
-                                            style={{ fontSize: '0.8rem' }}
+                                            className="dropdown-item text-danger"
+                                            style={{ fontSize: '0.85rem' }}
                                             onClick={() => { setShowMenu(false); onDelete(comment.id); }}
                                         >
-                                            Delete
+                                            <i className="fa fa-trash mr-1"></i>Delete
                                         </button>
                                     </div>
                                 )}

@@ -143,20 +143,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
     };
 
     return (
-        // <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ minHeight: '400px', maxHeight: `calc(100vh - ${maxHeight})` }}>
         <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ maxHeight: maxHeight }}>
-            <style>{`
-                .chat-scrollbar::-webkit-scrollbar {
-                    width: 6px;
-                }
-                .chat-scrollbar::-webkit-scrollbar-thumb {
-                    background: #c1c1c1; 
-                    border-radius: 10px;
-                }
-                .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #a8a8a8; 
-                }
-            `}</style>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3" style={{ borderRadius: '12px 12px 0 0' }}>
                 <h6 className="mb-0 fw-bold">Comments & Discussions</h6>
@@ -164,7 +151,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
 
             {/* Chat Body */}
             <div
-                className="card-body flex-grow-1 overflow-auto position-relative p-3 chat-scrollbar"
+                className="card-body flex-grow-1 overflow-auto position-relative p-3 custom-scrollbar"
                 ref={chatContainerRef}
             >
                 <div className="position-relative" style={{ zIndex: 1 }}>
