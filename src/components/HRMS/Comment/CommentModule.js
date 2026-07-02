@@ -35,9 +35,6 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
             const response = await api.get(`/comment.php?action=view&module_type=${moduleType}&module_id=${moduleId}`);
             if (response.data.status === 'success') {
                 setComments(response.data.data || []);
-                if (!silent) {
-                    setTimeout(scrollToBottom, 100);
-                }
             } else {
                 setAlert({ type: 'danger', message: response.data.message || 'Failed to fetch comments' });
             }
@@ -55,7 +52,9 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
         // eslint-disable-next-line
     }, [moduleType, moduleId]);
 
-    // scrolling is handled on fetch
+    useEffect(() => {
+        setTimeout(scrollToBottom, 100);
+    }, [comments]);
 
     const flatCommentsData = useMemo(() => {
         let flat = [];
@@ -143,6 +142,21 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
 
     return (
         <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ minHeight: '400px', maxHeight: maxHeight }}>
+            <style>{`
+                .chat-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .chat-scrollbar::-webkit-scrollbar-track {
+                    background: #f1f1f1; 
+                }
+                .chat-scrollbar::-webkit-scrollbar-thumb {
+                    background: #c1c1c1; 
+                    border-radius: 10px;
+                }
+                .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8; 
+                }
+            `}</style>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3">
                 <h6 className="mb-0 fw-bold">Comments & Discussions</h6>
@@ -150,7 +164,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
 
             {/* Chat Body */}
             <div
-                className="card-body flex-grow-1 overflow-auto position-relative p-3"
+                className="card-body flex-grow-1 overflow-auto position-relative p-3 chat-scrollbar"
                 ref={chatContainerRef}
             >
                 <div className="position-relative" style={{ zIndex: 1 }}>

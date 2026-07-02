@@ -30,43 +30,50 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
                     minWidth: '210px'
                 }}
             >
-                <div className="mb-1 pe-3" style={{ fontSize: '0.8rem', color: '#128C7E', fontWeight: 'bold' }}>
+                <div className="mb-1 pe-5" style={{ fontSize: '0.8rem', color: '#128C7E', fontWeight: 'bold' }}>
                     {isCurrentUser ? 'You' : `${comment.commented_by?.first_name} ${comment.commented_by?.last_name}`}
                 </div>
 
-                {isCurrentUser && (
-                    <div className="position-absolute" style={{ top: '8px', right: '8px', zIndex: 5 }}>
-                        <div className="position-relative">
-                            <button
-                                className="btn btn-sm btn-link p-0 text-muted"
-                                style={{ fontSize: '1.2rem', textDecoration: 'none', lineHeight: '0.5' }}
-                                onClick={() => setShowMenu(!showMenu)}
-                                onBlur={() => setTimeout(() => setShowMenu(false), 200)}
-                            >
-                                ⋮
-                            </button>
-                            {showMenu && (
-                                <div
-                                    className="position-absolute bg-white shadow rounded p-1"
-                                    style={{ top: '100%', right: '0', zIndex: 100, minWidth: '80px', border: '1px solid #ddd' }}
+                {(isCurrentUser || comment?.modified_at) && (
+                    <div className="position-absolute d-flex align-items-center" style={{ top: '8px', right: '8px', zIndex: 5 }}>
+                        {comment?.modified_at && (
+                            <span className="text-muted me-2" style={{ fontSize: '0.65rem', fontStyle: 'italic' }}>
+                                Edited
+                            </span>
+                        )}
+                        {isCurrentUser && (
+                            <div className="position-relative ml-2">
+                                <button
+                                    className="btn btn-sm btn-link p-0 text-muted"
+                                    style={{ fontSize: '1.2rem', textDecoration: 'none', lineHeight: '0.5' }}
+                                    onClick={() => setShowMenu(!showMenu)}
+                                    onBlur={() => setTimeout(() => setShowMenu(false), 200)}
                                 >
-                                    <button
-                                        className="btn btn-sm btn-link d-block w-100 text-start p-1 px-2 text-primary text-decoration-none"
-                                        style={{ fontSize: '0.8rem' }}
-                                        onClick={() => { setShowMenu(false); onEdit(comment); }}
+                                    ⋮
+                                </button>
+                                {showMenu && (
+                                    <div
+                                        className="position-absolute bg-white shadow rounded p-1"
+                                        style={{ top: '100%', right: '0', zIndex: 100, minWidth: '80px', border: '1px solid #ddd' }}
                                     >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-link d-block w-100 text-start p-1 px-2 text-danger text-decoration-none"
-                                        style={{ fontSize: '0.8rem' }}
-                                        onClick={() => { setShowMenu(false); onDelete(comment.id); }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                                        <button
+                                            className="btn btn-sm btn-link d-block w-100 text-start p-1 px-2 text-primary text-decoration-none"
+                                            style={{ fontSize: '0.8rem' }}
+                                            onClick={() => { setShowMenu(false); onEdit(comment); }}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-link d-block w-100 text-start p-1 px-2 text-danger text-decoration-none"
+                                            style={{ fontSize: '0.8rem' }}
+                                            onClick={() => { setShowMenu(false); onDelete(comment.id); }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -115,14 +122,6 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
 
                     <div className="d-flex ml-auto">
 
-                        {comment?.modified_at && (
-                            <span
-                                className="text-muted"
-                                style={{ fontSize: '0.65rem' }}
-                            >
-                                Edited
-                            </span>
-                        )}
                         <span
                             className="text-muted ml-1"
                             style={{ fontSize: '0.65rem' }}

@@ -47,25 +47,29 @@ const CommentInput = ({
     return (
         <div className="bg-white border-top shadow-sm" style={{ zIndex: 10 }}>
             {editingComment && (
-                <div className="d-flex align-items-center justify-content-between p-2 px-3 bg-light border-bottom">
-                    <div className="d-flex flex-column border-start border-4 border-primary ps-2">
+                <div className="d-flex align-items-center justify-content-between p-2 px-3 bg-light border-bottom overflow-hidden">
+                    <div className="d-flex flex-column border-start border-4 border-primary ps-2 flex-grow-1 overflow-hidden me-3" style={{ minWidth: 0 }}>
                         <small className="text-primary fw-bold">Editing message</small>
-                        <span className="text-muted text-truncate" style={{ fontSize: '0.85rem', maxWidth: '300px' }} dangerouslySetInnerHTML={{ __html: editingComment.message }}></span>
+                        <span className="text-muted text-truncate w-100" style={{ fontSize: '0.85rem' }} dangerouslySetInnerHTML={{ __html: editingComment.message }}></span>
                     </div>
-                    <Button className="btn-sm btn-link text-muted p-0" onClick={() => { setEditingComment(null); setInputText(''); }}>
-                        <i className="fa fa-times fs-5"></i>
-                    </Button>
+                    <Button 
+                        className="btn-sm btn-link text-muted p-0 flex-shrink-0" 
+                        onClick={() => { setEditingComment(null); setInputText(''); }}
+                        icon="fa fa-times fs-5"
+                    />
                 </div>
             )}
             {replyingTo && (
-                <div className="d-flex align-items-center justify-content-between p-2 px-3 bg-light border-bottom">
-                    <div className="d-flex flex-column border-start border-4 border-success ps-2">
+                <div className="d-flex align-items-center justify-content-between p-2 px-3 bg-light border-bottom overflow-hidden">
+                    <div className="d-flex flex-column border-start border-4 border-success ps-2 flex-grow-1 overflow-hidden me-3" style={{ minWidth: 0 }}>
                         <small className="text-success fw-bold">Replying to {checkIsCurrentUser(currentUser, replyingTo.commented_by) ? 'You' : replyingTo.commented_by?.first_name}</small>
-                        <span className="text-muted text-truncate" style={{ fontSize: '0.85rem', maxWidth: '300px' }} dangerouslySetInnerHTML={{ __html: replyingTo.message }}></span>
+                        <span className="text-muted text-truncate w-100" style={{ fontSize: '0.85rem' }} dangerouslySetInnerHTML={{ __html: replyingTo.message }}></span>
                     </div>
-                    <Button className="btn-sm btn-link text-muted p-0" onClick={() => setReplyingTo(null)}>
-                        <i className="fa fa-times fs-5"></i>
-                    </Button>
+                    <Button 
+                        className="btn-sm btn-link text-muted p-0 flex-shrink-0" 
+                        onClick={() => setReplyingTo(null)}
+                        icon="fa fa-times fs-5"
+                    />
                 </div>
             )}
 
