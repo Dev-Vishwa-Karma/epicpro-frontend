@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Avatar from '../../common/Avatar';
+import Avatar from '../../../common/Avatar';
 
 const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser, onReply, onEdit, onDelete, isHovered, onHover }) => {
     const [showMenu, setShowMenu] = useState(false);

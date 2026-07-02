@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import api from '../../../api/axios';
 import authService from '../../Authentication/authService';
 import AlertMessages from '../../common/AlertMessages';
-import Messagess from './Messagess';
-import CommentInput from './CommentInput';
+import Messagess from './elements/Messagess';
+import CommentInput from './elements/CommentInput';
 
 export const checkIsCurrentUser = (user1, user2) => {
     if (!user1 || !user2) return false;
@@ -77,9 +77,9 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
 
     const { flat: flatComments, map: commentsMap } = flatCommentsData;
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e, attachments = []) => {
         if (e) e.preventDefault();
-        if (!inputText.trim()) return;
+        if (!inputText.trim() && (!attachments || attachments.length === 0)) return;
 
         try {
             const formData = new FormData();
@@ -87,6 +87,12 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
             formData.append('module_id', moduleId);
             formData.append('message', inputText);
             formData.append('user_id', currentUser?.employee_id || currentUser?.id);
+
+            if (attachments && attachments.length > 0) {
+                attachments.forEach((file, index) => {
+                    formData.append(`attachments[${index}]`, file);
+                });
+            }
 
             if (editingComment) {
                 formData.append('comment_id', editingComment.id);
@@ -136,7 +142,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
     };
 
     return (
-        <div className="card shadow-sm border-0 d-flex flex-column h-100" style={{ minHeight: '400px', maxHeight: maxHeight }}>
+        <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ minHeight: '400px', maxHeight: maxHeight }}>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3">
                 <h6 className="mb-0 fw-bold">Comments & Discussions</h6>
