@@ -146,9 +146,6 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
                 .chat-scrollbar::-webkit-scrollbar {
                     width: 6px;
                 }
-                .chat-scrollbar::-webkit-scrollbar-track {
-                    background: #f1f1f1; 
-                }
                 .chat-scrollbar::-webkit-scrollbar-thumb {
                     background: #c1c1c1; 
                     border-radius: 10px;
@@ -158,7 +155,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
                 }
             `}</style>
             {/* Header */}
-            <div className="card-header bg-white border-bottom py-3">
+            <div className="card-header bg-white border-bottom py-3" style={{ borderRadius: '12px 12px 0 0' }}>
                 <h6 className="mb-0 fw-bold">Comments & Discussions</h6>
             </div>
 

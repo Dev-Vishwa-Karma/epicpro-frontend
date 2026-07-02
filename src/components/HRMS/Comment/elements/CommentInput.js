@@ -45,7 +45,7 @@ const CommentInput = ({
         }
     };
     return (
-        <div className="bg-white border-top shadow-sm" style={{ zIndex: 10 }}>
+        <div className="bg-white border-top shadow-sm" style={{ zIndex: 10, borderRadius: '0 0 12px 12px' }}>
             {editingComment && (
                 <div className="d-flex align-items-start justify-content-between p-2 px-3 bg-light border-bottom overflow-hidden">
                     <div className="d-flex flex-column border-start border-4 border-primary ps-2 flex-grow-1 overflow-hidden me-3" style={{ minWidth: 0 }}>
