@@ -91,7 +91,7 @@ const CommentInput = ({
                             value={inputText}
                             onChange={(value) => setInputText(value)}
                             placeholder={"Type your message here..."}
-                            height="80px"
+                            minHeight="60px"
                         />
                     </div>
                     <div className="d-flex flex-column gap-2 ml-2">
@@ -113,7 +113,7 @@ const CommentInput = ({
                         <Button
                             type="submit"
                             className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn"
-                            style={{ width: '50px', height: '50px', transition: 'all 0.2s ease-in-out' }}
+                            style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
                             disabled={(!inputText || inputText === '<p><br></p>') && attachments.length === 0}
                             label="Send"
                             title="Send"
