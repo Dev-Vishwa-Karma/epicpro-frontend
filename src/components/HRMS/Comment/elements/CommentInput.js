@@ -52,8 +52,8 @@ const CommentInput = ({
                         <small className="text-primary fw-bold">Editing message</small>
                         <span className="text-muted text-truncate w-100" style={{ fontSize: '0.85rem' }} dangerouslySetInnerHTML={{ __html: editingComment.message }}></span>
                     </div>
-                    <Button 
-                        className="btn-sm btn-link text-muted p-0 flex-shrink-0" 
+                    <Button
+                        className="btn-sm btn-link text-muted p-0 flex-shrink-0"
                         onClick={() => { setEditingComment(null); setInputText(''); }}
                         icon="fa fa-times fs-5"
                     />
@@ -65,8 +65,8 @@ const CommentInput = ({
                         <small className="text-success fw-bold">Replying to {checkIsCurrentUser(currentUser, replyingTo.commented_by) ? 'You' : replyingTo.commented_by?.first_name}</small>
                         <span className="text-muted text-truncate w-100" style={{ fontSize: '0.85rem' }} dangerouslySetInnerHTML={{ __html: replyingTo.message }}></span>
                     </div>
-                    <Button 
-                        className="btn-sm btn-link text-muted p-0 flex-shrink-0" 
+                    <Button
+                        className="btn-sm btn-link text-muted p-0 flex-shrink-0"
                         onClick={() => setReplyingTo(null)}
                         icon="fa fa-times fs-5"
                     />
@@ -95,7 +95,7 @@ const CommentInput = ({
                         />
                     </div>
                     <div className="d-flex flex-column gap-2 ml-2">
-                        <Button
+                        {/* <Button
                             type="button"
                             className="btn-light d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm border mb-2"
                             style={{ width: '40px', height: '40px', backgroundColor: '#f8f9fa', alignSelf: 'center' }}
@@ -109,7 +109,7 @@ const CommentInput = ({
                             style={{ display: 'none' }}
                             multiple
                             onChange={handleFileChange}
-                        />
+                        /> */}
                         <Button
                             type="submit"
                             className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn"
