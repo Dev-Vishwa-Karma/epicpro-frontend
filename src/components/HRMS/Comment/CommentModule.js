@@ -12,7 +12,7 @@ export const checkIsCurrentUser = (user1, user2) => {
     return id1 === id2;
 };
 
-const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)' }) => {
+const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [inputText, setInputText] = useState('');
@@ -141,7 +141,8 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = 'calc(100vh - 150px)'
     };
 
     return (
-        <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ minHeight: '400px', maxHeight: maxHeight }}>
+        // <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ minHeight: '400px', maxHeight: `calc(100vh - ${maxHeight})` }}>
+        <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ maxHeight: maxHeight }}>
             <style>{`
                 .chat-scrollbar::-webkit-scrollbar {
                     width: 6px;
