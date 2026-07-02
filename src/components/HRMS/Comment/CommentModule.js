@@ -128,6 +128,8 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
         try {
             const formData = new FormData();
             formData.append('comment_id', commentId);
+            formData.append('module_type', moduleType);
+            formData.append('module_id', moduleId);
 
             const response = await api.post('/comment.php?action=delete', formData);
             if (response.data.status === 'success') {
