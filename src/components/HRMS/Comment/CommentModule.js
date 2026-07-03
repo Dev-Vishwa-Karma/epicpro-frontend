@@ -147,9 +147,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
         // eslint-disable-next-line
     }, [moduleType, moduleId]);
 
-    useEffect(() => {
-        setTimeout(scrollToBottom, 100);
-    }, [comments]);
+
 
     const flatCommentsData = useMemo(() => {
         let flat = [];
@@ -170,6 +168,21 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
     }, [comments]);
 
     const { flat: flatComments, map: commentsMap } = flatCommentsData;
+
+    const prevFlatCommentsLengthRef = useRef(0);
+    const prevLoadingRef = useRef(loading);
+
+    useEffect(() => {
+        const justFinishedLoading = prevLoadingRef.current && !loading;
+        const newCommentAdded = flatComments.length > prevFlatCommentsLengthRef.current;
+
+        if (justFinishedLoading || newCommentAdded) {
+            setTimeout(scrollToBottom, 100);
+        }
+
+        prevFlatCommentsLengthRef.current = flatComments.length;
+        prevLoadingRef.current = loading;
+    }, [flatComments.length, loading]);
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
