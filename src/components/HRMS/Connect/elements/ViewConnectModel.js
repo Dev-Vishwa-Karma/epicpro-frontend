@@ -3,7 +3,6 @@ import Avatar from "../../../common/Avatar";
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { formatDateTimeAMPM, shortformatDate } from "../../../../utils";
 import InputField from '../../../common/formInputs/InputField';
-import CommentModule from "../../Comment/CommentModule";
 
 const ViewConnectModel = ({
 
@@ -266,13 +265,18 @@ const ViewConnectModel = ({
                                     </div>
 
                                     <div className="col-lg-8 col-md-12">
-                                        <div className="card shadow-sm border-0 pe-3 d-flex flex-column mb-3 h-110" style={{ maxHeight: "355px" }}>
-                                            <div className="card-header bg-white border-bottom py-3" style={{ borderRadius: '12px 12px 0 0' }}>
-                                                <h6 className="mb-0 fw-bold">Attached Files</h6>
+
+                                        <div className="card mb-0">
+                                            <div className="card-header">
+                                                <h3 className="card-title">Attached Files</h3>
                                             </div>
-                                            <div className="card-body flex-grow-1 overflow-auto position-relative p-0 custom-scrollbar">
-                                                <div className="table-responsive">
-                                                    <table className="table table-hover table-vcenter mb-0 table_custom text-nowrap">
+                                        </div>
+                                        <div className="table-responsive">
+                                            <table className="table table-hover table-vcenter mb-0 table_custom spacing8 text-nowrap">
+                                                <thead>
+                                                    <tr>
+                                                    </tr>
+                                                </thead>
                                                 <tbody>
                                                     {Array.isArray(files) && files.length > 0 ? (
                                                         files.map((file, index) => {
@@ -346,55 +350,47 @@ const ViewConnectModel = ({
                                                 </tbody>
                                             </table>
                                         </div>
-                                            </div>
-                                        </div>
-                                        {selectedConnect && selectedConnect.id && (
-                                            <CommentModule moduleType="connect" moduleId={selectedConnect?.id} maxHeight="580px" />
-                                        )}
+                                        {/* </div> */}
 
+                                        {showPreview && (
+
+                                        <div className="card">
+                                            <div className="card-header">
+                                                <h3 className="card-title">Preview:</h3>
+                                            </div>
+                                            <div className="card-body" style={{
+                                                height: "486px",
+                                                overflow: "auto"
+                                            }}>
+                                                {filePath && isImage(getExt(filePath)) && (
+                                                    <img
+                                                        src={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                                                        alt="preview"
+                                                        style={{ width: "450px", height: "450px", objectFit: "contain" }}
+                                                    />
+                                                )}
+
+                                                {filePath && !isImage(getExt(filePath)) && (
+                                                    <a
+                                                        href={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                                                        download
+                                                        className="btn btn-primary"
+                                                    >
+                                                        Download File
+                                                    </a>
+                                                )}
+
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div >
+                </div>
+
             )}
-
-            {
-                showPreview && (
-                    <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1060, backgroundColor: 'rgba(0,0,0,0.6)' }}>
-                        <div className="modal-dialog modal-dialog-centered modal-lg">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Preview File</h5>
-                                    <button type="button" className="close" onClick={() => setShowPreview(false)}>
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body text-center" style={{ overflow: "auto", maxHeight: "70vh" }}>
-                                    {filePath && isImage(getExt(filePath)) && (
-                                        <img
-                                            src={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                            alt="preview"
-                                            style={{ maxWidth: "100%", height: "auto" }}
-                                        />
-                                    )}
-                                    {filePath && !isImage(getExt(filePath)) && (
-                                        <a
-                                            href={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                            download
-                                            className="btn btn-primary"
-                                        >
-                                            Download File
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
             {show && <div className="modal-backdrop fade show" />}
         </>
     );
