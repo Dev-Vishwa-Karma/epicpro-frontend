@@ -5,6 +5,7 @@ import AlertMessages from '../../common/AlertMessages';
 import Messagess from './elements/Messagess';
 import Pusher from 'pusher-js';
 import CommentInput from './elements/CommentInput';
+import DeleteModal from '../../common/DeleteModal';
 
 export const checkIsCurrentUser = (user1, user2) => {
     if (!user1 || !user2) return false;
@@ -49,7 +50,7 @@ const deleteCommentFromTree = (comments, commentId) => {
     });
 };
 
-const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
+const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, maxHeight = '700px' }) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +62,9 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
     const [successMessage, setSuccessMessage] = useState('');
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [commentToDelete, setCommentToDelete] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const currentUser = authService.getUser();
     const chatContainerRef = useRef(null);
 
@@ -228,11 +232,17 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
         }
     };
 
-    const handleDelete = async (commentId) => {
-        if (!window.confirm("Are you sure you want to delete this message?")) return;
+    const promptDelete = (commentId) => {
+        setCommentToDelete(commentId);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!commentToDelete) return;
+        setDeleteLoading(true);
         try {
             const formData = new FormData();
-            formData.append('comment_id', commentId);
+            formData.append('comment_id', commentToDelete);
             formData.append('module_type', moduleType);
             formData.append('module_id', moduleId);
 
@@ -244,6 +254,10 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
             }
         } catch (error) {
             showErrorAlert('Error deleting comment');
+        } finally {
+            setDeleteLoading(false);
+            setShowDeleteModal(false);
+            setCommentToDelete(null);
         }
     };
 
@@ -251,7 +265,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
         <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ maxHeight: maxHeight }}>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3" style={{ borderRadius: '12px 12px 0 0' }}>
-                <h6 className="mb-0 fw-bold">Comments & Discussions</h6>
+                <h6 className="mb-0 fw-bold"> {title}</h6>
             </div>
 
             {/* Chat Body */}
@@ -303,7 +317,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                                             setReplyingTo(null);
                                             setInputText(c.message);
                                         }}
-                                        onDelete={handleDelete}
+                                        onDelete={promptDelete}
                                         isHovered={hoveredCommentId === comment.id}
                                         onHover={(id = comment.id) => setHoveredCommentId(id)}
                                     />
@@ -325,6 +339,14 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                 setReplyingTo={setReplyingTo}
                 currentUser={currentUser}
                 isSubmitting={isSubmitting}
+            />
+
+            <DeleteModal
+                show={showDeleteModal}
+                onClose={() => { setShowDeleteModal(false); setCommentToDelete(null); }}
+                onConfirm={confirmDelete}
+                isLoading={deleteLoading}
+                deleteBody="Are you sure you want to delete this message?"
             />
         </div>
     );
