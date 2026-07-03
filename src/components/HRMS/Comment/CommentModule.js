@@ -41,10 +41,13 @@ const editCommentInTree = (comments, updatedComment) => {
     });
 };
 
-const deleteCommentFromTree = (comments, commentId) => {
-    return comments.filter(c => String(c.id) !== String(commentId)).map(c => {
+const deleteCommentFromTree = (comments, deletedComment) => {
+    return comments.map(c => {
+        if (String(c.id) === String(deletedComment.id)) {
+            return { ...c, ...deletedComment };
+        }
         if (c.replies && c.replies.length > 0) {
-            return { ...c, replies: deleteCommentFromTree(c.replies, commentId) };
+            return { ...c, replies: deleteCommentFromTree(c.replies, deletedComment) };
         }
         return c;
     });
@@ -116,7 +119,6 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
             const eventName = `comment_updated_${moduleType}_${moduleId}`;
 
             channel.bind(eventName, (data) => {
-                console.log('Event received:', eventName, data);
                 if (data.status === 'success') {
                     // Use Pusher data to update state instead of fetching from API
                     if (data.data && Array.isArray(data.data)) {
@@ -131,8 +133,7 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
                             } else if (data.action === 'edit' && commentObj) {
                                 return editCommentInTree(prev, commentObj);
                             } else if (data.action === 'delete') {
-                                const id = data.comment_id || data.id || (commentObj ? commentObj.id : null);
-                                if (id) return deleteCommentFromTree(prev, id);
+                                return deleteCommentFromTree(prev, commentObj);
                             }
                             return prev;
                         });

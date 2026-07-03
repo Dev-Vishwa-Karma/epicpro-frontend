@@ -56,8 +56,7 @@ const CommentInput = ({
                         style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
                         disabled={!inputText || inputText === '<p><br></p>' || inputText === '<p>&nbsp;</p>' || inputText === '<p></p>' || isSubmitting}
                         loading={isSubmitting}
-                        label="Send"
-                        title="Send"
+                        icon="fa fa-paper-plane"
                     />
                 </div>
             </form >

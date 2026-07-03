@@ -36,12 +36,12 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
 
                 {(isCurrentUser || comment?.modified_at) && (
                     <div className="position-absolute d-flex align-items-center" style={{ top: '8px', right: '8px', zIndex: 5 }}>
-                        {comment?.modified_at && (
+                        {comment?.modified_at && !comment?.deleted_at && (
                             <span className="text-muted me-2" style={{ fontSize: '0.65rem', fontStyle: 'italic' }}>
                                 Edited
                             </span>
                         )}
-                        {isCurrentUser && (
+                        {isCurrentUser && !comment?.deleted_at && (
                             <div className="dropdown position-relative ml-2">
                                 <button
                                     className="btn btn-sm btn-link p-0 text-muted fw-bold"
@@ -77,7 +77,7 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
                     </div>
                 )}
 
-                {parentComment && (
+                {parentComment && !comment?.deleted_at && (
                     <div
                         className="p-2 mb-1 rounded"
                         style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '4px solid #128C7E', cursor: 'pointer' }}
@@ -112,21 +112,22 @@ const Messagess = ({ comment, isCurrentUser, parentComment, isParentCurrentUser,
                 </div>
 
                 <div className="d-flex align-items-center mt-1">
-                    <button
-                        className="btn btn-sm btn-link p-0 me-auto text-decoration-none fw-bold"
-                        style={{ fontSize: '0.75rem' }}
-                        onClick={() => onReply(comment)}
-                    >
-                        Reply
-                    </button>
+                    {!comment?.deleted_at && (
+                        <button
+                            className="btn btn-sm btn-link p-0 me-auto text-decoration-none fw-bold"
+                            style={{ fontSize: '0.75rem' }}
+                            onClick={() => onReply(comment)}
+                        >
+                            Reply
+                        </button>
+                    )}
 
                     <div className="d-flex ml-auto">
-
                         <span
                             className="text-muted ml-1"
                             style={{ fontSize: '0.65rem' }}
                         >
-                            {new Date(comment.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            At {new Date(comment?.deleted_at ? comment.deleted_at : comment.modified_at || comment.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </span>
                     </div>
                 </div>
