@@ -16,11 +16,15 @@ export const checkIsCurrentUser = (user1, user2) => {
 const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [inputText, setInputText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
     const [editingComment, setEditingComment] = useState(null);
     const [hoveredCommentId, setHoveredCommentId] = useState(null);
-    const [alert, setAlert] = useState(null);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const currentUser = authService.getUser();
     const chatContainerRef = useRef(null);
 
@@ -30,6 +34,18 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
         }
     };
 
+    const showSuccessAlert = (msg) => {
+        setSuccessMessage(msg);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+    };
+
+    const showErrorAlert = (msg) => {
+        setErrorMessage(msg);
+        setShowError(true);
+        setTimeout(() => setShowError(false), 3000);
+    };
+
     const fetchComments = async (silent = false) => {
         try {
             if (!silent) setLoading(true);
@@ -37,10 +53,10 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
             if (response.data.status === 'success') {
                 setComments(response.data.data || []);
             } else {
-                setAlert({ type: 'danger', message: response.data.message || 'Failed to fetch comments' });
+                showErrorAlert(response.data.message || 'Failed to fetch comments');
             }
         } catch (error) {
-            setAlert({ type: 'danger', message: 'Error fetching comments' });
+            showErrorAlert('Error fetching comments');
         } finally {
             if (!silent) setLoading(false);
         }
@@ -103,6 +119,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
         if (e) e.preventDefault();
         if (!inputText.trim()) return;
 
+        setIsSubmitting(true);
         try {
             const formData = new FormData();
             formData.append('module_type', moduleType);
@@ -116,9 +133,10 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                 if (response.data.status === 'success') {
                     setInputText('');
                     setEditingComment(null);
+                    showSuccessAlert('Comment updated successfully');
                     fetchComments(true);
                 } else {
-                    setAlert({ type: 'danger', message: response.data.message });
+                    showErrorAlert(response.data.message);
                 }
                 return;
             }
@@ -131,12 +149,15 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
             if (response.data.status === 'success') {
                 setInputText('');
                 setReplyingTo(null);
+                showSuccessAlert('Comment added successfully');
                 fetchComments(true);
             } else {
-                setAlert({ type: 'danger', message: response.data.message });
+                showErrorAlert(response.data.message);
             }
         } catch (error) {
-            setAlert({ type: 'danger', message: 'Error adding comment' });
+            showErrorAlert('Error adding comment');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -150,12 +171,13 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
 
             const response = await api.post('/comment.php?action=delete', formData);
             if (response.data.status === 'success') {
+                showSuccessAlert('Comment deleted successfully');
                 fetchComments(true);
             } else {
-                setAlert({ type: 'danger', message: response.data.message });
+                showErrorAlert(response.data.message);
             }
         } catch (error) {
-            setAlert({ type: 'danger', message: 'Error deleting comment' });
+            showErrorAlert('Error deleting comment');
         }
     };
 
@@ -172,7 +194,14 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                 ref={chatContainerRef}
             >
                 <div className="position-relative" style={{ zIndex: 1 }}>
-                    {alert && <AlertMessages type={alert.type} message={alert.message} />}
+                    <AlertMessages 
+                        showSuccess={showSuccess} 
+                        successMessage={successMessage} 
+                        showError={showError} 
+                        errorMessage={errorMessage} 
+                        setShowSuccess={setShowSuccess} 
+                        setShowError={setShowError} 
+                    />
 
                     {loading ? (
                         <div className="text-center py-4 text-muted">
@@ -229,6 +258,7 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                 replyingTo={replyingTo}
                 setReplyingTo={setReplyingTo}
                 currentUser={currentUser}
+                isSubmitting={isSubmitting}
             />
         </div>
     );

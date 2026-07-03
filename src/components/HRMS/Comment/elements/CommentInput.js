@@ -8,7 +8,8 @@ const CommentInput = ({
     handleSubmit,
     editingComment, setEditingComment,
     replyingTo, setReplyingTo,
-    currentUser
+    currentUser,
+    isSubmitting
 }) => {
     return (
         <div className="bg-white border-top shadow-sm" style={{ zIndex: 10, borderRadius: '0 0 12px 12px' }}>
@@ -53,7 +54,8 @@ const CommentInput = ({
                         type="submit"
                         className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn"
                         style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
-                        disabled={!inputText || inputText === '<p><br></p>' || inputText === '<p>&nbsp;</p>' || inputText === '<p></p>'}
+                        disabled={!inputText || inputText === '<p><br></p>' || inputText === '<p>&nbsp;</p>' || inputText === '<p></p>' || isSubmitting}
+                        loading={isSubmitting}
                         label="Send"
                         title="Send"
                     />
