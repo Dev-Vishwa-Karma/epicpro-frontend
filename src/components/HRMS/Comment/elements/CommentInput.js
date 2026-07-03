@@ -10,40 +10,6 @@ const CommentInput = ({
     replyingTo, setReplyingTo,
     currentUser
 }) => {
-    const fileInputRef = useRef(null);
-    const [attachments, setAttachments] = useState([]);
-
-    const handleFileChange = (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const newFiles = [];
-            for (let i = 0; i < e.target.files.length; i++) {
-                newFiles.push(e.target.files[i]);
-            }
-            setAttachments(prev => {
-                const updated = [...prev];
-                newFiles.forEach(newFile => {
-                    // Prevent adding duplicates based on file name and size
-                    if (!updated.some(existing => existing.name === newFile.name && existing.size === newFile.size)) {
-                        updated.push(newFile);
-                    }
-                });
-                return updated;
-            });
-            // Clear input so the same file (or another) can be selected without issues
-            e.target.value = '';
-        }
-    };
-
-    const clearAttachment = (indexToRemove = -1) => {
-        if (indexToRemove === -1) {
-            setAttachments([]);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        } else {
-            setAttachments(prev => prev.filter((_, idx) => idx !== indexToRemove));
-        }
-    };
     return (
         <div className="bg-white border-top shadow-sm" style={{ zIndex: 10, borderRadius: '0 0 12px 12px' }}>
             {editingComment && (
@@ -73,54 +39,26 @@ const CommentInput = ({
                 </div>
             )}
 
-            <form noValidate onSubmit={(e) => { e.preventDefault(); handleSubmit(e, attachments); clearAttachment(); }} className="p-3">
-                {attachments.length > 0 && (
-                    <div className="mb-2 d-flex flex-wrap gap-2">
-                        {attachments.map((file, idx) => (
-                            <div key={idx} className="d-flex align-items-center bg-light p-2 rounded border" style={{ maxWidth: '300px' }}>
-                                <i className="fa fa-paperclip text-muted me-2"></i>
-                                <span className="text-truncate flex-grow-1" style={{ fontSize: '0.85rem' }}>{file.name}</span>
-                                <Button className="btn-sm btn-link text-danger p-0 ms-2" onClick={() => clearAttachment(idx)} icon="fa fa-times" />
-                            </div>
-                        ))}
-                    </div>
-                )}
-                <div className="d-flex align-items-end gap-3">
-                    <div className="flex-grow-1" style={{ minWidth: 0 }}>
-                        <TextEditor
-                            value={inputText}
-                            onChange={(value) => setInputText(value)}
-                            placeholder={"Type your message here..."}
-                            minHeight="60px"
-                        />
-                    </div>
-                    <div className="d-flex flex-column gap-2 ml-2">
-                        {/* <Button
-                            type="button"
-                            className="btn-light d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm border mb-2"
-                            style={{ width: '40px', height: '40px', backgroundColor: '#f8f9fa', alignSelf: 'center' }}
-                            onClick={(e) => { e.preventDefault(); if (fileInputRef.current) fileInputRef.current.click(); }}
-                            title="Attach file"
-                            icon="fa fa-paperclip fs-6 text-muted"
-                        />
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            style={{ display: 'none' }}
-                            multiple
-                            onChange={handleFileChange}
-                        /> */}
-                        <Button
-                            type="submit"
-                            className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn"
-                            style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
-                            disabled={(!inputText || inputText === '<p><br></p>') && attachments.length === 0}
-                            label="Send"
-                            title="Send"
-                        />
-                    </div>
+            <form noValidate onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="p-3 d-flex align-items-end">
+                <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                    <TextEditor
+                        value={inputText}
+                        onChange={(value) => setInputText(value)}
+                        placeholder={"Type your message here..."}
+                        minHeight="60px"
+                    />
                 </div>
-            </form>
+                <div className="d-flex flex-column gap-2 ml-2">
+                    <Button
+                        type="submit"
+                        className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn"
+                        style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
+                        disabled={!inputText || inputText === '<p><br></p>' || inputText === '<p>&nbsp;</p>' || inputText === '<p></p>'}
+                        label="Send"
+                        title="Send"
+                    />
+                </div>
+            </form >
 
             <style>
                 {`
@@ -146,7 +84,7 @@ const CommentInput = ({
                 }
                 `}
             </style>
-        </div>
+        </div >
     );
 };
 

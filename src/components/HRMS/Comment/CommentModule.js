@@ -3,6 +3,7 @@ import api from '../../../api/axios';
 import authService from '../../Authentication/authService';
 import AlertMessages from '../../common/AlertMessages';
 import Messagess from './elements/Messagess';
+import Pusher from 'pusher-js';
 import CommentInput from './elements/CommentInput';
 
 export const checkIsCurrentUser = (user1, user2) => {
@@ -49,6 +50,28 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
         if (moduleType && moduleId) {
             fetchComments();
         }
+        // Initialize Pusher
+        if (process.env.REACT_APP_PUSHER_KEY) {
+            const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
+                cluster: process.env.REACT_APP_PUSHER_CLUSTER
+            });
+
+            const channel = pusher.subscribe(process.env.REACT_APP_PUSHER_CHANNEL);
+            const eventName = `comment_updated_${moduleType}_${moduleId}`;
+
+            channel.bind(eventName, (data) => {
+                console.log('Event received:', eventName, data);
+                if (data.status === 'success') {
+                    // Silently refresh comments without showing loading state
+                    fetchComments(true);
+                }
+            });
+
+            return () => {
+                channel.unbind(eventName);
+                pusher.unsubscribe(process.env.REACT_APP_PUSHER_CHANNEL);
+            };
+        }
         // eslint-disable-next-line
     }, [moduleType, moduleId]);
 
@@ -76,9 +99,9 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
 
     const { flat: flatComments, map: commentsMap } = flatCommentsData;
 
-    const handleSubmit = async (e, attachments = []) => {
+    const handleSubmit = async (e) => {
         if (e) e.preventDefault();
-        if (!inputText.trim() && (!attachments || attachments.length === 0)) return;
+        if (!inputText.trim()) return;
 
         try {
             const formData = new FormData();
@@ -86,12 +109,6 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
             formData.append('module_id', moduleId);
             formData.append('message', inputText);
             formData.append('user_id', currentUser?.employee_id || currentUser?.id);
-
-            if (attachments && attachments.length > 0) {
-                attachments.forEach((file, index) => {
-                    formData.append(`attachments[${index}]`, file);
-                });
-            }
 
             if (editingComment) {
                 formData.append('comment_id', editingComment.id);
