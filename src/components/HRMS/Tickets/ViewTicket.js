@@ -283,7 +283,7 @@ class ViewTicket extends Component {
                         });
                     }
                 })
-                .catch(() => { })
+                .catch(() => {})
                 .finally(() => {
                     this.setState({ isLoading: false });
                 });
@@ -360,10 +360,10 @@ class ViewTicket extends Component {
                                         {isLoading ? (
                                             <TableSkeleton columns={3} rows={4} />
                                         ) : (
-                                            <ul className="list-group" style={{ height: "500px", overflow: "aito" }}>
+                                            <ul className="list-group" style={{height:"500px", overflow:"aito"}}>
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Description: </small>
-                                                    <p className="mb-0" style={{ height: "180px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: ticket.description }}></p>
+                                                    <p className="mb-0" style={{height:"180px", overflow:"auto"}} dangerouslySetInnerHTML={{ __html: ticket.description }}></p>
                                                 </li>
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Priority: </small>
@@ -431,8 +431,8 @@ class ViewTicket extends Component {
                                                 overflowY: "auto"
                                             }}>
                                                 {logs.length === 0 ? (
-                                                    <BlankState message="No logs to show" />
-                                                ) : (
+                                                    <BlankState message="No logs to show" /> 
+                                                    ) : (
                                                     <table className="table table-hover table-vcenter mb-0 table_custom spacing8 text-nowrap">
                                                         <thead>
                                                             <tr>
@@ -442,16 +442,16 @@ class ViewTicket extends Component {
                                                         </thead>
                                                         <tbody>
                                                             {logs
-                                                                .sort((a, b) => new Date(a.log_date) - new Date(b.log_date))
-                                                                .map((log, index) => (
-                                                                    <tr key={log.log_id || index}>
-                                                                        <td>{shortformatDate(log.log_date)}</td>
-                                                                        <td>{log.log_working_hours} hrs</td>
-                                                                    </tr>
-                                                                ))}
+                                                            .sort((a, b) => new Date(a.log_date) - new Date(b.log_date))
+                                                            .map((log, index) => (
+                                                            <tr key={log.log_id || index}>
+                                                                <td>{shortformatDate(log.log_date)}</td>
+                                                                <td>{log.log_working_hours} hrs</td>
+                                                            </tr>
+                                                        ))}
                                                         </tbody>
                                                     </table>
-
+                                                    
                                                 )}
                                             </ul>
                                         )}
