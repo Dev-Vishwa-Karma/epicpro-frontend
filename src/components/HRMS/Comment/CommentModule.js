@@ -13,6 +13,42 @@ export const checkIsCurrentUser = (user1, user2) => {
     return id1 === id2;
 };
 
+const addCommentToTree = (comments, newComment) => {
+    if (!newComment.parent_comment_id) {
+        return [...comments, newComment];
+    }
+    return comments.map(c => {
+        if (String(c.id) === String(newComment.parent_comment_id)) {
+            return { ...c, replies: [...(c.replies || []), newComment] };
+        }
+        if (c.replies && c.replies.length > 0) {
+            return { ...c, replies: addCommentToTree(c.replies, newComment) };
+        }
+        return c;
+    });
+};
+
+const editCommentInTree = (comments, updatedComment) => {
+    return comments.map(c => {
+        if (String(c.id) === String(updatedComment.id)) {
+            return { ...c, ...updatedComment };
+        }
+        if (c.replies && c.replies.length > 0) {
+            return { ...c, replies: editCommentInTree(c.replies, updatedComment) };
+        }
+        return c;
+    });
+};
+
+const deleteCommentFromTree = (comments, commentId) => {
+    return comments.filter(c => String(c.id) !== String(commentId)).map(c => {
+        if (c.replies && c.replies.length > 0) {
+            return { ...c, replies: deleteCommentFromTree(c.replies, commentId) };
+        }
+        return c;
+    });
+};
+
 const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -78,8 +114,28 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
             channel.bind(eventName, (data) => {
                 console.log('Event received:', eventName, data);
                 if (data.status === 'success') {
-                    // Silently refresh comments without showing loading state
-                    fetchComments(true);
+                    // Use Pusher data to update state instead of fetching from API
+                    if (data.data && Array.isArray(data.data)) {
+                        setComments(data.data);
+                    } else if (Array.isArray(data)) {
+                        setComments(data);
+                    } else if (data.action) {
+                        setComments(prev => {
+                            const commentObj = data.comment || data.data;
+                            if (data.action === 'add' && commentObj) {
+                                return addCommentToTree(prev, commentObj);
+                            } else if (data.action === 'edit' && commentObj) {
+                                return editCommentInTree(prev, commentObj);
+                            } else if (data.action === 'delete') {
+                                const id = data.comment_id || data.id || (commentObj ? commentObj.id : null);
+                                if (id) return deleteCommentFromTree(prev, id);
+                            }
+                            return prev;
+                        });
+                    } else {
+                        // Fallback removed to prevent API execution as requested
+                        console.log('Pusher event received but format not recognized. Payload:', data);
+                    }
                 }
             });
 
@@ -134,7 +190,6 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                     setInputText('');
                     setEditingComment(null);
                     showSuccessAlert('Comment updated successfully');
-                    fetchComments(true);
                 } else {
                     showErrorAlert(response.data.message);
                 }
@@ -150,7 +205,6 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                 setInputText('');
                 setReplyingTo(null);
                 showSuccessAlert('Comment added successfully');
-                fetchComments(true);
             } else {
                 showErrorAlert(response.data.message);
             }
@@ -172,7 +226,6 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
             const response = await api.post('/comment.php?action=delete', formData);
             if (response.data.status === 'success') {
                 showSuccessAlert('Comment deleted successfully');
-                fetchComments(true);
             } else {
                 showErrorAlert(response.data.message);
             }
@@ -194,13 +247,13 @@ const CommentModule = ({ moduleType, moduleId, maxHeight = '700px' }) => {
                 ref={chatContainerRef}
             >
                 <div className="position-relative" style={{ zIndex: 1 }}>
-                    <AlertMessages 
-                        showSuccess={showSuccess} 
-                        successMessage={successMessage} 
-                        showError={showError} 
-                        errorMessage={errorMessage} 
-                        setShowSuccess={setShowSuccess} 
-                        setShowError={setShowError} 
+                    <AlertMessages
+                        showSuccess={showSuccess}
+                        successMessage={successMessage}
+                        showError={showError}
+                        errorMessage={errorMessage}
+                        setShowSuccess={setShowSuccess}
+                        setShowError={setShowError}
                     />
 
                     {loading ? (
