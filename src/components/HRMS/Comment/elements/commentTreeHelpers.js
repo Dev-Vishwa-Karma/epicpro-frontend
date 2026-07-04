@@ -20,25 +20,13 @@ export const addCommentToTree = (comments, newComment) => {
     });
 };
 
-export const editCommentInTree = (comments, updatedComment) => {
+export const commonCommentInTree = (comments, updatedComment) => {
     return comments.map(c => {
         if (String(c.id) === String(updatedComment.id)) {
             return { ...c, ...updatedComment };
         }
         if (c.replies && c.replies.length > 0) {
-            return { ...c, replies: editCommentInTree(c.replies, updatedComment) };
-        }
-        return c;
-    });
-};
-
-export const deleteCommentFromTree = (comments, deletedComment) => {
-    return comments.map(c => {
-        if (String(c.id) === String(deletedComment.id)) {
-            return { ...c, ...deletedComment };
-        }
-        if (c.replies && c.replies.length > 0) {
-            return { ...c, replies: deleteCommentFromTree(c.replies, deletedComment) };
+            return { ...c, replies: commonCommentInTree(c.replies, updatedComment) };
         }
         return c;
     });

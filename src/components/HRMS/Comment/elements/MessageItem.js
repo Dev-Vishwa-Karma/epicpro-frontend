@@ -10,6 +10,53 @@ const getActiveRepliesCount = (replies) => {
     }, 0);
 };
 
+const handleDownload = async (e, fileUrl, fileName) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+        const response = await fetch(fileUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading file:', error);
+        window.open(fileUrl, '_blank');
+    }
+};
+
+const showAttachements = (attachements) => {
+    return (
+        attachements.map((attachment, index) => {
+            const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
+            const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
+            const fileName = attachment.source.split('/').pop();
+
+            return (
+                <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
+                    {isImage ? (
+                        <div className="position-relative w-100 h-100">
+                            <a href={fileUrl} target="_blank" rel="noreferrer" title="Click to view full image">
+                                <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </a>
+                        </div>
+                    ) : (
+                        <a href={fileUrl} onClick={(e) => handleDownload(e, fileUrl, fileName)} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
+                            <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
+                            <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
+                        </a>
+                    )}
+                </div>
+            );
+        })
+    )
+}
+
 const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUser, onReply, onEdit, onDelete, isHovered, onHover, isParent, inThreadView }) => {
     const [showMenu, setShowMenu] = useState(false);
     const activeRepliesCount = getActiveRepliesCount(comment.replies);
@@ -123,26 +170,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 )}
                                 {parentComment.attachments && parentComment.attachments.length > 0 && (
                                     <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
-                                        {parentComment.attachments.map((attachment, index) => {
-                                            const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
-                                            const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
-                                            const fileName = attachment.source.split('/').pop();
-
-                                            return (
-                                                <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
-                                                    {isImage ? (
-                                                        <a href={fileUrl} target="_blank" rel="noreferrer" title="Click to view full image">
-                                                            <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                        </a>
-                                                    ) : (
-                                                        <a href={fileUrl} target="_blank" rel="noreferrer" className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
-                                                            <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
-                                                            <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
+                                        {showAttachements(parentComment.attachments)}
                                     </div>
                                 )}
                             </div>
@@ -154,26 +182,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
 
                     {comment.attachments && comment.attachments.length > 0 && (
                         <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
-                            {comment.attachments.map((attachment, index) => {
-                                const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
-                                const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
-                                const fileName = attachment.source.split('/').pop();
-
-                                return (
-                                    <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
-                                        {isImage ? (
-                                            <a href={fileUrl} target="_blank" rel="noreferrer" title="Click to view full image">
-                                                <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            </a>
-                                        ) : (
-                                            <a href={fileUrl} target="_blank" rel="noreferrer" className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
-                                                <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
-                                                <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
-                                            </a>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                            {showAttachements(comment.attachments)}
                         </div>
                     )}
 
@@ -231,29 +240,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                     className="ms-2 align-self-end mb-1"
                 />
             )}
-            <style>
-                {`
-                #comment-${comment.id} .message-content p {
-                margin-bottom: 0 !important;
-                margin-top: 0 !important;
-                }
-
-                #comment-${comment.id} .parent-message-content p {
-                margin: 0 !important;
-                display: inline !important;
-                }
-
-                #comment-${comment.id} .parent-message-content img {
-                max-height: 35px !important;
-                max-width: 35px !important;
-                object-fit: cover !important;
-                border-radius: 4px !important;
-                vertical-align: middle !important;
-                margin-left: 5px;
-                }
-            `}
-            </style>
-        </div>
+        </div >
     );
 };
 

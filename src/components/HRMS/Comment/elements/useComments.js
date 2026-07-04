@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import api from '../../../../api/axios';
 import Pusher from 'pusher-js';
-import { addCommentToTree, editCommentInTree, deleteCommentFromTree } from './commentTreeHelpers';
+import { addCommentToTree, commonCommentInTree } from './commentTreeHelpers';
 
 const useComments = (moduleType, moduleId, showErrorAlert) => {
     const [comments, setComments] = useState([]);
@@ -48,9 +48,9 @@ const useComments = (moduleType, moduleId, showErrorAlert) => {
                             if (data.action === 'add' && commentObj) {
                                 return addCommentToTree(prev, commentObj);
                             } else if (data.action === 'edit' && commentObj) {
-                                return editCommentInTree(prev, commentObj);
+                                return commonCommentInTree(prev, commentObj);
                             } else if (data.action === 'delete') {
-                                return deleteCommentFromTree(prev, commentObj);
+                                return commonCommentInTree(prev, commentObj);
                             }
                             return prev;
                         });
