@@ -245,7 +245,7 @@ const CommentInput = ({
                         })}
                     </div>
                 )}
-                <div className="d-flex align-items-end gap-3">
+                <div className="d-flex align-items-center gap-3">
                     <div className="flex-grow-1" style={{ minWidth: 0 }}>
                         <TextEditor
                             value={inputText}
@@ -269,18 +269,18 @@ const CommentInput = ({
                         />
                         {(
                             // isTextTooLong && (
-                            <div className={`text-end mt-1 ${isTextTooLong ? 'text-danger fw-bold' : 'text-muted'}`} style={{ fontSize: '0.75rem' }}>
+                            <div className={`text-end ${isTextTooLong ? 'text-danger fw-bold' : 'text-muted'}`} style={{ fontSize: '0.75rem' }}>
                                 {textByteSize}/4096 bytes
                             </div>
                             // )
                         )}
 
                     </div>
-                    <div className="d-flex gap-2 ml-2">
+                    <div className="d-flex align-items-center justify-content-end gap-2 ml-2">
                         <Button
                             type="button"
-                            className="btn-light d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm mb-2 mr-2 rounded"
-                            style={{ width: '40px', height: '40px', alignSelf: 'center' }}
+                            className="btn-light d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm rounded"
+                            style={{ width: '40px', height: '40px' }}
                             onClick={(e) => { e.preventDefault(); if (fileInputRef.current) fileInputRef.current.click(); }}
                             title="Attach file"
                             icon="fa fa-solid fa-plus"
@@ -294,7 +294,7 @@ const CommentInput = ({
                         />
                         <Button
                             type="submit"
-                            className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn"
+                            className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn ml-2"
                             style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
                             disabled={(!inputText || inputText === '<p><br></p>') && attachments.length === 0 && existingAttachments.length === 0 || isSubmitting || isTextTooLong}
                             loading={isSubmitting}
