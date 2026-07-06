@@ -15,6 +15,12 @@ const CommentInput = ({
     const containerRef = useRef(null);
     const [attachments, setAttachments] = useState([]);
     const [existingAttachments, setExistingAttachments] = useState([]);
+    const [errorMsg, setErrorMsg] = useState(null);
+
+    const showError = (msg) => {
+        setErrorMsg(msg);
+        setTimeout(() => setErrorMsg(null), 5000);
+    };
 
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -24,7 +30,19 @@ const CommentInput = ({
             }
             setAttachments(prev => {
                 const updated = [...prev];
+                let hasLimitError = false;
                 newFiles.forEach(newFile => {
+                    if (newFile.size > 5 * 1024 * 1024) {
+                        showError(`File ${newFile.name} exceeds the 5MB size limit.`);
+                        return;
+                    }
+                    if (updated.length + existingAttachments.length >= 5) {
+                        if (!hasLimitError) {
+                            showError(`Maximum of 5 attachments allowed per comment.`);
+                            hasLimitError = true;
+                        }
+                        return;
+                    }
                     // Prevent adding duplicates based on file name and size
                     if (!updated.some(existing => existing.name === newFile.name && existing.size === newFile.size)) {
                         updated.push(newFile);
@@ -60,7 +78,19 @@ const CommentInput = ({
             const newFiles = Array.from(e.clipboardData.files);
             setAttachments(prev => {
                 const updated = [...prev];
+                let hasLimitError = false;
                 newFiles.forEach(newFile => {
+                    if (newFile.size > 5 * 1024 * 1024) {
+                        showError(`Pasted file exceeds the 5MB size limit.`);
+                        return;
+                    }
+                    if (updated.length + existingAttachments.length >= 5) {
+                        if (!hasLimitError) {
+                            showError(`Maximum of 5 attachments allowed per comment.`);
+                            hasLimitError = true;
+                        }
+                        return;
+                    }
                     if (!updated.some(existing => existing.name === newFile.name && existing.size === newFile.size)) {
                         updated.push(newFile);
                     }
@@ -132,6 +162,18 @@ const CommentInput = ({
                         className="btn-sm btn-link text-muted p-0 flex-shrink-0"
                         onClick={() => setReplyingTo(null)}
                         icon="fa fa-times fs-5"
+                    />
+                </div>
+            )}
+
+            {errorMsg && (
+                <div className="alert alert-danger mx-3 mt-3 mb-0 py-2 d-flex justify-content-between align-items-center shadow-sm" role="alert" style={{ fontSize: '0.85rem' }}>
+                    <span className="me-2"><i className="fa fa-exclamation-circle me-1"></i> {errorMsg}</span>
+                    <Button
+                        className="btn-sm btn-link text-danger p-0 flex-shrink-0"
+                        onClick={() => setErrorMsg(null)}
+                        icon="fa fa-times"
+                        style={{ textDecoration: 'none' }}
                     />
                 </div>
             )}
