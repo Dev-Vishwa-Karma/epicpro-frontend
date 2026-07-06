@@ -10,31 +10,12 @@ const getActiveRepliesCount = (replies) => {
     }, 0);
 };
 
-const handleDownload = async (e, fileUrl, fileName) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-        const response = await fetch(fileUrl);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error('Error downloading file:', error);
-        window.open(fileUrl, '_blank');
-    }
-};
-
 const showAttachements = (attachements) => {
     return (
         attachements.map((attachment, index) => {
             const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
             const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
+            const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
             const fileName = attachment.source.split('/').pop();
 
             return (
@@ -44,9 +25,19 @@ const showAttachements = (attachements) => {
                             <a href={fileUrl} target="_blank" rel="noreferrer" title="Click to view full image">
                                 <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </a>
+                            <a
+                                href={downloadUrl}
+                                className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
+                                style={{ bottom: '4px', right: '4px', width: '24px', height: '24px', opacity: '0.7', textDecoration: 'none' }}
+                                title="Download image"
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                            >
+                                <i className="fa fa-download" style={{ fontSize: '0.7rem' }}></i>
+                            </a>
                         </div>
                     ) : (
-                        <a href={fileUrl} onClick={(e) => handleDownload(e, fileUrl, fileName)} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
+                        <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
                             <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
                             <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
                         </a>
@@ -61,186 +52,218 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
     const [showMenu, setShowMenu] = useState(false);
     const activeRepliesCount = getActiveRepliesCount(comment.replies);
 
-    return (
-        <div
-            id={`comment-${comment.id}`}
-            className={`d-flex mb-3 ${isCurrentUser ? 'justify-content-end' : 'justify-content-start'}`}
-            onMouseEnter={onHover}
-            onMouseLeave={() => onHover(null)}
+    const replyButton = (
+        <button
+            className="btn btn-sm p-0 text-primary text-decoration-none fw-bold d-flex align-items-center"
+            style={{ fontSize: '0.75rem', backgroundColor: 'transparent', border: 'none' }}
+            onClick={() => onReply(comment)}
         >
-            {!isCurrentUser && (
-                <Avatar
-                    profile={comment.commented_by?.profile}
-                    first_name={comment.commented_by?.first_name}
-                    last_name={comment.commented_by?.last_name}
-                    size={32}
-                    className="me-2 align-self-end mb-1"
-                />
-            )}
+            {activeRepliesCount} {activeRepliesCount === 1 ? 'reply' : 'replies'}
+        </button>
+    );
 
-            <div className={`d-flex flex-column ${isCurrentUser ? 'align-items-end' : 'align-items-start'}`}>
-                <div
-                    id={`bubble-${comment.id}`}
-                    className={`position-relative p-2 shadow-sm`}
-                    style={{
-                        maxWidth: '85%',
-                        backgroundColor: isCurrentUser ? '#d9fdd3' : '#ffffff',
-                        borderRadius: '8px',
-                        borderTopRightRadius: isCurrentUser ? '0px' : '8px',
-                        borderTopLeftRadius: isCurrentUser ? '8px' : '0px',
-                        minWidth: '250px'
-                    }}
-                >
-                    <div className="mb-1 pe-5" style={{ fontSize: '0.8rem', color: '#128C7E', fontWeight: 'bold' }}>
-                        {isCurrentUser ? 'You' : `${comment.commented_by?.first_name} ${comment.commented_by?.last_name}`}
-                    </div>
+    const replyIcon = (
+        <i
+            className={`fa fa-reply-all text-muted mt-0 ${isCurrentUser ? 'ms-1' : 'me-1'}`}
+            style={{
+                fontSize: '0.7rem',
+                transform: isCurrentUser ? 'rotate(180deg) scaleX(-1)' : 'rotate(180deg)',
+                display: 'inline-block',
+                padding: '4px'
+            }}
+        ></i>
+    );
 
-                    {(isCurrentUser || comment?.modified_at) && (
-                        <div className="position-absolute d-flex align-items-center" style={{ top: '8px', right: '8px', zIndex: 5 }}>
-                            {comment?.modified_at && !comment?.deleted_at && (
-                                <span className="text-muted me-2" style={{ fontSize: '0.65rem', fontStyle: 'italic' }}>
-                                    Edited
-                                </span>
-                            )}
-                            {isCurrentUser && !comment?.deleted_at && (
-                                <div className="dropdown position-relative ml-2">
-                                    <button
-                                        className="btn btn-sm btn-link p-0 text-muted fw-bold"
-                                        style={{ fontSize: '1.2rem', textDecoration: 'none', lineHeight: '0.5' }}
-                                        onClick={() => setShowMenu(!showMenu)}
-                                        onBlur={() => setTimeout(() => setShowMenu(false), 200)}
-                                    >
-                                        ⋮
-                                    </button>
-                                    {showMenu && (
-                                        <div
-                                            className="dropdown-menu dropdown-menu-right show shadow-sm"
-                                            style={{ top: '100%', right: '0', left: 'auto', zIndex: 100, minWidth: '100px', padding: '0.25rem 0', position: 'absolute' }}
-                                        >
-                                            <button
-                                                className="dropdown-item text-primary"
-                                                style={{ fontSize: '0.85rem' }}
-                                                onClick={() => { setShowMenu(false); onEdit(comment); }}
-                                            >
-                                                <i className="fa fa-edit mr-1"></i>Edit
-                                            </button>
-                                            <button
-                                                className="dropdown-item text-danger"
-                                                style={{ fontSize: '0.85rem' }}
-                                                onClick={() => { setShowMenu(false); onDelete(comment.id); }}
-                                            >
-                                                <i className="fa fa-trash mr-1"></i>Delete
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {parentComment && !comment?.deleted_at && (
-                        <div
-                            className="p-2 mb-1 rounded"
-                            style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '4px solid #128C7E', cursor: 'pointer' }}
-                            onClick={() => {
-                                const element = document.getElementById(`comment-${parentComment.id}`);
-                                if (element) {
-                                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    const bubble = document.getElementById(`bubble-${parentComment.id}`);
-                                    if (bubble) {
-                                        const originalBg = bubble.style.backgroundColor;
-                                        bubble.style.transition = 'background-color 0.3s ease';
-                                        bubble.style.backgroundColor = '#cce5ff';
-                                        setTimeout(() => {
-                                            bubble.style.backgroundColor = originalBg;
-                                            setTimeout(() => { bubble.style.transition = ''; }, 300);
-                                        }, 1200);
-                                    }
-                                }
-                            }}
-                        >
-                            <div
-                                className="fw-bold color-primary"
-                                style={{ fontSize: '0.75rem' }}>
-                                {isParentCurrentUser ? 'You' : `${parentComment.commented_by?.first_name} ${parentComment.commented_by?.last_name}`}
-                            </div>
-                            <div className="d-flex align-items-center text-muted parent-message-content mt-1" style={{ fontSize: '0.75rem' }}>
-                                {parentComment.message && typeof parentComment.message === 'string' && parentComment.message.replace(/(<([^>]+)>)/gi, "").replace(/&nbsp;/gi, "").trim() !== '' && (
-                                    <div className="text-truncate me-2" style={{ maxWidth: '200px' }} dangerouslySetInnerHTML={{ __html: parentComment.message ? parentComment.message : '' }}></div>
-                                )}
-                                {parentComment.attachments && parentComment.attachments.length > 0 && (
-                                    <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
-                                        {showAttachements(parentComment.attachments)}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="message-content" style={{ fontSize: '0.9rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingBottom: '4px', paddingRight: isCurrentUser ? '15px' : '0' }} dangerouslySetInnerHTML={{ __html: comment.message || '' }}>
-                    </div>
-
-                    {comment.attachments && comment.attachments.length > 0 && (
-                        <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
-                            {showAttachements(comment.attachments)}
-                        </div>
-                    )}
-
-                    <div className="d-flex mt-1">
-                        {!comment?.deleted_at && !(inThreadView && isParent) && (
-                            <button
-                                className="btn btn-sm btn-link p-0 me-auto text-decoration-none fw-bold"
-                                style={{ fontSize: '0.75rem' }}
-                                onClick={() => onReply(comment)}
-                            >
-                                {!inThreadView && comment.replies && activeRepliesCount === 0 ? 'Start Thread' : !inThreadView && comment.replies && activeRepliesCount > 0 ? 'View Thread' : 'Reply'}
-                            </button>
+    return (
+        <>
+            <div
+                id={`comment-${comment.id}`}
+                className={`d-flex flex-column mb-3 ${isCurrentUser ? 'align-items-end' : 'align-items-start'}`}
+                onMouseEnter={onHover}
+                onMouseLeave={() => onHover(null)}
+            >
+                <div className="d-flex flex-column" style={{ maxWidth: '100%' }}>
+                    <div className="d-flex align-items-end">
+                        {!isCurrentUser && (
+                            <Avatar
+                                profile={comment.commented_by?.profile}
+                                first_name={comment.commented_by?.first_name}
+                                last_name={comment.commented_by?.last_name}
+                                size={32}
+                                className="me-2 mb-1"
+                            />
                         )}
 
-                        <div className="d-flex ml-auto">
-                            <span
-                                className="text-muted ml-1"
-                                style={{ fontSize: '0.65rem' }}
-                            >
-                                At {new Date(comment?.deleted_at ? comment.deleted_at : comment.modified_at || comment.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                {
-                    !isParent && !comment?.deleted_at && !inThreadView && comment.replies && activeRepliesCount > 0 && (
-                        <div className={`d-flex mt-1 ${!isCurrentUser ? 'justify-content-start' : 'justify-content-end'}`}>
-                            <i
-                                className="fa fa-reply-all text-muted rounded-pill mt-0"
+                        <div className={`d-flex flex-column ${isCurrentUser ? 'align-items-end' : 'align-items-start'}`}>
+                            <div
+                                id={`bubble-${comment.id}`}
+                                className={`position-relative p-2 shadow-sm`}
                                 style={{
-                                    fontSize: '0.7rem',
-                                    transform: 'rotate(180deg)',
-                                    display: 'inline-block',
-                                    padding: '4px'
+                                    maxWidth: '100%',
+                                    backgroundColor: isCurrentUser ? '#d9fdd3' : '#ffffff',
+                                    borderRadius: '8px',
+                                    borderTopRightRadius: isCurrentUser ? '0px' : '8px',
+                                    borderTopLeftRadius: isCurrentUser ? '8px' : '0px',
+                                    minWidth: '250px'
                                 }}
-                            ></i>
-                            <button
-                                className="btn btn-sm p-0 text-primary text-decoration-none fw-bold d-flex align-items-center"
-                                style={{ fontSize: '0.75rem', backgroundColor: 'transparent', border: 'none' }}
-                                onClick={() => onReply(comment)}
                             >
-                                {activeRepliesCount} {activeRepliesCount === 1 ? 'reply' : 'replies'}
-                            </button>
+                                <div className="mb-1 pe-5" style={{ fontSize: '0.8rem', color: '#128C7E', fontWeight: 'bold' }}>
+                                    {isCurrentUser ? 'You' : `${comment.commented_by?.first_name} ${comment.commented_by?.last_name}`}
+                                </div>
+
+                                {(isCurrentUser || comment?.modified_at) && (
+                                    <div className="position-absolute d-flex align-items-center" style={{ top: '8px', right: '8px', zIndex: 5 }}>
+                                        {comment?.modified_at && !comment?.deleted_at && (
+                                            <span className="text-muted me-2" style={{ fontSize: '0.65rem', fontStyle: 'italic' }}>
+                                                Edited
+                                            </span>
+                                        )}
+                                        {isCurrentUser && !comment?.deleted_at && (
+                                            <div className="dropdown position-relative ml-2">
+                                                <button
+                                                    className="btn btn-sm btn-link p-0 text-muted fw-bold"
+                                                    style={{ fontSize: '1.2rem', textDecoration: 'none', lineHeight: '0.5' }}
+                                                    onClick={() => setShowMenu(!showMenu)}
+                                                    onBlur={() => setTimeout(() => setShowMenu(false), 200)}
+                                                >
+                                                    ⋮
+                                                </button>
+                                                {showMenu && (
+                                                    <div
+                                                        className="dropdown-menu dropdown-menu-right show shadow-sm"
+                                                        style={{ top: '100%', right: '0', left: 'auto', zIndex: 100, minWidth: '100px', padding: '0.25rem 0', position: 'absolute' }}
+                                                    >
+                                                        <button
+                                                            className="dropdown-item text-primary"
+                                                            style={{ fontSize: '0.85rem' }}
+                                                            onClick={() => { setShowMenu(false); onEdit(comment); }}
+                                                        >
+                                                            <i className="fa fa-edit mr-1"></i>Edit
+                                                        </button>
+                                                        <button
+                                                            className="dropdown-item text-danger"
+                                                            style={{ fontSize: '0.85rem' }}
+                                                            onClick={() => { setShowMenu(false); onDelete(comment.id); }}
+                                                        >
+                                                            <i className="fa fa-trash mr-1"></i>Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {parentComment && (
+                                    <div
+                                        className="p-2 mb-1 rounded"
+                                        style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '4px solid #128C7E', cursor: 'pointer' }}
+                                        onClick={() => {
+                                            const element = document.getElementById(`comment-${parentComment.id}`);
+                                            if (element) {
+                                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                const bubble = document.getElementById(`bubble-${parentComment.id}`);
+                                                if (bubble) {
+                                                    const originalBg = bubble.style.backgroundColor;
+                                                    bubble.style.transition = 'background-color 0.3s ease';
+                                                    bubble.style.backgroundColor = '#cce5ff';
+                                                    setTimeout(() => {
+                                                        bubble.style.backgroundColor = originalBg;
+                                                        setTimeout(() => { bubble.style.transition = ''; }, 300);
+                                                    }, 1200);
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        <div
+                                            className="fw-bold color-primary"
+                                            style={{ fontSize: '0.75rem' }}>
+                                            {isParentCurrentUser ? 'You' : `${parentComment.commented_by?.first_name} ${parentComment.commented_by?.last_name}`}
+                                        </div>
+                                        <div className="d-flex align-items-center text-muted parent-message-content mt-1" style={{ fontSize: '0.75rem' }}>
+                                            {parentComment.message && typeof parentComment.message === 'string' && parentComment.message.replace(/(<([^>]+)>)/gi, "").replace(/&nbsp;/gi, "").trim() !== '' && (
+                                                <div className="text-truncate me-2" style={{ maxWidth: '200px' }} dangerouslySetInnerHTML={{ __html: parentComment.message ? parentComment.message : '' }}></div>
+                                            )}
+                                            {parentComment.attachments && parentComment.attachments.length > 0 && (
+                                                <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
+                                                    {showAttachements(parentComment.attachments)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="message-content" style={{ fontSize: '0.9rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingRight: isCurrentUser ? '15px' : '0' }} dangerouslySetInnerHTML={{ __html: comment.message || '' }}>
+                                </div>
+
+                                {comment.attachments && comment.attachments.length > 0 && (
+                                    <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
+                                        {showAttachements(comment.attachments)}
+                                    </div>
+                                )}
+
+                                <div className="d-flex mt-1">
+                                    {!(inThreadView && isParent) && !comment.deleted_at && (
+                                        <button
+                                            className="btn btn-sm btn-link p-0 me-auto text-decoration-none fw-bold"
+                                            style={{ fontSize: '0.75rem' }}
+                                            onClick={() => onReply(comment)}
+                                        >
+                                            {!inThreadView && comment.replies && activeRepliesCount === 0 ? 'Start Thread' : !inThreadView && comment.replies && activeRepliesCount > 0 ? 'View Thread' : 'Reply'}
+                                        </button>
+                                    )}
+
+                                    <div className="d-flex ml-auto">
+                                        <span
+                                            className="text-muted ml-1"
+                                            style={{ fontSize: '0.65rem' }}
+                                        >
+                                            At {new Date(comment?.deleted_at ? comment.deleted_at : comment.modified_at || comment.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    )
-                }
+                        {/* right side avatar */}
+                        {isCurrentUser && (
+                            <Avatar
+                                profile={comment.commented_by?.profile}
+                                first_name={comment.commented_by?.first_name}
+                                last_name={comment.commented_by?.last_name}
+                                size={32}
+                                className="ms-2 mb-1"
+                            />
+                        )}
+                    </div>
+                    {
+                        !isParent && !inThreadView && comment.replies && activeRepliesCount > 0 && (
+                            <div className={`d-flex mt-1 ${isCurrentUser ? 'align-self-start' : 'align-self-end'}`}>
+                                {isCurrentUser ? (
+                                    <>
+                                        {replyButton}
+                                        {replyIcon}
+                                    </>
+                                ) : (
+                                    <>
+                                        {replyIcon}
+                                        {replyButton}
+                                    </>
+                                )}
+                            </div>
+                        )
+                    }
+                </div>
             </div>
-            {/* right side avatar */}
-            {isCurrentUser && (
-                <Avatar
-                    profile={comment.commented_by?.profile}
-                    first_name={comment.commented_by?.first_name}
-                    last_name={comment.commented_by?.last_name}
-                    size={32}
-                    className="ms-2 align-self-end mb-1"
-                />
+            {isParent && inThreadView && (
+                <div className="d-flex align-items-center mb-3 mt-1 w-100">
+                    <hr className="flex-grow-1 m-0" style={{ borderTop: '1px solid #dee2e6', opacity: 1 }} />
+                    <span className="mx-3 text-muted" style={{ fontSize: '0.75rem', fontWeight: '500' }}>
+                        {activeRepliesCount} {activeRepliesCount > 1 ? 'replies' : 'reply'}
+                    </span>
+                    <hr className="flex-grow-1 m-0" style={{ borderTop: '1px solid #dee2e6', opacity: 1 }} />
+                </div>
             )}
-        </div >
+        </>
     );
 };
 

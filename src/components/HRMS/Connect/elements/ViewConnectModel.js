@@ -324,7 +324,7 @@ const ViewConnectModel = ({
                                                                                     </button>
                                                                                 ) : (
                                                                                     <a
-                                                                                        href={`${process.env.REACT_APP_API_URL}/${file}`}
+                                                                                        href={`${process.env.REACT_APP_API_URL}/download.php?file=${file}`}
                                                                                         download
                                                                                         className="btn btn-sm btn-primary"
                                                                                     >
@@ -365,8 +365,18 @@ const ViewConnectModel = ({
                     <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1060, backgroundColor: 'rgba(0,0,0,0.6)' }}>
                         <div className="modal-dialog modal-dialog-centered modal-lg">
                             <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Preview File</h5>
+                                <div className="modal-header position-relative">
+                                    <h5 className="modal-title">Preview</h5>
+                                    <a
+                                        href={`${process.env.REACT_APP_API_URL}/download.php?file=${filePath}`}
+                                        className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
+                                        style={{ top: '50%', right: '55px', transform: 'translateY(-50%)', width: '32px', height: '32px', opacity: '0.7', textDecoration: 'none' }}
+                                        title="Download image"
+                                        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                                    >
+                                        <i className="fa fa-download" style={{ fontSize: '1rem' }}></i>
+                                    </a>
                                     <button type="button" className="close" onClick={() => setShowPreview(false)}>
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -376,17 +386,8 @@ const ViewConnectModel = ({
                                         <img
                                             src={`${process.env.REACT_APP_API_URL}/${filePath}`}
                                             alt="preview"
-                                            style={{ maxWidth: "100%", height: "auto" }}
+                                            style={{ maxWidth: "100%", height: "70vh" }}
                                         />
-                                    )}
-                                    {filePath && !isImage(getExt(filePath)) && (
-                                        <a
-                                            href={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                            download
-                                            className="btn btn-primary"
-                                        >
-                                            Download File
-                                        </a>
                                     )}
                                 </div>
                             </div>
