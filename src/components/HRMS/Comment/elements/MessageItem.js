@@ -81,8 +81,9 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                 className={`d-flex flex-column mb-3 ${isCurrentUser ? 'align-items-end' : 'align-items-start'}`}
                 onMouseEnter={onHover}
                 onMouseLeave={() => onHover(null)}
+                style={{ width: '100%' }}
             >
-                <div className="d-flex flex-column" style={{ maxWidth: '100%' }}>
+                <div className="d-flex flex-column" style={{ maxWidth: '85%' }}>
                     <div className="d-flex align-items-end">
                         {!isCurrentUser && (
                             <Avatar
@@ -99,7 +100,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 id={`bubble-${comment.id}`}
                                 className={`position-relative p-2 shadow-sm`}
                                 style={{
-                                    maxWidth: '75%',
+                                    maxWidth: '100%',
                                     backgroundColor: isCurrentUser ? '#d9fdd3' : '#ffffff',
                                     borderRadius: '8px',
                                     borderTopRightRadius: isCurrentUser ? '0px' : '8px',
@@ -175,12 +176,10 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                             }
                                         }}
                                     >
-                                        <div
-                                            className="fw-bold color-primary"
-                                            style={{ fontSize: '0.75rem' }}>
+                                        <div className="fw-bold color-primary" style={{ fontSize: '0.75rem' }}>
                                             {isParentCurrentUser ? 'You' : `${parentComment.commented_by?.first_name} ${parentComment.commented_by?.last_name}`}
                                         </div>
-                                        <div className="d-flex align-items-center text-muted parent-message-content mt-1" style={{ fontSize: '0.75rem' }}>
+                                        <div className="d-flex align-items-center text-muted parent-message-content preview-text mt-1" style={{ fontSize: '0.75rem' }}>
                                             {parentComment.message && typeof parentComment.message === 'string' && parentComment.message.replace(/(<([^>]+)>)/gi, "").replace(/&nbsp;/gi, "").trim() !== '' && (
                                                 <div className="text-truncate me-2" style={{ maxWidth: '200px' }} dangerouslySetInnerHTML={{ __html: parentComment.message ? parentComment.message : '' }}></div>
                                             )}

@@ -19,7 +19,7 @@ const CommentInput = ({
     const timeoutRef = useRef(null);
 
     const textByteSize = inputText ? new Blob([inputText]).size : 0;
-    const isTextTooLong = textByteSize > 10240;
+    const isTextTooLong = textByteSize > 4096;
 
     const showError = (msg) => {
         setErrorMsg(msg);
@@ -189,7 +189,7 @@ const CommentInput = ({
                 onSubmit={(e) => {
                     e.preventDefault();
                     if (isTextTooLong) {
-                        showError("Text limit of 10240 bytes exceeded.");
+                        showError("Text limit of 4096 bytes exceeded.");
                         return;
                     }
                     handleSubmit(e, attachments, existingAttachments);
@@ -251,16 +251,16 @@ const CommentInput = ({
                             value={inputText}
                             onChange={(value) => {
                                 setInputText(value);
-                                if (value && new Blob([value]).size > 10240) {
-                                    showError("Text limit of 10240 bytes exceeded.");
+                                if (value && new Blob([value]).size > 4096) {
+                                    showError("Text limit of 4096 bytes exceeded.");
                                 }
                             }}
                             placeholder={"Type your message here..."}
                             minHeight="60px"
                             onEnter={() => {
                                 if (isSubmitting || ((!inputText || inputText === '<p><br></p>') && attachments.length === 0 && existingAttachments.length === 0)) return;
-                                if (inputText && new Blob([inputText]).size > 10240) {
-                                    showError("Text limit of 10240 bytes exceeded.");
+                                if (inputText && new Blob([inputText]).size > 4096) {
+                                    showError("Text limit of 4096 bytes exceeded.");
                                     return;
                                 }
                                 handleSubmit(null, attachments, existingAttachments);
@@ -268,11 +268,11 @@ const CommentInput = ({
                             }}
                         />
                         {(
-                            isTextTooLong && (
-                                <div className={`text-end mt-1 ${isTextTooLong ? 'text-danger fw-bold' : 'text-muted'}`} style={{ fontSize: '0.75rem' }}>
-                                    {textByteSize}/10240 bytes
-                                </div>
-                            )
+                            // isTextTooLong && (
+                            <div className={`text-end mt-1 ${isTextTooLong ? 'text-danger fw-bold' : 'text-muted'}`} style={{ fontSize: '0.75rem' }}>
+                                {textByteSize}/4096 bytes
+                            </div>
+                            // )
                         )}
 
                     </div>
