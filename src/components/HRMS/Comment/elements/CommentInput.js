@@ -16,10 +16,15 @@ const CommentInput = ({
     const [attachments, setAttachments] = useState([]);
     const [existingAttachments, setExistingAttachments] = useState([]);
     const [errorMsg, setErrorMsg] = useState(null);
+    const timeoutRef = useRef(null);
+
+    const textByteSize = inputText ? new Blob([inputText]).size : 0;
+    const isTextTooLong = textByteSize > 10240;
 
     const showError = (msg) => {
         setErrorMsg(msg);
-        setTimeout(() => setErrorMsg(null), 5000);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => setErrorMsg(null), 5000);
     };
 
     const handleFileChange = (e) => {
@@ -107,6 +112,7 @@ const CommentInput = ({
         }
         return () => {
             if (el) el.removeEventListener('paste', handlePaste, true);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -180,7 +186,15 @@ const CommentInput = ({
 
             <form
                 noValidate
-                onSubmit={(e) => { e.preventDefault(); handleSubmit(e, attachments, existingAttachments); clearAttachment(); }}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    if (isTextTooLong) {
+                        showError("Text limit of 10240 bytes exceeded.");
+                        return;
+                    }
+                    handleSubmit(e, attachments, existingAttachments);
+                    clearAttachment();
+                }}
                 className="p-3"
             >
                 {(attachments.length > 0 || existingAttachments.length > 0) && (
@@ -235,15 +249,32 @@ const CommentInput = ({
                     <div className="flex-grow-1" style={{ minWidth: 0 }}>
                         <TextEditor
                             value={inputText}
-                            onChange={(value) => setInputText(value)}
+                            onChange={(value) => {
+                                setInputText(value);
+                                if (value && new Blob([value]).size > 10240) {
+                                    showError("Text limit of 10240 bytes exceeded.");
+                                }
+                            }}
                             placeholder={"Type your message here..."}
                             minHeight="60px"
                             onEnter={() => {
                                 if (isSubmitting || ((!inputText || inputText === '<p><br></p>') && attachments.length === 0 && existingAttachments.length === 0)) return;
+                                if (inputText && new Blob([inputText]).size > 10240) {
+                                    showError("Text limit of 10240 bytes exceeded.");
+                                    return;
+                                }
                                 handleSubmit(null, attachments, existingAttachments);
                                 clearAttachment();
                             }}
                         />
+                        {(
+                            isTextTooLong && (
+                                <div className={`text-end mt-1 ${isTextTooLong ? 'text-danger fw-bold' : 'text-muted'}`} style={{ fontSize: '0.75rem' }}>
+                                    {textByteSize}/10240 bytes
+                                </div>
+                            )
+                        )}
+
                     </div>
                     <div className="d-flex gap-2 ml-2">
                         <Button
@@ -265,7 +296,7 @@ const CommentInput = ({
                             type="submit"
                             className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn"
                             style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
-                            disabled={(!inputText || inputText === '<p><br></p>') && attachments.length === 0 && existingAttachments.length === 0 || isSubmitting}
+                            disabled={(!inputText || inputText === '<p><br></p>') && attachments.length === 0 && existingAttachments.length === 0 || isSubmitting || isTextTooLong}
                             loading={isSubmitting}
                             icon="fa fa-paper-plane"
                         />

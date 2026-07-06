@@ -441,7 +441,7 @@ class ViewTicket extends Component {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {logs
+                                                        {logs
                                                             .sort((a, b) => new Date(a.log_date) - new Date(b.log_date))
                                                             .map((log, index) => (
                                                             <tr key={log.log_id || index}>
@@ -460,7 +460,7 @@ class ViewTicket extends Component {
                             </div>
                             <div className="col-lg-8 col-md-12">
                                 {this.state.ticket_id && (
-                                    <CommentModule moduleType="ticket" moduleId={this.state.ticket_id} />
+                                    <CommentModule moduleType="ticket" moduleId={this.state.ticket_id} maxHeight="850px" />
                                 )}
                             </div>
                         </div>

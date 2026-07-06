@@ -99,12 +99,12 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 id={`bubble-${comment.id}`}
                                 className={`position-relative p-2 shadow-sm`}
                                 style={{
-                                    maxWidth: '100%',
+                                    maxWidth: '75%',
                                     backgroundColor: isCurrentUser ? '#d9fdd3' : '#ffffff',
                                     borderRadius: '8px',
                                     borderTopRightRadius: isCurrentUser ? '0px' : '8px',
                                     borderTopLeftRadius: isCurrentUser ? '8px' : '0px',
-                                    minWidth: '250px'
+                                    minWidth: '230px'
                                 }}
                             >
                                 <div className="mb-1 pe-5" style={{ fontSize: '0.8rem', color: '#128C7E', fontWeight: 'bold' }}>

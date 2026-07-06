@@ -64,7 +64,12 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
 
     const handleSubmit = async (e, attachments = [], existingAttachments = []) => {
         if (e) e.preventDefault();
-        if (!inputText.trim() && (!attachments || attachments.length === 0) && (!existingAttachments || existingAttachments.length === 0)) return;
+        if (!inputText || (!inputText.trim() && (!attachments || attachments.length === 0) && (!existingAttachments || existingAttachments.length === 0))) return;
+
+        if (inputText && new Blob([inputText]).size > 10240) {
+            showErrorAlert('Text limit of 10240 bytes exceeded.');
+            return;
+        }
 
         setIsSubmitting(true);
         try {
