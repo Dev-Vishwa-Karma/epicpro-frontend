@@ -205,20 +205,20 @@ class Menu extends Component {
 		const content = [
 				{
 					"id": 1,
-					"icon": "icon-rocket",
+					"icon": "fa fa-rocket",
 					"label": "HRMS",
 					"to": "#!",
 					"content": [
-					{ "id": 2, "label": "Dashboard", "to": "/" },
-					{ "id": 3, "label": "Activities", "to": "/hr-activities" },
-					{ "id": 4, "label": "Holidays", "to": "/hr-holidays" },
-					{ "id": 5, "label": "Events", "to": "/hr-events" },
-					{ "id": 6, "label": "Reports", "to": "/hr-report" },
-					{ "id": 7, "label": "Gallery", "to": "/gallery" },
-					{ "id": 8, "label": "Todo List", "to": "/project-todo" },
-					{ "id": 9, "label": "Notifications", "to": "/notifications" },
-					{ "id": 10, "label": "Referral", "to": "/job-application" },
-					{ "id": 21, "label": "Ticket", "to": "/ticket" },
+					{ "id": 2, "icon": "fa fa-home", "label": "Dashboard", "to": "/" },
+					{ "id": 3, "icon": "fa fa-list", "label": "Activities", "to": "/hr-activities" },
+					{ "id": 4, "icon": "fa fa-plane", "label": "Holidays", "to": "/hr-holidays" },
+					{ "id": 5, "icon": "fa fa-calendar", "label": "Events", "to": "/hr-events" },
+					{ "id": 6, "icon": "fa fa-file-text", "label": "Reports", "to": "/hr-report" },
+					{ "id": 7, "icon": "fa fa-picture-o", "label": "Gallery", "to": "/gallery" },
+					{ "id": 8, "icon": "fa fa-check-square-o", "label": "Todo List", "to": "/project-todo" },
+					{ "id": 9, "icon": "fa fa-bell", "label": "Notifications", "to": "/notifications" },
+					{ "id": 10, "icon": "fa fa-user-plus", "label": "Referral", "to": "/job-application" },
+					{ "id": 21, "icon": "fa fa-ticket", "label": "Ticket", "to": "/ticket" },
 					]
 				}
 			];
@@ -242,31 +242,31 @@ class Menu extends Component {
 
 				if (hrms) {
 				// Insert "Users" after Dashboard
-				const usersItem = { id: 11, label: "Users", to: "/hr-users" };
+				const usersItem = { id: 11, icon: "fa fa-users", label: "Users", to: "/hr-users" };
 				const dashboardIndex = hrms.content.findIndex(item => item.id === 2);
 				if (dashboardIndex !== -1) hrms.content.splice(dashboardIndex + 1, 0, usersItem);
 
 				// Insert "Department" after Users
-				const deptItem = { id: 12, label: "Department", to: "/hr-department" };
+				const deptItem = { id: 12, icon: "fa fa-sitemap", label: "Department", to: "/hr-department" };
 				const usersIndex = hrms.content.findIndex(item => item.id === 11);
 				if (usersIndex !== -1) hrms.content.splice(usersIndex + 1, 0, deptItem);
 
 				// Insert "Employee" after Department
-				const empItem = { id: 13, label: "Employee", to: "/hr-employee" };
+				const empItem = { id: 13, icon: "fa fa-user", label: "Employee", to: "/hr-employee" };
 				const deptIndex = hrms.content.findIndex(item => item.id === 12);
 				if (deptIndex !== -1) hrms.content.splice(deptIndex + 1, 0, empItem);
 				
-				const connectItem = { id: 22, label: "Connect", to: "/connect" };
+				const connectItem = { id: 22, icon: "fa fa-comments", label: "Connect", to: "/connect" };
 				const connectIndex = hrms.content.findIndex(item => item.id === 13);
 				if (connectIndex !== -1)hrms.content.splice(connectIndex + 1, 0, connectItem);
 
 				// Insert "Statistics" after Employee
-				const statItem = { id: 14, label: "Statistics", to: "/statistics" };
+				const statItem = { id: 14, icon: "fa fa-bar-chart", label: "Statistics", to: "/statistics" };
 				const empIndex = hrms.content.findIndex(item => item.id === 22);
 				if (empIndex !== -1) hrms.content.splice(empIndex + 1, 0, statItem);
 
 				// Insert "Link" after Todo
-				const linkItem = { id: 15, label: "Link", to: "/link" };
+				const linkItem = { id: 15, icon: "fa fa-link", label: "Link", to: "/link" };
 				const todoIndex = hrms.content.findIndex(item => item.id === 8);
 				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
 				else hrms.content.push(linkItem);
@@ -276,11 +276,11 @@ class Menu extends Component {
 				if (!content.find(item => item.id === 16)) {
 					content.push({
 						id: 16,
-						icon: "icon-cup",
+						icon: "fa fa-coffee",
 						label: "Project",
 						content: [
-						{ id: 17, label: "Project List", to: "/project-list" },
-						{ id: 18, label: "Clients", to: "/project-clients" }
+						{ id: 17, icon: "fa fa-list-alt", label: "Project List", to: "/project-list" },
+						{ id: 18, icon: "fa fa-user-md", label: "Clients", to: "/project-clients" }
 						]
 					});
 				}
@@ -289,10 +289,10 @@ class Menu extends Component {
 				if (!content.find(item => item.id === 19)) {
 					content.push({
 						id: 19,
-						icon: "icon-briefcase",
+						icon: "fa fa-briefcase",
 						label: "Job Board",
 						content: [
-						{ id: 20, label: "Applicants", to: "/applicant" }
+						{ id: 20, icon: "fa fa-address-card", label: "Applicants", to: "/applicant" }
 						]
 					});
 				}
@@ -316,6 +316,7 @@ class Menu extends Component {
 						toggleRightSidebar={this.toggleRightSidebar}
 						istoggleLeftMenu={istoggleLeftMenu}
 						handler={this.handler}
+						content={content}
 					/>
 					<RightSidebar 
 						isOpenRightSidebar={isOpenRightSidebar}
