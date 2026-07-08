@@ -177,8 +177,8 @@ class Dashboard extends Component {
 
 		const items = [
 			{ label: 'Todos', class_color: 'indigo', count: this.state.totalPendingTodos, icon: 'fa-check-square-o', link: '/project-todo', isFa: true },
-			{ label: 'Users', class_color: 'green', count: this.state.totalUsers, icon: 'users', link: '/hr-users' },
-			{ label: 'Employees', class_color: 'pink', count: this.state.totalEmployees, icon: 'user', link: '/hr-employee' },
+			{ label: 'Users', class_color: 'green', count: this.state.totalUsers, icon: 'user', link: '/hr-users' },
+			{ label: 'Employees', class_color: 'pink', count: this.state.totalEmployees, icon: 'users', link: '/hr-employee' },
 			{ label: 'Holidays', class_color: 'info', count: this.state.totalHolidays, icon: 'plane', link: '/hr-holidays' },
 			{ label: 'Events', class_color: 'orange', count: this.state.totalEvents, icon: 'calendar', link: '/hr-events' },
 		];

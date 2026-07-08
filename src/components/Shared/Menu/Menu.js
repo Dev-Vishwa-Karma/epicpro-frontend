@@ -242,21 +242,21 @@ class Menu extends Component {
 
 				if (hrms) {
 				// Insert "Users" after Dashboard
-				const usersItem = { id: 11, icon: "fa fa-users", label: "Users", to: "/hr-users" };
+				const usersItem = { id: 11, icon: "fa fa-user", label: "Users", to: "/hr-users" };
 				const dashboardIndex = hrms.content.findIndex(item => item.id === 2);
 				if (dashboardIndex !== -1) hrms.content.splice(dashboardIndex + 1, 0, usersItem);
 
 				// Insert "Department" after Users
-				const deptItem = { id: 12, icon: "fa fa-sitemap", label: "Department", to: "/hr-department" };
+				const deptItem = { id: 12, icon: "fa fa-building", label: "Department", to: "/hr-department" };
 				const usersIndex = hrms.content.findIndex(item => item.id === 11);
 				if (usersIndex !== -1) hrms.content.splice(usersIndex + 1, 0, deptItem);
 
 				// Insert "Employee" after Department
-				const empItem = { id: 13, icon: "fa fa-user", label: "Employee", to: "/hr-employee" };
+				const empItem = { id: 13, icon: "fa fa-users", label: "Employee", to: "/hr-employee" };
 				const deptIndex = hrms.content.findIndex(item => item.id === 12);
 				if (deptIndex !== -1) hrms.content.splice(deptIndex + 1, 0, empItem);
 				
-				const connectItem = { id: 22, icon: "fa fa-comments", label: "Connect", to: "/connect" };
+				const connectItem = { id: 22, icon: "fa fa-sitemap", label: "Connect", to: "/connect" };
 				const connectIndex = hrms.content.findIndex(item => item.id === 13);
 				if (connectIndex !== -1)hrms.content.splice(connectIndex + 1, 0, connectItem);
 
@@ -276,11 +276,11 @@ class Menu extends Component {
 				if (!content.find(item => item.id === 16)) {
 					content.push({
 						id: 16,
-						icon: "fa fa-coffee",
+						icon: "fa fa-folder",
 						label: "Project",
 						content: [
-						{ id: 17, icon: "fa fa-list-alt", label: "Project List", to: "/project-list" },
-						{ id: 18, icon: "fa fa-user-md", label: "Clients", to: "/project-clients" }
+						{ id: 17, icon: "fa fa-folder-open", label: "Project List", to: "/project-list" },
+						{ id: 18, icon: "fa fa-user-circle", label: "Clients", to: "/project-clients" }
 						]
 					});
 				}
