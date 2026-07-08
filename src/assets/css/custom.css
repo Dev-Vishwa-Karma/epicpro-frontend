@@ -804,4 +804,7 @@ border-left: 6px solid #e6140d !important;
   .header-menu-icons {
       display: none !important;
   }
+  #header_top .hleft {
+      flex-direction: row !important;
+  }
 }
