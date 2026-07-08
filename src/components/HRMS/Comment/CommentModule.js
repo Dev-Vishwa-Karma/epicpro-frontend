@@ -25,9 +25,12 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
     const chatContainerRef = useRef(null);
     const mainViewScrollPosRef = useRef(0);
 
-    const scrollToBottom = () => {
+    const scrollToBottom = (behavior = 'auto') => {
         if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: behavior
+            });
         }
     };
 
@@ -52,8 +55,10 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
         const justFinishedLoading = prevLoadingRef.current && !loading;
         const newCommentAdded = totalCount > prevCommentsLengthRef.current;
 
-        if (justFinishedLoading || newCommentAdded) {
-            setTimeout(scrollToBottom, 100);
+        if (justFinishedLoading) {
+            setTimeout(() => scrollToBottom('auto'), 100);
+        } else if (newCommentAdded) {
+            setTimeout(() => scrollToBottom('smooth'), 100);
         }
 
         prevCommentsLengthRef.current = totalCount;
@@ -159,7 +164,7 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
     const activeThread = activeThreadId ? commentsMap.get(String(activeThreadId)) : null;
 
     return (
-        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ minHeight: minHeight, maxHeight: 'calc(90vh - 200px)' }}>
+        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ minHeight: minHeight, maxHeight: 'calc(90vh - 290px)' }}>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3 d-flex align-items-center" style={{ borderRadius: '12px 12px 0 0' }}>
                 {activeThreadId && (
