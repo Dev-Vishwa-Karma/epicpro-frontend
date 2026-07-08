@@ -92,6 +92,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 last_name={comment.commented_by?.last_name}
                                 size={32}
                                 className="me-2 mb-1"
+                                backgroundColor="#018d40ff"
                             />
                         )}
 
@@ -208,7 +209,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                             style={{ fontSize: '0.75rem' }}
                                             onClick={() => onReply(comment)}
                                         >
-                                            {!inThreadView && comment.replies && activeRepliesCount === 0 ? 'Start Thread' : !inThreadView && comment.replies && activeRepliesCount > 0 ? 'View Thread' : 'Reply'}
+                                            {!inThreadView && comment.replies && activeRepliesCount > 0 ? 'View Thread' : 'Reply'}
                                         </button>
                                     )}
 
