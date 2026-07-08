@@ -2,15 +2,32 @@ import React from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-const TextEditor = ({ name, value, onChange, error }) => {
+const TextEditor = ({ name, value, onChange, error, minHeight = '300px', maxHeight = '300px', onEnter }) => {
+  const onEnterRef = React.useRef(onEnter);
+  
+  React.useEffect(() => {
+    onEnterRef.current = onEnter;
+  }, [onEnter]);
+
   return (
     <div className={`ck-editor-wrapper ${error ? 'is-invalid' : ''}`}>
       <CKEditor
         editor={ClassicEditor}
         data={value}
         onReady={(editor) => {
-          // Set a fixed height for the editor
-          editor.ui.view.editable.element.style.height = '300px';
+          // Set min and max height for the editor
+          editor.ui.view.editable.element.style.minHeight = minHeight;
+          editor.ui.view.editable.element.style.maxHeight = maxHeight;
+
+          editor.editing.view.document.on('enter', (evt, data) => {
+            if (!data.isSoft) {
+              if (onEnterRef.current) {
+                evt.stop();
+                data.preventDefault();
+                onEnterRef.current();
+              }
+            }
+          }, { priority: 'high' });
         }}
         onChange={(event, editor) => {
           const data = editor.getData();
@@ -26,8 +43,13 @@ const TextEditor = ({ name, value, onChange, error }) => {
       <style>
         {`
           .ck-editor__editable {
-            height: 300px !important;  /* Fix the height */
+            min-height: ${minHeight} !important;
+            max-height: ${maxHeight} !important;  
             overflow: auto; /* Enable scrolling if content exceeds the height */
+          }
+          .ck-editor__editable p {
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
           }
         `}
       </style>

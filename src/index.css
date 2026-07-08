@@ -527,6 +527,17 @@ code {
   }
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1; 
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8; 
+}
+
 /* @media (max-width: 267px) {
   .notification .dropdown-menu {
     min-width: 200px !important;

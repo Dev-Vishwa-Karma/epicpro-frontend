@@ -3,6 +3,7 @@ import Avatar from "../../../common/Avatar";
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
 import { formatDateTimeAMPM, shortformatDate } from "../../../../utils";
 import InputField from '../../../common/formInputs/InputField';
+import CommentModule from "../../Comment/CommentModule";
 
 const ViewConnectModel = ({
 
@@ -89,7 +90,11 @@ const ViewConnectModel = ({
                     <div className="modal-dialog modal-dialog-scrollable modal-xxl" role="document">
                         <div className="modal-content section-body" style={{ maxHeight: "90vh" }}>
                             <div className="modal-header">
-                                <h5 className="modal-title">View Connects</h5>
+                                <h5 className="modal-title" style={{ display: "flex", alignItems: "center" }}>
+                                    <span style={{ fontSize: "18px", fontWeight: "500", color: "#6e7687" }}>
+                                        Connect - #{selectedConnect.id} : {selectedConnect.title}
+                                    </span>
+                                </h5>
                                 <button type="button" className="close" onClick={onClose}><span aria-hidden="true">×</span></button>
                             </div>
                             <div className="container-fluid" style={{ overflowY: "auto" }}>
@@ -143,7 +148,7 @@ const ViewConnectModel = ({
                                                 {isLoading ? (
                                                     <TableSkeleton columns={3} rows={4} />
                                                 ) : (
-                                                    <ul className="list-group" style={{overflow: "aito" }}>
+                                                    <ul className="list-group" style={{ overflow: "aito" }}>
                                                         <li className="list-group-item">
                                                             <small className="text-muted">Description: </small>
                                                             <p className="mb-0" style={{ height: "180px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: selectedConnect.body }}></p>
@@ -265,132 +270,136 @@ const ViewConnectModel = ({
                                     </div>
 
                                     <div className="col-lg-8 col-md-12">
-
-                                        <div className="card mb-0">
-                                            <div className="card-header">
-                                                <h3 className="card-title">Attached Files</h3>
+                                        <div className="card shadow-sm border-0 pe-3 d-flex flex-column mb-3 h-110" style={{ maxHeight: "355px" }}>
+                                            <div className="card-header bg-white border-bottom py-3" style={{ borderRadius: '12px 12px 0 0' }}>
+                                                <h6 className="mb-0 fw-bold">Attached Files</h6>
                                             </div>
-                                        </div>
-                                        <div className="table-responsive">
-                                            <table className="table table-hover table-vcenter mb-0 table_custom spacing8 text-nowrap">
-                                                <thead>
-                                                    <tr>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {Array.isArray(files) && files.length > 0 ? (
-                                                        files.map((file, index) => {
-                                                            const ext = getExt(file);
-                                                            const isImg = isImage(ext);
-                                                            const fileName = file.split('/').pop();
+                                            <div className="card-body flex-grow-1 overflow-auto position-relative p-0 custom-scrollbar">
+                                                <div className="table-responsive">
+                                                    <table className="table table-hover table-vcenter mb-0 table_custom text-nowrap">
+                                                        <tbody>
+                                                            {Array.isArray(files) && files.length > 0 ? (
+                                                                files.map((file, index) => {
+                                                                    const ext = getExt(file);
+                                                                    const isImg = isImage(ext);
+                                                                    const fileName = file.split('/').pop();
 
-                                                            return (
-                                                                <tr key={index}>
-                                                                    <td>{index + 1}</td>
+                                                                    return (
+                                                                        <tr key={index}>
+                                                                            <td>{index + 1}</td>
 
-                                                                    {/* ICON / THUMBNAIL */}
-                                                                    <td>
-                                                                        {isImg ? (
-                                                                            <img
-                                                                                src={`${process.env.REACT_APP_API_URL}/${file}`}
-                                                                                alt={fileName}
-                                                                                style={{
-                                                                                    width: "45px",
-                                                                                    height: "45px",
-                                                                                    objectFit: "cover",
-                                                                                    borderRadius: "6px",
-                                                                                    border: "1px solid #ddd"
-                                                                                }}
-                                                                            />
-                                                                        ) : (
-                                                                            <i
-                                                                                className={getFileIcon(ext)}
-                                                                                style={{ fontSize: "22px" }}
-                                                                            />
-                                                                        )}
-                                                                    </td>
+                                                                            {/* ICON / THUMBNAIL */}
+                                                                            <td>
+                                                                                {isImg ? (
+                                                                                    <img
+                                                                                        src={`${process.env.REACT_APP_API_URL}/${file}`}
+                                                                                        alt={fileName}
+                                                                                        style={{
+                                                                                            width: "45px",
+                                                                                            height: "45px",
+                                                                                            objectFit: "cover",
+                                                                                            borderRadius: "6px",
+                                                                                            border: "1px solid #ddd"
+                                                                                        }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <i
+                                                                                        className={getFileIcon(ext)}
+                                                                                        style={{ fontSize: "22px" }}
+                                                                                    />
+                                                                                )}
+                                                                            </td>
 
-                                                                    {/* FILE NAME */}
-                                                                    <td style={{ maxWidth: "250px" }}>
-                                                                        <span title={fileName}>
-                                                                            {fileName}
-                                                                        </span>
-                                                                    </td>
+                                                                            {/* FILE NAME */}
+                                                                            <td style={{ maxWidth: "250px" }}>
+                                                                                <span title={fileName}>
+                                                                                    {fileName}
+                                                                                </span>
+                                                                            </td>
 
-                                                                    {/* ACTION */}
-                                                                    <td>
-                                                                        {isImg ? (
-                                                                            <button
-                                                                                className="btn btn-sm btn-info"
-                                                                                onClick={() => goToFile(file, index)}
-                                                                            >
-                                                                                <i className="fa fa-eye" /> View
-                                                                            </button>
-                                                                        ) : (
-                                                                            <a
-                                                                                href={`${process.env.REACT_APP_API_URL}/${file}`}
-                                                                                download
-                                                                                className="btn btn-sm btn-primary"
-                                                                            >
-                                                                                <i className="fa fa-download" /> Download
-                                                                            </a>
-                                                                        )}
+                                                                            {/* ACTION */}
+                                                                            <td>
+                                                                                {isImg ? (
+                                                                                    <button
+                                                                                        className="btn btn-sm btn-info"
+                                                                                        onClick={() => goToFile(file, index)}
+                                                                                    >
+                                                                                        <i className="fa fa-eye" /> View
+                                                                                    </button>
+                                                                                ) : (
+                                                                                    <a
+                                                                                        href={`${process.env.REACT_APP_API_URL}/download.php?file=${file}`}
+                                                                                        download
+                                                                                        className="btn btn-sm btn-primary"
+                                                                                    >
+                                                                                        <i className="fa fa-download" /> Download
+                                                                                    </a>
+                                                                                )}
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                })
+                                                            ) : (
+                                                                <tr>
+                                                                    <td colSpan="4" className="text-center">
+                                                                        No files found
                                                                     </td>
                                                                 </tr>
-                                                            );
-                                                        })
-                                                    ) : (
-                                                        <tr>
-                                                            <td colSpan="4" className="text-center">
-                                                                No files found
-                                                            </td>
-                                                        </tr>
-                                                    )}
+                                                            )}
 
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        {/* </div> */}
-
-                                        {showPreview && (
-
-                                        <div className="card">
-                                            <div className="card-header">
-                                                <h3 className="card-title">Preview:</h3>
-                                            </div>
-                                            <div className="card-body" style={{
-                                                height: "486px",
-                                                overflow: "auto"
-                                            }}>
-                                                {filePath && isImage(getExt(filePath)) && (
-                                                    <img
-                                                        src={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                                        alt="preview"
-                                                        style={{ width: "450px", height: "450px", objectFit: "contain" }}
-                                                    />
-                                                )}
-
-                                                {filePath && !isImage(getExt(filePath)) && (
-                                                    <a
-                                                        href={`${process.env.REACT_APP_API_URL}/${filePath}`}
-                                                        download
-                                                        className="btn btn-primary"
-                                                    >
-                                                        Download File
-                                                    </a>
-                                                )}
-
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
+                                        </div>
+                                        {selectedConnect && selectedConnect.id && (
+                                            <CommentModule moduleType="connect" moduleId={selectedConnect?.id} maxHeight="580px" />
                                         )}
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
+                </div >
             )}
+
+            {
+                showPreview && (
+                    <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1060, backgroundColor: 'rgba(0,0,0,0.6)' }}>
+                        <div className="modal-dialog modal-dialog-centered modal-lg">
+                            <div className="modal-content">
+                                <div className="modal-header position-relative">
+                                    <h5 className="modal-title">Preview</h5>
+                                    <a
+                                        href={`${process.env.REACT_APP_API_URL}/download.php?file=${filePath}`}
+                                        className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
+                                        style={{ top: '50%', right: '55px', transform: 'translateY(-50%)', width: '32px', height: '32px', opacity: '0.7', textDecoration: 'none' }}
+                                        title="Download image"
+                                        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                                    >
+                                        <i className="fa fa-download" style={{ fontSize: '1rem' }}></i>
+                                    </a>
+                                    <button type="button" className="close" onClick={() => setShowPreview(false)}>
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body text-center" style={{ overflow: "auto", maxHeight: "70vh" }}>
+                                    {filePath && isImage(getExt(filePath)) && (
+                                        <img
+                                            src={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                                            alt="preview"
+                                            style={{ maxWidth: "100%", height: "70vh" }}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
             {show && <div className="modal-backdrop fade show" />}
         </>
     );
