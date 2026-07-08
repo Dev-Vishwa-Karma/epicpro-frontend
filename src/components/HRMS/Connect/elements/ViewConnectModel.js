@@ -90,7 +90,11 @@ const ViewConnectModel = ({
                     <div className="modal-dialog modal-dialog-scrollable modal-xxl" role="document">
                         <div className="modal-content section-body" style={{ maxHeight: "90vh" }}>
                             <div className="modal-header">
-                                <h5 className="modal-title">View Connects</h5>
+                                <h5 className="modal-title" style={{ display: "flex", alignItems: "center" }}>
+                                    <span style={{ fontSize: "18px", fontWeight: "500", color: "#6e7687" }}>
+                                        Connect - #{selectedConnect.id} : {selectedConnect.title}
+                                    </span>
+                                </h5>
                                 <button type="button" className="close" onClick={onClose}><span aria-hidden="true">×</span></button>
                             </div>
                             <div className="container-fluid" style={{ overflowY: "auto" }}>

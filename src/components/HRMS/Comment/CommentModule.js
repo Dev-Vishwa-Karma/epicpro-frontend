@@ -7,7 +7,7 @@ import CommentInput from './elements/CommentInput';
 import DeleteModal from '../../common/DeleteModal';
 import useComments from './elements/useComments';
 
-const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, maxHeight = '700px' }) => {
+const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, minHeight = '12vh' }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [inputText, setInputText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
@@ -159,12 +159,15 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
     const activeThread = activeThreadId ? commentsMap.get(String(activeThreadId)) : null;
 
     return (
-        <div className="card shadow-sm border-0 pe-3 d-flex flex-column h-100" style={{ maxHeight: maxHeight }}>
+        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ minHeight: minHeight, maxHeight: 'calc(90vh - 200px)' }}>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3 d-flex align-items-center" style={{ borderRadius: '12px 12px 0 0' }}>
                 {activeThreadId && (
                     <button className="btn btn-sm btn-light me-2" onClick={() => {
                         setActiveThreadId(null);
+                        setReplyingTo(null);
+                        setEditingComment(null);
+                        setInputText('');
                         setTimeout(() => {
                             if (chatContainerRef.current) {
                                 chatContainerRef.current.scrollTop = mainViewScrollPosRef.current;
@@ -179,10 +182,10 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
 
             {/* Chat Body */}
             <div
-                className="card-body flex-grow-1 overflow-auto position-relative p-3 custom-scrollbar"
+                className="card-body flex-grow-1 overflow-auto position-relative p-3 custom-scrollbar d-flex flex-column"
                 ref={chatContainerRef}
             >
-                <div className="position-relative" style={{ zIndex: 1 }}>
+                <div className="position-relative mt-auto" style={{ zIndex: 1 }}>
                     <AlertMessages
                         showSuccess={showSuccess}
                         successMessage={successMessage}

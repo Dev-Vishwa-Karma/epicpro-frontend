@@ -283,7 +283,7 @@ class ViewTicket extends Component {
                         });
                     }
                 })
-                .catch(() => {})
+                .catch(() => { })
                 .finally(() => {
                     this.setState({ isLoading: false });
                 });
@@ -360,28 +360,33 @@ class ViewTicket extends Component {
                                         {isLoading ? (
                                             <TableSkeleton columns={3} rows={4} />
                                         ) : (
-                                            <ul className="list-group" style={{height:"500px", overflow:"aito"}}>
+                                            <ul className="list-group" style={{ height: "500px", overflow: "aito" }}>
                                                 <li className="list-group-item">
                                                     <small className="text-muted">Description: </small>
-                                                    <p className="mb-0" style={{height:"180px", overflow:"auto"}} dangerouslySetInnerHTML={{ __html: ticket.description }}></p>
+                                                    <p className="mb-0" style={{ height: "180px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: ticket.description }}></p>
                                                 </li>
                                                 <li className="list-group-item">
-                                                    <small className="text-muted">Priority: </small>
-                                                    <p className="mb-0">
-                                                        <span className={`tag ml-0 mr-0 ${ticket.priority === "high" ? "tag-danger"
-                                                            : ticket.priority === "medium" ? "tag-warning"
-                                                                : "tag-success"
-                                                            }`}>
-                                                            {ticket.priority ? ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) : ''}
+                                                    <span>
+                                                        <small className="text-muted">Priority: </small>
+                                                        <span className="mb-0">
+                                                            <span className={`tag ml-2 mr-0 ${ticket.priority === "high" ? "tag-danger"
+                                                                : ticket.priority === "medium" ? "tag-warning"
+                                                                    : "tag-success"
+                                                                }`}>
+                                                                {ticket.priority ? ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) : ''}
+                                                            </span>
                                                         </span>
-                                                    </p>
+                                                    </span>
                                                 </li>
                                                 <li className="list-group-item">
-                                                    <div className="d-flex justify-content-between">
-                                                        <small className="text-muted">Due Date: </small>
-                                                        {ticket.due_date && (new Date(ticket.due_date) < new Date() && ticket.status !== 'completed') ? <span className="tag over-due-ticket">Overdue</span> : ''}
+                                                    <div className="d-flex align-items-center">
+                                                        <small className="text-muted">Due Date:</small>
+                                                        <span className="mb-0 ml-2">
+                                                            {ticket.due_date ? this.formatDate(ticket.due_date) : '--/--/--'}
+                                                        </span>
+
+                                                        {ticket.due_date && (new Date(ticket.due_date) < new Date() && ticket.status !== 'completed') ? <span className="tag over-due-ticket ml-auto">Overdue</span> : ''}
                                                     </div>
-                                                    <p className="mb-0">{ticket.due_date ? this.formatDate(ticket.due_date) : '--/--/--'}</p>
                                                 </li>
                                                 <li className="list-group-item">
                                                     <div className="d-flex justify-content-between">
@@ -397,8 +402,12 @@ class ViewTicket extends Component {
                                                 </li>
                                                 {ticket.completed_at == null && ticket.progress !== 100 ? '' :
                                                     <li className="list-group-item">
-                                                        <small className="text-muted">Completed On: </small>
-                                                        <p className="mb-0">{this.formatDate(ticket.completed_at)}</p>
+                                                        <span>
+                                                            <small className="text-muted">Completed On: </small>
+                                                            <span className="mb-0">
+                                                                {this.formatDate(ticket.completed_at)}
+                                                            </span>
+                                                        </span>
                                                     </li>
                                                 }
                                             </ul>
@@ -431,8 +440,8 @@ class ViewTicket extends Component {
                                                 overflowY: "auto"
                                             }}>
                                                 {logs.length === 0 ? (
-                                                    <BlankState message="No logs to show" /> 
-                                                    ) : (
+                                                    <BlankState message="No logs to show" />
+                                                ) : (
                                                     <table className="table table-hover table-vcenter mb-0 table_custom spacing8 text-nowrap">
                                                         <thead>
                                                             <tr>
@@ -441,17 +450,17 @@ class ViewTicket extends Component {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                        {logs
-                                                            .sort((a, b) => new Date(a.log_date) - new Date(b.log_date))
-                                                            .map((log, index) => (
-                                                            <tr key={log.log_id || index}>
-                                                                <td>{shortformatDate(log.log_date)}</td>
-                                                                <td>{log.log_working_hours} hrs</td>
-                                                            </tr>
-                                                        ))}
+                                                            {logs
+                                                                .sort((a, b) => new Date(a.log_date) - new Date(b.log_date))
+                                                                .map((log, index) => (
+                                                                    <tr key={log.log_id || index}>
+                                                                        <td>{shortformatDate(log.log_date)}</td>
+                                                                        <td>{log.log_working_hours} hrs</td>
+                                                                    </tr>
+                                                                ))}
                                                         </tbody>
                                                     </table>
-                                                    
+
                                                 )}
                                             </ul>
                                         )}
@@ -460,12 +469,12 @@ class ViewTicket extends Component {
                             </div>
                             <div className="col-lg-8 col-md-12">
                                 {this.state.ticket_id && (
-                                    <CommentModule moduleType="ticket" moduleId={this.state.ticket_id} maxHeight="850px" />
+                                    <CommentModule moduleType="ticket" moduleId={this.state.ticket_id} />
                                 )}
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div >
+                </div >
 
                 {showProgressModal &&
                     <ProgressModal
