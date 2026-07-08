@@ -232,6 +232,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 last_name={comment.commented_by?.last_name}
                                 size={32}
                                 className="ms-2 mb-1"
+                                backgroundColor="#018d40ff"
                             />
                         )}
                     </div>

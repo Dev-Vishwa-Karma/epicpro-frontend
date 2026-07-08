@@ -744,3 +744,67 @@ border-left: 6px solid #e6140d !important;
     margin: 10px;
   }
 }
+/* Active state for collapsed menu icons in HeaderTop */
+#header_top .hleft .dropdown .nav-link.active {
+  color: #007bff !important;
+  background-color: rgba(0, 123, 255, 0.1) !important;
+  border-radius: 4px;
+}
+#header_top .hleft .dropdown .nav-link:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Allow hleft to handle overflowing icons */
+#header_top .hleft {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Base styles for the new icon container */
+.header-menu-icons {
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.header-menu-icons::-webkit-scrollbar {
+  display: none;
+}
+
+/* Desktop (>1200px): show only when offcanvas-active is true (sidebar hidden) */
+@media (min-width: 1200px) {
+  .offcanvas-active .header-menu-icons {
+      display: flex;
+  }
+}
+
+/* Tablet (768px - 1199px): show only when offcanvas-active is FALSE (sidebar hidden) */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .header-menu-icons {
+      display: flex;
+  }
+  .offcanvas-active .header-menu-icons {
+      display: none;
+  }
+  
+  /* Make the body auto-adjust (push) when sidebar is open */
+  .offcanvas-active .page {
+      left: 280px !important;
+      width: calc(100% - 280px) !important;
+  }
+}
+
+/* Mobile (<768px): always hide */
+@media (max-width: 767px) {
+  .header-menu-icons {
+      display: none !important;
+  }
+  #header_top .hleft {
+      flex-direction: row !important;
+  }
+}
