@@ -39,16 +39,16 @@ const HeaderTop = ({
         </div>
         <div className="hright">
           <div className="dropdown">
-            <div>
-              <span className="nav-link icon settingbar" onClick={toggleRightSidebar}>
-                <i
-                  className="fa fa-gear fa-spin"
-                  data-toggle="tooltip"
-                  data-placement="right"
-                  title="Settings"
-                />
-              </span>
-            </div>
+              <div>
+                <span className="nav-link icon settingbar" onClick={toggleRightSidebar}>
+                  <i
+                    className="fa fa-gear fa-spin"
+                    data-toggle="tooltip"
+                    data-placement="right"
+                    title="Settings"
+                  />
+                </span>
+              </div>
             <p className="nav-link icon menu_toggle" onClick={() => toggleLeftMenu(!istoggleLeftMenu)}>
               <i className="fa fa-align-left" />
             </p>
