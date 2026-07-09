@@ -65,7 +65,19 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
         prevLoadingRef.current = loading;
     }, [totalCount, loading]);
 
-
+    useEffect(() => {
+        if (activeThreadId && !loading && !commentsMap.has(String(activeThreadId))) {
+            setActiveThreadId(null);
+            setReplyingTo(null);
+            setEditingComment(null);
+            setInputText('');
+            setTimeout(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTop = mainViewScrollPosRef.current;
+                }
+            }, 50);
+        }
+    }, [activeThreadId, commentsMap, loading]);
 
     const handleSubmit = async (e, attachments = [], existingAttachments = []) => {
         if (e) e.preventDefault();
@@ -147,6 +159,17 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
             const response = await api.post('/comment.php?action=delete', formData);
             if (response.data.status === 'success') {
                 showSuccessAlert('Comment deleted successfully');
+                if (String(commentToDelete) === String(activeThreadId)) {
+                    setActiveThreadId(null);
+                    setReplyingTo(null);
+                    setEditingComment(null);
+                    setInputText('');
+                    setTimeout(() => {
+                        if (chatContainerRef.current) {
+                            chatContainerRef.current.scrollTop = mainViewScrollPosRef.current;
+                        }
+                    }, 50);
+                }
             } else {
                 showErrorAlert(response.data.message);
             }
