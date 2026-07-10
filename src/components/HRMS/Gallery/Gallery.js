@@ -608,11 +608,11 @@ class Gallery extends Component {
                                     currentImages.map((image, index) => (
                                         <div className="masonry-item" key={image.id || index}>
                                             <div className="card p-3 position-relative gallery-card">
-                                                <div className="gallery-image-wrapper">
+                                                <div className="gallery-image-wrapper rounded">
                                                     <img
                                                         src={`${process.env.REACT_APP_API_URL}/${image.url}`}
                                                         alt="Gallery"
-                                                        className="rounded w-100"
+                                                        className="w-100 gallery-inner-img"
                                                         style={{ cursor: 'pointer', height: '250px', objectFit: 'cover' }}
                                                         onClick={() => this.openImageModal(image)}
                                                         onError={(e) => {
