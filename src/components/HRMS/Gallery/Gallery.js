@@ -4,7 +4,6 @@ import AlertMessages from '../../common/AlertMessages';
 import { getService } from '../../../services/getService';
 import DeleteModal from '../../common/DeleteModal';
 import BlankState from '../../common/BlankState';
-import ImageModal from './elements/ImageModal';
 import Pagination from '../../common/Pagination';
 import { validateFields } from '../../common/validations';
 import ImageUploadModal from './elements/ImageUploadModal';
@@ -12,6 +11,7 @@ import GallerySkeleton from '../../common/skeletons/GallerySkeleton';
 import Button from '../../common/formInputs/Button';
 import { getSortedEmployees } from '../../../utils';
 import InputField from '../../common/formInputs/InputField';
+import ImagePreview from '../../common/ImagePreview';
 class Gallery extends Component {
     constructor(props) {
         super(props);
@@ -19,6 +19,7 @@ class Gallery extends Component {
             selectedImages: [],
             images: [],
             filteredImages: [], // Store filtered images
+            imageErrors: {}, // Store error states for images
             employees: [],
             logged_in_employee_id: null,
             selectedEmployeeId: '',
@@ -446,8 +447,8 @@ class Gallery extends Component {
         this.closeImageModal();
     };
 
-    handleDownload = () => {
-        const { selectedImageForModal } = this.state;
+    handleDownload = (image) => {
+        const selectedImageForModal = image;
         if (!selectedImageForModal) return;
 
         this.setState({ downloadLoading: true });
@@ -600,23 +601,37 @@ class Gallery extends Component {
                         <div className="container-fluid px-0">
                             <div className="masonry">
                                 {loading ? (
-                                <GallerySkeleton rows={currentImages.length} columns={4} />
+                                    <GallerySkeleton rows={currentImages.length} columns={4} />
                                 ) : filteredImages.length > 0 ? (
-                                currentImages.map((image, index) => (
-                                    <div className="masonry-item" key={image.id || index}>
-                                    <div className="card p-3 position-relative gallery-card">
-                                        <div className="gallery-image-wrapper">
-                                        <img
-                                            src={`${process.env.REACT_APP_API_URL}/${image.url}`}
-                                            alt="Gallery"
-                                            className="rounded w-100 h-auto"
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => this.openImageModal(image)}
-                                        />
+                                    currentImages.map((image, index) => (
+                                        <div className="masonry-item" key={image.id || index}>
+                                            <div className="card p-3 position-relative gallery-card">
+                                                <div className="gallery-image-wrapper">
+                                                    <img
+                                                        src={`${process.env.REACT_APP_API_URL}/${image.url}`}
+                                                        alt="Gallery"
+                                                        className="rounded w-100"
+                                                        style={{ cursor: 'pointer', height: '250px', objectFit: 'cover' }}
+                                                        onClick={() => this.openImageModal(image)}
+                                                        onError={(e) => {
+                                                            this.setState(prevState => ({ imageErrors: { ...prevState.imageErrors, [image.id]: true } }));
+                                                            e.target.onerror = null;
+                                                            e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%25%22%20height%3D%22100%25%22%20viewBox%3D%220%200%20800%20400%22%20preserveAspectRatio%3D%22xMidYMid%20meet%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f0f0f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2230%22%20fill%3D%22%23999%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%3EImage%20not%20available%3C%2Ftext%3E%3C%2Fsvg%3E';
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className='mt-2 d-flex justify-content-between w-100'>
+                                                    {!this.state.imageErrors[image.id] && (
+                                                        <>
+                                                            <Button label='Delete' className="btn btn-danger w-40 mr-1" onClick={() => this.openDeleteModal(image)} title="Delete" />
+                                                            <Button label='Download' className="btn btn-primary w-40 ml-1" onClick={() => this.handleDownload(image)} title="Download" />
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+
                                         </div>
-                                    </div>
-                                    </div>
-                                ))
+                                    ))
                                 ) : (
                                 <div className="col-12">
                                     <div
@@ -642,14 +657,15 @@ class Gallery extends Component {
                     </div>
                 </div>
                 {/* Modal for image preview, delete, and download */}
-                <ImageModal
-                    show={this.state.showImageModal}
-                    image={this.state.selectedImageForModal}
-                    onClose={this.closeImageModal}
-                    onDownload={this.handleDownload}
-                    onDelete={this.handleDeleteFromModal}
-                    downloadLoading={this.state.downloadLoading}
-                />
+                {
+                    this.state.showImageModal && (
+                        <ImagePreview
+                            imageUrl={`${process.env.REACT_APP_API_URL}/${this.state.selectedImageForModal.url}`}
+                            downloadUrl={`${process.env.REACT_APP_API_URL}/download.php?file=${this.state.selectedImageForModal.url}`}
+                            onClose={() => this.closeImageModal()}
+                        />
+                    )
+                }
 
             </>
         )
