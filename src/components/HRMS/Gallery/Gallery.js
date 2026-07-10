@@ -621,11 +621,9 @@ class Gallery extends Component {
                                                     />
                                                 </div>
                                                 <div className='mt-2 d-flex justify-content-between w-100'>
+                                                        <Button label='Delete' className="btn btn-danger w-40 mr-1" onClick={() => this.openDeleteModal(image)} title="Delete" />
                                                     {!this.state.imageErrors[image.id] && (
-                                                        <>
-                                                            <Button label='Delete' className="btn btn-danger w-40 mr-1" onClick={() => this.openDeleteModal(image)} title="Delete" />
-                                                            <Button label='Download' className="btn btn-primary w-40 ml-1" onClick={() => this.handleDownload(image)} title="Download" />
-                                                        </>
+                                                        <Button label='Download' className="btn btn-primary w-40 ml-1" onClick={() => this.handleDownload(image)} title="Download" />
                                                     )}
                                                 </div>
                                             </div>
