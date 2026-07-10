@@ -612,8 +612,8 @@ class Gallery extends Component {
                                                     <img
                                                         src={`${process.env.REACT_APP_API_URL}/${image.url}`}
                                                         alt="Gallery"
-                                                        className="w-100 gallery-inner-img"
-                                                        style={{ cursor: 'pointer', height: '250px', objectFit: 'cover' }}
+                                                        className="gallery-inner-img"
+                                                        style={{ cursor: 'pointer', width: '250px', height: '260px', objectFit: 'cover' }}
                                                         onClick={() => this.openImageModal(image)}
                                                         onError={(e) => {
                                                             this.setState(prevState => ({ imageErrors: { ...prevState.imageErrors, [image.id]: true } }));
