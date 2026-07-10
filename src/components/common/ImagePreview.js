@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import imageNotAvailable from '../../assets/images/image-not-available.svg';
 
 const ImagePreview = ({ imageUrl, downloadUrl, onClose }) => {
     const [zoom, setZoom] = useState(1);
@@ -191,7 +192,7 @@ const ImagePreview = ({ imageUrl, downloadUrl, onClose }) => {
                     onError={(e) => {
                         setHasError(true);
                         e.target.onerror = null;
-                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjdmN2Y3Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjM4IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5JbWFnZSBub3QgYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg==";
+                        e.target.src = imageNotAvailable;
                     }}
                     style={{
                         maxWidth: '90%',
