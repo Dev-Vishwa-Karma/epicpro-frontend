@@ -704,6 +704,20 @@ border-left: 6px solid #e6140d !important;
   gap: 10px;
 }
 
+.gallery-image-wrapper {  
+  overflow: hidden; 
+  display: block;
+  box-sizing: border-box;
+}
+
+.gallery-inner-img {
+  transition: transform 0.3s ease;
+}
+
+.gallery-inner-img:hover {
+  transform: scale(1.1);
+}
+
 @media (min-width: 768px) {
   .gallery-page-options {
     justify-content: flex-end;

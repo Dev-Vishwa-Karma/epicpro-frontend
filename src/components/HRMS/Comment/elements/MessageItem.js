@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Avatar from '../../../common/Avatar';
+import ImagePreview from '../../../common/ImagePreview';
 
 const getActiveRepliesCount = (replies) => {
     if (!replies || !Array.isArray(replies)) return 0;
@@ -10,7 +11,7 @@ const getActiveRepliesCount = (replies) => {
     }, 0);
 };
 
-const showAttachements = (attachements) => {
+const showAttachements = (attachements, onImageClick) => {
     return (
         attachements.map((attachment, index) => {
             const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
@@ -22,9 +23,16 @@ const showAttachements = (attachements) => {
                 <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
                     {isImage ? (
                         <div className="position-relative w-100 h-100">
-                            <a href={fileUrl} target="_blank" rel="noreferrer" title="Click to view full image">
+                            <div
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onImageClick) onImageClick({ url: fileUrl, downloadUrl });
+                                }}
+                                title="Click to view full image"
+                                style={{ cursor: 'pointer', width: '100%', height: '100%' }}
+                            >
                                 <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </a>
+                            </div>
                             <a
                                 href={downloadUrl}
                                 className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
@@ -50,6 +58,7 @@ const showAttachements = (attachements) => {
 
 const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUser, onReply, onEdit, onDelete, isHovered, onHover, isParent, inThreadView }) => {
     const [showMenu, setShowMenu] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
     const activeRepliesCount = getActiveRepliesCount(comment.replies);
 
     const replyButton = (
@@ -186,7 +195,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                             )}
                                             {parentComment.attachments && parentComment.attachments.length > 0 && (
                                                 <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
-                                                    {showAttachements(parentComment.attachments)}
+                                                    {showAttachements(parentComment.attachments, setPreviewImage)}
                                                 </div>
                                             )}
                                         </div>
@@ -198,7 +207,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
 
                                 {comment.attachments && comment.attachments.length > 0 && (
                                     <div className="d-flex flex-wrap gap-2 mt-2 mb-1">
-                                        {showAttachements(comment.attachments)}
+                                        {showAttachements(comment.attachments, setPreviewImage)}
                                     </div>
                                 )}
 
@@ -263,6 +272,14 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                     </span>
                     <hr className="flex-grow-1 m-0" style={{ borderTop: '1px solid #dee2e6', opacity: 1 }} />
                 </div>
+            )}
+
+            {previewImage && (
+                <ImagePreview
+                    imageUrl={previewImage.url}
+                    downloadUrl={previewImage.downloadUrl}
+                    onClose={() => setPreviewImage(null)}
+                />
             )}
         </>
     );
