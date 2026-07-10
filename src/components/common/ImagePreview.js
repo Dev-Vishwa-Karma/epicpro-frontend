@@ -22,6 +22,7 @@ const ImagePreview = ({ imageUrl, downloadUrl, onClose }) => {
 
     const handleImageClick = (e) => {
         e.stopPropagation();
+        if (hasError) return;
         if (e.detail === 2) {
             setZoom(prev => Math.min(prev + 0.5, 4));
         } else if (e.detail > 2) {
@@ -149,15 +150,20 @@ const ImagePreview = ({ imageUrl, downloadUrl, onClose }) => {
                 display: 'flex',
                 gap: '10px'
             }}>
-                <button className="btn btn-dark" onClick={handleZoomIn} title="Zoom In">
-                    <i className="fa fa-search-plus"></i>
-                </button>
-                <button className="btn btn-dark" onClick={handleReset} title="Reset Zoom">
-                    <i className="fa fa-undo"></i>
-                </button>
-                <button className="btn btn-dark" onClick={handleZoomOut} title="Zoom Out">
-                    <i className="fa fa-search-minus"></i>
-                </button>
+                {!hasError && (
+                    <>
+                        <button className="btn btn-dark" onClick={handleZoomIn} title="Zoom In">
+                            <i className="fa fa-search-plus"></i>
+                        </button>
+                        <button className="btn btn-dark" onClick={handleReset} title="Reset Zoom">
+                            <i className="fa fa-undo"></i>
+                        </button>
+                        <button className="btn btn-dark" onClick={handleZoomOut} title="Zoom Out">
+                            <i className="fa fa-search-minus"></i>
+                        </button>
+                    </>
+                )}
+
             </div>
 
             <div
