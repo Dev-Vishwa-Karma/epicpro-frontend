@@ -7,7 +7,7 @@ import CommentInput from './elements/CommentInput';
 import DeleteModal from '../../common/DeleteModal';
 import useComments from './elements/useComments';
 
-const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, minHeight = '12vh' }) => {
+const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, height = '48vh' }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [inputText, setInputText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
@@ -187,7 +187,7 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
     const activeThread = activeThreadId ? commentsMap.get(String(activeThreadId)) : null;
 
     return (
-        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ minHeight: minHeight, maxHeight: 'calc(90vh - 290px)' }}>
+        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ height: height, maxHeight: "100%", resize: "vertical", overflow: "hidden" }}>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3 d-flex align-items-center" style={{ borderRadius: '12px 12px 0 0' }}>
                 {activeThreadId && (
