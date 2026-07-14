@@ -22,7 +22,7 @@ const showAttachements = (attachements, onImageClick) => {
             return (
                 <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
                     {isImage ? (
-                        <div className="position-relative w-100 h-100">
+                        <div className="position-relative w-100 h-100 gallery-inner-img">
                             <div
                                 onClick={(e) => {
                                     e.stopPropagation();
