@@ -203,12 +203,12 @@ class Menu extends Component {
 
 	render() {
 		const content = [
-			{
-				"id": 1,
-				"icon": "fa fa-rocket",
-				"label": "HRMS",
-				"to": "#!",
-				"content": [
+				{
+					"id": 1,
+					"icon": "fa fa-rocket",
+					"label": "HRMS",
+					"to": "#!",
+					"content": [
 					{ "id": 2, "icon": "fa fa-home", "label": "Dashboard", "to": "/" },
 					{ "id": 3, "icon": "fa fa-list-ul", "label": "Activities", "to": "/hr-activities" },
 					{ "id": 4, "icon": "fa fa-plane", "label": "Holidays", "to": "/hr-holidays" },
@@ -219,16 +219,16 @@ class Menu extends Component {
 					{ "id": 9, "icon": "fa fa-bell", "label": "Notifications", "to": "/notifications" },
 					{ "id": 10, "icon": "fa fa-user-plus", "label": "Referral", "to": "/job-application" },
 					{ "id": 21, "icon": "fa fa-ticket", "label": "Ticket", "to": "/ticket" },
-				]
-			}
-		];
+					]
+				}
+			];
 
-		// Check logged-in user
-		const user = JSON.parse(localStorage.getItem("user"));
-		if (!user) {
+			// Check logged-in user
+			const user = JSON.parse(localStorage.getItem("user"));
+			if (!user) {
 			window.location.href = "/login";
 			return;
-		} else {
+			} else {
 			window.user = user;
 
 			// Remove "Referral" if not employee
@@ -241,35 +241,35 @@ class Menu extends Component {
 				const hrms = content.find(item => item.id === 1);
 
 				if (hrms) {
-					// Insert "Users" after Dashboard
-					const usersItem = { id: 11, icon: "fa fa-user", label: "Users", to: "/hr-users" };
-					const dashboardIndex = hrms.content.findIndex(item => item.id === 2);
-					if (dashboardIndex !== -1) hrms.content.splice(dashboardIndex + 1, 0, usersItem);
+				// Insert "Users" after Dashboard
+				const usersItem = { id: 11, icon: "fa fa-user", label: "Users", to: "/hr-users" };
+				const dashboardIndex = hrms.content.findIndex(item => item.id === 2);
+				if (dashboardIndex !== -1) hrms.content.splice(dashboardIndex + 1, 0, usersItem);
 
-					// Insert "Department" after Users
-					const deptItem = { id: 12, icon: "fa fa-building", label: "Department", to: "/hr-department" };
-					const usersIndex = hrms.content.findIndex(item => item.id === 11);
-					if (usersIndex !== -1) hrms.content.splice(usersIndex + 1, 0, deptItem);
+				// Insert "Department" after Users
+				const deptItem = { id: 12, icon: "fa fa-building", label: "Department", to: "/hr-department" };
+				const usersIndex = hrms.content.findIndex(item => item.id === 11);
+				if (usersIndex !== -1) hrms.content.splice(usersIndex + 1, 0, deptItem);
 
-					// Insert "Employee" after Department
-					const empItem = { id: 13, icon: "fa fa-users", label: "Employee", to: "/hr-employee" };
-					const deptIndex = hrms.content.findIndex(item => item.id === 12);
-					if (deptIndex !== -1) hrms.content.splice(deptIndex + 1, 0, empItem);
+				// Insert "Employee" after Department
+				const empItem = { id: 13, icon: "fa fa-users", label: "Employee", to: "/hr-employee" };
+				const deptIndex = hrms.content.findIndex(item => item.id === 12);
+				if (deptIndex !== -1) hrms.content.splice(deptIndex + 1, 0, empItem);
+				
+				const connectItem = { id: 22, icon: "fa fa-comments", label: "Connect", to: "/connect" };
+				const connectIndex = hrms.content.findIndex(item => item.id === 13);
+				if (connectIndex !== -1)hrms.content.splice(connectIndex + 1, 0, connectItem);
 
-					const connectItem = { id: 22, icon: "fa fa-comments", label: "Connect", to: "/connect" };
-					const connectIndex = hrms.content.findIndex(item => item.id === 13);
-					if (connectIndex !== -1) hrms.content.splice(connectIndex + 1, 0, connectItem);
+				// Insert "Statistics" after Employee
+				const statItem = { id: 14, icon: "fa fa-bar-chart", label: "Statistics", to: "/statistics" };
+				const empIndex = hrms.content.findIndex(item => item.id === 22);
+				if (empIndex !== -1) hrms.content.splice(empIndex + 1, 0, statItem);
 
-					// Insert "Statistics" after Employee
-					const statItem = { id: 14, icon: "fa fa-bar-chart", label: "Statistics", to: "/statistics" };
-					const empIndex = hrms.content.findIndex(item => item.id === 22);
-					if (empIndex !== -1) hrms.content.splice(empIndex + 1, 0, statItem);
-
-					// Insert "Link" after Todo
-					const linkItem = { id: 15, icon: "fa fa-link", label: "Link", to: "/link" };
-					const todoIndex = hrms.content.findIndex(item => item.id === 8);
-					if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
-					else hrms.content.push(linkItem);
+				// Insert "Link" after Todo
+				const linkItem = { id: 15, icon: "fa fa-link", label: "Link", to: "/link" };
+				const todoIndex = hrms.content.findIndex(item => item.id === 8);
+				if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
+				else hrms.content.push(linkItem);
 				}
 
 				// Add Project section if not exists
@@ -279,8 +279,8 @@ class Menu extends Component {
 						icon: "fa fa-folder",
 						label: "Project",
 						content: [
-							{ id: 17, icon: "fa fa-folder-open", label: "Project List", to: "/project-list" },
-							{ id: 18, icon: "fa fa-user-circle", label: "Clients", to: "/project-clients" }
+						{ id: 17, icon: "fa fa-folder-open", label: "Project List", to: "/project-list" },
+						{ id: 18, icon: "fa fa-user-circle", label: "Clients", to: "/project-clients" }
 						]
 					});
 				}
@@ -292,7 +292,7 @@ class Menu extends Component {
 						icon: "fa fa-briefcase",
 						label: "Job Board",
 						content: [
-							{ id: 20, icon: "fa fa-address-card", label: "Applicants", to: "/applicant" }
+						{ id: 20, icon: "fa fa-address-card", label: "Applicants", to: "/applicant" }
 						]
 					});
 				}
@@ -301,38 +301,38 @@ class Menu extends Component {
 
 
 		const { isOpenRightSidebar } = this.state
-		const { darkMinSidebar, istoggleLeftMenu } = this.props
+		const { darkMinSidebar, istoggleLeftMenu} = this.props
 
-		const pageHeading = Routes.filter((route) => route.path.split('/')[1] === this.props.location.pathname.split('/')[1])
-
+		const pageHeading = Routes.filter((route) =>  route.path.split('/')[1] === this.props.location.pathname.split('/')[1])
+		
 		return (
 			<>
 				<div className={`${istoggleLeftMenu ? "offcanvas-active" : ""}`}>
 					<div style={this.state.parentlink === 'login' ? masterNone : masterBlock}>
-						<HeaderTop
-							darkMinSidebar={darkMinSidebar}
-							user={user}
-							toggleLeftMenu={this.toggleLeftMenu}
-							toggleRightSidebar={this.toggleRightSidebar}
-							istoggleLeftMenu={istoggleLeftMenu}
-							handler={this.handler}
-							content={content}
-						/>
-						<RightSidebar
-							isOpenRightSidebar={isOpenRightSidebar}
-							toggleRightSidebar={this.toggleRightSidebar}
-							handleFont={this.handleFont}
-							handleMenuIcon={this.handleMenuIcon}
-							handleSubMenuIcon={this.handleSubMenuIcon}
-							handleDarkMode={this.handleDarkMode}
-							handleFixNavbar={this.handleFixNavbar}
-							handleDarkHeader={this.handleDarkHeader}
-							handleMinSidebar={this.handleMinSidebar}
-							handleSidebar={this.handleSidebar}
-							handleIconColor={this.handleIconColor}
-							handleGradientColor={this.handleGradientColor}
-							handleRtl={this.handleRtl}
-						/>
+					<HeaderTop
+						darkMinSidebar={darkMinSidebar}
+						user={user}
+						toggleLeftMenu={this.toggleLeftMenu}
+						toggleRightSidebar={this.toggleRightSidebar}
+						istoggleLeftMenu={istoggleLeftMenu}
+						handler={this.handler}
+						content={content}
+					/>
+					<RightSidebar 
+						isOpenRightSidebar={isOpenRightSidebar}
+						toggleRightSidebar={this.toggleRightSidebar}
+						handleFont={this.handleFont}
+						handleMenuIcon={this.handleMenuIcon}
+						handleSubMenuIcon={this.handleSubMenuIcon}
+						handleDarkMode={this.handleDarkMode}
+						handleFixNavbar={this.handleFixNavbar}
+						handleDarkHeader={this.handleDarkHeader}
+						handleMinSidebar={this.handleMinSidebar}
+						handleSidebar={this.handleSidebar}
+						handleIconColor={this.handleIconColor}
+						handleGradientColor={this.handleGradientColor}
+						handleRtl={this.handleRtl}
+					/>
 
 						<div id="left-sidebar" className="sidebar ">
 							<h6 className="brand-name">Profilics Systems HR</h6>
