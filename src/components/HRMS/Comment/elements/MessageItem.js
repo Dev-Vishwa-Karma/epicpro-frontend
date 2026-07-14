@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Avatar from '../../../common/Avatar';
 import ImagePreview from '../../../common/ImagePreview';
+import imageNotAvailable from '../../../../assets/images/image-not-available.svg';
 
 const getActiveRepliesCount = (replies) => {
     if (!replies || !Array.isArray(replies)) return 0;
@@ -11,50 +12,66 @@ const getActiveRepliesCount = (replies) => {
     }, 0);
 };
 
-const showAttachements = (attachements, onImageClick) => {
-    return (
-        attachements.map((attachment, index) => {
-            const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
-            const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
-            const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
-            const fileName = attachment.source.split('/').pop();
+const AttachmentItem = ({ attachment, index, onImageClick }) => {
+    const [hasError, setHasError] = useState(false);
+    const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
+    const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
+    const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
+    const fileName = attachment.source.split('/').pop();
 
-            return (
-                <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
-                    {isImage ? (
-                        <div className="position-relative w-100 h-100 gallery-inner-img">
-                            <div
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (onImageClick) onImageClick({ url: fileUrl, downloadUrl });
-                                }}
-                                title="Click to view full image"
-                                style={{ cursor: 'pointer', width: '100%', height: '100%' }}
-                            >
-                                <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                            <a
-                                href={downloadUrl}
-                                className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
-                                style={{ bottom: '4px', right: '4px', width: '24px', height: '24px', opacity: '0.7', textDecoration: 'none' }}
-                                title="Download image"
-                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                            >
-                                <i className="fa fa-download" style={{ fontSize: '0.7rem' }}></i>
-                            </a>
-                        </div>
-                    ) : (
-                        <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
-                            <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
-                            <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
+    return (
+        <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
+            {isImage ? (
+                <div className="position-relative w-100 h-100 gallery-inner-img">
+                    <div
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (onImageClick) onImageClick({ url: fileUrl, downloadUrl });
+                        }}
+                        title="Click to view full image"
+                        style={{ cursor: 'pointer', width: '100%', height: '100%' }}
+                    >
+                        <img 
+                            src={fileUrl} 
+                            alt={fileName} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                            onError={(e) => {
+                                setHasError(true);
+                                e.target.onerror = null;
+                                e.target.src = imageNotAvailable;
+                            }}
+                        />
+                    </div>
+                    {!hasError && (
+                        <a
+                            href={downloadUrl}
+                            className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
+                            style={{ bottom: '4px', right: '4px', width: '24px', height: '24px', opacity: '0.7', textDecoration: 'none' }}
+                            title="Download image"
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                        >
+                            <i className="fa fa-download" style={{ fontSize: '0.7rem' }}></i>
                         </a>
                     )}
                 </div>
-            );
-        })
-    )
-}
+            ) : (
+                <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
+                    <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
+                    <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
+                </a>
+            )}
+        </div>
+    );
+};
+
+const showAttachements = (attachements, onImageClick) => {
+    return (
+        attachements.map((attachment, index) => (
+            <AttachmentItem key={attachment.id || index} attachment={attachment} index={index} onImageClick={onImageClick} />
+        ))
+    );
+};
 
 const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUser, onReply, onEdit, onDelete, isHovered, onHover, isParent, inThreadView }) => {
     const [showMenu, setShowMenu] = useState(false);

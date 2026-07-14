@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Button from '../../../common/formInputs/Button';
 import ImagePreview from '../../../common/ImagePreview';
+import imageNotAvailable from '../../../../assets/images/image-not-available.svg';
 
 const MediaModel = ({ show, onClose, media = [] }) => {
     const [previewImage, setPreviewImage] = useState(null);
+
 
     if (!show) return null;
 
@@ -62,7 +64,14 @@ const MediaModel = ({ show, onClose, media = [] }) => {
                                                             title="Click to view full image"
                                                             style={{ cursor: 'pointer', width: '100%', height: '100%' }}
                                                         >
-                                                            <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
+                                                            <img
+                                                                src={fileUrl}
+                                                                alt={fileName}
+                                                                style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }}
+                                                                onError={(e) => {
+                                                                    e.target.onerror = null;
+                                                                    e.target.src = imageNotAvailable;
+                                                                }} />
                                                         </div>
                                                     </div>
                                                 ) : (
