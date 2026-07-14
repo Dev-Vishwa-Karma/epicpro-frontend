@@ -228,7 +228,7 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
                 <div className="d-flex justify-content-between align-items-center flex-grow-1">
                     <h6 className="fw-bold mb-0 ml-2">{activeThreadId ? 'Thread' : title}</h6>
                     <div>
-                        <Button label='Media' className="btn btn-outline-dark btn-sm" title="media" onClick={() => {
+                        <Button label='Media' className="btn btn-outline-info btn-sm" title="media" onClick={() => {
                             setShowMediaModal(true);
                         }} />
                     </div>
