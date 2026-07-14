@@ -13,7 +13,6 @@ const getActiveRepliesCount = (replies) => {
 };
 
 const AttachmentItem = ({ attachment, index, onImageClick }) => {
-    const [hasError, setHasError] = useState(false);
     const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
     const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
     const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
@@ -31,32 +30,24 @@ const AttachmentItem = ({ attachment, index, onImageClick }) => {
                         title="Click to view full image"
                         style={{ cursor: 'pointer', width: '100%', height: '100%' }}
                     >
-                        <img 
-                            src={fileUrl} 
-                            alt={fileName} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        <img
+                            src={fileUrl}
+                            alt={fileName}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={(e) => {
-                                setHasError(true);
                                 e.target.onerror = null;
                                 e.target.src = imageNotAvailable;
                             }}
                         />
                     </div>
-                    {!hasError && (
-                        <a
-                            href={downloadUrl}
-                            className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
-                            style={{ bottom: '4px', right: '4px', width: '24px', height: '24px', opacity: '0.7', textDecoration: 'none' }}
-                            title="Download image"
-                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                        >
-                            <i className="fa fa-download" style={{ fontSize: '0.7rem' }}></i>
-                        </a>
-                    )}
                 </div>
             ) : (
-                <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
+                <a
+                    href={downloadUrl}
+                    target="_blank"
+                    className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center"
+                    title="Click to download file"
+                >
                     <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
                     <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
                 </a>

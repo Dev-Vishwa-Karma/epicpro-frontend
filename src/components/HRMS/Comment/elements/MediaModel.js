@@ -75,7 +75,7 @@ const MediaModel = ({ show, onClose, media = [] }) => {
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
+                                                    <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file" target="_blank">
                                                         <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
                                                         <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
                                                     </a>
