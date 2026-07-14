@@ -61,6 +61,20 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
     const [previewImage, setPreviewImage] = useState(null);
     const activeRepliesCount = getActiveRepliesCount(comment.replies);
 
+    let read_status = 'sent';
+    if (comment.recipients && typeof comment.recipients === 'object') {
+        const statuses = Object.values(comment.recipients);
+        if (statuses.length > 0) {
+            if (statuses.every(s => s === 'read')) {
+                read_status = 'read';
+            } else if (statuses.some(s => s === 'delivered' || s === 'read')) {
+                read_status = 'delivered';
+            } else {
+                read_status = 'sent';
+            }
+        }
+    }
+
     const replyButton = (
         <button
             className="btn btn-sm p-0 text-primary text-decoration-none fw-bold d-flex align-items-center"
@@ -222,13 +236,25 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                         </button>
                                     )}
 
-                                    <div className="d-flex ml-auto">
+                                    <div className="d-flex align-items-center ml-auto">
                                         <span
-                                            className="text-muted ml-1"
+                                            className="text-muted ml-1 me-1"
                                             style={{ fontSize: '0.65rem' }}
                                         >
                                             At {new Date(comment?.deleted_at ? comment.deleted_at : comment.modified_at || comment.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                         </span>
+                                        {isCurrentUser && !comment.deleted_at && (
+                                            <span
+                                                className="d-flex align-items-center"
+                                                title={read_status === 'read' ? "Read" : (read_status === 'sent' ? "Sent" : "Delivered")}
+                                                style={{ color: read_status === 'read' ? '#28a745' : '#8696a0', marginLeft: '4px' }}
+                                            >
+                                                <i className="fa fa-check" style={{ fontSize: '0.65rem', marginRight: read_status === 'sent' ? '0' : '-3px' }}></i>
+                                                {read_status !== 'sent' && (
+                                                    <i className="fa fa-check" style={{ fontSize: '0.65rem' }}></i>
+                                                )}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>

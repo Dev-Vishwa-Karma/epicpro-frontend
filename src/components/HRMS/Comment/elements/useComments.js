@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../../../../api/axios';
 import Pusher from 'pusher-js';
 import { addCommentToTree, commonCommentInTree } from './commentTreeHelpers';
+import authService from '../../../../components/Authentication/authService';
 
 const useComments = (moduleType, moduleId, showErrorAlert) => {
     const [comments, setComments] = useState([]);
@@ -13,6 +14,35 @@ const useComments = (moduleType, moduleId, showErrorAlert) => {
             const response = await api.get(`/comment.php?action=view&module_type=${moduleType}&module_id=${moduleId}`);
             if (response.data.status === 'success') {
                 setComments(response.data.data || []);
+                // Mark comments as read for this user
+                const user = authService.getUser() || window.user;
+                if (user && (user.id || user.employee_id)) {
+                    const userId = user.id || user.employee_id;
+                    const fireMarkRead = () => {
+                        console.log("Executing mark_read API for user:", userId);
+                        const formData = new FormData();
+                        formData.append('action', 'mark_read');
+                        formData.append('module_type', moduleType);
+                        formData.append('module_id', moduleId);
+                        formData.append('user_id', userId);
+                        api.post('/comment.php', formData).then(res => {
+                            console.log("mark_read response:", res.data);
+                        }).catch(err => console.error("Error marking read:", err));
+                    };
+
+                    if (!document.hidden) {
+                        fireMarkRead();
+                    } else {
+                        console.log("Document is hidden. Waiting for user to focus the tab before marking as read.");
+                        const onVisibilityChange = () => {
+                            if (!document.hidden) {
+                                fireMarkRead();
+                                document.removeEventListener("visibilitychange", onVisibilityChange);
+                            }
+                        };
+                        document.addEventListener("visibilitychange", onVisibilityChange);
+                    }
+                }
             } else {
                 showErrorAlert(response.data.message || 'Failed to fetch comments');
             }
@@ -51,6 +81,9 @@ const useComments = (moduleType, moduleId, showErrorAlert) => {
                                 return commonCommentInTree(prev, commentObj);
                             } else if (data.action === 'delete') {
                                 return commonCommentInTree(prev, commentObj);
+                            } else if (data.action === 'status_update') {
+                                fetchComments(true);
+                                return prev;
                             }
                             return prev;
                         });

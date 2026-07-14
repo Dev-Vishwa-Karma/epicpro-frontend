@@ -9,54 +9,69 @@ import ResetPassword from './components/Authentication/ResetPassword';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import Pusher from 'pusher-js';
 import logo from "./logo.svg";
+import api from './api/axios';
 
 class App extends Component {
 	pusher = null;
-    channel = null;
+	channel = null;
 	constructor(props) {
-        super(props);
-        this.state = {
-            user: authService.getUser(),
-        };
-    }
+		super(props);
+		this.state = {
+			user: authService.getUser(),
+		};
+	}
 
 	componentDidMount() {
-        authService.subscribe((user) => {
-            this.setState({ user });
-        });
+		authService.subscribe((user) => {
+			this.setState({ user });
+		});
 		if (this.state.user) {
 			this.handlePusher();
 		}
-    }
+	}
 
-	handlePusher = ()=>{
+	handlePusher = () => {
 
 		// Request notification permission
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
+		if (Notification.permission !== "granted") {
+			Notification.requestPermission();
+		}
 
-		const {id, first_name, role} = window.user
-        // Initialize Pusher
-        Pusher.logToConsole = false;
+		const { id, first_name, role } = window.user
+		// Initialize Pusher
+		Pusher.logToConsole = false;
 		const url =
-		role !== "employee"
-			? process.env.REACT_APP_CONNECT_REDIRECT_URL
-			: process.env.REACT_APP_NOTIFICATION_REDIRECT_URL;
+			role !== "employee"
+				? process.env.REACT_APP_CONNECT_REDIRECT_URL
+				: process.env.REACT_APP_NOTIFICATION_REDIRECT_URL;
 		const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
 			cluster: process.env.REACT_APP_PUSHER_CLUSTER,
 		});
 		const channel = pusher.subscribe(process.env.REACT_APP_PUSHER_CHANNEL);
 
 		const events = [
-				`new_connect${id}`,
-				`update_status${id}`
-			];
+			`new_connect${id}`,
+			`update_status${id}`
+		];
 
-			events.forEach(eventName => {
-				channel.bind(eventName, (data) => {
-					showNotification(data, first_name);
+		events.forEach(eventName => {
+			channel.bind(eventName, (data) => {
+				showNotification(data, first_name);
 			});
+		});
+
+		// Listen for new comment notifications to mark as delivered
+		channel.bind(`new_comment_notification_${id}`, (data) => {
+			// Mark as delivered in the background
+			const formData = new FormData();
+			formData.append('action', 'mark_delivered');
+			formData.append('comment_id', data.comment_id);
+			formData.append('user_id', id);
+
+			api.post('/comment.php', formData)
+				.catch(err => console.error("Error marking comment as delivered:", err));
+
+			showNotification(data, first_name);
 		});
 
 		const showNotification = (data, first_name) => {
@@ -67,36 +82,44 @@ class App extends Component {
 					requireInteraction: true,
 				});
 				notification.onclick = function () {
-					window.open(url, "_blank");
+					let redirectUrl = url;
+					if (data.module_type) {
+						if (data.module_type === 'ticket') {
+							redirectUrl = '/ticket';
+						} else if (data.module_type === 'connect') {
+							redirectUrl = '/connect';
+						}
+					}
+					window.open(redirectUrl, "self");
 				};
 			}
 		};
 
-        // Cleanup on unmount
-        this.pusher = pusher;
-        this.channel = channel;
+		// Cleanup on unmount
+		this.pusher = pusher;
+		this.channel = channel;
 
 	}
 
 	componentWillUnmount() {
-        if (this.channel) {
-            this.channel.unbind_all();
-            this.channel.unsubscribe();
-        }
-        if (this.pusher) {
-            this.pusher.disconnect();
-        }
-    }
+		if (this.channel) {
+			this.channel.unbind_all();
+			this.channel.unsubscribe();
+		}
+		if (this.pusher) {
+			this.pusher.disconnect();
+		}
+	}
 
 	handleLogin = (userData) => {
-        authService.setUser(userData);  // Save user to localStorage
-        this.setState({ user: userData });  // Update state
-    };
+		authService.setUser(userData);  // Save user to localStorage
+		this.setState({ user: userData });  // Update state
+	};
 
-    handleLogout = () => {
-        authService.logout();  // Remove user from localStorage
-        this.setState({ user: null });
-    };
+	handleLogout = () => {
+		authService.logout();  // Remove user from localStorage
+		this.setState({ user: null });
+	};
 
 	render() {
 		const { user } = this.state;
