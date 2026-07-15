@@ -126,12 +126,12 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 }}
                             >
                                 {isCurrentUser ?
-                                    <span style={{ position: 'absolute', top: -2, right: '-16px', width: '16px', height: '26px', color: '#b8e9afff' }}>
+                                    <span id={`tail-${comment.id}`} style={{ position: 'absolute', top: -2, right: '-16px', width: '16px', height: '26px', color: '#b8e9afff' }}>
                                         <svg viewBox="0 0 8 13" width="100%" height="100%">
                                             <path opacity="1" fill="currentColor" d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path>
                                         </svg>
                                     </span>
-                                    : <span style={{ position: 'absolute', top: -2, left: '-16px', width: '16px', height: '26px', color: '#f4ededff' }}>
+                                    : <span id={`tail-${comment.id}`} style={{ position: 'absolute', top: -2, left: '-16px', width: '16px', height: '26px', color: '#f4ededff' }}>
                                         <svg viewBox="0 0 8 13" width="100%" height="100%">
                                             <path opacity="1" fill="currentColor" d="M1.533 3.568L8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z"></path>
                                         </svg>
@@ -192,12 +192,21 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                             if (element) {
                                                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 const bubble = document.getElementById(`bubble-${parentComment.id}`);
+                                                const tail = document.getElementById(`tail-${parentComment.id}`);
                                                 if (bubble) {
                                                     const originalBg = bubble.style.backgroundColor;
                                                     bubble.style.transition = 'background-color 0.3s ease';
                                                     bubble.style.backgroundColor = '#cce5ff';
+                                                    let originalTailColor = '';
+                                                    if (tail) {
+                                                        originalTailColor = tail.style.color;
+                                                        tail.style.color = '#cce5ff';
+                                                    }
                                                     setTimeout(() => {
                                                         bubble.style.backgroundColor = originalBg;
+                                                        if (tail) {
+                                                            tail.style.color = originalTailColor;
+                                                        }
                                                         setTimeout(() => { bubble.style.transition = ''; }, 300);
                                                     }, 1200);
                                                 }
