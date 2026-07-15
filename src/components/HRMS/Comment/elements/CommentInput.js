@@ -16,6 +16,8 @@ const CommentInput = ({
     const [attachments, setAttachments] = useState([]);
     const [existingAttachments, setExistingAttachments] = useState([]);
     const [errorMsg, setErrorMsg] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragCounter = useRef(0);
     const timeoutRef = useRef(null);
 
     const textByteSize = inputText ? new Blob([inputText]).size : 0;
@@ -76,6 +78,61 @@ const CommentInput = ({
         setExistingAttachments(prev => prev.filter(att => att.id !== idToRemove));
     };
 
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter.current += 1;
+        if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+            setIsDragging(true);
+        }
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter.current -= 1;
+        if (dragCounter.current === 0) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        dragCounter.current = 0;
+
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const newFiles = Array.from(e.dataTransfer.files);
+            setAttachments(prev => {
+                const updated = [...prev];
+                let hasLimitError = false;
+                newFiles.forEach(newFile => {
+                    if (newFile.size > 5 * 1024 * 1024) {
+                        showError(`File ${newFile.name} exceeds the 5MB size limit.`);
+                        return;
+                    }
+                    if (updated.length + existingAttachments.length >= 5) {
+                        if (!hasLimitError) {
+                            showError(`Maximum of 5 attachments allowed per comment.`);
+                            hasLimitError = true;
+                        }
+                        return;
+                    }
+                    if (!updated.some(existing => existing.name === newFile.name && existing.size === newFile.size)) {
+                        updated.push(newFile);
+                    }
+                });
+                return updated;
+            });
+        }
+    };
+
     const handlePaste = (e) => {
         if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
             e.preventDefault();
@@ -126,7 +183,30 @@ const CommentInput = ({
     }, [editingComment]);
 
     return (
-        <div ref={containerRef} className="bg-white border-top shadow-sm" style={{ zIndex: 10, borderRadius: '0 0 12px 12px' }}>
+        <div
+            ref={containerRef}
+            className={`border-top shadow-sm ${isDragging ? 'bg-light' : 'bg-white'}`}
+            style={{
+                zIndex: 10,
+                borderRadius: '0 0 12px 12px',
+                position: 'relative',
+            }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
+            {isDragging && (
+                <div 
+                    className="position-absolute w-100 h-100 d-flex justify-content-center align-items-center bg-white"
+                    style={{ zIndex: 20, borderRadius: '0 0 12px 12px', top: 0, left: 0, opacity: 0.9, pointerEvents: 'none', border: '2px dashed #0d6efd' }}
+                >
+                    <div className="text-primary fw-bold d-flex flex-column align-items-center">
+                        <i className="fa fa-cloud-upload mb-2" style={{ fontSize: '3rem' }}></i>
+                        <span className="fs-5">Drop files here to attach</span>
+                    </div>
+                </div>
+            )}
             {editingComment && (
                 <div className="d-flex align-items-start justify-content-between p-2 px-3 bg-light border-bottom overflow-hidden">
                     <div className="d-flex flex-column border-start border-4 border-primary ps-2 flex-grow-1 overflow-hidden me-3" style={{ minWidth: 0 }}>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Avatar from '../../../common/Avatar';
 import ImagePreview from '../../../common/ImagePreview';
+import imageNotAvailable from '../../../../assets/images/image-not-available.svg';
 
 const getActiveRepliesCount = (replies) => {
     if (!replies || !Array.isArray(replies)) return 0;
@@ -11,50 +12,57 @@ const getActiveRepliesCount = (replies) => {
     }, 0);
 };
 
+const AttachmentItem = ({ attachment, index, onImageClick }) => {
+    const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
+    const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
+    const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
+    const fileName = attachment.source.split('/').pop();
+
+    return (
+        <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
+            {isImage ? (
+                <div className="position-relative w-100 h-100 gallery-inner-img">
+                    <div
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (onImageClick) onImageClick({ url: fileUrl, downloadUrl });
+                        }}
+                        title="Click to view full image"
+                        style={{ cursor: 'pointer', width: '100%', height: '100%' }}
+                    >
+                        <img
+                            src={fileUrl}
+                            alt={fileName}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = imageNotAvailable;
+                            }}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <a
+                    href={downloadUrl}
+                    target="_blank"
+                    className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center"
+                    title="Click to download file"
+                >
+                    <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
+                    <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
+                </a>
+            )}
+        </div>
+    );
+};
+
 const showAttachements = (attachements, onImageClick) => {
     return (
-        attachements.map((attachment, index) => {
-            const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
-            const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
-            const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
-            const fileName = attachment.source.split('/').pop();
-
-            return (
-                <div key={attachment.id || index} className="attachment-item border rounded overflow-hidden" style={{ width: '100px', height: '100px', backgroundColor: '#f8f9fa' }}>
-                    {isImage ? (
-                        <div className="position-relative w-100 h-100">
-                            <div
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (onImageClick) onImageClick({ url: fileUrl, downloadUrl });
-                                }}
-                                title="Click to view full image"
-                                style={{ cursor: 'pointer', width: '100%', height: '100%' }}
-                            >
-                                <img src={fileUrl} alt={fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                            <a
-                                href={downloadUrl}
-                                className="position-absolute d-flex align-items-center justify-content-center bg-dark text-white rounded-circle shadow-sm"
-                                style={{ bottom: '4px', right: '4px', width: '24px', height: '24px', opacity: '0.7', textDecoration: 'none' }}
-                                title="Download image"
-                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                            >
-                                <i className="fa fa-download" style={{ fontSize: '0.7rem' }}></i>
-                            </a>
-                        </div>
-                    ) : (
-                        <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file">
-                            <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
-                            <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
-                        </a>
-                    )}
-                </div>
-            );
-        })
-    )
-}
+        attachements.map((attachment, index) => (
+            <AttachmentItem key={attachment.id || index} attachment={attachment} index={index} onImageClick={onImageClick} />
+        ))
+    );
+};
 
 const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUser, onReply, onEdit, onDelete, isHovered, onHover, isParent, inThreadView }) => {
     const [showMenu, setShowMenu] = useState(false);
@@ -93,31 +101,41 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                 style={{ width: '100%' }}
             >
                 <div className="d-flex flex-column" style={{ maxWidth: '85%' }}>
-                    <div className="d-flex align-items-end">
+                    <div className="d-flex align-items-start">
                         {!isCurrentUser && (
                             <Avatar
                                 profile={comment.commented_by?.profile}
                                 first_name={comment.commented_by?.first_name}
                                 last_name={comment.commented_by?.last_name}
                                 size={32}
-                                className="me-2 mb-1"
+                                className="me-2"
                                 backgroundColor="#018d40ff"
                             />
                         )}
-
-                        <div className={`d-flex flex-column ${isCurrentUser ? 'align-items-end' : 'align-items-start'}`}>
+                        <div className={`card d-flex flex-column ps-2 ${isCurrentUser ? 'align-items-end mr-2' : 'align-items-start ml-2'}`}>
                             <div
                                 id={`bubble-${comment.id}`}
-                                className={`position-relative p-2 shadow-sm`}
+                                className={`position-relative p-2`}
                                 style={{
                                     maxWidth: '100%',
-                                    backgroundColor: isCurrentUser ? '#d9fdd3' : '#ffffff',
-                                    borderRadius: '8px',
+                                    backgroundColor: isCurrentUser ? '#b8e9afff' : '#f4ededff',
+                                    borderRadius: '10px',
                                     borderTopRightRadius: isCurrentUser ? '0px' : '8px',
                                     borderTopLeftRadius: isCurrentUser ? '8px' : '0px',
                                     minWidth: '230px'
                                 }}
                             >
+                                {isCurrentUser ?
+                                    <span id={`tail-${comment.id}`} style={{ position: 'absolute', top: -2, right: '-16px', width: '16px', height: '26px', color: '#b8e9afff' }}>
+                                        <svg viewBox="0 0 8 13" width="100%" height="100%">
+                                            <path opacity="1" fill="currentColor" d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path>
+                                        </svg>
+                                    </span>
+                                    : <span id={`tail-${comment.id}`} style={{ position: 'absolute', top: -2, left: '-16px', width: '16px', height: '26px', color: '#f4ededff' }}>
+                                        <svg viewBox="0 0 8 13" width="100%" height="100%">
+                                            <path opacity="1" fill="currentColor" d="M1.533 3.568L8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z"></path>
+                                        </svg>
+                                    </span>}
                                 <div className="mb-1 pe-5" style={{ fontSize: '0.8rem', color: '#128C7E', fontWeight: 'bold' }}>
                                     {isCurrentUser ? 'You' : `${comment.commented_by?.first_name} ${comment.commented_by?.last_name}`}
                                 </div>
@@ -174,12 +192,21 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                             if (element) {
                                                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 const bubble = document.getElementById(`bubble-${parentComment.id}`);
+                                                const tail = document.getElementById(`tail-${parentComment.id}`);
                                                 if (bubble) {
                                                     const originalBg = bubble.style.backgroundColor;
                                                     bubble.style.transition = 'background-color 0.3s ease';
                                                     bubble.style.backgroundColor = '#cce5ff';
+                                                    let originalTailColor = '';
+                                                    if (tail) {
+                                                        originalTailColor = tail.style.color;
+                                                        tail.style.color = '#cce5ff';
+                                                    }
                                                     setTimeout(() => {
                                                         bubble.style.backgroundColor = originalBg;
+                                                        if (tail) {
+                                                            tail.style.color = originalTailColor;
+                                                        }
                                                         setTimeout(() => { bubble.style.transition = ''; }, 300);
                                                     }, 1200);
                                                 }
@@ -240,14 +267,14 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 first_name={comment.commented_by?.first_name}
                                 last_name={comment.commented_by?.last_name}
                                 size={32}
-                                className="ms-2 mb-1"
+                                className="ms-2"
                                 backgroundColor="#018d40ff"
                             />
                         )}
                     </div>
                     {
                         !isParent && !inThreadView && comment.replies && activeRepliesCount > 0 && (
-                            <div className={`d-flex mt-1 ${isCurrentUser ? 'align-self-start' : 'align-self-end'}`}>
+                            <div className={`d-flex ${isCurrentUser ? 'align-self-start' : 'align-self-end'}`} style={{ marginTop: '-12px' }}>
                                 {isCurrentUser ? (
                                     <>
                                         {replyButton}

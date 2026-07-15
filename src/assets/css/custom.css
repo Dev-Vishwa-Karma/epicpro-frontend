@@ -822,3 +822,9 @@ border-left: 6px solid #e6140d !important;
       flex-direction: row !important;
   }
 }
+@media (max-width: 425px) {
+  .full-modal-mobile {
+    width: 120% !important;
+    height:100% !important;
+  }
+}

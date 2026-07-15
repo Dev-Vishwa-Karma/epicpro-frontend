@@ -87,7 +87,7 @@ const ViewConnectModel = ({
         <>
             {show && (
 
-                <div className="modal fade show d-block" id={1} tabIndex={-1} role="dialog" aria-modal="true">
+                <div className="modal fade show d-block full-modal-mobile" id={1} tabIndex={-1} role="dialog" aria-modal="true">
                     <div className="modal-dialog modal-dialog-scrollable modal-xxl" role="document">
                         <div className="modal-content section-body" style={{ maxHeight: "90vh" }}>
                             <div className="modal-header">
@@ -354,7 +354,7 @@ const ViewConnectModel = ({
                                             </div>
                                         </div>
                                         {selectedConnect && selectedConnect.id && (
-                                            <CommentModule moduleType="connect" moduleId={selectedConnect?.id} maxHeight="580px" />
+                                            <CommentModule moduleType="connect" moduleId={selectedConnect?.id} height="45vh" />
                                         )}
 
                                     </div>

@@ -6,8 +6,11 @@ import MessageList from './elements/MessageList';
 import CommentInput from './elements/CommentInput';
 import DeleteModal from '../../common/DeleteModal';
 import useComments from './elements/useComments';
+import Button from '../../common/formInputs/Button';
+import MediaModel from './elements/MediaModel';
+import { useMemo } from 'react';
 
-const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, minHeight = '12vh' }) => {
+const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, height = '60vh' }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [inputText, setInputText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
@@ -21,6 +24,7 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [commentToDelete, setCommentToDelete] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [showMediaModal, setShowMediaModal] = useState(false);
     const currentUser = authService.getUser();
     const chatContainerRef = useRef(null);
     const mainViewScrollPosRef = useRef(0);
@@ -186,8 +190,27 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
 
     const activeThread = activeThreadId ? commentsMap.get(String(activeThreadId)) : null;
 
+    const allMedia = useMemo(() => {
+        const media = [];
+        const extract = (list) => {
+            list.forEach(c => {
+                if (c.attachments && c.attachments.length > 0) {
+                    media.push(...c.attachments.map(att => ({
+                        ...att,
+                        date: c.modified_at || c.created_at
+                    })));
+                }
+                if (c.replies && c.replies.length > 0) {
+                    extract(c.replies);
+                }
+            });
+        };
+        extract(comments);
+        return media;
+    }, [comments]);
+
     return (
-        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ minHeight: minHeight, maxHeight: 'calc(90vh - 290px)' }}>
+        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ height: height, maxHeight: "100%", resize: "vertical", overflow: "hidden" }}>
             {/* Header */}
             <div className="card-header bg-white border-bottom py-3 d-flex align-items-center" style={{ borderRadius: '12px 12px 0 0' }}>
                 {activeThreadId && (
@@ -205,7 +228,14 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
                         <i className="fa fa-arrow-left"></i>
                     </button>
                 )}
-                <h6 className="mb-0 fw-bold ml-1">{activeThreadId ? 'Thread' : title}</h6>
+                <div className="d-flex justify-content-between align-items-center flex-grow-1">
+                    <h6 className="fw-bold mb-0 ml-2">{activeThreadId ? 'Thread' : title}</h6>
+                    <div>
+                        <Button label='Media' className="btn btn-outline-info btn-sm" title="media" onClick={() => {
+                            setShowMediaModal(true);
+                        }} />
+                    </div>
+                </div>
             </div>
 
             {/* Chat Body */}
@@ -268,6 +298,12 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
                 onConfirm={confirmDelete}
                 isLoading={deleteLoading}
                 deleteBody="Are you sure you want to delete this message?"
+            />
+
+            <MediaModel
+                show={showMediaModal}
+                onClose={() => setShowMediaModal(false)}
+                media={allMedia}
             />
         </div>
     );

@@ -210,7 +210,7 @@ class Menu extends Component {
 					"to": "#!",
 					"content": [
 					{ "id": 2, "icon": "fa fa-home", "label": "Dashboard", "to": "/" },
-					{ "id": 3, "icon": "fa fa-list", "label": "Activities", "to": "/hr-activities" },
+					{ "id": 3, "icon": "fa fa-list-ul", "label": "Activities", "to": "/hr-activities" },
 					{ "id": 4, "icon": "fa fa-plane", "label": "Holidays", "to": "/hr-holidays" },
 					{ "id": 5, "icon": "fa fa-calendar", "label": "Events", "to": "/hr-events" },
 					{ "id": 6, "icon": "fa fa-file-text", "label": "Reports", "to": "/hr-report" },
@@ -256,7 +256,7 @@ class Menu extends Component {
 				const deptIndex = hrms.content.findIndex(item => item.id === 12);
 				if (deptIndex !== -1) hrms.content.splice(deptIndex + 1, 0, empItem);
 				
-				const connectItem = { id: 22, icon: "fa fa-sitemap", label: "Connect", to: "/connect" };
+				const connectItem = { id: 22, icon: "fa fa-comments", label: "Connect", to: "/connect" };
 				const connectIndex = hrms.content.findIndex(item => item.id === 13);
 				if (connectIndex !== -1)hrms.content.splice(connectIndex + 1, 0, connectItem);
 

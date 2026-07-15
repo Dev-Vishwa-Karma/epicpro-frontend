@@ -473,6 +473,16 @@ class ViewTicket extends Component {
                                 )}
                             </div>
                         </div>
+                        <div
+                            className="d-flex justify-content-end mt-3 mb-3"
+                            style={{ position: "sticky", bottom: "20px", zIndex: 1020 }}
+                        >
+                            <Button
+                                label="Back"
+                                onClick={this.handleBack}
+                                className="btn-secondary px-4"
+                            />
+                        </div>
                     </div >
                 </div >
 
