@@ -112,13 +112,13 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 backgroundColor="#018d40ff"
                             />
                         )}
-                        <div className={`d-flex flex-column ps-2 ${isCurrentUser ? 'align-items-end mr-2' : 'align-items-start ml-2'}`}>
+                        <div className={`card d-flex flex-column ps-2 ${isCurrentUser ? 'align-items-end mr-2' : 'align-items-start ml-2'}`}>
                             <div
                                 id={`bubble-${comment.id}`}
-                                className={`position-relative p-2 shadow-lg`}
+                                className={`position-relative p-2`}
                                 style={{
                                     maxWidth: '100%',
-                                    backgroundColor: isCurrentUser ? '#d9fdd3' : '#ffffff',
+                                    backgroundColor: isCurrentUser ? '#b8e9afff' : '#f4ededff',
                                     borderRadius: '10px',
                                     borderTopRightRadius: isCurrentUser ? '0px' : '8px',
                                     borderTopLeftRadius: isCurrentUser ? '8px' : '0px',
@@ -126,12 +126,12 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 }}
                             >
                                 {isCurrentUser ?
-                                    <span style={{ position: 'absolute', top: -2, right: '-16px', width: '16px', height: '26px', color: '#d9fdd3' }}>
+                                    <span style={{ position: 'absolute', top: -2, right: '-16px', width: '16px', height: '26px', color: '#b8e9afff' }}>
                                         <svg viewBox="0 0 8 13" width="100%" height="100%">
                                             <path opacity="1" fill="currentColor" d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path>
                                         </svg>
                                     </span>
-                                    : <span style={{ position: 'absolute', top: -2, left: '-16px', width: '16px', height: '26px', color: '#ffffff' }}>
+                                    : <span style={{ position: 'absolute', top: -2, left: '-16px', width: '16px', height: '26px', color: '#f4ededff' }}>
                                         <svg viewBox="0 0 8 13" width="100%" height="100%">
                                             <path opacity="1" fill="currentColor" d="M1.533 3.568L8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z"></path>
                                         </svg>

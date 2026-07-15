@@ -10,7 +10,7 @@ import Button from '../../common/formInputs/Button';
 import MediaModel from './elements/MediaModel';
 import { useMemo } from 'react';
 
-const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, height = '48vh' }) => {
+const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, height = '64vh' }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [inputText, setInputText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
