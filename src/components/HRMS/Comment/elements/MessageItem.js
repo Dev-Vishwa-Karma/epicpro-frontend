@@ -265,7 +265,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                     </div>
                     {
                         !isParent && !inThreadView && comment.replies && activeRepliesCount > 0 && (
-                            <div className={`d-flex mt-1 ${isCurrentUser ? 'align-self-start' : 'align-self-end'}`}>
+                            <div className={`d-flex ${isCurrentUser ? 'align-self-start' : 'align-self-end'}`} style={{ marginTop: '-12px' }}>
                                 {isCurrentUser ? (
                                     <>
                                         {replyButton}
