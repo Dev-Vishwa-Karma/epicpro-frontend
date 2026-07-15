@@ -195,7 +195,10 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
         const extract = (list) => {
             list.forEach(c => {
                 if (c.attachments && c.attachments.length > 0) {
-                    media.push(...c.attachments);
+                    media.push(...c.attachments.map(att => ({
+                        ...att,
+                        date: c.modified_at || c.created_at
+                    })));
                 }
                 if (c.replies && c.replies.length > 0) {
                     extract(c.replies);

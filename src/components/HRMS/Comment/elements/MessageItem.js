@@ -101,31 +101,41 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                 style={{ width: '100%' }}
             >
                 <div className="d-flex flex-column" style={{ maxWidth: '85%' }}>
-                    <div className="d-flex align-items-end">
+                    <div className="d-flex align-items-start">
                         {!isCurrentUser && (
                             <Avatar
                                 profile={comment.commented_by?.profile}
                                 first_name={comment.commented_by?.first_name}
                                 last_name={comment.commented_by?.last_name}
                                 size={32}
-                                className="me-2 mb-1"
+                                className="me-2"
                                 backgroundColor="#018d40ff"
                             />
                         )}
-
-                        <div className={`d-flex flex-column ${isCurrentUser ? 'align-items-end' : 'align-items-start'}`}>
+                        <div className={`d-flex flex-column ps-2 ${isCurrentUser ? 'align-items-end mr-2' : 'align-items-start ml-2'}`}>
                             <div
                                 id={`bubble-${comment.id}`}
-                                className={`position-relative p-2 shadow-sm`}
+                                className={`position-relative p-2 shadow-lg`}
                                 style={{
                                     maxWidth: '100%',
                                     backgroundColor: isCurrentUser ? '#d9fdd3' : '#ffffff',
-                                    borderRadius: '8px',
+                                    borderRadius: '10px',
                                     borderTopRightRadius: isCurrentUser ? '0px' : '8px',
                                     borderTopLeftRadius: isCurrentUser ? '8px' : '0px',
                                     minWidth: '230px'
                                 }}
                             >
+                                {isCurrentUser ?
+                                    <span style={{ position: 'absolute', top: -2, right: '-16px', width: '16px', height: '26px', color: '#d9fdd3' }}>
+                                        <svg viewBox="0 0 8 13" width="100%" height="100%">
+                                            <path opacity="1" fill="currentColor" d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path>
+                                        </svg>
+                                    </span>
+                                    : <span style={{ position: 'absolute', top: -2, left: '-16px', width: '16px', height: '26px', color: '#ffffff' }}>
+                                        <svg viewBox="0 0 8 13" width="100%" height="100%">
+                                            <path opacity="1" fill="currentColor" d="M1.533 3.568L8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z"></path>
+                                        </svg>
+                                    </span>}
                                 <div className="mb-1 pe-5" style={{ fontSize: '0.8rem', color: '#128C7E', fontWeight: 'bold' }}>
                                     {isCurrentUser ? 'You' : `${comment.commented_by?.first_name} ${comment.commented_by?.last_name}`}
                                 </div>
@@ -248,7 +258,7 @@ const MessageItem = ({ comment, isCurrentUser, parentComment, isParentCurrentUse
                                 first_name={comment.commented_by?.first_name}
                                 last_name={comment.commented_by?.last_name}
                                 size={32}
-                                className="ms-2 mb-1"
+                                className="ms-2"
                                 backgroundColor="#018d40ff"
                             />
                         )}

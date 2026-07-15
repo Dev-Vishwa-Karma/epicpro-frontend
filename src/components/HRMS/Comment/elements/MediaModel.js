@@ -18,7 +18,7 @@ const MediaModel = ({ show, onClose, media = [] }) => {
                 role="dialog"
                 aria-modal="true"
             >
-                <div className="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                <div className="modal-dialog modal-xl modal-dialog-scrollable" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title">All Media</h5>
@@ -45,7 +45,7 @@ const MediaModel = ({ show, onClose, media = [] }) => {
                             {media.length === 0 ? (
                                 <p className="text-center text-muted my-4">No media found.</p>
                             ) : (
-                                <div className="d-flex flex-wrap gap-5 gallery-image-wrapper">
+                                <div className="row g-3">
                                     {media.map((attachment, index) => {
                                         const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
                                         const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
@@ -53,33 +53,63 @@ const MediaModel = ({ show, onClose, media = [] }) => {
                                         const fileName = attachment.source ? attachment.source.split('/').pop() : 'Unknown File';
 
                                         return (
-                                            <div key={attachment.id || index} className="col-3 attachment-item border gallery-image-wrapper rounded overflow-hidden position-relative" style={{ width: '140px', height: '140px', backgroundColor: '#f8f9fa' }}>
-                                                {isImage ? (
-                                                    <div className="w-100 h-100 position-relative gallery-inner-img">
+                                            <div key={attachment.id || index} className="col-md-3 mb-3">
+                                                <div
+                                                    className="card border rounded overflow-hidden position-relative shadow-sm h-100"
+                                                    style={{ backgroundColor: '#f8f9fa' }}
+                                                >
+                                                    {isImage ? (
                                                         <div
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
+                                                            className="card-body p-2 d-flex justify-content-center align-items-center gallery-inner-img"
+                                                            onClick={() => {
                                                                 setPreviewImage({ url: fileUrl, downloadUrl });
                                                             }}
                                                             title="Click to view full image"
-                                                            style={{ cursor: 'pointer', width: '100%', height: '100%' }}
+                                                            style={{ cursor: 'pointer', height: '150px' }}
                                                         >
                                                             <img
                                                                 src={fileUrl}
                                                                 alt={fileName}
-                                                                style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }}
+                                                                style={{
+                                                                    maxWidth: '100%',
+                                                                    maxHeight: '100%',
+                                                                    objectFit: 'contain'
+                                                                }}
                                                                 onError={(e) => {
                                                                     e.target.onerror = null;
                                                                     e.target.src = imageNotAvailable;
-                                                                }} />
+                                                                }}
+                                                            />
                                                         </div>
-                                                    </div>
-                                                ) : (
-                                                    <a href={downloadUrl} className="d-flex flex-column align-items-center justify-content-center h-100 text-decoration-none text-dark p-2 text-center" title="Click to download file" target="_blank">
-                                                        <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2rem' }}></i>
-                                                        <span className="text-truncate w-100" style={{ fontSize: '0.65rem' }}>{fileName}</span>
-                                                    </a>
-                                                )}
+                                                    ) : (
+                                                        <a
+                                                            href={downloadUrl}
+                                                            className="card-body p-2 d-flex flex-column align-items-center justify-content-center text-decoration-none text-dark"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            style={{ height: '150px' }}
+                                                        >
+                                                            <i className="fa fa-file text-muted mb-2" style={{ fontSize: '2.5rem' }}></i>
+                                                            <span className="text-truncate w-100 text-center" style={{ fontSize: '0.75rem' }}>
+                                                                {fileName}
+                                                            </span>
+                                                        </a>
+                                                    )}
+
+                                                    {attachment.date && (
+                                                        <div className="card-footer p-2 text-center">
+                                                            <div className="text-muted" style={{ fontSize: '0.7rem', fontWeight: '500' }}>
+                                                                At- {new Date(attachment.date).toLocaleString('en-US', {
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    year: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         );
                                     })}
