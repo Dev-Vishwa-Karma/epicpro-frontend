@@ -6,11 +6,16 @@ import { addCommentToTree, commonCommentInTree } from './commentTreeHelpers';
 const useComments = (moduleType, moduleId, showErrorAlert) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [limit, setLimit] = useState(50);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const fetchComments = async (silent = false) => {
+    const fetchComments = async (silent = false, currentLimit = limit) => {
         try {
-            if (!silent) setLoading(true);
-            const response = await api.get(`/comment.php?action=view&module_type=${moduleType}&module_id=${moduleId}`);
+            if (!silent && currentLimit === 50) setLoading(true);
+            if (currentLimit > 50) setIsLoadingMore(true);
+
+            const response = await api.get(`/comment.php?action=view&module_type=${moduleType}&module_id=${moduleId}&limit=${currentLimit}`);
             if (response.data.status === 'success') {
                 setComments(response.data.data || []);
             } else {
@@ -19,7 +24,16 @@ const useComments = (moduleType, moduleId, showErrorAlert) => {
         } catch (error) {
             showErrorAlert('Error fetching comments');
         } finally {
-            if (!silent) setLoading(false);
+            if (!silent && currentLimit === 50) setLoading(false);
+            if (currentLimit > 50) setIsLoadingMore(false);
+        }
+    };
+
+    const loadMore = () => {
+        if (!isLoadingMore && hasMore) {
+            const nextLimit = limit + 50;
+            setLimit(nextLimit);
+            fetchComments(true, nextLimit);
         }
     };
 
@@ -85,13 +99,24 @@ const useComments = (moduleType, moduleId, showErrorAlert) => {
         return { totalCount, commentsMap: map };
     }, [comments]);
 
+    useEffect(() => {
+        if (totalCount > 0 && totalCount < limit) {
+            setHasMore(false);
+        } else if (totalCount >= limit) {
+            setHasMore(true);
+        }
+    }, [totalCount, limit]);
+
     return {
         comments,
         loading,
         totalCount,
         commentsMap,
         setComments,
-        fetchComments
+        fetchComments,
+        hasMore,
+        isLoadingMore,
+        loadMore
     };
 };
 
