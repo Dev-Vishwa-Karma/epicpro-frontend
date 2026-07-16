@@ -354,7 +354,7 @@ const ViewConnectModel = ({
                                             </div>
                                         </div>
                                         {selectedConnect && selectedConnect.id && (
-                                            <CommentModule moduleType="connect" moduleId={selectedConnect?.id} height="55vh" />
+                                            <CommentModule moduleType="connect" moduleId={selectedConnect?.id} height="45vh" />
                                         )}
 
                                     </div>
