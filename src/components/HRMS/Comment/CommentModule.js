@@ -58,7 +58,7 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
     const oldScrollHeightRef = useRef(0);
 
     const handleScroll = (e) => {
-        if (e.target.scrollTop === 0 && hasMore && !isLoadingMore) {
+        if (e.target.scrollTop === 0 && hasMore && !isLoadingMore && !activeThreadId) {
             oldScrollHeightRef.current = e.target.scrollHeight;
             loadMore();
         }

@@ -41,6 +41,68 @@ export const getFlatReplies = (replies) => {
         });
     }
     extract(replies);
-    flat.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    flat.sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at.replace(' ', 'T')).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at.replace(' ', 'T')).getTime() : 0;
+        
+        if (dateA && dateB && !isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
+            return dateA - dateB;
+        }
+        return parseInt(a.id) - parseInt(b.id);
+    });
     return flat;
 };
+
+export const mergeCommentTrees = (existingTree, newTree) => {
+    const map = new Map();
+    
+    const extract = (list) => {
+        list.forEach(c => {
+            const idStr = String(c.id);
+            if (!map.has(idStr)) {
+                map.set(idStr, { ...c, replies: [] });
+            } else {
+                const existing = map.get(idStr);
+                map.set(idStr, { ...existing, ...c, replies: [] });
+            }
+            if (c.replies && c.replies.length > 0) {
+                extract(c.replies);
+            }
+        });
+    };
+    
+    extract(existingTree);
+    extract(newTree);
+    
+    const tree = [];
+    Array.from(map.values()).forEach(c => {
+        const parentId = c.parent_comment_id ? String(c.parent_comment_id) : null;
+        if (!parentId || !map.has(parentId)) {
+            tree.push(c);
+        } else {
+            const parent = map.get(parentId);
+            parent.replies.push(c);
+        }
+    });
+    
+    const sortTree = (list) => {
+        list.sort((a, b) => {
+            const dateA = a.created_at ? new Date(a.created_at.replace(' ', 'T')).getTime() : 0;
+            const dateB = b.created_at ? new Date(b.created_at.replace(' ', 'T')).getTime() : 0;
+            
+            if (dateA && dateB && !isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
+                return dateA - dateB;
+            }
+            return parseInt(a.id) - parseInt(b.id);
+        });
+        list.forEach(c => {
+            if (c.replies && c.replies.length > 0) {
+                sortTree(c.replies);
+            }
+        });
+    };
+    
+    sortTree(tree);
+    return tree;
+};
+
