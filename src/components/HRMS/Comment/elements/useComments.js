@@ -1,31 +1,66 @@
 import { useState, useEffect, useMemo } from 'react';
 import api from '../../../../api/axios';
 import Pusher from 'pusher-js';
-import { addCommentToTree, commonCommentInTree } from './commentTreeHelpers';
+import { addCommentToTree, commonCommentInTree, mergeCommentTrees } from './commentTreeHelpers';
 
 const useComments = (moduleType, moduleId, showErrorAlert) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const limit = 20;
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const fetchComments = async (silent = false) => {
+    const fetchComments = async (silent = false, currentPage = page, reset = false) => {
         try {
-            if (!silent) setLoading(true);
-            const response = await api.get(`/comment.php?action=view&module_type=${moduleType}&module_id=${moduleId}`);
+            if (!silent && currentPage === 1) setLoading(true);
+            if (currentPage > 1) setIsLoadingMore(true);
+
+            const response = await api.get(`/comment.php?action=view&module_type=${moduleType}&module_id=${moduleId}&limit=${limit}&page=${currentPage}`);
             if (response.data.status === 'success') {
-                setComments(response.data.data || []);
+                const fetchedData = response.data.data || [];
+                
+                let fetchedCount = 0;
+                const extractCount = (list) => {
+                    list.forEach(c => { fetchedCount++; if (c.replies) extractCount(c.replies); });
+                };
+                extractCount(fetchedData);
+                
+                if (fetchedCount === 0 || fetchedData.length === 0) {
+                    setHasMore(false);
+                } else {
+                    setHasMore(true); // There might be more, wait for next fetch to confirm or just rely on backend total which we might not have here
+                }
+
+                if (reset || currentPage === 1) {
+                    setComments(fetchedData);
+                } else {
+                    setComments(prev => mergeCommentTrees(prev, fetchedData));
+                }
             } else {
                 showErrorAlert(response.data.message || 'Failed to fetch comments');
             }
         } catch (error) {
             showErrorAlert('Error fetching comments');
         } finally {
-            if (!silent) setLoading(false);
+            if (!silent && currentPage === 1) setLoading(false);
+            if (currentPage > 1) setIsLoadingMore(false);
+        }
+    };
+
+    const loadMore = () => {
+        if (!isLoadingMore && hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchComments(true, nextPage, false);
         }
     };
 
     useEffect(() => {
         if (moduleType && moduleId) {
-            fetchComments();
+            setPage(1);
+            setHasMore(true);
+            fetchComments(false, 1, true);
         }
         // Initialize Pusher
         if (process.env.REACT_APP_PUSHER_KEY) {
@@ -85,13 +120,20 @@ const useComments = (moduleType, moduleId, showErrorAlert) => {
         return { totalCount, commentsMap: map };
     }, [comments]);
 
+    useEffect(() => {
+        // We handle hasMore internally inside fetchComments based on fetched items count
+    }, [totalCount]);
+
     return {
         comments,
         loading,
         totalCount,
         commentsMap,
         setComments,
-        fetchComments
+        fetchComments,
+        hasMore,
+        isLoadingMore,
+        loadMore
     };
 };
 

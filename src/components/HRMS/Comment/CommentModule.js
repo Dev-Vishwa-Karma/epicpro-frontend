@@ -50,24 +50,40 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
         setTimeout(() => setShowError(false), 3000);
     };
 
-    const { comments, loading, totalCount, commentsMap } = useComments(moduleType, moduleId, showErrorAlert);
+    const { comments, loading, totalCount, commentsMap, hasMore, isLoadingMore, loadMore } = useComments(moduleType, moduleId, showErrorAlert);
 
     const prevCommentsLengthRef = useRef(0);
     const prevLoadingRef = useRef(loading);
+    const prevIsLoadingMoreRef = useRef(false);
+    const oldScrollHeightRef = useRef(0);
+
+    const handleScroll = (e) => {
+        if (e.target.scrollTop === 0 && hasMore && !isLoadingMore && !activeThreadId) {
+            oldScrollHeightRef.current = e.target.scrollHeight;
+            loadMore();
+        }
+    };
 
     useEffect(() => {
         const justFinishedLoading = prevLoadingRef.current && !loading;
+        const justFinishedLoadingMore = prevIsLoadingMoreRef.current && !isLoadingMore;
         const newCommentAdded = totalCount > prevCommentsLengthRef.current;
 
         if (justFinishedLoading) {
             setTimeout(() => scrollToBottom('auto'), 100);
-        } else if (newCommentAdded) {
+        } else if (justFinishedLoadingMore) {
+            if (chatContainerRef.current) {
+                const newScrollHeight = chatContainerRef.current.scrollHeight;
+                chatContainerRef.current.scrollTop = newScrollHeight - oldScrollHeightRef.current;
+            }
+        } else if (newCommentAdded && !isLoadingMore) {
             setTimeout(() => scrollToBottom('smooth'), 100);
         }
 
         prevCommentsLengthRef.current = totalCount;
         prevLoadingRef.current = loading;
-    }, [totalCount, loading]);
+        prevIsLoadingMoreRef.current = isLoadingMore;
+    }, [totalCount, loading, isLoadingMore]);
 
     useEffect(() => {
         if (activeThreadId && !loading && !commentsMap.has(String(activeThreadId))) {
@@ -242,8 +258,15 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
             <div
                 className="card-body flex-grow-1 overflow-auto position-relative p-3 custom-scrollbar d-flex flex-column"
                 ref={chatContainerRef}
+                onScroll={handleScroll}
             >
                 <div className="position-relative mt-auto" style={{ zIndex: 1 }}>
+                    {isLoadingMore && (
+                        <div className="text-center py-2 text-muted">
+                            <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+                            Loading older messages...
+                        </div>
+                    )}
                     <AlertMessages
                         showSuccess={showSuccess}
                         successMessage={successMessage}
