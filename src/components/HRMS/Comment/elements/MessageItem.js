@@ -6,7 +6,7 @@ import imageNotAvailable from '../../../../assets/images/image-not-available.svg
 const getActiveRepliesCount = (replies) => {
     if (!replies || !Array.isArray(replies)) return 0;
     return replies.reduce((count, reply) => {
-        const currentCount = reply.deleted_at ? 0 : 1;
+        const currentCount = reply ? 1 : 0;
         const childrenCount = getActiveRepliesCount(reply.replies);
         return count + currentCount + childrenCount;
     }, 0);
