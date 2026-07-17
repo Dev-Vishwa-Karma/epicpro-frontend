@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React from "react";
 import { Link } from "react-router-dom";
 import styles from './../client.module.css';
@@ -25,7 +26,7 @@ const ClientInfoModal = ({ client, onClose }) => {
                     {client.client_profile ? (
                       <img
                         className={`rounded-circle img-thumbnail ${styles['client-profile']}`}
-                        src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                        src={getFileUrl(client.client_profile)}
                         alt="Client Profile"/>
                     ) : (
                       <img

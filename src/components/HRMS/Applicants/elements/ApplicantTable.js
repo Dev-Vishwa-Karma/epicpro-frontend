@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React, { Component } from 'react';
 import NoDataRow from '../../../common/NoDataRow';
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
@@ -304,7 +305,7 @@ class ApplicantTable extends Component {
                               </a>
                               {applicant.resume_path && (
                                 <a
-                                  href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
+                                  href={getFileUrl(applicant.resume_path)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="dropdown-item"

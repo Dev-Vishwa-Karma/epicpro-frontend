@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Fullcalender from '../../../common/fullcalender';
@@ -340,7 +341,7 @@ class CalendarWithTabs extends Component {
 
                     this.setState(prevState => ({
                         employee: { ...prevState.employee, ...employeeData }, // Merge new data excluding password
-                        previewImage: employeeData.profile ? `${process.env.REACT_APP_API_URL}/${employeeData.profile}` : prevState.previewImage
+                        previewImage: employeeData.profile ? getFileUrl(employeeData.profile) : prevState.previewImage
                     }));
                     
                     const skillsFrontend = this.parseSkills(this.state.employee.frontend_skills);

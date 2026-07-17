@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../utils';
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import AlertMessages from "../../common/AlertMessages";
@@ -108,7 +109,7 @@ class Clients extends Component {
       clientFieldFormData: {
         name: client.client_name || '',
         profilePic: client.client_profile
-          ? `${process.env.REACT_APP_API_URL}/${client.client_profile}`
+          ? getFileUrl(client.client_profile)
           : '',
         email: client.client_email || '',
         about: client.client_about || '',

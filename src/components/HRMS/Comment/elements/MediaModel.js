@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React, { useState } from 'react';
 import Button from '../../../common/formInputs/Button';
 import ImagePreview from '../../../common/ImagePreview';
@@ -48,7 +49,7 @@ const MediaModel = ({ show, onClose, media = [] }) => {
                                 <div className="row g-3">
                                     {media.map((attachment, index) => {
                                         const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
-                                        const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
+                                        const fileUrl = getFileUrl(attachment.source);
                                         const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
                                         const fileName = attachment.source ? attachment.source.split('/').pop() : 'Unknown File';
 

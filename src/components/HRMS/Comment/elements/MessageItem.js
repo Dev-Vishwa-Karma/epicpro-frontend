@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React, { useState } from 'react';
 import Avatar from '../../../common/Avatar';
 import ImagePreview from '../../../common/ImagePreview';
@@ -14,7 +15,7 @@ const getActiveRepliesCount = (replies) => {
 
 const AttachmentItem = ({ attachment, index, onImageClick }) => {
     const isImage = attachment.source_type && attachment.source_type.startsWith('image/');
-    const fileUrl = `${process.env.REACT_APP_API_URL}/${attachment.source}`;
+    const fileUrl = getFileUrl(attachment.source);
     const downloadUrl = `${process.env.REACT_APP_API_URL}/download.php?file=${attachment.source}`;
     const fileName = attachment.source.split('/').pop();
 

@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React, { Component } from 'react';
 import Button from '../../../common/formInputs/Button';
 import styles from './applicant.module.css';
@@ -667,7 +668,7 @@ class ApplicantViewModal extends Component {
 
                   {applicant.resume_path ? (
                     <a
-                      href={`${process.env.REACT_APP_API_URL}/${applicant.resume_path}`}
+                      href={getFileUrl(applicant.resume_path)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-primary"

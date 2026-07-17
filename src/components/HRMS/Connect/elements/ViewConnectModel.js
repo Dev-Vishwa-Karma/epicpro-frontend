@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React, { Component } from "react";
 import Avatar from "../../../common/Avatar";
 import TableSkeleton from '../../../common/skeletons/TableSkeleton';
@@ -65,7 +66,7 @@ const ViewConnectModel = ({
 
     const goToFile = (file, index) => {
         const ext = getExt(file);
-        const url = `${process.env.REACT_APP_API_URL}/${file}`;
+        const url = getFileUrl(file);
         if (isImage(ext)) {
             if (filePath === file && showPreview) {
                 setShowPreview(false);
@@ -75,7 +76,7 @@ const ViewConnectModel = ({
                 setShowPreview(true);
             }
         } else {
-            window.open(`${process.env.REACT_APP_API_URL}/${file}`, "_blank");
+            window.open(getFileUrl(file), "_blank");
         }
     }
     const toggleEditStatus = () => {
@@ -113,7 +114,7 @@ const ViewConnectModel = ({
                                                     <>
                                                         <div className="circle">
                                                             <Avatar
-                                                                profile={`${process.env.REACT_APP_API_URL}/${user.profile}`}
+                                                                profile={getFileUrl(user.profile)}
                                                                 first_name={user.first_name}
                                                                 last_name={user.last_name}
                                                                 size={130}
@@ -293,7 +294,7 @@ const ViewConnectModel = ({
                                                                             <td>
                                                                                 {isImg ? (
                                                                                     <img
-                                                                                        src={`${process.env.REACT_APP_API_URL}/${file}`}
+                                                                                        src={getFileUrl(file)}
                                                                                         alt={fileName}
                                                                                         style={{
                                                                                             width: "45px",
@@ -368,7 +369,7 @@ const ViewConnectModel = ({
             {
                 showPreview && (
                     <ImagePreview
-                        imageUrl={`${process.env.REACT_APP_API_URL}/${filePath}`}
+                        imageUrl={getFileUrl(filePath)}
                         downloadUrl={`${process.env.REACT_APP_API_URL}/download.php?file=${filePath}`}
                         onClose={() => setShowPreview(false)}
                     />
