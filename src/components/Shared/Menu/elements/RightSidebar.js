@@ -3,6 +3,7 @@ import { getToday } from '../../../../utils';
 import { getService } from '../../../../services/getService';
 import BlankState from '../../../common/BlankState';
 import AlertMessages from '../../../common/AlertMessages';
+import ConfigModal from './ConfigModal';
 
 class RightSidebar extends Component {
 	constructor(props) {
@@ -19,6 +20,8 @@ class RightSidebar extends Component {
 			successMessage: '',
 			showError: false,
 			errorMessage: '',
+			showCloudModal: false,
+			showNewConfigModal: false,
 		};
 	}
 
@@ -133,6 +136,33 @@ class RightSidebar extends Component {
 	};
 
 	handleGlobalPreferenceChange = (preferenceType, value) => {
+		if (preferenceType === 'enable_cloud_storage' && value === true) {
+			getService.getCall('config_setting.php', { action: 'get', provider: 'cloudinary' })
+				.then(data => {
+					if (data.status === 'success' && data.data && data.data.provider === 'cloudinary') {
+						// Configuration exists, just enable
+						this.setState({ enable_cloud_storage: true }, () => {
+							getService.editCall('Settings.php', 'update-global-dashboard-preferences', { enable_cloud_storage: true })
+								.then((res) => {
+									if (res.status === "success") {
+										window.dispatchEvent(new CustomEvent('globalDashboardPrefsChanged', {
+											detail: {
+												show_todo: this.state.global_show_todo,
+												show_project: this.state.global_show_project,
+												enable_cloud_storage: true
+											}
+										}));
+									}
+								});
+						});
+					} else {
+						// No configuration, open modal
+						this.setState({ showCloudModal: true });
+					}
+				});
+			return;
+		}
+
 		this.setState({ [preferenceType]: value }, () => {
 			// Update global preference on server
 			getService.editCall('Settings.php', 'update-global-dashboard-preferences', { [preferenceType.replace('global_', '')]: value })
@@ -171,7 +201,7 @@ class RightSidebar extends Component {
 			handleSidebar,
 			handleGradientColor,
 		} = this.props;
-		const { activities, loading, show_todo, show_project, global_show_todo, global_show_project, enable_cloud_storage } = this.state;
+		const { activities, loading, show_todo, show_project, global_show_todo, global_show_project, enable_cloud_storage, showCloudModal, showNewConfigModal } = this.state;
 
 		return (
 			<>
@@ -229,50 +259,38 @@ class RightSidebar extends Component {
 											<span className="custom-checkbox-description">Show Projects</span>
 										</label>
 									</li>
+									{/* Global Hide  and show Todos and Projects */}
+									{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
+										<>
+											{/* <li>
+												<label className="custom-checkbox">
+													<input
+														type="checkbox"
+														checked={global_show_todo}
+														onChange={(e) => this.handleGlobalPreferenceChange('global_show_todo', e.target.checked)}
+													/>
+													<span className="checkmark"></span>
+													<span className="custom-checkbox-description">Global Show Todos</span>
+												</label>
+											</li>
+											<li>
+												<label className="custom-checkbox">
+													<input
+														type="checkbox"
+														checked={global_show_project}
+														onChange={(e) => this.handleGlobalPreferenceChange('global_show_project', e.target.checked)}
+													/>
+													<span className="checkmark"></span>
+													<span className="custom-checkbox-description">Global Show Projects</span>
+												</label>
+											</li> */}
+										</>
+									)}
 								</div>
 							</div>
 
 							{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
 								<div>
-									<h6 className="font-14 font-weight-bold text-muted">Global Setting</h6>
-									<div className="setting-list list-unstyled mt-1 mb-4 setting_switch">
-										{/* Global Hide  and show Todos and Projects */}
-										<>
-											{/* <li>
-                        <label className="custom-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={global_show_todo}
-                            onChange={(e) => this.handleGlobalPreferenceChange('global_show_todo', e.target.checked)}
-                          />
-                          <span className="checkmark"></span>
-                          <span className="custom-checkbox-description">Show Todos</span>
-                        </label>
-                      </li>
-                      <li>
-                        <label className="custom-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={global_show_project}
-                            onChange={(e) => this.handleGlobalPreferenceChange('global_show_project', e.target.checked)}
-                          />
-                          <span className="checkmark"></span>
-                          <span className="custom-checkbox-description">Show Projects</span>
-                        </label>
-                      </li> */}
-											<li>
-												<label className="custom-checkbox">
-													<input
-														type="checkbox"
-														checked={enable_cloud_storage}
-														onChange={(e) => this.handleGlobalPreferenceChange('enable_cloud_storage', e.target.checked)}
-													/>
-													<span className="checkmark"></span>
-													<span className="custom-checkbox-description" title="Enable this option to store images, videos, PDFs, and other files securely on cloud storage">Enable Cloud Storage</span>
-												</label>
-											</li>
-										</>
-									</div>
 									<div className="mb-4">
 										<h6 className="font-14 font-weight-bold text-muted">Font Style</h6>
 										<div className="custom-controls-stacked font_setting">
@@ -318,6 +336,40 @@ class RightSidebar extends Component {
 											))}
 										</ul>
 									</div>
+									<h6 className="font-14 font-weight-bold mt-3 text-muted">Configuration Setting</h6>
+									<div className="setting-list list-unstyled mt-1 mb-4 setting_switch">
+										{/* Global Hide  and show Todos and Projects */}
+										<>
+											<li className="d-flex align-items-center justify-content-between">
+												<label className="custom-checkbox mb-0">
+													<input
+														type="checkbox"
+														checked={enable_cloud_storage}
+														onChange={(e) => this.handleGlobalPreferenceChange('enable_cloud_storage', e.target.checked)}
+													/>
+													<span className="checkmark"></span>
+													<span className="custom-checkbox-description" title="Enable this option to store images, videos, PDFs, and other files securely on cloud storage">Enable Cloud Storage</span>
+												</label>
+												{enable_cloud_storage && (
+													<button
+														className="btn btn-sm btn-link p-0"
+														onClick={() => this.setState({ showCloudModal: true })}
+														title="Configure Cloud Storage Credentials"
+													>
+														<i className="icon-settings"></i>
+													</button>
+												)}
+											</li>
+										</>
+									</div>
+									{/* <div className="mb-4">
+										<button
+											className="btn btn-sm btn-outline-primary w-100"
+											onClick={() => this.setState({ showNewConfigModal: true })}
+										>
+											<i className="icon-plus"></i> Add New Configuration
+										</button>
+									</div> */}
 								</div>
 							)}
 						</div>
@@ -358,6 +410,70 @@ class RightSidebar extends Component {
 						)}
 					</div>
 				</div>
+				<ConfigModal
+					show={showCloudModal}
+					onClose={() => this.setState({ showCloudModal: false })}
+					onSaveSuccess={() => {
+						if (!this.state.enable_cloud_storage) {
+							this.setState({ enable_cloud_storage: true }, () => {
+								getService.editCall('Settings.php', 'update-global-dashboard-preferences', { enable_cloud_storage: true })
+									.then((data) => {
+										if (data.status === "success") {
+											window.dispatchEvent(new CustomEvent('globalDashboardPrefsChanged', {
+												detail: {
+													show_todo: this.state.global_show_todo,
+													show_project: this.state.global_show_project,
+													enable_cloud_storage: true
+												}
+											}));
+										}
+									});
+							});
+						}
+					}}
+					onDeleteSuccess={() => {
+						if (this.state.enable_cloud_storage) {
+							this.setState({ enable_cloud_storage: false }, () => {
+								getService.editCall('Settings.php', 'update-global-dashboard-preferences', { enable_cloud_storage: false })
+									.then((data) => {
+										if (data.status === "success") {
+											window.dispatchEvent(new CustomEvent('globalDashboardPrefsChanged', {
+												detail: {
+													show_todo: this.state.global_show_todo,
+													show_project: this.state.global_show_project,
+													enable_cloud_storage: false
+												}
+											}));
+										}
+									});
+							});
+						}
+					}}
+					showSuccess={(msg) => {
+						this.setState({ showSuccess: true, successMessage: msg });
+						setTimeout(() => this.setState({ showSuccess: false }), 3000);
+					}}
+					showError={(msg) => {
+						this.setState({ showError: true, errorMessage: msg });
+						setTimeout(() => this.setState({ showError: false }), 3000);
+					}}
+					title="Cloud Storage Configuration"
+					serviceName="cloudinary"
+				/>
+				<ConfigModal
+					show={showNewConfigModal}
+					onClose={() => this.setState({ showNewConfigModal: false })}
+					showSuccess={(msg) => {
+						this.setState({ showSuccess: true, successMessage: msg });
+						setTimeout(() => this.setState({ showSuccess: false }), 3000);
+					}}
+					showError={(msg) => {
+						this.setState({ showError: true, errorMessage: msg });
+						setTimeout(() => this.setState({ showError: false }), 3000);
+					}}
+					title="Add New Configuration"
+					serviceName=""
+				/>
 			</>
 		);
 	}
