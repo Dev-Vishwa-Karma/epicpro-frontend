@@ -17,12 +17,15 @@ const ConfigModal = ({
     const [serviceNameInput, setServiceNameInput] = useState(serviceName);
     // TEMPORARY: Commented out individual key/value field logic in favor of a single JSON text area.
     // const [fields, setFields] = useState([{ key: '', value: '' }]);
-    const [jsonConfig, setJsonConfig] = useState('{\n\n}');
+    const [apiKey, setApiKey] = useState('');
+    const [apiSecret, setApiSecret] = useState('');
+    const [cloudName, setCloudName] = useState('');
     const [isExisting, setIsExisting] = useState(false);
     const [loading, setLoading] = useState(false);
     const [localError, setLocalError] = useState('');
     const [localSuccess, setLocalSuccess] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (show) {
@@ -30,6 +33,7 @@ const ConfigModal = ({
             setIsExisting(false);
             setLocalError('');
             setLocalSuccess('');
+            setErrors({});
             fetchConfig();
         }
     }, [show, serviceName]);
@@ -72,16 +76,22 @@ const ConfigModal = ({
                             setFields([{ key: '', value: '' }]);
                         }
                         */
-                        setJsonConfig(JSON.stringify(serviceDetails, null, 2) || '{\n\n}');
+                        setApiKey(serviceDetails.api_key || '');
+                        setApiSecret(serviceDetails.api_secret || '');
+                        setCloudName(serviceDetails.cloud_name || '');
                     } else {
                         setIsExisting(false);
                         // setFields([{ key: '', value: '' }]);
-                        setJsonConfig('{\n\n}');
+                        setApiKey('');
+                        setApiSecret('');
+                        setCloudName('');
                     }
                 } else {
                     setIsExisting(false);
                     // setFields([{ key: '', value: '' }]);
-                    setJsonConfig('{\n\n}');
+                    setApiKey('');
+                    setApiSecret('');
+                    setCloudName('');
                 }
             })
             .catch(err => {
@@ -89,7 +99,9 @@ const ConfigModal = ({
                 console.error('Failed to fetch config:', err);
                 setIsExisting(false);
                 // setFields([{ key: '', value: '' }]);
-                setJsonConfig('{\n\n}');
+                setApiKey('');
+                setApiSecret('');
+                setCloudName('');
             });
     };
 
@@ -115,8 +127,14 @@ const ConfigModal = ({
     */
 
     const handleSave = async () => {
-        if (!serviceNameInput) {
-            showLocalError('Service Name (Cloud Name) is required');
+        let formErrors = {};
+        if (!serviceNameInput) formErrors.serviceNameInput = 'Service Name (Cloud Name) is required';
+        if (!apiKey) formErrors.apiKey = 'API Key is required';
+        if (!apiSecret) formErrors.apiSecret = 'API Secret is required';
+        if (!cloudName) formErrors.cloudName = 'Cloud Name is required';
+
+        if (Object.keys(formErrors).length > 0) {
+            setErrors(formErrors);
             return;
         }
 
@@ -128,18 +146,16 @@ const ConfigModal = ({
         }
         */
 
+        setErrors({});
         setLocalError('');
         setLoading(true);
 
         try {
-            let service_details = {};
-            try {
-                service_details = JSON.parse(jsonConfig);
-            } catch (e) {
-                setLoading(false);
-                showLocalError('Invalid JSON format in Service Details');
-                return;
-            }
+            let service_details = {
+                api_key: apiKey,
+                api_secret: apiSecret,
+                cloud_name: cloudName
+            };
             /*
             for (const field of validFields) {
                 service_details[field.key.trim()] = field.value.trim();
@@ -234,9 +250,13 @@ const ConfigModal = ({
                                         name="serviceNameInput"
                                         type="text"
                                         value={serviceNameInput}
-                                        onChange={e => setServiceNameInput(e.target.value)}
+                                        onChange={e => {
+                                            setServiceNameInput(e.target.value);
+                                            if (errors.serviceNameInput) setErrors(prev => ({ ...prev, serviceNameInput: '' }));
+                                        }}
                                         placeholder="Enter Service Name"
                                         disabled={loading || (serviceName !== '')}
+                                        error={errors.serviceNameInput}
                                     />
                                 </div>
                             </div>
@@ -296,14 +316,51 @@ const ConfigModal = ({
                             <div className="row clearfix mb-1">
                                 <div className="col-md-12">
                                     <InputField
-                                        type="textarea"
-                                        name="serviceDetails"
-                                        value={jsonConfig}
-                                        onChange={e => setJsonConfig(e.target.value)}
-                                        placeholder="{\n}"
+                                        label="API Key"
+                                        name="apiKey"
+                                        type="text"
+                                        value={apiKey}
+                                        onChange={e => {
+                                            setApiKey(e.target.value);
+                                            if (errors.apiKey) setErrors(prev => ({ ...prev, apiKey: '' }));
+                                        }}
+                                        placeholder="Enter API Key"
                                         disabled={loading}
-                                        rows={8}
-                                        style={{ fontFamily: 'monospace' }}
+                                        error={errors.apiKey}
+                                    />
+                                </div>
+                            </div>
+                            <div className="row clearfix mb-1">
+                                <div className="col-md-12">
+                                    <InputField
+                                        label="API Secret"
+                                        name="apiSecret"
+                                        type="text"
+                                        value={apiSecret}
+                                        onChange={e => {
+                                            setApiSecret(e.target.value);
+                                            if (errors.apiSecret) setErrors(prev => ({ ...prev, apiSecret: '' }));
+                                        }}
+                                        placeholder="Enter API Secret"
+                                        disabled={loading}
+                                        error={errors.apiSecret}
+                                    />
+                                </div>
+                            </div>
+                            <div className="row clearfix mb-1">
+                                <div className="col-md-12">
+                                    <InputField
+                                        label="Cloud Name"
+                                        name="cloudName"
+                                        type="text"
+                                        value={cloudName}
+                                        onChange={e => {
+                                            setCloudName(e.target.value);
+                                            if (errors.cloudName) setErrors(prev => ({ ...prev, cloudName: '' }));
+                                        }}
+                                        placeholder="Enter Cloud Name"
+                                        disabled={loading}
+                                        error={errors.cloudName}
                                     />
                                 </div>
                             </div>
