@@ -137,9 +137,9 @@ class RightSidebar extends Component {
 
 	handleGlobalPreferenceChange = (preferenceType, value) => {
 		if (preferenceType === 'enable_cloud_storage' && value === true) {
-			getService.getCall('config_setting.php', { action: 'get', provider: 'cloudinary' })
+			getService.getCall('config_setting.php', { action: 'get', service: 'cloudinary' })
 				.then(data => {
-					if (data.status === 'success' && data.data && data.data.provider === 'cloudinary') {
+					if (data.status === 'success' && data.data && data.data.service === 'cloudinary') {
 						// Configuration exists, just enable
 						this.setState({ enable_cloud_storage: true }, () => {
 							getService.editCall('Settings.php', 'update-global-dashboard-preferences', { enable_cloud_storage: true })
