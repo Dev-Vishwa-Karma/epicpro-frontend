@@ -291,21 +291,23 @@ class RightSidebar extends Component {
 
 							{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
 								<div>
-									<div className="mb-4">
-										<h6 className="font-14 font-weight-bold text-muted">Font Style</h6>
-										<div className="custom-controls-stacked font_setting">
-											{['font-opensans', 'font-montserrat', 'font-roboto'].map(font => (
-												<label className="custom-control custom-radio custom-control-inline" key={font}>
-													<input
-														type="radio"
-														className="custom-control-input"
-														name="font"
-														defaultValue={font}
-														onChange={() => handleFont(font)}
-													/>
-													<span className="custom-control-label">{font.replace('font-', '').replace('-', ' ').toUpperCase()}</span>
-												</label>
-											))}
+									<div>
+										<div className="mb-4">
+											<h6 className="font-14 font-weight-bold text-muted">Font Style</h6>
+											<div className="custom-controls-stacked font_setting">
+												{['font-opensans', 'font-montserrat', 'font-roboto'].map(font => (
+													<label className="custom-control custom-radio custom-control-inline" key={font}>
+														<input
+															type="radio"
+															className="custom-control-input"
+															name="font"
+															defaultValue={font}
+															onChange={() => handleFont(font)}
+														/>
+														<span className="custom-control-label">{font.replace('font-', '').replace('-', ' ').toUpperCase()}</span>
+													</label>
+												))}
+											</div>
 										</div>
 									</div>
 
@@ -336,33 +338,34 @@ class RightSidebar extends Component {
 											))}
 										</ul>
 									</div>
-									<h6 className="font-14 font-weight-bold mt-3 text-muted">Configuration Setting</h6>
-									<div className="setting-list list-unstyled mt-1 mb-4 setting_switch">
-										{/* Global Hide  and show Todos and Projects */}
-										<>
-											<li className="d-flex align-items-center justify-content-between">
-												<label className="custom-checkbox mb-0">
-													<input
-														type="checkbox"
-														checked={enable_cloud_storage}
-														onChange={(e) => this.handleGlobalPreferenceChange('enable_cloud_storage', e.target.checked)}
-													/>
-													<span className="checkmark"></span>
-													<span className="custom-checkbox-description" title="Enable this option to store images, videos, PDFs, and other files securely on cloud storage">Enable Cloud Storage</span>
-												</label>
-												{enable_cloud_storage && (
-													<button
-														className="btn btn-sm btn-link p-0"
-														onClick={() => this.setState({ showCloudModal: true })}
-														title="Configure Cloud Storage Credentials"
-													>
-														<i className="icon-settings"></i>
-													</button>
-												)}
-											</li>
-										</>
-									</div>
-									{/* <div className="mb-4">
+									<div>
+										<h6 className="font-14 font-weight-bold mt-4 text-muted">Configuration Setting</h6>
+										<div className="setting-list list-unstyled mt-1 mb-4 setting_switch">
+											{/* Global Hide  and show Todos and Projects */}
+											<>
+												<li className="d-flex align-items-center justify-content-between">
+													<label className="custom-checkbox mb-0">
+														<input
+															type="checkbox"
+															checked={enable_cloud_storage}
+															onChange={(e) => this.handleGlobalPreferenceChange('enable_cloud_storage', e.target.checked)}
+														/>
+														<span className="checkmark"></span>
+														<span className="custom-checkbox-description" title="Enable this option to store images, videos, PDFs, and other files securely on cloud storage">Enable Cloud Storage</span>
+													</label>
+													{enable_cloud_storage && (
+														<button
+															className="btn btn-sm btn-link p-0"
+															onClick={() => this.setState({ showCloudModal: true })}
+															title="Configure Cloud Storage Credentials"
+														>
+															<i className="icon-settings"></i>
+														</button>
+													)}
+												</li>
+											</>
+										</div>
+										{/* <div className="mb-4">
 										<button
 											className="btn btn-sm btn-outline-primary w-100"
 											onClick={() => this.setState({ showNewConfigModal: true })}
@@ -370,6 +373,7 @@ class RightSidebar extends Component {
 											<i className="icon-plus"></i> Add New Configuration
 										</button>
 									</div> */}
+									</div>
 								</div>
 							)}
 						</div>
