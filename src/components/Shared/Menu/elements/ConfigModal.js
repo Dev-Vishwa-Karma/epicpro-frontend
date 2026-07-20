@@ -21,6 +21,7 @@ const ConfigModal = ({
     const [isExisting, setIsExisting] = useState(false);
     const [loading, setLoading] = useState(false);
     const [localError, setLocalError] = useState('');
+    const [localSuccess, setLocalSuccess] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
@@ -28,6 +29,7 @@ const ConfigModal = ({
             setServiceNameInput(serviceName);
             setIsExisting(false);
             setLocalError('');
+            setLocalSuccess('');
             fetchConfig();
         }
     }, [show, serviceName]);
@@ -35,6 +37,11 @@ const ConfigModal = ({
     const showLocalError = (msg) => {
         setLocalError(msg);
         setTimeout(() => setLocalError(''), 3000);
+    };
+
+    const showLocalSuccess = (msg) => {
+        setLocalSuccess(msg);
+        setTimeout(() => setLocalSuccess(''), 3000);
     };
 
     const fetchConfig = () => {
@@ -155,10 +162,11 @@ const ConfigModal = ({
 
             setLoading(false);
             showSuccess('Configuration saved successfully');
+            showLocalSuccess('Configuration saved successfully');
             if (onSaveSuccess) {
                 onSaveSuccess();
             }
-            onClose();
+            // onClose();
         } catch (err) {
             console.error('Error saving config:', err);
             setLoading(false);
@@ -217,6 +225,7 @@ const ConfigModal = ({
                         </div>
                         <div className="modal-body">
                             {localError && <div className="alert alert-danger mb-3 p-2">{localError}</div>}
+                            {localSuccess && <div className="alert alert-success mb-3 p-2">{localSuccess}</div>}
                             {loading && <div className="text-center mb-3">Loading...</div>}
                             <div className="row clearfix">
                                 <div className="col-md-12">
