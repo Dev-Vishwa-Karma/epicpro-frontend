@@ -15,7 +15,9 @@ const ConfigModal = ({
     serviceName = ''
 }) => {
     const [serviceNameInput, setServiceNameInput] = useState(serviceName);
-    const [fields, setFields] = useState([{ key: '', value: '' }]);
+    // TEMPORARY: Commented out individual key/value field logic in favor of a single JSON text area.
+    // const [fields, setFields] = useState([{ key: '', value: '' }]);
+    const [jsonConfig, setJsonConfig] = useState('{\n\n}');
     const [isExisting, setIsExisting] = useState(false);
     const [loading, setLoading] = useState(false);
     const [localError, setLocalError] = useState('');
@@ -55,29 +57,37 @@ const ConfigModal = ({
                     if (currentProvider) {
                         setServiceNameInput(currentProvider);
                         setIsExisting(true);
+                        /*
                         const fieldsArr = Object.entries(providerDetails).map(([k, v]) => ({ key: k, value: v }));
                         if (fieldsArr.length > 0) {
                             setFields(fieldsArr);
                         } else {
                             setFields([{ key: '', value: '' }]);
                         }
+                        */
+                        setJsonConfig(JSON.stringify(providerDetails, null, 2) || '{\n\n}');
                     } else {
                         setIsExisting(false);
-                        setFields([{ key: '', value: '' }]);
+                        // setFields([{ key: '', value: '' }]);
+                        setJsonConfig('{\n\n}');
                     }
                 } else {
                     setIsExisting(false);
-                    setFields([{ key: '', value: '' }]);
+                    // setFields([{ key: '', value: '' }]);
+                    setJsonConfig('{\n\n}');
                 }
             })
             .catch(err => {
                 setLoading(false);
                 console.error('Failed to fetch config:', err);
                 setIsExisting(false);
-                setFields([{ key: '', value: '' }]);
+                // setFields([{ key: '', value: '' }]);
+                setJsonConfig('{\n\n}');
             });
     };
 
+    /*
+    // TEMPORARY: Commented out individual key/value field logic in favor of a single JSON text area.
     const handleFieldChange = (index, fieldName, val) => {
         const newFields = [...fields];
         newFields[index][fieldName] = val;
@@ -95,6 +105,7 @@ const ConfigModal = ({
         }
         setFields(newFields);
     };
+    */
 
     const handleSave = async () => {
         if (!serviceNameInput) {
@@ -102,20 +113,31 @@ const ConfigModal = ({
             return;
         }
 
+        /*
         const validFields = fields.filter(f => f.key.trim() !== '' && f.value.trim() !== '');
         if (validFields.length === 0) {
             showLocalError('Please add at least one valid key-value pair');
             return;
         }
+        */
 
         setLocalError('');
         setLoading(true);
 
         try {
-            const provider_details = {};
+            let provider_details = {};
+            try {
+                provider_details = JSON.parse(jsonConfig);
+            } catch (e) {
+                setLoading(false);
+                showLocalError('Invalid JSON format in Provider Details');
+                return;
+            }
+            /*
             for (const field of validFields) {
                 provider_details[field.key.trim()] = field.value.trim();
             }
+            */
 
             const payload = {
                 provider: serviceNameInput,
@@ -199,7 +221,7 @@ const ConfigModal = ({
                             <div className="row clearfix">
                                 <div className="col-md-12">
                                     <InputField
-                                        label="Service"
+                                        label="Provider Name"
                                         name="serviceNameInput"
                                         type="text"
                                         value={serviceNameInput}
@@ -210,7 +232,8 @@ const ConfigModal = ({
                                 </div>
                             </div>
 
-                            <label className="form-label font-weight-bold mt-2">Configuration Fields</label>
+                            <label className="form-label font-weight-bold mt-2">Provider Details</label>
+                            {/* TEMPORARY: Commented out individual key/value field logic in favor of a single JSON text area.
                             <div style={{ maxHeight: '280px', overflowY: 'auto', overflowX: 'hidden', paddingRight: '5px' }}>
                                 {fields.map((field, index) => (
                                     <div key={index} className="row clearfix mb-1">
@@ -258,6 +281,21 @@ const ConfigModal = ({
                                     >
                                         <i className="icon-plus"></i> Add Field
                                     </button>
+                                </div>
+                            </div>
+                            */}
+                            <div className="row clearfix mb-1">
+                                <div className="col-md-12">
+                                    <InputField
+                                        type="textarea"
+                                        name="providerDetails"
+                                        value={jsonConfig}
+                                        onChange={e => setJsonConfig(e.target.value)}
+                                        placeholder="{\n}"
+                                        disabled={loading}
+                                        rows={8}
+                                        style={{ fontFamily: 'monospace' }}
+                                    />
                                 </div>
                             </div>
                         </div>

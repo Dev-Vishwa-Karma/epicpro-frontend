@@ -348,20 +348,11 @@ class RightSidebar extends Component {
 														<input
 															type="checkbox"
 															checked={enable_cloud_storage}
-															onChange={(e) => this.handleGlobalPreferenceChange('enable_cloud_storage', e.target.checked)}
+															onChange={(e) => { this.handleGlobalPreferenceChange('enable_cloud_storage', e.target.checked); this.setState({ showCloudModal: e.target.checked ?? true }); }}
 														/>
 														<span className="checkmark"></span>
-														<span className="custom-checkbox-description" title="Enable this option to store images, videos, PDFs, and other files securely on cloud storage">Enable Cloud Storage</span>
+														<span onClick={(e) => { e.preventDefault(); this.setState({ showCloudModal: true }); }} className="custom-checkbox-description cursor-pointer" title="Enable this option to store images, videos, PDFs, and other files securely on cloud storage">Enable Cloud Storage</span>
 													</label>
-													{enable_cloud_storage && (
-														<button
-															className="btn btn-sm btn-link p-0"
-															onClick={() => this.setState({ showCloudModal: true })}
-															title="Configure Cloud Storage Credentials"
-														>
-															<i className="icon-settings"></i>
-														</button>
-													)}
 												</li>
 											</>
 										</div>
