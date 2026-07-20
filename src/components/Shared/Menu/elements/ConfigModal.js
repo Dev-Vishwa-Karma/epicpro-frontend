@@ -243,25 +243,34 @@ const ConfigModal = ({
                             {localError && <div className="alert alert-danger mb-3 p-2">{localError}</div>}
                             {localSuccess && <div className="alert alert-success mb-3 p-2">{localSuccess}</div>}
                             {loading && <div className="text-center mb-3">Loading...</div>}
-                            <div className="row clearfix">
+                            <div className="row clearfix mb-1">
                                 <div className="col-md-12">
-                                    <InputField
-                                        label="Service Name"
-                                        name="serviceNameInput"
-                                        type="text"
-                                        value={serviceNameInput}
-                                        onChange={e => {
-                                            setServiceNameInput(e.target.value);
-                                            if (errors.serviceNameInput) setErrors(prev => ({ ...prev, serviceNameInput: '' }));
-                                        }}
-                                        placeholder="Enter Service Name"
-                                        disabled={loading || (serviceName !== '')}
-                                        error={errors.serviceNameInput}
-                                    />
+                                    {(serviceName !== '' || isExisting) ? (
+                                        <div className="form-group d-flex align-items-center mb-2">
+                                            <label className="form-label mb-0 mr-2">Service Name:</label>
+                                            <div className="font-weight-bold text-primary" style={{ fontSize: '15px' }}>
+                                                {serviceNameInput.charAt(0).toUpperCase() + serviceNameInput.slice(1)}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <InputField
+                                            label="Service Name"
+                                            name="serviceNameInput"
+                                            type="text"
+                                            value={serviceNameInput}
+                                            onChange={e => {
+                                                setServiceNameInput(e.target.value);
+                                                if (errors.serviceNameInput) setErrors(prev => ({ ...prev, serviceNameInput: '' }));
+                                            }}
+                                            placeholder="Enter Service Name"
+                                            disabled={loading}
+                                            error={errors.serviceNameInput}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
-                            <label className="form-label font-weight-bold mt-2">Service Details</label>
+                            {/* <label className="form-label font-weight-bold mt-2">Service Details</label> */}
                             {/* TEMPORARY: Commented out individual key/value field logic in favor of a single JSON text area.
                             <div style={{ maxHeight: '280px', overflowY: 'auto', overflowX: 'hidden', paddingRight: '5px' }}>
                                 {fields.map((field, index) => (
