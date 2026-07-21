@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React, { useRef, useState, useEffect } from 'react';
 import { checkIsCurrentUser } from './commentTreeHelpers';
 import TextEditor from '../../../common/TextEditor';
@@ -235,7 +236,7 @@ const CommentInput = ({
                                         const isImage = att.source_type && att.source_type.startsWith('image/');
                                         const fileName = att.source.split('/').pop();
                                         return isImage ? (
-                                            <img key={att.id || idx} src={`${process.env.REACT_APP_API_URL}/${att.source}`} alt="preview" style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '4px' }} />
+                                            <img key={att.id || idx} src={getFileUrl(att.source)} alt="preview" style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '4px' }} />
                                         ) : (
                                             <span key={att.id || idx} className="badge bg-light text-dark border text-truncate" style={{ maxWidth: '100px' }}><i className="fa fa-file me-1"></i>{fileName}</span>
                                         );
@@ -282,7 +283,7 @@ const CommentInput = ({
                         {existingAttachments.map((file, idx) => {
                             const isImage = file.source_type && file.source_type.startsWith('image/');
                             const fileName = file.source.split('/').pop();
-                            const fileUrl = `${process.env.REACT_APP_API_URL}/${file.source}`;
+                            const fileUrl = getFileUrl(file.source);
                             return (
                                 <div key={`exist-${file.id || idx}`} className="d-flex align-items-center bg-light p-2 rounded border" style={{ maxWidth: '300px' }}>
                                     {isImage ? (

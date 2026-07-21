@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../utils';
 import React from 'react';
 
 const Avatar = ({ 
@@ -38,7 +39,7 @@ const Avatar = ({
   // Check if profile image is provided, else use initials
   const renderAvatar = profile ? (
     <img
-      src={`${process.env.REACT_APP_API_URL}/${profile}`}
+      src={getFileUrl(profile)}
       alt={alt || `${first_name} ${last_name}`}
       title={alt || `${first_name} ${last_name}`}                                                                                 
       style={avatarStyle}

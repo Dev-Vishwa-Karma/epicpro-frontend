@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../../utils';
 import React from "react";
 import { Link } from "react-router-dom";
 import Button from "../../../common/formInputs/Button";
@@ -20,7 +21,7 @@ const ClientCard = ({
             {client.client_profile ? (
               <img
                 className="rounded-circle img-thumbnail"
-                src={`${process.env.REACT_APP_API_URL}/${client.client_profile}`}
+                src={getFileUrl(client.client_profile)}
                 alt="Client Profile"
                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
               />

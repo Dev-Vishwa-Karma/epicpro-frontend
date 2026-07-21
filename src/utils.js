@@ -12,6 +12,19 @@ export function appendDataToFormData(formData, dataObject) {
   }
 }
 
+/**
+ * Utility function to resolve file URLs.
+ * Handles both local backend paths and remote Cloudinary URLs seamlessly.
+ */
+export function getFileUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  return `${process.env.REACT_APP_API_URL}/${cleanPath}`;
+}
+
 export function getColor(skill) {
   const colors = {
     HTML: "pink",

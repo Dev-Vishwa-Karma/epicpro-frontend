@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../utils';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -36,7 +37,9 @@ class ViewEmployee extends Component {
             hasMore: true,
             sortOrder: 'asc', // or 'desc'
             loading: true,
-            message: ''
+            message: '',
+            isUploading: false,
+            isUpdatingProfile: false
         };
         this.cropperRef = React.createRef();
     }
@@ -62,10 +65,16 @@ class ViewEmployee extends Component {
         this.setState({
             selectedImage: null,
             errorMessage: "",
-            showError: false
+            showError: false,
+            isUploading: true
         });
         
         const file = event.target.files[0];
+
+        if (!file) {
+            this.setState({ isUploading: false });
+            return;
+        }
         
         // Validate file type
         if (file) {
@@ -76,7 +85,8 @@ class ViewEmployee extends Component {
                 this.setState({
                     errorMessage: "Please select only PNG, JPG, or JPEG image files.",
                     showError: true,
-                    showSuccess: false
+                    showSuccess: false,
+                    isUploading: false
                 });
                 setTimeout(this.dismissMessages, 3000);
                 // Clear the file input
@@ -90,7 +100,8 @@ class ViewEmployee extends Component {
                 this.setState({
                     errorMessage: "File size should be less than 5MB.",
                     showError: true,
-                    showSuccess: false
+                    showSuccess: false,
+                    isUploading: false
                 });
                 setTimeout(this.dismissMessages, 3000);
                 event.target.value = '';
@@ -119,7 +130,7 @@ class ViewEmployee extends Component {
 
             if (data.status === "success") {
                 const profileImagePath = data.data[0].url.replace(/\\/g, '/');
-                const imageUrl = process.env.REACT_APP_API_URL + '/' + profileImagePath;
+                const imageUrl = getFileUrl(profileImagePath);
                 const dataUrl = await this.toDataURL(imageUrl);
                 const updatedImages = [...this.state.images, ...data.data];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
@@ -131,6 +142,15 @@ class ViewEmployee extends Component {
                     showSuccess: true,
                     errorMessage: "",
                     showError: false,
+                    isUploading: false
+                });
+                setTimeout(this.dismissMessages, 3000);
+            } else {
+                this.setState({
+                    errorMessage: data.message || "An error occurred while uploading the image.",
+                    showError: true,
+                    showSuccess: false,
+                    isUploading: false
                 });
                 setTimeout(this.dismissMessages, 3000);
             }
@@ -139,7 +159,8 @@ class ViewEmployee extends Component {
             this.setState({
                 errorMessage: "An error occurred while uploading the image.",
                 showError: true,
-                showSuccess: false
+                showSuccess: false,
+                isUploading: false
             });
             setTimeout(this.dismissMessages, 3000);
         }
@@ -180,6 +201,7 @@ class ViewEmployee extends Component {
     };
 
     handleSave = async () => {
+        this.setState({ isUpdatingProfile: true });
         const blob = this.state.finalCroppedBlob;
         const croppedImage = this.blobToFile(blob, 'profile.jpg');
         try {
@@ -193,7 +215,7 @@ class ViewEmployee extends Component {
                 const updatedImages = [...this.state.images];
                 const sortedImages = this.sortImages(updatedImages, 'desc');
                 this.setState({
-                    previewImage: `${process.env.REACT_APP_API_URL}/${profileImagePath}`,
+                    previewImage: getFileUrl(profileImagePath),
                     images: sortedImages,
                     successMessage: "Image uploaded successfully!",
                     showSuccess: true,
@@ -201,7 +223,8 @@ class ViewEmployee extends Component {
                     showError: false,
                     openFileSelectModel: false,
                     showGallery: true,
-                    showCropPreview: false
+                    showCropPreview: false,
+                    isUpdatingProfile: false
                 });
                 setTimeout(this.dismissMessages, 3000);
             } else {
@@ -209,6 +232,7 @@ class ViewEmployee extends Component {
                     errorMessage: "An error occurred while uploading the image. Check your image size",
                     showError: true,
                     showSuccess: false,
+                    isUpdatingProfile: false
             });
             }
             document.body.style.overflow = 'auto';
@@ -218,6 +242,7 @@ class ViewEmployee extends Component {
                 errorMessage: "An error occurred while uploading the image.",
                 showError: true,
                 showSuccess: false,
+                isUpdatingProfile: false
             });
         }
     };
@@ -312,7 +337,7 @@ class ViewEmployee extends Component {
                 if (data.status === "success") {
                     this.setState(prevState => ({
                         employeeNew: { ...prevState.employeeNew, ...data.data }, // Merge new data
-                        previewImage: data.data.profile ? `${process.env.REACT_APP_API_URL}/${data.data.profile}` : prevState.previewImage
+                        previewImage: data.data.profile ? getFileUrl(data.data.profile) : prevState.previewImage
                     }));
 
                 } else {
@@ -433,7 +458,8 @@ class ViewEmployee extends Component {
                                         {!showGallery ? "Crop" : "Select"} Your Profile Picture
                                     </h5>
                                     <div 
-                                        className="btn btn-close" 
+                                        className={`btn btn-close ${(this.state.isUploading || this.state.isUpdatingProfile) ? 'disabled' : ''}`}
+                                        style={{ pointerEvents: (this.state.isUploading || this.state.isUpdatingProfile) ? 'none' : 'auto', opacity: (this.state.isUploading || this.state.isUpdatingProfile) ? 0.5 : 1 }}
                                         onClick={() => {
                                             this.setState({ openFileSelectModel: false, showGallery: true, selectedImage: null, showCropPreview: false });
                                             document.body.style.overflow = 'auto';
@@ -542,13 +568,18 @@ class ViewEmployee extends Component {
                                                                 cursor: 'pointer'
                                                             }}
                                                         >
-                                                            <i className="fe fe-plus fs-4" />
+                                                            {this.state.isUploading ? (
+                                                                <div className="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                                                            ) : (
+                                                                <i className="fe fe-plus fs-4" />
+                                                            )}
                                                         </div>
                                                         <InputField
                                                             type="file"
                                                             onChange={this.handleFileChange}
                                                             accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
                                                             style={{ display: 'none' }} 
+                                                            disabled={this.state.isUploading}
                                                         />
                                                     </div>
                                                 </label>
@@ -560,8 +591,9 @@ class ViewEmployee extends Component {
                                                                 type="radio" 
                                                                 value={image.url} 
                                                                 className="d-none" 
+                                                                disabled={this.state.isUploading || this.state.isUpdatingProfile}
                                                                 onChange={async () => {
-                                                                    const imageUrl = process.env.REACT_APP_API_URL + '/' + image.url;
+                                                                    const imageUrl = getFileUrl(image.url);
                                                                     const dataUrl = await this.toDataURL(imageUrl);
                                                                     this.setState({
                                                                         selectedImage: image.url,
@@ -571,7 +603,7 @@ class ViewEmployee extends Component {
                                                             />
                                                             <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
                                                                 <img 
-                                                                    src={`${process.env.REACT_APP_API_URL}/${image.url}`} 
+                                                                    src={getFileUrl(image.url)} 
                                                                     alt="Profile option" 
                                                                     className="img-fluid rounded-1" 
                                                                     style={{ width: '80px', height: '80px', objectFit: 'cover', cursor: 'pointer' }}
@@ -600,13 +632,14 @@ class ViewEmployee extends Component {
                                         document.body.style.overflow = 'auto';
                                     }}
                                     className="btn-outline-secondary me-3 px-4"
+                                    disabled={this.state.isUploading || this.state.isUpdatingProfile}
                                     />
 
                                     {showGallery && (
                                     <Button
                                         label="Select & Crop"
                                         onClick={this.saveCroppedImage}
-                                        disabled={!this.state.selectedImage}
+                                        disabled={!this.state.selectedImage || this.state.isUploading || this.state.isUpdatingProfile}
                                         className="btn-primary px-4"
                                     />
                                     )}
@@ -616,6 +649,7 @@ class ViewEmployee extends Component {
                                         label="Back"
                                         onClick={this.handleBack}
                                         className="btn-primary px-4"
+                                        disabled={this.state.isUploading || this.state.isUpdatingProfile}
                                     />
                                     )}
 
@@ -624,6 +658,7 @@ class ViewEmployee extends Component {
                                             label="Crop Preview"
                                             onClick={this.handleCropPreview}
                                             className="btn-primary px-4"
+                                            disabled={this.state.isUploading || this.state.isUpdatingProfile}
                                         />
                                     )}
 
@@ -632,6 +667,7 @@ class ViewEmployee extends Component {
                                             label="Back to Crop"
                                             onClick={this.handleBackToCrop}
                                             className="btn-primary px-4"
+                                            disabled={this.state.isUploading || this.state.isUpdatingProfile}
                                         />
                                     )}
 
@@ -640,6 +676,7 @@ class ViewEmployee extends Component {
                                             label="Update Profile"
                                             onClick={this.handleSave}
                                             className="btn-primary px-4"
+                                            loading={this.state.isUpdatingProfile}
                                         />
                                     )}
                                 </div>

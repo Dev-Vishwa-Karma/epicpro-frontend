@@ -1,3 +1,4 @@
+import { getFileUrl } from '../../../utils';
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import AlertMessages from '../../common/AlertMessages';
@@ -610,7 +611,7 @@ class Gallery extends Component {
                                             <div className="card p-3 position-relative gallery-card">
                                                 <div className="gallery-image-wrapper rounded">
                                                     <img
-                                                        src={`${process.env.REACT_APP_API_URL}/${image.url}`}
+                                                        src={getFileUrl(image.url)}
                                                         alt="Gallery"
                                                         className="gallery-inner-img"
                                                         style={{ cursor: 'pointer', width: '320px', height: '260px', objectFit: 'cover', objectPosition: "center top" }}
@@ -660,7 +661,7 @@ class Gallery extends Component {
                 {
                     this.state.showImageModal && (
                         <ImagePreview
-                            imageUrl={`${process.env.REACT_APP_API_URL}/${this.state.selectedImageForModal.url}`}
+                            imageUrl={getFileUrl(this.state.selectedImageForModal.url)}
                             downloadUrl={`${process.env.REACT_APP_API_URL}/download.php?file=${this.state.selectedImageForModal.url}`}
                             onClose={() => this.closeImageModal()}
                         />
