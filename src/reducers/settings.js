@@ -1,5 +1,11 @@
 const initialState = {
-	isDarkMode: false, isDarkHeader: false, isFixNavbar: false, isMinSidebar: false, isDarkSidebar: false, isIconColor: false, isGradientColor: false,
+	isDarkMode: false,
+	isDarkHeader: true,
+	isFixNavbar: true,
+	isMinSidebar: true,
+	isDarkSidebar: true,
+	isIconColor: false,
+	isGradientColor: false,
 	isRtl: false,
 	isFont: "font-montserrat",
 	isSubMenuIcon: "list-a",
@@ -237,7 +243,7 @@ export default (state = initialState, action) => {
 			return {
 				...state,
 				breakDurationCalculation: action.payload
-		   	}
+			}
 
 		default:
 			return state

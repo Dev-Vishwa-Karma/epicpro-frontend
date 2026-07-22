@@ -15,6 +15,7 @@ import {
 	statisticsAction, friendListAction,
 	statisticsCloseAction, friendListCloseAction, toggleLeftMenuAction
 } from '../../../actions/settingsAction';
+import { getService } from '../../../services/getService';
 import Routes from '../../Route';
 import ProtectedRoute from '../../ProtectedRoutes';
 import HeaderTop from './elements/HeaderTop';
@@ -80,7 +81,12 @@ class Menu extends Component {
 		}
 		// Add global click handler for closing sidebar on small screens
 		document.addEventListener('mousedown', this.handleGlobalClick, true);
+		this.fetchGlobalSettings();
 	}
+
+	fetchGlobalSettings = () => {
+		// General settings operate locally via localStorage and Redux without DB persistence
+	};
 
 	componentWillUnmount() {
 		document.removeEventListener('mousedown', this.handleGlobalClick, true);
@@ -301,7 +307,7 @@ class Menu extends Component {
 
 
 		const { isOpenRightSidebar } = this.state
-		const { darkMinSidebar, istoggleLeftMenu} = this.props
+		const { darkMinSidebar, istoggleLeftMenu, isDarkMode, isFixNavbar, isDarkHeader, isDarkSidebar, isIconColor, isGradientColor } = this.props
 
 		const pageHeading = Routes.filter((route) =>  route.path.split('/')[1] === this.props.location.pathname.split('/')[1])
 		
@@ -332,6 +338,13 @@ class Menu extends Component {
 						handleIconColor={this.handleIconColor}
 						handleGradientColor={this.handleGradientColor}
 						handleRtl={this.handleRtl}
+						isDarkMode={isDarkMode}
+						isFixNavbar={isFixNavbar}
+						isDarkHeader={isDarkHeader}
+						isMinSidebar={darkMinSidebar}
+						isDarkSidebar={isDarkSidebar}
+						isGradientColor={isGradientColor}
+						isFont={this.props.isFont}
 					/>
 
 						<div id="left-sidebar" className="sidebar ">
@@ -360,7 +373,7 @@ class Menu extends Component {
 						</div>
 					</div>
 
-					<div className="page">
+					<div className={`page ${isFixNavbar ? "fix-navbar" : ""}`}>
 						<Header dataFromParent={this.props.dataFromParent} dataFromSubParent={pageHeading[0].pageTitle} />
 						<Switch>
 							{Routes.map((layout, i) => {
@@ -403,7 +416,14 @@ const mapStateToProps = state => ({
 	friendListOpen: state.settings.isFriendList,
 	statisticsClose: state.settings.isStatisticsClose,
 	friendListClose: state.settings.isFriendListClose,
-	istoggleLeftMenu: state.settings.isToggleLeftMenu
+	istoggleLeftMenu: state.settings.isToggleLeftMenu,
+	isDarkMode: state.settings.isDarkMode,
+	isFixNavbar: state.settings.isFixNavbar,
+	isDarkHeader: state.settings.isDarkHeader,
+	isDarkSidebar: state.settings.isDarkSidebar,
+	isIconColor: state.settings.isIconColor,
+	isGradientColor: state.settings.isGradientColor,
+	isFont: state.settings.isFont,
 })
 
 const mapDispatchToProps = dispatch => ({
