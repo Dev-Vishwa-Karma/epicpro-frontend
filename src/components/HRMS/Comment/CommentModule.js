@@ -10,7 +10,7 @@ import Button from '../../common/formInputs/Button';
 import MediaModel from './elements/MediaModel';
 import { useMemo } from 'react';
 
-const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, height = '60vh' }) => {
+const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId, height = '60vh', showMedia = true, style, onClose }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [inputText, setInputText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
@@ -226,9 +226,9 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
     }, [comments]);
 
     return (
-        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ height: height, maxHeight: "100%", resize: "vertical", overflow: "hidden" }}>
+        <div className="card shadow-sm border-0 pe-3 d-flex flex-column" style={{ height: height, maxHeight: "100%", overflow: "hidden", borderRadius: '12px' }}>
             {/* Header */}
-            <div className="card-header bg-white border-bottom py-3 d-flex align-items-center" style={{ borderRadius: '12px 12px 0 0' }}>
+            <div className={`card-header border-bottom py-3 d-flex align-items-center ${style?.backgroundColor ? '' : 'bg-white'}`} style={{ borderRadius: '12px 12px 0 0', ...style }}>
                 {activeThreadId && (
                     <button className="btn btn-sm btn-light me-2" onClick={() => {
                         setActiveThreadId(null);
@@ -247,9 +247,16 @@ const CommentModule = ({ title = 'Comments & Discussions', moduleType, moduleId,
                 <div className="d-flex justify-content-between align-items-center flex-grow-1">
                     <h6 className="fw-bold mb-0 ml-2">{activeThreadId ? 'Thread' : title}</h6>
                     <div>
-                        <Button label='Media' className="btn btn-outline-info btn-sm" title="media" onClick={() => {
-                            setShowMediaModal(true);
-                        }} />
+                        {showMedia && (
+                            <Button label='Media' className="btn btn-outline-info btn-sm" title="media" onClick={() => {
+                                setShowMediaModal(true);
+                            }} />
+                        )}
+                        {onClose && !activeThreadId && (
+                            <button className="btn btn-sm btn-light ml-2 ms-2" onClick={onClose}>
+                                <i className="fa fa-times"></i>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

@@ -198,7 +198,7 @@ const CommentInput = ({
             onDrop={handleDrop}
         >
             {isDragging && (
-                <div 
+                <div
                     className="position-absolute w-100 h-100 d-flex justify-content-center align-items-center bg-white"
                     style={{ zIndex: 20, borderRadius: '0 0 12px 12px', top: 0, left: 0, opacity: 0.9, pointerEvents: 'none', border: '2px dashed #0d6efd' }}
                 >
@@ -326,8 +326,8 @@ const CommentInput = ({
                         })}
                     </div>
                 )}
-                <div className="d-flex align-items-center gap-3">
-                    <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="flex-grow-1 position-relative" style={{ minWidth: 0 }}>
                         <TextEditor
                             value={inputText}
                             onChange={(value) => {
@@ -350,18 +350,18 @@ const CommentInput = ({
                         />
                         {(
                             // isTextTooLong && (
-                            <div className={`text-end ${isTextTooLong ? 'text-danger fw-bold' : 'text-muted'}`} style={{ fontSize: '0.75rem' }}>
+                            <div className={`text-end position-absolute w-100 ${isTextTooLong ? 'text-danger fw-bold' : 'text-muted'}`} style={{ fontSize: '0.75rem', bottom: '-22px' }}>
                                 {textByteSize}/4096 bytes
                             </div>
                             // )
                         )}
 
                     </div>
-                    <div className="d-flex align-items-center justify-content-end gap-2 ml-2">
+                    <div className="d-flex flex-column align-items-center justify-content-center gap-2 ml-2">
                         <Button
                             type="button"
-                            className="btn-light d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm rounded"
-                            style={{ width: '40px', height: '40px' }}
+                            className="btn-light d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                            style={{ width: '65px', height: '40px', borderRadius: '10px' }}
                             onClick={(e) => { e.preventDefault(); if (fileInputRef.current) fileInputRef.current.click(); }}
                             title="Attach file"
                             icon="fa fa-solid fa-plus"
@@ -375,7 +375,7 @@ const CommentInput = ({
                         />
                         <Button
                             type="submit"
-                            className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn ml-2"
+                            className="btn-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm send-btn mt-2"
                             style={{ width: '65px', height: '40px', borderRadius: '10px', transition: 'all 0.2s ease-in-out' }}
                             disabled={(!inputText || inputText === '<p><br></p>') && attachments.length === 0 && existingAttachments.length === 0 || isSubmitting || isTextTooLong}
                             loading={isSubmitting}

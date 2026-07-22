@@ -121,7 +121,7 @@ const ImagePreview = ({ imageUrl, downloadUrl, onClose }) => {
             onClick={handleBackgroundClick}
             style={{
                 position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 1)', zIndex: 999999,
+                backgroundColor: 'rgba(25, 22, 22, 0.85)', zIndex: 999999,
                 display: 'flex', flexDirection: 'column',
                 outline: 'none'
             }}

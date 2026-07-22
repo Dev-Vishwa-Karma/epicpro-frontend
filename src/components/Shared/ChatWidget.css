@@ -1,0 +1,162 @@
+.chat-widget-modal {
+    position: fixed;
+    bottom: 0px;
+    right: 15px;
+    width: 350px;
+    height: 600px;
+    max-height: calc(100vh - 20px);
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15), 0 0 2px rgba(0, 0, 0, 0.1);
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+    z-index: 9999;
+    border: 1px solid #ebebeb;
+    border-bottom: none;
+}
+
+.chat-widget-modal.open {
+    transform: translateY(0);
+}
+
+.chat-widget-modal.closed {
+    /* Only header visible when closed */
+    transform: translateY(calc(100% - 70px));
+}
+
+.chat-widget-header {
+    height: 70px;
+    padding: 0 12px;
+    background-color: #434A54;
+    color: #f7f5f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ebebeb;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.chat-widget-header:hover {
+    background-color: #434A54;
+}
+
+.chat-widget-title-container {
+    display: flex;
+    align-items: center;
+}
+
+.chat-widget-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.chat-widget-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+}
+
+.chat-widget-body-container {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+.chat-widget-body {
+    padding: 10px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-widget-search-container {
+    margin-bottom: 10px;
+}
+
+.chat-widget-search-input {
+    border-radius: 20px;
+}
+
+.chat-widget-list {
+    flex: 1;
+}
+
+.chat-widget-list-item {
+    cursor: pointer;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    border: 1px solid #eee;
+}
+
+.chat-widget-list-item-name {
+    margin-left: 10px;
+}
+
+.chat-widget-active-container {
+    position: fixed;
+    bottom: 0px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-end;
+    gap: 15px;
+    z-index: 9998;
+    pointer-events: none;
+    right: 380px;
+    /* Fixed position since main modal doesn't move horizontally anymore */
+}
+
+.chat-widget-active-window {
+    width: 400px;
+    height: 600px;
+    max-height: calc(100vh - 50px);
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15), 0 0 2px rgba(0, 0, 0, 0.1);
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    overflow: hidden;
+    border: 1px solid #ebebeb;
+    border-bottom: none;
+}
+
+.chat-widget-active-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-widget-active-window .card-header {
+    cursor: move;
+    /* Fallback */
+    cursor: grab;
+}
+
+.chat-widget-active-window .card-header:active {
+    cursor: grabbing;
+}
+
+.chat-widget-active-window .card-header button {
+    cursor: pointer;
+}
+
+/* Floating button removed as we use the docked header now */
+
+/* Mobile View Adjustments */
+@media (max-width: 768px) {
+    .chat-widget-modal {
+        max-width: calc(100vw - 30px);
+    }
+}
