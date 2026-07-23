@@ -917,8 +917,8 @@ class Header extends Component {
                       this.state.isPunchedInLocal ? this.handlePunchOut : this.handlePunchIn
                     }
                     disabled={disableButton}
-                    className="btn-primary"
-                    style={{ width: "190px", height: "35px", fontSize: "14px" }}
+                    className="btn-primary header-punch-btn"
+                    style={{ height: "35px", fontSize: "14px" }}
                   />
                 )}
                 <div className="notification d-flex">
@@ -986,20 +986,6 @@ class Header extends Component {
           `}
         </style>
 
-        {["admin", "super_admin", "employee"].includes(window.user.role) && (
-          <style>
-            {`
-            @media (max-width: 576px) {
-              .notification {
-                margin-top: ${["admin", "super_admin"].includes(window.user.role)
-                ? "-25px"
-                : "-45px"
-              } !important;
-              }
-            }
-          `}
-          </style>
-        )}
       </div>
     );
   }

@@ -96,6 +96,15 @@ class Menu extends Component {
 		if (this.props.istoggleLeftMenu && window.innerWidth <= 991) {
 			const sidebar = document.getElementById('left-sidebar');
 			const menuBtn = document.querySelector('.menu_toggle');
+
+			const clickedLink = event.target.closest('a');
+			if (clickedLink && sidebar && sidebar.contains(clickedLink)) {
+				if (!clickedLink.classList.contains('has-arrow') || clickedLink.getAttribute('href') !== '#!') {
+					this.toggleLeftMenu(false);
+					return;
+				}
+			}
+
 			if (
 				sidebar &&
 				!sidebar.contains(event.target) &&
