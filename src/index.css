@@ -365,114 +365,191 @@ code {
     box-shadow: 0 0 0 2px rgba(111, 66, 193, 0.1);
 }
 
-/* For Header Notification Dropdown */
+/* Header Notification & Layout Styles */
 
-@media (max-width: 768px) {
-  .notification {
-    position: absolute !important;
-    right: 0 !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    z-index: 1000 !important;
-    display: flex !important;
+.page-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  padding: 15px 0 !important;
+  gap: 10px !important;
+}
+
+.page-header .left {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.page-header .left .page-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+.page-header .right {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  position: static !important;
+}
+
+@media (max-width: 767px) {
+  #header_top .container,
+  #page_top .container-fluid {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
-  
+
+  #header_top .hright,
+  #header_top .hright .dropdown {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #header_top .settingbar,
+  #header_top .menu_toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 35px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .page-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px 0 !important;
+  }
+
+  .page-header .left {
+    display: flex !important;
+    width: 100% !important;
+  }
+
+  .page-header .left .page-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+  }
+
   .page-header .right {
-    position: relative !important;
-  }
-  
-  .notification .nav-link {
     display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
   }
-  
-  .notification .dropdown {
+
+  .notification {
     display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
   }
-  
-  .notification .d-none.d-md-flex {
-    display: flex !important;
-  }
-  
-  .notification .btn-icon {
-    display: flex !important;
-  }
-  
+
   .notification .nav-link.icon {
     display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 35px !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
-  
-  .notification .fa-bell,
-  .notification .fa-user {
-    display: inline-block !important;
-    visibility: visible !important;
+
+  #left-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: -280px !important;
+    width: 280px !important;
+    height: 100vh !important;
+    padding: 20px 15px !important;
+    transition: left 0.3s ease-in-out, transform 0.3s ease-in-out !important;
+    z-index: 1070 !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .offcanvas-active #left-sidebar {
+    left: 0 !important;
   }
 }
 
-@media screen and (width: 425px) and (height: 473px),
-       screen and (width: 375px) and (height: 473px) {
-  .notification {
-    position: absolute !important;
-    right: 0 !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    z-index: 1000 !important;
-    display: flex !important;
+.header-punch-btn {
+  white-space: nowrap !important;
+  height: 35px !important;
+  font-size: 14px !important;
+  max-width: 100% !important;
+}
+
+/* Modal position below header */
+.modal-dialog {
+  margin-top: 85px !important;
+}
+
+.modal-dialog-scrollable {
+  max-height: calc(100vh - 110px) !important;
+}
+
+.modal-dialog-scrollable .modal-content {
+  max-height: calc(100vh - 110px) !important;
+}
+
+@media (max-width: 767px) {
+  .modal-dialog {
+    margin-top: 110px !important;
   }
-  
-  .page-header .right {
-    position: relative !important;
+  .modal-dialog-scrollable {
+    max-height: calc(100vh - 135px) !important;
   }
-  
-  .notification .nav-link {
-    display: flex !important;
-  }
-  
-  .notification .dropdown {
-    display: flex !important;
-  }
-  
-  .notification .d-none.d-md-flex {
-    display: flex !important;
-  }
-  
-  .notification .btn-icon {
-    display: flex !important;
-  }
-  
-  .notification .nav-link.icon {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .notification .fa-bell,
-  .notification .fa-user {
-    display: inline-block !important;
-    visibility: visible !important;
-  }
-  
-  .notification .dropdown-menu {
-    position: absolute !important;
-    top: 100% !important;
-    right: 0 !important;
-    left: auto !important;
-    transform: none !important;
-    margin-top: 5px !important;
-    z-index: 1050 !important;
-    max-height: 400px !important;
-    min-width: 350px !important;
-    max-width: 400px !important;
-    overflow: hidden !important;
-  }
-  
-  .notification .dropdown-menu-right {
-    right: 0 !important;
-    left: auto !important;
-    transform: none !important;
+  .modal-dialog-scrollable .modal-content {
+    max-height: calc(100vh - 135px) !important;
   }
 }
+
+.notification {
+  position: static !important;
+  transform: none !important;
+  margin-top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+}
+
+.notification .nav-link.icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 35px !important;
+  width: 35px !important;
+  height: 35px !important;
+  padding: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+.notification .fa-bell,
+.notification .fa-user {
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
 
 /* Notification scroll area */
 .notification #notificationScrollArea {

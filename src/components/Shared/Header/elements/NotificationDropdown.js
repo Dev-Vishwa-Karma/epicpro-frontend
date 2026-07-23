@@ -28,7 +28,7 @@ class NotificationDropdown extends Component {
         {/* Notification Icon */}
         <a
           href="/#"
-          className="nav-link icon d-none d-md-flex btn btn-default btn-icon ml-1"
+          className="nav-link icon d-flex btn btn-default btn-icon ml-1"
           data-toggle="dropdown"
         >
           <i className="fa fa-bell" />

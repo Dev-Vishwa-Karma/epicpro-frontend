@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { toggleLeftMenuAction } from '../../actions/settingsAction';
+
 class DefaultLink extends Component {
 	constructor() {
 		super();
@@ -12,11 +14,13 @@ class DefaultLink extends Component {
 		if (this.props.itemProps.hasSubMenu) {
 			this.props.itemProps.toggleSubMenu(e)
 		} else {
-
 			this.props.itemProps.activateMe({
 				newLocation: this.props.to,
 				selectedMenuLabel: this.props.label,
 			});
+			if (window.innerWidth <= 991 && this.props.toggleLeftMenuAction) {
+				this.props.toggleLeftMenuAction(false);
+			}
 		}
 	}
 	render() {
@@ -43,5 +47,7 @@ const mapStateToProps = state => ({
 	menuIcon: state.settings.isMenuIcon
 })
 
-const mapDispatchToProps = dispatch => ({})
+const mapDispatchToProps = dispatch => ({
+	toggleLeftMenuAction: (e) => dispatch(toggleLeftMenuAction(e))
+})
 export default connect(mapStateToProps, mapDispatchToProps)(DefaultLink);

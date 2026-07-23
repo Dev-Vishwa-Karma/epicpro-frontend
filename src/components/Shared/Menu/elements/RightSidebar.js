@@ -200,6 +200,13 @@ class RightSidebar extends Component {
 			handleMinSidebar,
 			handleSidebar,
 			handleGradientColor,
+			isDarkMode,
+			isFixNavbar,
+			isDarkHeader,
+			isMinSidebar,
+			isDarkSidebar,
+			isGradientColor,
+			isFont,
 		} = this.props;
 		const { activities, loading, show_todo, show_project, global_show_todo, global_show_project, enable_cloud_storage, showCloudModal, showNewConfigModal } = this.state;
 
@@ -289,8 +296,8 @@ class RightSidebar extends Component {
 								</div>
 							</div>
 
-							{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
-								<div>
+							<div>
+								{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
 									<div>
 										<div className="mb-4">
 											<h6 className="font-14 font-weight-bold text-muted">Font Style</h6>
@@ -301,7 +308,8 @@ class RightSidebar extends Component {
 															type="radio"
 															className="custom-control-input"
 															name="font"
-															defaultValue={font}
+															value={font}
+															checked={isFont === font}
 															onChange={() => handleFont(font)}
 														/>
 														<span className="custom-control-label">{font.replace('font-', '').replace('-', ' ').toUpperCase()}</span>
@@ -310,34 +318,37 @@ class RightSidebar extends Component {
 											</div>
 										</div>
 									</div>
+								)}
+								<div>
+									<h6 className="font-14 font-weight-bold mt-4 text-muted">General Settings</h6>
+									<ul className="setting-list list-unstyled mt-1 setting_switch">
+										{[
+											{ label: 'Night Mode', onChange: handleDarkMode, checked: isDarkMode },
+											{ label: 'Fix Navbar top', onChange: handleFixNavbar, checked: isFixNavbar },
+											{ label: 'Header Dark', onChange: handleDarkHeader, checked: isDarkHeader },
+											{ label: 'Min Sidebar Dark', onChange: handleMinSidebar, checked: isMinSidebar },
+											{ label: 'Sidebar Dark', onChange: handleSidebar, checked: isDarkSidebar },
+											{ label: 'Gradient Color', onChange: handleGradientColor, checked: isGradientColor },
+											//{ label: 'RTL Support', onChange: handleRtl, checked: isRtl }
+										].map((setting, index) => (
+											<li key={index}>
+												<label className="custom-switch">
+													<span className="custom-switch-description">{setting.label}</span>
+													<input
+														type="checkbox"
+														name="custom-switch-checkbox"
+														className="custom-switch-input"
+														checked={!!setting.checked}
+														onChange={setting.onChange}
+													/>
+													<span className="custom-switch-indicator" />
+												</label>
+											</li>
+										))}
+									</ul>
+								</div>
+								{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
 
-									<div>
-										<h6 className="font-14 font-weight-bold mt-4 text-muted">General Settings</h6>
-										<ul className="setting-list list-unstyled mt-1 setting_switch">
-											{[
-												{ label: 'Night Mode', onChange: handleDarkMode },
-												{ label: 'Fix Navbar top', onChange: handleFixNavbar },
-												{ label: 'Header Dark', onChange: handleDarkHeader },
-												{ label: 'Min Sidebar Dark', onChange: handleMinSidebar },
-												{ label: 'Sidebar Dark', onChange: handleSidebar },
-												{ label: 'Gradient Color', onChange: handleGradientColor },
-												//{ label: 'RTL Support', onChange: handleRtl }
-											].map((setting, index) => (
-												<li key={index}>
-													<label className="custom-switch">
-														<span className="custom-switch-description">{setting.label}</span>
-														<input
-															type="checkbox"
-															name="custom-switch-checkbox"
-															className="custom-switch-input"
-															onChange={setting.onChange}
-														/>
-														<span className="custom-switch-indicator" />
-													</label>
-												</li>
-											))}
-										</ul>
-									</div>
 									<div>
 										<h6 className="font-14 font-weight-bold mt-4 text-muted">Configuration Setting</h6>
 										<div className="setting-list list-unstyled mt-1 mb-4 setting_switch">
@@ -365,8 +376,8 @@ class RightSidebar extends Component {
 										</button>
 									</div> */}
 									</div>
-								</div>
-							)}
+								)}
+							</div>
 						</div>
 						{(window.user.role === 'employee') && (
 							<div role="tabpanel" className="tab-pane vivify fadeIn" id="activity" aria-expanded="false">
