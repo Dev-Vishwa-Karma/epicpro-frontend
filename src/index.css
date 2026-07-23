@@ -397,6 +397,35 @@ code {
 }
 
 @media (max-width: 767px) {
+  #header_top .container,
+  #page_top .container-fluid {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  #header_top .hright,
+  #header_top .hright .dropdown {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #header_top .settingbar,
+  #header_top .menu_toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 35px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .page-header {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -419,6 +448,27 @@ code {
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
+  }
+
+  .notification {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+  }
+
+  .notification .nav-link.icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 35px !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   #left-sidebar {
@@ -450,9 +500,23 @@ code {
   margin-top: 85px !important;
 }
 
+.modal-dialog-scrollable {
+  max-height: calc(100vh - 110px) !important;
+}
+
+.modal-dialog-scrollable .modal-content {
+  max-height: calc(100vh - 110px) !important;
+}
+
 @media (max-width: 767px) {
   .modal-dialog {
     margin-top: 110px !important;
+  }
+  .modal-dialog-scrollable {
+    max-height: calc(100vh - 135px) !important;
+  }
+  .modal-dialog-scrollable .modal-content {
+    max-height: calc(100vh - 135px) !important;
   }
 }
 
@@ -464,6 +528,7 @@ code {
   align-items: center !important;
   gap: 4px !important;
   flex-shrink: 0 !important;
+  margin-left: auto !important;
 }
 
 .notification .nav-link.icon {
