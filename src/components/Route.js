@@ -28,8 +28,17 @@ import ViewTicket from './HRMS/Tickets/ViewTicket';
 import ForgotPassword from './Authentication/ForgotPassword';
 import ResetPassword from './Authentication/ResetPassword';
 import Connect from './HRMS/Connect/Connect';
+import Discussions from './HRMS/Discussions/Discussions';
 
 const Routes = [
+    {
+        path: "/discussions",
+        name: 'Discussions',
+        exact: true,
+        pageTitle: "Discussions",
+        roles: ['admin', 'super_admin', 'employee'],
+        component: Discussions
+    },
     {
         path: "/",
         name: 'dashboard',
