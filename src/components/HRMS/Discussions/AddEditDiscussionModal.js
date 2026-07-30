@@ -92,9 +92,9 @@ class AddEditDiscussionModal extends Component {
         if (!this.state.title.trim()) {
             errors.title = 'Title is required';
         }
-        if (!this.state.description.trim()) {
-            errors.description = 'Description is required';
-        }
+        // if (!this.state.description.trim()) {
+        //     errors.description = 'Description is required';
+        // }
         this.setState({ errors });
         return Object.keys(errors).length === 0;
     };
@@ -176,7 +176,7 @@ class AddEditDiscussionModal extends Component {
 
                                     <div className="form-group mb-3">
                                         <label className="form-label font-weight-bold">
-                                            Description <span className="text-danger">*</span>
+                                            Description (Optional)
                                         </label>
                                         <textarea
                                             className={`form-control ${errors.description ? 'is-invalid' : ''}`}

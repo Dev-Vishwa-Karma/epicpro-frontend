@@ -648,7 +648,7 @@ class Discussions extends Component {
                                 >
                                   <div>
                                     <strong className="mr-1" style={{ color: "#475569" }} title="Title">
-                                      <i className="fa fa-tag text-primary mr-1"></i>:
+                                      <i className="fa fa-tag text-primary mr-1"></i>
                                     </strong>
                                     <span className="font-weight-bold text-dark">
                                       {disc.title}
@@ -668,6 +668,7 @@ class Discussions extends Component {
                               </div>
 
                               {/* Description Box */}
+                              {disc?.description && (
                               <div
                                 className="mb-2 p-2 rounded"
                                 title="Description"
@@ -678,11 +679,12 @@ class Discussions extends Component {
                                   style={{ fontSize: "13px", color: "#334155", lineHeight: "1.4", wordBreak: "break-word" }}
                                 >
                                   <strong className="mr-1" style={{ color: "#475569" }} title="Description">
-                                    <i className="fa fa-align-left text-primary mr-1"></i>:
+                                    <i className="fa fa-align-left text-primary mr-1"></i>
                                   </strong>
                                   <span>{disc.description || "No description provided."}</span>
                                 </div>
                               </div>
+                              )}
 
                               {/* Conclusion Box */}
                               {isConcluded && disc.conclusion ? (
@@ -696,7 +698,7 @@ class Discussions extends Component {
                                     style={{ fontSize: "13px", color: "#15803d", lineHeight: "1.4", wordBreak: "break-word" }}
                                   >
                                     <strong className="mr-1" style={{ color: "#15803d" }} title="Conclusion">
-                                      <i className="fa fa-check-circle text-success mr-1"></i>:
+                                      <i className="fa fa-check-circle text-success mr-1"></i>
                                     </strong>
                                     <span>{disc.conclusion}</span>
                                   </div>
