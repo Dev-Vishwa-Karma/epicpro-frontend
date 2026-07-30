@@ -18,7 +18,7 @@ import "./Discussions.css";
 let cachedDiscussions = null;
 let cachedTotal = 0;
 let cachedHasMore = false;
-let cachedOffset = 0;
+let cachedPage = 1;
 
 class Discussions extends Component {
   constructor(props) {
@@ -33,7 +33,7 @@ class Discussions extends Component {
       // Backend Pagination States
       sortOrder: "ASC",
       limit: 5,
-      offset: cachedOffset,
+      page: cachedPage,
       total: cachedTotal,
       hasMore: cachedHasMore,
 
@@ -164,24 +164,18 @@ class Discussions extends Component {
       if (this.state.loadingMore || !this.state.hasMore) return;
       this.setState({ loadingMore: true });
     } else {
-      this.setState({ loading: true, discussions: [], offset: 0, hasMore: false });
+      this.setState({ loading: true, discussions: [], page: 1, hasMore: false });
     }
 
     const { searchQuery, filterDate, filterCreatedBy, filterParticipants, limit, discussions } =
       this.state;
 
-    const currentOffset = append ? discussions.length : 0;
-
-    // const user = window.user || JSON.parse(localStorage.getItem("user") || "{}") || {};
-    // const currentUserId = user.id || user.employee_id;
-    // const currentUserRole = user.role || "";
+    const currentPage = append ? Math.floor(discussions.length / limit) + 1 : 1;
 
     const params = {
       action: "view",
       limit: limit,
-      offset: currentOffset,
-      // user_id: currentUserId,
-      // user_role: currentUserRole,
+      page: currentPage,
     };
 
     if (searchQuery.trim()) {
@@ -225,13 +219,11 @@ class Discussions extends Component {
           this.setState(
             (prevState) => {
               const newDiscussions = append ? [...fetchedList, ...prevState.discussions] : fetchedList;
-              const newOffset = currentOffset + fetchedList.length;
-
               // Update in-memory cache
               cachedDiscussions = newDiscussions;
               cachedTotal = totalCount;
               cachedHasMore = hasMoreData;
-              cachedOffset = newOffset;
+              cachedPage = currentPage;
 
               return {
                 discussions: newDiscussions,
@@ -239,7 +231,7 @@ class Discussions extends Component {
                 hasMore: hasMoreData,
                 loading: false,
                 loadingMore: false,
-                offset: newOffset,
+                page: currentPage,
               };
             },
             () => {
