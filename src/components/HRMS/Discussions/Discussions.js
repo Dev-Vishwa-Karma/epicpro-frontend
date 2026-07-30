@@ -40,7 +40,7 @@ class Discussions extends Component {
       // Top Filter States
       searchQuery: "",
       filterDate: null,
-      filterCreatedBy: "",
+      filterCreatedBy: null,
       filterParticipants: [],
 
       // Modal States
@@ -173,16 +173,10 @@ class Discussions extends Component {
 
     const currentOffset = append ? discussions.length : 0;
 
-    const user = window.user || JSON.parse(localStorage.getItem("user") || "{}") || {};
-    const currentUserId = user.id || user.employee_id;
-    const currentUserRole = user.role || "";
-
     const params = {
       action: "view",
       limit: limit,
       offset: currentOffset,
-      user_id: currentUserId,
-      user_role: currentUserRole,
     };
 
     if (searchQuery.trim()) {
@@ -196,7 +190,7 @@ class Discussions extends Component {
     }
 
     if (filterCreatedBy) {
-      params.created_by = filterCreatedBy;
+      params.created_by = filterCreatedBy.value || filterCreatedBy;
     }
 
     if (filterParticipants && filterParticipants.length > 0) {
@@ -287,9 +281,9 @@ class Discussions extends Component {
     });
   };
 
-  handleCreatedByChange = (e) => {
+  handleCreatedByChange = (selectedOption) => {
     cachedDiscussions = null;
-    this.setState({ filterCreatedBy: e.target.value }, () => {
+    this.setState({ filterCreatedBy: selectedOption || null }, () => {
       this.fetchDiscussions(false);
     });
   };
@@ -520,18 +514,15 @@ class Discussions extends Component {
                     />
                   </div>
                   <div className="col-lg-3 col-md-6 col-sm-12 my-1">
-                    <select
-                      className="form-control custom-select discussion-filter-control"
+                    <Select
+                      isClearable
+                      options={participantOptions}
                       value={filterCreatedBy}
                       onChange={this.handleCreatedByChange}
-                    >
-                      <option value="">Created By</option>
-                      {employees.map((emp) => (
-                        <option key={emp.id} value={emp.id}>
-                          {emp.first_name} {emp.last_name}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="Created By..."
+                      className="basic-single-select discussion-filter-select"
+                      classNamePrefix="select"
+                    />
                   </div>
                   <div className="col-lg-3 col-md-6 col-sm-12 my-1">
                     <Select
