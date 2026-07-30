@@ -144,8 +144,7 @@ class Discussions extends Component {
 
   canModifyDiscussion = (disc) => {
     const user = authService.getUser() || window.user || {};
-    const isAdmin = ["admin", "super_admin"].includes((user.role || "").toLowerCase());
-    return isAdmin || String(disc?.created_by) === String(user.id || user.employee_id);
+    return String(disc?.created_by) === String(user.id || user.employee_id);
   };
 
   fetchEmployees = () => {
@@ -173,10 +172,16 @@ class Discussions extends Component {
 
     const currentOffset = append ? discussions.length : 0;
 
+    // const user = window.user || JSON.parse(localStorage.getItem("user") || "{}") || {};
+    // const currentUserId = user.id || user.employee_id;
+    // const currentUserRole = user.role || "";
+
     const params = {
       action: "view",
       limit: limit,
       offset: currentOffset,
+      // user_id: currentUserId,
+      // user_role: currentUserRole,
     };
 
     if (searchQuery.trim()) {
@@ -345,15 +350,12 @@ class Discussions extends Component {
   handleSaveDiscussion = (payload) => {
     this.setState({ buttonLoading: true });
     const { isEditing, selectedDiscussion } = this.state;
-    const user = window.user || JSON.parse(localStorage.getItem("user")) || {};
-    const created_by = user.id || 1;
 
     const targetId = payload.id || (selectedDiscussion ? selectedDiscussion.id : null);
     const action = isEditing || targetId ? "edit" : "add";
     const dataToSend = {
       ...payload,
       id: targetId,
-      created_by,
     };
 
     getService
