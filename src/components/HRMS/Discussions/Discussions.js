@@ -639,15 +639,14 @@ class Discussions extends Component {
                               {/* Title Box */}
                               <div
                                 className="mb-2 p-2 rounded"
-                                title="Title"
                               // style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0" }}
                               >
                                 <div
                                   className="discussion-text-clamp d-flex align-items-center justify-content-between flex-wrap"
                                   style={{ fontSize: "20px", color: "#334155", wordBreak: "break-word" }}
                                 >
-                                  <div>
-                                    <strong className="mr-1" style={{ color: "#475569" }} title="Title">
+                                  <div title="Title">
+                                    <strong className="mr-1" style={{ color: "#475569" }}>
                                       <i className="fa fa-tag text-primary mr-1"></i>
                                     </strong>
                                     <span className="font-weight-bold text-dark">
@@ -669,21 +668,21 @@ class Discussions extends Component {
 
                               {/* Description Box */}
                               {disc?.description && (
-                              <div
-                                className="mb-2 p-2 rounded"
-                                title="Description"
-                                style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0" }}
-                              >
                                 <div
-                                  className="discussion-text-clamp"
-                                  style={{ fontSize: "13px", color: "#334155", lineHeight: "1.4", wordBreak: "break-word" }}
+                                  className="mb-2 p-2 rounded"
+                                  title="Description"
+                                  style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0" }}
                                 >
-                                  <strong className="mr-1" style={{ color: "#475569" }} title="Description">
-                                    <i className="fa fa-align-left text-primary mr-1"></i>
-                                  </strong>
-                                  <span>{disc.description || "No description provided."}</span>
+                                  <div
+                                    className="discussion-text-clamp"
+                                    style={{ fontSize: "13px", color: "#334155", lineHeight: "1.4", wordBreak: "break-word" }}
+                                  >
+                                    <strong className="mr-1" style={{ color: "#475569" }} title="Description">
+                                      <i className="fa fa-align-left text-primary mr-1"></i>
+                                    </strong>
+                                    <span>{disc.description || "No description provided."}</span>
+                                  </div>
                                 </div>
-                              </div>
                               )}
 
                               {/* Conclusion Box */}
@@ -708,7 +707,7 @@ class Discussions extends Component {
 
                             {/* 3. Action Buttons Column */}
                             <div
-                              className="d-flex align-items-center justify-content-end my-1 flex-shrink-0"
+                              className="d-flex align-items-center justify-content-end my-1 flex-shrink-0 discussion-actions-col"
                               title="Actions"
                               style={{ width: "115px" }}
                             >
