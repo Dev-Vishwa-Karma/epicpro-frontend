@@ -234,7 +234,6 @@ class Menu extends Component {
 					{ "id": 9, "icon": "fa fa-bell", "label": "Notifications", "to": "/notifications" },
 					{ "id": 10, "icon": "fa fa-user-plus", "label": "Referral", "to": "/job-application" },
 					{ "id": 21, "icon": "fa fa-ticket", "label": "Ticket", "to": "/ticket" },
-					{ "id": 23, "icon": "fa fa-comments-o", "label": "Discussions", "to": "/discussions" },
 				]
 			}
 		];
@@ -285,7 +284,12 @@ class Menu extends Component {
 					const linkItem = { id: 15, icon: "fa fa-link", label: "Link", to: "/link" };
 					const todoIndex = hrms.content.findIndex(item => item.id === 8);
 					if (todoIndex !== -1) hrms.content.splice(todoIndex + 1, 0, linkItem);
-					else hrms.content.push(linkItem);
+
+					// Insert "Discussion" after Ticket
+					const DiscussionItem = { id: 23, "icon": "fa fa-comments-o", label: "Discussions", to: "/discussions" };
+					const TicketIndex = hrms.content.findIndex(item => item.id === 21);
+					if (TicketIndex !== -1) hrms.content.splice(TicketIndex + 1, 0, DiscussionItem);
+					else hrms.content.push(DiscussionItem);
 				}
 
 				// Add Project section if not exists
