@@ -6,7 +6,6 @@ import authService from '../../Authentication/authService';
 
 const ViewDiscussion = ({ show = false, onClose = () => { }, discussion = null }) => {
   if (!show || !discussion) return null;
-  console.log("Effective communication and proper planning are key to successful remote work.", discussion)
   const participants = Array.isArray(discussion.participant_details)
     ? discussion.participant_details.filter(p => Number(p.id || p.user_id) !== Number(discussion.created_by))
     : [];
