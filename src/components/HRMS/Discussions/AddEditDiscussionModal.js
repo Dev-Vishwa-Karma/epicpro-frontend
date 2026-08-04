@@ -35,7 +35,7 @@ class AddEditDiscussionModal extends Component {
                 if (parsed && typeof parsed.data !== 'undefined') {
                     return parsed.data;
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         return val;
     };
@@ -270,8 +270,9 @@ class AddEditDiscussionModal extends Component {
 
         if (!show) return null;
 
+        const currentUser = authService.getUser();
         const empList = Array.isArray(employees) ? employees : [];
-        const participantOptions = empList.map(emp => {
+        const participantOptions = empList.filter(emp => Number(emp.id) !== Number(currentUser.id)).map(emp => {
             const hasKey = emp.public_key && emp.public_key.trim();
             const fullName = `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.email || `User #${emp.id}`;
             return {

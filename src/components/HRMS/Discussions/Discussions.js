@@ -577,7 +577,7 @@ class Discussions extends Component {
 
     const participantOptions = employees.map((emp) => ({
       value: emp.id,
-      label: `${emp.first_name} ${emp.last_name}`,
+      label: authService.getUser().id === emp.id ? `You` : `${emp.first_name} ${emp.last_name}`,
     }));
 
     let displayedDiscussions = [...discussions];
