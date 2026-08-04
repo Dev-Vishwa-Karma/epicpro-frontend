@@ -256,6 +256,153 @@ export const cryptoService = {
     };
   },
 
+  wrapAesKeyForParticipant: async (rawAesKeyBuffer, publicKeyPEM) => {
+    if (!publicKeyPEM || !publicKeyPEM.trim() || !rawAesKeyBuffer) return null;
+    const rsaPublicKey = await cryptoService.importPublicKey(publicKeyPEM);
+    const encryptedKeyBuffer = await window.crypto.subtle.encrypt(
+      { name: 'RSA-OAEP' },
+      rsaPublicKey,
+      rawAesKeyBuffer
+    );
+    return arrayBufferToBase64(encryptedKeyBuffer);
+  },
+
+  unwrapAesKeyForUser: async (encryptedKeyBase64, currentUserId) => {
+    if (!encryptedKeyBase64 || !currentUserId) return null;
+    try {
+      const privateKeyPEM = await cryptoService.getPrivateKey(currentUserId);
+      if (!privateKeyPEM) return null;
+
+      const rsaPrivateKey = await cryptoService.importPrivateKey(privateKeyPEM);
+      const encryptedKeyBuffer = base64ToArrayBuffer(encryptedKeyBase64);
+      return await window.crypto.subtle.decrypt(
+        { name: 'RSA-OAEP' },
+        rsaPrivateKey,
+        encryptedKeyBuffer
+      );
+    } catch (err) {
+      console.error('Error unwrapping AES key for user:', err);
+      return null;
+    }
+  },
+
+  decryptDiscussionDetails: async (discussion, currentUserId) => {
+    if (!discussion) return discussion;
+
+    if (Number(discussion.is_encrypted) !== 1) {
+      const parseUnencryptedField = (fieldVal) => {
+        if (!fieldVal || typeof fieldVal !== 'string') return fieldVal || '';
+        if (fieldVal.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(fieldVal);
+            if (parsed && typeof parsed.data !== 'undefined') {
+              return parsed.data;
+            }
+          } catch (e) {
+            // Not valid JSON, return original
+          }
+        }
+        return fieldVal;
+      };
+
+      return {
+        ...discussion,
+        title: parseUnencryptedField(discussion.title),
+        description: parseUnencryptedField(discussion.description),
+        conclusion: parseUnencryptedField(discussion.conclusion),
+      };
+    }
+
+    try {
+      const privateKeyPEM = await cryptoService.getPrivateKey(currentUserId);
+      if (!privateKeyPEM) {
+        return { ...discussion, isDecrypted: false, decryptError: 'Private key missing on device' };
+      }
+
+      const partDetails = discussion.participant_details || [];
+      const userParticipant = partDetails.find(p => Number(p.user_id) === Number(currentUserId));
+      let encryptedKeyBase64 = userParticipant?.encrypted_key;
+
+      if (!encryptedKeyBase64) {
+        return { ...discussion, isDecrypted: false, decryptError: 'No encrypted key for current user' };
+      }
+
+      const rsaPrivateKey = await cryptoService.importPrivateKey(privateKeyPEM);
+      const encryptedKeyBuffer = base64ToArrayBuffer(encryptedKeyBase64);
+      const rawAesKeyBuffer = await window.crypto.subtle.decrypt(
+        { name: 'RSA-OAEP' },
+        rsaPrivateKey,
+        encryptedKeyBuffer
+      );
+
+      const aesKey = await window.crypto.subtle.importKey(
+        'raw',
+        rawAesKeyBuffer,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['decrypt']
+      );
+
+      const textDecoder = new TextDecoder();
+
+      // Decrypt field stored as JSON string {"data": "...", "iv": "..."} with fallback for legacy formats
+      const decryptFieldJSON = async (fieldVal) => {
+        if (!fieldVal || typeof fieldVal !== 'string') return fieldVal || '';
+        let ciphertextBase64 = '';
+        let fieldIvBase64 = '';
+
+        if (fieldVal.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(fieldVal);
+            ciphertextBase64 = parsed.data || parsed.ciphertext || '';
+            fieldIvBase64 = parsed.iv || discussion.iv || '';
+          } catch (e) {
+            ciphertextBase64 = fieldVal;
+            fieldIvBase64 = discussion.iv || '';
+          }
+        } else {
+          ciphertextBase64 = fieldVal;
+          fieldIvBase64 = discussion.iv || '';
+        }
+
+        if (!ciphertextBase64 || !fieldIvBase64) return '';
+
+        try {
+          const ivBuffer = base64ToArrayBuffer(fieldIvBase64);
+          const ciphertextBuffer = base64ToArrayBuffer(ciphertextBase64);
+          const decryptedBuffer = await window.crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: new Uint8Array(ivBuffer) },
+            aesKey,
+            ciphertextBuffer
+          );
+          return textDecoder.decode(decryptedBuffer);
+        } catch (err) {
+          return fieldVal;
+        }
+      };
+
+      const decryptedTitle = discussion.title ? await decryptFieldJSON(discussion.title) : '';
+      const decryptedDescription = discussion.description ? await decryptFieldJSON(discussion.description) : '';
+      const decryptedConclusion = discussion.conclusion ? await decryptFieldJSON(discussion.conclusion) : '';
+
+      return {
+        ...discussion,
+        title: decryptedTitle || discussion.title,
+        description: decryptedDescription || discussion.description,
+        conclusion: decryptedConclusion || discussion.conclusion,
+        rawAesKeyBuffer,
+        isDecrypted: true,
+      };
+    } catch (err) {
+      console.error('Discussion decryption failed for discussion ID:', discussion.id, err);
+      return {
+        ...discussion,
+        isDecrypted: false,
+        decryptError: 'Decryption failed',
+      };
+    }
+  },
+
   // --- Zero Knowledge Key Backup Helpers ---
   deriveBackupKey: async (password, saltBuffer) => {
     const encoder = new TextEncoder();

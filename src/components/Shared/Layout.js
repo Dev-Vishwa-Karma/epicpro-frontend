@@ -25,7 +25,7 @@ export default class Layout extends Component {
 	}
 
 	handleOpenModal = () => {
-		this.checkE2EEStatus(); // Re-check status before opening to ensure we have the latest mode
+		this.checkE2EEStatus();
 	};
 
 	checkE2EEStatus = async () => {

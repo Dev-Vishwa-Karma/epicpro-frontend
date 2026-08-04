@@ -12,9 +12,10 @@ import AddEditDiscussionModal from "./AddEditDiscussionModal";
 import ViewDiscussion from "./ViewDiscussion";
 import authService from "../../Authentication/authService";
 import Avatar from "../../common/Avatar";
+import api from "../../../api/axios";
+import cryptoService from "../../../services/cryptoService";
 import "./Discussions.css";
 
-// Cache discussions list in memory to prevent refetching API when coming back from ViewDiscussion
 let cachedDiscussions = null;
 let cachedTotal = 0;
 let cachedHasMore = false;
@@ -32,7 +33,7 @@ class Discussions extends Component {
 
       // Backend Pagination States
       sortOrder: "ASC",
-      limit: 5,
+      limit: 3,
       page: cachedPage,
       total: cachedTotal,
       hasMore: cachedHasMore,
@@ -47,6 +48,8 @@ class Discussions extends Component {
       showAddEditModal: false,
       showViewModal: false,
       showDeleteModal: false,
+      showE2EESetupModal: false,
+      e2eeStatus: "checking", // 'checking', 'ready', 'missing'
       selectedDiscussion: null,
       discussionToView: null,
       isEditing: false,
@@ -65,12 +68,53 @@ class Discussions extends Component {
 
   componentDidMount() {
     this.fetchEmployees();
+    this.checkE2EEStatus();
     if (!cachedDiscussions || cachedDiscussions.length === 0) {
       this.fetchDiscussions(false);
     }
     window.addEventListener("scroll", this.handleScroll, true);
     window.addEventListener("wheel", this.handleWheel, { passive: true });
   }
+
+  checkE2EEStatus = async () => {
+    const user = authService.getUser();
+    if (!user || !user.id) return;
+
+    try {
+      const res = await api.get("/get_employees.php?action=check-public-key");
+      const publicKey = res.data?.data?.public_key;
+      const encryptedBlob = res.data?.data?.encrypted_blob;
+      const hasPrivateKey = await cryptoService.hasPrivateKey(user.id);
+
+      if (!publicKey) {
+        this.setState({
+          showE2EESetupModal: true,
+          e2eeSetupMode: 'generate',
+          e2eeStatus: "missing",
+        });
+      } else if (!hasPrivateKey && encryptedBlob) {
+        this.setState({
+          showE2EESetupModal: true,
+          e2eeSetupMode: 'restore',
+          e2eeStatus: "missing",
+          backupData: { encryptedBlob },
+        });
+      } else if (!hasPrivateKey && !encryptedBlob) {
+        this.setState({
+          showE2EESetupModal: true,
+          e2eeSetupMode: 'generate',
+          e2eeStatus: "missing",
+        });
+      } else {
+        this.setState({
+          e2eeStatus: "ready",
+          showE2EESetupModal: false,
+        });
+      }
+    } catch (error) {
+      console.error("E2EE status check failed:", error);
+    }
+  };
 
   componentWillUnmount() {
     window.removeEventListener("scroll", this.handleScroll, true);
@@ -81,7 +125,6 @@ class Discussions extends Component {
     const { loading, loadingMore, hasMore } = this.state;
     if (loading || loadingMore || !hasMore) return;
 
-    // Detect wheel scroll UP gesture (deltaY < -5)
     if (e && e.deltaY < -5) {
       const now = Date.now();
       if (!this.lastWheelTime || now - this.lastWheelTime > 800) {
@@ -144,19 +187,120 @@ class Discussions extends Component {
 
   canModifyDiscussion = (disc) => {
     const user = authService.getUser() || window.user || {};
-    return String(disc?.created_by) === String(user.id || user.employee_id);
+    const uId = String(user.id || user.employee_id || "");
+    const hasPublicKey = user.public_key && user.public_key.trim();
+    const isAdmin = authService.isAdminCheck ? authService.isAdminCheck() : (authService.isAdmin ? authService.isAdmin() : false);
+    return hasPublicKey && (String(disc?.created_by) === uId || isAdmin);
   };
 
   fetchEmployees = () => {
     getService
-      .getCall("get_employees.php", { action: "view" })
+      .getCall("get_employees.php", { action: "view", role: "admin" })
       .then((res) => {
         const empList = res?.data || [];
-        this.setState({ employees: empList });
+        this.setState({ employees: empList }, () => {
+          if (this.state.discussions && this.state.discussions.length > 0) {
+            this.syncPendingParticipantKeys(this.state.discussions);
+          }
+        });
       })
       .catch((err) => {
         console.error("Error fetching employees:", err);
       });
+  };
+
+  syncPendingParticipantKeys = async (decryptedList) => {
+    const user = authService.getUser();
+    if (!user || !user.id || !Array.isArray(decryptedList) || decryptedList.length === 0) return;
+
+    const currentUserId = Number(user.id);
+    const { employees = [] } = this.state;
+
+    await Promise.all(decryptedList.map(async (disc) => {
+      if (!disc) return;
+
+      let partDetails = disc.participant_details || disc.participants || [];
+      if (typeof partDetails === 'string') {
+        try {
+          partDetails = JSON.parse(partDetails);
+        } catch (e) {
+          partDetails = [];
+        }
+      }
+      if (!Array.isArray(partDetails) || partDetails.length === 0) return;
+
+      let rawAesKeyBuffer = disc.rawAesKeyBuffer;
+
+      if (!rawAesKeyBuffer && Number(disc.is_encrypted) === 1) {
+        const userParticipant = partDetails.find((p) => Number(p.user_id) === currentUserId);
+        if (userParticipant?.encrypted_key) {
+          rawAesKeyBuffer = await cryptoService.unwrapAesKeyForUser(userParticipant.encrypted_key, currentUserId);
+        }
+      }
+
+      if (!rawAesKeyBuffer) return;
+
+      let keysToUpdate = false;
+
+      const updatedParticipantsPayload = await Promise.all(partDetails.map(async (p) => {
+        const pUserId = Number(p.user_id || p.id);
+        let encKey = p.encrypted_key;
+
+        if (!encKey || !String(encKey).trim()) {
+          const pEmp = employees.find((e) => Number(e.id) === pUserId);
+          const pPublicKey = p.public_key || pEmp?.public_key || (pUserId === currentUserId ? user?.public_key : null);
+
+          if (pPublicKey && String(pPublicKey).trim()) {
+            try {
+              encKey = await cryptoService.wrapAesKeyForParticipant(rawAesKeyBuffer, pPublicKey);
+              if (encKey) {
+                keysToUpdate = true;
+                p.encrypted_key = encKey;
+              }
+            } catch (err) {
+              console.error(`Failed to wrap AES key for participant #${pUserId} in discussion #${disc.id}:`, err);
+            }
+          }
+        }
+
+        return {
+          user_id: pUserId,
+          role: p.role || (Number(pUserId) === Number(disc.created_by) ? 'creator' : 'participant'),
+          encrypted_key: encKey || null,
+        };
+      }));
+
+      if (keysToUpdate) {
+        const payload = {
+          id: disc.id,
+          participants: updatedParticipantsPayload,
+        };
+
+        getService
+          .addCall("discussions.php", "update_participant_keys", payload)
+          .then((res) => {
+            if (res?.status === "success") {
+              console.log(`Auto-synced E2EE keys for discussion #${disc.id}`);
+            }
+          })
+          .catch((err) => {
+            console.error(`Error auto-syncing participant keys for discussion #${disc.id}:`, err);
+          });
+      }
+    }));
+  };
+
+  decryptDiscussionsList = async (discussionsList) => {
+    const user = authService.getUser();
+    if (!user || !user.id || !Array.isArray(discussionsList)) return discussionsList;
+
+    const decryptedPromises = discussionsList.map((disc) =>
+      cryptoService.decryptDiscussionDetails(disc, user.id)
+    );
+
+    const decryptedList = await Promise.all(decryptedPromises);
+    this.syncPendingParticipantKeys(decryptedList);
+    return decryptedList;
   };
 
   fetchDiscussions = (append = false) => {
@@ -167,7 +311,7 @@ class Discussions extends Component {
       this.setState({ loading: true, discussions: [], page: 1, hasMore: false });
     }
 
-    const { searchQuery, filterDate, filterCreatedBy, filterParticipants, limit, discussions } =
+    const { filterDate, filterCreatedBy, filterParticipants, limit, discussions } =
       this.state;
 
     const currentPage = append ? Math.floor(discussions.length / limit) + 1 : 1;
@@ -177,10 +321,6 @@ class Discussions extends Component {
       limit: limit,
       page: currentPage,
     };
-
-    if (searchQuery.trim()) {
-      params.search = searchQuery.trim();
-    }
 
     if (filterDate) {
       const formattedDate = dayjs(filterDate).format("YYYY-MM-DD");
@@ -200,7 +340,7 @@ class Discussions extends Component {
 
     getService
       .getCall("discussions.php", params)
-      .then((res) => {
+      .then(async (res) => {
         if (res?.status === "success") {
           let fetchedList = [];
           let totalCount = 0;
@@ -215,6 +355,8 @@ class Discussions extends Component {
             totalCount = res.data.length;
             hasMoreData = false;
           }
+
+          fetchedList = await this.decryptDiscussionsList(fetchedList);
 
           this.setState(
             (prevState) => {
@@ -262,13 +404,7 @@ class Discussions extends Component {
   };
 
   handleSearchChange = (e) => {
-    const val = e.target.value;
-    this.setState({ searchQuery: val });
-    if (this.searchTimeout) clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => {
-      cachedDiscussions = null;
-      this.fetchDiscussions(false);
-    }, 500);
+    this.setState({ searchQuery: e.target.value });
   };
 
   handleDateChange = (date) => {
@@ -444,8 +580,26 @@ class Discussions extends Component {
       label: `${emp.first_name} ${emp.last_name}`,
     }));
 
-    // Sort on UI side: sortOrder === 'ASC' puts last created at bottom
-    const displayedDiscussions = [...discussions].sort((a, b) => {
+    let displayedDiscussions = [...discussions];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      displayedDiscussions = displayedDiscussions.filter((disc) => {
+        const title = (disc.title || "").toLowerCase();
+        const description = (disc.description || "").toLowerCase();
+        const conclusion = (disc.conclusion || "").toLowerCase();
+        const creatorName = (disc.creator_name || "").toLowerCase();
+
+        return (
+          title.includes(q) ||
+          description.includes(q) ||
+          conclusion.includes(q) ||
+          creatorName.includes(q)
+        );
+      });
+    }
+
+    displayedDiscussions.sort((a, b) => {
       const timeA = new Date(a.created_at || 0).getTime();
       const timeB = new Date(b.created_at || 0).getTime();
       if (timeA !== timeB) {
@@ -469,7 +623,20 @@ class Discussions extends Component {
         <div className={`section-body ${fixNavbar ? "marginTop" : ""}`}>
           <div className="container-fluid">
             <div className="d-flex justify-content-end align-items-center mb-2">
-              <div className="header-action">
+              <div className="header-action d-flex align-items-center">
+                {this.state.e2eeStatus === "ready" ? (
+                  <span className="badge badge-success px-3 py-2 mr-2" style={{ fontSize: "13px", fontWeight: "600", borderRadius: "8px" }}>
+                    <i className="fe fe-shield mr-1" /> E2EE Active
+                  </span>
+                ) : (
+                  <button
+                    className="btn btn-sm btn-outline-warning mr-2"
+                    style={{ fontWeight: "600", borderRadius: "8px" }}
+                    onClick={() => window.dispatchEvent(new Event('openE2EESetupModal'))}
+                  >
+                    <i className="fe fe-shield-off mr-1" /> E2EE Disabled
+                  </button>
+                )}
                 <Button
                   label="Add Discussion"
                   onClick={this.handleOpenAddModal}
@@ -568,104 +735,154 @@ class Discussions extends Component {
                 <div className="row clearfix">
                   {displayedDiscussions.map((disc) => {
                     const isConcluded = disc.conclusion && disc.conclusion.trim();
+                    const displayParticipants = disc.participant_details ? disc.participant_details.filter(p => Number(p.user_id) !== Number(disc.created_by)) : [];
 
                     return (
-                      <div className="col-12 mb-2" key={disc.id}>
+                      <div className="col-12 mb-3" key={disc.id}>
                         <div
-                          className="card shadow-sm border-0 rounded-lg mb-0 discussion-card-item cursor-pointer"
+                          className="card shadow-sm rounded-lg mb-0 discussion-card-item cursor-pointer"
                           onClick={() => this.handleOpenViewModal(disc)}
                           title="Click to view discussion details"
                           style={{
-                            borderLeft: "5px solid #0284c7",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "12px",
                             backgroundColor: "#ffffff",
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                             minHeight: "85px",
                             cursor: "pointer",
                           }}
                         >
-                          <div className="card-body py-2 px-3 d-flex align-items-center justify-content-between flex-wrap" style={{ minHeight: "85px" }}>
+                          <div className="card-body py-3 px-3 d-flex align-items-center justify-content-between discussion-card-body">
                             {/* 1. Date & Creator */}
-                            <div className="d-flex align-items-center mr-3 my-1" style={{ minWidth: "170px" }}>
+                            <div className="d-flex align-items-center mr-md-3 discussion-meta-col">
                               <div
-                                className="text-center mr-3 px-2 py-2 rounded-lg border-0 flex-shrink-0"
+                                className="text-center mr-3 rounded-lg flex-shrink-0"
                                 title="Created Date"
                                 style={{
-                                  backgroundColor: "#e0f2fe",
-                                  color: "#0284c7",
-                                  minWidth: "55px",
+                                  backgroundColor: "#eff6ff",
+                                  border: "1px solid #dbeafe",
+                                  minWidth: "62px",
+                                  paddingTop: "6px",
+                                  paddingBottom: "6px",
+                                  paddingLeft: "8px",
+                                  paddingRight: "8px",
+                                  borderRadius: "10px",
                                 }}
                               >
-                                <small className="d-block font-weight-bold text-uppercase" style={{ fontSize: "11px", letterSpacing: "0.5px", lineHeight: "1" }}>
+                                <small
+                                  className="d-block font-weight-bold text-uppercase"
+                                  style={{ fontSize: "11px", letterSpacing: "0.5px", lineHeight: "1", color: "#2563eb" }}
+                                >
                                   {disc.created_at ? dayjs(disc.created_at).format("MMM") : "NOTE"}
                                 </small>
-                                <strong className="d-block font-weight-bold" style={{ fontSize: "18px", lineHeight: "1.1" }}>
+                                <strong
+                                  className="d-block font-weight-extrabold my-1"
+                                  style={{ fontSize: "20px", lineHeight: "1.1", color: "#2563eb" }}
+                                >
                                   {disc.created_at ? dayjs(disc.created_at).format("DD") : "--"}
                                 </strong>
+                                <small
+                                  className="d-block font-weight-medium text-muted"
+                                  style={{ fontSize: "10px", lineHeight: "1", color: "#64748b" }}
+                                >
+                                  {disc.created_at ? dayjs(disc.created_at).format("YYYY") : ""}
+                                </small>
                               </div>
                               <div
-                                className="d-flex align-items-center"
-                                title="Created By"
+                                className="d-flex align-items-center overflow-hidden"
+                                title={`Created by ${disc.creator_name || 'User #' + disc.created_by}`}
                               >
                                 <Avatar
                                   profile={disc.creator_profile}
                                   first_name={disc.creator_first_name || disc.creator_name || "U"}
                                   last_name={disc.creator_last_name || ""}
-                                  size={38}
+                                  size={36}
                                   className="mr-2 flex-shrink-0"
                                 />
-                                <small className="text-dark font-weight-semibold text-truncate" style={{ maxWidth: "120px", fontSize: "13px" }}>
-                                  {disc.creator_name || `User #${disc.created_by}`}
-                                </small>
+                                <div className="overflow-hidden" style={{ minWidth: 0 }}>
+                                  <span
+                                    className="d-block font-weight-bold text-dark text-truncate"
+                                    style={{ fontSize: "14px", lineHeight: "1.2", color: "#0f172a" }}
+                                  >
+                                    {Number(disc.created_by) === Number(authService.getUser()?.id) ? 'You' : (disc.creator_name || `User #${disc.created_by}`)}
+                                  </span>
+                                  <small
+                                    className="d-block text-secondary text-truncate"
+                                    style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.3" }}
+                                  >
+                                    {disc.creator_name || `User #${disc.created_by}`}
+                                  </small>
+                                </div>
                               </div>
                             </div>
 
                             {/* 2. Content & Snippets */}
-                            <div className="flex-fill mr-3 my-1" style={{ minWidth: "240px", maxWidth: "1080px" }}>
-                              {/* Title Box */}
-                              <div
-                                className="mb-2 p-2 rounded"
-                              // style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0" }}
-                              >
-                                <div
-                                  className="discussion-text-clamp d-flex align-items-center justify-content-between flex-wrap"
-                                  style={{ fontSize: "20px", color: "#334155", wordBreak: "break-word" }}
-                                >
-                                  <div title="Title">
-                                    <strong className="mr-1" style={{ color: "#475569" }}>
-                                      <i className="fa fa-tag text-primary mr-1"></i>
-                                    </strong>
-                                    <span className="font-weight-bold text-dark">
-                                      {disc.title}
-                                    </span>
-                                  </div>
-                                  {disc.participant_details && disc.participant_details.length > 0 && (
-                                    <span
-                                      className="badge badge-pill badge-light border text-secondary font-weight-normal my-1"
-                                      title="Participants"
-                                      style={{ fontSize: "15px", backgroundColor: "#ffffff" }}
-                                    >
-                                      <i className="fa fa-users text-info mr-1"></i>
-                                      {disc.participant_details.length} participant{disc.participant_details.length > 1 ? "s" : ""}
-                                    </span>
-                                  )}
+                            <div className="flex-fill mr-md-3 overflow-hidden" style={{ minWidth: 0 }}>
+                              {/* Title & Participants Header */}
+                              <div className="d-flex align-items-center justify-content-between mb-2">
+                                <div className="d-flex align-items-center flex-grow-1" style={{ minWidth: 0 }}>
+                                  <i
+                                    className="fa fa-tag mr-2"
+                                    style={{ color: "#4f46e5", fontSize: "14px", flexShrink: 0 }}
+                                  ></i>
+
+                                  <span
+                                    className="font-weight-bold text-dark"
+                                    style={{
+                                      flex: 1,
+                                      minWidth: 0,
+                                      overflow: "hidden",
+                                      whiteSpace: "nowrap",
+                                      textOverflow: "ellipsis",
+                                      fontSize: "15px",
+                                      color: "#0f172a",
+                                    }}
+                                    title={`Title: ${disc.title}`}
+                                  >
+                                    {disc.title}
+                                  </span>
                                 </div>
+
+                                {displayParticipants.length > 0 && (
+                                  <span
+                                    className="badge badge-pill border text-secondary ml-2 d-inline-flex align-items-center"
+                                    style={{
+                                      flexShrink: 0,
+                                      backgroundColor: "#f8fafc",
+                                      borderColor: "#e2e8f0",
+                                      color: "#475569",
+                                      fontSize: "12px",
+                                      fontWeight: "500",
+                                      padding: "4px 10px",
+                                      borderRadius: "16px",
+                                    }}
+                                  >
+                                    <i className="fa fa-users text-secondary mr-1" style={{ fontSize: "12px" }}></i>
+                                    {displayParticipants.length} participant{displayParticipants.length > 1 ? "s" : ""}
+                                  </span>
+                                )}
                               </div>
 
                               {/* Description Box */}
                               {disc?.description && (
                                 <div
-                                  className="mb-2 p-2 rounded"
+                                  className="mb-2 px-3 py-2 rounded-lg d-flex align-items-start"
                                   title="Description"
-                                  style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0" }}
+                                  style={{
+                                    backgroundColor: "#eff6ff",
+                                    border: "1px solid #dbeafe",
+                                    borderRadius: "8px",
+                                  }}
                                 >
+                                  <i
+                                    className="fa fa-file-text-o text-primary mr-2"
+                                    style={{ fontSize: "14px", marginTop: "3px", flexShrink: 0 }}
+                                  ></i>
                                   <div
-                                    className="discussion-text-clamp"
-                                    style={{ fontSize: "13px", color: "#334155", lineHeight: "1.4", wordBreak: "break-word" }}
+                                    className="discussion-text-clamp flex-fill"
+                                    style={{ fontSize: "13.5px", color: "#334155", lineHeight: "1.5" }}
                                   >
-                                    <strong className="mr-1" style={{ color: "#475569" }} title="Description">
-                                      <i className="fa fa-align-left text-primary mr-1"></i>
-                                    </strong>
-                                    <span>{disc.description || "No description provided."}</span>
+                                    <span>{disc.description}</span>
                                   </div>
                                 </div>
                               )}
@@ -673,17 +890,22 @@ class Discussions extends Component {
                               {/* Conclusion Box */}
                               {isConcluded && disc.conclusion ? (
                                 <div
-                                  className="p-2 rounded"
+                                  className="px-3 py-2 rounded-lg d-flex align-items-start"
                                   title="Conclusion"
-                                  style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}
+                                  style={{
+                                    backgroundColor: "#ecfdf5",
+                                    border: "1px solid #bbf7d0",
+                                    borderRadius: "8px",
+                                  }}
                                 >
+                                  <i
+                                    className="fa fa-check-circle text-success mr-2"
+                                    style={{ fontSize: "15px", marginTop: "2px", flexShrink: 0 }}
+                                  ></i>
                                   <div
-                                    className="discussion-text-clamp"
-                                    style={{ fontSize: "13px", color: "#15803d", lineHeight: "1.4", wordBreak: "break-word" }}
+                                    className="discussion-text-clamp flex-fill"
+                                    style={{ fontSize: "13.5px", color: "#15803d", lineHeight: "1.5" }}
                                   >
-                                    <strong className="mr-1" style={{ color: "#15803d" }} title="Conclusion">
-                                      <i className="fa fa-check-circle text-success mr-1"></i>
-                                    </strong>
                                     <span>{disc.conclusion}</span>
                                   </div>
                                 </div>
@@ -692,12 +914,11 @@ class Discussions extends Component {
 
                             {/* 3. Action Buttons Column */}
                             <div
-                              className="d-flex align-items-center justify-content-end my-1 flex-shrink-0 discussion-actions-col"
+                              className="d-flex align-items-center justify-content-end discussion-actions-col"
                               title="Actions"
-                              style={{ width: "115px" }}
                             >
                               <button
-                                className="btn btn-sm btn-light text-primary rounded-circle mr-1 shadow-none"
+                                className="btn btn-sm btn-light border text-secondary rounded-circle mr-1 shadow-none"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   this.handleOpenViewModal(disc);
@@ -709,7 +930,7 @@ class Discussions extends Component {
                               </button>
                               {this.canModifyDiscussion(disc) && (
                                 <button
-                                  className="btn btn-sm btn-light text-info rounded-circle mr-1 shadow-none"
+                                  className="btn btn-sm btn-light border text-secondary rounded-circle mr-1 shadow-none"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     this.handleOpenEditModal(disc);
@@ -717,12 +938,12 @@ class Discussions extends Component {
                                   title="Edit Discussion"
                                   style={{ width: "32px", height: "32px", padding: 0 }}
                                 >
-                                  <i className="fa fa-edit"></i>
+                                  <i className="fa fa-pencil" style={{ fontSize: "13px", color: "#64748b" }}></i>
                                 </button>
                               )}
                               {this.canModifyDiscussion(disc) && (
                                 <button
-                                  className="btn btn-sm btn-light text-danger rounded-circle shadow-none"
+                                  className="btn btn-sm btn-light border text-secondary rounded-circle shadow-none"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     this.handleOpenDeleteModal(disc);

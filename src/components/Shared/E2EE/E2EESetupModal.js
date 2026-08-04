@@ -7,9 +7,42 @@ import './E2EESetupModal.css';
 const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupData = null }) => {
   const [password, setPassword] = useState('');
   const [backupPin, setBackupPin] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showBackupPin, setShowBackupPin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  const handleMaskedChange = (e, currentValue, setValue, isVisible) => {
+    if (error) setError(null);
+    const val = e.target.value;
+    if (isVisible) {
+      setValue(val);
+      return;
+    }
+
+    const isPureStars = val === '*'.repeat(val.length);
+    const currentLen = currentValue.length;
+    const newLen = val.length;
+
+    if (val === '') {
+      setValue('');
+    } else if (isPureStars) {
+      if (newLen < currentLen) {
+        setValue(currentValue.slice(0, newLen));
+      } else if (newLen > currentLen) {
+        setValue(currentValue + '*'.repeat(newLen - currentLen));
+      }
+    } else {
+      if (newLen > currentLen) {
+        const added = val.slice(currentLen);
+        setValue(currentValue + added);
+      } else {
+        const cleaned = val.replace(/\*/g, '');
+        setValue(cleaned);
+      }
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -73,10 +106,10 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           throw new Error(uploadRes.data?.message || 'Failed to upload keys to server.');
         }
 
-        // Step 5: Store Private Key in Local IndexedDB
+        // Store Private Key in Local IndexedDB
         await cryptoService.savePrivateKey(user.id, keyPair.privateKeyPEM);
 
-        // Step 6: Update Local User State
+        // Update Local User State
         const updatedUser = { ...user, public_key: keyPair.publicKeyPEM };
         authService.setUser(updatedUser);
 
@@ -91,11 +124,6 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
         const backupBlob = backupJson?.blob;
         const backupSalt = backupJson?.salt;
         const backupIv = backupJson?.iv;
-
-        console.log("backupBlob", backupBlob);
-        console.log("backupSalt", backupSalt);
-        console.log("backupIv", backupIv);
-
         if (!backupData || !backupBlob || !backupSalt || !backupIv) {
           throw new Error('Backup data is missing or corrupted.');
         }
@@ -123,6 +151,13 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
       setLoading(false);
     }
   };
+
+  const isPasswordInvalid = Boolean(
+    error && (error.toLowerCase().includes('password') || (!password && mode === 'generate'))
+  );
+  const isPinInvalid = Boolean(
+    error && (error.toLowerCase().includes('pin') || !backupPin || backupPin.length < 4 || backupPin.length > 6)
+  );
 
   return (
     <div className="e2ee-modal-backdrop">
@@ -163,29 +198,54 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           {mode === 'generate' && (
             <div className="e2ee-form-group">
               <label className="e2ee-label">Account Password</label>
-              <input
-                type="password"
-                className={`e2ee-input ${error ? 'is-invalid' : ''}`}
-                placeholder="Enter your account password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading || success}
-                autoFocus={mode === 'generate'}
-              />
+              <div className="e2ee-input-wrapper">
+                <input
+                  type="text"
+                  className={`form-control form-control-sm e2ee-input ${!showPassword && password ? 'is-masked' : ''} ${isPasswordInvalid ? 'is-invalid' : ''}`}
+                  placeholder="Enter your account password"
+                  value={showPassword ? password : '*'.repeat(password.length)}
+                  onChange={(e) => handleMaskedChange(e, password, setPassword, showPassword)}
+                  disabled={loading || success}
+                  autoFocus={mode === 'generate'}
+                />
+                <button
+                  type="button"
+                  className="e2ee-toggle-visibility"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  disabled={loading || success}
+                  tabIndex="-1"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <i className={`fe ${showPassword ? 'fe-eye-off' : 'fe-eye'}`} />
+                </button>
+              </div>
             </div>
           )}
 
           <div className="e2ee-form-group">
-            <label className="e2ee-label">{mode === 'generate' ? 'Create Backup PIN' : 'Enter Backup PIN'}</label>
-            <input
-              type="password"
-              className={`e2ee-input ${error ? 'is-invalid' : ''}`}
-              placeholder="e.g. 123456"
-              value={backupPin}
-              onChange={(e) => setBackupPin(e.target.value)}
-              disabled={loading || success}
-              autoFocus={mode === 'restore'}
-            />
+            <label className="e2ee-label" title='Please remember your Backup PIN. It is required to restore your end-to-end encrypted discussions. If you forget this PIN, your encrypted backup cannot be recovered'>{mode === 'generate' ? 'Create Backup PIN' : 'Enter Backup PIN'}</label>
+            <div className="e2ee-input-wrapper">
+              <input
+                type="text"
+                title='Please remember your Backup PIN. It is required to restore your end-to-end encrypted discussions. If you forget this PIN, your encrypted backup cannot be recovered.'
+                className={`form-control form-control-sm e2ee-input ${!showBackupPin && backupPin ? 'is-masked' : ''} ${isPinInvalid ? 'is-invalid' : ''}`}
+                placeholder="e.g. 123456"
+                value={showBackupPin ? backupPin : '*'.repeat(backupPin.length)}
+                onChange={(e) => handleMaskedChange(e, backupPin, setBackupPin, showBackupPin)}
+                disabled={loading || success}
+                autoFocus={mode === 'restore'}
+              />
+              <button
+                type="button"
+                className="e2ee-toggle-visibility"
+                onClick={() => setShowBackupPin((prev) => !prev)}
+                disabled={loading || success}
+                tabIndex="-1"
+                aria-label={showBackupPin ? 'Hide PIN' : 'Show PIN'}
+              >
+                <i className={`fe ${showBackupPin ? 'fe-eye-off' : 'fe-eye'}`} />
+              </button>
+            </div>
           </div>
 
           <button
