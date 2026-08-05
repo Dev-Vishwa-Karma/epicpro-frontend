@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import api from '../../../api/axios';
 import authService from '../../Authentication/authService';
 import cryptoService from '../../../services/cryptoService';
+import InputField from '../../common/formInputs/InputField';
+import Button from '../../common/formInputs/Button';
 import './E2EESetupModal.css';
 
 const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupData = null }) => {
@@ -10,36 +12,60 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
   const [showPassword, setShowPassword] = useState(false);
   const [showBackupPin, setShowBackupPin] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [serverError, setServerError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  const handleMaskedChange = (e, currentValue, setValue, isVisible) => {
-    if (error) setError(null);
-    const val = e.target.value;
-    if (isVisible) {
-      setValue(val);
-      return;
+  const pinRefs = useRef([]);
+
+  const handlePasswordChange = (e) => {
+    if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: null }));
+    if (serverError) setServerError(null);
+    setPassword(e.target.value);
+  };
+
+  const handleBoxChange = (val, idx) => {
+    if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: null }));
+    if (serverError) setServerError(null);
+    const digit = val.replace(/\D/g, '').slice(-1);
+    const pinArr = backupPin.split('');
+    pinArr[idx] = digit || '';
+    const updatedPin = pinArr.join('');
+    setBackupPin(updatedPin);
+
+    if (digit && idx < 3 && pinRefs.current[idx + 1]) {
+      pinRefs.current[idx + 1].focus();
     }
+  };
 
-    const isPureStars = val === '*'.repeat(val.length);
-    const currentLen = currentValue.length;
-    const newLen = val.length;
-
-    if (val === '') {
-      setValue('');
-    } else if (isPureStars) {
-      if (newLen < currentLen) {
-        setValue(currentValue.slice(0, newLen));
-      } else if (newLen > currentLen) {
-        setValue(currentValue + '*'.repeat(newLen - currentLen));
+  const handleBoxKeyDown = (e, idx) => {
+    if (e.key === 'Backspace') {
+      if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: null }));
+      if (serverError) setServerError(null);
+      if (!backupPin[idx] && idx > 0 && pinRefs.current[idx - 1]) {
+        const pinArr = backupPin.split('');
+        pinArr[idx - 1] = '';
+        setBackupPin(pinArr.join(''));
+        pinRefs.current[idx - 1].focus();
       }
-    } else {
-      if (newLen > currentLen) {
-        const added = val.slice(currentLen);
-        setValue(currentValue + added);
-      } else {
-        const cleaned = val.replace(/\*/g, '');
-        setValue(cleaned);
+    } else if (e.key === 'ArrowLeft' && idx > 0 && pinRefs.current[idx - 1]) {
+      pinRefs.current[idx - 1].focus();
+    } else if (e.key === 'ArrowRight' && idx < 3 && pinRefs.current[idx + 1]) {
+      pinRefs.current[idx + 1].focus();
+    }
+  };
+
+  const handleBoxPaste = (e) => {
+    e.preventDefault();
+    if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: null }));
+    if (serverError) setServerError(null);
+    const pastedData = e.clipboardData.getData('text');
+    const digitsOnly = pastedData.replace(/\D/g, '').slice(0, 4);
+    setBackupPin(digitsOnly);
+    if (digitsOnly.length > 0) {
+      const focusIndex = Math.min(digitsOnly.length, 3);
+      if (pinRefs.current[focusIndex]) {
+        pinRefs.current[focusIndex].focus();
       }
     }
   };
@@ -48,23 +74,26 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const errors = {};
     if (mode === 'generate' && !password) {
-      setError('Please enter your account password.');
-      return;
+      errors.password = 'Please enter your account password.';
     }
     if (!backupPin) {
-      setError('Please enter a Backup PIN.');
-      return;
+      errors.pin = 'Please enter a Backup PIN.';
+    } else if (!/^\d{4}$/.test(backupPin)) {
+      errors.pin = 'Backup PIN must be exactly 4 integer digits.';
     }
 
-    // Show warning if using weak backup PIN (less than 6 digits)
-    if (backupPin.length < 4 || backupPin.length > 6) {
-      setError('Backup PIN must be 4 to 6 digits.');
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setServerError(null);
       return;
     }
 
     setLoading(true);
-    setError(null);
+    setFieldErrors({});
+    setServerError(null);
 
     try {
       const user = authService.getUser();
@@ -73,7 +102,6 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
       }
 
       if (mode === 'generate') {
-        // Step 1: Verify Password with backend
         const formData = new FormData();
         formData.append('password', password);
 
@@ -83,13 +111,9 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           throw new Error(verifyRes.data?.message || 'Password verification failed.');
         }
 
-        // Generate Web Crypto RSA-OAEP 2048 Key Pair
         const keyPair = await cryptoService.generateKeyPair();
-
-        // Encrypt Private Key for Backup
         const backup = await cryptoService.encryptPrivateKeyForBackup(keyPair.privateKeyPEM, backupPin);
 
-        // Upload Public Key and Backup JSON to Backend
         const backupJson = JSON.stringify({
           iv: backup.iv,
           salt: backup.salt,
@@ -106,14 +130,13 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           throw new Error(uploadRes.data?.message || 'Failed to upload keys to server.');
         }
 
-        // Store Private Key in Local IndexedDB
         await cryptoService.savePrivateKey(user.id, keyPair.privateKeyPEM);
 
-        // Update Local User State
         const updatedUser = { ...user, public_key: keyPair.publicKeyPEM };
         authService.setUser(updatedUser);
 
         setSuccess(true);
+        window.dispatchEvent(new CustomEvent('e2eeKeysUpdated', { detail: { publicKey: keyPair.publicKeyPEM } }));
         setTimeout(() => {
           if (onSuccess) onSuccess(keyPair.publicKeyPEM);
           if (onClose) onClose();
@@ -128,7 +151,6 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           throw new Error('Backup data is missing or corrupted.');
         }
 
-        // Decrypt the backup blob
         const privateKeyPEM = await cryptoService.decryptPrivateKeyFromBackup(
           backupBlob,
           backupSalt,
@@ -136,34 +158,49 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           backupPin
         );
 
-        // Store in Local IndexedDB
         await cryptoService.savePrivateKey(user.id, privateKeyPEM);
 
         setSuccess(true);
+        window.dispatchEvent(new CustomEvent('e2eeKeysUpdated', { detail: { publicKey: user.public_key } }));
         setTimeout(() => {
           if (onSuccess) onSuccess(user.public_key);
           if (onClose) onClose();
         }, 1000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'An unexpected error occurred.');
+      const msg = err.response?.data?.message || err.message || 'An unexpected error occurred.';
+      setServerError(msg);
+      const newFieldErrors = {};
+      if (msg.toLowerCase().includes('password')) newFieldErrors.password = msg;
+      if (msg.toLowerCase().includes('pin')) newFieldErrors.pin = msg;
+      if (Object.keys(newFieldErrors).length > 0) setFieldErrors(newFieldErrors);
     } finally {
       setLoading(false);
     }
   };
 
-  const isPasswordInvalid = Boolean(
-    error && (error.toLowerCase().includes('password') || (!password && mode === 'generate'))
-  );
-  const isPinInvalid = Boolean(
-    error && (error.toLowerCase().includes('pin') || !backupPin || backupPin.length < 4 || backupPin.length > 6)
-  );
-
   return (
     <div className="e2ee-modal-backdrop">
       <div className="e2ee-modal-card">
         <div className="e2ee-modal-header">
-          <button type="button" className="close" onClick={onClose} aria-label="Close">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              position: 'absolute',
+              right: '16px',
+              top: '16px',
+              border: 'none',
+              background: 'transparent',
+              fontSize: '20px',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: 0,
+              lineHeight: 1
+            }}
+          >
+            <i className="fe fe-x" />
           </button>
           <div className="e2ee-modal-icon">
             <i className="fe fe-lock" />
@@ -178,10 +215,10 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           </p>
         </div>
 
-        {error && (
+        {serverError && (
           <div className="e2ee-alert-error">
             <i className="fe fe-alert-triangle" />
-            <span>{error}</span>
+            <span>{serverError}</span>
           </div>
         )}
 
@@ -196,75 +233,85 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
 
         <form onSubmit={handleSubmit} className="e2ee-modal-body">
           {mode === 'generate' && (
-            <div className="e2ee-form-group">
-              <label className="e2ee-label">Account Password</label>
-              <div className="e2ee-input-wrapper">
-                <input
-                  type="text"
-                  className={`form-control form-control-sm e2ee-input ${!showPassword && password ? 'is-masked' : ''} ${isPasswordInvalid ? 'is-invalid' : ''}`}
-                  placeholder="Enter your account password"
-                  value={showPassword ? password : '*'.repeat(password.length)}
-                  onChange={(e) => handleMaskedChange(e, password, setPassword, showPassword)}
-                  disabled={loading || success}
-                  autoFocus={mode === 'generate'}
-                />
-                <button
-                  type="button"
-                  className="e2ee-toggle-visibility"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  disabled={loading || success}
-                  tabIndex="-1"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  <i className={`fe ${showPassword ? 'fe-eye-off' : 'fe-eye'}`} />
-                </button>
-              </div>
+            <div className="e2ee-form-group position-relative mb-4">
+              <InputField
+                label="Account Password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your account password"
+                value={password}
+                onChange={handlePasswordChange}
+                disabled={loading || success}
+                inputClassName="form-control-sm e2ee-input"
+                error={fieldErrors.password}
+              />
+              <Button
+                type="button"
+                className="e2ee-toggle-visibility border-0 p-0 bg-transparent shadow-none"
+                onClick={() => setShowPassword((prev) => !prev)}
+                disabled={loading || success}
+                icon={`fe ${showPassword ? 'fe-eye-off' : 'fe-eye'}`}
+                title={showPassword ? 'Hide password' : 'Show password'}
+                style={{ position: 'absolute', right: '12px', top: '36px', zIndex: 5 }}
+              />
             </div>
           )}
 
-          <div className="e2ee-form-group">
-            <label className="e2ee-label" title='Please remember your Backup PIN. It is required to restore your end-to-end encrypted discussions. If you forget this PIN, your encrypted backup cannot be recovered'>{mode === 'generate' ? 'Create Backup PIN' : 'Enter Backup PIN'}</label>
-            <div className="e2ee-input-wrapper">
-              <input
-                type="text"
-                title='Please remember your Backup PIN. It is required to restore your end-to-end encrypted discussions. If you forget this PIN, your encrypted backup cannot be recovered.'
-                className={`form-control form-control-sm e2ee-input ${!showBackupPin && backupPin ? 'is-masked' : ''} ${isPinInvalid ? 'is-invalid' : ''}`}
-                placeholder="e.g. 123456"
-                value={showBackupPin ? backupPin : '*'.repeat(backupPin.length)}
-                onChange={(e) => handleMaskedChange(e, backupPin, setBackupPin, showBackupPin)}
-                disabled={loading || success}
-                autoFocus={mode === 'restore'}
-              />
-              <button
+          <div className="e2ee-form-group mb-4">
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <label className="e2ee-label mb-0" title="Please remember your Backup PIN. It is required to restore your end-to-end encrypted discussions. If you forget this PIN, your encrypted backup cannot be recovered.">
+                {mode === 'generate' ? 'Create Backup PIN (4 Digits)' : 'Enter Backup PIN (4 Digits)'}
+              </label>
+              <Button
                 type="button"
-                className="e2ee-toggle-visibility"
+                className="btn-sm border-0 p-0 bg-transparent shadow-none text-muted"
                 onClick={() => setShowBackupPin((prev) => !prev)}
                 disabled={loading || success}
-                tabIndex="-1"
-                aria-label={showBackupPin ? 'Hide PIN' : 'Show PIN'}
-              >
-                <i className={`fe ${showBackupPin ? 'fe-eye-off' : 'fe-eye'}`} />
-              </button>
+                icon={`fe ${showBackupPin ? 'fe-eye-off' : 'fe-eye'} mr-1`}
+                label={showBackupPin ? 'Hide PIN' : 'Show PIN'}
+                style={{ fontSize: '12px', fontWeight: '500' }}
+              />
             </div>
+
+            <div className="pin-boxes-wrapper">
+              {Array.from({ length: 4 }).map((_, idx) => {
+                const digit = backupPin[idx] || '';
+                return (
+                  <input
+                    key={idx}
+                    ref={(el) => (pinRefs.current[idx] = el)}
+                    type={showBackupPin ? "text" : "password"}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleBoxChange(e.target.value, idx)}
+                    onKeyDown={(e) => handleBoxKeyDown(e, idx)}
+                    onPaste={handleBoxPaste}
+                    disabled={loading || success}
+                    className={`pin-box-single ${digit ? 'is-filled' : ''} ${fieldErrors.pin ? 'is-invalid' : ''}`}
+                    autoFocus={mode === 'restore' && idx === 0}
+                  />
+                );
+              })}
+            </div>
+
+            {fieldErrors.pin && (
+              <div className="text-danger text-center small mt-2">
+                <i className="fe fe-alert-circle mr-1" />
+                {fieldErrors.pin}
+              </div>
+            )}
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="e2ee-btn-primary"
+            className="e2ee-btn-primary w-100"
             disabled={loading || success}
-          >
-            {loading ? (
-              <>
-                <div className="e2ee-spinner" />
-                <span>{mode === 'generate' ? 'Generating Keys...' : 'Restoring Keys...'}</span>
-              </>
-            ) : (
-              <>
-                <i className={mode === 'generate' ? 'fe fe-key' : 'fe fe-unlock'} />
-                <span>{mode === 'generate' ? 'Generate Keys' : 'Restore Keys'}</span>
-              </>
-            )}
-          </button>
+            loading={loading}
+            icon={mode === 'generate' ? 'fe fe-key mr-2' : 'fe fe-unlock mr-2'}
+            label={mode === 'generate' ? (loading ? 'Generating Keys...' : 'Generate Keys') : (loading ? 'Restoring Keys...' : 'Restore Keys')}
+          />
         </form>
       </div>
     </div>
@@ -272,4 +319,3 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
 };
 
 export default E2EESetupModal;
-

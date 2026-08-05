@@ -256,61 +256,11 @@ export const cryptoService = {
     };
   },
 
-  wrapAesKeyForParticipant: async (rawAesKeyBuffer, publicKeyPEM) => {
-    if (!publicKeyPEM || !publicKeyPEM.trim() || !rawAesKeyBuffer) return null;
-    const rsaPublicKey = await cryptoService.importPublicKey(publicKeyPEM);
-    const encryptedKeyBuffer = await window.crypto.subtle.encrypt(
-      { name: 'RSA-OAEP' },
-      rsaPublicKey,
-      rawAesKeyBuffer
-    );
-    return arrayBufferToBase64(encryptedKeyBuffer);
-  },
-
-  unwrapAesKeyForUser: async (encryptedKeyBase64, currentUserId) => {
-    if (!encryptedKeyBase64 || !currentUserId) return null;
-    try {
-      const privateKeyPEM = await cryptoService.getPrivateKey(currentUserId);
-      if (!privateKeyPEM) return null;
-
-      const rsaPrivateKey = await cryptoService.importPrivateKey(privateKeyPEM);
-      const encryptedKeyBuffer = base64ToArrayBuffer(encryptedKeyBase64);
-      return await window.crypto.subtle.decrypt(
-        { name: 'RSA-OAEP' },
-        rsaPrivateKey,
-        encryptedKeyBuffer
-      );
-    } catch (err) {
-      console.error('Error unwrapping AES key for user:', err);
-      return null;
-    }
-  },
-
   decryptDiscussionDetails: async (discussion, currentUserId) => {
     if (!discussion) return discussion;
 
     if (Number(discussion.is_encrypted) !== 1) {
-      const parseUnencryptedField = (fieldVal) => {
-        if (!fieldVal || typeof fieldVal !== 'string') return fieldVal || '';
-        if (fieldVal.trim().startsWith('{')) {
-          try {
-            const parsed = JSON.parse(fieldVal);
-            if (parsed && typeof parsed.data !== 'undefined') {
-              return parsed.data;
-            }
-          } catch (e) {
-            // Not valid JSON, return original
-          }
-        }
-        return fieldVal;
-      };
-
-      return {
-        ...discussion,
-        title: parseUnencryptedField(discussion.title),
-        description: parseUnencryptedField(discussion.description),
-        conclusion: parseUnencryptedField(discussion.conclusion),
-      };
+      return discussion;
     }
 
     try {
@@ -390,7 +340,6 @@ export const cryptoService = {
         title: decryptedTitle || discussion.title,
         description: decryptedDescription || discussion.description,
         conclusion: decryptedConclusion || discussion.conclusion,
-        rawAesKeyBuffer,
         isDecrypted: true,
       };
     } catch (err) {
@@ -466,7 +415,7 @@ export const cryptoService = {
       const decoder = new TextDecoder();
       return decoder.decode(decryptedContent);
     } catch (e) {
-      throw new Error("Decryption failed. Incorrect backup password.");
+      throw new Error("Decryption failed. Incorrect backup pin.");
     }
   },
 };

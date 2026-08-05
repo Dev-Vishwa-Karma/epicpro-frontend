@@ -48,7 +48,6 @@ class Discussions extends Component {
       showAddEditModal: false,
       showViewModal: false,
       showDeleteModal: false,
-      showE2EESetupModal: false,
       e2eeStatus: "checking", // 'checking', 'ready', 'missing'
       selectedDiscussion: null,
       discussionToView: null,
@@ -74,7 +73,25 @@ class Discussions extends Component {
     }
     window.addEventListener("scroll", this.handleScroll, true);
     window.addEventListener("wheel", this.handleWheel, { passive: true });
+    window.addEventListener("e2eeKeysUpdated", this.handleE2EEKeysUpdated);
   }
+
+  handleE2EEKeysUpdated = () => {
+    cachedDiscussions = null;
+    this.setState(
+      {
+        e2eeStatus: "ready",
+        page: 1,
+        discussions: [],
+        loading: true,
+      },
+      () => {
+        this.checkE2EEStatus();
+        this.fetchEmployees();
+        this.fetchDiscussions(false);
+      }
+    );
+  };
 
   checkE2EEStatus = async () => {
     const user = authService.getUser();
@@ -83,32 +100,15 @@ class Discussions extends Component {
     try {
       const res = await api.get("/get_employees.php?action=check-public-key");
       const publicKey = res.data?.data?.public_key;
-      const encryptedBlob = res.data?.data?.encrypted_blob;
       const hasPrivateKey = await cryptoService.hasPrivateKey(user.id);
 
-      if (!publicKey) {
+      if (!publicKey || !hasPrivateKey) {
         this.setState({
-          showE2EESetupModal: true,
-          e2eeSetupMode: 'generate',
-          e2eeStatus: "missing",
-        });
-      } else if (!hasPrivateKey && encryptedBlob) {
-        this.setState({
-          showE2EESetupModal: true,
-          e2eeSetupMode: 'restore',
-          e2eeStatus: "missing",
-          backupData: { encryptedBlob },
-        });
-      } else if (!hasPrivateKey && !encryptedBlob) {
-        this.setState({
-          showE2EESetupModal: true,
-          e2eeSetupMode: 'generate',
           e2eeStatus: "missing",
         });
       } else {
         this.setState({
           e2eeStatus: "ready",
-          showE2EESetupModal: false,
         });
       }
     } catch (error) {
@@ -119,6 +119,7 @@ class Discussions extends Component {
   componentWillUnmount() {
     window.removeEventListener("scroll", this.handleScroll, true);
     window.removeEventListener("wheel", this.handleWheel);
+    window.removeEventListener("e2eeKeysUpdated", this.handleE2EEKeysUpdated);
   }
 
   handleWheel = (e) => {
@@ -188,9 +189,9 @@ class Discussions extends Component {
   canModifyDiscussion = (disc) => {
     const user = authService.getUser() || window.user || {};
     const uId = String(user.id || user.employee_id || "");
-    const hasPublicKey = user.public_key && user.public_key.trim();
+    const isE2EEReady = this.state.e2eeStatus === "ready";
     const isAdmin = authService.isAdminCheck ? authService.isAdminCheck() : (authService.isAdmin ? authService.isAdmin() : false);
-    return hasPublicKey && (String(disc?.created_by) === uId || isAdmin);
+    return isE2EEReady && (String(disc?.created_by) === uId || isAdmin);
   };
 
   fetchEmployees = () => {
@@ -198,96 +199,11 @@ class Discussions extends Component {
       .getCall("get_employees.php", { action: "view", role: "admin" })
       .then((res) => {
         const empList = res?.data || [];
-        this.setState({ employees: empList }, () => {
-          if (this.state.discussions && this.state.discussions.length > 0) {
-            this.syncPendingParticipantKeys(this.state.discussions);
-          }
-        });
+        this.setState({ employees: empList });
       })
       .catch((err) => {
         console.error("Error fetching employees:", err);
       });
-  };
-
-  syncPendingParticipantKeys = async (decryptedList) => {
-    const user = authService.getUser();
-    if (!user || !user.id || !Array.isArray(decryptedList) || decryptedList.length === 0) return;
-
-    const currentUserId = Number(user.id);
-    const { employees = [] } = this.state;
-
-    await Promise.all(decryptedList.map(async (disc) => {
-      if (!disc) return;
-
-      let partDetails = disc.participant_details || disc.participants || [];
-      if (typeof partDetails === 'string') {
-        try {
-          partDetails = JSON.parse(partDetails);
-        } catch (e) {
-          partDetails = [];
-        }
-      }
-      if (!Array.isArray(partDetails) || partDetails.length === 0) return;
-
-      let rawAesKeyBuffer = disc.rawAesKeyBuffer;
-
-      if (!rawAesKeyBuffer && Number(disc.is_encrypted) === 1) {
-        const userParticipant = partDetails.find((p) => Number(p.user_id) === currentUserId);
-        if (userParticipant?.encrypted_key) {
-          rawAesKeyBuffer = await cryptoService.unwrapAesKeyForUser(userParticipant.encrypted_key, currentUserId);
-        }
-      }
-
-      if (!rawAesKeyBuffer) return;
-
-      let keysToUpdate = false;
-
-      const updatedParticipantsPayload = await Promise.all(partDetails.map(async (p) => {
-        const pUserId = Number(p.user_id || p.id);
-        let encKey = p.encrypted_key;
-
-        if (!encKey || !String(encKey).trim()) {
-          const pEmp = employees.find((e) => Number(e.id) === pUserId);
-          const pPublicKey = p.public_key || pEmp?.public_key || (pUserId === currentUserId ? user?.public_key : null);
-
-          if (pPublicKey && String(pPublicKey).trim()) {
-            try {
-              encKey = await cryptoService.wrapAesKeyForParticipant(rawAesKeyBuffer, pPublicKey);
-              if (encKey) {
-                keysToUpdate = true;
-                p.encrypted_key = encKey;
-              }
-            } catch (err) {
-              console.error(`Failed to wrap AES key for participant #${pUserId} in discussion #${disc.id}:`, err);
-            }
-          }
-        }
-
-        return {
-          user_id: pUserId,
-          role: p.role || (Number(pUserId) === Number(disc.created_by) ? 'creator' : 'participant'),
-          encrypted_key: encKey || null,
-        };
-      }));
-
-      if (keysToUpdate) {
-        const payload = {
-          id: disc.id,
-          participants: updatedParticipantsPayload,
-        };
-
-        getService
-          .addCall("discussions.php", "update_participant_keys", payload)
-          .then((res) => {
-            if (res?.status === "success") {
-              console.log(`Auto-synced E2EE keys for discussion #${disc.id}`);
-            }
-          })
-          .catch((err) => {
-            console.error(`Error auto-syncing participant keys for discussion #${disc.id}:`, err);
-          });
-      }
-    }));
   };
 
   decryptDiscussionsList = async (discussionsList) => {
@@ -298,9 +214,7 @@ class Discussions extends Component {
       cryptoService.decryptDiscussionDetails(disc, user.id)
     );
 
-    const decryptedList = await Promise.all(decryptedPromises);
-    this.syncPendingParticipantKeys(decryptedList);
-    return decryptedList;
+    return await Promise.all(decryptedPromises);
   };
 
   fetchDiscussions = (append = false) => {
@@ -433,6 +347,10 @@ class Discussions extends Component {
 
   // Add / Edit / View / Delete Handlers
   handleOpenAddModal = () => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     this.setState({
       showAddEditModal: true,
       selectedDiscussion: null,
@@ -441,6 +359,10 @@ class Discussions extends Component {
   };
 
   handleOpenEditModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     this.setState({
       showAddEditModal: true,
       selectedDiscussion: discussion,
@@ -458,6 +380,10 @@ class Discussions extends Component {
   };
 
   handleOpenDeleteModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     this.setState({
       showDeleteModal: true,
       discussionToDelete: discussion,

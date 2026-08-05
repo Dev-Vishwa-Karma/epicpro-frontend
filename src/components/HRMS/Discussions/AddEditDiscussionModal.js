@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Select from 'react-select';
 import Button from '../../common/formInputs/Button';
+import InputField from '../../common/formInputs/InputField';
 import authService from '../../Authentication/authService';
 import cryptoService from '../../../services/cryptoService';
 
@@ -27,19 +28,6 @@ class AddEditDiscussionModal extends Component {
         }
     }
 
-    unwrapFieldValue = (val) => {
-        if (!val || typeof val !== 'string') return val || '';
-        if (val.trim().startsWith('{')) {
-            try {
-                const parsed = JSON.parse(val);
-                if (parsed && typeof parsed.data !== 'undefined') {
-                    return parsed.data;
-                }
-            } catch (e) { }
-        }
-        return val;
-    };
-
     populateFormData = () => {
         const { discussion, employees = [] } = this.props;
         const empList = Array.isArray(employees) ? employees : [];
@@ -60,78 +48,37 @@ class AddEditDiscussionModal extends Component {
                 .map(p => Number(typeof p === 'object' && p !== null ? p.user_id || p.id || p.value : p))
                 .filter(Boolean);
 
+            const creatorId = Number(discussion.created_by);
             const selectedParts = empList
-                .filter(emp => numericParts.includes(Number(emp.id)) && Number(emp.id) !== Number(discussion.created_by))
+                .filter(emp => numericParts.includes(Number(emp.id)) && Number(emp.id) !== creatorId)
                 .map(emp => {
                     const hasKey = emp.public_key && emp.public_key.trim();
                     const fullName = `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.email || `User #${emp.id}`;
                     return {
                         value: emp.id,
-                        label: hasKey ? fullName : `${fullName} (No E2EE Key)`
+                        label: hasKey ? fullName : `${fullName} (No E2EE Key)`,
+                        isDisabled: !hasKey
                     };
                 });
 
-            const pendingNotice = this.checkPendingKeys(selectedParts);
-
             this.setState({
                 id: discussion.id || null,
-                title: this.unwrapFieldValue(discussion.title),
-                description: this.unwrapFieldValue(discussion.description),
-                conclusion: this.unwrapFieldValue(discussion.conclusion),
+                title: discussion.title || '',
+                description: discussion.description || '',
+                conclusion: discussion.conclusion || '',
                 selectedParticipants: selectedParts,
-                pendingNotice: pendingNotice,
                 errors: {},
             });
         } else {
-            const pendingNotice = this.checkPendingKeys([]);
             this.setState({
                 id: null,
                 title: '',
                 description: '',
                 conclusion: '',
                 selectedParticipants: [],
-                pendingNotice: pendingNotice,
                 errors: {},
             });
         }
-    };
-
-    checkPendingKeys = (selectedParticipantsList) => {
-        const { employees = [] } = this.props;
-        const currentUser = authService.getUser();
-
-        const selected = selectedParticipantsList || [];
-        const missingKeysParticipants = [];
-
-        // 1. Check Creator Public Key (Non-blocking notice)
-        let creatorHasPublicKey = true;
-        if (currentUser) {
-            const creatorEmp = employees.find(e => Number(e.id) === Number(currentUser.id));
-            const creatorPublicKey = creatorEmp?.public_key || currentUser?.public_key;
-            if (!creatorPublicKey || !creatorPublicKey.trim()) {
-                creatorHasPublicKey = false;
-            }
-        }
-
-        if (!creatorHasPublicKey) {
-            return 'You (Creator) do not have an E2EE public key configured. This discussion will be stored in unencrypted format.';
-        }
-
-        // 2. Check Participants Public Keys (Non-blocking notice)
-        selected.forEach(item => {
-            const empId = Number(item.value);
-            if (currentUser && Number(empId) === Number(currentUser.id)) return;
-            const emp = employees.find(e => Number(e.id) === empId);
-            if (!emp || !emp.public_key || !emp.public_key.trim()) {
-                const name = item.label ? item.label.replace(/\s*\(No E2EE Key\)/i, '') : `User #${empId}`;
-                missingKeysParticipants.push(name);
-            }
-        });
-
-        if (missingKeysParticipants.length > 0) {
-            return `The following users (${missingKeysParticipants.join(', ')}) have not set up E2EE encryption keys yet. Discussion will still be created/saved, and E2EE access will be granted automatically as soon as they set up E2EE keys and a keyholder views the discussion.`;
-        }
-        return '';
     };
 
     handleInputChange = (e) => {
@@ -144,11 +91,27 @@ class AddEditDiscussionModal extends Component {
 
     handleParticipantChange = (selectedOptions) => {
         const selected = selectedOptions || [];
-        const pendingNotice = this.checkPendingKeys(selected);
+        const { employees = [] } = this.props;
+        const currentUser = authService.getUser();
+        const missingKeys = [];
+
+        selected.forEach(item => {
+            const empId = Number(item.value);
+            if (currentUser && Number(empId) === Number(currentUser.id)) return;
+            const emp = employees.find(e => Number(e.id) === empId);
+            if (!emp || !emp.public_key || !emp.public_key.trim()) {
+                const name = item.label ? item.label.replace(/\s*\(No E2EE Key\)/i, '') : `User #${empId}`;
+                missingKeys.push(name);
+            }
+        });
+
+        const participantError = missingKeys.length > 0
+            ? `User(s) without E2EE key cannot be added: ${missingKeys.join(', ')}`
+            : '';
+
         this.setState({
             selectedParticipants: selected,
-            pendingNotice: pendingNotice,
-            errors: { ...this.state.errors, participants: '', general: '' }
+            errors: { ...this.state.errors, participants: participantError, general: '' }
         });
     };
 
@@ -158,9 +121,26 @@ class AddEditDiscussionModal extends Component {
             errors.title = 'Title is required';
         }
 
-        const pendingNotice = this.checkPendingKeys(this.state.selectedParticipants);
+        const { employees = [] } = this.props;
+        const currentUser = authService.getUser();
+        const selected = this.state.selectedParticipants || [];
+        const missingKeys = [];
 
-        this.setState({ errors, pendingNotice });
+        selected.forEach(item => {
+            const empId = Number(item.value);
+            if (currentUser && Number(empId) === Number(currentUser.id)) return;
+            const emp = employees.find(e => Number(e.id) === empId);
+            if (!emp || !emp.public_key || !emp.public_key.trim()) {
+                const name = item.label ? item.label.replace(/\s*\(No E2EE Key\)/i, '') : `User #${empId}`;
+                missingKeys.push(name);
+            }
+        });
+
+        if (missingKeys.length > 0) {
+            errors.participants = `Selected participant(s) (${missingKeys.join(', ')}) do not have an E2EE public key configured.`;
+        }
+
+        this.setState({ errors });
         return Object.keys(errors).length === 0;
     };
 
@@ -168,62 +148,54 @@ class AddEditDiscussionModal extends Component {
         e.preventDefault();
         if (!this.validate()) return;
 
-        const { employees = [] } = this.props;
+        const { employees = [], discussion } = this.props;
         const currentUser = authService.getUser();
+        if (!currentUser || !currentUser.id) return;
 
-        let creatorPublicKey = null;
-        if (currentUser) {
-            const creatorEmp = employees.find(e => Number(e.id) === Number(currentUser.id));
-            creatorPublicKey = (creatorEmp?.public_key || currentUser?.public_key || '').trim();
-        }
+        const currentUserId = Number(currentUser.id);
+        const creatorId = discussion?.created_by ? Number(discussion.created_by) : currentUserId;
 
         const selected = this.state.selectedParticipants || [];
-        const participantIds = selected.map(item => Number(item.value));
-        if (currentUser && !participantIds.includes(Number(currentUser.id))) {
-            participantIds.push(Number(currentUser.id));
-        }
+        const participantIdsSet = new Set(selected.map(item => Number(item.value)));
+        participantIdsSet.add(creatorId);
+        participantIdsSet.add(currentUserId);
 
-        // If creator does NOT have a public key, store discussion in unencrypted format as JSON formatted strings
-        if (!creatorPublicKey) {
-            const formatUnencryptedJSONField = (text) => {
-                const trimmed = (text || '').trim();
-                if (!trimmed) return undefined;
-                return JSON.stringify({
-                    data: trimmed,
-                    iv: ''
-                });
-            };
+        const participantIds = Array.from(participantIdsSet);
 
-            const participantsPayload = participantIds.map(pId => ({
-                user_id: pId,
-                role: (currentUser && Number(pId) === Number(currentUser.id)) ? 'creator' : 'participant',
-                encrypted_key: null
-            }));
-
-            const payload = {
-                id: this.state.id,
-                title: formatUnencryptedJSONField(this.state.title),
-                description: formatUnencryptedJSONField(this.state.description),
-                conclusion: formatUnencryptedJSONField(this.state.conclusion),
-                is_encrypted: 0,
-                participants: participantsPayload,
-            };
-
-            this.props.onSubmit(payload);
-            return;
-        }
-
-        // Build participants public key map (creator + participants)
+        // Build participants public key map (creator + editor + participants)
         const participantsPublicKeysMap = {};
-        participantsPublicKeysMap[currentUser.id] = creatorPublicKey;
+        const missingKeys = [];
 
-        selected.forEach(item => {
-            const empId = Number(item.value);
-            const emp = employees.find(e => Number(e.id) === empId);
-            if (emp && emp.public_key) {
-                participantsPublicKeysMap[empId] = emp.public_key;
+        participantIds.forEach(empId => {
+            let pubKey = '';
+            if (empId === currentUserId && currentUser.public_key) {
+                pubKey = currentUser.public_key.trim();
+            }
+            if (!pubKey) {
+                const emp = employees.find(e => Number(e.id) === empId);
+                if (emp && emp.public_key && emp.public_key.trim()) {
+                    pubKey = emp.public_key.trim();
+                }
+            }
+
+            if (pubKey) {
+                participantsPublicKeysMap[empId] = pubKey;
+            } else {
+                const emp = employees.find(e => Number(e.id) === empId);
+                const name = emp ? `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.email : `User #${empId}`;
+                missingKeys.push(name);
             }
         });
+
+        if (missingKeys.length > 0) {
+            this.setState({
+                errors: {
+                    ...this.state.errors,
+                    general: `Participant(s) without E2EE key configured: ${missingKeys.join(', ')}`
+                }
+            });
+            return;
+        }
 
         try {
             // Encrypt discussion details using hybrid AES-GCM + RSA-OAEP
@@ -239,7 +211,7 @@ class AddEditDiscussionModal extends Component {
             // Construct participant items containing their wrapped AES key
             const participantsPayload = participantIds.map(pId => ({
                 user_id: pId,
-                role: (currentUser && Number(pId) === Number(currentUser.id)) ? 'creator' : 'participant',
+                role: pId === creatorId ? 'creator' : 'participant',
                 encrypted_key: encrypted.encryptedKeys[pId] || null
             }));
 
@@ -266,7 +238,7 @@ class AddEditDiscussionModal extends Component {
 
     render() {
         const { show, onClose, isEditing, isLoading, employees = [] } = this.props;
-        const { title, description, conclusion, selectedParticipants, errors, pendingNotice } = this.state;
+        const { title, description, conclusion, selectedParticipants, errors } = this.state;
 
         if (!show) return null;
 
@@ -277,7 +249,8 @@ class AddEditDiscussionModal extends Component {
             const fullName = `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.email || `User #${emp.id}`;
             return {
                 value: emp.id,
-                label: hasKey ? fullName : `${fullName} (No E2EE Key)`
+                label: hasKey ? fullName : `${fullName} (No E2EE Key)`,
+                isDisabled: !hasKey
             };
         });
 
@@ -304,20 +277,16 @@ class AddEditDiscussionModal extends Component {
                                         </div>
                                     )}
 
-                                    <div className="form-group mb-3">
-                                        <label className="form-label font-weight-bold">
-                                            Title <span className="text-danger">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className={`form-control ${errors.title ? 'is-invalid' : ''}`}
-                                            name="title"
-                                            placeholder="Enter discussion title..."
-                                            value={title}
-                                            onChange={this.handleInputChange}
-                                        />
-                                        {errors.title && <div className="invalid-feedback">{errors.title}</div>}
-                                    </div>
+                                    <InputField
+                                        label="Title *"
+                                        name="title"
+                                        required
+                                        placeholder="Enter discussion title..."
+                                        value={title}
+                                        onChange={this.handleInputChange}
+                                        error={errors.title}
+                                        containerClassName="mb-3"
+                                    />
 
                                     <div className="form-group mb-3">
                                         <label className="form-label font-weight-bold">
@@ -338,42 +307,30 @@ class AddEditDiscussionModal extends Component {
                                                 {errors.participants}
                                             </div>
                                         )}
-                                        {pendingNotice && (
-                                            <div className="alert alert-info mb-0 mt-2 py-2 px-3 small" style={{ backgroundColor: '#e0f2fe', borderColor: '#bae6fd', color: '#0369a1' }}>
-                                                <i className="fa fa-info-circle mr-2"></i>
-                                                {pendingNotice}
-                                            </div>
-                                        )}
                                     </div>
 
-                                    <div className="form-group mb-3">
-                                        <label className="form-label font-weight-bold">
-                                            Description (Optional)
-                                        </label>
-                                        <textarea
-                                            className={`form-control ${errors.description ? 'is-invalid' : ''}`}
-                                            name="description"
-                                            rows="5"
-                                            placeholder="Enter discussion agenda or details..."
-                                            value={description}
-                                            onChange={this.handleInputChange}
-                                        />
-                                        {errors.description && <div className="invalid-feedback">{errors.description}</div>}
-                                    </div>
+                                    <InputField
+                                        type="textarea"
+                                        label="Description (Optional)"
+                                        name="description"
+                                        rows={5}
+                                        placeholder="Enter discussion agenda or details..."
+                                        value={description}
+                                        onChange={this.handleInputChange}
+                                        error={errors.description}
+                                        containerClassName="mb-3"
+                                    />
 
-                                    <div className="form-group mb-3">
-                                        <label className="form-label font-weight-bold">
-                                            Conclusion (Optional)
-                                        </label>
-                                        <textarea
-                                            className="form-control"
-                                            name="conclusion"
-                                            rows="3"
-                                            placeholder="Enter final decision or conclusion..."
-                                            value={conclusion}
-                                            onChange={this.handleInputChange}
-                                        />
-                                    </div>
+                                    <InputField
+                                        type="textarea"
+                                        label="Conclusion (Optional)"
+                                        name="conclusion"
+                                        rows={3}
+                                        placeholder="Enter final decision or conclusion..."
+                                        value={conclusion}
+                                        onChange={this.handleInputChange}
+                                        containerClassName="mb-3"
+                                    />
                                 </div>
                                 <div className="modal-footer bg-white">
                                     <Button
