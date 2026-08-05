@@ -1,6 +1,7 @@
-const DB_NAME = 'epicpro_e2ee_keys_db';
-const DB_VERSION = 1;
-const STORE_NAME = 'user_keys';
+
+const DB_NAME = process.env.REACT_APP_UI_DB_NAME;
+const DB_VERSION = process.env.REACT_APP_UI_DB_VERSION;
+const STORE_NAME = process.env.REACT_APP_UI_STORE_NAME;
 
 function openDB() {
   return new Promise((resolve, reject) => {
