@@ -1,7 +1,7 @@
 
-const DB_NAME = process.env.REACT_APP_UI_DB_NAME;
-const DB_VERSION = process.env.REACT_APP_UI_DB_VERSION;
-const STORE_NAME = process.env.REACT_APP_UI_STORE_NAME;
+const DB_NAME = process.env.REACT_APP_INDEX_DB_NAME;
+const DB_VERSION = process.env.REACT_APP_INDEX_DB_VERSION;
+const STORE_NAME = process.env.REACT_APP_INDEX_DB_STORE_NAME;
 
 function openDB() {
   return new Promise((resolve, reject) => {
