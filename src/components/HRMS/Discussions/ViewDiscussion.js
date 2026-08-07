@@ -7,7 +7,7 @@ import authService from '../../Authentication/authService';
 const ViewDiscussion = ({ show = false, onClose = () => { }, discussion = null }) => {
   if (!show || !discussion) return null;
   const participants = Array.isArray(discussion.participant_details)
-    ? discussion.participant_details.filter(p => Number(p.id || p.user_id) !== Number(discussion.created_by))
+    ? discussion.participant_details
     : [];
   const isConcluded = discussion.conclusion && discussion.conclusion.trim();
 
@@ -115,7 +115,7 @@ const ViewDiscussion = ({ show = false, onClose = () => { }, discussion = null }
                                 className="mr-2 flex-shrink-0"
                               />
                               <span className="text-truncate" style={{ maxWidth: '160px' }}>
-                                {Number(p?.id || p?.user_id) === Number(authService.getUser()?.id) ? 'You' : p?.name || `${p?.first_name || ''} ${p?.last_name || ''}`.trim() || `User #${p}`}
+                                {Number(p?.user_id) === Number(authService.getUser()?.id) ? 'You' : p?.name || `${p?.first_name || ''} ${p?.last_name || ''}`.trim() || `User #${p}`}
                               </span>
                             </span>
                           ))

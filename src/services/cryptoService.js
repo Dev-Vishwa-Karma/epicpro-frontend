@@ -419,6 +419,38 @@ export const cryptoService = {
       throw new Error("Decryption failed. Incorrect backup pin.");
     }
   },
+
+  reencryptDiscussionKeyForTargetUser: async (discussion, currentUserId, targetPublicKeyPEM) => {
+    const privateKeyPEM = await cryptoService.getPrivateKey(currentUserId);
+    if (!privateKeyPEM) {
+      throw new Error("Private key missing on your device");
+    }
+
+    const partDetails = discussion.participant_details || [];
+    const userParticipant = partDetails.find(p => Number(p.user_id) === Number(currentUserId));
+    const encryptedKeyBase64 = userParticipant?.encrypted_key;
+
+    if (!encryptedKeyBase64) {
+      throw new Error("No encrypted discussion key found for current user");
+    }
+
+    const rsaPrivateKey = await cryptoService.importPrivateKey(privateKeyPEM);
+    const encryptedKeyBuffer = base64ToArrayBuffer(encryptedKeyBase64);
+    const rawAesKeyBuffer = await window.crypto.subtle.decrypt(
+      { name: 'RSA-OAEP' },
+      rsaPrivateKey,
+      encryptedKeyBuffer
+    );
+
+    const targetRsaPublicKey = await cryptoService.importPublicKey(targetPublicKeyPEM);
+    const reencryptedBuffer = await window.crypto.subtle.encrypt(
+      { name: 'RSA-OAEP' },
+      targetRsaPublicKey,
+      rawAesKeyBuffer
+    );
+
+    return arrayBufferToBase64(reencryptedBuffer);
+  }
 };
 
 export default cryptoService;

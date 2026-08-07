@@ -348,8 +348,20 @@ class RightSidebar extends Component {
 									</ul>
 								</div>
 								{(window.user.role === 'admin' || window.user.role === 'super_admin') && (
-
 									<div>
+										<h6 className="font-14 font-weight-bold mt-4 text-muted">Security Settings</h6>
+										<div className="mt-2 mb-4">
+											<button
+												type="button"
+												className="btn btn-sm btn-outline-primary w-100 d-flex align-items-center justify-content-center"
+												onClick={() => {
+													if (toggleRightSidebar) toggleRightSidebar();
+													window.dispatchEvent(new CustomEvent('openE2EESetupModal', { detail: { mode: 'reset_pin' } }));
+												}}
+											>
+												<i className="fe fe-key mr-2" /> Reset E2EE Backup PIN
+											</button>
+										</div>
 										<h6 className="font-14 font-weight-bold mt-4 text-muted">Configuration Setting</h6>
 										<div className="setting-list list-unstyled mt-1 mb-4 setting_switch">
 											{/* Global Hide  and show Todos and Projects */}

@@ -10,6 +10,7 @@ import Button from "../../common/formInputs/Button";
 import DeleteModal from "../../common/DeleteModal";
 import AddEditDiscussionModal from "./AddEditDiscussionModal";
 import ViewDiscussion from "./ViewDiscussion";
+import ParticipantsModal from "./ParticipantsModal";
 import authService from "../../Authentication/authService";
 import Avatar from "../../common/Avatar";
 import api from "../../../api/axios";
@@ -20,6 +21,20 @@ let cachedDiscussions = null;
 let cachedTotal = 0;
 let cachedHasMore = false;
 let cachedPage = 1;
+
+const parseTags = (rawTags) => {
+  if (!rawTags) return [];
+  if (Array.isArray(rawTags)) return rawTags.map(String);
+  if (typeof rawTags === "string") {
+    try {
+      const parsed = JSON.parse(rawTags);
+      if (Array.isArray(parsed)) return parsed.map(String);
+    } catch (e) {
+      return rawTags.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+  }
+  return [];
+};
 
 class Discussions extends Component {
   constructor(props) {
@@ -48,6 +63,7 @@ class Discussions extends Component {
       showAddEditModal: false,
       showViewModal: false,
       showDeleteModal: false,
+      showParticipantsModal: false,
       e2eeStatus: "checking", // 'checking', 'ready', 'missing'
       selectedDiscussion: null,
       discussionToView: null,
@@ -371,12 +387,27 @@ class Discussions extends Component {
   };
 
   handleOpenViewModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     if (discussion && discussion.id) {
       this.setState({
         showViewModal: true,
         discussionToView: discussion,
       });
     }
+  };
+
+  handleParticipantModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
+    this.setState({
+      showParticipantsModal: true,
+      discussionToView: discussion,
+    });
   };
 
   handleOpenDeleteModal = (discussion) => {
@@ -395,6 +426,7 @@ class Discussions extends Component {
       showAddEditModal: false,
       showDeleteModal: false,
       showViewModal: false,
+      showParticipantsModal: false,
       selectedDiscussion: null,
       discussionToDelete: null,
       discussionToView: null,
@@ -488,6 +520,7 @@ class Discussions extends Component {
       showAddEditModal,
       showViewModal,
       showDeleteModal,
+      showParticipantsModal,
       selectedDiscussion,
       discussionToView,
       isEditing,
@@ -661,26 +694,72 @@ class Discussions extends Component {
                 <div className="row clearfix">
                   {displayedDiscussions.map((disc) => {
                     const isConcluded = disc.conclusion && disc.conclusion.trim();
-                    const displayParticipants = disc.participant_details ? disc.participant_details.filter(p => Number(p.user_id) !== Number(disc.created_by)) : [];
+                    const displayParticipants = disc.participant_details ? disc.participant_details : [];
+
+                    const currentUserId = authService.getUser()?.id;
+                    const currentUserParticipant = (displayParticipants || []).find(
+                      (p) => Number(p.user_id) === Number(currentUserId)
+                    );
+                    const myTags = parseTags(currentUserParticipant?.tags);
+                    const hasApproveRequest = disc.isDecrypted && displayParticipants.some((p) => myTags.includes(String(p.user_id)));
+                    const hasSentRequest = !disc.isDecrypted && displayParticipants.some((p) => parseTags(p?.tags).includes(String(currentUserId)));
 
                     return (
                       <div className="col-12 mb-3" key={disc.id}>
                         <div
-                          className="card shadow-sm rounded-lg mb-0 discussion-card-item cursor-pointer"
+                          className="card shadow-sm rounded-lg mb-0 discussion-card-item cursor-pointer position-relative overflow-hidden"
                           onClick={() => this.handleOpenViewModal(disc)}
                           title="Click to view discussion details"
                           style={{
                             border: "1px solid #e2e8f0",
-                            borderRadius: "12px",
+                            borderRadius: "8px",
                             backgroundColor: "#ffffff",
                             boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                             minHeight: "85px",
                             cursor: "pointer",
+                            position: "relative",
+                            overflow: "hidden",
                           }}
                         >
+                          {/* Top Right Corner Tag: Approvals or Requested */}
+                          {hasApproveRequest || hasSentRequest ? (
+                            <div
+                              className="position-absolute cursor-pointer"
+                              style={{
+                                top: 0,
+                                right: 0,
+                                zIndex: 10,
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                this.handleParticipantModal(disc);
+                              }}
+                              title={hasApproveRequest ? "Recovery request waiting for your approval." : "Recovery request sent. Waiting for approval."}
+                            >
+                              <span
+                                className="badge font-weight-bold d-inline-flex align-items-center shadow-sm"
+                                style={{
+                                  backgroundColor: hasApproveRequest ? "#f59e0b" : "#2563eb",
+                                  color: "#ffffff",
+                                  borderBottomLeftRadius: "8px",
+                                  borderTopRightRadius: "6px",
+                                  padding: "9px 10px",
+                                  fontSize: "11px",
+                                  letterSpacing: "0.4px",
+                                  fontWeight: "700",
+                                  boxShadow: "0 2px 4px rgba(0,0,0,0.12)"
+                                }}
+                              >
+                                <i className="fa fa-exclamation-circle mr-1" style={{ fontSize: "11px" }} />
+                                {hasApproveRequest ? "Approvals" : "Requested"}
+                              </span>
+                            </div>
+                          ) : null}
+
                           <div className="card-body py-3 px-3 d-flex align-items-center justify-content-between discussion-card-body">
                             {/* 1. Date & Creator */}
                             <div className="d-flex align-items-center mr-md-3 discussion-meta-col">
+                              {/* Date Container */}
                               <div
                                 className="text-center mr-3 rounded-lg flex-shrink-0"
                                 title="Created Date"
@@ -714,6 +793,8 @@ class Discussions extends Component {
                                   {disc.created_at ? dayjs(disc.created_at).format("YYYY") : ""}
                                 </small>
                               </div>
+
+                              {/* Creator Details */}
                               <div
                                 className="d-flex align-items-center overflow-hidden"
                                 title={`Created by ${disc.creator_name || 'User #' + disc.created_by}`}
@@ -769,24 +850,27 @@ class Discussions extends Component {
                                   </span>
                                 </div>
 
-                                {displayParticipants.length > 0 && (
-                                  <span
-                                    className="badge badge-pill border text-secondary ml-2 d-inline-flex align-items-center"
-                                    style={{
-                                      flexShrink: 0,
-                                      backgroundColor: "#f8fafc",
-                                      borderColor: "#e2e8f0",
-                                      color: "#475569",
-                                      fontSize: "12px",
-                                      fontWeight: "500",
-                                      padding: "4px 10px",
-                                      borderRadius: "16px",
-                                    }}
-                                  >
-                                    <i className="fa fa-users text-secondary mr-1" style={{ fontSize: "12px" }}></i>
-                                    {displayParticipants.length} participant{displayParticipants.length > 1 ? "s" : ""}
-                                  </span>
-                                )}
+                                <div className="d-flex align-items-center flex-shrink-0">
+                                  {displayParticipants.length > 0 && (
+                                    <button
+                                      className="btn btn-sm btn-light border text-secondary rounded-pill ml-2 d-inline-flex align-items-center shadow-none"
+                                      title="View Participant"
+                                      style={{
+                                        flexShrink: 0,
+                                        fontSize: "12px",
+                                        fontWeight: "500",
+                                        padding: "3px 10px",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        this.handleParticipantModal(disc);
+                                      }}
+                                    >
+                                      <i className="fa fa-users text-secondary mr-1" style={{ fontSize: "12px" }}></i>
+                                      {displayParticipants.length} participant{displayParticipants.length > 1 ? "s" : ""}
+                                    </button>
+                                  )}
+                                </div>
                               </div>
 
                               {/* Description Box */}
@@ -925,6 +1009,14 @@ class Discussions extends Component {
           onClose={this.handleCloseModals}
           discussion={discussionToView}
           discussionId={discussionToView?.id}
+          onDiscussionUpdated={() => this.fetchDiscussions(false)}
+        />
+
+        {/* Participants Modal */}
+        <ParticipantsModal
+          show={showParticipantsModal}
+          onClose={this.handleCloseModals}
+          discussion={discussionToView}
           onDiscussionUpdated={() => this.fetchDiscussions(false)}
         />
       </div>

@@ -24,8 +24,16 @@ export default class Layout extends Component {
 		window.removeEventListener('openE2EESetupModal', this.handleOpenModal);
 	}
 
-	handleOpenModal = () => {
-		this.checkE2EEStatus(true);
+	handleOpenModal = (event) => {
+		const targetMode = event?.detail?.mode;
+		if (targetMode) {
+			this.setState({
+				showE2EESetupModal: true,
+				e2eeSetupMode: targetMode,
+			});
+		} else {
+			this.checkE2EEStatus(true);
+		}
 	};
 
 	checkE2EEStatus = async (force = false) => {
