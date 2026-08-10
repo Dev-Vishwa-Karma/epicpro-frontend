@@ -9,6 +9,7 @@ import {
   breakDurationCalAction,
 } from "../../../actions/settingsAction";
 import api from "../../../api/axios";
+import cryptoService from "../../../services/cryptoService";
 import AlertMessages from "../../common/AlertMessages";
 import TextEditor from "../../common/TextEditor";
 import DueTasksAlert from "../../common/DueTasksAlert";
@@ -19,6 +20,7 @@ import Button from "../../common/formInputs/Button";
 import NotificationDropdown from "./elements/NotificationDropdown";
 import UserDropdown from "./elements/UserDropdown";
 import DailyReportModal from "./elements/DailyReportModal";
+import BulkRecoveryModal from "../../HRMS/Discussions/BulkRecoveryModal";
 
 class Header extends Component {
   constructor(props) {
@@ -61,6 +63,17 @@ class Header extends Component {
       limit: 5,
       isTimeLoading: false,
       isPunchedInLocal: localStorage.getItem('isPunchedIn') === 'true',
+
+      // Bulk approval modal state
+      showBulkApprovalModal: false,
+      bulkApprovalRequesterId: null,
+      bulkApprovalRequesterName: "",
+      bulkApprovalPublicKey: null,
+      bulkApprovalProgress: 0,
+      bulkApprovalTotal: 0,
+      bulkApprovalLoading: false,
+      bulkApprovalDone: false,
+      bulkApprovalResult: null,
     };
   }
 
@@ -99,10 +112,12 @@ class Header extends Component {
       );
     }
     window.addEventListener("refreshActivities", this.handleApplyFilter);
+    window.addEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
   }
 
   componentWillUnmount() {
     window.removeEventListener("refreshActivities", this.handleApplyFilter);
+    window.removeEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
     clearInterval(this.state.timer);
     if (this.userStatusInterval) {
       clearInterval(this.userStatusInterval);
@@ -402,6 +417,59 @@ class Header extends Component {
   // Navigate to notifications page
   navigateToNotifications = () => {
     this.props.history.push("/notifications");
+  };
+
+  handleBulkApprovalRequest = (requesterId, requesterPublicKey, requesterName) => {
+    this.handleOpenBulkApprovalModal({
+      detail: { requesterId, requesterPublicKey, requesterName },
+    });
+  };
+
+  handleOpenBulkApprovalModal = async (event) => {
+    const { requesterId, requesterPublicKey, requesterName } = event.detail || {};
+
+    if (!requesterId) {
+      this.setState({
+        showError: true,
+        errorMessage: "Unable to identify the requester for this notification.",
+      });
+      setTimeout(this.dismissMessages, 3000);
+      return;
+    }
+
+    try {
+      const currentUser = authService.getUser();
+      const [publicKeyRes, hasPrivateKey] = await Promise.all([
+        api.get("/get_employees.php?action=check-public-key"),
+        cryptoService.hasPrivateKey(currentUser?.id),
+      ]);
+      const publicKey = publicKeyRes.data?.data?.public_key;
+
+      if (!publicKey || !hasPrivateKey) {
+        this.setState({
+          showError: true,
+          errorMessage:
+            "Your E2EE keys are not set up on this device. Please open Discussions to set up your encryption keys before approving recovery requests.",
+        });
+        setTimeout(this.dismissMessages, 5000);
+        return;
+      }
+    } catch (_) {
+      // If the check itself fails, still allow the modal to open;
+      // BulkRecoveryModal will surface a meaningful error on approve.
+    }
+
+    this.setState({
+      showBulkApprovalModal: true,
+      bulkApprovalRequesterId: requesterId,
+      bulkApprovalPublicKey: requesterPublicKey,
+      bulkApprovalRequesterName: requesterName,
+      bulkApprovalDone: false,
+      bulkApprovalResult: null,
+      bulkApprovalProgress: 0,
+      bulkApprovalTotal: 0,
+      bulkApprovalLoading: false,
+    });
   };
 
   getActivities = () => {
@@ -927,6 +995,7 @@ class Header extends Component {
                     fetchNotifications={this.fetchNotifications}
                     markAsRead={this.markAsRead}
                     navigateToNotifications={this.navigateToNotifications}
+                    onBulkApprovalRequest={this.handleBulkApprovalRequest}
                   />
                   <UserDropdown
                     userId={this.state.userId}
@@ -959,6 +1028,17 @@ class Header extends Component {
         />
 
         {this.state.showModal && <div className="modal-backdrop fade show" />}
+
+        {/* ── Bulk Recovery Modal — Always available from Header (Approve Mode) ── */}
+        <BulkRecoveryModal
+          show={this.state.showBulkApprovalModal}
+          mode="approve"
+          requesterId={this.state.bulkApprovalRequesterId}
+          requesterPublicKey={this.state.bulkApprovalPublicKey}
+          requesterName={this.state.bulkApprovalRequesterName}
+          onClose={() => this.setState({ showBulkApprovalModal: false })}
+        />
+
         {is_task_due_today && showDueAlert && dueTasks?.length > 0 && (
           <DueTasksAlert
             dueTasks={dueTasks}

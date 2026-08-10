@@ -41,6 +41,21 @@ const ParticipantsModal = ({
     }
   }, [discussion]);
 
+  useEffect(() => {
+    setShowSuccess(false);
+    setSuccessMessage("");
+    setShowError(false);
+    setErrorMessage("");
+  }, [show, discussion]);
+
+  const handleClose = () => {
+    setShowSuccess(false);
+    setSuccessMessage("");
+    setShowError(false);
+    setErrorMessage("");
+    onClose();
+  };
+
   if (!show) return null;
 
   const currentUserId = authService.getUser()?.id;
@@ -183,7 +198,7 @@ const ParticipantsModal = ({
               <button
                 type="button"
                 className="close"
-                onClick={onClose}
+                onClick={handleClose}
                 aria-label="Close"
               >
                 <span aria-hidden="true">&times;</span>
@@ -270,7 +285,7 @@ const ParticipantsModal = ({
             <div className="modal-footer">
               <Button
                 label="Close"
-                onClick={onClose}
+                onClick={handleClose}
                 className="btn-secondary"
               />
             </div>

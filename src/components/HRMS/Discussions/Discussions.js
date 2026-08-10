@@ -15,6 +15,7 @@ import authService from "../../Authentication/authService";
 import Avatar from "../../common/Avatar";
 import api from "../../../api/axios";
 import cryptoService from "../../../services/cryptoService";
+import BulkRecoveryModal from "./BulkRecoveryModal";
 import "./Discussions.css";
 
 let cachedDiscussions = null;
@@ -70,6 +71,12 @@ class Discussions extends Component {
       isEditing: false,
       discussionToDelete: null,
 
+      // Unified Bulk Recovery Modal State (Request / Approve)
+      showBulkModal: false,
+      bulkModalMode: "approve", // "request" | "approve"
+      bulkRequesterId: null,
+      bulkRequesterName: "",
+      bulkRequesterPublicKey: null,
 
       // Alert States
       showSuccess: false,
@@ -90,6 +97,7 @@ class Discussions extends Component {
     window.addEventListener("scroll", this.handleScroll, true);
     window.addEventListener("wheel", this.handleWheel, { passive: true });
     window.addEventListener("e2eeKeysUpdated", this.handleE2EEKeysUpdated);
+    window.addEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
   }
 
   handleE2EEKeysUpdated = () => {
@@ -136,7 +144,31 @@ class Discussions extends Component {
     window.removeEventListener("scroll", this.handleScroll, true);
     window.removeEventListener("wheel", this.handleWheel);
     window.removeEventListener("e2eeKeysUpdated", this.handleE2EEKeysUpdated);
+    window.removeEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
   }
+
+  handleOpenBulkRecoveryModal = () => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
+    this.setState({
+      showBulkModal: true,
+      bulkModalMode: "request",
+    })
+  }
+
+  handleOpenBulkApprovalModal = (event) => {
+    const { requesterId, requesterPublicKey, requesterName } = event.detail || {};
+    if (!requesterId) return;
+    this.setState({
+      showBulkModal: true,
+      bulkModalMode: "approve",
+      bulkRequesterId: requesterId,
+      bulkRequesterName: requesterName || "A participant",
+      bulkRequesterPublicKey: requesterPublicKey || null,
+    });
+  };
 
   handleWheel = (e) => {
     const { loading, loadingMore, hasMore } = this.state;
@@ -534,9 +566,16 @@ class Discussions extends Component {
 
     const { fixNavbar } = this.props;
 
+    // Show Sync Bulk button only when there is at least one un-decrypted discussion
+    const hasAnyUndecrypted = discussions.some((d) => !d.isDecrypted);
+
+    // Participant options excluding current user (can't request from yourself)
+    const currentUser = authService.getUser();
+    const currentUserId = currentUser?.id;
+
     const participantOptions = employees.map((emp) => ({
       value: emp.id,
-      label: authService.getUser().id === emp.id ? `You` : `${emp.first_name} ${emp.last_name}`,
+      label: currentUser && Number(currentUser.id) === Number(emp.id) ? `You` : `${emp.first_name} ${emp.last_name}`,
     }));
 
     let displayedDiscussions = [...discussions];
@@ -596,6 +635,21 @@ class Discussions extends Component {
                     <i className="fe fe-shield-off mr-1" /> E2EE Disabled
                   </button>
                 )}
+
+                {/* Sync Bulk button — only visible when any discussion is NOT decrypted */}
+                {hasAnyUndecrypted && (
+                  <button
+                    className="btn btn-sm btn-outline-info mr-2"
+                    style={{ fontWeight: "600", borderRadius: "8px" }}
+                    title="Request bulk key recovery from another participant"
+                    onClick={() =>
+                      this.handleOpenBulkRecoveryModal()
+                    }
+                  >
+                    <i className="fa fa-refresh mr-1" /> Sync Bulk
+                  </button>
+                )}
+
                 <Button
                   label="Add Discussion"
                   onClick={this.handleOpenAddModal}
@@ -938,7 +992,7 @@ class Discussions extends Component {
                               >
                                 <i className="fa fa-eye"></i>
                               </button>
-                              {this.canModifyDiscussion(disc) && (
+                              {disc.isDecrypted && this.canModifyDiscussion(disc) && (
                                 <button
                                   className="btn btn-sm btn-light border text-secondary rounded-circle mr-1 shadow-none"
                                   onClick={(e) => {
@@ -951,7 +1005,7 @@ class Discussions extends Component {
                                   <i className="fa fa-pencil" style={{ fontSize: "13px", color: "#64748b" }}></i>
                                 </button>
                               )}
-                              {this.canModifyDiscussion(disc) && (
+                              {disc.isDecrypted && this.canModifyDiscussion(disc) && (
                                 <button
                                   className="btn btn-sm btn-light border text-secondary rounded-circle shadow-none"
                                   onClick={(e) => {
@@ -1018,6 +1072,22 @@ class Discussions extends Component {
           onClose={this.handleCloseModals}
           discussion={discussionToView}
           onDiscussionUpdated={() => this.fetchDiscussions(false)}
+        />
+
+        {/* Unified Bulk Recovery Modal in Discussions Module */}
+        <BulkRecoveryModal
+          show={this.state.showBulkModal}
+          mode={this.state.bulkModalMode}
+          participantOptions={participantOptions}
+          currentUserId={currentUserId}
+          requesterId={this.state.bulkRequesterId}
+          requesterName={this.state.bulkRequesterName}
+          requesterPublicKey={this.state.bulkRequesterPublicKey}
+          onClose={() => this.setState({ showBulkModal: false })}
+          onSuccess={() => {
+            cachedDiscussions = null;
+            this.fetchDiscussions(false);
+          }}
         />
       </div>
     );
