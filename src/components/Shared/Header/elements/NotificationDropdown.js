@@ -155,19 +155,6 @@ class NotificationDropdown extends Component {
                                 Click to review &amp; approve
                               </div>
                             )}
-                            {isBulkRecovered && (
-                              <div
-                                style={{
-                                  fontSize: "11px",
-                                  color: "#16a34a",
-                                  fontWeight: "600",
-                                  marginTop: "4px",
-                                }}
-                              >
-                                <i className="fa fa-unlock mr-1" />
-                                Your discussions are accessible again
-                              </div>
-                            )}
                           </div>
                         </li>
                       );
