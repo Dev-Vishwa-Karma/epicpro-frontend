@@ -238,7 +238,7 @@ class BulkRecoveryModal extends Component {
     const displayName = requesterName || "A participant";
 
     // Options for participant select (excluding current user)
-    const options = participantOptions.filter(emp => Number(emp.id) !== Number(currentUserId)).map(emp => {
+    const options = (participantOptions || []).filter(emp => Number(emp.id) !== Number(currentUserId)).map(emp => {
             const hasKey = emp.public_key && emp.public_key.trim();
             const fullName = `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.email || `User #${emp.id}`;
             return {
