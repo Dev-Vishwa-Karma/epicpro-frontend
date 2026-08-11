@@ -1078,7 +1078,7 @@ class Discussions extends Component {
         <BulkRecoveryModal
           show={this.state.showBulkModal}
           mode={this.state.bulkModalMode}
-          participantOptions={participantOptions}
+          participantOptions={employees}
           currentUserId={currentUserId}
           requesterId={this.state.bulkRequesterId}
           requesterName={this.state.bulkRequesterName}
