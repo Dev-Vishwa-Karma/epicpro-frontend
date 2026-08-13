@@ -57,8 +57,15 @@ const RecoveryModal = ({
       const incList = Array.isArray(incRes?.data) ? incRes.data : (incRes?.data ? [incRes.data] : []);
       const outList = Array.isArray(outRes?.data) ? outRes.data : (outRes?.data ? [outRes.data] : []);
 
-      setIncomingRequests(incList.filter(r => r.status !== 'completed'));
-      setOutgoingRequests(outList.filter(r => r.status !== 'completed'));
+      setIncomingRequests(incList.filter(r => {
+        const appStatus = r.approver_status || r.status;
+        const procStatus = r.process_status;
+        return appStatus === 'pending' && procStatus !== 'completed';
+      }));
+      setOutgoingRequests(outList.filter(r => {
+        const procStatus = r.process_status;
+        return procStatus !== 'completed';
+      }));
     } catch (err) {
       console.error("Failed to fetch recovery requests:", err);
     } finally {
@@ -89,6 +96,7 @@ const RecoveryModal = ({
             request_id: reqId,
             status: "accepted",
           });
+          setIncomingRequests((prev) => (prev || []).filter((r) => Number(r.id) !== Number(reqId)));
           try {
             const raw = localStorage.getItem("active_recovery_requests");
             const activeRequests = raw ? JSON.parse(raw) : [];
@@ -222,7 +230,7 @@ const RecoveryModal = ({
             <div className="modal-body" style={{ maxHeight: "65vh", overflowY: "auto" }}>
               <p className="text-muted small mb-3">
                 {mode === "approve"
-                  ? "Participants below have requested you to recover and re-encrypt their discussion keys."
+                  ? "The participants have requested to be able to retrieve the discussions they had with you."
                   : "Select a participant to request key recovery for your shared discussions."}
               </p>
 
@@ -296,13 +304,24 @@ const RecoveryModal = ({
             </div >
 
             {/* Modal Footer */}
-            < div className="modal-footer" >
-              <Button
-                label="Close"
-                onClick={handleClose}
-                className="btn-secondary"
-              />
-            </div >
+            {displayParticipants.length !== 0 ? (
+              <div className={`modal-footer ${mode === 'approve' ? 'd-flex justify-content-center w-100' : ''}`}>
+                {mode === 'approve' ? (
+                  <Button
+                    label='Ignore'
+                    onClick={handleClose}
+                    className='btn-secondary btn-xl px-5 font-weight-bold w-100'
+                    style={{ minWidth: '280px', fontSize: '16px' }}
+                  />
+                ) : (
+                  <Button
+                    label='Cancel'
+                    onClick={handleClose}
+                    className='btn-secondary btn-md'
+                  />
+                )}
+              </div>
+            ) : null}
           </div >
         </div >
       </div >
