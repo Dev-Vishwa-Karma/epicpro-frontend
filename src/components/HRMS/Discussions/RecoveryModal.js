@@ -304,24 +304,26 @@ const RecoveryModal = ({
             </div >
 
             {/* Modal Footer */}
-            <div className='modal-footer '>
-              <div className={`${mode === 'approve' && displayParticipants.length !== 0 ? 'd-flex justify-content-center' : ''}`}>
-                {mode === 'approve' && displayParticipants.length !== 0 ? (
-                  <Button
-                    label='Ignore'
-                    onClick={handleClose}
-                    className='btn-secondary btn-xl px-5 font-weight-bold'
-                    style={{ minWidth: '280px', fontSize: '16px' }}
-                  />
-                ) : mode === 'request' && displayParticipants.length !== 0 ? (
-                  <Button
-                    label='Cancel'
-                    onClick={handleClose}
-                    className='btn-secondary btn-md'
-                  />
-                ) : null}
+            {displayParticipants.length !== 0 ? (
+              <div className='modal-footer '>
+                <div className={`${mode === 'approve' ? 'd-flex justify-content-center' : ''}`}>
+                  {mode === 'approve' ? (
+                    <Button
+                      label='Ignore'
+                      onClick={handleClose}
+                      className='btn-secondary btn-xl px-5 font-weight-bold'
+                      style={{ minWidth: '280px', fontSize: '16px' }}
+                    />
+                  ) : (
+                    <Button
+                      label='Cancel'
+                      onClick={handleClose}
+                      className='btn-secondary btn-md'
+                    />
+                  )}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div >
         </div >
       </div >
