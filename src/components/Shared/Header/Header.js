@@ -9,7 +9,6 @@ import {
   breakDurationCalAction,
 } from "../../../actions/settingsAction";
 import api from "../../../api/axios";
-import cryptoService from "../../../services/cryptoService";
 import AlertMessages from "../../common/AlertMessages";
 import TextEditor from "../../common/TextEditor";
 import DueTasksAlert from "../../common/DueTasksAlert";
@@ -20,12 +19,13 @@ import Button from "../../common/formInputs/Button";
 import NotificationDropdown from "./elements/NotificationDropdown";
 import UserDropdown from "./elements/UserDropdown";
 import DailyReportModal from "./elements/DailyReportModal";
-import BulkRecoveryModal from "../../HRMS/Discussions/BulkRecoveryModal";
+import cryptoService from "../../../services/cryptoService";
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.userStatusInterval = null;
+    this.recoveryInterval = null;
     this.state = {
       showModal: false,
       report: "",
@@ -64,16 +64,6 @@ class Header extends Component {
       isTimeLoading: false,
       isPunchedInLocal: localStorage.getItem('isPunchedIn') === 'true',
 
-      // Bulk approval modal state
-      showBulkApprovalModal: false,
-      bulkApprovalRequesterId: null,
-      bulkApprovalRequesterName: "",
-      bulkApprovalPublicKey: null,
-      bulkApprovalProgress: 0,
-      bulkApprovalTotal: 0,
-      bulkApprovalLoading: false,
-      bulkApprovalDone: false,
-      bulkApprovalResult: null,
     };
   }
 
@@ -85,6 +75,136 @@ class Header extends Component {
       showError: false,
       errorMessage: "",
     });
+  };
+
+
+  syncActiveRecoveryRequestsOnLogin = async (userId) => {
+    try {
+      const payload = { approver_id: userId, status: 'accepted' };
+      const res = await getService.addCall("discussions.php", "get_recovery_request", payload);
+      const requests = Array.isArray(res?.data) ? res.data : [];
+      const acceptedIds = requests.map(r => Number(r.id)).filter(Boolean);
+      localStorage.setItem("active_recovery_requests", JSON.stringify(acceptedIds));
+    } catch (err) {
+      console.error("Error syncing active recovery requests on login:", err);
+    }
+  };
+
+  removeActiveRecoveryRequest = (requestId) => {
+    try {
+      const raw = localStorage.getItem("active_recovery_requests");
+      const activeRequests = raw ? JSON.parse(raw) : [];
+      const updated = activeRequests.filter(id => Number(id) !== Number(requestId));
+      localStorage.setItem("active_recovery_requests", JSON.stringify(updated));
+    } catch (err) {
+      console.error("Error removing active recovery request from localStorage:", err);
+    }
+  };
+
+  processBackgroundBulkRecovery = () => {
+    this.recoveryInterval = setInterval(async () => {
+      if (this.isProcessingRecovery) return;
+
+      let activeRequestIds = [];
+      try {
+        const raw = localStorage.getItem("active_recovery_requests");
+        activeRequestIds = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        activeRequestIds = [];
+      }
+
+      if (!Array.isArray(activeRequestIds) || activeRequestIds.length === 0) return;
+
+      const currentUserId = authService.getUser()?.id;
+      if (!currentUserId) return;
+
+      const hasPrivateKey = cryptoService.hasPrivateKey(currentUserId);
+      if (!hasPrivateKey) return;
+
+      this.isProcessingRecovery = true;
+      try {
+        const payload = { approver_id: currentUserId, status: 'accepted' };
+        const res = await getService.addCall("discussions.php", "get_recovery_request", payload);
+        const allRequests = Array.isArray(res?.data) ? res.data : [];
+        const requestsToProcess = allRequests.filter(r => activeRequestIds.map(Number).includes(Number(r.id)));
+
+        if (requestsToProcess.length === 0) {
+          const validBackendIds = allRequests.map(r => Number(r.id));
+          const filtered = activeRequestIds.filter(id => validBackendIds.includes(Number(id)));
+          localStorage.setItem("active_recovery_requests", JSON.stringify(filtered));
+          this.isProcessingRecovery = false;
+          return;
+        }
+
+        for (const req of requestsToProcess) {
+          const requesterId = req.requester_id;
+          const requesterPublicKey = req.requester_public_key;
+          const requestId = req.id;
+          const lastSuccessfulItemId = req?.last_successful_item_id || 0;
+
+          if (!requesterId || !requesterPublicKey) continue;
+
+          const res = await getService.getCall("discussions.php", {
+            action: "view",
+            participant_id: requesterId,
+            requested_id: lastSuccessfulItemId,
+            page: 1,
+          });
+          const recoveries = [];
+          const discs = res.data?.discussions ?? (Array.isArray(res.data) ? res.data : []);
+          for (const disc of discs) {
+            const participantDetails = disc.participant_details || [];
+            const approverParticipant = participantDetails.find(p => Number(p.user_id) === Number(currentUserId));
+            const requesterParticipant = participantDetails.find(p => Number(p.user_id) === Number(requesterId));
+            if (approverParticipant && approverParticipant.encrypted_key && requesterParticipant) {
+              try {
+                const reencryptedKeyBase64 = await cryptoService.reencryptDiscussionKeyForTargetUser(
+                  disc,
+                  currentUserId,
+                  requesterPublicKey
+                );
+                recoveries.push({
+                  discussion_id: disc.id,
+                  encrypted_key: reencryptedKeyBase64,
+                });
+              } catch (err) {
+                console.error(`Failed to re-encrypt key for discussion ${disc.id}:`, err);
+              }
+            }
+          }
+
+          if (recoveries.length > 0) {
+            const bulkPayload = {
+              requester_id: requesterId,
+              request_id: requestId,
+              recoveries: recoveries,
+            };
+            const bulkRes = await getService.addCall("discussions.php", "bulk_recover_keys", bulkPayload);
+            if (bulkRes?.status === "success") {
+              console.log(`Successfully bulk recovered ${recoveries.length} discussion keys for requester ${requesterId}`);
+              if (bulkRes?.data?.is_completed) {
+                this.removeActiveRecoveryRequest(requestId);
+              }
+            }
+          } else {
+            const completePayload = {
+              requester_id: requesterId,
+              request_id: requestId,
+              recoveries: [],
+              mark_completed: true,
+            };
+            const bulkRes = await getService.addCall("discussions.php", "bulk_recover_keys", completePayload);
+            if (bulkRes?.status === "success" || bulkRes?.data?.is_completed) {
+              this.removeActiveRecoveryRequest(requestId);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Background recovery check error:", err);
+      } finally {
+        this.isProcessingRecovery = false;
+      }
+    }, 8000);
   };
 
   componentDidMount() {
@@ -108,19 +228,24 @@ class Header extends Component {
           this.startNotificationInterval();
           this.checktodayDueDate();
           this.startUserStatusCheck();
+          if (user.role != "employee") {
+            this.syncActiveRecoveryRequestsOnLogin(user.id);
+            this.processBackgroundBulkRecovery();
+          }
         }
       );
     }
     window.addEventListener("refreshActivities", this.handleApplyFilter);
-    window.addEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
   }
 
   componentWillUnmount() {
     window.removeEventListener("refreshActivities", this.handleApplyFilter);
-    window.removeEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
     clearInterval(this.state.timer);
     if (this.userStatusInterval) {
       clearInterval(this.userStatusInterval);
+    }
+    if (this.recoveryInterval) {
+      clearInterval(this.recoveryInterval);
     }
   }
 
@@ -417,59 +542,6 @@ class Header extends Component {
   // Navigate to notifications page
   navigateToNotifications = () => {
     this.props.history.push("/notifications");
-  };
-
-  handleBulkApprovalRequest = (requesterId, requesterPublicKey, requesterName) => {
-    this.handleOpenBulkApprovalModal({
-      detail: { requesterId, requesterPublicKey, requesterName },
-    });
-  };
-
-  handleOpenBulkApprovalModal = async (event) => {
-    const { requesterId, requesterPublicKey, requesterName } = event.detail || {};
-
-    if (!requesterId) {
-      this.setState({
-        showError: true,
-        errorMessage: "Unable to identify the requester for this notification.",
-      });
-      setTimeout(this.dismissMessages, 3000);
-      return;
-    }
-
-    try {
-      const currentUser = authService.getUser();
-      const [publicKeyRes, hasPrivateKey] = await Promise.all([
-        api.get("/get_employees.php?action=check-public-key"),
-        cryptoService.hasPrivateKey(currentUser?.id),
-      ]);
-      const publicKey = publicKeyRes.data?.data?.public_key;
-
-      if (!publicKey || !hasPrivateKey) {
-        this.setState({
-          showError: true,
-          errorMessage:
-            "Your E2EE keys are not set up on this device. Please open Discussions to set up your encryption keys before approving recovery requests.",
-        });
-        setTimeout(this.dismissMessages, 5000);
-        return;
-      }
-    } catch (_) {
-      // If the check itself fails, still allow the modal to open;
-      // BulkRecoveryModal will surface a meaningful error on approve.
-    }
-
-    this.setState({
-      showBulkApprovalModal: true,
-      bulkApprovalRequesterId: requesterId,
-      bulkApprovalPublicKey: requesterPublicKey,
-      bulkApprovalRequesterName: requesterName,
-      bulkApprovalDone: false,
-      bulkApprovalResult: null,
-      bulkApprovalProgress: 0,
-      bulkApprovalTotal: 0,
-      bulkApprovalLoading: false,
-    });
   };
 
   getActivities = () => {
@@ -995,7 +1067,6 @@ class Header extends Component {
                     fetchNotifications={this.fetchNotifications}
                     markAsRead={this.markAsRead}
                     navigateToNotifications={this.navigateToNotifications}
-                    onBulkApprovalRequest={this.handleBulkApprovalRequest}
                   />
                   <UserDropdown
                     userId={this.state.userId}
@@ -1028,16 +1099,6 @@ class Header extends Component {
         />
 
         {this.state.showModal && <div className="modal-backdrop fade show" />}
-
-        {/* ── Bulk Recovery Modal — Always available from Header (Approve Mode) ── */}
-        <BulkRecoveryModal
-          show={this.state.showBulkApprovalModal}
-          mode="approve"
-          requesterId={this.state.bulkApprovalRequesterId}
-          requesterPublicKey={this.state.bulkApprovalPublicKey}
-          requesterName={this.state.bulkApprovalRequesterName}
-          onClose={() => this.setState({ showBulkApprovalModal: false })}
-        />
 
         {is_task_due_today && showDueAlert && dueTasks?.length > 0 && (
           <DueTasksAlert

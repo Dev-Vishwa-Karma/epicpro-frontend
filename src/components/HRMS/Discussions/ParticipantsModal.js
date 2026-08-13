@@ -86,7 +86,7 @@ const ParticipantsModal = ({
         target_user_id: targetUserId,
       };
 
-      const res = await getService.addCall("discussions.php", "request_key_recovery", payload);
+      const res = await getService.addCall("discussions.php", "request_key_recovery_for_single_discussion", payload);
       if (res?.status === "success") {
         setShowSuccess(true);
         setSuccessMessage(res?.message || "Key recovery request sent successfully.");
@@ -145,7 +145,7 @@ const ParticipantsModal = ({
         encrypted_key: reencryptedKeyBase64,
       };
 
-      const res = await getService.addCall("discussions.php", "recover_participant_key", payload);
+      const res = await getService.addCall("discussions.php", "recover_participant_key_for_single_discussion", payload);
       if (res?.status === "success") {
         setShowSuccess(true);
         setSuccessMessage(res?.message || "Key recovered successfully.");

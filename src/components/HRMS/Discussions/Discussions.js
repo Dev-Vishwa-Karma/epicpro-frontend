@@ -15,8 +15,8 @@ import authService from "../../Authentication/authService";
 import Avatar from "../../common/Avatar";
 import api from "../../../api/axios";
 import cryptoService from "../../../services/cryptoService";
-import BulkRecoveryModal from "./BulkRecoveryModal";
 import "./Discussions.css";
+import RecoveryModal from "./RecoveryModal";
 
 let cachedDiscussions = null;
 let cachedTotal = 0;
@@ -71,18 +71,14 @@ class Discussions extends Component {
       isEditing: false,
       discussionToDelete: null,
 
-      // Unified Bulk Recovery Modal State (Request / Approve)
-      showBulkModal: false,
-      bulkModalMode: "approve", // "request" | "approve"
-      bulkRequesterId: null,
-      bulkRequesterName: "",
-      bulkRequesterPublicKey: null,
-
       // Alert States
       showSuccess: false,
       successMessage: "",
       showError: false,
       errorMessage: "",
+
+      showRecoveryModal: false,
+      recoveryModalMode: "request",
     };
 
     this.searchTimeout = null;
@@ -97,7 +93,6 @@ class Discussions extends Component {
     window.addEventListener("scroll", this.handleScroll, true);
     window.addEventListener("wheel", this.handleWheel, { passive: true });
     window.addEventListener("e2eeKeysUpdated", this.handleE2EEKeysUpdated);
-    window.addEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
   }
 
   handleE2EEKeysUpdated = () => {
@@ -147,28 +142,16 @@ class Discussions extends Component {
     window.removeEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
   }
 
-  handleOpenBulkRecoveryModal = () => {
+  handleOpenRecoveryModal = (hasAnyUndecrypted) => {
     if (this.state.e2eeStatus !== "ready") {
       window.dispatchEvent(new Event('openE2EESetupModal'));
       return;
     }
     this.setState({
-      showBulkModal: true,
-      bulkModalMode: "request",
+      showRecoveryModal: true,
+      recoveryModalMode: hasAnyUndecrypted ? "request" : "approve",
     })
   }
-
-  handleOpenBulkApprovalModal = (event) => {
-    const { requesterId, requesterPublicKey, requesterName } = event.detail || {};
-    if (!requesterId) return;
-    this.setState({
-      showBulkModal: true,
-      bulkModalMode: "approve",
-      bulkRequesterId: requesterId,
-      bulkRequesterName: requesterName || "A participant",
-      bulkRequesterPublicKey: requesterPublicKey || null,
-    });
-  };
 
   handleWheel = (e) => {
     const { loading, loadingMore, hasMore } = this.state;
@@ -571,7 +554,6 @@ class Discussions extends Component {
 
     // Participant options excluding current user (can't request from yourself)
     const currentUser = authService.getUser();
-    const currentUserId = currentUser?.id;
 
     const participantOptions = employees.map((emp) => ({
       value: emp.id,
@@ -636,19 +618,17 @@ class Discussions extends Component {
                   </button>
                 )}
 
-                {/* Sync Bulk button — only visible when any discussion is NOT decrypted */}
-                {hasAnyUndecrypted && (
-                  <button
-                    className="btn btn-sm btn-outline-info mr-2"
-                    style={{ fontWeight: "600", borderRadius: "8px" }}
-                    title="Request bulk key recovery from another participant"
-                    onClick={() =>
-                      this.handleOpenBulkRecoveryModal()
-                    }
-                  >
-                    <i className="fa fa-refresh mr-1" /> Sync Bulk
-                  </button>
-                )}
+                {/* visible when any discussion is NOT decrypted */}
+                <button
+                  className="btn btn-sm btn-outline-info mr-2"
+                  style={{ fontWeight: "600", borderRadius: "8px" }}
+                  title="Request key recovery from another participant"
+                  onClick={() =>
+                    this.handleOpenRecoveryModal(hasAnyUndecrypted)
+                  }
+                >
+                  <i className="fa fa-key mr-1" /> Key Recovery
+                </button>
 
                 <Button
                   label="Add Discussion"
@@ -1075,19 +1055,10 @@ class Discussions extends Component {
         />
 
         {/* Unified Bulk Recovery Modal in Discussions Module */}
-        <BulkRecoveryModal
-          show={this.state.showBulkModal}
-          mode={this.state.bulkModalMode}
-          participantOptions={employees}
-          currentUserId={currentUserId}
-          requesterId={this.state.bulkRequesterId}
-          requesterName={this.state.bulkRequesterName}
-          requesterPublicKey={this.state.bulkRequesterPublicKey}
-          onClose={() => this.setState({ showBulkModal: false })}
-          onSuccess={() => {
-            cachedDiscussions = null;
-            this.fetchDiscussions(false);
-          }}
+        <RecoveryModal
+          show={this.state.showRecoveryModal}
+          mode={this.state.recoveryModalMode}
+          onClose={() => this.setState({ showRecoveryModal: false })}
         />
       </div>
     );

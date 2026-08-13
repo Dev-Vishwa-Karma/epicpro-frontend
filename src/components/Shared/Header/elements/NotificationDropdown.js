@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import NotificationSkeleton from "../../../common/skeletons/NotificationSkeleton";
-import { getService } from "../../../../services/getService";
+import RecoveryModal from "../../../HRMS/Discussions/RecoveryModal";
 
 class NotificationDropdown extends Component {
   constructor(props) {
@@ -9,6 +9,8 @@ class NotificationDropdown extends Component {
     this.state = {
       loadingMore: false,
       hasMore: true,
+      showRecoveryModal: false,
+      recoveryModalMode: "approve",
     };
   }
 
@@ -20,34 +22,13 @@ class NotificationDropdown extends Component {
     }, 1000);
   };
 
-  handleBulkNotificationClick = async (notification) => {
+  handleOpenRecoveryModal = async (notification) => {
     this.props.markAsRead(notification.id, notification?.connect_id);
+    this.setState({
+      showRecoveryModal: true,
+      recoveryModalMode: "approve",
+    })
 
-    let requesterId = notification?.created_by;
-    let requesterPublicKey = null;
-    let requesterName = "";
-    try {
-      const empRes = await getService.getCall("get_employees.php", {
-        action: "view",
-        user_id: requesterId,
-      });
-
-      const empData = empRes?.data ?? empRes;
-      if (empData) {
-        requesterPublicKey = empData.public_key;
-        requesterName = empData?.first_name + ' ' + empData?.last_name;
-      }
-    } catch (_) { }
-
-    if (this.props.onBulkApprovalRequest) {
-      this.props.onBulkApprovalRequest(requesterId, requesterPublicKey, requesterName);
-    } else {
-      window.dispatchEvent(
-        new CustomEvent("openBulkApprovalModal", {
-          detail: { requesterId, requesterPublicKey, requesterName },
-        })
-      );
-    }
   };
 
   render() {
@@ -107,7 +88,7 @@ class NotificationDropdown extends Component {
                           }}
                           onClick={() => {
                             if (isBulkRequest) {
-                              this.handleBulkNotificationClick(notification);
+                              this.handleOpenRecoveryModal(notification);
                             } else {
                               markAsRead(
                                 notification.id,
@@ -189,6 +170,11 @@ class NotificationDropdown extends Component {
               </>
             )}
           </div>
+          <RecoveryModal
+            show={this.state.showRecoveryModal}
+            mode={this.state.recoveryModalMode}
+            onClose={() => this.setState({ showRecoveryModal: false })}
+          />
         </div>
 
       </>
