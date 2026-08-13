@@ -103,9 +103,12 @@
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
 
-.e2ee-input.is-invalid {
-  border-color: #ef4444;
-  background-color: #fef2f2;
+.e2ee-input.is-invalid,
+.form-control.e2ee-input.is-invalid {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+  background-image: none !important;
+  padding-right: 44px !important;
 }
 
 .e2ee-input.is-masked {
@@ -225,4 +228,46 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* 4-Digit Simple Centered Box PIN Input Styles */
+.pin-boxes-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.pin-box-single {
+  width: 52px;
+  height: 56px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+}
+
+.pin-box-single:focus {
+  border-color: #6366f1;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.pin-box-single.is-invalid {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.pin-box-single.is-filled {
+  border-color: #6366f1;
+  background-color: #f0fdf4;
 }

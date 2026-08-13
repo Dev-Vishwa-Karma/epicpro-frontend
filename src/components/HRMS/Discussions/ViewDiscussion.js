@@ -7,7 +7,7 @@ import authService from '../../Authentication/authService';
 const ViewDiscussion = ({ show = false, onClose = () => { }, discussion = null }) => {
   if (!show || !discussion) return null;
   const participants = Array.isArray(discussion.participant_details)
-    ? discussion.participant_details.filter(p => Number(p.id || p.user_id) !== Number(discussion.created_by))
+    ? discussion.participant_details
     : [];
   const isConcluded = discussion.conclusion && discussion.conclusion.trim();
 
@@ -105,6 +105,7 @@ const ViewDiscussion = ({ show = false, onClose = () => { }, discussion = null }
                               key={p?.id || idx}
                               className="badge badge-pill badge-light border border-info text-dark px-3 py-1 mr-2 mb-2 d-inline-flex align-items-center"
                               style={{ fontSize: '13px', backgroundColor: '#f0f9ff', maxWidth: '100%' }}
+                              title={p?.name || `${p?.first_name || ''} ${p?.last_name || ''}`.trim()}
                             >
                               <Avatar
                                 profile={p?.profile}
@@ -114,17 +115,8 @@ const ViewDiscussion = ({ show = false, onClose = () => { }, discussion = null }
                                 className="mr-2 flex-shrink-0"
                               />
                               <span className="text-truncate" style={{ maxWidth: '160px' }}>
-                                {Number(p?.id || p?.user_id) === Number(authService.getUser()?.id) ? 'You' : p?.name || `${p?.first_name || ''} ${p?.last_name || ''}`.trim() || `User #${p}`}
+                                {Number(p?.user_id) === Number(authService.getUser()?.id) ? 'You' : p?.name || `${p?.first_name || ''} ${p?.last_name || ''}`.trim() || `User #${p}`}
                               </span>
-                              {!p.encrypted_key && discussion?.is_encrypted && (
-                                <span
-                                  className="badge badge-warning text-dark ml-2"
-                                  style={{ fontSize: '10px', fontWeight: '500', padding: '2px 6px' }}
-                                  title="Key sync pending: User hasn't set up E2EE keys yet"
-                                >
-                                  Pending Key
-                                </span>
-                              )}
                             </span>
                           ))
                         ) : (
@@ -203,7 +195,7 @@ const ViewDiscussion = ({ show = false, onClose = () => { }, discussion = null }
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

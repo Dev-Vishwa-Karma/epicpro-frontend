@@ -10,16 +10,32 @@ import Button from "../../common/formInputs/Button";
 import DeleteModal from "../../common/DeleteModal";
 import AddEditDiscussionModal from "./AddEditDiscussionModal";
 import ViewDiscussion from "./ViewDiscussion";
+import ParticipantsModal from "./ParticipantsModal";
 import authService from "../../Authentication/authService";
 import Avatar from "../../common/Avatar";
 import api from "../../../api/axios";
 import cryptoService from "../../../services/cryptoService";
 import "./Discussions.css";
+import RecoveryModal from "./RecoveryModal";
 
 let cachedDiscussions = null;
 let cachedTotal = 0;
 let cachedHasMore = false;
 let cachedPage = 1;
+
+const parseTags = (rawTags) => {
+  if (!rawTags) return [];
+  if (Array.isArray(rawTags)) return rawTags.map(String);
+  if (typeof rawTags === "string") {
+    try {
+      const parsed = JSON.parse(rawTags);
+      if (Array.isArray(parsed)) return parsed.map(String);
+    } catch (e) {
+      return rawTags.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+  }
+  return [];
+};
 
 class Discussions extends Component {
   constructor(props) {
@@ -48,19 +64,21 @@ class Discussions extends Component {
       showAddEditModal: false,
       showViewModal: false,
       showDeleteModal: false,
-      showE2EESetupModal: false,
+      showParticipantsModal: false,
       e2eeStatus: "checking", // 'checking', 'ready', 'missing'
       selectedDiscussion: null,
       discussionToView: null,
       isEditing: false,
       discussionToDelete: null,
 
-
       // Alert States
       showSuccess: false,
       successMessage: "",
       showError: false,
       errorMessage: "",
+
+      showRecoveryModal: false,
+      recoveryModalMode: "request",
     };
 
     this.searchTimeout = null;
@@ -74,7 +92,25 @@ class Discussions extends Component {
     }
     window.addEventListener("scroll", this.handleScroll, true);
     window.addEventListener("wheel", this.handleWheel, { passive: true });
+    window.addEventListener("e2eeKeysUpdated", this.handleE2EEKeysUpdated);
   }
+
+  handleE2EEKeysUpdated = () => {
+    cachedDiscussions = null;
+    this.setState(
+      {
+        e2eeStatus: "ready",
+        page: 1,
+        discussions: [],
+        loading: true,
+      },
+      () => {
+        this.checkE2EEStatus();
+        this.fetchEmployees();
+        this.fetchDiscussions(false);
+      }
+    );
+  };
 
   checkE2EEStatus = async () => {
     const user = authService.getUser();
@@ -83,32 +119,15 @@ class Discussions extends Component {
     try {
       const res = await api.get("/get_employees.php?action=check-public-key");
       const publicKey = res.data?.data?.public_key;
-      const encryptedBlob = res.data?.data?.encrypted_blob;
       const hasPrivateKey = await cryptoService.hasPrivateKey(user.id);
 
-      if (!publicKey) {
+      if (!publicKey || !hasPrivateKey) {
         this.setState({
-          showE2EESetupModal: true,
-          e2eeSetupMode: 'generate',
-          e2eeStatus: "missing",
-        });
-      } else if (!hasPrivateKey && encryptedBlob) {
-        this.setState({
-          showE2EESetupModal: true,
-          e2eeSetupMode: 'restore',
-          e2eeStatus: "missing",
-          backupData: { encryptedBlob },
-        });
-      } else if (!hasPrivateKey && !encryptedBlob) {
-        this.setState({
-          showE2EESetupModal: true,
-          e2eeSetupMode: 'generate',
           e2eeStatus: "missing",
         });
       } else {
         this.setState({
           e2eeStatus: "ready",
-          showE2EESetupModal: false,
         });
       }
     } catch (error) {
@@ -119,6 +138,19 @@ class Discussions extends Component {
   componentWillUnmount() {
     window.removeEventListener("scroll", this.handleScroll, true);
     window.removeEventListener("wheel", this.handleWheel);
+    window.removeEventListener("e2eeKeysUpdated", this.handleE2EEKeysUpdated);
+    window.removeEventListener("openBulkApprovalModal", this.handleOpenBulkApprovalModal);
+  }
+
+  handleOpenRecoveryModal = (hasAnyUndecrypted) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
+    this.setState({
+      showRecoveryModal: true,
+      recoveryModalMode: hasAnyUndecrypted ? "request" : "approve",
+    })
   }
 
   handleWheel = (e) => {
@@ -188,9 +220,9 @@ class Discussions extends Component {
   canModifyDiscussion = (disc) => {
     const user = authService.getUser() || window.user || {};
     const uId = String(user.id || user.employee_id || "");
-    const hasPublicKey = user.public_key && user.public_key.trim();
+    const isE2EEReady = this.state.e2eeStatus === "ready";
     const isAdmin = authService.isAdminCheck ? authService.isAdminCheck() : (authService.isAdmin ? authService.isAdmin() : false);
-    return hasPublicKey && (String(disc?.created_by) === uId || isAdmin);
+    return isE2EEReady && (String(disc?.created_by) === uId || isAdmin);
   };
 
   fetchEmployees = () => {
@@ -198,96 +230,11 @@ class Discussions extends Component {
       .getCall("get_employees.php", { action: "view", role: "admin" })
       .then((res) => {
         const empList = res?.data || [];
-        this.setState({ employees: empList }, () => {
-          if (this.state.discussions && this.state.discussions.length > 0) {
-            this.syncPendingParticipantKeys(this.state.discussions);
-          }
-        });
+        this.setState({ employees: empList });
       })
       .catch((err) => {
         console.error("Error fetching employees:", err);
       });
-  };
-
-  syncPendingParticipantKeys = async (decryptedList) => {
-    const user = authService.getUser();
-    if (!user || !user.id || !Array.isArray(decryptedList) || decryptedList.length === 0) return;
-
-    const currentUserId = Number(user.id);
-    const { employees = [] } = this.state;
-
-    await Promise.all(decryptedList.map(async (disc) => {
-      if (!disc) return;
-
-      let partDetails = disc.participant_details || disc.participants || [];
-      if (typeof partDetails === 'string') {
-        try {
-          partDetails = JSON.parse(partDetails);
-        } catch (e) {
-          partDetails = [];
-        }
-      }
-      if (!Array.isArray(partDetails) || partDetails.length === 0) return;
-
-      let rawAesKeyBuffer = disc.rawAesKeyBuffer;
-
-      if (!rawAesKeyBuffer && Number(disc.is_encrypted) === 1) {
-        const userParticipant = partDetails.find((p) => Number(p.user_id) === currentUserId);
-        if (userParticipant?.encrypted_key) {
-          rawAesKeyBuffer = await cryptoService.unwrapAesKeyForUser(userParticipant.encrypted_key, currentUserId);
-        }
-      }
-
-      if (!rawAesKeyBuffer) return;
-
-      let keysToUpdate = false;
-
-      const updatedParticipantsPayload = await Promise.all(partDetails.map(async (p) => {
-        const pUserId = Number(p.user_id || p.id);
-        let encKey = p.encrypted_key;
-
-        if (!encKey || !String(encKey).trim()) {
-          const pEmp = employees.find((e) => Number(e.id) === pUserId);
-          const pPublicKey = p.public_key || pEmp?.public_key || (pUserId === currentUserId ? user?.public_key : null);
-
-          if (pPublicKey && String(pPublicKey).trim()) {
-            try {
-              encKey = await cryptoService.wrapAesKeyForParticipant(rawAesKeyBuffer, pPublicKey);
-              if (encKey) {
-                keysToUpdate = true;
-                p.encrypted_key = encKey;
-              }
-            } catch (err) {
-              console.error(`Failed to wrap AES key for participant #${pUserId} in discussion #${disc.id}:`, err);
-            }
-          }
-        }
-
-        return {
-          user_id: pUserId,
-          role: p.role || (Number(pUserId) === Number(disc.created_by) ? 'creator' : 'participant'),
-          encrypted_key: encKey || null,
-        };
-      }));
-
-      if (keysToUpdate) {
-        const payload = {
-          id: disc.id,
-          participants: updatedParticipantsPayload,
-        };
-
-        getService
-          .addCall("discussions.php", "update_participant_keys", payload)
-          .then((res) => {
-            if (res?.status === "success") {
-              console.log(`Auto-synced E2EE keys for discussion #${disc.id}`);
-            }
-          })
-          .catch((err) => {
-            console.error(`Error auto-syncing participant keys for discussion #${disc.id}:`, err);
-          });
-      }
-    }));
   };
 
   decryptDiscussionsList = async (discussionsList) => {
@@ -298,9 +245,7 @@ class Discussions extends Component {
       cryptoService.decryptDiscussionDetails(disc, user.id)
     );
 
-    const decryptedList = await Promise.all(decryptedPromises);
-    this.syncPendingParticipantKeys(decryptedList);
-    return decryptedList;
+    return await Promise.all(decryptedPromises);
   };
 
   fetchDiscussions = (append = false) => {
@@ -433,6 +378,10 @@ class Discussions extends Component {
 
   // Add / Edit / View / Delete Handlers
   handleOpenAddModal = () => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     this.setState({
       showAddEditModal: true,
       selectedDiscussion: null,
@@ -441,6 +390,10 @@ class Discussions extends Component {
   };
 
   handleOpenEditModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     this.setState({
       showAddEditModal: true,
       selectedDiscussion: discussion,
@@ -449,6 +402,10 @@ class Discussions extends Component {
   };
 
   handleOpenViewModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     if (discussion && discussion.id) {
       this.setState({
         showViewModal: true,
@@ -457,7 +414,22 @@ class Discussions extends Component {
     }
   };
 
+  handleParticipantModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
+    this.setState({
+      showParticipantsModal: true,
+      discussionToView: discussion,
+    });
+  };
+
   handleOpenDeleteModal = (discussion) => {
+    if (this.state.e2eeStatus !== "ready") {
+      window.dispatchEvent(new Event('openE2EESetupModal'));
+      return;
+    }
     this.setState({
       showDeleteModal: true,
       discussionToDelete: discussion,
@@ -469,6 +441,7 @@ class Discussions extends Component {
       showAddEditModal: false,
       showDeleteModal: false,
       showViewModal: false,
+      showParticipantsModal: false,
       selectedDiscussion: null,
       discussionToDelete: null,
       discussionToView: null,
@@ -562,6 +535,7 @@ class Discussions extends Component {
       showAddEditModal,
       showViewModal,
       showDeleteModal,
+      showParticipantsModal,
       selectedDiscussion,
       discussionToView,
       isEditing,
@@ -575,9 +549,15 @@ class Discussions extends Component {
 
     const { fixNavbar } = this.props;
 
+    // Show Sync Bulk button only when there is at least one un-decrypted discussion
+    const hasAnyUndecrypted = discussions.some((d) => !d.isDecrypted);
+
+    // Participant options excluding current user (can't request from yourself)
+    const currentUser = authService.getUser();
+
     const participantOptions = employees.map((emp) => ({
       value: emp.id,
-      label: `${emp.first_name} ${emp.last_name}`,
+      label: currentUser && Number(currentUser.id) === Number(emp.id) ? `You` : `${emp.first_name} ${emp.last_name}`,
     }));
 
     let displayedDiscussions = [...discussions];
@@ -637,6 +617,19 @@ class Discussions extends Component {
                     <i className="fe fe-shield-off mr-1" /> E2EE Disabled
                   </button>
                 )}
+
+                {/* visible when any discussion is NOT decrypted */}
+                <button
+                  className="btn btn-sm btn-outline-info mr-2"
+                  style={{ fontWeight: "600", borderRadius: "8px" }}
+                  title="Request key recovery from another participant"
+                  onClick={() =>
+                    this.handleOpenRecoveryModal(hasAnyUndecrypted)
+                  }
+                >
+                  <i className="fa fa-key mr-1" /> Key Recovery
+                </button>
+
                 <Button
                   label="Add Discussion"
                   onClick={this.handleOpenAddModal}
@@ -735,26 +728,72 @@ class Discussions extends Component {
                 <div className="row clearfix">
                   {displayedDiscussions.map((disc) => {
                     const isConcluded = disc.conclusion && disc.conclusion.trim();
-                    const displayParticipants = disc.participant_details ? disc.participant_details.filter(p => Number(p.user_id) !== Number(disc.created_by)) : [];
+                    const displayParticipants = disc.participant_details ? disc.participant_details : [];
+
+                    const currentUserId = authService.getUser()?.id;
+                    const currentUserParticipant = (displayParticipants || []).find(
+                      (p) => Number(p.user_id) === Number(currentUserId)
+                    );
+                    const myTags = parseTags(currentUserParticipant?.tags);
+                    const hasApproveRequest = disc.isDecrypted && displayParticipants.some((p) => myTags.includes(String(p.user_id)));
+                    const hasSentRequest = !disc.isDecrypted && displayParticipants.some((p) => parseTags(p?.tags).includes(String(currentUserId)));
 
                     return (
                       <div className="col-12 mb-3" key={disc.id}>
                         <div
-                          className="card shadow-sm rounded-lg mb-0 discussion-card-item cursor-pointer"
+                          className="card shadow-sm rounded-lg mb-0 discussion-card-item cursor-pointer position-relative overflow-hidden"
                           onClick={() => this.handleOpenViewModal(disc)}
                           title="Click to view discussion details"
                           style={{
                             border: "1px solid #e2e8f0",
-                            borderRadius: "12px",
+                            borderRadius: "8px",
                             backgroundColor: "#ffffff",
                             boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                             minHeight: "85px",
                             cursor: "pointer",
+                            position: "relative",
+                            overflow: "hidden",
                           }}
                         >
+                          {/* Top Right Corner Tag: Approvals or Requested */}
+                          {hasApproveRequest || hasSentRequest ? (
+                            <div
+                              className="position-absolute cursor-pointer"
+                              style={{
+                                top: 0,
+                                right: 0,
+                                zIndex: 10,
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                this.handleParticipantModal(disc);
+                              }}
+                              title={hasApproveRequest ? "Recovery request waiting for your approval." : "Recovery request sent. Waiting for approval."}
+                            >
+                              <span
+                                className="badge font-weight-bold d-inline-flex align-items-center shadow-sm"
+                                style={{
+                                  backgroundColor: hasApproveRequest ? "#f59e0b" : "#2563eb",
+                                  color: "#ffffff",
+                                  borderBottomLeftRadius: "8px",
+                                  borderTopRightRadius: "6px",
+                                  padding: "9px 10px",
+                                  fontSize: "11px",
+                                  letterSpacing: "0.4px",
+                                  fontWeight: "700",
+                                  boxShadow: "0 2px 4px rgba(0,0,0,0.12)"
+                                }}
+                              >
+                                <i className="fa fa-exclamation-circle mr-1" style={{ fontSize: "11px" }} />
+                                {hasApproveRequest ? "Approvals" : "Requested"}
+                              </span>
+                            </div>
+                          ) : null}
+
                           <div className="card-body py-3 px-3 d-flex align-items-center justify-content-between discussion-card-body">
                             {/* 1. Date & Creator */}
                             <div className="d-flex align-items-center mr-md-3 discussion-meta-col">
+                              {/* Date Container */}
                               <div
                                 className="text-center mr-3 rounded-lg flex-shrink-0"
                                 title="Created Date"
@@ -788,6 +827,8 @@ class Discussions extends Component {
                                   {disc.created_at ? dayjs(disc.created_at).format("YYYY") : ""}
                                 </small>
                               </div>
+
+                              {/* Creator Details */}
                               <div
                                 className="d-flex align-items-center overflow-hidden"
                                 title={`Created by ${disc.creator_name || 'User #' + disc.created_by}`}
@@ -843,24 +884,27 @@ class Discussions extends Component {
                                   </span>
                                 </div>
 
-                                {displayParticipants.length > 0 && (
-                                  <span
-                                    className="badge badge-pill border text-secondary ml-2 d-inline-flex align-items-center"
-                                    style={{
-                                      flexShrink: 0,
-                                      backgroundColor: "#f8fafc",
-                                      borderColor: "#e2e8f0",
-                                      color: "#475569",
-                                      fontSize: "12px",
-                                      fontWeight: "500",
-                                      padding: "4px 10px",
-                                      borderRadius: "16px",
-                                    }}
-                                  >
-                                    <i className="fa fa-users text-secondary mr-1" style={{ fontSize: "12px" }}></i>
-                                    {displayParticipants.length} participant{displayParticipants.length > 1 ? "s" : ""}
-                                  </span>
-                                )}
+                                <div className="d-flex align-items-center flex-shrink-0">
+                                  {displayParticipants.length > 0 && (
+                                    <button
+                                      className="btn btn-sm btn-light border text-secondary rounded-pill ml-2 d-inline-flex align-items-center shadow-none"
+                                      title="View Participant"
+                                      style={{
+                                        flexShrink: 0,
+                                        fontSize: "12px",
+                                        fontWeight: "500",
+                                        padding: "3px 10px",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        this.handleParticipantModal(disc);
+                                      }}
+                                    >
+                                      <i className="fa fa-users text-secondary mr-1" style={{ fontSize: "12px" }}></i>
+                                      {displayParticipants.length} participant{displayParticipants.length > 1 ? "s" : ""}
+                                    </button>
+                                  )}
+                                </div>
                               </div>
 
                               {/* Description Box */}
@@ -928,7 +972,7 @@ class Discussions extends Component {
                               >
                                 <i className="fa fa-eye"></i>
                               </button>
-                              {this.canModifyDiscussion(disc) && (
+                              {disc.isDecrypted && this.canModifyDiscussion(disc) && (
                                 <button
                                   className="btn btn-sm btn-light border text-secondary rounded-circle mr-1 shadow-none"
                                   onClick={(e) => {
@@ -941,7 +985,7 @@ class Discussions extends Component {
                                   <i className="fa fa-pencil" style={{ fontSize: "13px", color: "#64748b" }}></i>
                                 </button>
                               )}
-                              {this.canModifyDiscussion(disc) && (
+                              {disc.isDecrypted && this.canModifyDiscussion(disc) && (
                                 <button
                                   className="btn btn-sm btn-light border text-secondary rounded-circle shadow-none"
                                   onClick={(e) => {
@@ -1000,6 +1044,21 @@ class Discussions extends Component {
           discussion={discussionToView}
           discussionId={discussionToView?.id}
           onDiscussionUpdated={() => this.fetchDiscussions(false)}
+        />
+
+        {/* Participants Modal */}
+        <ParticipantsModal
+          show={showParticipantsModal}
+          onClose={this.handleCloseModals}
+          discussion={discussionToView}
+          onDiscussionUpdated={() => this.fetchDiscussions(false)}
+        />
+
+        {/* Unified Bulk Recovery Modal in Discussions Module */}
+        <RecoveryModal
+          show={this.state.showRecoveryModal}
+          mode={this.state.recoveryModalMode}
+          onClose={() => this.setState({ showRecoveryModal: false })}
         />
       </div>
     );

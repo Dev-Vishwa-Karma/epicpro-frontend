@@ -19,11 +19,13 @@ import Button from "../../common/formInputs/Button";
 import NotificationDropdown from "./elements/NotificationDropdown";
 import UserDropdown from "./elements/UserDropdown";
 import DailyReportModal from "./elements/DailyReportModal";
+import cryptoService from "../../../services/cryptoService";
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.userStatusInterval = null;
+    this.recoveryInterval = null;
     this.state = {
       showModal: false,
       report: "",
@@ -61,6 +63,7 @@ class Header extends Component {
       limit: 5,
       isTimeLoading: false,
       isPunchedInLocal: localStorage.getItem('isPunchedIn') === 'true',
+
     };
   }
 
@@ -72,6 +75,136 @@ class Header extends Component {
       showError: false,
       errorMessage: "",
     });
+  };
+
+
+  syncActiveRecoveryRequestsOnLogin = async (userId) => {
+    try {
+      const payload = { approver_id: userId, status: 'accepted' };
+      const res = await getService.addCall("discussions.php", "get_recovery_request", payload);
+      const requests = Array.isArray(res?.data) ? res.data : [];
+      const acceptedIds = requests.map(r => Number(r.id)).filter(Boolean);
+      localStorage.setItem("active_recovery_requests", JSON.stringify(acceptedIds));
+    } catch (err) {
+      console.error("Error syncing active recovery requests on login:", err);
+    }
+  };
+
+  removeActiveRecoveryRequest = (requestId) => {
+    try {
+      const raw = localStorage.getItem("active_recovery_requests");
+      const activeRequests = raw ? JSON.parse(raw) : [];
+      const updated = activeRequests.filter(id => Number(id) !== Number(requestId));
+      localStorage.setItem("active_recovery_requests", JSON.stringify(updated));
+    } catch (err) {
+      console.error("Error removing active recovery request from localStorage:", err);
+    }
+  };
+
+  processBackgroundBulkRecovery = () => {
+    this.recoveryInterval = setInterval(async () => {
+      if (this.isProcessingRecovery) return;
+
+      let activeRequestIds = [];
+      try {
+        const raw = localStorage.getItem("active_recovery_requests");
+        activeRequestIds = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        activeRequestIds = [];
+      }
+
+      if (!Array.isArray(activeRequestIds) || activeRequestIds.length === 0) return;
+
+      const currentUserId = authService.getUser()?.id;
+      if (!currentUserId) return;
+
+      const hasPrivateKey = cryptoService.hasPrivateKey(currentUserId);
+      if (!hasPrivateKey) return;
+
+      this.isProcessingRecovery = true;
+      try {
+        const payload = { approver_id: currentUserId, status: 'accepted' };
+        const res = await getService.addCall("discussions.php", "get_recovery_request", payload);
+        const allRequests = Array.isArray(res?.data) ? res.data : [];
+        const requestsToProcess = allRequests.filter(r => activeRequestIds.map(Number).includes(Number(r.id)));
+
+        if (requestsToProcess.length === 0) {
+          const validBackendIds = allRequests.map(r => Number(r.id));
+          const filtered = activeRequestIds.filter(id => validBackendIds.includes(Number(id)));
+          localStorage.setItem("active_recovery_requests", JSON.stringify(filtered));
+          this.isProcessingRecovery = false;
+          return;
+        }
+
+        for (const req of requestsToProcess) {
+          const requesterId = req.requester_id;
+          const requesterPublicKey = req.requester_public_key;
+          const requestId = req.id;
+          const lastSuccessfulItemId = req?.last_successful_item_id || 0;
+
+          if (!requesterId || !requesterPublicKey) continue;
+
+          const res = await getService.getCall("discussions.php", {
+            action: "view",
+            participant_id: requesterId,
+            requested_id: lastSuccessfulItemId,
+            page: 1,
+          });
+          const recoveries = [];
+          const discs = res.data?.discussions ?? (Array.isArray(res.data) ? res.data : []);
+          for (const disc of discs) {
+            const participantDetails = disc.participant_details || [];
+            const approverParticipant = participantDetails.find(p => Number(p.user_id) === Number(currentUserId));
+            const requesterParticipant = participantDetails.find(p => Number(p.user_id) === Number(requesterId));
+            if (approverParticipant && approverParticipant.encrypted_key && requesterParticipant) {
+              try {
+                const reencryptedKeyBase64 = await cryptoService.reencryptDiscussionKeyForTargetUser(
+                  disc,
+                  currentUserId,
+                  requesterPublicKey
+                );
+                recoveries.push({
+                  discussion_id: disc.id,
+                  encrypted_key: reencryptedKeyBase64,
+                });
+              } catch (err) {
+                console.error(`Failed to re-encrypt key for discussion ${disc.id}:`, err);
+              }
+            }
+          }
+
+          if (recoveries.length > 0) {
+            const bulkPayload = {
+              requester_id: requesterId,
+              request_id: requestId,
+              recoveries: recoveries,
+            };
+            const bulkRes = await getService.addCall("discussions.php", "bulk_recover_keys", bulkPayload);
+            if (bulkRes?.status === "success") {
+              console.log(`Successfully bulk recovered ${recoveries.length} discussion keys for requester ${requesterId}`);
+              if (bulkRes?.data?.is_completed) {
+                this.removeActiveRecoveryRequest(requestId);
+              }
+            }
+          } else {
+            const completePayload = {
+              requester_id: requesterId,
+              request_id: requestId,
+              recoveries: [],
+              mark_completed: true,
+            };
+            const bulkRes = await getService.addCall("discussions.php", "bulk_recover_keys", completePayload);
+            if (bulkRes?.status === "success" || bulkRes?.data?.is_completed) {
+              this.removeActiveRecoveryRequest(requestId);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Background recovery check error:", err);
+      } finally {
+        this.isProcessingRecovery = false;
+      }
+    }, 8000);
   };
 
   componentDidMount() {
@@ -95,6 +228,10 @@ class Header extends Component {
           this.startNotificationInterval();
           this.checktodayDueDate();
           this.startUserStatusCheck();
+          if (user.role != "employee") {
+            this.syncActiveRecoveryRequestsOnLogin(user.id);
+            this.processBackgroundBulkRecovery();
+          }
         }
       );
     }
@@ -106,6 +243,9 @@ class Header extends Component {
     clearInterval(this.state.timer);
     if (this.userStatusInterval) {
       clearInterval(this.userStatusInterval);
+    }
+    if (this.recoveryInterval) {
+      clearInterval(this.recoveryInterval);
     }
   }
 
@@ -959,6 +1099,7 @@ class Header extends Component {
         />
 
         {this.state.showModal && <div className="modal-backdrop fade show" />}
+
         {is_task_due_today && showDueAlert && dueTasks?.length > 0 && (
           <DueTasksAlert
             dueTasks={dueTasks}
