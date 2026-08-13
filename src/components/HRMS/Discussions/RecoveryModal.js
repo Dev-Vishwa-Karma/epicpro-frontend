@@ -305,12 +305,12 @@ const RecoveryModal = ({
 
             {/* Modal Footer */}
             {displayParticipants.length !== 0 ? (
-              <div className={`modal-footer ${mode === 'approve' ? 'd-flex justify-content-center' : ''}`}>
+              <div className={`modal-footer ${mode === 'approve' ? 'd-flex justify-content-center w-100' : ''}`}>
                 {mode === 'approve' ? (
                   <Button
                     label='Ignore'
                     onClick={handleClose}
-                    className='btn-secondary btn-xl px-5 font-weight-bold'
+                    className='btn-secondary btn-xl px-5 font-weight-bold w-100'
                     style={{ minWidth: '280px', fontSize: '16px' }}
                   />
                 ) : (
