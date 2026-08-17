@@ -985,7 +985,7 @@ class Discussions extends Component {
                                   <i className="fa fa-pencil" style={{ fontSize: "13px", color: "#64748b" }}></i>
                                 </button>
                               )}
-                              {disc.isDecrypted && this.canModifyDiscussion(disc) && (
+                              {this.canModifyDiscussion(disc) && (
                                 <button
                                   className="btn btn-sm btn-light border text-secondary rounded-circle shadow-none"
                                   onClick={(e) => {

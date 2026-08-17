@@ -354,7 +354,7 @@ class ApplicantViewModal extends Component {
                     </div>
                   )}
 
-                  {/* Note Section - only show if has note */}
+                  {/* Note Section - formatted structured notes */}
                   {applicant.note && (
                     <div className="mb-4">
                       <h6
@@ -368,11 +368,69 @@ class ApplicantViewModal extends Component {
                           color: "#2C3E50",
                         }}
                       >
-                        Notes / Comments
+                        Notes & Follow-ups
                       </h6>
 
-                      <div className="text-left pl-3 pr-3 py-2 text-muted" style={{ backgroundColor: '#FEE2E2', borderRadius: '8px' }}>
-                        {applicant.note}
+                      <div
+                        className="text-left p-3"
+                        style={{
+                          backgroundColor: "#F9FAFB",
+                          borderRadius: "8px",
+                          border: "1px solid #E5E7EB",
+                        }}
+                      >
+                        {applicant.note.includes(":") ? (
+                          <div>
+                            {applicant.note.split("|").map((part, index, array) => {
+                              const trimmed = part.trim();
+                              if (!trimmed) return null;
+                              const colonIdx = trimmed.indexOf(":");
+                              const isLast = index === array.length - 1;
+
+                              if (colonIdx !== -1) {
+                                const label = trimmed.substring(0, colonIdx).trim();
+                                const value = trimmed.substring(colonIdx + 1).trim();
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`py-2 ${!isLast ? "border-bottom" : ""}`}
+                                    style={{ borderColor: "#E5E7EB" }}
+                                  >
+                                    <span
+                                      className="badge badge-info mr-2"
+                                      style={{
+                                        fontSize: "11px",
+                                        padding: "5px 8px",
+                                        fontWeight: "600",
+                                      }}
+                                    >
+                                      {label}
+                                    </span>
+                                    <span
+                                      className="text-dark"
+                                      style={{ fontSize: "13px", lineHeight: "1.5" }}
+                                    >
+                                      {value}
+                                    </span>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div
+                                  key={index}
+                                  className={`py-2 text-dark ${!isLast ? "border-bottom" : ""}`}
+                                  style={{ fontSize: "13px", borderColor: "#E5E7EB" }}
+                                >
+                                  {trimmed}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-dark" style={{ fontSize: "13px", lineHeight: "1.5" }}>
+                            {applicant.note}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -522,20 +580,20 @@ class ApplicantViewModal extends Component {
                   <div className="mb-4">
                     <div className="text-center mb-4">
                       <Avatar
-                          first_name={applicant.fullname ? applicant.fullname.split(" ")[0] : ""}
-                          last_name={applicant.fullname ? applicant.fullname.split(" ")[1] : ""}
-                          size={120}
-                          style={{
-                            ...getStatusColor(applicant.status),
-                            fontSize: "2.5rem",
-                            objectFit: "cover",
-                          }}
-                          title={`${applicant.fullname || ''}`}
+                        first_name={applicant.fullname ? applicant.fullname.split(" ")[0] : ""}
+                        last_name={applicant.fullname ? applicant.fullname.split(" ")[1] : ""}
+                        size={120}
+                        style={{
+                          ...getStatusColor(applicant.status),
+                          fontSize: "2.5rem",
+                          objectFit: "cover",
+                        }}
+                        title={`${applicant.fullname || ''}`}
                       />
                     </div>
-                  </div>                                                                                  
+                  </div>
                   <div className='text-center mb-4                                                                  '>
-                     <span
+                    <span
                       className="badge badge-pill"
                       style={{
                         ...getStatusColor(applicant.status),
@@ -567,12 +625,12 @@ class ApplicantViewModal extends Component {
                       <div style={{ fontSize: "13px", lineHeight: "1.6" }}>
                         {(applicant.experience_display ||
                           applicant.experience) && (
-                          <div className="mb-2">
-                            <strong>Experience:</strong>{" "}
-                            {applicant.experience_display ||
-                              `${applicant.experience} years`}
-                          </div>
-                        )}
+                            <div className="mb-2">
+                              <strong>Experience:</strong>{" "}
+                              {applicant.experience_display ||
+                                `${applicant.experience} years`}
+                            </div>
+                          )}
                         {applicant.branch && (
                           <div className="mb-2">
                             <strong>Branch:</strong> {applicant.branch}
@@ -611,7 +669,7 @@ class ApplicantViewModal extends Component {
                     <div style={{ fontSize: "13px", lineHeight: "1.6" }}>
                       <div className="mb-2">
                         <strong>Applied on:</strong>{" "}
-                        {shortformatDate(applicant.created_at|| "")}
+                        {shortformatDate(applicant.created_at || "")}
                       </div>
                       <div className="mb-2">
                         <strong>Source:</strong>{" "}
@@ -619,10 +677,12 @@ class ApplicantViewModal extends Component {
                           ? applicant.source === "sync"
                             ? "Synced from External Source"
                             : applicant.source === "admin"
-                            ? "Added by Admin"
-                            : applicant.source === "referral"
-                            ? "referral Application Form"
-                            : "Unknown"
+                              ? "Added by Admin"
+                              : applicant.source === "referral"
+                                ? "referral Application Form"
+                                : applicant.source === "import"
+                                ? "by import admin"
+                                : "Unknown"
                           : "N/A"}
                       </div>
                       {applicant.employee_id && (
@@ -631,7 +691,7 @@ class ApplicantViewModal extends Component {
                           {applicant.employee_name ? (
                             <span>
                               {" "}
-                              {applicant.employee_name} 
+                              {applicant.employee_name}
                               {/* (ID:{" "}
                               {applicant.employee_id}) */}
                             </span>
@@ -639,7 +699,7 @@ class ApplicantViewModal extends Component {
                             <span>
                               {" "}
                               {this.state.employeeDetails.first_name}{" "}
-                              {this.state.employeeDetails.last_name} 
+                              {this.state.employeeDetails.last_name}
                               {/* (ID:{" "}
                               {applicant.employee_id}) */}
                             </span>
@@ -647,7 +707,7 @@ class ApplicantViewModal extends Component {
                             <span>Loading...</span>
                           ) : (
                             <span> Employee ID:
-                               {/* {applicant.employee_id} */}
+                              {/* {applicant.employee_id} */}
                             </span>
                           )}
                         </div>

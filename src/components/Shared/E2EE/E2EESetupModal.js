@@ -140,6 +140,7 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           throw new Error(uploadRes.data?.message || 'Failed to upload keys to server.');
         }
 
+        await cryptoService.clearPrivateKey(user.id);
         await cryptoService.savePrivateKey(user.id, keyPair.privateKeyPEM);
 
         const updatedUser = { ...user, public_key: keyPair.publicKeyPEM };
@@ -168,6 +169,7 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
           backupPin
         );
 
+        await cryptoService.clearPrivateKey(user.id);
         await cryptoService.savePrivateKey(user.id, privateKeyPEM);
 
         setSuccess(true);
@@ -240,6 +242,7 @@ const E2EESetupModal = ({ isOpen, onClose, onSuccess, mode = 'generate', backupD
             throw new Error(uploadRes.data?.message || 'Failed to update public key and backup blob in database.');
           }
 
+          await cryptoService.clearPrivateKey(user.id);
           await cryptoService.savePrivateKey(user.id, keyPair.privateKeyPEM);
 
           const updatedUser = { ...user, public_key: keyPair.publicKeyPEM };
