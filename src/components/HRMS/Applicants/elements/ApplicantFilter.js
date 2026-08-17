@@ -11,13 +11,13 @@ class ApplicantFilter extends Component {
           <form className="row" onSubmit={onFilter}>
             <div className="col-lg-4 col-md-4 col-sm-6">
               <label>Search</label>
-                <InputField
-                  className="form-control"
-                  name="search"
-                  value={search}
-                  onChange={onInputChange}
-                  placeholder="Search..."
-                />
+              <InputField
+                className="form-control"
+                name="search"
+                value={search}
+                onChange={onInputChange}
+                placeholder="Search..."
+              />
             </div>
             <div className="col-lg-3 col-md-4 col-sm-6">
               <label>Status</label>
@@ -36,9 +36,10 @@ class ApplicantFilter extends Component {
                     { value: "reviewed", label: "Reviewed" },
                     { value: "interviewed", label: "Interviewed" },
                     { value: "hired", label: "Hired" },
-                    { value: "rejected", label: "Rejected" }
+                    { value: "rejected", label: "Rejected" },
+                    { value: "closed", label: "Closed" }
                   ]}
-                  firstOption = {false}
+                  firstOption={false}
                 />
               </div>
             </div>
@@ -57,7 +58,7 @@ class ApplicantFilter extends Component {
                     { value: "newest", label: "Newest" },
                     { value: "oldest", label: "Oldest" }
                   ]}
-                  firstOption = {false}
+                  firstOption={false}
                 />
               </div>
             </div>
