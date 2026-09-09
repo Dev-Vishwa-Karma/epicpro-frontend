@@ -20,6 +20,7 @@ class ApplicantTable extends Component {
       case 'interviewed': return { background: '#FFFFE0', color: 'orange' };
       case 'hired': return { background: '#DCFCE7', color: 'green' };
       case 'rejected': return { background: '#FEE2E2', color: 'red' };
+      case 'closed': return { background: '#fab9f4', color: 'gray' };
       case 'blacklisted': return { background: '#8f8989ff', color: 'white' };
       case 'noresponse': return { background: '#E0E0E0', color: 'gray' };
       default: return {};
@@ -250,6 +251,14 @@ class ApplicantTable extends Component {
                                       title={applicant.employee_name ? `Referral by ${applicant.employee_name}` : 'referral form'}
                                     ></i>
                                   )}
+                                  {applicant.source === 'import' && (
+                                    <i
+                                      className={`fa fa-solid fa-upload text-warning`}
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      title={applicant.employee_name ? `Imported by ${applicant.employee_name}` : 'Imported form'}
+                                    ></i>
+                                  )}
                                 </span>
                               </div>
                               <span className="text-muted">{applicant.email}</span>
@@ -284,7 +293,8 @@ class ApplicantTable extends Component {
                                 { value: "reviewed", label: "Reviewed" },
                                 { value: "interviewed", label: "Interviewed" },
                                 { value: "hired", label: "Hired" },
-                                { value: "rejected", label: "Rejected" }
+                                { value: "rejected", label: "Rejected" },
+                                { value: "closed", label: "Closed" }
                               ]}
                               firstOption={false}
                             />

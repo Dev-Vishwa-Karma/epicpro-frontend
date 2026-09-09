@@ -2,7 +2,7 @@
 	"name": "admin-app",
 	"version": "0.1.0",
 	"private": true,
-	"home" :"/build",
+	"home": "/build",
 	"dependencies": {
 		"@babel/core": "^7.26.9",
 		"@ckeditor/ckeditor5-build-classic": "^35.3.2",
@@ -45,7 +45,8 @@
 		"reactjs-popup": "^2.0.6",
 		"redux": "^4.0.5",
 		"redux-thunk": "^2.3.0",
-		"typescript": "^5.7.3"
+		"typescript": "^5.7.3",
+		"xlsx": "^0.18.5"
 	},
 	"scripts": {
 		"start": "react-scripts start",

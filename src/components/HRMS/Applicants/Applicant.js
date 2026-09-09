@@ -8,6 +8,7 @@ import ApplicantFilter from './elements/ApplicantFilter';
 import AddApplicant from './elements/AddApplicant'
 import { appendDataToFormData } from '../../../utils';
 import DuplicateDecisionModal from './elements/DuplicateDecisionModal';
+import ImportApplicantModal from './elements/ImportApplicantModal';
 import Button from '../../common/formInputs/Button';
 import { shortformatDate } from '../../../utils';
 
@@ -38,11 +39,20 @@ class Applicant extends Component {
     tabKey: 0,
     lastSyncTime: null,
     editingApplicant: null,
+    showImportModal: false,
   };
 
   componentDidMount() {
     this.fetchApplicants();
   }
+
+  handleOpenImportModal = () => {
+    this.setState({ showImportModal: true });
+  };
+
+  handleCloseImportModal = () => {
+    this.setState({ showImportModal: false });
+  };
 
   fetchApplicants = () => {
     this.setState({ loading: true });
@@ -365,17 +375,26 @@ class Applicant extends Component {
               </ul>
               <div className={`tab-pane fade ${activeTab === 'list' ? 'show active' : ''}`} id="applicant-list" role="tabpanel">
                 <div className="d-flex flex-column align-items-end">
-                  <Button
-                    label={isSyncing ? "Syncing..." : `Sync`}
-                    onClick={this.handleSync}
-                    disabled={isSyncing}
-                    className="btn-sm btn-primary mt-2"
-                    icon={isSyncing ? "fa fa-refresh" : "fa fa-refresh"}
-                    iconStyle={{
-                      marginRight: isSyncing ? '2' : '8px',
-                      animation: isSyncing ? 'spin 1s linear infinite' : 'none'
-                    }}
-                  />
+                  <div className="d-flex align-items-center mt-2">
+                    <Button
+                      label="Import"
+                      onClick={this.handleOpenImportModal}
+                      className="btn-sm btn-outline-secondary mr-2"
+                      icon="fa fa-upload"
+                      iconStyle={{ marginRight: '6px' }}
+                    />
+                    <Button
+                      label={isSyncing ? "Syncing..." : `Sync`}
+                      onClick={this.handleSync}
+                      disabled={isSyncing}
+                      className="btn-sm btn-primary"
+                      icon={isSyncing ? "fa fa-refresh" : "fa fa-refresh"}
+                      iconStyle={{
+                        marginRight: isSyncing ? '2px' : '6px',
+                        animation: isSyncing ? 'spin 1s linear infinite' : 'none'
+                      }}
+                    />
+                  </div>
                   <style>
                     {`
                       @keyframes spin {
@@ -457,6 +476,13 @@ class Applicant extends Component {
           isLoading={isDeleting}
           onClose={this.closeDeleteModal}
           deleteBody={"Are you sure you want to delete this applicant?"}
+        />
+
+        {/* Import Applicant Modal */}
+        <ImportApplicantModal
+          show={this.state.showImportModal}
+          onClose={this.handleCloseImportModal}
+          onSuccess={this.refreshApplicants}
         />
       </>
     );
