@@ -12,7 +12,7 @@ import InputField from '../../../common/formInputs/InputField';
 import CheckboxGroup from '../../../common/formInputs/CheckboxGroup';
 import { getToday, formatDate } from '../../../../utils';
 import Button from '../../../common/formInputs/Button';
-import { withRouter } from 'react-router-dom'; 
+import { withRouter } from 'react-router-dom';
 
 
 import { PASSWORD_SENTINEL as PASSWORD_STRING } from '../../../../utils';
@@ -128,7 +128,7 @@ class CalendarWithTabs extends Component {
 
     getDepartments = () => {
         // Get department data from departments table
-         getService.getCall('departments.php', {
+        getService.getCall('departments.php', {
             action: 'view'
         })
             .then(data => {
@@ -266,11 +266,11 @@ class CalendarWithTabs extends Component {
 
         if (currentEmployeeId) {
             getService.getCall('reports.php', {
-                        action: 'view',
-                        user_id: currentEmployeeId,
-                        from_date:startDate,
-                        to_date:endDate,
-                    })
+                action: 'view',
+                user_id: currentEmployeeId,
+                from_date: startDate,
+                to_date: endDate,
+            })
                 .then(data => {
                     if (data.status === 'success') {
                         const reports = data.data;
@@ -295,11 +295,11 @@ class CalendarWithTabs extends Component {
                     const calendarEventsData = this.generateCalendarEvents(reports, leaves);
                     this.setState({ calendarEventsData });
                 });
-               
+
             getService.getCall('employee_leaves.php', {
                 action: 'view',
-                from_date:startDate,
-                to_date:endDate,
+                from_date: startDate,
+                to_date: endDate,
                 employee_id: currentEmployeeId
             })
                 .then(data => {
@@ -331,19 +331,19 @@ class CalendarWithTabs extends Component {
 
     fetchEmployeeDetails = (employeeId) => {
         getService.getCall('get_employees.php', {
-                    action: 'view',
-                    user_id:employeeId,
-                })
-        
+            action: 'view',
+            user_id: employeeId,
+        })
+
             .then((data) => {
                 if (data.status === "success") {
-                     const { password, ...employeeData } = data.data;
+                    const { password, ...employeeData } = data.data;
 
                     this.setState(prevState => ({
                         employee: { ...prevState.employee, ...employeeData }, // Merge new data excluding password
                         previewImage: employeeData.profile ? getFileUrl(employeeData.profile) : prevState.previewImage
                     }));
-                    
+
                     const skillsFrontend = this.parseSkills(this.state.employee.frontend_skills);
                     const skillsBackend = this.parseSkills(this.state.employee.backend_skills);
 
@@ -430,9 +430,9 @@ class CalendarWithTabs extends Component {
 
         getService.getCall('reports.php', {
             action: 'view',
-            user_id:employeeId,
-            from_date:startDate,
-            to_date:endDate
+            user_id: employeeId,
+            from_date: startDate,
+            to_date: endDate
         })
             .then((data) => {
                 if (data.status === "success") {
@@ -488,7 +488,7 @@ class CalendarWithTabs extends Component {
             { name: 'email', value: employee.email, type: 'email', required: true, messageName: 'Email' },
             { name: 'gender', value: employee.gender, required: true, messageName: 'Gender' },
             { name: 'department_id', value: employee.department_id, required: true, messageName: 'Department' },
-            { name: 'dob', value: employee.dob, type: 'date', required: true, messageName: 'Date of Birth'},
+            { name: 'dob', value: employee.dob, type: 'date', required: true, messageName: 'Date of Birth' },
             { name: 'joining_date', value: employee.joining_date, type: 'date', required: true, messageName: 'Joining Date' },
             { name: 'mobile_no1', value: employee.mobile_no1, type: 'mobile', required: true, messageName: 'Mobile Number' },
             { name: 'mobile_no2', value: employee.mobile_no2, type: 'mobile', messageName: 'Mobile Number' },
@@ -560,7 +560,7 @@ class CalendarWithTabs extends Component {
         appendField("facebook_url", employee.facebook_url);
         appendField("twitter_url", employee.twitter_url);
 
-        getService.editCall('get_employees.php','edit', updatedProfileData, null, employee.id )
+        getService.editCall('get_employees.php', 'edit', updatedProfileData, null, employee.id)
             .then(data => {
                 if (data.status === "success") {
                     const updatedUser = data.data;
@@ -632,20 +632,20 @@ class CalendarWithTabs extends Component {
 
     handleApplyFilter = async () => {
         this.setState({ loading: true });
-        const { filterFromDate, filterToDate } = this.state;  
-            getService.getCall('activities.php', {
-                action: 'view',
-                user_id:this.props.employeeId,
-                from_date: filterFromDate,
-                to_date:filterToDate,
-                is_timeline:true
-            }).then(data => {
-                if (data.status === "success") {
-                    this.setState({ activities: data.data, loading: false });
-                } else {
-                    this.setState({ activities: [], loading: false, error: data.message });
-                }
-            })       
+        const { filterFromDate, filterToDate } = this.state;
+        getService.getCall('activities.php', {
+            action: 'view',
+            user_id: this.props.employeeId,
+            from_date: filterFromDate,
+            to_date: filterToDate,
+            is_timeline: true
+        }).then(data => {
+            if (data.status === "success") {
+                this.setState({ activities: data.data, loading: false });
+            } else {
+                this.setState({ activities: [], loading: false, error: data.message });
+            }
+        })
     };
 
     handleDateChange = (date, type) => {
@@ -653,18 +653,18 @@ class CalendarWithTabs extends Component {
             const newDate = formatDate(new Date(date));
             if (type === 'fromDate') {
                 this.setState({ filterFromDate: newDate });
-               
+
             } else if (type === 'toDate') {
                 this.setState({ filterToDate: newDate });
             }
-         
+
         } else {
             this.setState({ [type]: null });
         }
     };
 
     render() {
-        const { activities, employee, calendarEventsData, skillsFrontend, skillsBackend, showSuccess,successMessage,showError, errorMessage, col, errors } = this.state;
+        const { activities, employee, calendarEventsData, skillsFrontend, skillsBackend, showSuccess, successMessage, showError, errorMessage, col, errors } = this.state;
         const frontendSkills = ["HTML", "CSS", "JavaScript", "React", "Angular", "Vue"];
         const backendSkills = ["PHP", "Laravel", "Python", "Node.js", "Symfony", "Django", "Ruby on Rails"];
         // Handle case where employee data is not available
@@ -805,22 +805,22 @@ class CalendarWithTabs extends Component {
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "timeline" ? "show active" : ""}`} id="pills-timeline" role="tabpanel" aria-labelledby="pills-timeline-tab">
                                         {/* <div className='container-fluid'> */}
-                                            <div className="card mb-3">
-                                                <div className="card-body">
-                                                    <div className="row">
-                                                        <DateFilterForm
-                                                            fromDate={this.state.filterFromDate}
-                                                            toDate={this.state.filterToDate}
-                                                            ButtonLoading={this.state.ButtonLoading}
-                                                            handleDateChange={this.handleDateChange}
-                                                            handleApplyFilters={this.handleApplyFilter}
-                                                            col={col}
-                                                        />
-                                                    </div>
+                                        <div className="card mb-3">
+                                            <div className="card-body">
+                                                <div className="row">
+                                                    <DateFilterForm
+                                                        fromDate={this.state.filterFromDate}
+                                                        toDate={this.state.filterToDate}
+                                                        ButtonLoading={this.state.ButtonLoading}
+                                                        handleDateChange={this.handleDateChange}
+                                                        handleApplyFilters={this.handleApplyFilter}
+                                                        col={col}
+                                                    />
                                                 </div>
                                             </div>
-                                                            
-                                        <ActivitiesTime activities = { activities } employeeId={this.state.employeeId || this.props.employeeId} fromDate={this.state.filterFromDate} toDate={this.state.filterToDate} />
+                                        </div>
+
+                                        <ActivitiesTime activities={activities} employeeId={this.state.employeeId || this.props.employeeId} fromDate={this.state.filterFromDate} toDate={this.state.filterToDate} />
                                     </div>
                                     <div className={`tab-pane fade ${this.state.activeTab === "profile" ? "show active" : ""}`} id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
                                         <div className="card">
@@ -855,19 +855,6 @@ class CalendarWithTabs extends Component {
                                                     </div>
                                                     <div className="col-sm-4 col-md-4">
                                                         <InputField
-                                                            label="Email Address"
-                                                            name="email"
-                                                            value={employee.email}
-                                                            onChange={this.handleProfileChange}
-                                                            placeholder="Email"
-                                                            error={errors.email}
-                                                            refInput={this.fieldRefs.email}
-                                                            type="email"
-                                                            required
-                                                        />
-                                                    </div>
-                                                    <div className="col-sm-4 col-md-4">
-                                                        <InputField
                                                             label="Gender"
                                                             name="gender"
                                                             value={employee.gender}
@@ -876,8 +863,8 @@ class CalendarWithTabs extends Component {
                                                             refInput={this.fieldRefs.gender}
                                                             type="select"
                                                             options={[
-                                                            { value: 'male', label: 'Male' },
-                                                            { value: 'female', label: 'Female' }
+                                                                { value: 'male', label: 'Male' },
+                                                                { value: 'female', label: 'Female' }
                                                             ]}
                                                             required
                                                         />
@@ -904,8 +891,8 @@ class CalendarWithTabs extends Component {
                                                             refInput={this.fieldRefs.department_id}
                                                             type="select"
                                                             options={this.state.departments.map(dept => ({
-                                                            value: dept.id,
-                                                            label: dept.department_name
+                                                                value: dept.id,
+                                                                label: dept.department_name
                                                             }))}
                                                             disabled={window.user && window.user.role === 'employee'}
                                                             required
@@ -935,7 +922,7 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             maxLength="10"
                                                             onInput={(e) => {
-                                                            e.target.value = e.target.value.replace(/\D/g, '');
+                                                                e.target.value = e.target.value.replace(/\D/g, '');
                                                             }}
                                                         />
                                                     </div>
@@ -951,51 +938,19 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             maxLength="10"
                                                             onInput={(e) => {
-                                                            e.target.value = e.target.value.replace(/\D/g, ''); // Allow only numbers
+                                                                e.target.value = e.target.value.replace(/\D/g, ''); // Allow only numbers
                                                             }}
                                                         />
                                                     </div>
-                                                    <div className="col-sm-4 col-md-4">
-                                                        <div className="form-group">
-                                                            <label className="form-label" htmlFor="password">Password</label>
-                                                            <div className="input-group">
-                                                                <input
-                                                                    id="password"
-                                                                    type={this.state.showPassword ? 'text' : 'password'}
-                                                                    name="password"
-                                                                    className={`form-control${errors.password ? ' is-invalid' : ''}`}
-                                                                    value={employee.password}
-                                                                    onChange={this.handleProfileChange}
-                                                                    placeholder="Enter password"
-                                                                    autoComplete="new-password"
-                                                                    required
-                                                                    ref={this.fieldRefs.password}
-                                                                />
-                                                                {this.state.passwordCleared && String(employee.password || '') !== '' && (
-                                                                <div className="input-group-append">
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-outline-secondary"
-                                                                        onClick={this.onTogglePassword}
-                                                                        title={this.state.showPassword ? 'Hide' : 'Show'}
-                                                                    >
-                                                                        <i className={`fe ${this.state.showPassword ? 'fe-eye-off' : 'fe-eye'}`}></i>
-                                                                    </button>
-                                                                </div>
-                                                                )}
-                                                            </div>
-                                                            {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
-                                                        </div>
-                                                    </div>
                                                     <div className="col-md-12">
-                                                    <InputField
-                                                        label="Address Line 1"
-                                                        name="address_line1"
-                                                        value={employee.address_line1}
-                                                        onChange={this.handleProfileChange}
-                                                        placeholder="Enter Address Line 1"
-                                                        refInput={this.fieldRefs.address_line1}
-                                                    />
+                                                        <InputField
+                                                            label="Address Line 1"
+                                                            name="address_line1"
+                                                            value={employee.address_line1}
+                                                            onChange={this.handleProfileChange}
+                                                            placeholder="Enter Address Line 1"
+                                                            refInput={this.fieldRefs.address_line1}
+                                                        />
                                                     </div>
                                                     <div className="col-md-12">
                                                         <InputField
@@ -1019,7 +974,7 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             maxLength="10"
                                                             onInput={(e) => {
-                                                            e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
+                                                                e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
                                                             }}
                                                         />
                                                     </div>
@@ -1035,7 +990,7 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             maxLength="10"
                                                             onInput={(e) => {
-                                                            e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
+                                                                e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
                                                             }}
                                                         />
                                                     </div>
@@ -1051,7 +1006,7 @@ class CalendarWithTabs extends Component {
                                                             type="tel"
                                                             maxLength="10"
                                                             onInput={(e) => {
-                                                            e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
+                                                                e.target.value = e.target.value.replace(/\D/g, '');  // Allow only numbers
                                                             }}
                                                         />
                                                     </div>
@@ -1074,7 +1029,7 @@ class CalendarWithTabs extends Component {
                                                     </div>
 
                                                     <div className="col-md-12">
-                                                       <InputField
+                                                        <InputField
                                                             label="About Me"
                                                             name="about_me"
                                                             type="textarea"

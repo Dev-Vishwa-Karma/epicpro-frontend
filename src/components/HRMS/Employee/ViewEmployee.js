@@ -15,7 +15,7 @@ class ViewEmployee extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            employeeNew : {
+            employeeNew: {
                 first_name: "",
                 last_name: "",
                 about_me: "",
@@ -27,9 +27,9 @@ class ViewEmployee extends Component {
             showSuccess: false,
             errorMessage: "",
             showError: false,
-            activeTab: "calendar", 
+            activeTab: "calendar",
             openFileSelectModel: false,
-            images: [],   
+            images: [],
             showGallery: true,
             croppperPreviewImage: null,
             profileImage: null,
@@ -55,10 +55,10 @@ class ViewEmployee extends Component {
     };
 
     blobToFile = (blob, fileName) => {
-    return new File([blob], fileName, {
-        type: blob.type,
-        lastModified: Date.now()
-    });
+        return new File([blob], fileName, {
+            type: blob.type,
+            lastModified: Date.now()
+        });
     };
 
     handleFileChange = async (event) => {
@@ -68,19 +68,19 @@ class ViewEmployee extends Component {
             showError: false,
             isUploading: true
         });
-        
+
         const file = event.target.files[0];
 
         if (!file) {
             this.setState({ isUploading: false });
             return;
         }
-        
+
         // Validate file type
         if (file) {
             const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
             const fileType = file.type.toLowerCase();
-            
+
             if (!allowedTypes.includes(fileType)) {
                 this.setState({
                     errorMessage: "Please select only PNG, JPG, or JPEG image files.",
@@ -93,7 +93,7 @@ class ViewEmployee extends Component {
                 event.target.value = '';
                 return;
             }
-            
+
             // Validate file size (optional - 5MB limit)
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
@@ -108,16 +108,16 @@ class ViewEmployee extends Component {
                 return;
             }
         }
-        
+
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 //this.setState({ croppperPreviewImage: reader.result });
-               // this.saveCroppedImage();
+                // this.saveCroppedImage();
             };
             reader.readAsDataURL(file);
         }
-        
+
         try {
             const uploadImageData = new FormData();
             uploadImageData.append('employee_id', this.state.employeeId);
@@ -126,7 +126,7 @@ class ViewEmployee extends Component {
 
             // Wait for the API response
             const data = await getService.addCall('gallery.php', 'add', uploadImageData);
-            
+
 
             if (data.status === "success") {
                 const profileImagePath = data.data[0].url.replace(/\\/g, '/');
@@ -171,7 +171,7 @@ class ViewEmployee extends Component {
     };
 
     handleBack = () => {
-        this.setState({ showGallery: true});
+        this.setState({ showGallery: true });
     }
 
     handleCropPreview = async () => {
@@ -233,7 +233,7 @@ class ViewEmployee extends Component {
                     showError: true,
                     showSuccess: false,
                     isUpdatingProfile: false
-            });
+                });
             }
             document.body.style.overflow = 'auto';
         } catch (error) {
@@ -267,7 +267,7 @@ class ViewEmployee extends Component {
             activeTab = 'profile';
         }
 
-        this.setState({ activeTab: activeTab})
+        this.setState({ activeTab: activeTab })
         this.fetchEmployeeDetails(id);
         this.getEmployeeGallery(id);
     }
@@ -276,7 +276,7 @@ class ViewEmployee extends Component {
         const { id, activeTab } = this.props.match.params;
         // // Watch for tab change even if pathname is same
         if (activeTab && activeTab !== prevState.activeTab) {
-             console.log('prevState.activeTab',prevState.activeTab)
+            console.log('prevState.activeTab', prevState.activeTab)
             this.setState({ activeTab });
         }
     }
@@ -284,35 +284,35 @@ class ViewEmployee extends Component {
     getEmployeeGallery = (id, page = 1, limit = 12) => {
         getService.getCall('gallery.php', {
             action: 'view',
-            user_id:id,
-            page:page,
-            limit:limit
+            user_id: id,
+            page: page,
+            limit: limit
         })
-        .then(data => {
-            if (data.status === 'success') {
-                const sortedImages = this.sortImages(data.data, this.state.sortOrder);
-                this.setState(prevState => ({
-                    images: page === 1 ? sortedImages : [...prevState.images, ...sortedImages],
-                    hasMore: sortedImages.length >= limit, // if less than limit, we assume no more images
-                    page,
-                    loading: false,
-                    loadingMore: false,
-                }));
-            } else {
-                this.setState({ message: data.message, loading: false, hasMore: false, loadingMore: false });
-            }
-        })
-        .catch(err => {
-            this.setState({ message: 'Failed to fetch data', loading: false, hasMore: false, loadingMore: false });
-            console.error(err);
-        });
+            .then(data => {
+                if (data.status === 'success') {
+                    const sortedImages = this.sortImages(data.data, this.state.sortOrder);
+                    this.setState(prevState => ({
+                        images: page === 1 ? sortedImages : [...prevState.images, ...sortedImages],
+                        hasMore: sortedImages.length >= limit, // if less than limit, we assume no more images
+                        page,
+                        loading: false,
+                        loadingMore: false,
+                    }));
+                } else {
+                    this.setState({ message: data.message, loading: false, hasMore: false, loadingMore: false });
+                }
+            })
+            .catch(err => {
+                this.setState({ message: 'Failed to fetch data', loading: false, hasMore: false, loadingMore: false });
+                console.error(err);
+            });
     };
 
     fetchMoreImages = () => {
         let { id } = this.props.match.params;
-            this.setState({
-                employeeId: id
-            })
+        this.setState({
+            employeeId: id
+        })
 
         const { page } = this.state;
         const nextPage = page + 1;
@@ -329,9 +329,9 @@ class ViewEmployee extends Component {
     };
 
     fetchEmployeeDetails = (employeeId) => {
-         getService.getCall('get_employees.php', {
+        getService.getCall('get_employees.php', {
             action: 'view',
-            user_id:employeeId
+            user_id: employeeId
         })
             .then((data) => {
                 if (data.status === "success") {
@@ -346,11 +346,11 @@ class ViewEmployee extends Component {
             })
             .catch((error) => console.error("Error fetching employee details:", error));
     };
-        
+
     // Update profile
     handleProfileChange = (event) => {
         const { name, value } = event.target;
-        
+
         // Update state for the selected user
         this.setState((prevState) => ({
             employeeNew: {
@@ -361,8 +361,8 @@ class ViewEmployee extends Component {
     };
 
     render() {
-        const { fixNavbar} = this.props;
-        const {employeeNew, openFileSelectModel, showGallery, showSuccess, successMessage, showError, errorMessage} = this.state;
+        const { fixNavbar } = this.props;
+        const { employeeNew, openFileSelectModel, showGallery, showSuccess, successMessage, showError, errorMessage } = this.state;
 
         return (
             <>
@@ -422,14 +422,18 @@ class ViewEmployee extends Component {
                                             </label>
                                         </div>
 
-                                        <h4 className="mb-3">{`${employeeNew.first_name} ${employeeNew.last_name || ''}`}
+                                        <h4 className="mb-1">{`${employeeNew.first_name} ${employeeNew.last_name || ''}`}
                                             {(window.user?.role === 'admin' || window.user?.role === 'super_admin') && (
                                                 <span className={`badge ${employeeNew.status === 1 ? 'active-profile' : 'inactive-profile'}`} style={{ marginLeft: 10 }}>
                                                     {employeeNew.status === 1 ? 'Active' : 'In-active'}
                                                 </span>
+
                                             )}
                                         </h4>
-                                        
+                                        {employeeNew.email && (
+                                            <small className="d-block text-muted mb-3">({employeeNew.email})</small>
+                                        )}
+
                                         <p className="mb-4" style={{ whiteSpace: "pre-line" }}>{employeeNew.about_me}</p>
                                     </div>
                                 </div>
@@ -437,7 +441,7 @@ class ViewEmployee extends Component {
                         </div>
                     </div>
                 </div>
-                <CalendarWithTabs activeTab={this.state.activeTab} employeeId={this.state.employeeId}  />
+                <CalendarWithTabs activeTab={this.state.activeTab} employeeId={this.state.employeeId} />
                 {openFileSelectModel && (
                     <div
                         className="modal fade show d-block"
@@ -457,7 +461,7 @@ class ViewEmployee extends Component {
                                     <h5 className="modal-title w-100 text-center fw-bold fs-5 text-dark">
                                         {!showGallery ? "Crop" : "Select"} Your Profile Picture
                                     </h5>
-                                    <div 
+                                    <div
                                         className={`btn btn-close ${(this.state.isUploading || this.state.isUpdatingProfile) ? 'disabled' : ''}`}
                                         style={{ pointerEvents: (this.state.isUploading || this.state.isUpdatingProfile) ? 'none' : 'auto', opacity: (this.state.isUploading || this.state.isUpdatingProfile) ? 0.5 : 1 }}
                                         onClick={() => {
@@ -485,14 +489,14 @@ class ViewEmployee extends Component {
                                                 {this.state.errorMessage}
                                             </div>
                                         )}
-                                        
+
                                         {/* Success Message Display */}
                                         {this.state.showSuccess && this.state.successMessage && (
                                             <div className="alert alert-success alert-dismissible fade show mb-3" role="alert">
                                                 {this.state.successMessage}
                                             </div>
                                         )}
-                                        
+
                                         <p className="text-muted text-center mb-4">
                                             {!showGallery ? "Crop your profile image" : "Choose from existing images or upload a new one"}
                                         </p>
@@ -514,7 +518,7 @@ class ViewEmployee extends Component {
                                                             guides={false}
                                                             scalable={false}
                                                             checkCrossOrigin={false}
-                                                            crossOrigin="anonymous" 
+                                                            crossOrigin="anonymous"
                                                         />
                                                     )}
                                                 </div>
@@ -537,120 +541,120 @@ class ViewEmployee extends Component {
                                         )}
 
                                         {showGallery && (
-                                          <InfiniteScroll
-                                            dataLength={this.state.images.length}
-                                            next={() => {
-                                                this.setState({ loadingMore: true });
-                                                setTimeout(() => {
-                                                    this.fetchMoreImages(); 
-                                                }, 1000);
-                                            }}
-                                            hasMore={this.state.hasMore}
-                                            loader={this.state.loadingMore ? <p className="text-center">Loading more images...</p> : null}
-                                            scrollableTarget="scrollableGallery"
-                                        >
-                                            <div
-                                                id="scrollableGallery"
-                                                className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start"
-                                                style={{ maxHeight: '200px', overflowY: 'auto' }}
+                                            <InfiniteScroll
+                                                dataLength={this.state.images.length}
+                                                next={() => {
+                                                    this.setState({ loadingMore: true });
+                                                    setTimeout(() => {
+                                                        this.fetchMoreImages();
+                                                    }, 1000);
+                                                }}
+                                                hasMore={this.state.hasMore}
+                                                loader={this.state.loadingMore ? <p className="text-center">Loading more images...</p> : null}
+                                                scrollableTarget="scrollableGallery"
                                             >
-                                                {/* Upload box */}
-                                                <label className="cursor-pointer">
-                                                    <div className="border rounded-2 mt-1 mr-3 border-dashed hover-bg-light">
-                                                        <div 
-                                                            style={{
-                                                                width: '80px',
-                                                                height: '80px',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                color: '#6c757d',
-                                                                cursor: 'pointer'
-                                                            }}
-                                                        >
-                                                            {this.state.isUploading ? (
-                                                                <div className="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                                                            ) : (
-                                                                <i className="fe fe-plus fs-4" />
-                                                            )}
-                                                        </div>
-                                                        <InputField
-                                                            type="file"
-                                                            onChange={this.handleFileChange}
-                                                            accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
-                                                            style={{ display: 'none' }} 
-                                                            disabled={this.state.isUploading}
-                                                        />
-                                                    </div>
-                                                </label>
-                                                {this.state.images.map((image, index) => (
-                                                    <div key={index} className="position-relative mr-2">
-                                                        <label className="d-block mb-0 pointer">
-                                                            <input 
-                                                                name="imagecheck" 
-                                                                type="radio" 
-                                                                value={image.url} 
-                                                                className="d-none" 
-                                                                disabled={this.state.isUploading || this.state.isUpdatingProfile}
-                                                                onChange={async () => {
-                                                                    const imageUrl = getFileUrl(image.url);
-                                                                    const dataUrl = await this.toDataURL(imageUrl);
-                                                                    this.setState({
-                                                                        selectedImage: image.url,
-                                                                        croppperPreviewImage: dataUrl
-                                                                    });
+                                                <div
+                                                    id="scrollableGallery"
+                                                    className="d-flex flex-wrap gap-3 px-2 align-items-start justify-content-start"
+                                                    style={{ maxHeight: '200px', overflowY: 'auto' }}
+                                                >
+                                                    {/* Upload box */}
+                                                    <label className="cursor-pointer">
+                                                        <div className="border rounded-2 mt-1 mr-3 border-dashed hover-bg-light">
+                                                            <div
+                                                                style={{
+                                                                    width: '80px',
+                                                                    height: '80px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    color: '#6c757d',
+                                                                    cursor: 'pointer'
                                                                 }}
-                                                            />
-                                                            <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
-                                                                <img 
-                                                                    src={getFileUrl(image.url)} 
-                                                                    alt="Profile option" 
-                                                                    className="img-fluid rounded-1" 
-                                                                    style={{ width: '80px', height: '80px', objectFit: 'cover', cursor: 'pointer' }}
-                                                                />
+                                                            >
+                                                                {this.state.isUploading ? (
+                                                                    <div className="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                                                                ) : (
+                                                                    <i className="fe fe-plus fs-4" />
+                                                                )}
                                                             </div>
-                                                        </label>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </InfiniteScroll>
-                                         )}
+                                                            <InputField
+                                                                type="file"
+                                                                onChange={this.handleFileChange}
+                                                                accept=".png,.jpg,.jpeg,image/png,image/jpg,image/jpeg"
+                                                                style={{ display: 'none' }}
+                                                                disabled={this.state.isUploading}
+                                                            />
+                                                        </div>
+                                                    </label>
+                                                    {this.state.images.map((image, index) => (
+                                                        <div key={index} className="position-relative mr-2">
+                                                            <label className="d-block mb-0 pointer">
+                                                                <input
+                                                                    name="imagecheck"
+                                                                    type="radio"
+                                                                    value={image.url}
+                                                                    className="d-none"
+                                                                    disabled={this.state.isUploading || this.state.isUpdatingProfile}
+                                                                    onChange={async () => {
+                                                                        const imageUrl = getFileUrl(image.url);
+                                                                        const dataUrl = await this.toDataURL(imageUrl);
+                                                                        this.setState({
+                                                                            selectedImage: image.url,
+                                                                            croppperPreviewImage: dataUrl
+                                                                        });
+                                                                    }}
+                                                                />
+                                                                <div className={`border rounded-2 p-1 ${this.state.selectedImage === image.url ? 'border-primary border-2' : 'border-light'}`}>
+                                                                    <img
+                                                                        src={getFileUrl(image.url)}
+                                                                        alt="Profile option"
+                                                                        className="img-fluid rounded-1"
+                                                                        style={{ width: '80px', height: '80px', objectFit: 'cover', cursor: 'pointer' }}
+                                                                    />
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </InfiniteScroll>
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Modal Footer */}
                                 <div className="modal-footer border-b-2 pt-2 d-flex justify-content-end">
                                     <Button
-                                    label="Cancel"
-                                    onClick={() => {
-                                        this.setState({
-                                        openFileSelectModel: false,
-                                        showGallery: true,
-                                        selectedImage: null,
-                                        showCropPreview: false
-                                        });
-                                        document.body.style.overflow = 'auto';
-                                    }}
-                                    className="btn-outline-secondary me-3 px-4"
-                                    disabled={this.state.isUploading || this.state.isUpdatingProfile}
+                                        label="Cancel"
+                                        onClick={() => {
+                                            this.setState({
+                                                openFileSelectModel: false,
+                                                showGallery: true,
+                                                selectedImage: null,
+                                                showCropPreview: false
+                                            });
+                                            document.body.style.overflow = 'auto';
+                                        }}
+                                        className="btn-outline-secondary me-3 px-4"
+                                        disabled={this.state.isUploading || this.state.isUpdatingProfile}
                                     />
 
                                     {showGallery && (
-                                    <Button
-                                        label="Select & Crop"
-                                        onClick={this.saveCroppedImage}
-                                        disabled={!this.state.selectedImage || this.state.isUploading || this.state.isUpdatingProfile}
-                                        className="btn-primary px-4"
-                                    />
+                                        <Button
+                                            label="Select & Crop"
+                                            onClick={this.saveCroppedImage}
+                                            disabled={!this.state.selectedImage || this.state.isUploading || this.state.isUpdatingProfile}
+                                            className="btn-primary px-4"
+                                        />
                                     )}
 
                                     {!showGallery && !this.state.showCropPreview && (
-                                    <Button
-                                        label="Back"
-                                        onClick={this.handleBack}
-                                        className="btn-primary px-4"
-                                        disabled={this.state.isUploading || this.state.isUpdatingProfile}
-                                    />
+                                        <Button
+                                            label="Back"
+                                            onClick={this.handleBack}
+                                            className="btn-primary px-4"
+                                            disabled={this.state.isUploading || this.state.isUpdatingProfile}
+                                        />
                                     )}
 
                                     {!showGallery && !this.state.showCropPreview && (
