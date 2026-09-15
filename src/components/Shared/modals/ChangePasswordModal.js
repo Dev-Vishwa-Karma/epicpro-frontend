@@ -419,7 +419,7 @@ class ChangePasswordModal extends Component {
                   />
                   <Button
                     type="submit"
-                    label="Change Password"
+                    label="Change"
                     className="btn-primary px-4"
                     disabled={loading}
                     loading={loading}
