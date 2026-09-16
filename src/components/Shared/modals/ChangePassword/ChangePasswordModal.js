@@ -423,7 +423,7 @@ class ChangePasswordModal extends Component {
                     type="submit"
                     label="Change"
                     className="btn-primary px-4"
-                    disabled={loading}
+                    disabled={loading || !hasMinLength || !hasUppercase || !hasLowercase || !hasNumber || !hasSymbol || !oldPassword || !newPassword || !confirmPassword}
                     loading={loading}
                   />
                 </div>
