@@ -1,7 +1,8 @@
 import React, { Component } from "react";
-import api from "../../../api/axios";
-import Button from "../../common/formInputs/Button";
-import AlertMessages from "../../common/AlertMessages";
+import api from "../../../../api/axios";
+import Button from "../../../common/formInputs/Button";
+import AlertMessages from "../../../common/AlertMessages";
+import "./ChangePasswordModal.css";
 
 class ChangePasswordModal extends Component {
   constructor(props) {
@@ -217,58 +218,6 @@ class ChangePasswordModal extends Component {
           setShowError={(val) => this.setState({ showErrorAlert: val })}
         />
 
-        {/* Scoped CSS for hoverable and focused active border animation */}
-        <style>{`
-          .modal-body .form-label {
-            color: #2c3e50 !important;
-            font-weight: 600 !important;
-            margin-bottom: 0.375rem;
-          }
-          .custom-hoverable-input-group {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            background-color: #fff;
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            width: 100%;
-          }
-          .custom-hoverable-input-group:hover {
-            border-color: #467fcf;
-          }
-          .custom-hoverable-input-group:focus-within {
-            border-color: #467fcf;
-            box-shadow: 0 0 0 3px rgba(70, 127, 207, 0.25);
-          }
-          .custom-hoverable-input-group.is-invalid-wrapper {
-            border-color: #cd201f !important;
-          }
-          .custom-hoverable-input-group.is-invalid-wrapper:focus-within {
-            box-shadow: 0 0 0 3px rgba(205, 32, 31, 0.25) !important;
-          }
-          .custom-hoverable-input-group .form-control {
-            border: none !important;
-            box-shadow: none !important;
-            outline: none !important;
-            background: transparent !important;
-            flex: 1;
-            padding-right: 0.5rem;
-          }
-          .custom-hoverable-input-group .eye-toggle-btn {
-            border: none !important;
-            background: transparent !important;
-            color: #6e82a5;
-            padding: 0.375rem 0.75rem;
-            cursor: pointer;
-            outline: none !important;
-            box-shadow: none !important;
-            transition: color 0.15s ease-in-out;
-          }
-          .custom-hoverable-input-group .eye-toggle-btn:hover {
-            color: #467fcf;
-          }
-        `}</style>
-
         {/* Backdrop */}
         <div
           className="modal-backdrop fade show"
@@ -306,6 +255,13 @@ class ChangePasswordModal extends Component {
                 <div className={`modal-body p-4 ${loading ? "dimmer active" : "dimmer"}`}>
                   {loading && <div className="loader" />}
                   <div className="dimmer-content">
+                    {/* Warning Notice */}
+                    <div className="alert alert-warning d-flex align-items-start mb-4" role="alert">
+                      <i className="fe fe-alert-triangle mr-2 mt-1 flex-shrink-0" />
+                      <small className="mb-0">
+                        <strong>Warning:</strong> Once you have successfully updated your password, you will need to log in again. Please remember your changed password.
+                      </small>
+                    </div>
                     {/* Old Password */}
                     <div className="form-group mb-3">
                       <label className="form-label font-weight-semibold">

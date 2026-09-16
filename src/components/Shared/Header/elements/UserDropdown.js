@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
-import ChangePasswordModal from "../../modals/ChangePasswordModal";
+import ChangePasswordModal from "../../modals/ChangePassword/ChangePasswordModal";
 
 class UserDropdown extends Component {
   constructor(props) {
