@@ -20,6 +20,7 @@ import NotificationDropdown from "./elements/NotificationDropdown";
 import UserDropdown from "./elements/UserDropdown";
 import DailyReportModal from "./elements/DailyReportModal";
 import cryptoService from "../../../services/cryptoService";
+import PendingEmailChangeBanner from "./../modals/ChangeEmail/PendingEmailChangeBanner";
 
 class Header extends Component {
   constructor(props) {
@@ -1013,6 +1014,7 @@ class Header extends Component {
 
     return (
       <div>
+        <PendingEmailChangeBanner />
         <AlertMessages
           showSuccess={showSuccess}
           successMessage={successMessage}
