@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import api from "../../../../api/axios";
 import Button from "../../../common/formInputs/Button";
 import AlertMessages from "../../../common/AlertMessages";
+import VerifyEmailCodeModal from "./VerifyEmailCodeModal";
 
 class ChangeEmailModal extends Component {
   constructor(props) {
@@ -19,6 +20,8 @@ class ChangeEmailModal extends Component {
       emailErrorMessage: "",
       passwordError: false,
       passwordErrorMessage: "",
+      showVerifyModal: false,
+      pendingRequestData: null,
     };
   }
 
@@ -42,6 +45,8 @@ class ChangeEmailModal extends Component {
       emailErrorMessage: "",
       passwordError: false,
       passwordErrorMessage: "",
+      showVerifyModal: false,
+      pendingRequestData: null,
     });
   };
 
@@ -116,8 +121,10 @@ class ChangeEmailModal extends Component {
         });
 
         setTimeout(() => {
-          if (this.props.onClose) this.props.onClose();
-          window.location.reload();
+          this.setState({
+            showVerifyModal: true,
+            pendingRequestData: { new_email: newEmail }
+          });
         }, 500);
 
       } else {
@@ -153,9 +160,25 @@ class ChangeEmailModal extends Component {
       emailErrorMessage,
       passwordError,
       passwordErrorMessage,
+      showVerifyModal,
+      pendingRequestData,
     } = this.state;
 
     if (!show) return null;
+
+    if (showVerifyModal) {
+      return (
+        <VerifyEmailCodeModal
+          show={true}
+          onClose={() => {
+            this.setState({ showVerifyModal: false, pendingRequestData: null });
+            if (this.props.onClose) this.props.onClose();
+            window.location.reload();
+          }}
+          pendingRequest={pendingRequestData}
+        />
+      );
+    }
 
     return (
       <>
@@ -208,7 +231,7 @@ class ChangeEmailModal extends Component {
                     <div className="alert alert-warning d-flex align-items-start mb-4" role="alert">
                       <i className="fe fe-alert-triangle mr-2 mt-1 flex-shrink-0" />
                       <small className="mb-0">
-                        <strong>Note:</strong> A 6-digit verification code will be sent to your new email. Once requested, you will be logged out until the code is verified.
+                        <strong>Note:</strong> A 6-digit verification code will be sent to your new email. Once requested, you will receive an email with the code to verify the change.
                       </small>
                     </div>
 

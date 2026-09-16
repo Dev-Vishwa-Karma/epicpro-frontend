@@ -34,8 +34,15 @@ class VerifyEmailCodeModal extends Component {
   }
 
   handleChange = (e) => {
+    const { name, value } = e.target;
+    let newValue = value;
+
+    if (name === "verificationCode") {
+      newValue = newValue.replace(/\D/g, "");
+    }
+
     this.setState({
-      [e.target.name]: e.target.value,
+      [name]: newValue,
       error: "",
       showErrorAlert: false,
       codeError: false,
@@ -187,7 +194,8 @@ class VerifyEmailCodeModal extends Component {
                     <div className="alert alert-primary mb-4" role="alert">
                       <i className="fe fe-mail mr-2" />
                       Enter the 6-digit verification code sent to{" "}
-                      <strong>{newEmail}</strong>.
+                      <strong>{newEmail}</strong>. Once verified, you will be logged out and
+                      required to log in again with your new email address.
                     </div>
 
                     {/* Verification Code Input */}
