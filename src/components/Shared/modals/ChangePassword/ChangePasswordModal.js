@@ -91,9 +91,15 @@ class ChangePasswordModal extends Component {
     if (!newPassword) {
       newPasswordError = true;
       newPasswordErrorMessage = "New password is required.";
-    } else if (newPassword.length < 6) {
-      newPasswordError = true;
-      newPasswordErrorMessage = "Password must be at least 6 characters long.";
+    } else {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      if (newPassword.length < 8) {
+        newPasswordError = true;
+        newPasswordErrorMessage = "Password must be at least 8 characters long.";
+      } else if (!passwordRegex.test(newPassword)) {
+        newPasswordError = true;
+        newPasswordErrorMessage = "Password must include uppercase, lowercase, numbers, and symbols.";
+      }
     }
 
     if (!confirmPassword) {
@@ -207,6 +213,12 @@ class ChangePasswordModal extends Component {
 
     if (!show) return null;
 
+    const hasMinLength = newPassword.length >= 8;
+    const hasUppercase = /[A-Z]/.test(newPassword);
+    const hasLowercase = /[a-z]/.test(newPassword);
+    const hasNumber = /\d/.test(newPassword);
+    const hasSymbol = /[\W_]/.test(newPassword);
+
     return (
       <>
         <AlertMessages
@@ -309,7 +321,7 @@ class ChangePasswordModal extends Component {
                           type={showNewPassword ? "text" : "password"}
                           name="newPassword"
                           className="form-control"
-                          placeholder="Enter new password (min. 6 characters)"
+                          placeholder="Enter new password (min. 8 characters)"
                           value={newPassword}
                           onChange={this.handleChange}
                           disabled={loading}
@@ -327,6 +339,40 @@ class ChangePasswordModal extends Component {
                       {newPasswordError && (
                         <div className="invalid-feedback d-block mt-1">{newPasswordErrorMessage}</div>
                       )}
+
+                      {/* Password Requirements Indicator */}
+                      <div className="mt-2" style={{ fontSize: "0.85rem" }}>
+                        <div className="text-muted mb-1 small font-weight-medium">
+                          Password must contain:
+                        </div>
+
+                        <div className="d-flex flex-column gap-2">
+                          <div className={`d-flex align-items-center ${hasMinLength ? "text-success" : "text-muted"}`}>
+                            <i className={`fe ${hasMinLength ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+                            <span>Minimum 8 characters</span>
+                          </div>
+
+                          <div className={`d-flex align-items-center ${hasUppercase ? "text-success" : "text-muted"}`}>
+                            <i className={`fe ${hasUppercase ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+                            <span>At least 1 uppercase letter</span>
+                          </div>
+
+                          <div className={`d-flex align-items-center ${hasLowercase ? "text-success" : "text-muted"}`}>
+                            <i className={`fe ${hasLowercase ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+                            <span>At least 1 lowercase letter</span>
+                          </div>
+
+                          <div className={`d-flex align-items-center ${hasNumber ? "text-success" : "text-muted"}`}>
+                            <i className={`fe ${hasNumber ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+                            <span>At least 1 number</span>
+                          </div>
+
+                          <div className={`d-flex align-items-center ${hasSymbol ? "text-success" : "text-muted"}`}>
+                            <i className={`fe ${hasSymbol ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+                            <span>Minimum 1 special symbol (@, #, $)</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Confirm New Password */}
