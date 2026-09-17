@@ -1,23 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-const AlertMessages = ({ showSuccess, successMessage, showError, errorMessage, setShowSuccess, setShowError }) => {
+const AlertMessages = ({
+  showSuccess,
+  successMessage,
+  showError,
+  errorMessage,
+  setShowSuccess,
+  setShowError,
+  duration = 5000,
+}) => {
+  const setShowSuccessRef = useRef(setShowSuccess);
+  const setShowErrorRef = useRef(setShowError);
+
+  useEffect(() => {
+    setShowSuccessRef.current = setShowSuccess;
+  }, [setShowSuccess]);
+
+  useEffect(() => {
+    setShowErrorRef.current = setShowError;
+  }, [setShowError]);
+
   useEffect(() => {
     if (showSuccess) {
       const timer = setTimeout(() => {
-        if (setShowSuccess) setShowSuccess(false);
-      }, 3500);
+        if (setShowSuccessRef.current) setShowSuccessRef.current(false);
+      }, duration);
       return () => clearTimeout(timer);
     }
-  }, [showSuccess, setShowSuccess]);
+  }, [showSuccess, duration]);
 
   useEffect(() => {
     if (showError) {
       const timer = setTimeout(() => {
-        if (setShowError) setShowError(false);
-      }, 4000);
+        if (setShowErrorRef.current) setShowErrorRef.current(false);
+      }, duration);
       return () => clearTimeout(timer);
     }
-  }, [showError, setShowError]);
+  }, [showError, duration]);
 
   return (
     <>
@@ -38,7 +57,7 @@ const AlertMessages = ({ showSuccess, successMessage, showError, errorMessage, s
         <button
           type="button"
           className="close"
-          onClick={() => setShowSuccess && setShowSuccess(false)}
+          onClick={() => setShowSuccessRef.current && setShowSuccessRef.current(false)}
         ></button>
       </div>
 
@@ -59,7 +78,7 @@ const AlertMessages = ({ showSuccess, successMessage, showError, errorMessage, s
         <button
           type="button"
           className="close"
-          onClick={() => setShowError && setShowError(false)}
+          onClick={() => setShowErrorRef.current && setShowErrorRef.current(false)}
         ></button>
       </div>
     </>
@@ -67,3 +86,4 @@ const AlertMessages = ({ showSuccess, successMessage, showError, errorMessage, s
 };
 
 export default AlertMessages;
+
