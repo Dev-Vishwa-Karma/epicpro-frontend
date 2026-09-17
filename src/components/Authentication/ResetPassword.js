@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
+import '../Shared/modals/ChangePassword/ChangePasswordModal.css';
 
 class ResetPassword extends Component {
 
@@ -9,6 +10,8 @@ class ResetPassword extends Component {
 			token: "",
 			newPassword: "",
 			confirmPassword: "",
+			showNewPassword: false,
+			showConfirmPassword: false,
 			error: null,
 			success: null,
 			newPasswordError: false,
@@ -30,15 +33,25 @@ class ResetPassword extends Component {
 		}
 	}
 
-	handleNewPasswordChange = (event) => {
-		this.setState({ newPassword: event.target.value });
+	handleChange = (event) => {
+		this.setState({
+			[event.target.name]: event.target.value,
+			error: null,
+			newPasswordError: false,
+			confirmPasswordError: false,
+		});
 	};
 
-	handleConfirmPasswordChange = (event) => {
-		this.setState({ confirmPassword: event.target.value });
+	toggleVisibility = (field) => {
+		this.setState((prevState) => ({
+			[field]: !prevState[field],
+		}));
 	};
 
-	handleResetPassword = () => {
+	handleResetPassword = (e) => {
+		if (e && e.preventDefault) {
+			e.preventDefault();
+		}
 		const { token, newPassword, confirmPassword } = this.state;
 
 		// Reset error messages
@@ -50,19 +63,25 @@ class ResetPassword extends Component {
 		// Validate new password
 		if (!newPassword) {
 			newPasswordError = true;
-			newPasswordErrorMessage = 'New password is required';
-		} else if (newPassword.length < 6) {
-			newPasswordError = true;
-			newPasswordErrorMessage = 'Password must be at least 6 characters long';
+			newPasswordErrorMessage = 'New password is required.';
+		} else {
+			const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+			if (newPassword.length < 8) {
+				newPasswordError = true;
+				newPasswordErrorMessage = 'Password must be at least 8 characters long.';
+			} else if (!passwordRegex.test(newPassword)) {
+				newPasswordError = true;
+				newPasswordErrorMessage = 'Password must include uppercase, lowercase, numbers, and symbols.';
+			}
 		}
 
 		// Validate confirm password
 		if (!confirmPassword) {
 			confirmPasswordError = true;
-			confirmPasswordErrorMessage = 'Confirm password is required';
-		} else if (newPassword !== confirmPassword) {
+			confirmPasswordErrorMessage = 'Please confirm your new password.';
+		} else if (newPassword && newPassword !== confirmPassword) {
 			confirmPasswordError = true;
-			confirmPasswordErrorMessage = 'Passwords do not match';
+			confirmPasswordErrorMessage = 'Passwords do not match.';
 		}
 
 		if (newPasswordError || confirmPasswordError) {
@@ -76,10 +95,13 @@ class ResetPassword extends Component {
 			});
 			return;
 		}
+
 		this.setState({
 			loading: true,
 			success: null,
-			error: null
+			error: null,
+			newPasswordError: false,
+			confirmPasswordError: false,
 		});
 
 		const formData = new FormData();
@@ -137,6 +159,8 @@ class ResetPassword extends Component {
 		const {
 			newPassword,
 			confirmPassword,
+			showNewPassword,
+			showConfirmPassword,
 			newPasswordError,
 			confirmPasswordError,
 			newPasswordErrorMessage,
@@ -169,6 +193,13 @@ class ResetPassword extends Component {
 			);
 		}
 
+		const hasMinLength = newPassword.length >= 8;
+		const hasUppercase = /[A-Z]/.test(newPassword);
+		const hasLowercase = /[a-z]/.test(newPassword);
+		const hasNumber = /\d/.test(newPassword);
+		const hasSymbol = /[\W_]/.test(newPassword);
+		const isSubmitDisabled = loading || !hasMinLength || !hasUppercase || !hasLowercase || !hasNumber || !hasSymbol || !newPassword || !confirmPassword;
+
 		return (
 			<div className="auth">
 				<div className="auth_left">
@@ -180,44 +211,116 @@ class ResetPassword extends Component {
 						</div>
 						{success && <div className="card-alert alert alert-success mb-0">{success}</div>}
 						{error && <div className="card-alert alert alert-danger mb-0">{error}</div>}
-						<div className={`card-body ${loading ? 'dimmer active' : 'dimmer'}`}>
-							<div className="card-title">Reset Password</div>
-							{loading && <div className="loader"></div>}
-							<div className="dimmer-content">
-								<div className="form-group">
-									<label className="form-label">New Password</label>
-									<input
-										type="password"
-										className={`form-control ${newPasswordError ? 'is-invalid' : ''}`}
-										id="newPassword"
-										placeholder="Enter new password"
-										value={newPassword}
-										onChange={this.handleNewPasswordChange}
-									/>
-									{newPasswordError && <div className="invalid-feedback">{newPasswordErrorMessage}</div>}
-								</div>
-								<div className="form-group">
-									<label className="form-label">Confirm Password</label>
-									<input
-										type="password"
-										className={`form-control ${confirmPasswordError ? 'is-invalid' : ''}`}
-										id="confirmPassword"
-										placeholder="Confirm new password"
-										value={confirmPassword}
-										onChange={this.handleConfirmPasswordChange}
-									/>
-									{confirmPasswordError && <div className="invalid-feedback">{confirmPasswordErrorMessage}</div>}
-								</div>
-								<div className="form-footer">
-									<button className="btn btn-primary btn-block" onClick={this.handleResetPassword}>
-										Reset Password
-									</button>
-								</div>
-								<div className="text-center mt-3">
-									<Link to="/login">Back to Login</Link>
+						<form onSubmit={this.handleResetPassword}>
+							<div className={`card-body ${loading ? 'dimmer active' : 'dimmer'}`}>
+								<div className="card-title">Reset Password</div>
+								{loading && <div className="loader"></div>}
+								<div className="dimmer-content">
+									{/* New Password */}
+									<div className="form-group mb-3">
+										<label className="form-label font-weight-semibold">
+											New Password <span className="text-danger">*</span>
+										</label>
+										<div className={`custom-hoverable-input-group ${newPasswordError ? 'is-invalid-wrapper' : ''}`}>
+											<input
+												type={showNewPassword ? "text" : "password"}
+												className="form-control"
+												name="newPassword"
+												placeholder="Enter new password (min. 8 characters)"
+												value={newPassword}
+												onChange={this.handleChange}
+												disabled={loading}
+											/>
+											<button
+												type="button"
+												className="eye-toggle-btn"
+												onClick={() => this.toggleVisibility("showNewPassword")}
+												tabIndex="-1"
+												aria-label="Toggle password visibility"
+											>
+												<i className={`fe ${showNewPassword ? "fe-eye-off" : "fe-eye"}`} />
+											</button>
+										</div>
+										{newPasswordError && <div className="invalid-feedback d-block mt-1">{newPasswordErrorMessage}</div>}
+
+										{/* Password Requirements Indicator */}
+										<div className="mt-2" style={{ fontSize: "0.85rem" }}>
+											<div className="text-muted mb-1 small font-weight-medium">
+												Password must contain:
+											</div>
+
+											<div className="d-flex flex-column gap-2">
+												<div className={`d-flex align-items-center ${hasMinLength ? "text-success" : "text-muted"}`}>
+													<i className={`fe ${hasMinLength ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+													<span>Minimum 8 characters</span>
+												</div>
+
+												<div className={`d-flex align-items-center ${hasUppercase ? "text-success" : "text-muted"}`}>
+													<i className={`fe ${hasUppercase ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+													<span>At least 1 uppercase letter</span>
+												</div>
+
+												<div className={`d-flex align-items-center ${hasLowercase ? "text-success" : "text-muted"}`}>
+													<i className={`fe ${hasLowercase ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+													<span>At least 1 lowercase letter</span>
+												</div>
+
+												<div className={`d-flex align-items-center ${hasNumber ? "text-success" : "text-muted"}`}>
+													<i className={`fe ${hasNumber ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+													<span>At least 1 number</span>
+												</div>
+
+												<div className={`d-flex align-items-center ${hasSymbol ? "text-success" : "text-muted"}`}>
+													<i className={`fe ${hasSymbol ? "fe-check-circle" : "fe-circle"} mr-2`} aria-hidden="true" />
+													<span>Minimum 1 special symbol (@, #, $)</span>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									{/* Confirm Password */}
+									<div className="form-group mb-3">
+										<label className="form-label font-weight-semibold">
+											Confirm Password <span className="text-danger">*</span>
+										</label>
+										<div className={`custom-hoverable-input-group ${confirmPasswordError ? 'is-invalid-wrapper' : ''}`}>
+											<input
+												type={showConfirmPassword ? "text" : "password"}
+												className="form-control"
+												name="confirmPassword"
+												placeholder="Confirm new password"
+												value={confirmPassword}
+												onChange={this.handleChange}
+												disabled={loading}
+											/>
+											<button
+												type="button"
+												className="eye-toggle-btn"
+												onClick={() => this.toggleVisibility("showConfirmPassword")}
+												tabIndex="-1"
+												aria-label="Toggle confirm password visibility"
+											>
+												<i className={`fe ${showConfirmPassword ? "fe-eye-off" : "fe-eye"}`} />
+											</button>
+										</div>
+										{confirmPasswordError && <div className="invalid-feedback d-block mt-1">{confirmPasswordErrorMessage}</div>}
+									</div>
+
+									<div className="form-footer">
+										<button
+											type="submit"
+											className="btn btn-primary btn-block"
+											disabled={isSubmitDisabled}
+										>
+											Reset Password
+										</button>
+									</div>
+									<div className="text-center mt-3">
+										<Link to="/login">Back to Login</Link>
+									</div>
 								</div>
 							</div>
-						</div>
+						</form>
 					</div>
 				</div>
 				<div className="auth_right">
@@ -234,7 +337,7 @@ class ResetPassword extends Component {
 								<img src="https://ik.imagekit.io/sentyaztie/reset-password.png?updatedAt=1762326731649" className="img-fluid" alt="reset password" />
 								<div className="px-4 mt-4">
 									<h4>Password Requirements</h4>
-									<p>Your new password should be at least 6 characters long and hard to guess.</p>
+									<p>Your new password should be at least 8 characters long and hard to guess.</p>
 								</div>
 							</div>
 							<div className="carousel-item">
