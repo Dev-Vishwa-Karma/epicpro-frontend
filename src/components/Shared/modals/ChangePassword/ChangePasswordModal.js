@@ -239,12 +239,12 @@ class ChangePasswordModal extends Component {
 
         {/* Modal */}
         <div
-          className="modal fade show d-block"
+          className="modal fade show d-block change-password-modal"
           tabIndex="-1"
           role="dialog"
-          style={{ zIndex: 1050 }}
+          style={{ zIndex: 1050, overflowY: "auto" }}
         >
-          <div className="modal-dialog" role="document">
+          <div className="modal-dialog modal-dialog-scrollable" role="document">
             <div className="modal-content shadow-lg border-0">
               {/* Modal Header */}
               <div className="modal-header bg-primary text-white">
