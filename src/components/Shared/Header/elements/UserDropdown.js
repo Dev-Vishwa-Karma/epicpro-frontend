@@ -1,12 +1,14 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
 import ChangePasswordModal from "../../modals/ChangePassword/ChangePasswordModal";
+import ChangeEmailModal from "../../modals/ChangeEmail/ChangeEmailModal";
 
 class UserDropdown extends Component {
   constructor(props) {
     super(props);
     this.state = {
       showChangePasswordModal: false,
+      showChangeEmailModal: false,
     };
   }
 
@@ -17,6 +19,15 @@ class UserDropdown extends Component {
 
   handleCloseChangePasswordModal = () => {
     this.setState({ showChangePasswordModal: false });
+  };
+
+  handleOpenChangeEmailModal = (e) => {
+    e.preventDefault();
+    this.setState({ showChangeEmailModal: true });
+  };
+
+  handleCloseChangeEmailModal = () => {
+    this.setState({ showChangeEmailModal: false });
   };
 
   render() {
@@ -51,13 +62,22 @@ class UserDropdown extends Component {
             <i className="dropdown-icon fe fe-user" /> Profile
           </NavLink>
 
-          {/* Reset Password link after Profile */}
+          {/* Reset Password link */}
           <a
             href="/#"
             className="dropdown-item"
             onClick={this.handleOpenChangePasswordModal}
           >
             <i className="dropdown-icon fe fe-lock" /> Change Password
+          </a>
+
+          {/* Change Email link */}
+          <a
+            href="/#"
+            className="dropdown-item"
+            onClick={this.handleOpenChangeEmailModal}
+          >
+            <i className="dropdown-icon fe fe-mail" /> Change Email
           </a>
 
           {role === "employee" && (
@@ -119,6 +139,12 @@ class UserDropdown extends Component {
         <ChangePasswordModal
           show={this.state.showChangePasswordModal}
           onClose={this.handleCloseChangePasswordModal}
+        />
+
+        {/* Modal for Change Email */}
+        <ChangeEmailModal
+          show={this.state.showChangeEmailModal}
+          onClose={this.handleCloseChangeEmailModal}
         />
       </div>
     );
