@@ -38,8 +38,9 @@ export default class Layout extends Component {
 
 	checkE2EEStatus = async (force = false) => {
 		const user = authService.getUser();
-		if (!user || !user.id) return;
-		if (!force && !["super_admin", "admin"].includes(user?.role)) return;
+		if (!force && (!user || !user.id)) return;
+		// enable the disscussion module for all
+		// if (!force && !["super_admin", "admin"].includes(user?.role)) return;
 
 		try {
 			const res = await api.get("/get_employees.php?action=check-public-key");

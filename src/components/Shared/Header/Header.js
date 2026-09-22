@@ -228,10 +228,10 @@ class Header extends Component {
           this.startNotificationInterval();
           this.checktodayDueDate();
           this.startUserStatusCheck();
-          if (user.role != "employee") {
-            this.syncActiveRecoveryRequestsOnLogin(user.id);
-            this.processBackgroundBulkRecovery();
-          }
+          // if (user.role != "employee") {
+          this.syncActiveRecoveryRequestsOnLogin(user.id);
+          this.processBackgroundBulkRecovery();
+          // }
         }
       );
     }

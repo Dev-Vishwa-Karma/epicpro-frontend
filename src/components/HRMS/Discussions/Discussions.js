@@ -220,14 +220,15 @@ class Discussions extends Component {
   canModifyDiscussion = (disc) => {
     const user = authService.getUser() || window.user || {};
     const uId = String(user.id || user.employee_id || "");
+    const role = user.role || "";
     const isE2EEReady = this.state.e2eeStatus === "ready";
-    const isAdmin = authService.isAdminCheck ? authService.isAdminCheck() : (authService.isAdmin ? authService.isAdmin() : false);
+    const isAdmin = ["admin", "super_admin"].includes(role);
     return isE2EEReady && (String(disc?.created_by) === uId || isAdmin);
   };
 
   fetchEmployees = () => {
     getService
-      .getCall("get_employees.php", { action: "view", role: "admin" })
+      .getCall("get_employees.php", { action: "view", role: "all" })
       .then((res) => {
         const empList = res?.data || [];
         this.setState({ employees: empList });
@@ -622,12 +623,12 @@ class Discussions extends Component {
                 <button
                   className="btn btn-sm btn-outline-info mr-2"
                   style={{ fontWeight: "600", borderRadius: "8px" }}
-                  title="Request key recovery from another participant"
+                  title="Discussion Recovery Approval/Requests"
                   onClick={() =>
                     this.handleOpenRecoveryModal(hasAnyUndecrypted)
                   }
                 >
-                  <i className="fa fa-key mr-1" /> Key Recovery
+                  <i className="fa fa-key mr-1" /> Recovery Requests
                 </button>
 
                 <Button

@@ -36,7 +36,7 @@ const Routes = [
         name: 'Discussions',
         exact: true,
         pageTitle: "Discussions",
-        roles: ['admin', 'super_admin'],
+        roles: ['admin', 'super_admin', 'employee'],
         component: Discussions
     },
     {

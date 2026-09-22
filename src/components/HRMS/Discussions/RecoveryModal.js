@@ -36,7 +36,7 @@ const RecoveryModal = ({
 
   const fetchEmployees = () => {
     getService
-      .getCall("get_employees.php", { action: "view", role: "admin" })
+      .getCall("get_employees.php", { action: "view", role: "all" })
       .then((res) => {
         const empList = res?.data || [];
         setEmployees(empList);
@@ -204,7 +204,7 @@ const RecoveryModal = ({
             <div className="modal-header bg-primary" style={{ color: "#fff" }}>
               <h5 className="modal-title">
                 <i className="fa fa-key mr-2"></i>
-                {mode === "approve" ? "Approve Key Recovery" : "Request Key Recovery"}
+                {mode === "approve" ? "Approve Discussion Recovery" : "Request Discussion Recovery"}
               </h5>
               <button
                 type="button"
@@ -276,10 +276,10 @@ const RecoveryModal = ({
                           label={actionMeta.label}
                           title={
                             actionMeta.type === "approve"
-                              ? "Approve key recovery request from this participant"
+                              ? "Approve Discussion Recovery request from this participant"
                               : actionMeta.type === "resend"
-                                ? "Resend key recovery request to this participant"
-                                : "Send key recovery request to this participant"
+                                ? "Resend Discussion Recovery request to this participant"
+                                : "Send Discussion Recovery request to this participant"
                           }
                           loading={loadingUserId === userId}
                           onClick={() => handleAction(p, actionMeta)}
