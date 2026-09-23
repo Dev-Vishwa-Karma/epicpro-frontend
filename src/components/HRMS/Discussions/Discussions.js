@@ -59,6 +59,7 @@ class Discussions extends Component {
       filterDate: null,
       filterCreatedBy: null,
       filterParticipants: [],
+      filterStatus: ["open"],
 
       // Modal States
       showAddEditModal: false,
@@ -257,7 +258,7 @@ class Discussions extends Component {
       this.setState({ loading: true, discussions: [], page: 1, hasMore: false });
     }
 
-    const { filterDate, filterCreatedBy, filterParticipants, limit, discussions } =
+    const { filterDate, filterCreatedBy, filterParticipants, filterStatus, limit, discussions } =
       this.state;
 
     const currentPage = append ? Math.floor(discussions.length / limit) + 1 : 1;
@@ -280,6 +281,12 @@ class Discussions extends Component {
 
     if (filterParticipants && filterParticipants.length > 0) {
       params.participants = filterParticipants
+        .map((p) => p.value)
+        .join(",");
+    }
+
+    if (filterStatus && filterStatus.length > 0) {
+      params.status = filterStatus
         .map((p) => p.value)
         .join(",");
     }
@@ -375,6 +382,14 @@ class Discussions extends Component {
         this.fetchDiscussions(false);
       }
     );
+  };
+
+  handleStatusFilterChange = (selectedOption) => {
+    cachedDiscussions = null;
+    console.log('selectedOption', selectedOption);
+    this.setState({ filterStatus: selectedOption || [] }, () => {
+      this.fetchDiscussions(false);
+    });
   };
 
   // Add / Edit / View / Delete Handlers
@@ -535,6 +550,7 @@ class Discussions extends Component {
       filterDate,
       filterCreatedBy,
       filterParticipants,
+      filterStatus,
       showAddEditModal,
       showViewModal,
       showDeleteModal,
@@ -562,6 +578,12 @@ class Discussions extends Component {
       value: emp.id,
       label: currentUser && Number(currentUser.id) === Number(emp.id) ? `You` : `${emp.first_name} ${emp.last_name}`,
     }));
+
+    const statusOptions = [
+      { value: "open", label: "Open" },
+      { value: "closed", label: "Closed" },
+      { value: "deleted", label: "Deleted" },
+    ];
 
     let displayedDiscussions = [...discussions];
 
@@ -688,6 +710,17 @@ class Discussions extends Component {
                       value={filterParticipants}
                       onChange={this.handleParticipantsFilterChange}
                       placeholder="Participants..."
+                      className="basic-multi-select discussion-filter-select"
+                      classNamePrefix="select"
+                    />
+                  </div>
+                  <div className="col-lg-3 col-md-6 col-sm-12 my-1">
+                    <Select
+                      isMulti
+                      options={statusOptions}
+                      value={filterStatus}
+                      onChange={this.handleStatusFilterChange}
+                      placeholder="Status..."
                       className="basic-multi-select discussion-filter-select"
                       classNamePrefix="select"
                     />
