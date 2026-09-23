@@ -408,10 +408,12 @@ class Discussions extends Component {
       return;
     }
     if (discussion && discussion.id) {
-      this.setState({
-        showViewModal: true,
-        discussionToView: discussion,
-      });
+      if (this.props.history) {
+        this.props.history.push({
+          pathname: `/discussions/${discussion.id}`,
+          state: { discussion, discussionId: discussion.id },
+        });
+      }
     }
   };
 
@@ -968,7 +970,7 @@ class Discussions extends Component {
                                   e.stopPropagation();
                                   this.handleOpenViewModal(disc);
                                 }}
-                                title="View Details"
+                                title="View Details & Comments"
                                 style={{ width: "32px", height: "32px", padding: 0 }}
                               >
                                 <i className="fa fa-eye"></i>
@@ -1036,15 +1038,6 @@ class Discussions extends Component {
           isLoading={buttonLoading}
           deleteBody={`Are you sure you want to delete the discussion "${discussionToDelete?.title}"? This action cannot be undone.`}
           label="Delete Discussion"
-        />
-
-        {/* View Discussion Modal */}
-        <ViewDiscussion
-          show={showViewModal}
-          onClose={this.handleCloseModals}
-          discussion={discussionToView}
-          discussionId={discussionToView?.id}
-          onDiscussionUpdated={() => this.fetchDiscussions(false)}
         />
 
         {/* Participants Modal */}

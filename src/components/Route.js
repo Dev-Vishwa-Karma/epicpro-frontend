@@ -29,6 +29,7 @@ import ForgotPassword from './Authentication/ForgotPassword';
 import ResetPassword from './Authentication/ResetPassword';
 import Connect from './HRMS/Connect/Connect';
 import Discussions from './HRMS/Discussions/Discussions';
+import ViewDiscussion from './HRMS/Discussions/ViewDiscussion';
 
 const Routes = [
     {
@@ -38,6 +39,14 @@ const Routes = [
         pageTitle: "Discussions",
         roles: ['admin', 'super_admin', 'employee'],
         component: Discussions
+    },
+    {
+        path: "/discussions/:id",
+        name: 'View Discussion',
+        exact: true,
+        pageTitle: "View Discussion",
+        roles: ['admin', 'super_admin', 'employee'],
+        component: ViewDiscussion
     },
     {
         path: "/",
