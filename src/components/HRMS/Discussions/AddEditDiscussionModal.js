@@ -283,6 +283,7 @@ class AddEditDiscussionModal extends Component {
                                         required
                                         placeholder="Enter discussion title..."
                                         value={title}
+                                        maxLength={50}
                                         onChange={this.handleInputChange}
                                         error={errors.title}
                                         containerClassName="mb-3"
