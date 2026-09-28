@@ -59,7 +59,7 @@ class Discussions extends Component {
       filterDate: null,
       filterCreatedBy: null,
       filterParticipants: [],
-      filterStatus: ["open"],
+      filterStatus: [{ value: "open", label: "Open" }],
 
       // Modal States
       showAddEditModal: false,
@@ -287,7 +287,7 @@ class Discussions extends Component {
 
     if (filterStatus && filterStatus.length > 0) {
       params.status = filterStatus
-        .map((p) => p.value)
+        .map((p) => (typeof p === "object" && p !== null ? p.value : p))
         .join(",");
     }
 
